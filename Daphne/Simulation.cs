@@ -34,15 +34,14 @@ namespace Daphne
             reset();
         }
 
-        private void reset()
+        public void reset()
         {
             RunStatus = RUNSTAT_OFF;
             curStep = 0;
         }
 
-        public void Start(int steps)
+        public void restart()
         {
-            numSteps = steps;
             reset();
             RunStatus = RUNSTAT_RUN;
         }
@@ -331,9 +330,19 @@ namespace Daphne
             }
         }
 
-        public bool Load(SimConfiguration sc)
+        public bool Load(SimConfiguration sc, bool completeReset)
         {
             Scenario scenario = sc.scenario;
+
+            numSteps = (int)Math.Ceiling(scenario.time_config.duration / scenario.time_config.rendering_interval);
+            // make sure the simulation does not start to run immediately
+            RunStatus = RUNSTAT_OFF;
+
+            // exit if no reset required
+            if (completeReset == false)
+            {
+                return true;
+            }
 
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(scenario));

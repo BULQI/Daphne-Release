@@ -540,6 +540,98 @@ namespace DaphneGui
             return result;
         }
 
+        private void lockSaveStartSim(bool completeReset)
+        {
+            // prevent when a fit is in progress
+            lock (cellFitLock)
+            {
+                // re-initialize; if there are no cells, always do a full reset
+                initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, "");
+                enableCritical(loadSuccess);
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+
+                // it doesn't make sense to run a simulation if there are no cells after the reinitialization
+                if (Simulation.dataBasket.Cells.Count < 1)
+                {
+                    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // next time around, force a reset
+                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
+
+                // hide the cell regions
+                //foreach (Region rr in configurator.SimConfig.scenario.regions)
+                //{
+                //    // Use the utility dict to find the box associated with this region
+                //    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[rr.region_box_spec_guid_ref];
+
+                //    // Property changed notifications will take care of turning off the Widgets and Actors
+                //    bb.box_visibility = false;
+                //    rr.region_visibility = false;
+                //}
+
+                //// hide the regions used to control Gaussians
+                //foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
+                //{
+                //    // Use the utility dict to find the box associated with this region
+                //    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+
+                //    // Property changed notifications will take care of turning off the Widgets and Actors
+                //    bb.box_visibility = false;
+                //    gg.gaussian_region_visibility = false;
+                //}
+
+                //// always reset the simulation for now to start at the beginning
+                //if (Properties.Settings.Default.skipDataBaseWrites == false)
+                //{
+                //    DataBaseTools.CreateExpInDataBase();
+                //    DataBaseTools.SaveCellSetIDs();
+                //    DataBaseTools.CreateSaveAttributes();
+                //}
+
+                // since the above call resets the experiment name each time, reset comparison string
+                // so we don't bother people about saving just because of this change
+                // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
+                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                sim.restart();
+                UpdateGraphics();
+
+                // prevent the user from running certain tasks immediately, crashing the simulation
+                //resetButton.IsEnabled = false;
+                resetButton.Content = "Abort";
+                //runButton.IsEnabled = false;
+                fileMenu.IsEnabled = false;
+                analysisMenu.IsEnabled = false;
+                optionsMenu.IsEnabled = false;
+                gc.ToolsToolbar_IsEnabled = false;
+                gc.DisablePickingButtons();
+                VCR_Toolbar.IsEnabled = false;
+                this.menu_ActivateSimSetup.IsEnabled = false;
+                SimConfigToolWindow.Close();
+
+                // prevent all fit/analysis-related things
+                hideFit();
+                ExportMenu.IsEnabled = false;
+            }
+        }
+
+        /// <summary>
+        ///  enable/disable critical, i.e. when a config load error happens, gui elements
+        /// </summary>
+        /// <param name="enable">false to disable</param>
+        private void enableCritical(bool enable)
+        {
+            resetButton.IsEnabled = enable;
+            runButton.IsEnabled = enable;
+            analysisMenu.IsEnabled = enable;
+            saveScenario.IsEnabled = enable;
+            saveScenarioAs.IsEnabled = enable;
+        }
+
         /// <summary>
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
@@ -564,14 +656,12 @@ namespace DaphneGui
                 // after doing a full reset, don't require one immediately unless we did a db load
                 MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
 
-                //REMOVE VTK AND GRAPHICS WINDOW CODE FOR NOW
-                //////////sim.reset();
+                sim.reset();
                 // reset cell tracks and free memory
                 //////////gc.CleanupTracks();
-                //////////gc.CellController.SetCellOpacities(1.0);
-                //////////fitCellOpacitySlider.Value = 1.0;
-                //////////vtkdataBasket.UpdateData();
-                //////////gc.DrawFrame(sim.GetProgressPercent());
+                gc.CellController.SetCellOpacities(1.0);
+                fitCellOpacitySlider.Value = 1.0;
+                UpdateGraphics();
 
                 // prevent all fit/analysis-related things
                 hideFit();
@@ -1097,14 +1187,14 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
-            ////////if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-            ////////{
-            ////////    sim.RunStatus = Simulation.RUNSTAT_ABORT;
-            ////////}
-            ////////else
-            ////////{
-            ////////    reset();
-            ////////}
+            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            {
+                sim.RunStatus = Simulation.RUNSTAT_ABORT;
+            }
+            else
+            {
+                reset();
+            }
         }
 
         /// <summary>
@@ -1312,7 +1402,7 @@ namespace DaphneGui
             this.SimConfigToolWindow.DataContext = configurator.SimConfig;
 
             // set up the simulation
-            if (sim.Load(configurator.SimConfig) == false)
+            if (sim.Load(configurator.SimConfig, completeReset) == false)
             {
                 handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
                 return;
@@ -1386,19 +1476,6 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        ///  enable/disable critical, i.e. when a config load error happens, gui elements
-        /// </summary>
-        /// <param name="enable">false to disable</param>
-        private void enableCritical(bool enable)
-        {
-            resetButton.IsEnabled = enable;
-            runButton.IsEnabled = enable;
-            analysisMenu.IsEnabled = enable;
-            saveScenario.IsEnabled = enable;
-            saveScenarioAs.IsEnabled = enable;
-        }
-
         private void run()
         {
             while (true)
@@ -1407,8 +1484,119 @@ namespace DaphneGui
                 {
                     sim.Step(configurator.SimConfig.scenario.time_config.rendering_interval);
                     UpdateGraphics();
+                    if (sim.RunStatus != Simulation.RUNSTAT_RUN)
+                    {
+                        // never rerun the simulation if the simulation was aborted
+                        if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                        {
+                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                        }
+                        // for profiling: close the application after a completed experiment
+                        else if (ControlledProfiling() == true && sim.RunStatus == Simulation.RUNSTAT_FINISHED && repetition >= configurator.SimConfig.experiment_reps)
+                        {
+                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
+                            return;
+                        }
+                        else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                        {
+                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                        }
+                    }
                 }
+                else if (sim.RunStatus == Simulation.RUNSTAT_ABORT)
+                {
+                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(reset));
+                    sim.RunStatus = Simulation.RUNSTAT_OFF;
+                }
+                //else if (vcrControl != null && vcrControl.IsActive() == true)
+                //{
+                //    vcrControl.Play();
+                //    if (vcrControl.IsActive() == false)
+                //    {
+                //        // switch from pause to the play button
+                //        VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
+                //    }
+                //}
             }
+        }
+
+        // gui update delegate; needed because we can't access the gui elements directly; they are part of a different thread
+        private delegate void GUIDelegateNoArgs();
+        private delegate void GUIDelegateTwoArgs(int iArg, bool bArg);
+
+        // close the application
+        private void CloseApp()
+        {
+            this.Close();
+        }
+
+        // rerun the simulation when multiple repetitions are specified
+        private void RerunSimulation()
+        {
+            // increment the repetition
+            repetition++;
+            lockSaveStartSim(true);
+        }
+
+        // re-enable the gui elements that got disabled during a simulation run
+        private void GUIUpdate(int expID, bool force)
+        {
+            //if (skipDataWriteMenu.IsChecked == false && OpenVCR(true, expID) == true)
+            //{
+            //    VCR_Toolbar.IsEnabled = true;
+            //    VCR_Toolbar.DataContext = vcrControl;
+            //    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
+            //}
+
+            // only allow fitting and other analysis that needs the database if database writing is on
+            if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+            {
+                analysisMenu.IsEnabled = true;
+                // NOTE: Uncomment this to open the LP Fitting ToolWindow after a run has completed
+                // this.LPFittingToolWindow.Activate();
+                this.menu_ActivateLPFitting.IsEnabled = true;
+                this.ExportMenu.IsEnabled = true;
+                // And show stats results chart
+                // NOTE: If the stats charts can be displayed without the database saving, then these
+                //   ChartViewDocWindow calls can be moved outside this if() block
+                //if (runStatisticalSummaryMenu.IsChecked == true)
+                //{
+                //    this.ChartViewDocWindow.RenderPlots();
+                //    this.ChartViewDocWindow.Open();
+                //    this.menu_ActivateAnalysisChart.IsEnabled = true;
+                //}
+                gc.EnablePickingButtons();
+            }
+
+            resetButton.IsEnabled = true;
+            resetButton.Content = "Reset";
+            runButton.Content = "Run";
+            statusBarMessagePanel.Content = "Ready";
+            //runButton.IsEnabled = true;
+            fileMenu.IsEnabled = true;
+            optionsMenu.IsEnabled = true;
+            // TODO: Should probably combine these...
+            gc.ToolsToolbar_IsEnabled = true;
+            SolfacRenderingCB.IsEnabled = true;
+            // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
+            this.SimConfigToolWindow.Activate();
+            this.menu_ActivateSimSetup.IsEnabled = true;
+            SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
+            // TODO: These Focus calls will be a problem with multiple GCs...
+            gc.Rwc.Focus();
+        }
+
+        private void reset()
+        {
+            lockAndResetSim(false, "");
+            //also need to delete every for this experiment in database.
+            //DataBaseTools.DeleteExperiment(configurator.SimConfig.experiment_db_id);
+            //SC.SimConfig.experiment_db_id = -1;//reset
+            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+
+            //If main VTK window is not open, open it. Close the CellInfo tab.
+            this.VTKDisplayDocWindow.Open();
+            this.ToolWinCellInfo.Close();
         }
 
         /// <summary>
@@ -1419,12 +1607,6 @@ namespace DaphneGui
         private void runSim()
         {
             //MessageBox.Show("In runSim()");
-            double T = configurator.SimConfig.scenario.time_config.duration;
-            double dt = configurator.SimConfig.scenario.time_config.rendering_interval;
-            int nSteps = (int)(T / dt);
-
-            repetition = 1;
-            sim.Start(nSteps);
 
             //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
             //YOU CAN ONLY CALL THIS AFTER LOADING A DRIVER-LOCOMOTOR SCENARIO
@@ -1433,122 +1615,118 @@ namespace DaphneGui
             //YOU CAN ONLY CALL THIS AFTER LOADING A LIGAND-RECEPTOR SCENARIO
             //TestStepperLigandReceptor(nSteps, 0.01);
 
+            //sim.refreshDatabaseBufferRows();
+            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            {
+                //resetButton.IsEnabled = true;
+                resetButton.Content = "Reset";
+                sim.RunStatus = Simulation.RUNSTAT_PAUSE;
+                runButton.Content = "Continue";
+                statusBarMessagePanel.Content = "Paused...";
+                runButton.ToolTip = "Continue the Simulation.";
+            }
+            else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
+            {
+                //resetButton.IsEnabled = false;
+                resetButton.Content = "Abort";
+                sim.RunStatus = Simulation.RUNSTAT_RUN;
+                runButton.Content = "Pause";
+                statusBarMessagePanel.Content = "Running...";
+            }
+            else
+            {
+                if (vcrControl != null)
+                {
+                    vcrControl.SetInactive();
+                }
 
-            //***************************************************************************************************************
+                // only check for unique names if database writing is on and the unique names option is on
+                /*if (skipDataWriteMenu.IsChecked == false && uniqueNamesMenu.IsChecked == true)
+                {
+                    string nameTemplate = "Enter a unique name here...";
 
+                    // if database writing is on, notify the user that it may be a good idea to have unique experiment names
+                    // don't consider the template name a good idea
+                    if (configurator.SimConfig.experiment_name == nameTemplate || checkExpNameUniqueness(configurator.SimConfig.experiment_name) == false)
+                    {
+                        string messageBoxText = "Consider using a unique, meaningful experiment name.\n\nDo you want to go back to setup to make this change?";
+                        string caption = "Experiment name unchanged";
+                        MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                        MessageBoxImage icon = MessageBoxImage.Warning;
 
-            //////////sim.refreshDatabaseBufferRows();
-            //////////if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-            //////////{
-            //////////    //resetButton.IsEnabled = true;
-            //////////    resetButton.Content = "Reset";
-            //////////    sim.RunStatus = Simulation.RUNSTAT_PAUSE;
-            //////////    runButton.Content = "Continue";
-            //////////    statusBarMessagePanel.Content = "Paused...";
-            //////////    runButton.ToolTip = "Continue the Simulation.";
-            //////////}
-            //////////else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
-            //////////{
-            //////////    //resetButton.IsEnabled = false;
-            //////////    resetButton.Content = "Abort";
-            //////////    sim.RunStatus = Simulation.RUNSTAT_RUN;
-            //////////    runButton.Content = "Pause";
-            //////////    statusBarMessagePanel.Content = "Running...";
-            //////////}
-            //////////else
-            //////////{
-            //////////    if (vcrControl != null)
-            //////////    {
-            //////////        vcrControl.SetInactive();
-            //////////    }
+                        // Display message box
+                        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
 
-            //////////    // only check for unique names if database writing is on and the unique names option is on
-            //////////    if (skipDataWriteMenu.IsChecked == false && uniqueNamesMenu.IsChecked == true)
-            //////////    {
-            //////////        string nameTemplate = "Enter a unique name here...";
+                        // Process message box results
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                // show the sim setup panels if they are closed
+                                SimConfigToolWindow.Activate();
+                                // switch to the panel that has the name, give the name box the focus and change
+                                // its content to something indicating what the user should do
+                                SimConfigToolWindow.SelectSimSetupInGUISetExpName(nameTemplate);
+                                return;
+                            case MessageBoxResult.No:
+                                break;
+                            default:
+                                return;
+                        }
+                    }
+                }*/
 
-            //////////        // if database writing is on, notify the user that it may be a good idea to have unique experiment names
-            //////////        // don't consider the template name a good idea
-            //////////        if (configurator.SimConfig.experiment_name == nameTemplate || checkExpNameUniqueness(configurator.SimConfig.experiment_name) == false)
-            //////////        {
-            //////////            string messageBoxText = "Consider using a unique, meaningful experiment name.\n\nDo you want to go back to Sim Setup to make this change?";
-            //////////            string caption = "Experiment name unchanged";
-            //////////            MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            //////////            MessageBoxImage icon = MessageBoxImage.Warning;
+                if (configurator.SerializeSimConfigToStringSkipDeco() == orig_content)
+                {
+                    // initiating a run starts always at repetition 1
+                    repetition = 1;
+                    // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
+                    // after a run or vcr playback
+                    lockSaveStartSim(MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
+                }
+                else
+                {
+                    // Configure the message box to be displayed
+                    string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
+                    string caption = "Scenario Changed";
+                    MessageBoxButton button = MessageBoxButton.YesNoCancel;
+                    MessageBoxImage icon = MessageBoxImage.Warning;
 
-            //////////            // Display message box
-            //////////            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                    // Display message box
+                    MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
 
-            //////////            // Process message box results
-            //////////            switch (result)
-            //////////            {
-            //////////                case MessageBoxResult.Yes:
-            //////////                    // show the sim setup panels if they are closed
-            //////////                    SimConfigToolWindow.Activate();
-            //////////                    // switch to the panel that has the name, give the name box the focus and change
-            //////////                    // its content to something indicating what the user should do
-            //////////                    SimConfigToolWindow.SelectSimSetupInGUISetExpName(nameTemplate);
-            //////////                    return;
-            //////////                case MessageBoxResult.No:
-            //////////                    break;
-            //////////                default:
-            //////////                    return;
-            //////////            }
-            //////////        }
-            //////////    }
-
-            //////////    if (configurator.SerializeSimConfigToStringSkipDeco() == orig_content)
-            //////////    {
-            //////////        // initiating a run starts always at repetition 1
-            //////////        repetition = 1;
-            //////////        // call with false (lockSaveStartSim(false)) or modify otherwise to enable the simulation to continue from the last visible state
-            //////////        // after a run or vcr playback
-            //////////        lockSaveStartSim(MainWindow.CheckControlFlag(MainWindow.CONTROL_FORCE_RESET));
-            //////////    }
-            //////////    else
-            //////////    {
-            //////////        // Configure the message box to be displayed
-            //////////        string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
-            //////////        string caption = "Scenario Changed";
-            //////////        MessageBoxButton button = MessageBoxButton.YesNoCancel;
-            //////////        MessageBoxImage icon = MessageBoxImage.Warning;
-
-            //////////        // Display message box
-            //////////        MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
-
-            //////////        // Process message box results
-            //////////        switch (result)
-            //////////        {
-            //////////            case MessageBoxResult.Yes:
-            //////////                configurator.SerializeSimConfigToFile();
-            //////////                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-            //////////                orig_path = Path.GetDirectoryName(xmlPath.LocalPath);
-            //////////                // initiating a run starts always at repetition 1
-            //////////                repetition = 1;
-            //////////                lockSaveStartSim(true);
-            //////////                break;
-            //////////            case MessageBoxResult.No:
-            //////////                if (saveScenarioUsingDialog() == true)
-            //////////                {
-            //////////                    // initiating a run starts always at repetition 1
-            //////////                    repetition = 1;
-            //////////                    lockSaveStartSim(true);
-            //////////                }
-            //////////                break;
-            //////////            case MessageBoxResult.Cancel:
-            //////////                // Do nothing...
-            //////////                break;
-            //////////        }
-            //////////    }
-            //////////    if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-            //////////    {
-            //////////        runButton.Content = "Pause";
-            //////////        runButton.ToolTip = "Pause the Simulation.";
-            //////////        statusBarMessagePanel.Content = "Running...";
-            //////////    }
-            //////////}
+                    // Process message box results
+                    switch (result)
+                    {
+                        case MessageBoxResult.Yes:
+                            configurator.SerializeSimConfigToFile();
+                            orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                            orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
+                            // initiating a run starts always at repetition 1
+                            repetition = 1;
+                            lockSaveStartSim(true);
+                            break;
+                        case MessageBoxResult.No:
+                            if (saveScenarioUsingDialog() == true)
+                            {
+                                // initiating a run starts always at repetition 1
+                                repetition = 1;
+                                lockSaveStartSim(true);
+                            }
+                            break;
+                        case MessageBoxResult.Cancel:
+                            // Do nothing...
+                            break;
+                    }
+                }
+                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                {
+                    runButton.Content = "Pause";
+                    runButton.ToolTip = "Pause the Simulation.";
+                    statusBarMessagePanel.Content = "Running...";
+                }
+            }
         }
-
+        /*
         private void TestStepperLigandReceptor(int nSteps, double dt)
         {
             double receptorConc,
@@ -1620,7 +1798,7 @@ namespace DaphneGui
 
                 MessageBox.Show("Processing finished.");
             }
-        }
+        }*/
 
         private void hideFit()
         {
@@ -1715,12 +1893,6 @@ namespace DaphneGui
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             dw.Close();
-        }
-
-        // close the application
-        private void CloseApp()
-        {            
-            this.Close();
         }
 
         private void exitApp_Click(object sender, RoutedEventArgs e)
