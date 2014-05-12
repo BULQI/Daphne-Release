@@ -157,7 +157,15 @@ namespace DaphneGui
                         current_item.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
+                        if (current_mol.boundaryCondition.Count != 2)
+                        {
+                            MessageBox.Show("Specify values for boundary conditions first.");
+                            return;
+                        }
                         MolPopLinear slg = new MolPopLinear();
+                        slg.dim = (int)current_mol.boundary_face - 1;
+                        slg.c1 = current_mol.boundaryCondition[0].val;
+                        slg.c2 = current_mol.boundaryCondition[1].val;
                         current_item.mp_distribution = slg;
                         break;
                     case MolPopDistributionType.Gaussian:
@@ -1433,6 +1441,10 @@ namespace DaphneGui
 
             cbi.IsEnabled = true;
             if (cbToroidal.IsChecked == true)
+            {
+                cbi.IsEnabled = false;
+            }
+            else if (cmp == null)
             {
                 cbi.IsEnabled = false;
             }

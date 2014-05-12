@@ -134,6 +134,10 @@ namespace ManifoldRing
                     temp.array[n] += 2 * flux.Value(flux.M.PrincipalPoints[i]) / m.StepSize();
                 }
             }
+
+            // Zero the flux
+            flux.Initialize("const", new double[1] { 0 });
+
             return temp;
         }
 

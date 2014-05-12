@@ -149,7 +149,8 @@ namespace Daphne
                 {
                     MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
 
-                    //Need to get x2 from environment extents
+                    mpl.c1 = cmp.boundaryCondition[0].val;
+                    mpl.c2 = cmp.boundaryCondition[1].val;
                     double x2;
                     switch (mpl.dim)
                     {
@@ -163,7 +164,7 @@ namespace Daphne
                             x2 = sc.scenario.environment.extent_z;
                             break;
                         default:
-                            x2 = sc.scenario.environment.extent_x;  //??  WHAT SHOULD THE DEFAULT BE??
+                            x2 = sc.scenario.environment.extent_x; 
                             break;
                     }
                          
@@ -173,7 +174,6 @@ namespace Daphne
                                 mpl.x1, 
                                 x2, 
                                 mpl.dim});
-
                 }
 
                 else
@@ -530,6 +530,12 @@ namespace Daphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(scenario));
 
+            // The first instantiation of ScalarField occurs during execution of the dataBasket.ECS statement in 
+            // ManifoldRing.NodeInterpolator.Init(), so instantiate ScalarField for the first time here to create
+            // the static factory.
+            ScalarField factoryBuilder = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", new TinySphere()));
+
+
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -626,16 +632,30 @@ namespace Daphne
                 }
             }
 
-            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-
             // ADD ECS MOLECULAR POPULATIONS
             addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, sc);
-            // set non-diffusing
+            // NOTE: This boolean isn't used anywhere. Do we envision a need for it?
+            // Default: set diffusing
             foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
             {
-                mp.IsDiffusing = false;
+                mp.IsDiffusing = true;
+            }
+
+            // ECS molpops boundary conditions
+            foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops)
+            {
+                foreach (BoundaryCondition bc in cmp.boundaryCondition)
+                {
+                    int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
+                    if (bc.boundaryType == MolBoundaryType.Dirichlet)
+                    {
+                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
+                    }
+                    else
+                    {
+                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
+                    }
+                }
             }
 
             // ADD ECS REACTIONS

@@ -1263,11 +1263,24 @@ namespace Daphne
 
     public enum ReportType { CELL_MP, ECM_MP };
 
-    //skg daphne new classes
+    // Note: Neumann option may be added later.
+    public enum MolBoundaryType { None = 0, Dirichlet }
+    public enum Boundary { None = 0, left = 1, right, bottom, top, back, front };
+    public class BoundaryCondition
+    {
+        public MolBoundaryType boundaryType;
+        public Boundary boundary;
+        public double val;
+
+        public BoundaryCondition(MolBoundaryType _boundaryType, Boundary _boundary)
+        {
+            boundaryType = _boundaryType;
+            boundary = _boundary;
+        }
+    }
     public class ConfigMolecularPopulation //: EntityModelBase
     {
         public string molpop_guid { get; set; }
-
         private string _molecule_guid_ref;
         public string molecule_guid_ref 
         {
@@ -1296,6 +1309,51 @@ namespace Daphne
             set { reportMP = value; }
         }
 
+        public List<BoundaryCondition> boundaryCondition { get; set; }
+        private double _boundaryVal1;
+        public double boundaryVal1 
+        { 
+            get
+            {
+                return _boundaryVal1;
+            }
+            set
+            {
+                _boundaryVal1 = value;
+                if (_boundary_face != BoundaryFace.None)
+                {
+                    boundaryCondition[0].val = value;
+                    // If linear is already set, then c1 needs to be updated here.
+                    if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    {
+                        MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
+                        mpl.c1 = value;
+                    }
+                }
+            }
+        }
+        private double _boundaryVal2;
+        public double boundaryVal2
+        {
+            get
+            {
+                return _boundaryVal2;
+            }
+            set
+            {
+                _boundaryVal2 = value;
+                if (_boundary_face != BoundaryFace.None)
+                {
+                    boundaryCondition[1].val = value;
+                    // If linear is already set, then c2 needs to be updated here.
+                    if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    {
+                        MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
+                        mpl.c2 = value;
+                    }
+                }
+            }
+        }
         private BoundaryFace _boundary_face;
         public BoundaryFace boundary_face
         {
@@ -1303,14 +1361,68 @@ namespace Daphne
             {
                 return _boundary_face;
             }
-            set {
+            set
+            {
                 _boundary_face = value;
-                if (_boundary_face != BoundaryFace.None) {
+
+                // NOTE: Future implementations may allow both Neumann and Dirichlet at the same face
+                // or additional faces to be added. Until then...
+
+                if (_boundary_face == BoundaryFace.None)
+                {
+                    // Clear boundaryCondition list.
+                    boundaryCondition = new List<BoundaryCondition>();
+                }
+                else
+                {
+                    if (boundaryCondition.Count == 0)
+                    {
+                        // Neumann not implemented yet. 
+                        MolBoundaryType molBoundType = MolBoundaryType.Dirichlet;
+                        switch (value)
+                        {
+                            case BoundaryFace.X:
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.left));
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.right));
+                                break;
+                            case BoundaryFace.Y:
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.bottom));
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.top));
+                                break;
+                            case BoundaryFace.Z:
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.back));
+                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.front));
+                                break;
+                            default:
+                                throw new Exception("Improper boundary face selection");
+                        }
+                    }
+                    else
+                    {
+                        switch (value)
+                        {
+                            case BoundaryFace.X:
+                                boundaryCondition[0].boundary = Boundary.left;
+                                boundaryCondition[1].boundary = Boundary.right;
+                                break;
+                            case BoundaryFace.Y:
+                                boundaryCondition[0].boundary = Boundary.bottom;
+                                boundaryCondition[1].boundary = Boundary.top;
+                                break;
+                            case BoundaryFace.Z:
+                                boundaryCondition[0].boundary = Boundary.back;
+                                boundaryCondition[1].boundary = Boundary.front;
+                                break;
+                            default:
+                                throw new Exception("Improper boundary face selection");
+                        }
+                    }
+
+                    // If linear is already set, then dim needs to be updated here.
                     if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                     {
                         MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
                         mpl.dim = (int)_boundary_face - 1;
-                        
                     }
                 }
             }
@@ -1322,6 +1434,7 @@ namespace Daphne
 
             molpop_guid = id.ToString();
             boundary_face = BoundaryFace.None;
+            boundaryCondition = new List<BoundaryCondition>();
 
             if (rt == ReportType.CELL_MP)
             {
@@ -1338,7 +1451,6 @@ namespace Daphne
             reportMP.molpop_guid_ref = molpop_guid;
         }
 
-        
     }
 
     public class ConfigCompartment : EntityModelBase
@@ -2572,13 +2684,12 @@ namespace Daphne
         public double c1 { get; set; }
         public double c2 { get; set; }
         public double x1 { get; set; }
-        //public double x2 { get; set; }
         public int dim { get; set; }
         
         public MolPopLinear()
         {
             mp_distribution_type = MolPopDistributionType.Linear;
-            x1 = 0.0;            
+            x1 = 0;
         }
     }
 

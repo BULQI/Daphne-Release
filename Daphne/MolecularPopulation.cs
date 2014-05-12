@@ -111,8 +111,8 @@ namespace Daphne
             naturalBoundaryConcs = new Dictionary<int, ScalarField>();
             foreach (KeyValuePair<int, Manifold> kvp in compartment.NaturalBoundaries)
             {
-                naturalBoundaryFluxes.Add(kvp.Key, new ScalarField(kvp.Value));
-                naturalBoundaryConcs.Add(kvp.Key, new ScalarField(kvp.Value));
+                naturalBoundaryFluxes.Add(kvp.Key, SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value)));
+                naturalBoundaryConcs.Add(kvp.Key, SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value)));
             }
         }
 
@@ -142,12 +142,11 @@ namespace Daphne
 
             concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
 
-            // Apply boundary fluxes
-            // The flux is accumulating in Reactions, so we need to zero it after updating the concentration. 
+            // Apply boundary fluxes 
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes.ToList())
             {
                 concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
-                kvp.Value.reset(); //reset to 0
+                //kvp.Value.reset(); //reset to 0
             }
 
             // Apply Neumann natural boundary conditions

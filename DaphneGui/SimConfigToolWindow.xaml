@@ -161,11 +161,11 @@
             <!-- skg 5/29/12 -->
             <CollectionViewSource x:Key="baseCellTypesListView"  
                                   Source="{Binding Path=entity_repository.CellBaseTypeLabel}"/>
-
             
-
-
-
+            
+            
+            
+            
             <!-- Style for visibility checkboxes in list views -->
             <Style x:Key="EyeballCheckboxStyle" TargetType="CheckBox">
                 <Setter Property="SnapsToDevicePixels" Value="true"/>
@@ -1895,7 +1895,7 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=mpInfo.mp_distribution.c1}">
+                                <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1}">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
@@ -1931,7 +1931,7 @@
                                     </TextBlock.Style>
                                     </TextBlock>
 
-                                <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=mpInfo.mp_distribution.c2}">
+                                <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">
                                     <TextBox.Style>
                                         <Style TargetType="TextBox">
                                             <Style.Triggers>
@@ -1971,7 +1971,7 @@
                                         MinWidth="120">
 
 
-                                    <ComboBox.Style>
+                                    <!--<ComboBox.Style>
                                         <Style TargetType="ComboBox">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
@@ -1985,7 +1985,7 @@
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </ComboBox.Style>
+                                    </ComboBox.Style>-->
                                     
                                     <ComboBox.ItemContainerStyle>
                                         <Style TargetType="{x:Type ComboBoxItem}">

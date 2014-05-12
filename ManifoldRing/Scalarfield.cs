@@ -255,7 +255,7 @@ namespace ManifoldRing
         private readonly Manifold m;
         private IFieldInitializer init;
 
-        private IFieldInitializerFactory factory;
+        private static IFieldInitializerFactory factory;
 
         /// <summary>
         /// underlying manifold
@@ -266,9 +266,12 @@ namespace ManifoldRing
         /// constructor
         /// </summary>
         /// <param name="m">manifold</param>
-        public ScalarField(Manifold m, IFieldInitializerFactory factory = null)
+        public ScalarField(Manifold m, IFieldInitializerFactory _factory = null)
         {
-            this.factory = factory;
+            if (factory == null && _factory != null)
+            {
+                factory = _factory;
+            }
             this.m = m;
             array = new double[m.ArraySize];
         }
