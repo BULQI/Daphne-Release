@@ -300,6 +300,7 @@ namespace ManifoldRing
     public class TinySphere : MomentExpansionManifold
     {
         private double radius;
+        protected ScalarField laplacian;
 
         /// <summary>
         /// constructor
@@ -307,6 +308,7 @@ namespace ManifoldRing
         public TinySphere()
             : base(2)
         {
+            laplacian = new ScalarField(this);
         }
 
         /// <summary>
@@ -433,14 +435,12 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            ScalarField s = new ScalarField(this);
-
-            s.array[0] = 0;
-            s.array[1] = sf.array[1];
-            s.array[2] = sf.array[2];
-            s.array[3] = sf.array[3];
-            s *= -2.0 / (radius * radius);
-            return s;
+            double[] array = laplacian.array;
+            array[0] = 0;
+            array[1] = sf.array[1];
+            array[2] = sf.array[2];
+            array[3] = sf.array[3];
+            return laplacian.Multiply(-2.0 / (radius * radius));
         }
 
         /// <summary>
@@ -487,13 +487,19 @@ namespace ManifoldRing
     public class TinyBall : MomentExpansionManifold
     {
         private double radius;
-        
+
+        protected ScalarField diffusionField;
+        protected ScalarField laplacian;
+        protected double[] gradient = new double[3];
+
         /// <summary>
         /// constructor
         /// </summary>
         public TinyBall()
             : base(3)
         {
+            laplacian = new ScalarField(this);
+            diffusionField = new ScalarField(this);    
         }
 
         /// <summary>
@@ -616,14 +622,13 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            ScalarField s = new ScalarField(this);
-
-            s.array[0] = 0;
-            s.array[1] = sf.array[1];
-            s.array[2] = sf.array[2];
-            s.array[3] = sf.array[3];
-            s *= -5.0 / (radius * radius);
-            return s;
+            double[] array = laplacian.array;
+            array[0] = 0;
+            array[1] = sf.array[1];
+            array[2] = sf.array[2];
+            array[3] = sf.array[3];
+            laplacian.Multiply(-5.0 / (radius * radius));
+            return laplacian;
         }
 
         /// <summary>
@@ -638,8 +643,11 @@ namespace ManifoldRing
             {
                 return new double[] { 0, 0, 0 };
             }
+            gradient[0] = sf.array[1];
+            gradient[1] = sf.array[2];
+            gradient[2] = sf.array[3];
 
-            return new double[] { sf.array[1], sf.array[2], sf.array[3] };
+            return gradient;
         }
 
         /// <summary>
@@ -651,19 +659,18 @@ namespace ManifoldRing
         /// <returns>diffusion flux term as field</returns>
         public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            if(flux.M.GetType() != typeof(TinySphere))
+            if (flux.M is TinySphere == false)
             {
                 throw new Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
             }
 
-            ScalarField s = new ScalarField(this);
+            double[] array = diffusionField.array;
+            array[0] = 3 * flux.array[0] / radius;
+            array[1] = 5 * flux.array[1] / radius;
+            array[2] = 5 * flux.array[2] / radius;
+            array[3] = 5 * flux.array[3] / radius;
 
-            s.array[0] = 3 * flux.array[0] / radius;
-            s.array[1] = 5 * flux.array[1] / radius;
-            s.array[2] = 5 * flux.array[2] / radius;
-            s.array[3] = 5 * flux.array[3] / radius;
-            
-            return s;
+            return diffusionField;
         }
 
         /// <summary>

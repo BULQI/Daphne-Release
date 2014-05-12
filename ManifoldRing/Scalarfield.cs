@@ -369,6 +369,24 @@ namespace ManifoldRing
             }
         }
 
+        /// <summary>
+        /// if src not null, copy src's value
+        /// else set all values ot 0
+        /// </summary>
+        /// <param name="src"></param>
+        /// <returns></returns>
+        public ScalarField reset(ScalarField src = null)
+        {
+            if (src == null)
+            {
+                for (int i = 0; i < array.Length; i++) array[i] = 0;
+            }
+            else
+            {
+                for (int i = 0; i < array.Length; i++) array[i] = src.array[i];
+            }
+            return this;
+        }
 
         /// <summary>
         /// copy array value to valarr, used to access the array
@@ -472,14 +490,29 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public ScalarField Multiply(double s)
         {
-            ScalarField product = new ScalarField(m);
-
             for (int i = 0; i < m.ArraySize; i++)
             {
-                product.array[i] = s * this.array[i];
+                array[i] *= s;
             }
 
-            return product;
+            return this;
+        }
+
+        /// <summary>
+        /// this multipy will return a new scalarfield
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public ScalarField Multiply(ScalarField sf2)
+        {
+            double s1 = this.array[0];
+            double s2 = sf2.array[0];
+            array[0] *= sf2.array[0];
+            for (int i = 1; i < array.Length; i++)
+            {
+                array[i] = array[i] * s2 + s1 * sf2.array[i];
+            }
+            return this;
         }
 
         /// <summary>
@@ -490,7 +523,14 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator *(ScalarField f, double s)
         {
-            return f.Multiply(s);
+            ScalarField product = new ScalarField(f.m);
+
+            for (int i = 0; i < f.m.ArraySize; i++)
+            {
+                product.array[i] = s * f.array[i];
+            }
+
+            return product;
         }
 
         /// <summary>
@@ -501,7 +541,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator *(double s, ScalarField f)
         {
-            return f.Multiply(s);
+            return f * s;
         }
 
         /// <summary>
@@ -547,15 +587,12 @@ namespace ManifoldRing
             {
                 throw new Exception("Scalar field division by zero.");
             }
-
-            ScalarField product = new ScalarField(m);
-
             for (int i = 0; i < m.ArraySize; i++)
             {
-                product.array[i] = this.array[i] / s;
+                array[i] /= s;
             }
 
-            return product;
+            return this;
         }
 
         /// <summary>
@@ -566,7 +603,19 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator /(ScalarField f, double s)
         {
-            return f.Divide(s);
+            if (s == 0)
+            {
+                throw new Exception("Scalar field division by zero.");
+            }
+
+            ScalarField product = new ScalarField(f.m);
+
+            for (int i = 0; i < f.m.ArraySize; i++)
+            {
+                product.array[i] = f.array[i] / s;
+            }
+
+            return product;
         }
 
         /// <summary>
@@ -577,7 +626,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator /(double s, ScalarField f)
         {
-            return f.Divide(s);
+            return f / s;
         }
 
         /// <summary>
@@ -591,15 +640,12 @@ namespace ManifoldRing
             {
                 throw new Exception("Scalar field addends must share a manifold.");
             }
-
-            ScalarField sum = new ScalarField(f.m);
-
-            for (int i = 0; i < f.m.ArraySize; i++)
+            for (int i = 0; i < m.ArraySize; i++)
             {
-                sum.array[i] = this.array[i] + f.array[i];
+                array[i] += f.array[i];
             }
 
-            return sum;
+            return this;
         }
 
         /// <summary>
@@ -620,7 +666,19 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator +(ScalarField f1, ScalarField f2)
         {
-            return f1.Add(f2);
+            if (f1.m != f2.m)
+            {
+                throw new Exception("Scalar field addends must share a manifold.");
+            }
+
+            ScalarField sum = new ScalarField(f1.m);
+
+            for (int i = 0; i < f1.m.ArraySize; i++)
+            {
+                sum.array[i] = f1.array[i] + f2.array[i];
+            }
+
+            return sum;
         }
 
         /// <summary>
@@ -657,14 +715,12 @@ namespace ManifoldRing
                 throw new Exception("Scalar field addends must share a manifold.");
             }
 
-            ScalarField difference = new ScalarField(f.m);
-
-            for (int i = 0; i < f.m.ArraySize; i++)
+            for (int i = 0; i < m.ArraySize; i++)
             {
-                difference.array[i] = this.array[i] - f.array[i];
+                array[i] -= f.array[i];
             }
 
-            return difference;
+            return this;
         }
 
         /// <summary>
@@ -675,7 +731,19 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public static ScalarField operator -(ScalarField f1, ScalarField f2)
         {
-            return f1.Subtract(f2);
+            if (f1.m != f2.m)
+            {
+                throw new Exception("Scalar field addends must share a manifold.");
+            }
+
+            ScalarField difference = new ScalarField(f1.m);
+
+            for (int i = 0; i < f1.m.ArraySize; i++)
+            {
+                difference.array[i] = f1.array[i] - f2.array[i];
+            }
+
+            return difference;
         }
 
         /// <summary>

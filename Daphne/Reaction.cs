@@ -29,12 +29,14 @@ namespace Daphne
             reactant = _reactant;
             RateConstant = _RateConst;
             //Type = ReactionType.Annihilation;
+            intensity = new ScalarField(_reactant.Man);
+
         }
 
         public override void Step(double dt)
         {
-            intensity = (dt * RateConstant) * reactant.Conc;
-            reactant.Conc -= intensity;
+            intensity.reset(reactant.Conc).Multiply(dt * RateConstant);
+            reactant.Conc.Subtract(intensity);
         }
     }
 
@@ -144,13 +146,14 @@ namespace Daphne
             product = _product;
             RateConstant = _RateConst;
             //Type = ReactionType.Transformation;
+            intensity = new ScalarField(reactant.Man);
         }
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc;
-            reactant.Conc -= intensity;
-            product.Conc += intensity;
+            intensity.reset(reactant.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product.Conc.Add(intensity);
         }
     }
 
@@ -179,13 +182,14 @@ namespace Daphne
             }
             RateConstant = _RateConst;
             //Type = ReactionType.AutocatalyticTransformation;
+            intensity = new ScalarField(reactant.Man);
         }
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant) * dt * catalyst.Conc * reactant.Conc;
-            catalyst.Conc += intensity;
-            reactant.Conc -= intensity;
+            intensity = (catalyst.Conc * reactant.Conc).Multiply(RateConstant * dt);
+            catalyst.Conc.Add(intensity);
+            reactant.Conc.Subtract(intensity);
         }
     }
 
@@ -201,12 +205,13 @@ namespace Daphne
             catalyst = _catalyst;
             RateConstant = _RateConst;
             //Type = ReactionType.CatalyzedAnnihilation;
+            intensity = new ScalarField(reactant.Man);
         }
 
         public override void Step(double dt)
         {
-            intensity = (dt * RateConstant) * catalyst.Conc * reactant.Conc;
-            reactant.Conc -= intensity;
+            intensity = (catalyst.Conc * reactant.Conc).Multiply(dt * RateConstant); 
+            reactant.Conc.Subtract(intensity);
         }
     }
 
@@ -226,14 +231,15 @@ namespace Daphne
             product = _product;
             RateConstant = _RateConst;
             //Type = ReactionType.CatalyzedAssociation;
+            //intensity = new ScalarField(reactant1.Man);
         }
 
         public override void Step(double dt)
         {
             intensity = (RateConstant) * dt * catalyst.Conc * reactant1.Conc * reactant2.Conc;
-            reactant1.Conc -= intensity;
-            reactant2.Conc -= intensity;
-            product.Conc += intensity;
+            reactant1.Conc.Subtract(intensity);
+            reactant2.Conc.Subtract(intensity);
+            product.Conc.Add(intensity);
         }
     }
 
@@ -254,12 +260,13 @@ namespace Daphne
             product = _product;
             RateConstant = _RateConst;
             //Type = ReactionType.CatalyzedCreation;
+            intensity = new ScalarField(catalyst.Man);
         }
 
         public override void Step(double dt)
         {
-            intensity = (dt * RateConstant) * catalyst.Conc;
-            product.Conc += intensity;
+            intensity.reset(catalyst.Conc).Multiply(dt * RateConstant);
+            product.Conc.Add(intensity);
         }
     }
 
@@ -467,15 +474,16 @@ namespace Daphne
             {
                 throw new Exception("Receptor and complex manifolds are unequal.");
             }
+            intensity = new ScalarField(this.receptor.Man);
         }
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * receptor.Conc * ligand.BoundaryConcs[boundary.Id];
-
-            ligand.BoundaryFluxes[boundary.Id] += intensity;
-            receptor.Conc -= intensity * dt;
-            complex.Conc += intensity * dt;
+            intensity.reset(receptor.Conc).Multiply(ligand.BoundaryConcs[boundary.Id]).Multiply(RateConstant);
+            ligand.BoundaryFluxes[boundary.Id].Add(intensity);
+            intensity.Multiply(dt);
+            receptor.Conc.Subtract(intensity);
+            complex.Conc.Add(intensity);
         }
     }
 
@@ -495,15 +503,17 @@ namespace Daphne
             boundary = complex.Man;
             RateConstant = _RateConst;
             //Type = ReactionType.BoundaryDissociation;
+            intensity = new ScalarField(this.boundary);
         }
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * complex.Conc;
+            intensity.reset(complex.Conc).Multiply(RateConstant);
 
-            ligand.BoundaryFluxes[boundary.Id] -= intensity;
-            receptor.Conc += intensity * dt;
-            complex.Conc -= intensity * dt;
+            ligand.BoundaryFluxes[boundary.Id].Subtract(intensity);
+            intensity.Multiply(dt);
+            receptor.Conc.Add(intensity);
+            complex.Conc.Subtract(intensity);
         }
     }
 
@@ -529,14 +539,15 @@ namespace Daphne
             {
                 throw new Exception("Membrane and boundary concentration manifolds are unequal.");
             }
+            intensity = new ScalarField(boundary);
         }
 
         public override void Step(double dt)
         {
-            intensity = RateConstant  * membrane.Conc;
+            intensity.reset(membrane.Conc).Multiply(RateConstant);
 
-            bulk.BoundaryFluxes[boundary.Id] -= intensity;
-            membrane.Conc -= intensity * dt;
+            bulk.BoundaryFluxes[boundary.Id].Subtract(intensity);
+            membrane.Conc.Subtract(intensity.Multiply(dt));
         }
     }
 
@@ -562,14 +573,15 @@ namespace Daphne
             {
                 throw new Exception("Membrane and boundary concentration manifolds are unequal.");
             }
+            intensity = new ScalarField(boundary);
         }
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * bulk.BoundaryConcs[boundary.Id];
+            intensity.reset(bulk.BoundaryConcs[boundary.Id]).Multiply(RateConstant);
 
-            bulk.BoundaryFluxes[boundary.Id] += intensity;
-            membrane.Conc += intensity * dt;
+            bulk.BoundaryFluxes[boundary.Id].Add(intensity);
+            membrane.Conc.Add(intensity.Multiply(dt));
         }
     }
 
@@ -597,15 +609,16 @@ namespace Daphne
             {
                 throw new Exception("Receptor and complex manifolds are unequal.");
             }
-
+            intensity = new ScalarField(boundary);
         }
         public override void Step(double dt)
         {
-            intensity = RateConstant * receptor.Conc * bulk.BoundaryConcs[boundary.Id];
+
+            intensity.reset(receptor.Conc).Multiply(RateConstant).Multiply(bulk.BoundaryConcs[boundary.Id]);
 
             // fluxes, so multiplication by time step in diffusion
-            bulk.BoundaryFluxes[boundary.Id] += intensity;
-            bulkActivated.BoundaryFluxes[boundary.Id] -= intensity ;
+            bulk.BoundaryFluxes[boundary.Id].Add(intensity);
+            bulkActivated.BoundaryFluxes[boundary.Id].Subtract(intensity);
         }
 
     }

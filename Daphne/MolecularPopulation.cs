@@ -217,13 +217,14 @@ namespace Daphne
             UpdateBoundary();
 
             // Laplacian
-            concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
+            concentration.Add(concentration.Laplacian().Multiply(dt * Molecule.DiffusionCoefficient));
 
             // Boundary fluxes
-            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes.ToList())
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
             {
-                concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
-                kvp.Value.Initialize("explicit", new double[kvp.Value.M.ArraySize]);
+                concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
+                //kvp.Value.Initialize("explicit", new double[kvp.Value.M.ArraySize]);
+                kvp.Value.reset();
             }
 
             // Natural boundary conditions
