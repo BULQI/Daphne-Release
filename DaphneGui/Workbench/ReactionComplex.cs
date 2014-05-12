@@ -50,8 +50,8 @@ namespace DaphneGui
         protected Dictionary<string, double> dictOriginalConcs = new Dictionary<string, double>();
         protected Dictionary<string, double> dictInitialConcs = new Dictionary<string, double>();
 
-        private ObservableCollection<GuiReactionTemplate> reacs = new ObservableCollection<GuiReactionTemplate>();
-        public ObservableCollection<GuiReactionTemplate> ReactionsInComplex
+        private ObservableCollection<ConfigReaction> reacs = new ObservableCollection<ConfigReaction>();
+        public ObservableCollection<ConfigReaction> ReactionsInComplex
         {
             get
             {
@@ -63,8 +63,8 @@ namespace DaphneGui
             }
         }
 
-        public List<GuiReactionTemplate> guiRtList;
-        public List<GuiReactionTemplate> GRTList
+        public List<ConfigReaction> guiRtList;
+        public List<ConfigReaction> GRTList
         {
             get
             {
@@ -87,7 +87,7 @@ namespace DaphneGui
         {
             double minVal = 1e7;
             //Reactions.Clear();
-            foreach (GuiReactionTemplate rt in ReactionsInComplex)
+            foreach (ConfigReaction rt in ReactionsInComplex)
             {
                 minVal = Math.Min(minVal, rt.RateConst);                
             }
@@ -101,7 +101,7 @@ namespace DaphneGui
         public void LoadMolecules(Dictionary<string, Molecule> MolDict)
         {
             List<string> molNames2 = new List<string>();
-            foreach (GuiReactionTemplate rt in GRTList)
+            foreach (ConfigReaction rt in GRTList)
             {
                 foreach (SpeciesReference sr in rt.listOfReactants)
                 {
@@ -132,7 +132,7 @@ namespace DaphneGui
             }
 
             //Now add the actual reactions using ReactionBuilder class
-            foreach (GuiReactionTemplate grt in GRTList)
+            foreach (ConfigReaction grt in GRTList)
             {
                 ReactionTemplate rt = new ReactionTemplate();
                 grt.CopyTo(rt);
@@ -329,7 +329,7 @@ namespace DaphneGui
 
         private void UpdateRateConstants()
         {
-            foreach (GuiReactionTemplate rt in GRTList)
+            foreach (ConfigReaction rt in GRTList)
             {
                 foreach (Reaction r in Reactions)
                 {

@@ -163,8 +163,8 @@ namespace Daphne
                     //if (cp.CellReactions != null)
                     if (cp.CellType.CellReactions != null)
                     {
-                        //foreach (GuiReactionTemplate grt in cp.CellReactions)
-                        foreach (GuiReactionTemplate grt in cp.CellType.CellReactions)
+                        //foreach (ConfigReaction grt in cp.CellReactions)
+                        foreach (ConfigReaction grt in cp.CellType.CellReactions)
                         {
                             if (grt.ReacType == ReactionType.Association)
                             {
@@ -268,7 +268,7 @@ namespace Daphne
                 MolecularPopulation receptor, ligand, complex;
                 double k1plus = 2.0, k1minus = 1;
 
-                foreach (GuiReactionTemplate grt in scenario.Reactions)
+                foreach (ConfigReaction grt in scenario.Reactions)
                 {
                     if (grt.ReacType == ReactionType.BoundaryAssociation || grt.ReacType == ReactionType.BoundaryDissociation)
                     {

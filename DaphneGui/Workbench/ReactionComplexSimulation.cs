@@ -46,8 +46,8 @@ namespace Workbench
         }
 
         //Reactions
-        private List<GuiReactionTemplate> rtList = new List<GuiReactionTemplate>();
-        public List<GuiReactionTemplate> ReactionTemplateList
+        private List<ConfigReaction> rtList = new List<ConfigReaction>();
+        public List<ConfigReaction> ReactionTemplateList
         {
             get
             {
@@ -86,7 +86,7 @@ namespace Workbench
             rc = new ReactionComplex(grc.Name, ball);
             
             //grc.CopyReactionsTo(rc);
-            foreach (GuiReactionTemplate grt in grc.Reactions)
+            foreach (ConfigReaction grt in grc.Reactions)
             {
                 rc.ReactionsInComplex.Add(grt);
             }
@@ -99,7 +99,7 @@ namespace Workbench
                 rc.AddMolecularPopulation(kvp.Value, "const", new double[] { 2.0 });
             }
 
-            foreach (GuiReactionTemplate grt in rc.ReactionsInComplex)
+            foreach (ConfigReaction grt in rc.ReactionsInComplex)
             {
                 ReactionTemplate rt = new ReactionTemplate();
                 grt.CopyTo(rt);

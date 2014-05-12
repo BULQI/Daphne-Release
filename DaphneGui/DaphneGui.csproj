@@ -200,22 +200,20 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Config\DaphnePredefinedCells.txt" />
     <Content Include="Config\DaphnePredefinedMolecules.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Config\DaphnePredefinedReactions.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Config\daphne_ecm_scenario.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_test_scenario.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Config\blank_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="app.config" />
+    <None Include="Config\daphne_diffusion_scenario.json" />
+    <None Include="Config\daphne_driver_locomotion_scenario.json" />
+    <None Include="Config\daphne_ligand_receptor_scenario.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -242,20 +240,6 @@
     <Resource Include="Images\preview_path.png" />
     <Resource Include="Images\Properties16.png" />
     <Resource Include="Images\Vista_RTM_Mouse_Cursors_by_Joshu4.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Config\blank_scenario.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\daphne_test_scenario.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\default_scenario.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\GC103.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">

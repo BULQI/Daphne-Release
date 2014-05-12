@@ -13,7 +13,7 @@ namespace Daphne
     public class GuiReactionComplex
     {
         public string Name { get; set; }
-        public ObservableCollection<GuiReactionTemplate> Reactions { get; set; }
+        public ObservableCollection<ConfigReaction> Reactions { get; set; }
         public ObservableCollection<ConfigMolecule> Molecules { get; set; }
         public string gui_reaction_complex_guid { get; set; }
 
@@ -24,13 +24,13 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             gui_reaction_complex_guid = id.ToString();
-            Reactions = new ObservableCollection<GuiReactionTemplate>();
+            Reactions = new ObservableCollection<ConfigReaction>();
         }
 
         public void ParseForMolecules()
         {
             MolDict = new Dictionary<string, Molecule>();
-            foreach (GuiReactionTemplate grt in Reactions)
+            foreach (ConfigReaction grt in Reactions)
             {
                 foreach (SpeciesReference sr in grt.listOfReactants)
                 {
@@ -76,7 +76,7 @@ namespace Daphne
         ////public void CopyReactionsTo(ReactionComplex rc)
         ////{
         ////    //Copy reactions
-        ////    foreach (GuiReactionTemplate grt in Reactions)
+        ////    foreach (ConfigReaction grt in Reactions)
         ////    {
         ////        rc.ReactionsInComplex.Add(grt);
         ////    }

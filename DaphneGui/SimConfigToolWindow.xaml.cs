@@ -242,7 +242,7 @@ namespace DaphneGui
             ConfigMolecule gm = new ConfigMolecule();
             gm.ReadOnly = false;
             gm.ForegroundColor = System.Windows.Media.Colors.Black;
-            MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Add(gm);
+            //MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Add(gm);
             MainWindow.SC.SimConfig.entity_repository.AllMolecules.Add(gm);
             MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;
 
@@ -273,8 +273,8 @@ namespace DaphneGui
         }
         private void AddReacButton_Click(object sender, RoutedEventArgs e)
         {
-            GuiReactionTemplate new_grt = new GuiReactionTemplate();
-            GuiReactionTemplate selected_grt = (GuiReactionTemplate)lbAvailableReacs.SelectedItem;
+            ConfigReaction new_grt = new ConfigReaction();
+            ConfigReaction selected_grt = (ConfigReaction)lbAvailableReacs.SelectedItem;
 
             new_grt = selected_grt;
             MainWindow.SC.SimConfig.scenario.Reactions.Add(new_grt);            
@@ -285,7 +285,7 @@ namespace DaphneGui
             int nIndex = ReacListBox.SelectedIndex;
             if (nIndex >= 0)
             {
-                GuiReactionTemplate grt = (GuiReactionTemplate)ReacListBox.SelectedValue;
+                ConfigReaction grt = (ConfigReaction)ReacListBox.SelectedValue;
                 MainWindow.SC.SimConfig.scenario.Reactions.Remove(grt);
             }
         }
@@ -427,7 +427,7 @@ namespace DaphneGui
             if (gm.ReadOnly == false)
             {
                 int index = lbMol.SelectedIndex;
-                MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Remove(gm);
+                //MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Remove(gm);
                 MainWindow.SC.SimConfig.entity_repository.AllMolecules.Remove(gm);
 
                 lbMol.SelectedIndex = index;

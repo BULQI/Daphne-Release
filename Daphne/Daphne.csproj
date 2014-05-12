@@ -83,7 +83,6 @@
     <Compile Include="Compartment.cs" />
     <Compile Include="Differentiator.cs" />
     <Compile Include="GuiReactionComplex.cs" />
-    <Compile Include="GuiReactionTemplate.cs" />
     <Compile Include="Locomotor.cs" />
     <Compile Include="MolecularPopulation.cs" />
     <Compile Include="MoleculeBuilder.cs" />

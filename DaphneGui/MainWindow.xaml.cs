@@ -318,7 +318,7 @@ namespace DaphneGui
                 //skg daphne Thursday, April 18, 2013
                 //file = "daphne_test_scenario.xml";
                 //file = "default_scenario.xml";
-                file = "daphne_test_scenario.json";
+                //file = "daphne_test_scenario.json";
                 file = "daphne_ligand_receptor_scenario.json";
             }
 
