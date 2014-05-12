@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Daphne
 {
-    struct SpatialState
+    public struct SpatialState
     {
         public double[] X;
         public double[] V;
@@ -13,7 +13,22 @@ namespace Daphne
 
     public class CellManager
     {
-        Dictionary<Cell, SpatialState> spatialStates;
+        private Dictionary<Cell, SpatialState> spatialStates;
+
+        public CellManager()
+        {
+            spatialStates = new Dictionary<Cell, SpatialState>();
+        }
+
+        public void AddState(Cell c, SpatialState s)
+        {
+            spatialStates.Add(c, s);
+        }
+
+        public Dictionary<Cell, SpatialState> States
+        {
+            get { return spatialStates; }
+        }
 
         public void Step(double dt)
         {
@@ -29,10 +44,39 @@ namespace Daphne
     {
         public Simulation()
         {
-            CellManager = new CellManager();
+            cellManager = new CellManager();
+            cells = new Dictionary<int, Cell>();
         }
-        public Compartment ExtracellularSpace;
-        public CellManager CellManager;
-        public Dictionary<int, Cell> cells;
+
+        public void AddCell(double[] pos, double[] vel)
+        {
+            Cell c = new Cell();
+            SpatialState s = new SpatialState();
+
+            s.X = pos;
+            s.V = vel;
+            cellManager.AddState(c, s);
+            cells.Add(c.Index, c);
+        }
+
+        public Compartment ECS
+        {
+            get { return extracellularSpace; }
+            set { extracellularSpace = value; }
+        }
+
+        public CellManager CMGR
+        {
+            get { return cellManager; }
+        }
+
+        public Dictionary<int, Cell> Cells
+        {
+            get { return cells; }
+        }
+
+        private Compartment extracellularSpace;
+        private CellManager cellManager;
+        private Dictionary<int, Cell> cells;
     }
 }

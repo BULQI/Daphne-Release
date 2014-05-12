@@ -21,8 +21,6 @@ namespace Daphne
         /// </summary>
         public bool Cytokinetic;
 
-        public Locator Loc;
-
         public Cell()
         {
             Alive = true;
@@ -35,28 +33,6 @@ namespace Daphne
             Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior,cellEmbed);
 
             Index = safeIndex++;
-        }
-
-        public Cell(double[] position)
-        {
-            Alive = true;
-            Cytokinetic = false;
-            PlasmaMembrane = new Compartment(new TinySphere());
-            Cytosol = new Compartment(new TinyBall());
-            //OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
-            DirectTranslEmbedding cellEmbed = new DirectTranslEmbedding(PlasmaMembrane.Interior, Cytosol.Interior, new int[1]{0}, new double[1]{0.0});
-            Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, cellEmbed);
-
-            Index = safeIndex++;
-
-            Loc = new Locator();
-            // NOTE: This assumes the usual case - that the cell is moving in 3 dimensions
-            // Not sure if we will ever have cells moving in only 2 dimensions - constrained to a surface
-            Loc.position = new double[3];
-            Loc.position[0] = position[0];
-            Loc.position[1] = position[1];
-            Loc.position[2] = position[2];
         }
 
         /// <summary>
@@ -108,18 +84,6 @@ namespace Daphne
 
         // There may be other components specific to a given cell type.
     }
-
-    /// <summary>
-    /// Contains information about the cell's location
-    /// To be used in cell manager?
-    /// NOTE: This information used by MotileTSEmbedding
-    /// </summary>
-    public struct Locator
-    {
-        // The position of the embedded manifolds origin in the embedding manifold
-        public double[] position;
-    }
-
 }
 
 

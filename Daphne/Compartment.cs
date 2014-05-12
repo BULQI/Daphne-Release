@@ -30,15 +30,77 @@ namespace Daphne
         {
             ScalarField s = new ScalarField(Interior, initConc);
             MolecularPopulation molpop = new MolecularPopulation(mol, Interior, s);
+
             Populations.Add(molpop.Molecule.Name, molpop);
         }
 
         public void AddMolecularPopulation(Molecule mol, ScalarField initConc)
         {
             // Add the molecular population with concentration specified with initConc
-
             MolecularPopulation molpop = new MolecularPopulation(mol, Interior, initConc);
+
             Populations.Add(molpop.Molecule.Name, molpop);
+        }
+
+        public bool HasThisReaction(ReactionTemplate rt)
+        {
+            if (rtList.Count == 0) return false;
+
+            return rtList.Contains(rt) == true;
+        }
+
+        public bool HasAllReactants(ReactionTemplate rt)
+        {
+            // find if all the species in the reaction template have matches in the molecular populations
+            if (rt.listOfReactants.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (SpeciesReference spRef in rt.listOfReactants)
+            {
+                // as soon as there is one not found we can return false
+                if (Populations.ContainsKey(spRef.species) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool HasAllModifiers(ReactionTemplate rt)
+        {
+            // find if all the species in the reaction template have matches in the molecular populations
+            if (rt.listOfModifiers.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (SpeciesReference spRef in rt.listOfModifiers)
+            {
+                // as soon as there is one not found we can return false
+                if (Populations.ContainsKey(spRef.species) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void AddNeededProducts(ReactionTemplate rt, Dictionary<string, Molecule> MolDict)
+        {
+            // Check the product molecules exist as MolecularPopulations in the Compartment
+            // If not, add a molecular population to the compartment
+            foreach (SpeciesReference spRef in rt.listOfProducts)
+            {
+                // not contained? add it
+                if (Populations.ContainsKey(spRef.species) == false)
+                {
+                    AddMolecularPopulation(MolDict[spRef.species], 0.0);
+                }
+            }
         }
 
         /// <summary>

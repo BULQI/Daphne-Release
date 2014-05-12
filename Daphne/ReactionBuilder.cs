@@ -7,81 +7,6 @@ namespace Daphne
 {
     public static class ReactionBuilder
     {
-        public static bool CompartHasThisReaction(List<ReactionTemplate> rtList, ReactionTemplate RT)
-        {
-            // Compare the compartments list of reactions templates to the global list
-
-            if (rtList.Count == 0) return false;
-
-            foreach (ReactionTemplate rt in rtList)
-            {
-                if (rt == RT)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool HasAllReactants(Dictionary<string, MolecularPopulation> molPops, ReactionTemplate rt)
-        {
-            // Compare the molecules in molPops to the Reaction species in the reaction template
-            // Return true if all the species in the reaction template have matches in the molecular population
-
-            if (rt.listOfReactants.Count == 0)
-            {
-                return true;
-            }
-
-            foreach (SpeciesReference spRef in rt.listOfReactants)
-            {
-                // as soon as there is one not found we can return false
-                if (molPops.ContainsKey(spRef.species) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool HasAllModifiers(Dictionary<string, MolecularPopulation> molPops, ReactionTemplate rt)
-        {
-            // Compare the molecules in molPops to the Modifier species in the reaction template
-            // Return true if all the species in the reaction template have matches in the molecular population
-
-            if (rt.listOfModifiers.Count == 0)
-            {
-                return true;
-            }
-
-            foreach (SpeciesReference spRef in rt.listOfModifiers)
-            {
-                // as soon as there is one not found we can return false
-                if (molPops.ContainsKey(spRef.species) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static void AddNeededProducts(ReactionTemplate rt, Compartment C, Dictionary<string, Molecule> MolDict)
-        {
-            // Check the product molecules exist as MolecularPopulations in the Compartment
-            // If not, add a molecular population to the compartment
-            foreach (SpeciesReference spRef in rt.listOfProducts)
-            {
-                // not contained? add it
-                if (C.Populations.ContainsKey(spRef.species) == false)
-                {
-                    C.AddMolecularPopulation(MolDict[spRef.species], 0.0);
-                }
-            }
-        }
-
         public static void ReactionSwitch(Compartment C, ReactionTemplate rt)
         {
             MolecularPopulation reactant0, reactant1, product0, product1, catalyst;
@@ -277,13 +202,13 @@ namespace Daphne
             foreach (ReactionTemplate rt in rtList)
             {
                 // Check to see if this reaction already exists in the compartment
-                if (ReactionBuilder.CompartHasThisReaction(C.rtList, rt) == false)
+                if (C.HasThisReaction(rt) == false)
                 {
                     // Check for all the necessary reactants and catalysts
-                    if (HasAllReactants(C.Populations, rt) == true && HasAllModifiers(C.Populations, rt) == true)
+                    if (C.HasAllReactants(rt) == true && C.HasAllModifiers(rt) == true)
                     {
                         // Add any missing products
-                        AddNeededProducts(rt, C, MolDict);
+                        C.AddNeededProducts(rt, MolDict);
 
                         // Add reaction and reaction template to Compartment
                         ReactionSwitch(C, rt);
@@ -324,7 +249,7 @@ namespace Daphne
             foreach (ReactionTemplate rt in rtList)
             {
                 // Check to see if this reaction already exists in the compartment associated with the embedded manifold
-                if ( ReactionBuilder.CompartHasThisReaction(C2.rtList, rt) == false )
+                if (C2.HasThisReaction(rt) == false)
                 {
                     // NOTE: At this point, we only have BoundaryAssociation and BoundaryDissociation
                     if (rt.typeOfReaction == "association" || rt.typeOfReaction == "dissociation")
@@ -336,8 +261,7 @@ namespace Daphne
                         reacComp = ShareAllReactants(C1, C2, rt);
                         modComp = ShareAllModifiers(C1, C2, rt);
 
-                        if ( (reacComp.Count > 0 || rt.listOfReactants.Count == 0) &&
-                            (modComp.Count > 0 || rt.listOfModifiers.Count == 0)  )
+                        if ((reacComp.Count > 0 || rt.listOfReactants.Count == 0) && (modComp.Count > 0 || rt.listOfModifiers.Count == 0))
                         {                        
                             // NOTE: Missing product molecules always get added to embedded manifold. 
                             // QUESTION: How robust is this assumption?
@@ -346,14 +270,13 @@ namespace Daphne
                             // Check to see whether each compartment has at least one reactant, modifier, or product
                             // molecular population associated with this reaction. Otherwise, don't add it.
                             // e.g., CXCL13 -> 0
-                            if ( BothCompsInThisReaction(reacComp, modComp, prodComp, C1, C2) == true)
+                            if (BothCompsInThisReaction(reacComp, modComp, prodComp, C1, C2) == true)
                             {
                                 // Add reaction and reaction template to the Compartment of the embedded manifold
                                 ReactionSwitchList(reacComp, modComp, prodComp, C2, rt);
 
                                 changed = true;
                             }
-
                         }
                     }
                 }
@@ -381,6 +304,12 @@ namespace Daphne
                 {
                     tfC2 = true;
                 }
+
+                // once both are true there is no need to keep iterating
+                if(tfC1 == true && tfC2 == true)
+                {
+                    return true;
+                }
             }
 
             foreach (Compartment c in modComp)
@@ -392,6 +321,12 @@ namespace Daphne
                 else if (c == C2)
                 {
                     tfC2 = true;
+                }
+
+                // once both are true there is no need to keep iterating
+                if(tfC1 == true && tfC2 == true)
+                {
+                    return true;
                 }
             }
 
@@ -405,9 +340,14 @@ namespace Daphne
                 {
                     tfC2 = true;
                 }
+
+                // once both are true there is no need to keep iterating
+                if(tfC1 == true && tfC2 == true)
+                {
+                    return true;
+                }
             }
-           
-            
+                      
             return (tfC1 && tfC2);
         }
 
@@ -457,8 +397,6 @@ namespace Daphne
             // Return an empty list if there are no Reactants specified in the reaction template or all the Reactants are not present
 
             List<Compartment> reacComp = new List<Compartment>();
-            Dictionary<string, MolecularPopulation> molPops1 = C1.Populations;
-            Dictionary<string, MolecularPopulation> molPops2 = C2.Populations;
 
             if (rt.listOfReactants.Count == 0)
             {
@@ -467,11 +405,11 @@ namespace Daphne
 
             foreach (SpeciesReference spRef in rt.listOfReactants)
             {
-                if (molPops1.ContainsKey(spRef.species) == true)
+                if (C1.Populations.ContainsKey(spRef.species) == true)
                 {
                     reacComp.Add(C1);
                 }
-                else if (molPops2.ContainsKey(spRef.species) == true)
+                else if (C2.Populations.ContainsKey(spRef.species) == true)
                 {
                     reacComp.Add(C2);
                 }
@@ -492,8 +430,6 @@ namespace Daphne
             // Return an empty list if there are no Modifiers specified in the reaction template or all the Modifiers are not present
 
             List<Compartment> modComp = new List<Compartment>();
-            Dictionary<string, MolecularPopulation> molPops1 = C1.Populations;
-            Dictionary<string, MolecularPopulation> molPops2 = C2.Populations;
 
             if (rt.listOfModifiers.Count == 0)
             {
@@ -502,11 +438,11 @@ namespace Daphne
 
             foreach (SpeciesReference spRef in rt.listOfModifiers)
             {
-                if (molPops1.ContainsKey(spRef.species) == true)
+                if (C1.Populations.ContainsKey(spRef.species) == true)
                 {
                     modComp.Add(C1);
                 }
-                else if (molPops2.ContainsKey(spRef.species) == true)
+                else if (C2.Populations.ContainsKey(spRef.species) == true)
                 {
                     modComp.Add(C2);
                 }
@@ -569,12 +505,8 @@ namespace Daphne
  
                     embeddedComp.rtList.Add(rt);
                     break;
-
             }
         }
-
-
-
     }
 
 }
