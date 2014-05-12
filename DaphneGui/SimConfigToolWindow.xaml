@@ -2191,7 +2191,7 @@
                                                 Maximum="2000" 
                                                 Value="{Binding Path=scenario.time_config.sampling_interval}" 
                                                 IsSnapToTickEnabled="True" 
-                                                TickFrequency="1" 
+                                                TickFrequency="0.1" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                         <editors:DoubleEditBox x:Name="SamplingInterval" 
@@ -2199,7 +2199,7 @@
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
                                                               Format="N2"
-                                                              StepValue="1"
+                                                              StepValue="0.1"
                                                               Width="60" 
                                                               CenterSlotHorizontalAlignment="Right"
                                                               Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
@@ -2239,10 +2239,10 @@
                     <!-- Toroidal BoundaryTypeToBooleanConv
                     SelectedIndex="{Binding Path=scenario.environment.toroidal, Converter=BoolToIndexConv}"
                     -->
-                    <StackPanel Orientation="Horizontal">                        
-                        <TextBlock Text="Toroidal Boundary" FontWeight="Bold" Margin="0,20,0,0" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
                         <CheckBox x:Name="cbToroidal" Margin="10,22" Visibility="Hidden" IsChecked="{Binding Path=scenario.environment.toroidal}"/>
-                        <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="16,16" Height="22"
+                        <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"
                                   SelectedIndex="{Binding scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
                                   ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
                                   
@@ -3447,7 +3447,8 @@
                                             <DataTemplate>
                                                 <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
 
-                                                <TextBox Width="150" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                          LostFocus="TextBox_LostFocus">
                                                     <TextBox.Style>
                                                         <Style TargetType="{x:Type TextBox}">
                                                             <Style.Triggers>
@@ -3534,7 +3535,7 @@
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolecule_Click"></Button>
-                                <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddMolecule_Click"></Button>
+                                <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddLibMolecule_Click"></Button>
                                 <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolecule_Click"></Button>
                             </StackPanel>
                         </StackPanel>
@@ -3794,7 +3795,7 @@
                                     />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="CopyCellButton"  Width="50" Content="Copy" Click="CopyCellButton_Click" />
-                                <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click_1"/>
+                                <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddLibCellButton_Click"/>
                                 <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
                             </StackPanel>
 

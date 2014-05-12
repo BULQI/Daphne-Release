@@ -928,9 +928,10 @@ namespace DaphneGui
 
         //LIBRARIES TAB EVENT HANDLERS
         //MOLECULES        
-        private void btnAddMolecule_Click(object sender, RoutedEventArgs e)
+        private void btnAddLibMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = new ConfigMolecule();
+            gm.Name = gm.GenerateNewName(MainWindow.SC.SimConfig, "_New");
             gm.ReadOnly = false;
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
@@ -947,13 +948,14 @@ namespace DaphneGui
                 return;
 
             //ConfigMolecule gm = new ConfigMolecule(cm);
-            ConfigMolecule newmol = cm.Clone() ;
+            ConfigMolecule newmol = cm.Clone(MainWindow.SC.SimConfig);
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(newmol);
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
             dgLibMolecules.ScrollIntoView(cm);
         }
+
         private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
@@ -1481,7 +1483,7 @@ namespace DaphneGui
 
 
 
-        private void AddCellButton_Click_1(object sender, RoutedEventArgs e)
+        private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
             cc.ReadOnly = false;
@@ -1572,6 +1574,7 @@ namespace DaphneGui
                 cellPop.cellPopDist = cpg;
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
+            ToolBarTray tr = new ToolBarTray();
 
         }
 #if CELL_REGIONS
@@ -2057,7 +2060,7 @@ namespace DaphneGui
             ConfigCell cellNew = cell.Clone();
             
             //Generate a new cell name
-            cellNew.CellName = GenerateNewCellName(cell);
+            cellNew.CellName = GenerateNewCellName(cell, "_Copy");
 
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cellNew);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
@@ -2074,6 +2077,21 @@ namespace DaphneGui
                 TempCellName = cell.CellName.Replace(sSuffix, "");
                 nSuffix++;
                 sSuffix = string.Format("_Copy{0:000}", nSuffix);
+            }
+            TempCellName += sSuffix;
+            return TempCellName;
+        }
+
+        private string GenerateNewCellName(ConfigCell cell, string ending)
+        {
+            int nSuffix = 1;
+            string sSuffix = ending + string.Format("{0:000}", nSuffix);
+            string TempCellName = cell.CellName;
+            while (FindCellBySuffix(sSuffix) == true)
+            {
+                TempCellName = cell.CellName.Replace(sSuffix, "");
+                nSuffix++;
+                sSuffix = ending + string.Format("{0:000}", nSuffix);
             }
             TempCellName += sSuffix;
             return TempCellName;
@@ -2115,6 +2133,16 @@ namespace DaphneGui
         private void TabItem_Loaded(object sender, RoutedEventArgs e)
         {
             lbRptCellPops.SelectedIndex = 0;
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
+
+            if (cm == null)
+                return;
+
+            cm.ValidateName(MainWindow.SC.SimConfig);
         }
 
         //private ComboBox MolPopDistComboBox;

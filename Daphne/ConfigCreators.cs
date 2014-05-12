@@ -215,10 +215,11 @@ namespace Daphne
                     //hl.concentration = conc[i];
                     //configMolPop.mpInfo.mp_distribution = hl;
                     //configMolPop.mpInfo.mp_dist_name = "Uniform";
+                    
+                    MolPopLinear molpoplin = new MolPopLinear();
                     configMolPop.boundary_face = BoundaryFace.X;
                     configMolPop.boundaryVal1 = 5 * CXCL13conc;
                     configMolPop.boundaryVal2 = 0;
-                    MolPopLinear molpoplin = new MolPopLinear();
                     molpoplin.c1 = configMolPop.boundaryVal1;
                     molpoplin.c2 = configMolPop.boundaryVal2;
                     molpoplin.dim = 0;

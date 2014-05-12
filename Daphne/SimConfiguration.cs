@@ -1522,7 +1522,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molecule_guid = id.ToString();
-            Name = "NewMolecule"; // +"_" + DateTime.Now.ToString("hhmmssffff");
+            Name = "Molecule_New001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
@@ -1530,19 +1530,30 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public ConfigMolecule(ConfigMolecule gm)
+        public string GenerateNewName(SimConfiguration sc, string ending)
         {
-            Guid id = Guid.NewGuid();
-            molecule_guid = id.ToString();
-            Name = "CopyOf_" + gm.Name; // +"_" + DateTime.Now.ToString("hhmmssffff");
-            MolecularWeight = gm.MolecularWeight;
-            EffectiveRadius = gm.EffectiveRadius;
-            DiffusionCoefficient = gm.DiffusionCoefficient;
-            ReadOnly = gm.ReadOnly;
-            molecule_location = gm.molecule_location;
-        }
+            string OriginalName = Name;
 
-        public ConfigMolecule Clone()
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempMolName = OriginalName + suffix;
+            while (FindMoleculeByName(sc, TempMolName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempMolName = OriginalName + suffix;
+            }
+
+            return TempMolName;
+        }
+       
+        public ConfigMolecule Clone(SimConfiguration sc)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -1552,8 +1563,45 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             newmol.molecule_guid = id.ToString();
             newmol.ReadOnly = false;
+            newmol.Name = newmol.GenerateNewName(sc, "_Copy");
+            
             return newmol;
+        }        
+
+        public static bool FindMoleculeByName(SimConfiguration sc, string tempMolName)
+        {
+            bool ret = false;
+            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
+            {
+                if (mol.Name == tempMolName)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
+
+        public void ValidateName(SimConfiguration sc)
+        {
+            bool found = false;
+            string tempMolName = Name;
+            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
+            {
+                if (mol.Name == tempMolName && mol.molecule_guid != molecule_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                Name = GenerateNewName(sc, "_Ch");
+            }
+        }
+
     }
 
     public enum ExtendedReport { NONE, LEAN, COMPLETE };
@@ -1642,8 +1690,8 @@ namespace Daphne
 
         public List<BoundaryCondition> boundaryCondition { get; set; }
         private double _boundaryVal1;
-        public double boundaryVal1 
-        { 
+        public double boundaryVal1
+        {
             get
             {
                 return _boundaryVal1;
@@ -3234,6 +3282,8 @@ namespace Daphne
         public double c2 { get; set; }
         public double x1 { get; set; }
         public int dim { get; set; }
+
+        
         
         public MolPopLinear()
         {
@@ -3281,60 +3331,6 @@ namespace Daphne
 
         public double[] conc;
     }
-
-    //public class MolPopCustom : MolPopDistribution
-    //{
-    //    private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
-    //    private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
-
-    //    public MolPopCustom()
-    //    {
-    //        mp_distribution_type = MolPopDistributionType.Custom;
-    //    }
-
-    //    [XmlIgnore]
-    //    public Uri custom_gradient_file_uri
-    //    {
-    //        get { return _custom_gradient_file_uri; }
-    //        set
-    //        {
-    //            if (_custom_gradient_file_uri == value)
-    //                return;
-    //            else
-    //            {
-    //                _custom_gradient_file_uri = value;
-    //                _custom_gradient_file_string = value.AbsolutePath;
-    //                //OnPropertyChanged("custom_gradient_file_uri");
-    //                //OnPropertyChanged("custom_gradient_file_string");
-    //                //OnPropertyChanged("custom_gradient_file_name");
-    //            }
-    //        }
-    //    }
-
-    //    public string custom_gradient_file_string
-    //    {
-    //        get { return _custom_gradient_file_string; }
-    //        set
-    //        {
-    //            if (_custom_gradient_file_string == value)
-    //                return;
-    //            else
-    //            {
-    //                _custom_gradient_file_string = value;
-    //                _custom_gradient_file_uri = new Uri(value);
-    //                //OnPropertyChanged("custom_gradient_file_uri");
-    //                //OnPropertyChanged("custom_gradient_file_string");
-    //                //OnPropertyChanged("custom_gradient_file_name");
-    //            }
-    //        }
-    //    }
-
-    //    [XmlIgnore]
-    //    public string custom_gradient_file_name
-    //    {
-    //        get { return _custom_gradient_file_uri.Segments[_custom_gradient_file_uri.Segments.Length - 1]; }
-    //    }
-    //}
 
     public class GaussianSpecification : EntityModelBase
     {

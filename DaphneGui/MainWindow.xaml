@@ -349,22 +349,22 @@
                                                 <ToggleButton Name="WhArrowToolButton" 
                                           IsChecked="{Binding WhArrowToolButton_IsChecked}" 
                                           IsEnabled="{Binding WhArrowToolButton_IsEnabled}"
-                                          ToolBar.OverflowMode="Never" ToolTip="Navigation tool" ToolTipService.ShowOnDisabled="True">
+                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Navigation tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_wh_arrow.png" Style="{StaticResource toolbarTBImageStyle}"/>
                                                 </ToggleButton>
                                                 <ToggleButton Name="HandToolButton" 
                                                           IsChecked="{Binding HandToolButton_IsChecked}" 
                                                           IsEnabled="{Binding HandToolButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="Never" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="PreviewButton" 
                                                           IsChecked="{Binding PreviewButton_IsChecked}" 
                                                           IsEnabled="{Binding PreviewButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="Never" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
                                                     <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
-                                                <Separator ToolBar.OverflowMode="Never"/>
+                                                <Separator ToolBar.OverflowMode="AsNeeded"/>
                                                 <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cells</Label>
 
                                                 <!--ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
@@ -372,23 +372,23 @@
                                                 SelectedValue="{Binding Path=CellRenderMethod}"-->
                                                 <ComboBox Name="CellRenderMethodCB" Width="100"
                                                           BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="Never" ToolTip="Cells rendered as shape"
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
                                                           />
                                                 <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
                                                 <ComboBox x:Name="CellsColorByCB" Width="100" 
                                                           ItemsSource="{Binding Path=CellAttributeArrayNames}" 
                                                           SelectedValue="{Binding Path=CellColorArrayName}"
                                                           BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="Never" ToolTip="Cells color by attribute">
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells color by attribute">
                                                 </ComboBox>
 
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell selection mode</Label>
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
                                                 <ComboBox Name="CellSelectionToolCB" Width="160"
                                                           ItemsSource="{Binding Path=CellSelectionToolModes}"
                                                           SelectedValue="{Binding Path=CellSelectionToolMode}"
                                                           SelectionChanged="CellSelectionToolCB_SelectionChanged"
                                                           BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="Never" ToolTip="Select the function the cell selection tool should perform"
+                                                          ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
                                                           />
 
                                                 <Slider x:Name="ColorMapScaleFactorSlider"
@@ -396,7 +396,7 @@
                                                         Value="{Binding ColorScaleMaxFactor}"
                                                         Orientation="Horizontal"
                                                         VerticalAlignment="Center"
-                                                        ToolBar.OverflowMode="Never"
+                                                        ToolBar.OverflowMode="AsNeeded"
                                                         Width="50"
                                                         RenderTransform="1.0,0,0,0.5,0,6"
                                                         Minimum="0.01" 
@@ -404,7 +404,7 @@
                                                         KeyboardNavigation.IsTabStop="False"
                                                         >
                                                 </Slider>
-                                                <TextBlock ToolBar.OverflowMode="Never" 
+                                                <TextBlock ToolBar.OverflowMode="AsNeeded" 
                                                             VerticalAlignment="Center"
                                                             Margin="2,0,5,0"
                                                             Visibility="{Binding ColorScaleSlider_IsEnabled}"
@@ -415,7 +415,7 @@
                                                             ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
                                                             SelectedValue="{Binding Path=ECSRenderingMethod}"
                                                             BorderBrush="LightGray" 
-                                                            ToolBar.OverflowMode="Never" ToolTip="Extracellular medium rendering style">
+                                                            ToolBar.OverflowMode="AsNeeded" ToolTip="Extracellular medium rendering style">
                                                 </ComboBox>
                                                 <ToggleButton x:Name="ScalarBarMarkerButton" 
                                                         IsChecked="{Binding ScalarBarMarker_IsChecked}" 
