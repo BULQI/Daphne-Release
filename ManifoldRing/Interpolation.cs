@@ -17,6 +17,7 @@ namespace ManifoldRing
         double[] Gradient(double[] x, ScalarField sf);
         ScalarField Laplacian(ScalarField sf);
         ScalarField DiffusionFlux(ScalarField flux, Transform t);
+        ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to);
     }
 
     public abstract class NodeInterpolator : Interpolator
@@ -113,6 +114,58 @@ namespace ManifoldRing
             }
             return temp;
         }
+
+        /// <summary>
+        /// Impose Dirichlet boundary conditions
+        /// NOTE: This algorithm is best when there is a one-to-one correspondance between 
+        /// boundary and interior manifold principla points (nodes). May not be as accurate
+        /// when there is not a one-to-one correspondance.
+        /// </summary>
+        /// <param name="from">Field specified on the boundary manifold</param>
+        /// <param name="t">Transform that specifies the geometric relationship between 
+        /// the boundary and interior manifolds </param>
+        /// <param name="to">Field specified on the interior manifold</param>
+        /// <returns>The field after imposing Dirichlet boundary conditions</returns>
+        public ScalarField DirichletBC(ScalarField from, Transform t, ScalarField sf)
+        {
+            int n;
+
+            //double[] x_interior = new double[3];
+            //double[] x_boundary = new double[3];
+            //int[] idx = new int[3];
+            //double val;
+            //InterpolatedNodes mb = (InterpolatedNodes)from.M;
+
+            //double[] pos = t.Translation;
+            //Console.WriteLine("Translation: " + pos[0] + ", " + pos[1] + ", " + pos[2]);
+
+            for (int i = 0; i < from.M.PrincipalPoints.Length; i++)
+            {
+                //// The position in the boundary manifold's coordinate system?
+                //x_boundary = (double[])from.M.PrincipalPoints[i];
+                //// The position in the interior manifold's coordinate system
+                //// Takes translation into account
+                //x_interior = (double[])t.toContaining(x_boundary);
+                //// The indices of the closest interior manifold point corresponding to x
+                //idx = m.localToIndexArray(x_interior);
+                //// The corresponding linear index
+                //n = m.indexArrayToLinearIndex(idx);
+                //val = from.Value(from.M.PrincipalPoints[i]);
+                //Console.WriteLine(i + ":");
+                //Console.WriteLine("\t x_boundary " + x_boundary[0] + ", " + x_boundary[1] + ", " + x_boundary[2]);
+                //Console.WriteLine("\t x_interior " + x_interior[0] + ", " + x_interior[1] + ", " + x_interior[2]);
+                //Console.WriteLine("\t interior indices " + idx[0] + ", " + idx[1] + ", " + idx[2]);
+                //Console.WriteLine("\t" + val);
+
+                // Find the node in this manifold that is closest to the principal point
+                n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(from.M.PrincipalPoints[i])));
+                sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
+
+                //Console.WriteLine("\t" + n);
+
+            }
+            return sf;
+        }   
     }
 
 

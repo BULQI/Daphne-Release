@@ -230,8 +230,10 @@ namespace ManifoldRing
         /// <summary>
         /// field diffusion flux term
         /// </summary>
-        /// <param name="flux">flux involved</param>
-        /// <returns>diffusion flux term as field</returns>
+        /// <param name="flux">flux from boundary manifold</param>
+        /// <param name="t">Transform that specifies the geometric relationship between 
+        /// the boundary and interior manifolds </param>
+        /// <returns>diffusion flux term as field in the interior manifold</returns>
         public ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
             return m.DiffusionFluxTerm(flux,t);
@@ -245,40 +247,18 @@ namespace ManifoldRing
         {
             return m.Integrate(this);
         }
-
+        
         /// <summary>
-        ///  convert 'from' to the format of this at pos
+        /// Impose Dirichlet boundary conditions
         /// </summary>
-        /// <param name="from">field to convert</param>
-        /// <param name="pos">position at which to convert</param>
-        //public void Convert(ScalarField from, double[] pos)
-        //{
-        //    if(from.M.GetType() == typeof(InterpolatedRectangularPrism) && m.GetType() == typeof(TinySphere))
-        //    {
-        //        double[] grad = m.Grad(pos, from);
-
-        //        array[0] = from.Value(pos);
-        //        array[1] = grad[0];
-        //        array[2] = grad[1];
-        //        array[3] = grad[2];
-        //    }
-        //    else if (from.M.GetType() == typeof(TinyBall) && m.GetType() == typeof(TinySphere))
-        //    {
-        //        // same representation
-        //        for (int i = 0; i < m.ArraySize; i++)
-        //        {
-        //            array[i] = from.array[i];
-        //        }
-        //    }
-        //    else if (from.M.GetType() == typeof(InterpolatedRectangle) && m.GetType() == typeof(InterpolatedRectangularPrism))
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //    else
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //}
+        /// <param name="from">Field specified on the boundary manifold</param>
+        /// <param name="t">Transform that specifies the geometric relationship between 
+        /// the boundary and interior manifolds </param>
+        /// <returns>The field after imposing Dirichlet boundary conditions</returns>
+        public ScalarField DirichletBC(ScalarField from, Transform t)
+        {
+            return m.DirichletBC(from, t, this);
+        }
 
         /// <summary>
         /// multiply the field by a scalar

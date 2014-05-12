@@ -137,6 +137,15 @@ namespace ManifoldRing
         /// The points on a manifold that are used to exchange flux
         /// </summary>
         public Vector[] PrincipalPoints { get; set; }
+        /// <summary>
+        /// Impose Dirichlet boundary conditions
+        /// </summary>
+        /// <param name="from">Field specified on the boundary manifold</param>
+        /// <param name="t">Transform that specifies the geometric relationship between 
+        /// the boundary and interior manifolds </param>
+        /// <param name="to">Field specified on the interior manifold</param>
+        /// <returns>The field after imposing Dirichlet boundary conditions</returns>
+        public abstract ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to);
     }
 
     /// <summary>
@@ -218,6 +227,12 @@ namespace ManifoldRing
 
             return to;
         }
+
+        public override ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 
     /// <summary>
@@ -874,7 +889,7 @@ namespace ManifoldRing
         /// Restriction of a scalar field to an IL boundary manifold
         /// </summary>
         /// <param name="from">scalar field as represented on from.M, the interior manifold</param>
-        /// <param name="pos">scalar field as represented on to.M, the boundary manifold</param>
+        /// <param name="t">Transform that defines spatial relation between from and to</param>
         /// <param name="to">the location of the boundary manifold in the interior manifold</param>
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
@@ -895,6 +910,19 @@ namespace ManifoldRing
         public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
             return interpolator.DiffusionFlux(flux, t);
+        }
+
+        /// <summary>
+        /// Impose Dirichlet boundary conditions
+        /// </summary>
+        /// <param name="from">Field specified on the boundary manifold</param>
+        /// <param name="t">Transform that specifies the geometric relationship between 
+        /// the boundary and interior manifolds </param>
+        /// <param name="to">Field specified on the interior manifold</param>
+        /// <returns>The field after imposing Dirichlet boundary conditions</returns>
+        public override ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to)
+        {
+            return interpolator.DirichletBC(from, t, to);
         }
     }
 
