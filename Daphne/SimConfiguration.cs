@@ -1975,22 +1975,28 @@ namespace Daphne
 
         public void addMolPopulation(string key, MolecularPopulation mp)
         {
-            if (mp.BoundaryConcs == null || mp.BoundaryConcs.Count == 0)
+
+            int arr_len = mp.Conc.M.ArraySize;
+            if (mp.BoundaryConcs.Count > 0)
             {
-                configMolPop.Add(key, mp.Conc.ValueArray);
-                return;
+                arr_len += mp.BoundaryConcs.First().Value.M.ArraySize;
             }
-            //save cells boundaryconc & boundaryflux
-            int arr_len = mp.Conc.ValueArray.Length + mp.BoundaryConcs.First().Value.ValueArray.Length + 
-                mp.BoundaryFluxes.First().Value.ValueArray.Length;
-            double[] val = new double[arr_len];
-            Array.Copy(mp.Conc.ValueArray, val, mp.Conc.ValueArray.Length);
-            int dst_index = mp.Conc.ValueArray.Length;
-            int copy_len = mp.BoundaryConcs.First().Value.ValueArray.Length;
-            Array.Copy(mp.BoundaryConcs.First().Value.ValueArray, 0, val, dst_index, copy_len);
-            dst_index += copy_len;
-            Array.Copy(mp.BoundaryFluxes.First().Value.ValueArray, 0, val, dst_index, copy_len);
-            configMolPop.Add(key, val);
+            if (mp.BoundaryFluxes.Count > 0)
+            {
+                arr_len += mp.BoundaryFluxes.First().Value.M.ArraySize;
+            }
+
+            double[] valarr = new double[arr_len];
+            int dst_index = mp.Conc.CopyArray(valarr);
+            if (mp.BoundaryConcs.Count > 0)
+            {
+                dst_index += mp.BoundaryConcs.First().Value.CopyArray(valarr, dst_index);
+            }
+            if (mp.BoundaryFluxes.Count > 0)
+            {
+                mp.BoundaryFluxes.First().Value.CopyArray(valarr, dst_index);
+            }
+            configMolPop.Add(key, valarr);
         }
     }
 

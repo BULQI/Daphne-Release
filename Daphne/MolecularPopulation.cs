@@ -133,14 +133,25 @@ namespace Daphne
             if (type == "explicit" && parameters.Length > concentration.M.ArraySize)
             {
                 //reset boundary conc and flux, only for cell and only one boundary per molpop
-                int src_index = Conc.M.ArraySize;                
-                int arr_len = BoundaryConcs.First().Value.M.ArraySize;
-                double[] newvals = new double[arr_len];
-                Array.Copy(parameters, src_index, newvals, 0, arr_len);
-                this.boundaryConcs.First().Value.Initialize(type, newvals);
-                src_index += arr_len;
-                Array.Copy(parameters, src_index, newvals, 0, arr_len);
-                BoundaryFluxes.First().Value.Initialize(type, newvals);
+                int src_index = Conc.M.ArraySize;
+                foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
+                {
+
+                    int arr_len = kvp.Value.M.ArraySize;
+                    double[] newvals = new double[arr_len];
+                    Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                    kvp.Value.Initialize(type, newvals);
+                    src_index += arr_len;
+                }
+
+                foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
+                {
+                    int arr_len = kvp.Value.M.ArraySize;
+                    double[] newvals = new double[arr_len];
+                    Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                    kvp.Value.Initialize(type, newvals);
+                    src_index += arr_len;
+                }
             }
         }
 

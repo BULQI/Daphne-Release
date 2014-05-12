@@ -65,13 +65,12 @@ namespace DaphneGui
             {
                 //loop through molecular population
                 MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref];
-                ScalarField molecule_concentration = cur_mp.Conc;
-
-                double[] cur_conc_values = new double[molecule_concentration.ValueArray.Length];
-                Array.Copy(molecule_concentration.ValueArray, cur_conc_values, cur_conc_values.Length);
 
                 MolPopExplicit mpex = new MolPopExplicit();
+                double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
+                cur_mp.Conc.CopyArray(cur_conc_values);
                 mpex.conc = cur_conc_values;
+
                 cmp.mpInfo.mp_distribution = mpex;
             }
 

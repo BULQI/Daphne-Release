@@ -360,40 +360,18 @@ namespace ManifoldRing
             }
         }
 
-        /// <summary>
-        /// initialize fields when no factory exists.
-        /// </summary>
-        /// <param name="init">initializer object</param>
-        public void reset(double[] vals = null)
-        {
-            if (factory != null)
-            {
-                throw new Exception("this needs to be Initialized through factory.");
-            }
-            if (vals == null)
-            {
-                for (int i = 0; i < array.Length; i++) array[i] = 0;
-            }
-            else
-            {
-                if (vals.Length < array.Length)
-                {
-                    throw new Exception("array length too short");
-                }
-                Array.Copy(vals, array, array.Length);
-            }
-        }
 
         /// <summary>
-        /// allow accesss to array from outside of assesmbly
+        /// copy array value to valarr, used to access the array
+        /// for saving states only
         /// </summary>
-        /// <returns></returns>
-        public double[] ValueArray
+        /// <param name="val">destination array</param>
+        /// <param name="start">destination start index</param>
+        /// <returns> number of elemnts copied</returns>
+        public int CopyArray(double[] valarr, int start = 0)
         {
-            get
-            {
-                return array;
-            }
+            Array.Copy(array, 0, valarr, start, array.Length);
+            return array.Length;
         }
 
         /// <summary>
