@@ -415,23 +415,12 @@ namespace ManifoldRing
 
         /// <summary>
         /// field gradient at a location
-        /// not appropriate for points on the lattice if the underlying manifold is of type InterpolatedNodes
         /// </summary>
         /// <param name="point">point parameter</param>
         /// <returns>gradient vector</returns>
         public double[] Gradient(double[] point)
         {
             return m.Grad(point, this);
-        }
-
-        /// <summary>
-        /// field gradient at lattice points when the underlying manifold is of type InterpolatedNodes
-        /// </summary>
-        /// <param name="n"></param>
-        /// <returns></returns>
-        public double[] LatticeGradient(int n)
-        {
-            return m.LatticeGrad(n, this);
         }
 
         /// <summary>
