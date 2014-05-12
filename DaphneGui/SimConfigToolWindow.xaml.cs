@@ -3648,11 +3648,84 @@ namespace DaphneGui
 
             if (ads.ShowDialog() == true)
             {
+                //DiffRegGrid.ItemContainerGenerator.ItemsChanged += new ItemsChangedEventHandler(DiffRegGridItemContainerGenerator_ItemsChanged);
+
                 ConfigDiffScheme diff_scheme = cell.diff_scheme;
                 diff_scheme.AddState(ads.StateName);
                 DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, ads.StateName));
+                EpigeneticMapGrid.ItemsSource = null;
+                EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
+
+                DiffRegGrid.ItemsSource = null;
+                DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
+                UpdateDiffRegGrid();
+                                
+                //int rowcount = DiffRegGrid.Items.Count;
+                //DataGridRow row = DiffRegGrid.GetRow(rowcount-1);
+                //if (row != null)
+                //{
+                //    row.SetValue(DataGridRow.HeaderProperty, diff_scheme.Driver.states[rowcount - 1]);
+                //}
             }
 
+        }
+
+        //private void DiffRegGridItemContainerGenerator_ItemsChanged(object sender, EventArgs e)
+        private void UpdateDiffRegGrid()
+        {
+            if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            {
+                int nRows = DiffRegGrid.Items.Count;
+                for (int j = 0; j < nRows; j++)
+                {
+                    var currRow = DiffRegGrid.GetRow(j);
+                    int nCols = DiffRegGrid.Columns.Count;
+                    for (int i = 0; i < nCols; i++)
+                    {
+                        if (j == i)
+                        {
+                            var columnCell = DiffRegGrid.GetCell(currRow, i);
+                            if (columnCell != null)
+                            {
+                                columnCell.IsEnabled = false;
+                                columnCell.Background = Brushes.LightGray;
+                            }
+                        }
+                        else
+                        {
+                            //Trying to disable the expander here but this does not work, at least not yet.
+                            var columnCell = DiffRegGrid.GetCell(currRow, i);
+                            ComboBox cbx = FindChild<ComboBox>(columnCell, "comboMolPops");
+                        }
+                    }
+                }
+            }
+
+            //The code below sets the row headers
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme == null)
+                return;
+
+            ConfigDiffScheme scheme = cell.diff_scheme;
+
+            if (scheme == null)
+                return;
+
+            int rowcount = DiffRegGrid.Items.Count;
+            for (int ii = 0; ii < rowcount; ii++)
+            {
+                if (ii >= scheme.Driver.states.Count)
+                    break;
+
+                DataGridRow row = DiffRegGrid.GetRow(ii);
+                if (row != null)
+                {
+                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
+                }
+            }
         }
 
         /// <summary>
@@ -3735,6 +3808,7 @@ namespace DaphneGui
                 }
             }
 
+            //The code below sets the row headers
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
