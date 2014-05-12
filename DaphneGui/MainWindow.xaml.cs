@@ -1578,6 +1578,12 @@ namespace DaphneGui
                 return;
             }
 
+            //temporary solution to avoid popup resaving states -axin
+            if (true)
+            {
+                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+            }
+
             vtkDataBasket.SetupVTKData(configurator.SimConfig);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
