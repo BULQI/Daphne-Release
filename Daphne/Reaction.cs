@@ -58,10 +58,10 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant) * dt * reactant1.Conc * reactant2.Conc;
-            reactant1.Conc -= intensity;
-            reactant2.Conc -= intensity;
-            product.Conc += intensity;
+            intensity = intensity.reset(reactant1.Conc).Multiply(reactant2.Conc).Multiply(RateConstant * dt);
+            reactant1.Conc.Subtract(intensity);
+            reactant2.Conc.Subtract(intensity);
+            product.Conc.Add(intensity);
         }
     }
 
@@ -81,9 +81,9 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc * reactant.Conc;
-            reactant.Conc -= 2 * intensity;
-            product.Conc += intensity;
+            intensity.reset(reactant.Conc).Multiply(reactant.Conc).Multiply(RateConstant * dt);
+            product.Conc.Add(intensity);
+            reactant.Conc.Subtract(intensity.Multiply(2));
         }
     }
 
@@ -103,9 +103,9 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc;
-            reactant.Conc -= intensity;
-            product.Conc += 2 * intensity;
+            intensity.reset(reactant.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product.Conc.Add(intensity.Multiply(2));
         }
     }
 
@@ -127,10 +127,10 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc;
-            reactant.Conc -= intensity;
-            product1.Conc += intensity;
-            product2.Conc += intensity;
+            intensity.reset(reactant.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product1.Conc.Add(intensity);
+            product2.Conc.Add(intensity);
         }
     }
 
@@ -187,7 +187,7 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (catalyst.Conc * reactant.Conc).Multiply(RateConstant * dt);
+            intensity.reset(catalyst.Conc).Multiply(reactant.Conc).Multiply(RateConstant * dt);
             catalyst.Conc.Add(intensity);
             reactant.Conc.Subtract(intensity);
         }
@@ -210,7 +210,7 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (catalyst.Conc * reactant.Conc).Multiply(dt * RateConstant); 
+            intensity.reset(catalyst.Conc).Multiply(reactant.Conc).Multiply(dt * RateConstant);
             reactant.Conc.Subtract(intensity);
         }
     }
@@ -236,7 +236,7 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant) * dt * catalyst.Conc * reactant1.Conc * reactant2.Conc;
+            intensity.reset(catalyst.Conc).Multiply(reactant1.Conc).Multiply(reactant2.Conc).Multiply(RateConstant * dt);
             reactant1.Conc.Subtract(intensity);
             reactant2.Conc.Subtract(intensity);
             product.Conc.Add(intensity);
@@ -288,9 +288,9 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc * catalyst.Conc;
-            reactant.Conc -= 2 * intensity;
-            product.Conc += intensity;
+            intensity.reset(reactant.Conc).Multiply(catalyst.Conc).Multiply(RateConstant * dt);
+            product.Conc.Add(intensity);
+            reactant.Conc.Subtract(intensity.Multiply(2));
         }
     }
 
@@ -312,9 +312,9 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * reactant.Conc * catalyst.Conc;
-            reactant.Conc -= intensity;
-            product.Conc += 2 * intensity;
+            intensity.reset(reactant.Conc).Multiply(catalyst.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product.Conc.Add(intensity.Multiply(2));
         }
     }
 
@@ -338,10 +338,10 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = RateConstant * dt * catalyst.Conc * reactant.Conc;
-            reactant.Conc -= intensity;
-            product1.Conc += intensity;
-            product2.Conc += intensity;
+            intensity.reset(catalyst.Conc).Multiply(reactant.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product1.Conc.Add(intensity);
+            product2.Conc.Add(intensity);
         }
     }
 
@@ -363,9 +363,9 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (dt * RateConstant) * catalyst.Conc * reactant.Conc;
-            reactant.Conc -= intensity;
-            product.Conc += intensity;
+            intensity.reset(catalyst.Conc).Multiply(reactant.Conc).Multiply(RateConstant * dt);
+            reactant.Conc.Subtract(intensity);
+            product.Conc.Add(intensity);
         }
     }
 
@@ -400,6 +400,11 @@ namespace Daphne
             genReac = _genReac;
             RateConstant = _RateConst;
             //Type = ReactionType.Generalized;
+            if (genReac.Count > 0)
+            {
+                MolecularPopulation mp = genReac.First().Key;
+                intensity = new ScalarField(mp.Man);
+            }
         }
 
         public override void Step(double dt)
@@ -411,27 +416,29 @@ namespace Daphne
             // power = reactant stoichiometry
             // MolecularPopulations that do not participate as reactants will not 
             // contribute due to kvp.Value[0]=0.
+            bool intensity_initalized = false;
             foreach (KeyValuePair<MolecularPopulation, int[]> kvp in genReac)
             {
                 for (int j = 0; j < kvp.Value[0]; j++)
                 {
-                    if (j == 0)
+                    if (!intensity_initalized)
                     {
-                        intensity = kvp.Key.Conc;
+                        intensity.reset(kvp.Key.Conc);
+                        intensity_initalized = true;
                     }
                     else
                     {
-                        intensity *= kvp.Key.Conc;
+                        intensity.Multiply(kvp.Key.Conc);
                     }
                 }
             }
-            intensity = (dt * RateConstant) * intensity;
+            intensity.Multiply(dt * RateConstant);
 
             // Update the concentration according to the difference between the 
             // product and reactant stoichiometries.
             foreach (KeyValuePair<MolecularPopulation, int[]> kvp in genReac)
             {
-                kvp.Key.Conc += (kvp.Value[1] - kvp.Value[0]) * intensity;
+                kvp.Key.Conc.Add(intensity * (kvp.Value[1] - kvp.Value[0]));
             }
         }
     }
@@ -643,7 +650,7 @@ namespace Daphne
         public override void Step(double dt)
         {
             intensity = RateConstant * gene.CopyNumber * gene.ActivationLevel * dt;
-            product.Conc += intensity;
+            product.Conc.Add(intensity);
         }
 
     }

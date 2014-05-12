@@ -224,7 +224,7 @@ namespace Daphne
             {
                 concentration.Add(concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]).Multiply(-dt));
                 //kvp.Value.Initialize("explicit", new double[kvp.Value.M.ArraySize]);
-                kvp.Value.reset();
+                kvp.Value.reset(0);
             }
 
             // Natural boundary conditions
@@ -237,7 +237,8 @@ namespace Daphne
                 }
                 else
                 {
-                    concentration += -dt * concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]) / Molecule.DiffusionCoefficient;
+                    //concentration += -dt * concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]) / Molecule.DiffusionCoefficient;
+                    concentration.Add(concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]).Multiply(-dt / Molecule.DiffusionCoefficient));
                 }
             }
         }

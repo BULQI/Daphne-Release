@@ -369,22 +369,15 @@ namespace ManifoldRing
             }
         }
 
-        /// <summary>
-        /// if src not null, copy src's value
-        /// else set all values ot 0
-        /// </summary>
-        /// <param name="src"></param>
-        /// <returns></returns>
-        public ScalarField reset(ScalarField src = null)
+        public ScalarField reset(ScalarField src)
         {
-            if (src == null)
-            {
-                for (int i = 0; i < array.Length; i++) array[i] = 0;
-            }
-            else
-            {
-                for (int i = 0; i < array.Length; i++) array[i] = src.array[i];
-            }
+            for (int i = 0; i < array.Length; i++) array[i] = src.array[i];
+            return this;
+        }
+
+        public ScalarField reset(double d)
+        {  
+            for (int i = 0; i < array.Length; i++) array[i] = d;
             return this;
         }
 
@@ -503,16 +496,15 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="f"></param>
         /// <returns></returns>
-        public ScalarField Multiply(ScalarField sf2)
+        public ScalarField Multiply(ScalarField f2)
         {
-            double s1 = this.array[0];
-            double s2 = sf2.array[0];
-            array[0] *= sf2.array[0];
-            for (int i = 1; i < array.Length; i++)
+
+            if (this.m != f2.m)
             {
-                array[i] = array[i] * s2 + s1 * sf2.array[i];
+                throw new Exception("Scalar field multiplicands must share a manifold.");
             }
-            return this;
+
+            return this.m.Multiply(this, f2);
         }
 
         /// <summary>
@@ -556,8 +548,8 @@ namespace ManifoldRing
             {
                 throw new Exception("Scalar field multiplicands must share a manifold.");
             }
-
-            return f1.m.Multiply(f1, f2);
+            ScalarField product = new ScalarField(f1.m);
+            return f1.m.Multiply(product.reset(f1), f2);
         }
 
         /// <summary>
@@ -648,6 +640,7 @@ namespace ManifoldRing
             return this;
         }
 
+
         /// <summary>
         /// addition of a constant to this scalar field
         /// </summary>
@@ -689,7 +682,8 @@ namespace ManifoldRing
         /// <returns></returns>
         public static ScalarField operator +(ScalarField f, double d)
         {
-            return f.Add(d);
+            ScalarField sf = new ScalarField(f.m);
+            return sf.reset(f).Add(d);
         }
 
         /// <summary>
