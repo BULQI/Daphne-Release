@@ -168,11 +168,15 @@ namespace Daphne
         private Compartment space;
         private Dictionary<string, int> sides;
         public double Gamma { get; set; }
+        public bool toroidal { get; private set; }
 
         public ExtraCellularSpace(int[] numGridPts, double gridStep, bool toroidal, IKernel kernel)
         {
             InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>();
             double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep, Convert.ToDouble(toroidal) };
+
+            // boundary condition
+            this.toroidal = toroidal;
 
             p.Initialize(data);
             space = new Compartment(p);

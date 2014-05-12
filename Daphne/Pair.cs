@@ -46,11 +46,32 @@ namespace Daphne
         /// <summary>
         /// calculate the distance for this pair of cells
         /// </summary>
-        public virtual void distance()
+        public virtual void distance(double[] gridSize)
         {
             Vector tmp = new Vector(a.State.X);
 
             tmp -= b.State.X;
+
+            // correction for periodic boundary conditions
+            if (Simulation.dataBasket.ECS.toroidal == true)
+            {
+                double dx = Math.Abs(tmp[0]),
+                       dy = Math.Abs(tmp[1]),
+                       dz = Math.Abs(tmp[2]);
+
+                if(dx > 0.5 * gridSize[0])
+                {
+                    tmp[0] = gridSize[0] - dx;
+                }
+                if (dy > 0.5 * gridSize[1])
+                {
+                    tmp[1] = gridSize[1] - dy;
+                }
+                if (dz > 0.5 * gridSize[2])
+                {
+                    tmp[2] = gridSize[2] - dz;
+                }
+            }
             dist = tmp.Norm();
         }
 
@@ -218,8 +239,9 @@ namespace Daphne
             pairInteract(dt);
             b_ij = saveB;
         }
-#endif
+
         public static double DeltaM;
+#endif
     }
 #if ALL_PAIRS
     /// <summary>
@@ -357,11 +379,11 @@ namespace Daphne
         /// <summary>
         /// calculate the distance for B-FDC: traditional distance before the synapse forms, B-cell tracking after
         /// </summary>
-        public override void distance()
+        public override void distance(double[] gridSize)
         {
             if (isCriticalPair() == false)
             {
-                base.distance();
+                base.distance(gridSize);
             }
             else
             {

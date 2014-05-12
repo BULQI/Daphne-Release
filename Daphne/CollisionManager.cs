@@ -33,10 +33,28 @@ namespace Daphne
         private bool clearSeparation(Pair p)
         {
             double maxSep = Math.Ceiling((p.Cell(0).Radius + p.Cell(1).Radius) / gridStep);
+            int dx = Math.Abs(p.Cell(0).GridIndex[0] - p.Cell(1).GridIndex[0]),
+                dy = Math.Abs(p.Cell(0).GridIndex[1] - p.Cell(1).GridIndex[1]),
+                dz = Math.Abs(p.Cell(0).GridIndex[2] - p.Cell(1).GridIndex[2]);
 
-            return Math.Max(Math.Max(Math.Abs(p.Cell(0).GridIndex[0] - p.Cell(1).GridIndex[0]),
-                                     Math.Abs(p.Cell(0).GridIndex[1] - p.Cell(1).GridIndex[1])),
-                            Math.Abs(p.Cell(0).GridIndex[2] - p.Cell(1).GridIndex[2])) > maxSep;
+            // correction for periodic boundary conditions
+            if (Simulation.dataBasket.ECS.toroidal == true)
+            {
+                if (dx > 0.5 * gridPts[0])
+                {
+                    dx = gridPts[0] - dx;
+                }
+                if (dy > 0.5 * gridPts[1])
+                {
+                    dy = gridPts[1] - dy;
+                }
+                if (dz > 0.5 * gridPts[2])
+                {
+                    dz = gridPts[2] - dz;
+                }
+            }
+            // the separation distance in units of voxels
+            return Math.Max(Math.Max(dx, dy), dz) > maxSep;
         }
 
         // think high and low byte but using integer logic
@@ -56,7 +74,38 @@ namespace Daphne
 
             if (legalIndex(idx) == false)
             {
-                idx[0] = idx[1] = idx[2] = -1;
+                // correction for periodic boundary conditions
+                if (Simulation.dataBasket.ECS.toroidal == true)
+                {
+                    if (idx[0] < 0 || idx[0] >= gridPts[0])
+                    {
+                        idx[0] %= gridPts[0];
+                        if (idx[0] < 0)
+                        {
+                            idx[0] += gridPts[0];
+                        }
+                    }
+                    if (idx[1] < 0 || idx[1] >= gridPts[1])
+                    {
+                        idx[1] %= gridPts[1];
+                        if (idx[1] < 0)
+                        {
+                            idx[1] += gridPts[1];
+                        }
+                    }
+                    if (idx[2] < 0 || idx[2] >= gridPts[2])
+                    {
+                        idx[2] %= gridPts[2];
+                        if (idx[2] < 0)
+                        {
+                            idx[2] += gridPts[2];
+                        }
+                    }
+                }
+                else
+                {
+                    idx[0] = idx[1] = idx[2] = -1;
+                }
             }
             return idx;
         }
@@ -160,7 +209,7 @@ namespace Daphne
                 foreach (KeyValuePair<int, Pair> kvp in pairs)
                 {
                     // recalculate the distance for pairs
-                    kvp.Value.distance();
+                    kvp.Value.distance(gridSize);
                 }
             }
         }
@@ -210,7 +259,7 @@ namespace Daphne
                     else
                     {
                         // recalculate the distance for pairs that stay
-                        kvp.Value.distance();
+                        kvp.Value.distance(gridSize);
                     }
                 }
                 if (removalPairKeys != null)
@@ -401,7 +450,7 @@ namespace Daphne
 #endif
 
                                             // calculate the distance
-                                            p.distance();
+                                            p.distance(gridSize);
                                             // insert the pair
                                             pairs.Add(hash, p);
                                         }

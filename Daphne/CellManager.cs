@@ -16,13 +16,14 @@ namespace Daphne
         {
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
-                // reset the force
-                kvp.Value.resetForce();
                 // cell takes a step
                 kvp.Value.Step(dt);
 
                 if (kvp.Value.IsMotile == true)
                 {
+                    // enforce boundary condition
+                    kvp.Value.EnforceBC();
+
                     // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
                     // add the chemotactic force (accumulate it into the force variable)
                     kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
@@ -34,6 +35,8 @@ namespace Daphne
                         kvp.Value.State.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
                 }
+                // reset the force
+                kvp.Value.resetForce();
             }
         }
 
@@ -45,9 +48,9 @@ namespace Daphne
                 foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                 {
                     writer.Write(n + "\t"
-                        + kvp.Value.State.X[0] + "\t" + kvp.Value.State.X[1] + "\t" + kvp.Value.State.X[2] + "\t"
-                        + kvp.Value.State.V[0] + "\t" + kvp.Value.State.V[1] + "\t" + kvp.Value.State.V[2]
-                        + "\n");
+                                 + kvp.Value.State.X[0] + "\t" + kvp.Value.State.X[1] + "\t" + kvp.Value.State.X[2] + "\t"
+                                 + kvp.Value.State.V[0] + "\t" + kvp.Value.State.V[1] + "\t" + kvp.Value.State.V[2]
+                                 + "\n");
 
                     n++;
                 }

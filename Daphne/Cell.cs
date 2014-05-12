@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Troschuetz.Random;
 
+using MathNet.Numerics.LinearAlgebra;
+
 using Ninject;
 
 using ManifoldRing;
@@ -196,8 +198,88 @@ namespace Daphne
             state.F[2] += f[2];
         }
 
+        /// <summary>
+        /// calculate the boundary force when approaching the environment walls
+        /// </summary>
+        /// <param name="normal">direction of the force</param>
+        /// <param name="dist">distance of the cell to the wall</param>
+        private void applyBoundaryForce(Vector normal, double dist)
+        {
+            if (dist != 0.0)
+            {
+                double force = Pair.Phi1 * (1.0 / dist - 1.0 / radius);
 
-        // There may be other components specific to a given cell type.
+                addForce(normal * force);
+            }
+        }
+
+        /// <summary>
+        /// implement boundary conditions
+        /// </summary>
+        public void EnforceBC()
+        {
+            // toroidal boundary conditions, wrap around
+            // NOTE: this assumes the environment has a lower bound of (0, 0, 0)
+            if (Simulation.dataBasket.ECS.toroidal == true)
+            {
+                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
+                {
+                    double safetySlab = 1e-3;
+
+                    // displace the cell such that it wraps around
+                    if (State.X[i] < 0.0)
+                    {
+                        // use a small fudge factor to displace the cell just back into the grid
+                        State.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
+                    }
+                    else if (State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    {
+                        State.X[i] = 0.0;
+                    }
+                }
+            }
+            // boundary force
+            else
+            {
+                double dist = 0.0;
+
+                // X
+                // left
+                if ((dist = State.X[0]) < radius)
+                {
+                    applyBoundaryForce(new double[] { 1, 0, 0 }, dist);
+                }
+                // right
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(0) - State.X[0]) < radius)
+                {
+                    applyBoundaryForce(new double[] { -1, 0, 0 }, dist);
+                }
+
+                // Y
+                // bottom
+                if ((dist = State.X[1]) < radius)
+                {
+                    applyBoundaryForce(new double[] { 0, 1, 0 }, dist);
+                }
+                // top
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(1) - State.X[1]) < radius)
+                {
+                    applyBoundaryForce(new double[] { 0, -1, 0 }, dist);
+                }
+
+                // Z
+                // far
+                if ((dist = State.X[2]) < radius)
+                {
+                    applyBoundaryForce(new double[] { 0, 0, 1 }, dist);
+                }
+                // near
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(2) - State.X[2]) < radius)
+                {
+                    applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
+                }
+            }
+        }
     }
 }
 

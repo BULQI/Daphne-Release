@@ -660,7 +660,7 @@ namespace ManifoldRing
         /// <summary>
         /// initialize the nodes per side and stepsize members
         /// </summary>
-        /// <param name="data">data array with dim + 1 entries</param>
+        /// <param name="data">data array with dim + 2 entries</param>
         public override void Initialize(double[] data)
         {
             if (data.Length != Dim + 2)

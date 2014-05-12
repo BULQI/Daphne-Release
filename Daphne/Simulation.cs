@@ -647,11 +647,12 @@ namespace Daphne
                 foreach (BoundaryCondition bc in cmp.boundaryCondition)
                 {
                     int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
+
                     dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
                     if (bc.boundaryType == MolBoundaryType.Dirichlet)
                     {
                         dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
-                     }
+                    }
                     else
                     {
                         dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.val });
@@ -727,13 +728,13 @@ namespace Daphne
             {
                 localStep = Math.Min(integratorStep, dt - t);
                 dataBasket.ECS.Space.Step(localStep);
-                // force reset happens in cell manager; call cellManager.Step first
-                cellManager.Step(localStep);
-                // handle collisions second
+                // handle collisions
                 if (collisionManager != null)
                 {
                     collisionManager.Step(localStep);
                 }
+                // cell force reset happens in cell manager at the end of the cell update
+                cellManager.Step(localStep);
                 t += localStep;
             }
             accumulatedTime += dt;
