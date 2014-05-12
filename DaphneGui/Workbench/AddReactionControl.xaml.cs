@@ -26,6 +26,7 @@ namespace DaphneGui
         private List<string> prodmolguids;
         private Dictionary<string, int> inputReactants;
         private Dictionary<string, int> inputProducts;
+        private Dictionary<string, int> inputModifiers;
         public double inputRateConstant { get; set; }
         
         public AddReactionControl()
@@ -36,6 +37,7 @@ namespace DaphneGui
             prodmolguids = new List<string>();
             inputReactants = new Dictionary<string, int>();
             inputProducts = new Dictionary<string, int>();
+            inputModifiers = new Dictionary<string, int>();
             inputRateConstant = 2.0;
 
             //InitializeWordList();
@@ -164,6 +166,7 @@ namespace DaphneGui
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool bValid = ParseUserInput();
+            IdentifyModifiers();
 
             if (!bValid)
                 return;
@@ -189,12 +192,13 @@ namespace DaphneGui
             ////        cr.products_molecule_guid_ref.Add(s);
             ////}
 
-            //NEED MODIFIERS TOO IN GUI?  NO!
-
-            //Grace is working on a method that will determine the reaction type given a 2 dictionaries of reactants and products with coefficients
-            //For now assume reaction type is Association
-            //THIS IS TEMPORARY
-            cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.entity_repository.reaction_templates[(int)ReactionType.Association].reaction_template_guid;
+            cr.reaction_template_guid_ref = IdentifyReactionType();
+            if (cr.reaction_template_guid_ref == null)
+            {
+                string msg = string.Format("Unsupported reaction.");
+                MessageBox.Show(msg);
+                return;
+            }
             ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
 
             foreach (KeyValuePair<string, int> kvp in inputReactants)
@@ -224,7 +228,18 @@ namespace DaphneGui
                 if (!cr.products_molecule_guid_ref.Contains(guid))
                     cr.products_molecule_guid_ref.Add(guid);
             }
-
+            foreach (KeyValuePair<string, int> kvp in inputModifiers)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (guid == null)  //this should never happen
+                {
+                    string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
+                    MessageBox.Show(msg);
+                    return;
+                }
+                if (!cr.products_molecule_guid_ref.Contains(guid))
+                    cr.modifiers_molecule_guid_ref.Add(guid);
+            }
             //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
         }
@@ -235,6 +250,7 @@ namespace DaphneGui
             
             inputReactants.Clear();
             inputProducts.Clear();
+            inputModifiers.Clear();
 
             //THIS CODE PARSES REACTION INPUT BY USER
             //LEFT SIDE
@@ -386,6 +402,176 @@ namespace DaphneGui
                 return false;
             }
             return true;
+        }
+
+        private void IdentifyModifiers()
+        {
+            if (inputReactants == null || inputProducts == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<string, int> kvpReac in inputReactants)
+            {
+                foreach (KeyValuePair<string, int> kvpProd in inputProducts)
+                {
+                    if ((kvpProd.Key == kvpReac.Key) && (kvpProd.Value == kvpReac.Value))
+                    {
+                        inputModifiers.Add(kvpReac.Key, kvpReac.Value);
+                    }
+                }
+            }
+            foreach (KeyValuePair<string, int> kvp in inputModifiers)
+            {
+                inputReactants.Remove(kvp.Key);
+                inputProducts.Remove(kvp.Key);
+            }
+        }
+
+        private bool HasMoleculeType(Dictionary<string,int> inputList, MoleculeLocation molLoc)
+        {
+            foreach (KeyValuePair<string, int> kvp in inputList)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == molLoc)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        private string IdentifyReactionType()
+        {
+            string reaction_template_guid_ref = null;
+
+            bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
+            bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
+            int totalReacStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputReactants)
+            {
+                totalReacStoich += kvp.Value;
+            }
+
+            bool boundProd = HasMoleculeType(inputProducts, MoleculeLocation.Boundary);
+            bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
+            int totalProdStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputProducts)
+            {
+                totalProdStoich += kvp.Value;
+            }
+
+            bool boundMod = HasMoleculeType(inputModifiers, MoleculeLocation.Boundary);
+            bool bulkMod = HasMoleculeType(inputModifiers, MoleculeLocation.Bulk);
+            int totalModStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputModifiers)
+            {
+                totalModStoich += kvp.Value;
+            }
+
+            int     bulkBoundVal = 1,
+                    modVal = 10,            
+                    reacVal = 100,
+                    prodVal = 1000,
+                    reacStoichVal = 10000,
+                    prodStoichVal = 100000,
+                    modStoichVal = 1000000;
+
+            if (inputModifiers.Count > 9 || inputReactants.Count > 9 || inputProducts.Count > 9 || totalReacStoich > 9 || totalProdStoich > 9 || totalModStoich > 9)
+            {
+                throw new Exception("Unsupported reaction with current typing algoithm.\n");
+            }
+
+            int reacNum = inputModifiers.Count * modVal
+                            + inputReactants.Count * reacVal
+                            + inputProducts.Count * prodVal
+                            + totalReacStoich * reacStoichVal
+                            + totalProdStoich * prodStoichVal
+                            + totalModStoich * modStoichVal;
+    
+            if ((boundReac || boundProd || boundMod) && (bulkReac || bulkProd || bulkMod))
+            {
+                reacNum += bulkBoundVal;
+            }
+
+            string s;
+            switch (reacNum)
+            {
+                // Interior
+                case 10100:
+                    return findReactionTemplateGuid(ReactionType.Annihilation, MainWindow.SC.SimConfig);
+                case 121200:
+                    return findReactionTemplateGuid(ReactionType.Association, MainWindow.SC.SimConfig);
+                case 121100:
+                    return findReactionTemplateGuid(ReactionType.Dimerization, MainWindow.SC.SimConfig);
+                case 211100:
+                    return findReactionTemplateGuid(ReactionType.DimerDissociation, MainWindow.SC.SimConfig);
+                case 212100:
+                    return findReactionTemplateGuid(ReactionType.Dissociation, MainWindow.SC.SimConfig);
+                case 111100:
+                    return findReactionTemplateGuid(ReactionType.Transformation, MainWindow.SC.SimConfig);
+                case 221200:
+                    return findReactionTemplateGuid(ReactionType.AutocatalyticTransformation, MainWindow.SC.SimConfig);
+                // Interior Catalyzed (catalyst stoichiometry doesn't change)
+                case 1010110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedAnnihilation, MainWindow.SC.SimConfig);
+                case 1121210:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedAssociation, MainWindow.SC.SimConfig);
+                case 1101010:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedCreation, MainWindow.SC.SimConfig);
+                case 1121110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerization, MainWindow.SC.SimConfig);
+                case 1211110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDimerDissociation, MainWindow.SC.SimConfig);
+                case 1212110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedDissociation, MainWindow.SC.SimConfig);
+                case 1111110:
+                    return findReactionTemplateGuid(ReactionType.CatalyzedTransformation, MainWindow.SC.SimConfig);
+                // Bulk/Boundary reactions
+                case 121201:
+                    if ((boundProd) && (boundReac))
+                    {
+                        // The product and one of the reactants must be boundary molecules 
+                        return findReactionTemplateGuid(ReactionType.BoundaryAssociation, MainWindow.SC.SimConfig);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                case 212101:
+                    if ((boundProd) && (boundReac))
+                    {
+                        // The reactant and one of the products must be boundary molecules 
+                        return findReactionTemplateGuid(ReactionType.BoundaryDissociation, MainWindow.SC.SimConfig);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                case 111101:
+                    if (boundReac)
+                    {
+                        return findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, MainWindow.SC.SimConfig);
+                    }
+                    else
+                    {
+                        return findReactionTemplateGuid(ReactionType.BoundaryTransportTo, MainWindow.SC.SimConfig);
+                    }
+                // Catalyzed Bulk/Boundary reactions
+                case 1111111:
+                    if (boundMod)
+                    {
+                        return findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, MainWindow.SC.SimConfig);
+                    }
+                    else
+                    {
+                        return reaction_template_guid_ref;
+                    }
+                // Generalized reaction
+                default:
+                    // Not implemented yet
+                    return reaction_template_guid_ref;
+            }
         }
     }
 }

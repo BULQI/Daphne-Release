@@ -819,6 +819,10 @@ namespace DaphneGui
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
+            if (cr == null)
+            {
+                return;
+            }
             if (cr.ReadOnly == true)
             {
                 MessageBox.Show("Cannot remove a predefined reaction.");

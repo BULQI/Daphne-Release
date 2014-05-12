@@ -1066,8 +1066,8 @@ namespace Daphne
         Association = 0, Dissociation, Annihilation, Dimerization, DimerDissociation,
         Transformation, AutocatalyticTransformation, CatalyzedAnnihilation,
         CatalyzedAssociation, CatalyzedCreation, CatalyzedDimerization, CatalyzedDimerDissociation,
-        CatalyzedDissociation, CatalyzedTransformation, CatalyzedBoundaryActivation, BoundaryAssociation, 
-        BoundaryDissociation, BoundaryTransportFrom, BoundaryTransportTo, Generalized
+        CatalyzedTransformation, CatalyzedDissociation, CatalyzedBoundaryActivation, BoundaryAssociation, 
+        BoundaryDissociation, Generalized, BoundaryTransportFrom, BoundaryTransportTo  
     }
 
     /// <summary>
@@ -1175,6 +1175,7 @@ namespace Daphne
 
             s = s + " -> ";
 
+            i = 0;
             foreach (string mol_guid_ref in products_molecule_guid_ref)
             {
                 ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
@@ -1188,6 +1189,7 @@ namespace Daphne
                 s += cm.Name;
                 s += " + ";
             }
+            i = 0;
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
                 ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
