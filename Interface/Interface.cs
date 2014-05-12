@@ -116,9 +116,9 @@ namespace Interface
     }
 
 
-    public class MomemtnExpansionScalarField : ScalarField
+    public class MomentExpansionScalarField : ScalarField
     {
-        public MomemtnExpansionScalarField(Manifold m, Del initializer)
+        public MomentExpansionScalarField(Manifold m, Del initializer)
             : base(m, initializer)
         {
         }
@@ -316,7 +316,7 @@ namespace Interface
             double[,] rotation = new double[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
             Embedding cytosolToMembrane = new Embedding(cytosol, membrane, origin, rotation);
             ScalarField concentration = new DiscreteScalarField(cytosol, _ => 0);
-            ScalarField flux = new MomemtnExpansionScalarField(membrane, _ => 0);
+            ScalarField flux = new MomentExpansionScalarField(membrane, _ => 0);
             IMolecule a = new Molecule("molecule", 0.0);
             IMolecule b = new Molecule("molecule", 0.0);
             IMolecule c = new Molecule("mole\tcule", 0.0);

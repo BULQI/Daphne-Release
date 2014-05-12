@@ -253,13 +253,13 @@ namespace Daphne
 
     }
 
-    public class MultipoleExpansionScalarField : ScalarField
+    public class MomentExpansionScalarField : ScalarField
     {
-        public MultipoleExpansionScalarField(Manifold m) : base(m)
+        public MomentExpansionScalarField(Manifold m) : base(m)
         {
         }
 
-        public MultipoleExpansionScalarField(Manifold m, double c) : this(m)
+        public MomentExpansionScalarField(Manifold m, double c) : this(m)
         {
         }
 
