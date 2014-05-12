@@ -155,36 +155,49 @@ namespace Daphne
                         throw new Exception("Can't have a null boundary in a boundary reaction.");
                     }
 
-                    MolecularPopulation r1, r2, p;
+                    MolecularPopulation receptor, ligand, complex;
 
-                    // reactant 1
+                    // reactants
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        r1 = comp.Populations[cr.reactants_molecule_guid_ref[0]];
+                        ligand = comp.Populations[cr.reactants_molecule_guid_ref[0]];
+
+                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                        }
+                        else
+                        {
+                            throw new Exception("BoundaryAssociation must have one boundary molecule as a reactant.");
+                        }
+                    }
+                    else if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        ligand = comp.Populations[cr.reactants_molecule_guid_ref[1]];
+
+                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            throw new Exception("BoundaryAssociation must have one boundary molecule as a reactant.");
+                        }
                     }
                     else
                     {
-                        r1 = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
-                    }
-                    // reactant 2
-                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
-                    {
-                        r2 = comp.Populations[cr.reactants_molecule_guid_ref[1]];
-                    }
-                    else
-                    {
-                        r2 = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                        throw new Exception("BoundaryAssociation must have one bulk molecule as a reactant.");
                     }
                     // product
-                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        p = comp.Populations[cr.products_molecule_guid_ref[0]];
+                        complex = boundary.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        p = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        throw new Exception("BoundaryAssociation product must be a boundary molecule.");
                     }
-                    comp.Reactions.Add(new BoundaryAssociation(r1, r2, p, cr.rate_const));
+                    comp.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryDissociation)
                 {
@@ -193,36 +206,49 @@ namespace Daphne
                         throw new Exception("Can't have a null boundary in a boundary reaction.");
                     }
 
-                    MolecularPopulation p1, p2, r;
+                    MolecularPopulation receptor, ligand, complex;
 
-                    // product 1
+                    // products
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        p1 = comp.Populations[cr.products_molecule_guid_ref[0]];
+                        ligand = comp.Populations[cr.products_molecule_guid_ref[0]];
+
+                        if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                        }
+                        else
+                        {
+                            throw new Exception("BoundaryDissociation must have one boundary molecule as a product.");
+                        }
+                    }
+                    else if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        ligand = comp.Populations[cr.products_molecule_guid_ref[1]];
+
+                        if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            throw new Exception("BoundaryDissociation must have one boundary molecule as a product.");
+                        }
                     }
                     else
                     {
-                        p1 = boundary.Populations[cr.products_molecule_guid_ref[0]];
-                    }
-                    // product 2
-                    if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
-                    {
-                        p2 = comp.Populations[cr.products_molecule_guid_ref[1]];
-                    }
-                    else
-                    {
-                        p2 = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                        throw new Exception("BoundaryDissociation must have one bulk molecule as a product.");
                     }
                     // reactant
-                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        r = comp.Populations[cr.reactants_molecule_guid_ref[0]];
+                        complex = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        r = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        throw new Exception("BoundaryDissociation reactant must be a boundary molecule.");
                     }
-                    comp.Reactions.Add(new BoundaryDissociation(p1, p2, r, cr.rate_const));
+                    comp.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, cr.rate_const));
                 }
                 else if(er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
                 {
@@ -233,49 +259,127 @@ namespace Daphne
 
                     MolecularPopulation receptor = null, bulk = null, bulkActivated = null;
 
-                    // find bulk, bulkActivated, and the receptor
-                    // test reactant 1
+                    // reactants
+                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[0]];
+
+                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                        }
+                        else
+                        {
+                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a reactant.");
+                        }
+                    }
+                    else if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[1]];
+
+                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a reactant.");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("CatalyzedBoundaryActivation must have one bulk molecule as a reactant.");
+                    }
+                    // products
+                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.products_molecule_guid_ref[0]];
+
+                        if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                        }
+                        else
+                        {
+                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a product.");
+                        }
+                    }
+                    else if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.products_molecule_guid_ref[1]];
+
+                        if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                        {
+                            receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a product.");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("CatalyzedBoundaryActivation must have one bulk molecule as a product.");
+                    }
+                    comp.Reactions.Add(new CatalyzedBoundaryActivation(bulk, bulkActivated, receptor, cr.rate_const));
+                }
+                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
+                {
+                    if (boundary == null)
+                    {
+                        throw new Exception("Can't have a null boundary in a boundary reaction.");
+                    }
+
+                    MolecularPopulation membrane = null, bulk = null;
+
+                    // reactant
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
                         bulk = comp.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
-                    else
+                    else 
                     {
-                        receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                            throw new Exception("BoundaryTransportTo reactant must be a bulk molecule.");
                     }
-                    // test reactant 2
-                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    // product
+                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[1]];
+                        membrane = boundary.Populations[cr.products_molecule_guid_ref[0]];
                     }
-                    else
+                    else 
                     {
-                        receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                            throw new Exception("BoundaryTransportTo product must be a boundary molecule.");
                     }
-                    // test product 1
+                    comp.Reactions.Add(new BoundaryTransportTo(bulk, membrane, cr.rate_const));
+                }
+                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
+                {
+                    if (boundary == null)
+                    {
+                        throw new Exception("Can't have a null boundary in a boundary reaction.");
+                    }
+
+                    MolecularPopulation membrane = null, bulk = null;
+
+                    // product
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulkActivated = comp.Populations[cr.products_molecule_guid_ref[0]];
+                        bulk = comp.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        throw new Exception("BoundaryTransportFrom product must be a bulk molecule.");
                     }
-                    // test product 2
-                    if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
+                    // reactant
+                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        bulkActivated = comp.Populations[cr.products_molecule_guid_ref[1]];
+                        membrane = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                        throw new Exception("BoundaryTransportFrom reactant must be a boundary molecule.");
                     }
-                    // if any is null, throw an exception
-                    if (bulk == null || bulkActivated == null || receptor == null)
-                    {
-                        throw new Exception("At least one argument of the CatalyzedBoundaryActivation constructor is null.");
-                    }
-                    comp.Reactions.Add(new CatalyzedBoundaryActivation(bulk, bulkActivated, receptor, cr.rate_const));
+                    comp.Reactions.Add(new BoundaryTransportFrom(membrane, bulk, cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
