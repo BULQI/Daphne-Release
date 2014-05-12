@@ -440,17 +440,6 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecule cm = nn as ConfigMolecule;
-
-                    //foreach (ConfigMolecule mol in entity_repository.molecules)
-                    //{
-                    //    if (mol.Name == cm.Name)
-                    //    {
-                    //        string output = string.Format("Molecule '{0}' already exists, please use a different name", cm.Name);
-                    //        MessageBox.Show(output);
-                    //        return;
-                    //    }
-                    //}
-                    
                     entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
                 }
             }
@@ -1113,7 +1102,7 @@ namespace Daphne
         }
     }
 
-    public enum BoundaryFace {None=0, YZplane, XZplane, XYplane }
+    public enum BoundaryFace {None=0, X, Y, Z }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1126,9 +1115,9 @@ namespace Daphne
         private List<string> _boundary_face_strings = new List<string>()
                                 {
                                     "None",
-                                    "YZplane",
-                                    "XZplane",
-                                    "XYplane"
+                                    "X",
+                                    "Y",
+                                    "Z"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -1179,9 +1168,7 @@ namespace Daphne
             return (BoundaryFace)Enum.ToObject(typeof(BoundaryFace), (int)idx);
         }
     }
-
-
-
+    
     //skg daphne
     public class ConfigMolecule 
     {
