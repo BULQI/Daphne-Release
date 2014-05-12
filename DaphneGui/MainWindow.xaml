@@ -124,6 +124,8 @@
                         <MenuItem Header="Clear DataBase" Name="deleteDataBase" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.DeleteDBCommand}" />
                         <MenuItem Header="Skip Writing Data" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataBase_Click" />
                         <MenuItem Header="Buffer Database Writing" Name="bufferDatabaseWriteMenu" IsCheckable="True" IsChecked="False" Click="bufferDatabaseWriteMenu_Click"  />
+                        <Separator />
+                        <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
                     </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />

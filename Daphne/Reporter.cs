@@ -15,10 +15,18 @@ namespace Daphne
         private StreamWriter ecm_mean_file;
         private Dictionary<int, StreamWriter> cell_files;
         private DateTime startTime;
+        private string reportFolder;
 
         public Reporter()
         {
             cell_files = new Dictionary<int, StreamWriter>();
+            reportFolder = "";
+        }
+
+        public string ReportFolder
+        {
+            get { return reportFolder; }
+            set { reportFolder = value; }
         }
 
         public void StartReporter(SimConfiguration sc)
@@ -41,6 +49,39 @@ namespace Daphne
             closeCells();
         }
 
+        private StreamWriter createStreamWriter(string file, string extension)
+        {
+            int version = 1;
+            string rootPath = reportFolder,
+                   timeStamp,
+                   fullPath;
+            
+            if(rootPath != "")
+            {
+                rootPath += @"\";
+            }
+            timeStamp = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
+            fullPath = rootPath + timeStamp + file + "." + extension;
+
+            do
+            {
+
+                if (File.Exists(fullPath) == true)
+                {
+                    fullPath = rootPath + timeStamp + "_" + file + "(" + version + ")." + extension;
+                    version++;
+                }
+                else
+                {
+                    if (rootPath != "" && Directory.Exists(rootPath) == false)
+                    {
+                        Directory.CreateDirectory(rootPath);
+                    }
+                    return File.CreateText(fullPath);
+                }
+            } while (true);
+        }
+
         private void startECM(SimConfiguration sc)
         {
             string header = "time";
@@ -58,7 +99,7 @@ namespace Daphne
             // was at least one molecule selected?
             if(create == true)
             {
-                ecm_mean_file = File.CreateText("ecm_mean_report.txt");
+                ecm_mean_file = createStreamWriter("ecm_mean_report", "txt");
                 ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", sc.experiment_name, startTime);
                 ecm_mean_file.WriteLine(header);
             }
@@ -89,7 +130,7 @@ namespace Daphne
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
                     string name = sc.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
-                    StreamWriter writer = File.CreateText("ecm_" + name + "_report_step" + sim.AccumulatedTime + ".txt");
+                    StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + sim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
                     writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, sim.AccumulatedTime, sc.experiment_name, startTime);
@@ -195,7 +236,7 @@ namespace Daphne
                 // create file, write header
                 if (create == true)
                 {
-                    StreamWriter writer = File.CreateText("cell_type" + cp.cellpopulation_id + "_report.txt");
+                    StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
                     writer.WriteLine("Cell {0} report from {1} run on {2}.", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellName, sc.experiment_name, startTime);
                     writer.WriteLine(header);

@@ -884,6 +884,22 @@ namespace DaphneGui
             }
         }
 
+        private void setReporterFolder_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog dlg = new System.Windows.Forms.FolderBrowserDialog();
+
+            dlg.Description = "Select report output folder";
+            dlg.SelectedPath = appPath;
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                reporter.ReportFolder = dlg.SelectedPath;
+            }
+            else
+            {
+                reporter.ReportFolder = appPath;
+            }
+        }
+
         private void bufferDatabaseWriteMenu_Click(object sender, RoutedEventArgs e)
         {
             if (bufferDatabaseWriteMenu.IsChecked)
