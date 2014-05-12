@@ -235,14 +235,14 @@ namespace DaphneGui
 
             this.ToolWinCellInfo.Close();
 
-            try
-            {
-                CreateAndSerializeDaphneScenarios();
-            }
-            catch(Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+            ////try
+            ////{
+            ////    CreateAndSerializeDaphneScenarios();
+            ////}
+            ////catch(Exception e)
+            ////{
+            ////    showExceptionBox(exceptionMessage(e));
+            ////}
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
