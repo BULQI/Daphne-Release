@@ -9,12 +9,13 @@ namespace Daphne
 {
     public abstract class Manifold
     {
-        public Manifold()
+        public Manifold(int dim)
         {
             Id = safeId++;
+            Dim = dim;
         }
 
-        public int Dim { get; set; }
+        public int Dim { get; private set; }
         public int Id { get; set; }
         private static int safeId = 0;
         public int ArraySize { get; set; }
@@ -88,9 +89,8 @@ namespace Daphne
 
     public class TinySphere : Manifold
     {
-        public TinySphere(double[] extent)
+        public TinySphere(double[] extent) : base(0)
         {
-            Dim = 0;
             ArraySize = 1;
             //Boundaries = null;
             Laplacian = new LocalMatrix[0][];
@@ -141,9 +141,8 @@ namespace Daphne
 
     public class TinyBall : Manifold
     {
-        public TinyBall(double[] extent)
+        public TinyBall(double[] extent) : base(0)
         {
-            Dim = 0;
             ArraySize = 1;
             //Boundaries = null;
             Laplacian = new LocalMatrix[0][];
@@ -246,9 +245,8 @@ namespace Daphne
     */
     public class BoundedRectangle : Manifold
     {
-        public BoundedRectangle(int[] numGridPts, double[] extent)
+        public BoundedRectangle(int[] numGridPts, double[] extent) : base(2)
         {
-            Dim = 2;
             Debug.Assert(Dim == numGridPts.Length && Dim == extent.Length);
             NumPoints = (int[])numGridPts.Clone();
             ArraySize = NumPoints[0] * NumPoints[1];
@@ -535,9 +533,8 @@ namespace Daphne
 
     public class BoundedRectangularPrism : Manifold
     {
-        public BoundedRectangularPrism(int[] numGridPts, double[] extent)
+        public BoundedRectangularPrism(int[] numGridPts, double[] extent) : base(3)
         {
-            Dim = 3;
             Debug.Assert(Dim == numGridPts.Length && Dim == extent.Length);
             NumPoints = (int[])numGridPts.Clone();
             ArraySize = NumPoints[0] * NumPoints[1] * NumPoints[2];

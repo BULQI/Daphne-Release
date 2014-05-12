@@ -13,7 +13,7 @@ namespace Daphne
     {
         public Manifold M { get { return m; } }
 
-        protected Manifold m;
+        protected readonly Manifold m;
 
         public ScalarField(Manifold m)
         {
