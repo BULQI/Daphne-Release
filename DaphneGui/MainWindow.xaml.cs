@@ -1657,7 +1657,7 @@ namespace DaphneGui
 
                     // cytosol; convert from the membrane's to the cytosol's system
                     convDriverLoc = Simulation.dataBasket.Cells.First().Value.Cytosol.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
-                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["A"].Conc.Value(convDriverLoc);
+                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["A*"].Conc.Value(convDriverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
                              driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];

@@ -203,10 +203,11 @@ namespace Daphne
 
             //ADD CELLS AND MOLECULES IN THE CELLS
             ConfigCell gc = new ConfigCell();
+
             gc.CellName = "BCell";
             gc.CellRadius = 4.0;
             gc.TransductionConstant = 1e4;
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A", MoleculeLocation.Bulk, sc);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
 
             CellPopulation cp = new CellPopulation();
             cp.cellpopulation_name = "My-B-Cell";
@@ -262,7 +263,7 @@ namespace Daphne
             //MOLECULES IN CYTOSOL
             var query2 =
                 from mol in sc.entity_repository.molecules
-                where mol.Name == "A"
+                where mol.molecule_guid == gc.locomotor_mol_guid_ref
                 select mol;
 
             gmp = null;
@@ -273,7 +274,7 @@ namespace Daphne
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
 
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Constant level";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -301,11 +302,10 @@ namespace Daphne
             //////grt = (GuiBoundaryReactionTemplate)entity_repository.AllReactions[1];    //The 1st reaction is Boundary Dissociation
 
             //////scenario.Reactions.Add(grt);
-            string guid = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
+            string guid = findReactionGuid(ReactionType.BoundaryAssociation, sc);
             sc.scenario.environment.ecs.reactions_guid_ref.Add(guid);
-            guid = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
+            guid = findReactionGuid(ReactionType.BoundaryDissociation, sc);
             sc.scenario.environment.ecs.reactions_guid_ref.Add(guid);
-
         }
 
         /// <summary>
@@ -373,7 +373,7 @@ namespace Daphne
             gc.CellName = "BCell";
             gc.CellRadius = 5.0;
             gc.TransductionConstant = 1e4;
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A", MoleculeLocation.Bulk, sc);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
 
             //MOLECULES IN MEMBRANE
             var query1 =
@@ -410,7 +410,7 @@ namespace Daphne
             //MOLECULES IN CYTOSOL
             var query2 =
                 from mol in sc.entity_repository.molecules
-                where mol.Name == "A"
+                where mol.molecule_guid == gc.locomotor_mol_guid_ref
                 select mol;
 
             gmp = null;
@@ -569,7 +569,7 @@ namespace Daphne
             return null;
         }
 
-        // given a reaction type, find its guid
+        // given a reaction template type, find its guid
         public static string findReactionTemplateGuid(ReactionType rt, SimConfiguration sc)
         {
             foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
@@ -577,6 +577,24 @@ namespace Daphne
                 if (crt.reac_type == rt)
                 {
                     return crt.reaction_template_guid;
+                }
+            }
+            return null;
+        }
+
+        // this only works if we have only one reaction per type of reaction
+        public static string findReactionGuid(ReactionType rt, SimConfiguration sc)
+        {
+            string template_guid = findReactionTemplateGuid(rt, sc);
+
+            if (template_guid != null)
+            {
+                foreach (ConfigReaction cr in sc.entity_repository.reactions)
+                {
+                    if (cr.reaction_template_guid_ref == template_guid)
+                    {
+                        return cr.reaction_guid;
+                    }
                 }
             }
             return null;

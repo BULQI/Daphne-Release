@@ -362,19 +362,6 @@ namespace Daphne
                         addCompartmentMolpops(simComp[comp], configComp[comp]);
                     }
 
-                    // ADD ECS MOLECULAR POPULATIONS
-
-                    // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-                    // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-                    // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-
-                    addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs);
-                    // set non-diffusing
-                    foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
-                    {
-                        mp.IsDiffusing = false;
-                    }
-
                     //CELL REACTIONS
                     // cytosol; has boundary
                     addCompartmentReactions(cell.Cytosol, cell.PlasmaMembrane, cp.CellType.cytosol, sc.entity_repository);
@@ -395,6 +382,18 @@ namespace Daphne
 
                     AddCell(cell);
                 }
+            }
+
+            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
+
+            // ADD ECS MOLECULAR POPULATIONS
+            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs);
+            // set non-diffusing
+            foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
+            {
+                mp.IsDiffusing = false;
             }
 
             // ADD ECS REACTIONS
