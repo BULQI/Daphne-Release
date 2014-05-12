@@ -1398,7 +1398,7 @@ namespace DaphneGui
             get { return wfh; }
         }
 
-        private void WigetTransformToBoxMatrix(RegionWidget rw, BoxSpecification bs)
+        private void WidgetTransformToBoxMatrix(RegionWidget rw, BoxSpecification bs)
         {
             vtkMatrix4x4 mat = rw.GetTransform(RegionControl.PARAM_SCALE).GetMatrix();
             double[][] array2d = new double[4][];
@@ -1525,7 +1525,7 @@ namespace DaphneGui
                         {
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
-                        WigetTransformToBoxMatrix(rw, MainWindow.SC.SimConfig.box_guid_box_dict[key]);
+                        WidgetTransformToBoxMatrix(rw, MainWindow.SC.SimConfig.box_guid_box_dict[key]);
                         // Transfer transform to VTKDataBasket
                         MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
                     }
