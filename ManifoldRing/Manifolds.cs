@@ -91,13 +91,6 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public abstract ScalarField Multiply(ScalarField sf1, ScalarField sf2);
         /// <summary>
-        /// scalarfield division
-        /// </summary>
-        /// <param name="sf1">lh operand</param>
-        /// <param name="sf2">rh operand</param>
-        /// <returns>resulting field</returns>
-        public abstract ScalarField Divide(ScalarField sf1, ScalarField sf2);
-        /// <summary>
         /// addition of a constant to a scalar field
         /// </summary>
         /// <param name="sf">scalar field</param>
@@ -210,31 +203,6 @@ namespace ManifoldRing
         }
 
         /// <summary>
-        /// ME scalarfield division
-        /// </summary>
-        /// <param name="sf1">lh operand</param>
-        /// <param name="sf2">rh operand</param>
-        /// <returns>resulting field</returns>
-        public override ScalarField Divide(ScalarField sf1, ScalarField sf2)
-        {
-            if (sf2.array[0] == 0)
-            {
-                throw new Exception("Moment expansion division by zero.");
-            }
-
-            ScalarField c = new ScalarField(this);
-
-            c.array[0] = sf1.array[0] / sf2.array[0];
-
-            for (int i = 1; i < ArraySize; i++)
-            {
-                c.array[i] = (sf1.array[i] - sf1.array[0] * sf2.array[i] / sf2.array[0]) / sf2.array[0];
-            }
-
-            return c;
-        }
-
-        /// <summary>
         /// addition of a constant to a ME scalar field
         /// gradient is not changed
         /// </summary>
@@ -247,7 +215,6 @@ namespace ManifoldRing
             return sf;
         }
             
-
         /// <summary>
         /// Restriction of a scalar field to an ME boundary manifold
         /// </summary>
@@ -793,28 +760,6 @@ namespace ManifoldRing
         }
 
         /// <summary>
-        /// IL scalarfield division
-        /// </summary>
-        /// <param name="sf1">lh operand</param>
-        /// <param name="sf2">rh operand</param>
-        /// <returns>resulting field</returns>
-        public override ScalarField Divide(ScalarField sf1, ScalarField sf2)
-        {
-            ScalarField c = new ScalarField(this);
-
-            for (int i = 0; i < ArraySize; i++)
-            {
-                if (sf2.array[i] == 0)
-                {
-                    throw new Exception("Scalar field division by zero.");
-                }
-                c.array[i] = sf1.array[i] / sf2.array[i];
-            }
-
-            return c;
-        }
-
-        /// <summary>
         /// addition of a constant to interpolated nodes scalar field
         /// </summary>
         /// <param name="sf">interpolated nodes scalar field</param>
@@ -1312,25 +1257,6 @@ namespace ManifoldRing
         {
             sf1.array[0] *= sf2.array[0];
             return sf1;
-        }
-
-        /// <summary>
-        /// scalarfield division
-        /// </summary>
-        /// <param name="sf1">lh operand</param>
-        /// <param name="sf2">rh operand</param>
-        /// <returns>resulting field</returns>
-        public override ScalarField Divide(ScalarField sf1, ScalarField sf2)
-        {
-            ScalarField c = new ScalarField(this);
-
-            if (sf2.array[0] == 0)
-            {
-                throw new Exception("Scalar field division by zero.");
-            }
-            c.array[0] = sf1.array[0] / sf2.array[0];
-
-            return c;
         }
 
         /// <summary>

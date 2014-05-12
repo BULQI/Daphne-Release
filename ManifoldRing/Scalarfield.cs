@@ -553,75 +553,6 @@ namespace ManifoldRing
         }
 
         /// <summary>
-        /// scalar field division operator
-        /// </summary>
-        /// <param name="f1">field 1</param>
-        /// <param name="f2">field 2</param>
-        /// <returns>resulting field</returns>
-        public static ScalarField operator /(ScalarField f1, ScalarField f2)
-        {
-            if (f1.m != f2.m)
-            {
-                throw new Exception("Scalar field multiplicands must share a manifold.");
-            }
-
-            return f1.m.Divide(f1, f2);
-        }
-
-        /// <summary>
-        /// scalar field division by scalar
-        /// </summary>
-        /// <param name="s">scalar divisor</param>
-        /// <returns>resulting field</returns>
-        public ScalarField Divide(double s)
-        {
-            if (s == 0)
-            {
-                throw new Exception("Scalar field division by zero.");
-            }
-            for (int i = 0; i < m.ArraySize; i++)
-            {
-                array[i] /= s;
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// scalar field division operator by scalar
-        /// </summary>
-        /// <param name="f">field</param>
-        /// <param name="s">divisor</param>
-        /// <returns>resulting field</returns>
-        public static ScalarField operator /(ScalarField f, double s)
-        {
-            if (s == 0)
-            {
-                throw new Exception("Scalar field division by zero.");
-            }
-
-            ScalarField product = new ScalarField(f.m);
-
-            for (int i = 0; i < f.m.ArraySize; i++)
-            {
-                product.array[i] = f.array[i] / s;
-            }
-
-            return product;
-        }
-
-        /// <summary>
-        /// scalar field division operator by scalar
-        /// </summary>
-        /// <param name="s">divisor</param>
-        /// <param name="f">field</param>
-        /// <returns>resulting field</returns>
-        public static ScalarField operator /(double s, ScalarField f)
-        {
-            return f / s;
-        }
-
-        /// <summary>
         /// scalar field addition
         /// </summary>
         /// <param name="f">field addend</param>
@@ -639,7 +570,6 @@ namespace ManifoldRing
 
             return this;
         }
-
 
         /// <summary>
         /// addition of a constant to this scalar field

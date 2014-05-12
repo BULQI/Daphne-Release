@@ -234,11 +234,11 @@ namespace Daphne
                 // half the chemistry
                 foreach (MolecularPopulation mp in Cytosol.Populations.Values)
                 {
-                    mp.Conc /= 2;
+                    mp.Conc.Multiply(0.5);
                 }
                 foreach (MolecularPopulation mp in PlasmaMembrane.Populations.Values)
                 {
-                    mp.Conc /= 2;
+                    mp.Conc.Multiply(0.5);
                 }
 
                 // create daughter
