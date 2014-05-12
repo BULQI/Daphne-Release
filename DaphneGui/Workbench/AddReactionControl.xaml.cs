@@ -147,7 +147,7 @@ namespace DaphneGui
         }
 
         // given a molecule name, check if it exists in repository - return
-        private static string findMoleculeByName(string inputMolName)
+        private static string findMoleculeGuidByName(string inputMolName)
         {
             string guid = null;
             foreach (ConfigMolecule cm in MainWindow.SC.SimConfig.entity_repository.molecules)
@@ -191,9 +191,39 @@ namespace DaphneGui
 
             //NEED MODIFIERS TOO IN GUI?  NO!
 
-            //THIS IS NOT OK
-            //UNTIL WE HAVE AUTOMATIC REACTIONS, WE NEED USER TO INPUT REACTION_TYPE
+            //Grace is working on a method that will determine the reaction type given a 2 dictionaries of reactants and products with coefficients
+            //For now assume reaction type is Association
+            //THIS IS TEMPORARY
             cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.entity_repository.reaction_templates[(int)ReactionType.Association].reaction_template_guid;
+            ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
+
+            foreach (KeyValuePair<string, int> kvp in inputReactants)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (guid == null)  //this should never happen
+                {
+                    string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
+                    MessageBox.Show(msg);
+                    return;
+                }
+
+                if (!cr.reactants_molecule_guid_ref.Contains(guid))
+                    cr.reactants_molecule_guid_ref.Add(guid);
+
+                //Don't have to add stoichiometry since the reaction template knows it based on reaction type
+            }
+            foreach (KeyValuePair<string, int> kvp in inputProducts)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (guid == null)  //this should never happen
+                {
+                    string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
+                    MessageBox.Show(msg);
+                    return;
+                }
+                if (!cr.products_molecule_guid_ref.Contains(guid))
+                    cr.products_molecule_guid_ref.Add(guid);
+            }
 
             //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
@@ -348,7 +378,7 @@ namespace DaphneGui
 
         private bool ValidateMoleculeName(string sMol)
         {
-            string molGuid = findMoleculeByName(sMol);
+            string molGuid = findMoleculeGuidByName(sMol);
             if (molGuid == null)
             {
                 string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", sMol);

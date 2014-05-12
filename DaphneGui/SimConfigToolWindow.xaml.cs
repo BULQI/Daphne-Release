@@ -284,6 +284,176 @@ namespace DaphneGui
             }
         }
 
+        private void MembraneMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only want to respond to purposeful user interaction, not just population and depopulation
+            // of solfacs list
+            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            ////////    return;
+
+
+            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+
+            if (current_mol != null)
+            {
+                MolPopInfo current_item = current_mol.mpInfo;
+
+                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+                if (e.AddedItems.Count > 0)
+                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+
+
+                // Only want to change distribution type if the combo box isn't just selecting 
+                // the type of current item in the solfacs list box (e.g. when list selection is changed)
+
+                if (current_item.mp_distribution == null)
+                {
+                }
+                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                {
+                    return;
+                }
+                //else
+                //{
+                switch (new_dist_type)
+                {
+                    case MolPopDistributionType.Homogeneous:
+                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        current_item.mp_distribution = shl;
+                        break;
+                    case MolPopDistributionType.Linear:
+                        MolPopLinear slg = new MolPopLinear();
+                        current_item.mp_distribution = slg;
+                        break;
+                    case MolPopDistributionType.Gaussian:
+                        // Make sure there is at least one gauss_spec in repository
+                        if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                        {
+                            this.AddGaussianSpecification();
+                        }
+                        MolPopGaussian sgg = new MolPopGaussian();
+                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                        current_item.mp_distribution = sgg;
+                        break;
+                    case MolPopDistributionType.Custom:
+
+                        var prev_distribution = current_item.mp_distribution;
+                        MolPopCustom scg = new MolPopCustom();
+                        current_item.mp_distribution = scg;
+
+                        // Configure open file dialog box
+                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                        dlg.InitialDirectory = MainWindow.appPath;
+                        dlg.DefaultExt = ".txt"; // Default file extension
+                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+
+                        // Show open file dialog box
+                        Nullable<bool> result = dlg.ShowDialog();
+
+                        // Process open file dialog box results
+                        if (result == true)
+                        {
+                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                            string filename = dlg.FileName;
+                            scg.custom_gradient_file_string = filename;
+                        }
+                        else
+                        {
+                            current_item.mp_distribution = prev_distribution;
+                        }
+                        break;
+                    default:
+                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                }
+                //}
+            }
+        }
+
+        private void CytosolMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only want to respond to purposeful user interaction, not just population and depopulation
+            // of solfacs list
+            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            ////////    return;
+
+
+            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+
+            if (current_mol != null)
+            {
+                MolPopInfo current_item = current_mol.mpInfo;
+
+                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+                if (e.AddedItems.Count > 0)
+                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+
+
+                // Only want to change distribution type if the combo box isn't just selecting 
+                // the type of current item in the solfacs list box (e.g. when list selection is changed)
+
+                if (current_item.mp_distribution == null)
+                {
+                }
+                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                {
+                    return;
+                }
+                //else
+                //{
+                switch (new_dist_type)
+                {
+                    case MolPopDistributionType.Homogeneous:
+                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        current_item.mp_distribution = shl;
+                        break;
+                    case MolPopDistributionType.Linear:
+                        MolPopLinear slg = new MolPopLinear();
+                        current_item.mp_distribution = slg;
+                        break;
+                    case MolPopDistributionType.Gaussian:
+                        // Make sure there is at least one gauss_spec in repository
+                        if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                        {
+                            this.AddGaussianSpecification();
+                        }
+                        MolPopGaussian sgg = new MolPopGaussian();
+                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                        current_item.mp_distribution = sgg;
+                        break;
+                    case MolPopDistributionType.Custom:
+
+                        var prev_distribution = current_item.mp_distribution;
+                        MolPopCustom scg = new MolPopCustom();
+                        current_item.mp_distribution = scg;
+
+                        // Configure open file dialog box
+                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                        dlg.InitialDirectory = MainWindow.appPath;
+                        dlg.DefaultExt = ".txt"; // Default file extension
+                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+
+                        // Show open file dialog box
+                        Nullable<bool> result = dlg.ShowDialog();
+
+                        // Process open file dialog box results
+                        if (result == true)
+                        {
+                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                            string filename = dlg.FileName;
+                            scg.custom_gradient_file_string = filename;
+                        }
+                        else
+                        {
+                            current_item.mp_distribution = prev_distribution;
+                        }
+                        break;
+                    default:
+                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                }
+                //}
+            }
+        }
+
         /// <summary>
         /// Event handler for button press for changing custom chemokine distribution input file
         /// </summary>
@@ -365,6 +535,7 @@ namespace DaphneGui
             lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }
 
+        //ECM TAB EVENT HANDLERS
         private void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             //SolfacsDetailsExpander.IsExpanded = true;
@@ -387,14 +558,13 @@ namespace DaphneGui
             }
         }
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
-        {            
-            ConfigReaction selected_grt = (ConfigReaction)lbAvailableReacs.SelectedItem;
+        {
+            ConfigReaction selected_grt = (ConfigReaction)lvAvailableReacs.SelectedItem;
             if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(selected_grt.reaction_guid))
             {
-                //selected_grt.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                 MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(selected_grt.reaction_guid);
             }
-
+            
         }
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
@@ -403,7 +573,6 @@ namespace DaphneGui
             {
                 string guid = (string)lvEcsReactions.SelectedValue;
                 ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
-                //ConfigReaction grt = (ConfigReaction)lvEcsReactions.SelectedValue;
                 if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
                 {
                     MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
@@ -411,6 +580,10 @@ namespace DaphneGui
                 
             }
         }
+
+
+
+
         private void AddReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             ////GuiReactionComplex grc = new GuiReactionComplex();
@@ -536,6 +709,24 @@ namespace DaphneGui
             ////}
         }
 
+        //LIBRARIES TAB EVENT HANDLERS
+        //MOLECULES
+        private void lbMol_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ConfigMolecule cm = (ConfigMolecule)lbMol.SelectedItem;
+            if (cm == null)
+                return;
+
+            if (cm.molecule_location == MoleculeLocation.Boundary)
+            {
+                chkBoundary.IsChecked = true;
+            }
+            else
+            {
+                chkBoundary.IsChecked = false;
+            }
+        }
+
         private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;
@@ -577,58 +768,135 @@ namespace DaphneGui
             }
         }
 
+        //CELLS EVENT HANDLERS
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
+            ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
             if (cc != null && cr != null)
                 cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+
+            //ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            //ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
+            //if (cc != null && cr != null)
+            //    cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
+            ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
 
             if (cc != null && cr != null)
                 cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+
+            //ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            //ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
+
+            //if (cc != null && cr != null)
+            //    cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
-        //private void rbBulk_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (rbBulk.IsChecked == true)
-        //    {
-        //        rbBoundary.IsChecked = false;
-        //    }
-        //}
-
-        //private void rbBoundary_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (rbBoundary.IsChecked == true)
-        //    {
-        //        rbBulk.IsChecked = false;
-        //    }
-        //}
-
-        private void lbMol_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecule cm = (ConfigMolecule)lbMol.SelectedItem;
-            if (cm == null)
-                return;
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            gmp.Name = "NewMP";
+            gmp.mpInfo = new MolPopInfo("");
+            gmp.mpInfo.mp_dist_name = "New distribution";
+            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            gmp.mpInfo.mp_render_on = true;
+            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
 
-            if (cm.molecule_location == MoleculeLocation.Boundary)
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.membrane.molpops.Add(gmp);
+            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+        }
+        private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.membrane.molpops.Remove(cmp);
+            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+        }
+        private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            gmp.Name = "NewMP";
+            gmp.mpInfo = new MolPopInfo("");
+            gmp.mpInfo.mp_dist_name = "New distribution";
+            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            gmp.mpInfo.mp_render_on = true;
+            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.cytosol.molpops.Add(gmp);
+            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+        }
+        private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.cytosol.molpops.Remove(cmp);
+            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+        }
+
+        private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+        }
+
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //ListBox lb = (ListBox)e.Source;
+            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lb.SelectedItem;
+            //string molname = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
+        }
+
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //Binding b = new Binding();
+            //b.ElementName = "CellCytosolMolPopsListBox";
+            //PropertyPath pp = new PropertyPath(CellCytosolMolPopsListBox.SelectedItem);
+            //DependencyProperty dp;
+            //dp.PropertyType = CellCytosolMolPopsListBox.SelectedItem.GetType();
+            //b.Path = pp;
+            //CytoMolPopDetails.SetBinding(dp, b);
+
+            //cc.SetBinding(
+            //MembMolPopDetails.Content = cont
+        }
+
+        private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            int nIndex = MembReacListBox.SelectedIndex;
+            if (nIndex >= 0)
             {
-                //rbBulk.IsChecked = false;
-                //rbBoundary.IsChecked = true;
-                chkBoundary.IsChecked = true;
-            }
-            else
-            {
-                //rbBulk.IsChecked = true;
-                //rbBoundary.IsChecked = false;
-                chkBoundary.IsChecked = false;
+                string guid = (string)MembReacListBox.SelectedValue;
+                if (cell.membrane.reactions_guid_ref.Contains(guid))
+                {
+                    cell.membrane.reactions_guid_ref.Remove(guid);
+                }
             }
         }
+
+        private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            int nIndex = CytosolReacListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                string guid = (string)CytosolReacListBox.SelectedValue;
+                if (cell.cytosol.reactions_guid_ref.Contains(guid))
+                {
+                    cell.cytosol.reactions_guid_ref.Remove(guid);
+                }
+            }
+        }
+
+        //****************************************************************************************************************
+
+        
 
         private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
@@ -681,15 +949,7 @@ namespace DaphneGui
             }
         }
 
-        private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
 
         private void AddCellButton_Click_1(object sender, RoutedEventArgs e)
         {
@@ -715,91 +975,9 @@ namespace DaphneGui
         {
         }
 
-        private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
-            gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
-            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_render_on = true;
-            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.membrane.molpops.Add(gmp);
-            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
-        }
-        private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
-        {            
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.membrane.molpops.Remove(cmp);
-            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
-        }
-        private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
-            gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
-            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_render_on = true;
-            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.cytosol.molpops.Add(gmp);
-            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-        }
-        private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.cytosol.molpops.Remove(cmp);
-            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-        }
         
-        private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            if (cell == null)
-                return;
-
-            MembReacListBox.Items.Clear();
-            foreach (string guid in cell.membrane.reactions_guid_ref) 
-            {
-                if (MainWindow.SC.SimConfig.entity_repository.reactions_dict.ContainsKey(guid))
-                    MembReacListBox.Items.Add(MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid]);
-            }
-
-            CytosolReacListBox.Items.Clear();
-            foreach (string guid in cell.cytosol.reactions_guid_ref)
-            {
-                if (MainWindow.SC.SimConfig.entity_repository.reactions_dict.ContainsKey(guid))
-                    CytosolReacListBox.Items.Add(MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid]);
-            }
-        }
-
-        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //ListBox lb = (ListBox)e.Source;
-            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lb.SelectedItem;
-            //string molname = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
-        }
-
-        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //Binding b = new Binding();
-            //b.ElementName = "CellCytosolMolPopsListBox";
-            //PropertyPath pp = new PropertyPath(CellCytosolMolPopsListBox.SelectedItem);
-            //DependencyProperty dp;
-            //dp.PropertyType = CellCytosolMolPopsListBox.SelectedItem.GetType();
-            //b.Path = pp;
-            //CytoMolPopDetails.SetBinding(dp, b);
-            
-            //cc.SetBinding(
-            //MembMolPopDetails.Content = cont
-        }
+        
+        
 
         private void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -986,6 +1164,10 @@ namespace DaphneGui
             cp.number = cp.cell_locations.Count;
             e.Handled = true;
 
+        }
+
+        private void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
+        {
         }
 
         private void dgLocations_Scroll(object sender, RoutedEventArgs e)
