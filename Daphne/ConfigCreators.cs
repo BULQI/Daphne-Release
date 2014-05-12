@@ -604,8 +604,6 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.cells, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedCells.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
         }
 
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
@@ -718,8 +716,6 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.molecules, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedMolecules.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
         }
 
         //Following function needs to be called only once
@@ -1009,8 +1005,6 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.reaction_templates, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedReactionTemplates.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
         }
 
         // given a molecule name and location, find its guid
@@ -1440,8 +1434,6 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.reactions, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedReactions.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
         }
 
         private static void PredefinedReactionComplexesCreator(SimConfiguration sc)
