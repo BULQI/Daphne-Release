@@ -455,7 +455,7 @@ namespace Daphne
                 // remove the cell from the population
                 populations[cell.Population_id].Remove(cell.Cell_id);
                 // remove the cell itself
-                cells.Remove(cell.Cell_id);
+                hSim.RemoveCell(cell);
                 return true;
             }
             return false;

@@ -32,11 +32,11 @@ namespace Daphne
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is alive or dead.
         /// </summary>
-        //private bool Alive;
+        private bool alive;
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is ready to divide. 
         /// </summary>
-        //private bool Cytokinetic;
+        private bool cytokinetic;
         /// <summary>
         /// a flag that signals that the cell is motile
         /// </summary>
@@ -54,8 +54,8 @@ namespace Daphne
             {
                 throw new Exception("Cell radius must be greater than zero.");
             }
-            //Alive = true;
-            //Cytokinetic = false;
+            alive = true;
+            cytokinetic = false;
             this.radius = radius;
 
             Cell_id = SafeCell_id++;
@@ -166,6 +166,18 @@ namespace Daphne
             set { isMotile = value; }
         }
 
+        public bool Alive
+        {
+            get { return alive; }
+            set { alive = value; }
+        }
+
+        public bool Cytokinetic
+        {
+            get { return cytokinetic; }
+            set { cytokinetic = value; }
+        }
+
         public double Radius
         {
             get { return radius; }
@@ -262,9 +274,9 @@ namespace Daphne
         }
 
         /// <summary>
-        /// toroidal boundary condition
+        /// enforce boundary condition
         /// </summary>
-        public void ToroidalBC()
+        public void EnforceBC()
         {
             // toroidal boundary conditions, wrap around
             // NOTE: this assumes the environment has a lower bound of (0, 0, 0)
@@ -283,6 +295,18 @@ namespace Daphne
                     else if (State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
                     {
                         State.X[i] = 0.0;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
+                {
+                    // detect out of bounds cells
+                    if (State.X[i] < 0.0 || State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    {
+                        // cell dies
+                        alive = false;
                     }
                 }
             }

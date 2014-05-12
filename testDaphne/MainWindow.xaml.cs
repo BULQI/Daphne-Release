@@ -553,7 +553,7 @@ namespace testDaphne
                 complex = kvp.Value.PlasmaMembrane.Populations["CXCR5:CXCL13"];
 
                 //Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-                Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+                Simulation.dataBasket.ECS.Space.AddBoundaryReaction(kvp.Value.PlasmaMembrane.Interior.Id, new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 // Choose false to have the driver dynamics, but no movement
                 kvp.Value.IsMotile = true;
@@ -561,8 +561,8 @@ namespace testDaphne
                 // Add driver dynamics for locomotion
                 driver = kvp.Value.Cytosol.Populations["driver"];
                 driverA = kvp.Value.Cytosol.Populations["driverA"];
-                kvp.Value.Cytosol.Reactions.Add(new CatalyzedBoundaryActivation(driver, driverA, complex, k2plus));
-                kvp.Value.Cytosol.Reactions.Add(new Transformation(driverA, driver, k2minus));
+                kvp.Value.Cytosol.AddBoundaryReaction(kvp.Value.PlasmaMembrane.Interior.Id, new CatalyzedBoundaryActivation(driver, driverA, complex, k2plus));
+                kvp.Value.Cytosol.BulkReactions.Add(new Transformation(driverA, driver, k2minus));
 
                 kvp.Value.Locomotor = new Locomotor(driver, transductionConstant);
             }
@@ -664,10 +664,9 @@ namespace testDaphne
                 //kvp.Value.PlasmaMembrane.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
                 // sim.ECS.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                 //Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-                Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+                Simulation.dataBasket.ECS.Space.AddBoundaryReaction(kvp.Value.PlasmaMembrane.Interior.Id, new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 kvp.Value.IsMotile = false;
-
             }
         }
 

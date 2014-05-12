@@ -14,6 +14,8 @@ namespace Daphne
 
         public void Step(double dt)
         {
+            List<int> removalList = new List<int>();
+
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
                 // cell takes a step
@@ -35,8 +37,18 @@ namespace Daphne
                     }
 
                     // enforce boundary condition
-                    kvp.Value.ToroidalBC();
+                    kvp.Value.EnforceBC();
+                    if (kvp.Value.Alive == false)
+                    {
+                        removalList.Add(kvp.Value.Cell_id);
+                    }
                 }
+            }
+
+            // process removal list
+            foreach (int key in removalList)
+            {
+                Simulation.dataBasket.RemoveCell(key);
             }
         }
 

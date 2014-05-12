@@ -21,7 +21,8 @@ namespace Daphne
         {
             Interior = interior;
             Populations = new Dictionary<string, MolecularPopulation>();
-            Reactions = new List<Reaction>();
+            BulkReactions = new List<Reaction>();
+            BoundaryReactions = new Dictionary<int, List<Reaction>>();
             RTList = new List<ReactionTemplate>();
             Boundaries = new Dictionary<int, Compartment>();
             BoundaryTransforms = new Dictionary<int, Transform>();
@@ -125,9 +126,16 @@ namespace Daphne
         {
             // the step method may organize the reactions in a more sophisticated manner to account
             // for different rate constants etc.
-            foreach (Reaction r in Reactions)
+            foreach (Reaction r in BulkReactions)
             {
                 r.Step(dt);
+            }
+            foreach (List<Reaction> rlist in BoundaryReactions.Values)
+            {
+                foreach (Reaction r in rlist)
+                {
+                    r.Step(dt);
+                }
             }
 
             //double[] pos;
@@ -153,8 +161,21 @@ namespace Daphne
             }
         }
 
+        public void AddBoundaryReaction(int key, Reaction r)
+        {
+            // create the list if it doesn't exist
+            if(BoundaryReactions.ContainsKey(key) == false)
+            {
+                BoundaryReactions.Add(key, new List<Reaction>());
+            }
+
+            // add the reaction
+            BoundaryReactions[key].Add(r);
+        }
+
         public Dictionary<string, MolecularPopulation> Populations { get; private set; }
-        public List<Reaction> Reactions { get; private set; }
+        public List<Reaction> BulkReactions { get; private set; }
+        public Dictionary<int, List<Reaction>> BoundaryReactions { get; private set; }
         public Manifold Interior { get; private set; }
         public List<ReactionTemplate> RTList { get; private set; }
         public Dictionary<int, Compartment> Boundaries { get; private set; }
