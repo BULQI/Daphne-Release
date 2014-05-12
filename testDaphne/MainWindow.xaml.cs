@@ -30,7 +30,7 @@ namespace testDaphne
         public MainWindow()
         {
             InitializeComponent();
-       }
+        }
 
         private void initialize()
         {
@@ -116,9 +116,11 @@ namespace testDaphne
                 // For example, cxcr5:cxc113 (membrane) -> cxcr5:cxcl13 (cytoplaxm)
             //}
 
-           // Add reaction(s) to the Cytosol compartment
-           // Add reaction(s) to the PlasmaMembrane compartment
+            // Add reaction(s) to the Cytosol compartment
+            // Add reaction(s) to the PlasmaMembrane compartment
 
+            // create the simulation
+            sim = new Simulation();
             // this needs to go into the simulation's variable for that
             sim.ExtracellularSpace = XCellSpace;
         }
