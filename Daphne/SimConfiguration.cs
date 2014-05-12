@@ -1906,10 +1906,6 @@ namespace Daphne
 
     public class CellPopGaussianDistribution : CellPopDistribution
     {
-        private double[] center;
-        private double[] sigma;
-        private double peak;
-
         public double[] Center { get; set; }
         public double[] Sigma { get; set; }
         public double   Peak { get; set; }
