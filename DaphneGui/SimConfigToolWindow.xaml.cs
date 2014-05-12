@@ -2534,6 +2534,51 @@ namespace DaphneGui
             }
         }
 
+        private void time_duration_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SC == null)
+                return;
+            if (MainWindow.SC.SimConfig == null)
+                return;
+            if (MainWindow.SC.SimConfig.scenario == null)
+                return;
+
+            //Need to do this to make sure that the sampling and rendering sliders get the correct "Value"s
+            double temp_samp = MainWindow.SC.SimConfig.scenario.time_config.sampling_interval;
+            double temp_rand = MainWindow.SC.SimConfig.scenario.time_config.rendering_interval;
+
+            sampling_interval_slider.Maximum = time_duration_slider.Value;
+            if (temp_samp > sampling_interval_slider.Maximum)
+                temp_samp = sampling_interval_slider.Maximum;
+            sampling_interval_slider.Value = temp_samp;
+            MainWindow.SC.SimConfig.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+            
+            time_step_slider.Maximum = time_duration_slider.Value;
+            if (temp_rand > time_step_slider.Maximum)
+                temp_rand = time_step_slider.Maximum;
+            time_step_slider.Value = temp_rand;
+            MainWindow.SC.SimConfig.scenario.time_config.rendering_interval = time_step_slider.Value;
+
+        }
+
+        private void sampling_interval_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SC == null)
+                return;
+
+            if (MainWindow.SC.SimConfig == null)
+                return;
+
+            if (MainWindow.SC.SimConfig.scenario == null)
+                return;
+
+            if (MainWindow.SC.SimConfig.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
+                MainWindow.SC.SimConfig.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+
+            if (MainWindow.SC.SimConfig.scenario.time_config.rendering_interval > time_step_slider.Maximum)
+                MainWindow.SC.SimConfig.scenario.time_config.rendering_interval = time_step_slider.Value;
+        }
+
         
         
 
