@@ -788,6 +788,8 @@
                     </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
                                         Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
                                         SliderEnabled="False">
                         </uc:DoublesBox>
                     </StackPanel>
@@ -810,7 +812,9 @@
                         </TextBlock.Style>
                     </TextBlock>
                         <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
-                                        Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                        
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
                                         SliderEnabled="False">
                         </uc:DoublesBox>
                     </StackPanel>
