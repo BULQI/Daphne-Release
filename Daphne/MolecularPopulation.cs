@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using MathNet.Numerics.LinearAlgebra;
 
+using Ninject;
+using Ninject.Parameters;
+
 using ManifoldRing;
 
 namespace Daphne
@@ -79,15 +82,18 @@ namespace Daphne
         }
 
         // NOTE: Put this here so json deserialization would work. gmk
-        public MolecularPopulation()
-        {
-        }
+        // NOTE HS: we should have single constructors for Ninject to work;
+        // the other entities seem to deserialize without a default constructor, at least they have none
+        // revisit and reevealuate if needed
+        //public MolecularPopulation()
+        //{
+        //}
 
-        public MolecularPopulation(Molecule mol, ScalarField init, Compartment comp)
+        public MolecularPopulation(Molecule mol, Compartment comp)
         {
+            concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+            manifold = comp.Interior;
             Molecule = mol;
-            manifold = init.M;
-            concentration = init;
             compartment = comp;
 
             // true boundaries

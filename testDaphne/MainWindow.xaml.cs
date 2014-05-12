@@ -441,7 +441,7 @@ namespace testDaphne
             // 
 
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -470,11 +470,11 @@ namespace testDaphne
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-            double maxConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-            double[] sigma = new double[] { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
-                     center = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0 };
+            double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
+                                                2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new GaussianFieldInitializer(center, sigma, maxConc));
+            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
             //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
             sim.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
 
@@ -482,18 +482,14 @@ namespace testDaphne
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], 125.0);
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], 130.0);
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 125.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 130.0 });
             }
 
             // Add Cytosol molecular populations
-            // Start with a non-zero (activated) driver concentration and global gradient
-            double[] initGrad = new double[3] { 0, 2.0, 2.0 };
-            double initConc = 250;
-
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], initConc);
+                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], "const", new double[] { 250.0 });
             }
 
             //
@@ -564,7 +560,7 @@ namespace testDaphne
             // 
 
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -591,18 +587,12 @@ namespace testDaphne
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-            double maxConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-
-            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 };
-
-            double[] center = new double[sim.ECS.Space.Interior.Dim];
-
-            center[0] = extent[0] / 2.0;
-            center[1] = extent[1] / 2.0;
-            center[2] = extent[2] / 2.0;
+            double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
+                                                2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new GaussianFieldInitializer(center, sigma, maxConc));
+            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
             //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
             sim.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
 
@@ -610,8 +600,8 @@ namespace testDaphne
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], 255.0);
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], 0.0);
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 255.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 0.0 });
             }
 
             //
@@ -667,7 +657,7 @@ namespace testDaphne
             // 
 
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -678,20 +668,15 @@ namespace testDaphne
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-            double maxConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-
             double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
                                              sim.ECS.Space.Interior.Extent(1), 
                                              sim.ECS.Space.Interior.Extent(2) },
-                     sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
-                     center = new double[sim.ECS.Space.Interior.Dim];
-
-            center[0] = extent[0] / 2.0;
-            center[1] = extent[1] / 2.0;
-            center[2] = extent[2] / 2.0;
+                     initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
+                                                2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new GaussianFieldInitializer(center, sigma, maxConc));
+            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
             sim.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
 
         }
@@ -702,7 +687,7 @@ namespace testDaphne
             FakeConfig.gridStep = 2;
 
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -753,7 +738,7 @@ namespace testDaphne
             // 
 
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
@@ -761,33 +746,26 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-            double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
-                                             sim.ECS.Space.Interior.Extent(1), 
-                                             sim.ECS.Space.Interior.Extent(2) },
-                     sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
-                     center = new double[sim.ECS.Space.Interior.Dim];
-
-            center[0] = extent[0] / 2.0;
-            center[1] = extent[1] / 2.0;
-            center[2] = extent[2] / 2.0;
-
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new ConstFieldInitializer(10.0));
+            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { 10.0 });
             //sim.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
 
             Manifold m;
-
+            ScalarField sf;
             int n = sim.ECS.Sides["right"];
-            ConstFieldInitializer cfi = new ConstFieldInitializer(100.0);
+
             m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
-            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+            sf.Initialize("const", new double[] { 100.0 });
+            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = sf;
             // A hack
             sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
 
             n = sim.ECS.Sides["left"];
-            cfi.SetC(-100.0);
             m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
-            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+            sf.Initialize("const", new double[] { -100.0 });
+            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = sf;
             sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
 
         }

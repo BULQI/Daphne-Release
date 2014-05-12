@@ -127,8 +127,7 @@ namespace DaphneGui
             {
                 if (MolDict.ContainsKey(s))
                 {
-                    double initialConc = 2.0;                    
-                    AddMolecularPopulation(MolDict[s], initialConc);
+                    AddMolecularPopulation(MolDict[s], "const", new double[] { 2.0 });
                 }
             }
 
@@ -175,14 +174,18 @@ namespace DaphneGui
             //    Populations[j].Conc.array[0] = conc;    //set the mol pop conc from the dictInitialConcs dictionary since user may have dragged
             //    dictGraphConcs[molname].Add(conc);
             //}
+            double[] initArray = new double[1];
+
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Populations)
             {
                 string molname = kvp.Key;
                 double conc = dictInitialConcs[molname];
+
                 //CONC PROBLEM
                 //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
                 //Populations[molname].Conc = s;
-                Populations[molname].Conc.Initialize(new ConstFieldInitializer(conc));
+                initArray[0] = conc;
+                Populations[molname].Conc.Initialize("const", initArray);
                 //////////Populations[molname].Conc.Value = conc;  //set the mol pop conc from the dictInitialConcs dictionary since user may have dragged
                 dictGraphConcs[molname].Add(conc);
             }
@@ -267,7 +270,7 @@ namespace DaphneGui
             //CONC PROBLEM
             //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
             //mp.Conc = s;
-            mp.Conc.Initialize(new ConstFieldInitializer(conc));
+            mp.Conc.Initialize("const", new double[] { conc });
             //////////mp.Conc.ConcArray[0] = conc;
             dictInitialConcs[mol] = conc;
         }
@@ -293,6 +296,8 @@ namespace DaphneGui
         //by copying the original concs back to mol pops
         public void RestoreOriginalConcs()
         {
+            double[] initArray = new double[1];
+
             foreach (KeyValuePair<string, double> kvp in dictOriginalConcs)
             {
                 //MolecularPopulation mp = molpopDict[kvp.Key];
@@ -301,7 +306,8 @@ namespace DaphneGui
                 //CONC PROBLEM
                 //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(kvp.Value));
                 //mp.Conc = s;
-                mp.Conc.Initialize(new ConstFieldInitializer(kvp.Value));
+                initArray[0] = kvp.Value;
+                mp.Conc.Initialize("const", initArray);
                 ////////////mp.Conc.ConcArray[0] = kvp.Value;
                 dictInitialConcs[kvp.Key] = kvp.Value;
             }

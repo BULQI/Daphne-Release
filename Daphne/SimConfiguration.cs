@@ -1311,9 +1311,53 @@ namespace Daphne
         }
     }
 
+    // start at > 0 as zero seems to be the default for metadata when a property is not present
+    public enum SimStates { Linear = 1, Cubic, Tiny, Large, OneD, TwoD, ThreeD };
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(SimStates), typeof(string))]
+    public class SimStatesToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the SimStates enum...
+        private List<string> _sim_states_strings = new List<string>()
+                                {
+                                    "linear",
+                                    "cubic",
+                                    "tiny",
+                                    "large",
+                                    "1d",
+                                    "2d",
+                                    "3d"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _sim_states_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _sim_states_strings.FindIndex(item => item == str);
+            return (SimStates)Enum.ToObject(typeof(SimStates), (int)idx);
+        }
+    }
+
     public class Scenario
     {
         public string description { get; set; }
+        public SimStates simInterpolate { get; set; }
+        public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
         public Environment environment { get; set; }
         public ObservableCollection<Region> regions { get; set; }        
@@ -1330,6 +1374,8 @@ namespace Daphne
         public Scenario()
         {
             description = "Scenario description";
+            simInterpolate = SimStates.Linear;
+            simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
             environment = new Environment();
             regions = new ObservableCollection<Region>();

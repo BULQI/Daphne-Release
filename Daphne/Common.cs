@@ -5,6 +5,7 @@ using System.Text;
 
 using Ninject;
 using Ninject.Modules;
+using Ninject.Extensions.Factory;
 
 using ManifoldRing;
 
@@ -16,9 +17,6 @@ namespace Daphne
     /// </summary>
     public class FakeConfig
     {
-        // start at > 0 as zero seems to be the default for metadata when a property is not present
-        public enum SimStates { Linear = 1, Cubic, Tiny, Large, OneD, TwoD, ThreeD };
-
         static FakeConfig()
         {
             simInterpolate = SimStates.Linear;
@@ -36,32 +34,71 @@ namespace Daphne
         public static int[] numGridPts { get; set; }
     }
 
+    public class CustomInstanceProvider : StandardInstanceProvider
+    {
+        protected override string GetName(System.Reflection.MethodInfo methodInfo, object[] arguments)
+        {
+            return (string)arguments[0];
+        }
+
+        protected override Ninject.Parameters.ConstructorArgument[] GetConstructorArguments(System.Reflection.MethodInfo methodInfo, object[] arguments)
+        {
+            return base.GetConstructorArguments(methodInfo, arguments).Skip(1).ToArray();
+        }
+    }
+
     public class SimulationModule : NinjectModule
     {
         public static IKernel kernel;
+        private Scenario scenario;
+
+        public SimulationModule(Scenario scenario)
+            : base()
+        {
+            // hack to get this to work for now
+            if (scenario == null)
+            {
+                scenario = new Scenario();
+                scenario.simInterpolate = FakeConfig.simInterpolate;
+                scenario.simCellSize = FakeConfig.simCellSize;
+                scenario.NumGridPts = FakeConfig.numGridPts;
+                scenario.GridStep = FakeConfig.gridStep;
+                scenario.CellRadius = FakeConfig.radius;
+            }
+            // end hack
+            this.scenario = scenario;
+        }
 
         public override void Load()
         {
             // bindings for interpolators
-            Bind<Interpolator>().To<Trilinear2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Interpolation") == FakeConfig.SimStates.Linear && ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Dimension") == FakeConfig.SimStates.TwoD);
-            Bind<Interpolator>().To<Tricubic2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Interpolation") == FakeConfig.SimStates.Cubic && ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Dimension") == FakeConfig.SimStates.TwoD);
-            Bind<Interpolator>().To<Trilinear3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Interpolation") == FakeConfig.SimStates.Linear && ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Dimension") == FakeConfig.SimStates.ThreeD);
-            Bind<Interpolator>().To<Tricubic3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Interpolation") == FakeConfig.SimStates.Cubic && ctx.Binding.Metadata.Get<FakeConfig.SimStates>("Dimension") == FakeConfig.SimStates.ThreeD);
+            Bind<Interpolator>().To<Trilinear2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.TwoD);
+            Bind<Interpolator>().To<Tricubic2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.TwoD);
+            Bind<Interpolator>().To<Trilinear3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.ThreeD);
+            Bind<Interpolator>().To<Tricubic3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.ThreeD);
 
             // bindings for manifolds
-            Bind<Manifold>().To<TinyBall>().WhenParentNamed("Cytosol").WithConstructorArgument("radius", FakeConfig.radius);
-            Bind<Manifold>().To<TinySphere>().WhenParentNamed("Membrane").WithConstructorArgument("radius", FakeConfig.radius);
-            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.ThreeD).WithMetadata("Interpolation", FakeConfig.simInterpolate);
-            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.TwoD).WithMetadata("Interpolation", FakeConfig.simInterpolate);
+            Bind<Manifold>().To<TinyBall>().WhenParentNamed("Cytosol").WithConstructorArgument("radius", scenario.CellRadius);
+            Bind<Manifold>().To<TinySphere>().WhenParentNamed("Membrane").WithConstructorArgument("radius", scenario.CellRadius);
+            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", SimStates.ThreeD).WithMetadata("Interpolation", scenario.simInterpolate);
+            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", SimStates.TwoD).WithMetadata("Interpolation", scenario.simInterpolate);
 
             // bindings for compartment
             Bind<Compartment>().ToSelf().WhenMemberHas<Cytosol>().Named("Cytosol");
             Bind<Compartment>().ToSelf().WhenMemberHas<Membrane>().Named("Membrane");
             Bind<Compartment>().ToSelf();
 
-            // bindings for entities
-            Bind<Cell>().ToSelf().WithConstructorArgument("radius", FakeConfig.radius).WithMetadata("Size", FakeConfig.simCellSize);
-            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", FakeConfig.numGridPts).WithConstructorArgument("gridStep", FakeConfig.gridStep);
+            // bindings for molecular populations
+            Bind<IFieldInitializer>().To<ConstFieldInitializer>().Named("const");
+            Bind<IFieldInitializer>().To<GaussianFieldInitializer>().Named("gauss");
+            Bind<ScalarField>().ToSelf();
+            Bind<MolecularPopulation>().ToSelf();
+            Bind<IFieldInitializerFactory>().ToFactory(() => new CustomInstanceProvider());
+
+
+            // bindings for simulation entities
+            Bind<Cell>().ToSelf().WithConstructorArgument("radius", scenario.CellRadius).WithMetadata("Size", scenario.simCellSize);
+            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.NumGridPts).WithConstructorArgument("gridStep", scenario.GridStep);
         }
     }
 }

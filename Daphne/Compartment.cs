@@ -29,22 +29,12 @@ namespace Daphne
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
         }
 
-        // gmk
-        public void AddMolecularPopulation(Molecule mol, double initConc)
+        public void AddMolecularPopulation(Molecule mol, string type, double[] parameters)
         {
-            ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(initConc));
-            MolecularPopulation molpop = new MolecularPopulation(mol, s, this);
+            MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("comp", this));
 
-            Populations.Add(molpop.Molecule.Name, molpop);
-        }
-
-        public void AddMolecularPopulation(Molecule mol, IFieldInitializer initConc)
-        {
-            // Add the molecular population with concentration specified with initConc
-            ScalarField s = new ScalarField(Interior, initConc);
-            MolecularPopulation molpop = new MolecularPopulation(mol, s, this);
-
-            Populations.Add(molpop.Molecule.Name, molpop);
+            mp.Conc.Initialize(type, parameters);
+            Populations.Add(mp.Molecule.Name, mp);
         }
 
         public bool HasThisReaction(ReactionTemplate rt)
@@ -106,7 +96,7 @@ namespace Daphne
                 // not contained? add it
                 if (Populations.ContainsKey(spRef.species) == false)
                 {
-                    AddMolecularPopulation(MolDict[spRef.species], 0.0);
+                    AddMolecularPopulation(MolDict[spRef.species], "const", new double[] { 0.0 });
                 }
             }
         }

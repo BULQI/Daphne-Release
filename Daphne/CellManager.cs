@@ -89,11 +89,8 @@ namespace Daphne
         {
             Scenario scenario = sc.scenario;
 
-            FakeConfig.numGridPts = scenario.NumGridPts;
-            FakeConfig.gridStep = scenario.GridStep;
-
             // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(scenario));
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
@@ -142,21 +139,20 @@ namespace Daphne
                                 //cell.PlasmaMembrane.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
                                 if (mol.Name == "CXCR5")
                                 {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 125.0);
+                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, "const", new double[] { 125.0 });
                                 }
                                 else if (mol.Name == "CXCR5:CXCL13")
                                 {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 130.0);
+                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, "const", new double[] { 130.0 });
                                 }
                                 else
                                 {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 0.0);
+                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, "const", new double[] { 0.0 });
                                 }
                             }
                             else
                             {
-                                double initConc = 250;
-                                cell.Cytosol.AddMolecularPopulation(mol, initConc);
+                                cell.PlasmaMembrane.AddMolecularPopulation(mol, "const", new double[] { 250.0 });
                             }
                         }
 
@@ -252,16 +248,13 @@ namespace Daphne
                 if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
-                    double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                    double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[ECS.Space.Interior.Dim];
-
-                    center[0] = extent[0] / 2.0;
-                    center[1] = extent[1] / 2.0;
-                    center[2] = extent[2] / 2.0;
+                    double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                        extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
+                                                        mpgg.peak_concentration };  // 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23
 
                     // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
                     Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
-                    ECS.Space.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
+                    ECS.Space.AddMolecularPopulation(mol, "gauss", initArray);
                     ECS.Space.Populations[mol.Name].IsDiffusing = false;
                 }
             }

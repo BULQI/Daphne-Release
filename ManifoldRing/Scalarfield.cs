@@ -18,6 +18,7 @@ namespace ManifoldRing
         /// <param name="point">point parameter</param>
         /// <returns>field value at point</returns>
         double initialize(double[] point = null);
+        void setParameters(double[] parameters);
     }
 
     /// <summary>
@@ -26,23 +27,29 @@ namespace ManifoldRing
     public class ConstFieldInitializer : IFieldInitializer
     {
         private double cVal;
+        private bool initialized;
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="c">constant initialization value</param>
-        public ConstFieldInitializer(double c)
+        public ConstFieldInitializer()
         {
-            cVal = c;
+            initialized = false;
         }
 
         /// <summary>
         /// set the constant value
         /// </summary>
-        /// <param name="c">constant value</param>
-        public void SetC(double c)
+        /// <param name="parameters">array with one constant value</param>
+        public void setParameters(double[] parameters)
         {
-            cVal = c;
+            if (parameters.Length != 1)
+            {
+                throw new Exception("ConstFieldInitializer length must be 1.");
+            }
+
+            cVal = parameters[0];
+            initialized = true;
         }
 
         /// <summary>
@@ -52,6 +59,11 @@ namespace ManifoldRing
         /// <returns>constant value regardless of point</returns>
         public double initialize(double[] point)
         {
+            if (initialized == false)
+            {
+                throw new Exception("Must call setParameters prior to using FieldInitializer.");
+            }
+
             return cVal;
         }
     }
@@ -64,31 +76,32 @@ namespace ManifoldRing
         private double[] center;
         private double[] sigma;
         private double max;
+        private bool initialized;
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="center">the Gaussian's center</param>
-        /// <param name="sigma">sigma/decay vector</param>
-        /// <param name="max">maximum value</param>
-        public GaussianFieldInitializer(double[] center, double[] sigma, double max)
+        /// <param name="c">initialization array</param>
+        public GaussianFieldInitializer()
         {
-            this.center = center;
-            this.sigma = sigma;
-            this.max = max;
+            initialized = false;
         }
 
         /// <summary>
         /// set the Gaussian parameters
         /// </summary>
-        /// <param name="center">the Gaussian's center</param>
-        /// <param name="sigma">sigma/decay vector</param>
-        /// <param name="max">maximum value</param>
-        public void SetParams(double[] center, double[] sigma, double max)
+        /// <param name="parameters">the Gaussian's center, sigma/decay vector, maximum value packed into an array</param>
+        public void setParameters(double[] parameters)
         {
-            this.center = center;
-            this.sigma = sigma;
-            this.max = max;
+            if (parameters.Length != 7)
+            {
+                throw new Exception("GaussianFieldInitializer length must be 7.");
+            }
+
+            this.center = new double[] { parameters[0], parameters[1], parameters[2] };
+            this.sigma = new double[] { parameters[3], parameters[4], parameters[5] };
+            this.max = parameters[6];
+            initialized = true;
         }
 
         /// <summary>
@@ -106,6 +119,10 @@ namespace ManifoldRing
             {
                 throw new Exception("Exception initializing Gaussian field, array length mismatch.");
             }
+            if (initialized == false)
+            {
+                throw new Exception("Must call setParameters prior to using FieldInitializer.");
+            }
 
             double f = 0, d = 1.0;
             // double d = Math.Pow(2.0 * Math.PI, 1.5) * sigma[0] * sigma[1] * sigma[2];
@@ -119,12 +136,22 @@ namespace ManifoldRing
     }
 
     /// <summary>
+    /// initializer factory
+    /// </summary>
+    public interface IFieldInitializerFactory
+    {
+        IFieldInitializer Initialize(string type);
+    }
+
+    /// <summary>
     /// scalar field class with operations
     /// </summary>
     public class ScalarField
     {
         internal double[] array;
         private readonly Manifold m;
+        private IFieldInitializer init;
+        private IFieldInitializerFactory factory;
         /// <summary>
         /// underlying manifold
         /// </summary>
@@ -134,28 +161,21 @@ namespace ManifoldRing
         /// constructor
         /// </summary>
         /// <param name="m">manifold</param>
-        public ScalarField(Manifold m)
+        public ScalarField(Manifold m, IFieldInitializerFactory factory = null)
         {
+            this.factory = factory;
             this.m = m;
             array = new double[m.ArraySize];
-        }
-
-        /// <summary>
-        /// constructor with initialization
-        /// </summary>
-        /// <param name="m">underlying manifold</param>
-        /// <param name="init">initializer</param>
-        public ScalarField(Manifold m, IFieldInitializer init) : this(m)
-        {
-            Initialize(init);
         }
 
         /// <summary>
         /// initialize the field according to the initializer object
         /// </summary>
         /// <param name="init">initializer object</param>
-        public void Initialize(IFieldInitializer init)
+        public void Initialize(string type, double[] parameters)
         {
+            init = factory.Initialize(type);
+            init.setParameters(parameters);
             if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
             {
                 for (int i = 0; i < m.ArraySize; i++)
