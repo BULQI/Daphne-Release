@@ -999,22 +999,22 @@ namespace Daphne
             // generic cell differentiation
             for (int i = 1; i < 8; i++)
             {
-                cm = new ConfigMolecule("Sdif" + i, 1.0, 1.0, 1.0);
+                cm = new ConfigMolecule("sDif" + i, 1.0, 1.0, 1.0);
                 sc.entity_repository.molecules.Add(cm);
                 sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
             }
 
             // generic cell apoptosis
-            cm = new ConfigMolecule("Sap", 1.0, 1.0, 1.0);
+            cm = new ConfigMolecule("sAp", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             // generic t cell rescue
-            cm = new ConfigMolecule("SResc1", 1.0, 1.0, 1.0);
+            cm = new ConfigMolecule("sResc1", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("SResc2", 1.0, 1.0, 1.0);
+            cm = new ConfigMolecule("sResc2", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
