@@ -1159,10 +1159,10 @@ namespace Daphne
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {            
-            if (value == null)
-                return 1;
-
             Color col = Color.FromRgb(255, 0, 0);
+
+            if (value == null)
+                return col;
 
             try
             {
@@ -1783,6 +1783,12 @@ namespace Daphne
             molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
+            reactions_guid_ref.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_guid_ref_CollectionChanged);
+        }
+
+        private void reactions_guid_ref_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -1842,9 +1848,7 @@ namespace Daphne
 
             if (molpop_guid.Length > 0)
             {
-                //molpops.Remove(molpops_dict[molpop_guid]);
                 molpops.Remove(delMolPop);
-                //molpops_dict.Remove(molpop_guid);
             }
         }
     }
@@ -3038,6 +3042,65 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return null;
+        }
+    }
+
+    //ColorListToBrushConverter
+    /// <summary>
+    /// Convert ColorList enum to SolidBrush for rectangle fills
+    /// </summary>
+    public class ColorListToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Color col = Color.FromRgb(255, 0, 0);
+            if (value == null)
+                return col;
+
+            try
+            {
+                int index = (int)value;
+                ColorList colEnum = (ColorList)Enum.ToObject(typeof(ColorList), (int)index);
+
+                switch (colEnum)
+                {
+                    case ColorList.Red:
+                        col = Color.FromRgb(255, 0, 0);
+                        break;
+                    case ColorList.Orange:
+                        col = Colors.Orange;
+                        break;
+                    case ColorList.Yellow:
+                        col = Color.FromRgb(255, 255, 0);
+                        break;
+                    case ColorList.Green:
+                        col = Color.FromRgb(0, 255, 0);
+                        break;
+                    case ColorList.Blue:
+                        col = Color.FromRgb(0, 0, 255);
+                        break;
+                    case ColorList.Indigo:
+                        col = Color.FromRgb(64, 0, 192);
+                        break;
+                    case ColorList.Violet:
+                        col = Color.FromRgb(192, 0, 255);
+                        break;
+                    case ColorList.Custom:
+                    default:
+                        break;
+                }
+
+                return new System.Windows.Media.SolidColorBrush(col);
+            }
+            catch
+            {
+                return new System.Windows.Media.SolidColorBrush(col);
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return 0;
         }
     }
 

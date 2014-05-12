@@ -573,6 +573,16 @@ namespace DaphneGui
                     }
                 }
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(cmp);
+
+                ConfigReaction dummy = new ConfigReaction();
+                MainWindow.SC.SimConfig.entity_repository.reactions.Add(dummy);
+                MainWindow.SC.SimConfig.entity_repository.reactions.Remove(dummy);
+                //AddReacExpander.InvalidateVisual();
+                //lvAvailableReacs.Items.Clear();
+                //lvAvailableReacs.InvalidateVisual();
+                //CollectionViewSource cvs = ConfigTabControl.FindResource("ecmAvailableReacs") as CollectionViewSource;
+                //cvs.View.Refresh();
+                //lvAvailableReacs.
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -627,6 +637,9 @@ namespace DaphneGui
 
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
+            if (lvAvailableReacs.SelectedIndex == -1)
+                return;
+
             ConfigReaction reac = (ConfigReaction)lvAvailableReacs.SelectedItem;
 
             //HERE MUST CHECK IF THE ECM HAS THE MOLECULES NEEDED BY THIS REACTION
@@ -742,7 +755,6 @@ namespace DaphneGui
                 {
                     MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
                 }
-
             }
         }
 
