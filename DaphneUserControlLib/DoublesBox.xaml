@@ -3,20 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="30" d:DesignWidth="360"
+             mc:Ignorable="d"              
              x:Name="UC"
              >
     <StackPanel x:Name="stpMainPanel" Height="28" Width="230">  
 
         <StackPanel x:Name="stpControl" Orientation="Horizontal" Height="27" Width="220" VerticalAlignment="Top">
-            <!--<Label Width="100" x:Name="lblCaption" Content="{Binding Path=Caption, ElementName=UC}"></Label>-->
             <Slider x:Name="slFNumber" Height="24" VerticalAlignment="Top" Margin="0,0" RenderTransform="1.0,0,0,0.5,0,4" 
                     Minimum="{Binding Path=Minimum, Mode=OneWay, ElementName=UC}" 
                     Maximum="{Binding Path=Maximum, Mode=OneWay, ElementName=UC}"
                     Value="{Binding Path=Number, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ElementName=UC}"
                     LostMouseCapture="slFNumber_LostMouseCapture"
-                    
                     >
                 
                 <Slider.Style>
@@ -32,46 +29,14 @@
                     </Style>
                 </Slider.Style>
             </Slider>
-            <TextBox x:Name="tbFNumber" Width="{Binding Path=TextFieldWidth, Mode=OneWay, ElementName=UC}" Height="24" VerticalAlignment="Top" BorderThickness="1" Margin="0,0" Text="{Binding Path=FNumber, ElementName=UC}"
-                GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
+            
+            <TextBox x:Name="tbFNumber" Height="24" VerticalAlignment="Top" BorderThickness="1" Margin="0,0" 
+                    Width="{Binding Path=TextFieldWidth, Mode=OneWay, ElementName=UC}"
+                    Text="{Binding Path=FNumber, ElementName=UC}"
+                    IsReadOnly="{Binding Path=IsReadOnly, ElementName=UC}"
+                    GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
             </TextBox>
             
-            
         </StackPanel>
-
-        <!--<Separator Margin="0,30"></Separator>
-        <Label Margin="0,10">Actual Value</Label>
-        <TextBox x:Name="tbNumber" Text="{Binding Path=Number, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ElementName=UC}">
-        </TextBox>
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Min" Height="28" Width="150" />
-            <TextBox Height="24" Margin="20,0" Name="txtMin" Width="200" Text="{Binding Path=Minimum, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>
-
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Max" Height="28" Width="150" />
-            <TextBox Height="24" Margin="20,0" Name="txtMax" Width="200" Text="{Binding Path=Maximum, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>
-
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Decimal Places" Height="28" Width="150" />
-            <TextBox Height="24" Margin="20,0" Name="txtDec" Width="200" Text="{Binding Path=DecimalPlaces, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>
-
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Range Factor" Height="28" Width="150" />
-            <TextBox Height="24" Margin="20,0" Name="txtRange" Width="200" Text="{Binding Path=RangeFactor, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>
-
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Lower Scientific Notation Threshold" Height="28" Width="200" />
-            <TextBox Height="24" Margin="20,0" Name="txtSNLower" Width="200" Text="{Binding Path=SNLowerThreshold, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>
-
-        <StackPanel Margin="10, 0" Orientation="Horizontal" >
-            <Label Content="Upper Scientific Notation Threshold" Height="28" Width="200" />
-            <TextBox Height="24" Margin="20,0" Name="txtsnUpper" Width="200" Text="{Binding Path=SNUpperThreshold, Mode=OneWay, ElementName=UC}" />
-        </StackPanel>-->
-
     </StackPanel>
 </UserControl>

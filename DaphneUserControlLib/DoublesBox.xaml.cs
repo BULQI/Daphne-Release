@@ -137,6 +137,9 @@ namespace DaphneUserControlLib
 
         private void tbFNumber_GotFocus(object sender, RoutedEventArgs e)
         {
+            if (IsReadOnly)
+                return;
+
             TextBox tb = sender as TextBox;
             tb.Text = Number.ToString();
         }
@@ -360,6 +363,31 @@ namespace DaphneUserControlLib
             // insert your code here
             DoublesBox uc = d as DoublesBox;
             uc.TextFieldWidth = (int)(e.NewValue);
+        }
+
+        //ISREADONLY          
+        public static DependencyProperty IsReadOnlyProperty = DependencyProperty.Register("IsReadOnly", typeof(bool), typeof(DoublesBox), new FrameworkPropertyMetadata(false, IsReadOnlyPropertyChanged));
+        public bool IsReadOnly
+        {
+            get { return (bool)GetValue(IsReadOnlyProperty); }
+            set
+            {
+                SetValue(IsReadOnlyProperty, value);
+                stpControl.Width = 220;
+                stpMainPanel.Width = 230;
+                if (value == false)
+                {
+                    stpControl.Width = 110;
+                    stpMainPanel.Width = 120;
+                }
+                OnPropertyChanged("IsReadOnly");
+            }
+        }
+        private static void IsReadOnlyPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.IsReadOnly = (bool)(e.NewValue);
         }
     }
 }

@@ -2750,8 +2750,6 @@ namespace DaphneGui
                 MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
-
-
     }      
     
      

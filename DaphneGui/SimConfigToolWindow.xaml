@@ -11,9 +11,6 @@
                     ImageSource="Images/Properties16.png"
                     >
     
-    <!-- xmlns:daph="clr-namespace:Daphne"-->
-
-    
     <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged">
         <TabControl.Resources >
             <!-- For changing color of alternating rows of ListBox -->
@@ -3482,8 +3479,6 @@
                                     <GridView>
                                         <GridView.ColumnHeaderContainerStyle>
                                             <Style TargetType="GridViewColumnHeader">
-                                                <!--<Setter Property="BorderThickness" Value="1"></Setter>
-                                                    <Setter Property="BorderBrush" Value="Green"></Setter>-->
                                                 <Setter Property="Height" Value="Auto"></Setter>
                                                 <Setter Property="Background">
                                                     <Setter.Value>
@@ -3496,43 +3491,34 @@
                                             </Style>
                                         </GridView.ColumnHeaderContainerStyle>
 
-                                        <GridViewColumn x:Name="colRate" Width="80" Header="Rate constant">
+                                        <GridViewColumn x:Name="colRate" Width="120" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <!--<TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}"> 
-                                                            <TextBlock.Style>
-                                                                <Style>
-                                                                    <Setter Property="TextBlock.Foreground" 
-                                                                            Value="Black">
-                                                                    </Setter>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                    </TextBlock>-->
-                                                    <!--<TextBox Text="{Binding rate_const, StringFormat={}{0:#.00}}">-->
-                                                    <TextBox Width="{Binding ElementName=colRate, Path=Width}">
-                                                        <TextBox.Text>
-                                                            <!--<Binding Path="daph_rate_const.Value" Mode="TwoWay" UpdateSourceTrigger="LostFocus" Converter="{StaticResource DoubleToFormattedStringConv}">-->
-                                                            <Binding Path="rate_const" Mode="TwoWay" UpdateSourceTrigger="LostFocus" >
-                                                                    <Binding.ConverterParameter>
-                                                                    <FrameworkElement DataContext="{TemplateBinding DataContext}" />
-                                                                </Binding.ConverterParameter>
-                                                            </Binding>
-                                                        </TextBox.Text>
-                                                        <TextBox.Style>
-                                                            <Style>                                                                
-                                                                <Setter Property="TextBox.Foreground" Value="Black"> </Setter>
-                                                                <!--<Setter Property="TextBox.Text" Value="{Binding Path=rate_const}"></Setter>-->
+                                                <DataTemplate>                                                                                                  
+                                                    <uc:DoublesBox  Margin="-10,0" Width="{Binding ElementName=colRate, Path=Width}"
+                                                                    Number="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                    DecimalPlaces="2" 
+                                                                    RangeFactor="2"
+                                                                    SNLowerThreshold="0.001"
+                                                                    SNUpperThreshold="1000"
+                                                                    SliderEnabled="False" 
+                                                                   >
+
+                                                        <uc:DoublesBox.Style>
+                                                            <Style>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                        <Setter Property="TextBox.IsReadOnly" Value="True" />
+                                                                        <Setter Property="uc:DoublesBox.IsReadOnly" Value="True" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                        <Setter Property="TextBox.IsReadOnly" Value="False" />
+                                                                        <Setter Property="uc:DoublesBox.IsReadOnly" Value="False" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </TextBox.Style>
-                                                    </TextBox>
+                                                        </uc:DoublesBox.Style>
+
+
+                                                    </uc:DoublesBox>
+                                                    
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -3786,74 +3772,62 @@
 
                                         <!-- Cell Molecular Populations -->
                                         <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
+                                            <StackPanel>
+                                                
+                                                <TabControl x:Name="tcMembMolPops">
 
-                                                <!-- Membrane Mol Pops -->
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,4,0,0" >
-                                                    </TextBlock>
-                                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="230"
+                                                    <!-- Membrane Mol Pops -->
+                                                    <TabItem >
+                                                        <TabItem.Header>
+                                                            <TextBlock Text="Membrane" FontWeight="Bold" />
+                                                        </TabItem.Header>
+
+                                                        
+                                                        <StackPanel Orientation="Vertical">
+                                                            <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                                 ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}" 
                                                                 DisplayMemberPath="Name"
                                                                 SelectedIndex="0" 
                                                                      SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"/>
 
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
-                                                        <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click"/>
-                                                    </StackPanel>
-                                                </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
+                                                                <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click"/>
+                                                            </StackPanel>
+                                                            <!-- Membrane Mol Pop Details-->
+                                                            <ContentControl Name="MembMolPopDetails"
+                                                                        Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
+                                                                        ContentTemplate="{StaticResource membraneMolPopDetailsTemplate}" 
+                                                                        Margin="6"/>
+                                                        </StackPanel>
+                                                    </TabItem>
 
-                                                <!-- Cytosol Mol Pops -->
-                                                <StackPanel Orientation="Vertical" >
-                                                    <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,4,0,0" ></TextBlock>
-                                                    <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="230"
+                                                    <!-- Cytosol Mol Pops -->
+                                                    <TabItem >
+                                                        <TabItem.Header>
+                                                            <TextBlock Text="Cytosol" FontWeight="Bold" />
+                                                        </TabItem.Header>
+
+                                                        <StackPanel Orientation="Vertical" >
+                                                            <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                                     ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
                                                                     DisplayMemberPath="Name"                                                    
                                                                     SelectedIndex="-1"
                                                                      SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"/>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
-                                                        <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
-                                                    </StackPanel>
-                                                </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
+                                                                <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
+                                                            </StackPanel>
+                                                            <!-- Cytosol Mol Pop Details-->
+                                                            <ContentControl Name="CytoMolPopDetails"
+                                                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"    
+                                                                            ContentTemplate="{StaticResource cytosolMolPopDetailsTemplate}"
+                                                                        Margin="6">
+                                                            </ContentControl>
 
-                                            </StackPanel>
-
-                                            <!-- Cell Mol Pop Details -->
-                                            <StackPanel>
-
-                                                <Expander ExpandDirection="Down"
-                                                          IsExpanded="False"
-                                                          Header="Membrane Molecular Population Details"
-                                                          x:Name="MembraneMolPopDetailsExpander"
-                                                          Margin="0,0,0,0" 
-                                                          Canvas.ZIndex="1"
-                                                          >
-                                                    <StackPanel Orientation="Vertical">
-                                                        <ContentControl Name="MembMolPopDetails"
-                                                                    Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
-                                                                    ContentTemplate="{StaticResource membraneMolPopDetailsTemplate}" 
-                                                                    Margin="6"/>
-                                                    </StackPanel>
-                                                </Expander>
-                                                <Expander ExpandDirection="Down"
-                                                          IsExpanded="False"
-                                                          Header="Cytosol Molecular Population Details"
-                                                          x:Name="CytosolMolPopDetailsExpander"
-                                                          Margin="0,0,0,0" 
-                                                          Canvas.ZIndex="1"
-                                                          >
-                                                    <StackPanel Orientation="Vertical">
-                                                        <ContentControl Name="CytoMolPopDetails"
-                                                                    Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"    
-                                                                        ContentTemplate="{StaticResource cytosolMolPopDetailsTemplate}"
-                                                                    Margin="6">
-                                                        </ContentControl>
-
-                                                    </StackPanel>
-
-                                                </Expander>
+                                                        </StackPanel>
+                                                    </TabItem>
+                                                </TabControl>
                                             </StackPanel>
 
                                         </StackPanel>
