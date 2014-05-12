@@ -164,6 +164,7 @@ namespace Daphne
             if (ecm_mean_file != null)
             {
                 ecm_mean_file.Close();
+                ecm_mean_file = null;
             }
         }
 
