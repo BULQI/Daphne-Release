@@ -149,7 +149,6 @@ namespace DaphneGui
                         mpg.gaussgrad_gauss_spec_guid_ref = "";
                         MainWindow.GC.Rwc.Invalidate();
                     }
-                    }
                 }
                 switch (new_dist_type)
                 {
