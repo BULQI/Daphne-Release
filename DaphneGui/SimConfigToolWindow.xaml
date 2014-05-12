@@ -2707,10 +2707,10 @@
                             <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
                                 <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
                                 <TextBox x:Name="txtCxName" Width="150" HorizontalAlignment="Left" Text="{Binding Path=Name}" ></TextBox>
-                                <Button x:Name="btnEditComplex" Width="50" Click="btnEditComplex_Click">Edit</Button>
-                                <Button x:Name="btnCopyComplex" Width="50" Click="btnCopyComplex_Click">Copy</Button>
-                                <Button x:Name="btnAddComplex" Width="50" Click="btnAddComplex_Click">New</Button>
-                                <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveComplex_Click">Remove</Button>
+                                <Button x:Name="btnEditComplex" Width="50" Click="btnEditReactionComplex_Click">Edit</Button>
+                                <Button x:Name="btnCopyComplex" Width="50" Click="btnCopyReactionComplex_Click">Copy</Button>
+                                <Button x:Name="btnAddComplex" Width="50" Click="btnAddReactionComplex_Click">New</Button>
+                                <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveReactionComplex_Click">Remove</Button>
                             </StackPanel>
 
                             <!-- List of Reactions in selected Reaction Complex -->
@@ -2783,7 +2783,7 @@
                                         </GridView>
                                     </ListView.View>
                                 </ListView>
-                                <Button x:Name="btnGraphComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphComplex_Click">Run Reaction Complex</Button>
+                                <Button x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphReactionComplex_Click">Run Reaction Complex</Button>
                             </StackPanel>
                         </StackPanel>
                     </Expander>
@@ -2809,7 +2809,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="CopyCellButton"  Width="50" Content="Copy" Click="CopyCellButton_Click" />
                                 <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click_1"/>
-                                <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click_1" />
+                                <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
                             </StackPanel>
 
                             <Expander ExpandDirection="Down" Padding="6"
@@ -3893,7 +3893,7 @@
                             </StackPanel>
                     
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveReacCompButton_Click" />
+                                <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
                             </StackPanel>
 
 
@@ -3999,7 +3999,7 @@
                                         >
                                     </ListBox>
                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                        <Button Name="AddReacCxButton"  Width="50" Content="Add" Click="AddEcsReacCompButton_Click"/>
+                                        <Button Name="AddReacCxButton"  Width="50" Content="Add" Click="AddEcmReacCompButton_Click"/>
                                     </StackPanel>
 
                                     <ContentControl Name="AddReactionComplexDetails"

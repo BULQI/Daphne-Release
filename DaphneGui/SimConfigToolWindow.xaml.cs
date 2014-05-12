@@ -63,6 +63,12 @@ namespace DaphneGui
         {
             int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
+
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you would like to remove this cell population?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+                       
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
 
             CellPopsListBox.SelectedIndex = index;
@@ -728,7 +734,7 @@ namespace DaphneGui
             }
         }
 
-        private void AddEcsReacCompButton_Click(object sender, RoutedEventArgs e)
+        private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
             if (crc != null)
@@ -740,11 +746,11 @@ namespace DaphneGui
             }
         }
 
-        private void RemoveReacCompButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = ReactionComplexListBox.SelectedIndex;
             if (nIndex >= 0)
-            {
+            {                
                 string guid = (string)ReactionComplexListBox.SelectedValue;
                 MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Remove(guid);
             }
@@ -752,7 +758,7 @@ namespace DaphneGui
 
         //LIBRARIES REACTION COMPLEXES HANDLERS
 
-        private void btnCopyComplex_Click(object sender, RoutedEventArgs e)
+        private void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             if (lbComplexes.SelectedIndex < 0)
             {
@@ -774,15 +780,14 @@ namespace DaphneGui
 
         }
 
-        //Reaction Complexes/Differentiation Schemes tab
-        private void btnAddComplex_Click(object sender, RoutedEventArgs e)
+        private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
             if (arc.ShowDialog() == true)
                 lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
 
-        private void btnEditComplex_Click(object sender, RoutedEventArgs e)
+        private void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
             if (crc == null)
@@ -799,13 +804,18 @@ namespace DaphneGui
             }
         }
 
-        private void btnRemoveComplex_Click(object sender, RoutedEventArgs e)
+        private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
             if (crc != null)
             {
                 if (crc.ReadOnly == false)
                 {
+                    MessageBoxResult res;
+                    res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
+                    if (res == MessageBoxResult.No)
+                        return;
+
                     int index = lbComplexes.SelectedIndex;
                     MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Remove(crc);
 
@@ -819,12 +829,12 @@ namespace DaphneGui
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined reaction complex.");
+                    MessageBox.Show("Cannot remove a predefined reaction complex.");
                 }
             }
         }
 
-        private void btnGraphComplex_Click(object sender, RoutedEventArgs e)
+        private void btnGraphReactionComplex_Click(object sender, RoutedEventArgs e)
         {
 
             if (lbComplexes.SelectedIndex < 0)
@@ -878,6 +888,7 @@ namespace DaphneGui
 
             MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
         }
+
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -2016,7 +2027,7 @@ namespace DaphneGui
             cbi.IsEnabled = false;
         }
 
-        private void RemoveCellButton_Click_1(object sender, RoutedEventArgs e)
+        private void RemoveCellButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = CellsListBox.SelectedIndex;
             
