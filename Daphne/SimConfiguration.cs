@@ -1242,6 +1242,19 @@ namespace Daphne
             ReadOnly = gm.ReadOnly;
             molecule_location = gm.molecule_location;
         }
+
+        public ConfigMolecule Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
+            Guid id = Guid.NewGuid();
+            newmol.molecule_guid = id.ToString();
+            newmol.ReadOnly = false;
+            return newmol;
+        }
     }
 
     public enum ExtendedReport { NONE, LEAN, COMPLETE };
@@ -1753,10 +1766,7 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "c:\\temp\\tempcell.json";
-            File.WriteAllText(jsonFile, jsonSpec);
-            string readText = File.ReadAllText(jsonFile);
-            ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(readText, Settings);
+            ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
             newcell.cell_guid = id.ToString();
             newcell.ReadOnly = false;

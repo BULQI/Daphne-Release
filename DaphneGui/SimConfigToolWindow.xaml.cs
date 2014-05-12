@@ -706,8 +706,15 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
-            arc.ShowDialog();
+            if (crc.ReadOnly == false)
+            {
+                AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
+                arc.ShowDialog();
+            }
+            else
+            {
+                System.Windows.Forms.MessageBox.Show("Cannot edit a predefined reaction complex.");
+            }
         }
 
         private void btnRemoveComplex_Click(object sender, RoutedEventArgs e)
@@ -838,9 +845,9 @@ namespace DaphneGui
             if (cm == null)
                 return;
 
-            ConfigMolecule gm = new ConfigMolecule(cm);
-            gm.ReadOnly = false;
-            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
+            //ConfigMolecule gm = new ConfigMolecule(cm);
+            ConfigMolecule newmol = cm.Clone() ;
+            MainWindow.SC.SimConfig.entity_repository.molecules.Add(newmol);
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
