@@ -40,6 +40,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Daphne, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\Daphne.dll</HintPath>
+    </Reference>
+    <Reference Include="ManifoldRing, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
+    </Reference>
     <Reference Include="MathNet.Iridium">
       <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
@@ -106,16 +114,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Daphne\Daphne.csproj">
-      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
-      <Name>Daphne</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ManifoldRing\ManifoldRing.csproj">
-      <Project>{621278E2-936D-4F67-B2B2-B4E2705DE5BA}</Project>
-      <Name>ManifoldRing</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

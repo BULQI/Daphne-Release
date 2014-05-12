@@ -41,6 +41,10 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ManifoldRing, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\dependencies\ManifoldRing.dll</HintPath>
+    </Reference>
     <Reference Include="MathNet.Iridium">
       <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
@@ -69,12 +73,6 @@
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ManifoldRing\ManifoldRing.csproj">
-      <Project>{621278E2-936D-4F67-B2B2-B4E2705DE5BA}</Project>
-      <Name>ManifoldRing</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
