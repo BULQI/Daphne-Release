@@ -38,7 +38,7 @@ namespace DaphneGui
         public static string appPath;
 
         private DocWindow dw;
-        private Thread simThread;
+        //private Thread simThread;
         private VCRControl vcrControl;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
@@ -73,7 +73,7 @@ namespace DaphneGui
         }
         private Process devHelpProc;
         private static SimConfigurator configurator = null;
-        private static int repetition;
+        //private static int repetition;
 
         /// <summary>
         /// uri for the scenario file
@@ -156,10 +156,10 @@ namespace DaphneGui
         /// <summary>
         /// retrieve the repetition number
         /// </summary>
-        public static int Repetition
-        {
-            get { return repetition; }
-        }
+        //////////public static int Repetition
+        //////////{
+        //////////    get { return repetition; }
+        //////////}
 
         /// <summary>
         /// utility to query whether we are running a profiling session; need to enable the RUNNING_PROFILER flag and recompile

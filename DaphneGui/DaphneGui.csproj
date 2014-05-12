@@ -128,7 +128,6 @@
     </Compile>
     <Compile Include="SimConfiguration.cs" />
     <Compile Include="TextSearchFilter.cs" />
-    <Compile Include="Utilities.cs" />
     <Compile Include="VCRControl.cs" />
     <Compile Include="Workbench\ReactionComplexSimulation.cs" />
     <Page Include="DocWindow.xaml">
