@@ -3509,7 +3509,7 @@
                                                                   CenterSlotHorizontalAlignment="Right"
                                                                   Value="{Binding ElementName=sliderGridStep, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                                   />
-
+                                <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
                             </StackPanel>
 
                         </StackPanel>
@@ -4228,13 +4228,14 @@
                                     </Setter>
                                 </Style>
                             </DataGrid.ColumnHeaderStyle>
+
+                            <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv},-->
+                                
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Cell type" >
+                                <DataGridTemplateColumn Header="Cell Population" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv}, 
-                                            ConverterParameter={StaticResource cellTypesListView}, 
-                                           UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                            <TextBlock HorizontalAlignment="Center" Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -4434,16 +4435,15 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                              ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
-                                                        
-                            Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
-                            CanUserReorderColumns="False" CanUserResizeRows="False"
-                            CanUserSortColumns="False" RowHeaderWidth="0"
-                            VerticalContentAlignment="Center"
-                            CanUserAddRows="False"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            >
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                                                                                 
+                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                        CanUserReorderColumns="False" CanUserResizeRows="False"
+                                        CanUserSortColumns="False" RowHeaderWidth="0"
+                                        VerticalContentAlignment="Center"
+                                        CanUserAddRows="False"
+                                        BorderThickness="1"
+                                        BorderBrush="Black"
+                                        >
 
                                         <DataGrid.ColumnHeaderStyle>
                                             <Style TargetType="DataGridColumnHeader" >

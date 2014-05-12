@@ -1004,6 +1004,7 @@ namespace DaphneGui
         private void AddCellButton_Click_1(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
+            cc.ReadOnly = false;
             cc.CellName = "DefaultCell";
             cc.CellRadius = 10;
             cc.TransductionConstant = 0;
