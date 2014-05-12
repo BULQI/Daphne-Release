@@ -224,6 +224,21 @@
                             </ToolTip>
                         </Button.ToolTip>
                     </Button>
+                    <Button Content="Save" HorizontalAlignment="Right" Name="saveButton" 
+                            IsEnabled="{Binding ElementName=runButton, Path=Content, UpdateSourceTrigger=PropertyChanged, Converter={local:PauseButtonTextToBoolConverter}}"
+                            Width="60" ToolTipService.InitialShowDelay="1500"
+                            Margin="0" Click="saveButton_Click">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save simulation State.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
                     <!-- skg experimenting 9/17/12 -->
                     <!-- IsChecked="{Binding HandToolButton_IsChecked}" 
                                                           IsEnabled="{Binding HandToolButton_IsEnabled}"-->

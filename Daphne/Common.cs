@@ -95,6 +95,7 @@ namespace Daphne
             Bind<IFieldInitializer>().To<ConstFieldInitializer>().Named("const");
             Bind<IFieldInitializer>().To<LinearFieldInitializer>().Named("linear");
             Bind<IFieldInitializer>().To<GaussianFieldInitializer>().Named("gauss");
+            Bind<IFieldInitializer>().To<ExplicitFieldInitializer>().Named("explicit"); 
             Bind<ScalarField>().ToSelf();
             Bind<MolecularPopulation>().ToSelf();
             Bind<IFieldInitializerFactory>().ToFactory(() => new CustomInstanceProvider());

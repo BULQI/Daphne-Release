@@ -144,17 +144,10 @@ namespace Daphne
 
             // Apply boundary fluxes
             // The flux is accumulating in Reactions, so we need to zero it after updating the concentration. 
-            // Perhaps, someone can suggest a better way to do so.
-            int[] saveKeys = new int[boundaryFluxes.Count];
-            int cnt = 0;
-            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes.ToList())
             {
                 concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
-                saveKeys[cnt++] = kvp.Key;
-            }
-            for (int i = 0; i < cnt; i++)
-            {
-                BoundaryFluxes[saveKeys[i]] *= 0.0;
+                kvp.Value.reset(); //reset to 0
             }
 
             // Apply Neumann natural boundary conditions

@@ -118,6 +118,9 @@
     <Compile Include="GraphicsController.cs" />
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
+    <Compile Include="SaveSimulation.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
@@ -260,6 +263,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

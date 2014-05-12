@@ -140,6 +140,11 @@ namespace Daphne
 
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
                 }
+                else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                {
+                	MolPopExplicit mpc = (MolPopExplicit)cmp.mpInfo.mp_distribution;
+                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "explicit", mpc.conc);
+                }
                 else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
                     MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
@@ -577,17 +582,24 @@ namespace Daphne
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
 
-                    // set location, keep remaining state variables equal to zero
-                    state[0] = cp.cell_locations[i].X;
-                    state[1] = cp.cell_locations[i].Y;
-                    state[2] = cp.cell_locations[i].Z;
-                    cell.setState(state);
+                    //set location etc, keep remaining state variables equal to zero
+                    cell.setState(cp.cell_list[i].ConfigState);
 
                     simComp[0] = cell.Cytosol;
                     simComp[1] = cell.PlasmaMembrane;
 
+                    //modify molpop information before setting
                     for (int comp = 0; comp < 2; comp++)
                     {
+                        foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
+                        {
+                            //config_comp's distriubution changed. may need to keep 
+                            //it for not customized cell later(?)
+                            if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+                            MolPopExplicit mp_explicit = new MolPopExplicit();
+                            mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
+                            cmp.mpInfo.mp_distribution = mp_explicit;                              
+                        }
                         addCompartmentMolpops(simComp[comp], configComp[comp], sc);
                     }
 

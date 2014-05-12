@@ -44,9 +44,9 @@ namespace DaphneGui
             cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
             cs.cellpopulation_name = "New cell";
             cs.number = 50;
-            CellLocation cl = new CellLocation();
-            cl.X = 0; cl.Y = 0; cl.Z = 0;
-            cs.cell_locations.Add(cl);
+
+            cs.cell_list.Add(new CellState(10, 100, 1000));
+
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.scenario.cellpopulations.Add(cs);
@@ -650,9 +650,7 @@ namespace DaphneGui
             cp.cell_guid_ref = cc.cell_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
-            CellLocation cl = new CellLocation();
-            cl.X = 0; cl.Y = 0; cl.Z = 0;
-            cp.cell_locations.Add(cl);
+            cp.cell_list.Add(new CellState());
             cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
@@ -1218,29 +1216,27 @@ namespace DaphneGui
             if (cp == null)
                 return;
 
-            if (numNew > numOld && numNew > cp.cell_locations.Count)
+            if (numNew > numOld && numNew > cp.cell_list.Count)
             {
                 int rows_to_add = numNew - numOld;
                 for (int i = 0; i < rows_to_add; i++)
                 {
-                    CellLocation cl = new CellLocation();
-                    cl.X = 1; cl.Y = 1; cl.Z = 1;
-                    cp.cell_locations.Add(cl);
+                    cp.cell_list.Add(new CellState());                    
                 }
             }
             else if (numNew < numOld)
             {
-                if (numOld > cp.cell_locations.Count)
-                    numOld = cp.cell_locations.Count;
+                if (numOld > cp.cell_list.Count)
+                    numOld = cp.cell_list.Count;
 
                 int rows_to_delete = numOld - numNew;
 
                 for (int i = rows_to_delete; i > 0; i--)
                 {
-                    cp.cell_locations.RemoveAt(numNew + i - 1);
+                    cp.cell_list.RemoveAt(numNew + i - 1);
                 }
             }
-            cp.number = cp.cell_locations.Count;
+            cp.number = cp.cell_list.Count;
 
         }
 
@@ -1268,14 +1264,13 @@ namespace DaphneGui
                 char[] delim = { '\t', '\r', '\n' };
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-                cp.cell_locations.Clear();
+                cp.cell_list.Clear();
                 for (int i = 0; i < paste.Length; i += 3)
                 {
-                    CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
-                    cp.cell_locations.Add(cl);
+                    cp.cell_list.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
 
-                cp.number = cp.cell_locations.Count;
+                cp.number = cp.cell_list.Count;
 
             }
 
@@ -1346,7 +1341,7 @@ namespace DaphneGui
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
                 return;
-            cp.number = cp.cell_locations.Count;
+            cp.number = cp.cell_list.Count;
         }
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)

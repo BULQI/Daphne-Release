@@ -196,6 +196,49 @@ namespace ManifoldRing
     }
 
     /// <summary>
+    /// field initialization for explicit valus
+    /// </summary>
+    public class ExplicitFieldInitializer : IFieldInitializer
+    {
+        private bool initialized;
+        double[] exp_vals;
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public ExplicitFieldInitializer()
+        {
+            initialized = false;
+        }
+
+        /// <summary>
+        /// set the constant value
+        /// </summary>
+        /// <param name="parameters">array with one constant value</param>
+        public void setParameters(double[] parameters)
+        {
+            exp_vals = new double[parameters.Length];
+            Array.Copy(parameters, exp_vals, parameters.Length);
+            initialized = true;
+        }
+        /// <summary>
+        /// initialization routine
+        /// </summary>
+        /// <param name="point">point parameter</param>
+        /// <returns>constant value regardless of point</returns>
+        public double initialize(double[] point)
+        {
+
+            if (initialized == false)
+            {
+                throw new Exception("Must call setParameters prior to using FieldInitializer.");
+            }
+            return exp_vals[(int)point[0]];
+        }
+    }
+
+
+    /// <summary>
     /// initializer factory
     /// </summary>
     public interface IFieldInitializerFactory
@@ -211,7 +254,9 @@ namespace ManifoldRing
         internal double[] array;
         private readonly Manifold m;
         private IFieldInitializer init;
+
         private IFieldInitializerFactory factory;
+
         /// <summary>
         /// underlying manifold
         /// </summary>
@@ -241,6 +286,7 @@ namespace ManifoldRing
 
             init = factory.Initialize(type);
             init.setParameters(parameters);
+
             if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
             {
                 for (int i = 0; i < m.ArraySize; i++)
@@ -256,10 +302,53 @@ namespace ManifoldRing
                     // initialize the zero-th moment for ME fields; leave gradient equal to zero
                     array[0] = init.initialize();
                 }
+                else if (init.GetType() == typeof(ExplicitFieldInitializer))
+                {
+                    for (int i = 0; i < m.ArraySize; i++)
+                    {
+                        array[i] = init.initialize(new double[] { i });
+                    }
+                }
                 else
                 {
                     throw new Exception("Currently only the constant initializer is supported for ME fields.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// initialize fields when no factory exists.
+        /// </summary>
+        /// <param name="init">initializer object</param>
+        public void reset(double[] vals = null)
+        {
+            if (factory != null)
+            {
+                throw new Exception("this needs to be Initialized through factory.");
+            }
+            if (vals == null)
+            {
+                for (int i = 0; i < array.Length; i++) array[i] = 0;
+            }
+            else
+            {
+                if (vals.Length < array.Length)
+                {
+                    throw new Exception("array length too short");
+                }
+                Array.Copy(vals, array, array.Length);
+            }
+        }
+
+        /// <summary>
+        /// allow accesss to array from outside of assesmbly
+        /// </summary>
+        /// <returns></returns>
+        public double[] ValueArray
+        {
+            get
+            {
+                return array;
             }
         }
 

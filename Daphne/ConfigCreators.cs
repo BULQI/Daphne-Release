@@ -98,11 +98,8 @@ namespace Daphne
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cp.cell_guid_ref = gc.cell_guid;
-            CellLocation cl = new CellLocation();
-            cl.X = sc.scenario.environment.extent_x / 2.0;
-            cl.Y = sc.scenario.environment.extent_y / 2.0;
-            cl.Z = sc.scenario.environment.extent_z / 2.0;
-            cp.cell_locations.Add(cl);
+
+            cp.cell_list.Add(new CellState(10, 100, 1000));
             // Cell reporting
             cp.report_xvf.position = false;
             cp.report_xvf.velocity = false;
@@ -226,11 +223,11 @@ namespace Daphne
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cp.cell_guid_ref = gc.cell_guid;
-            CellLocation cl = new CellLocation();
-            cl.X = sc.scenario.environment.extent_x / (5/4);
-            cl.Y = sc.scenario.environment.extent_y / 2;
-            cl.Z = sc.scenario.environment.extent_z / 2;
-            cp.cell_locations.Add(cl);
+
+
+            cp.cell_list.Add(new CellState(400, 250, 250));
+
+
 
             foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
             {

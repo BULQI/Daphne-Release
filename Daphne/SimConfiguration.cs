@@ -1812,21 +1812,74 @@ namespace Daphne
         }
     }
 
-    public class CellLocation
+    public class CellState
     {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
 
-        public CellLocation()
+        //for cell's sate X V F location
+        [JsonProperty]
+        internal double[] ConfigState { get; set; }
+
+
+        [JsonIgnore]
+        public double X 
         {
+            get { return ConfigState[0]; }
+            set { ConfigState[0] = value; }
         }
 
-        public CellLocation(double x, double y, double z)
+        [JsonIgnore]
+        public double Y 
         {
-            X = x;
-            Y = y;
-            Z = z;
+            get { return ConfigState[1]; }
+            set { ConfigState[1] = value; }
+        }
+
+        [JsonIgnore]
+        public double Z 
+        {
+            get { return ConfigState[2]; }
+            set { ConfigState[2] = value; }
+        }
+
+        public CellState()
+        {
+            ConfigState = new double[] { 1, 1, 1, 0, 0, 0, 0, 0, 0 };
+        }
+        public CellState(double x, double y, double z)
+        {
+            ConfigState = new double[]{ x, y, z, 0,0,0,0,0,0 };
+        }
+
+
+        //map conctration info into molpop info.
+        public Dictionary<string, double[]> configMolPop = new Dictionary<string, double[]>();
+        public void setState(SpatialState state)
+        {
+            List<double> tmp = new List<double>(9);
+            tmp.AddRange(state.X);
+            tmp.AddRange(state.V);
+            tmp.AddRange(state.F);
+            this.ConfigState = tmp.ToArray();
+        }
+
+        public void addMolPopulation(string key, MolecularPopulation mp)
+        {
+            if (mp.BoundaryConcs == null || mp.BoundaryConcs.Count == 0)
+            {
+                configMolPop.Add(key, mp.Conc.ValueArray);
+                return;
+            }
+            //save cells boundaryconc & boundaryflux
+            int arr_len = mp.Conc.ValueArray.Length + mp.BoundaryConcs.First().Value.ValueArray.Length + 
+                mp.BoundaryFluxes.First().Value.ValueArray.Length;
+            double[] val = new double[arr_len];
+            Array.Copy(mp.Conc.ValueArray, val, mp.Conc.ValueArray.Length);
+            int dst_index = mp.Conc.ValueArray.Length;
+            int copy_len = mp.BoundaryConcs.First().Value.ValueArray.Length;
+            Array.Copy(mp.BoundaryConcs.First().Value.ValueArray, 0, val, dst_index, copy_len);
+            dst_index += copy_len;
+            Array.Copy(mp.BoundaryFluxes.First().Value.ValueArray, 0, val, dst_index, copy_len);
+            configMolPop.Add(key, val);
         }
     }
 
@@ -1911,15 +1964,15 @@ namespace Daphne
         public System.Windows.Media.Color cellpopulation_color { get; set; }
         public CellPopDistribution cellPopDist { get; set; }
 
-        private ObservableCollection<CellLocation> _cell_locations;
-        public ObservableCollection<CellLocation> cell_locations
+        private ObservableCollection<CellState> _cell_list;
+        public ObservableCollection<CellState> cell_list
         {
-            get { return _cell_locations; }
+            get { return _cell_list; }
             set
             {
-                _cell_locations = value;
-                number = _cell_locations.Count;
-                //OnPropertyChanged("cell_locations");
+                _cell_list = value;
+                number = value == null ? 0 : _cell_list.Count;
+                //OnPropertyChanged("cell_list");
             }
         } 
 
@@ -1974,7 +2027,7 @@ namespace Daphne
             CellPopDistTypes = new ObservableCollection<CellPopDistType>();
             InitDistTypes();
 
-            cell_locations = new ObservableCollection<CellLocation>();
+            cell_list = new ObservableCollection<CellState>();
 
             // reporting
             reportXVF = new ReportXVF();
@@ -2199,7 +2252,7 @@ namespace Daphne
     /// Converter to go between molecule GUID references in MolPops
     /// and molecule names kept in the repository of molecules.
     /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
+    [ValueConversion(typeof(string), typeof(ObservableCollection<ConfigMolecularPopulation>))]
     public class CellGUIDtoCellNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2402,7 +2455,7 @@ namespace Daphne
         }
     }
 
-    public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Custom }
+    public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Custom, Explicit }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -2417,7 +2470,8 @@ namespace Daphne
                                     "Homogeneous",
                                     "Linear",
                                     "Gaussian",
-                                    "Custom"
+                                    "Custom",
+                                    "Explicit",
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2506,6 +2560,19 @@ namespace Daphne
             peak_concentration = 100.0;
             gaussgrad_gauss_spec_guid_ref = "";
         }
+    }
+
+    /// <summary>
+    /// added to store intermediate run state
+    /// </summary>
+    public class MolPopExplicit : MolPopDistribution
+    {
+        public MolPopExplicit()
+        {
+            mp_distribution_type = MolPopDistributionType.Explicit;
+        }
+
+        public double[] conc;
     }
 
     public class MolPopCustom : MolPopDistribution

@@ -40,6 +40,19 @@ namespace Daphne
             MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("comp", this));
 
             mp.Conc.Initialize(type, parameters);
+            if (type == "explicit" && parameters.Length > mp.Conc.ValueArray.Length)
+            {
+                //reset boundary conc and flux, only for cell and only one boundary per molpop
+                int src_index = mp.Conc.ValueArray.Length;
+                int arr_len = mp.BoundaryConcs.First().Value.ValueArray.Length;
+                double[] newvals = new double[arr_len];
+                Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                mp.BoundaryConcs.First().Value.reset(newvals);
+                src_index += arr_len;
+                Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                mp.BoundaryFluxes.First().Value.reset(newvals);
+            }
+
             if (Populations.ContainsKey(moleculeKey) == false)
             {
                 Populations.Add(moleculeKey, mp);

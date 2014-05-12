@@ -1234,6 +1234,16 @@ namespace DaphneGui
             runSim();
         }
 
+        /// <summary>
+        /// save when simulation is paused state
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            save_simululation_state();
+        }
+
         private void BlueHandToolButton_Click(object sender, RoutedEventArgs e)
         {
             blueHandToolButton_IsChecked = !blueHandToolButton_IsChecked;
@@ -1349,6 +1359,11 @@ namespace DaphneGui
         public static void GUIInteractionToWidgetCallback(object sender, PropertyChangedEventArgs e)
         {
             BoxSpecification box = (BoxSpecification)sender;
+
+            if (box == null)
+            {
+                return;
+            }
 
             if (box == null)
             {
@@ -1545,6 +1560,7 @@ namespace DaphneGui
 #if LANGEVIN_TIMING
             gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
 #endif
+
             loadSuccess = true;
         }
 
