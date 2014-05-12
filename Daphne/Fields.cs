@@ -9,6 +9,57 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Daphne
 {
+    public interface IFieldInitializer
+    {
+        double initialize(double[] point);
+    }
+
+    public class ConstFieldInitializer : IFieldInitializer
+    {
+        private double cVal;
+
+        public ConstFieldInitializer(double c)
+        {
+            cVal = c;
+        }
+
+        public double initialize(double[] point)
+        {
+            return cVal;
+        }
+    }
+
+    public class GaussianFieldInitializer : IFieldInitializer
+    {
+        private double[] center;
+        private double[] sigma;
+        private double max;
+
+        public GaussianFieldInitializer(double[] center, double[] sigma, double max)
+        {
+            this.center = center;
+            this.sigma = sigma;
+            this.max = max;
+        }
+
+        public double initialize(double[] point)
+        {
+            if (point.Length != center.Length || point.Length != sigma.Length)
+            {
+                throw new Exception("Exception initializing Gaussian field, array length mismatch.");
+            }
+
+            double f = 0, d = 1.0;
+            // double d = Math.Pow(2.0 * Math.PI, 1.5) * sigma[0] * sigma[1] * sigma[2];
+
+            for (int i = 0; i < point.Length; i++)
+            {
+                f += (center[i] - point[i]) * (center[i] - point[i]) / (2 * sigma[i] * sigma[i]);
+            }
+            return max * Math.Exp(-f) / d;
+        }
+    }
+
     public abstract class ScalarField
     {
         public Manifold M { get { return m; } }
@@ -90,11 +141,17 @@ namespace Daphne
             array = new double[m.ArraySize];
         }
 
-        public DiscreteScalarField(Manifold m, double c): this(m)
+        public DiscreteScalarField(Manifold m, IFieldInitializer init): this(m)
         {
+            double[] point = new double[m.Dim];
+
             for (int i = 0; i < m.ArraySize; i++)
             {
-                array[i] = c;
+                for(int j = 0; j < m.Dim; j++)
+                {
+                    point[j] = m.Coordinates[i, j];
+                }
+                array[i] = init.initialize(point);
             }
         }
 
@@ -259,7 +316,7 @@ namespace Daphne
         {
         }
 
-        public MomentExpansionScalarField(Manifold m, double c) : this(m)
+        public MomentExpansionScalarField(Manifold m, IFieldInitializer init) : this(m)
         {
         }
 
@@ -357,40 +414,6 @@ namespace Daphne
         }
     }
 
-    public class GaussianScalarField : DiscreteScalarField
-    {
-        public GaussianScalarField(Manifold m) : base(m)
-        {
-        }
-
-        /// <summary>
-        /// Calculate and return values of a Gaussian scalar field at each array point in the manifold
-        /// The value at the center is max
-        /// </summary>
-        public bool Initialize(double[] x0, double[] sigma, double max)
-        {
-            if (m.Dim != x0.Length || m.Dim != sigma.Length)
-            {
-                return false;
-            }
-
-            double f = 0, d = 1.0;
-            // double d = Math.Pow(2.0 * Math.PI, 1.5) * sigma[0] * sigma[1] * sigma[2];
-
-            for (int i = 0; i < m.ArraySize; i++)
-            {
-                f = 0;
-                for (int j = 0; j < m.Dim; j++)
-                {
-                    f += (x0[j] - m.Coordinates[i, j]) * (x0[j] - m.Coordinates[i, j]) / (2 * sigma[j] * sigma[j]);
-                }
-                array[i] = max * Math.Exp(-f) / d;
-            }
-            return true;
-        }
-
-    }
-
     public class VectorField
     {
         private double[][] vector;
@@ -479,7 +502,7 @@ namespace Daphne
                 throw new Exception("Field manifolds and dimensions must be identical for vector field dot product.");
             }
 
-            DiscreteScalarField product = new DiscreteScalarField(f1.m, 0);
+            DiscreteScalarField product = new DiscreteScalarField(f1.m);
 
             for (int i = 0; i < f1.m.ArraySize; i++)
             {

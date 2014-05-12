@@ -20,16 +20,11 @@ namespace Daphne
             rtList = new List<ReactionTemplate>();
         }
 
-        public void AddMolecularPopulation(MolecularPopulation molpop)
-        {
-            Populations.Add(molpop.Molecule.Name, molpop);
-        }
-
         // gmk
         public void AddMolecularPopulation(Molecule mol, double initConc)
         {
-            ScalarField s = new DiscreteScalarField(Interior, initConc);
-            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, s);
+            ScalarField s = new DiscreteScalarField(Interior, new ConstFieldInitializer(initConc));
+            MolecularPopulation molpop = new MolecularPopulation(mol, s, null);
 
             Populations.Add(molpop.Molecule.Name, molpop);
         }
@@ -37,7 +32,7 @@ namespace Daphne
         public void AddMolecularPopulation(Molecule mol, ScalarField initConc)
         {
             // Add the molecular population with concentration specified with initConc
-            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, initConc);
+            MolecularPopulation molpop = new MolecularPopulation(mol, initConc, null);
 
             Populations.Add(molpop.Molecule.Name, molpop);
         }
@@ -45,7 +40,9 @@ namespace Daphne
         public void AddMolecularPopulation(Molecule mol, double initConc, double[] initGrad)
         {
             // Add the molecular population with concentration specified with initConc
-            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, new DiscreteScalarField(Interior, initConc), new VectorField(Interior, initGrad));
+            ScalarField s = new DiscreteScalarField(Interior, new ConstFieldInitializer(initConc));
+            VectorField v = new VectorField(Interior, initGrad);
+            MolecularPopulation molpop = new MolecularPopulation(mol, s, v);
 
             Populations.Add(molpop.Molecule.Name, molpop);
         }

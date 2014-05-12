@@ -495,8 +495,6 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            GaussianScalarField gsf = new GaussianScalarField(sim.ECS.Interior);
 
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
@@ -512,7 +510,8 @@ namespace testDaphne
             center[1] = sim.ECS.Interior.Extents[1] / 2.0;
             center[2] = sim.ECS.Interior.Extents[2] / 2.0;
 
-            gsf.Initialize(center, sigma, maxConc);
+            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            ScalarField gsf = new DiscreteScalarField(sim.ECS.Interior, new GaussianFieldInitializer(center, sigma, maxConc));
 
             sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], gsf);
             //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
@@ -638,9 +637,6 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            GaussianScalarField gsf = new GaussianScalarField(sim.ECS.Interior);
-
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
@@ -655,7 +651,8 @@ namespace testDaphne
             center[1] = sim.ECS.Interior.Extents[1] / 2.0;
             center[2] = sim.ECS.Interior.Extents[2] / 2.0;
 
-            gsf.Initialize(center, sigma, maxConc);
+            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            ScalarField gsf = new DiscreteScalarField(sim.ECS.Interior, new GaussianFieldInitializer(center, sigma, maxConc));
 
             sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], gsf);
             //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
@@ -735,9 +732,6 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            GaussianScalarField gsf = new GaussianScalarField(sim.ECS.Interior);
-
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
@@ -752,7 +746,8 @@ namespace testDaphne
             center[1] = sim.ECS.Interior.Extents[1] / 2.0;
             center[2] = sim.ECS.Interior.Extents[2] / 2.0;
 
-            gsf.Initialize(center, sigma, maxConc);
+            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            ScalarField gsf = new DiscreteScalarField(sim.ECS.Interior, new GaussianFieldInitializer(center, sigma, maxConc));
 
             sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], gsf);
         }

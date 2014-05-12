@@ -6,14 +6,12 @@ using System.Diagnostics;
 
 namespace Interface
 {
-
     /* Interfaces */
 
     public interface IDynamic
     {
         void step(double dt);
     }
-
 
     public interface IEmbedding
     {
@@ -25,6 +23,11 @@ namespace Interface
         string name { get; }
 	    double molecularWeight { get; }
 	    double stokesRadius { get; }
+    }
+
+    public interface IFieldInitializer
+    {
+        double initialize(double[] point);
     }
 
     /* Manifolds */
@@ -61,16 +64,47 @@ namespace Interface
 
     /* ScalarField */
 
-    // Should probably move into an Initializer interface so that delegates 
-    // and classes can be used
-    // Initializer delegate for scalar field
-    public delegate double Del(double[] point);
+    // Initializer classes for scalar fields
+    public class ConstFieldInitializer : IFieldInitializer
+    {
+        private double cVal;
+
+        public ConstFieldInitializer(double c)
+        {
+            cVal = c;
+        }
+
+        public double initialize(double[] point)
+        {
+            return cVal;
+        }
+    }
+
+    public class GaussianFieldInitializer : IFieldInitializer
+    {
+        private double[] center;
+        private double[] sigma;
+        private double max;
+
+        public GaussianFieldInitializer(double[] center, double[] sigma, double max)
+        {
+            this.center = center;
+            this.sigma = sigma;
+            this.max = max;
+        }
+
+        public double initialize(double[] point)
+        {
+            // return the Gaussian intensity at point
+            return 0;
+        }
+    }
 
     public abstract class ScalarField
     {
         protected readonly Manifold m;
 
-        public ScalarField(Manifold m, Del initializer)
+        public ScalarField(Manifold m, IFieldInitializer initializer)
         {
             this.m = m;
             // do something with initializer
@@ -97,7 +131,7 @@ namespace Interface
 
     public class DiscreteScalarField : ScalarField
     {
-        public DiscreteScalarField(Manifold m, Del initializer)
+        public DiscreteScalarField(Manifold m, IFieldInitializer initializer)
             : base(m, initializer)
         {
         }
@@ -146,7 +180,7 @@ namespace Interface
 
     public class MomentExpansionScalarField : ScalarField
     {
-        public MomentExpansionScalarField(Manifold m, Del initializer)
+        public MomentExpansionScalarField(Manifold m, IFieldInitializer initializer)
             : base(m, initializer)
         {
         }
@@ -211,9 +245,10 @@ namespace Interface
     /* MolecularPopulation */
     public class MolecularPopulation : IDynamic
     {
+        private readonly Manifold manifold;
         private readonly IMolecule molecule;
-        private readonly ScalarField concentration;
-        private readonly ScalarField flux;
+        private ScalarField concentration;
+        private readonly ScalarField flux; // must this be a dictionary as it is currently in Daphne?
 
         public MolecularPopulation(IMolecule molecule, ScalarField concentration, ScalarField flux)
         {
@@ -333,8 +368,9 @@ namespace Interface
             double[] origin = new double[3];
             double[,] rotation = new double[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
             Embedding cytosolToMembrane = new Embedding(cytosol, membrane, origin, rotation);
-            ScalarField concentration = new DiscreteScalarField(cytosol, _ => 0);
-            ScalarField flux = new DiscreteScalarField(membrane, _ => 0);
+            IFieldInitializer init = new ConstFieldInitializer(0);
+            ScalarField concentration = new DiscreteScalarField(cytosol, init);
+            ScalarField flux = new DiscreteScalarField(membrane, init);
             IMolecule a = new Molecule("molecule", 0.0, 0.0);
             IMolecule b = new Molecule("molecule", 0.0, 0.0);
             IMolecule c = new Molecule("molecule", 0.0, 0.0);
