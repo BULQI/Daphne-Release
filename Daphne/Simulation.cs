@@ -279,67 +279,32 @@ namespace Daphne
 
                     MolecularPopulation receptor = null, bulk = null, bulkActivated = null;
 
-                    // reactants
+                    // reactant
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
                         bulk = comp.Populations[cr.reactants_molecule_guid_ref[0]];
-
-                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
-                        {
-                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
-                        }
-                        else
-                        {
-                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a reactant.");
-                        }
-                    }
-                    else if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
-                    {
-                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[1]];
-
-                        if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
-                        {
-                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
-                        }
-                        else
-                        {
-                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a reactant.");
-                        }
                     }
                     else
                     {
-                        throw new Exception("CatalyzedBoundaryActivation must have one bulk molecule as a reactant.");
+                        throw new Exception("CatalyzedBoundaryActivation reactant must be a bulk molecule.");
                     }
-                    // products
+                    // modifier
+                    if (er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                    {
+                        receptor = boundary.Populations[cr.modifiers_molecule_guid_ref[0]];
+                    }
+                    else
+                    {
+                        throw new Exception("CatalyzedBoundaryActivation modifier must be a boundary molecule.");
+                    }
+                    // product
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulk = comp.Populations[cr.products_molecule_guid_ref[0]];
-
-                        if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
-                        {
-                            receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
-                        }
-                        else
-                        {
-                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a product.");
-                        }
-                    }
-                    else if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
-                    {
-                        bulk = comp.Populations[cr.products_molecule_guid_ref[1]];
-
-                        if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
-                        {
-                            receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
-                        }
-                        else
-                        {
-                            throw new Exception("CatalyzedBoundaryActivation must have one boundary molecule as a product.");
-                        }
+                        bulkActivated = comp.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        throw new Exception("CatalyzedBoundaryActivation must have one bulk molecule as a product.");
+                        throw new Exception("CatalyzedBoundaryActivation product must be a bulk molecule.");
                     }
                     comp.Reactions.Add(new CatalyzedBoundaryActivation(bulk, bulkActivated, receptor, cr.rate_const));
                 }
@@ -602,6 +567,7 @@ namespace Daphne
 
                         cell.Locomotor = new Locomotor(driver, sc.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
                         cell.IsMotile = true;
+                        cell.DragCoefficient = sc.entity_repository.cells_dict[cp.cell_guid_ref].DragCoefficient;
                     }
                     else
                     {

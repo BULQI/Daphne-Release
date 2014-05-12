@@ -31,7 +31,7 @@ namespace Daphne
                     for (int i = 0; i < kvp.Value.State.X.Length; i++)
                     {
                         kvp.Value.State.X[i] += kvp.Value.State.V[i] * dt;
-                        kvp.Value.State.V[i] += (-Simulation.dataBasket.ECS.Gamma * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
+                        kvp.Value.State.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
                 }
             }

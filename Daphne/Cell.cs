@@ -144,6 +144,7 @@ namespace Daphne
         public Compartment PlasmaMembrane { get; private set; }
         public Differentiator Differentiator { get; private set; }
         private SpatialState state;
+        public double DragCoefficient { get; set; }
 
         public int Cell_id { get; private set; }
         public static int SafeCell_id = 0;
@@ -194,6 +195,7 @@ namespace Daphne
             state.F[1] += f[1];
             state.F[2] += f[2];
         }
+
 
         // There may be other components specific to a given cell type.
     }

@@ -124,19 +124,22 @@ namespace Daphne
         public static void CreateAndSerializeDriverLocomotionScenario(SimConfiguration sc)
         {
             // Experiment
-            sc.experiment_name = "Driver Locomotion Scenario";
-            sc.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor";
-
-            sc.scenario.environment.extent_x = 1000;
-            sc.scenario.environment.extent_y = 1000;
-            sc.scenario.environment.extent_z = 1000;
+            sc.experiment_name = "Cell locomotion with driver molecule.";
+            sc.experiment_description = "Cell moves toward center of simulation. Drag coefficient=2. Cytosol molecule A* drives locomotion. The CXCL13 in the ECS is diffusing, so the driving force will dissipate over time.";
+            //sc.experiment_description = "ECS with CXCL13 and one cell."
+            //    + " PlasmaMembrane CXCR5 and CXCR5:CXCL13 surface molecules."
+            //    + " Cytosol A molecule is activated to A* by CXCR5:CXCL13."
+            //    + " The CXCL13 initial distribution is Gaussian centered in the ECM.";
+            sc.scenario.environment.extent_x = 500;
+            sc.scenario.environment.extent_y = 500;
+            sc.scenario.environment.extent_z = 500;
             sc.scenario.environment.extent_min = 5;
             sc.scenario.environment.extent_max = 1000;
             sc.scenario.environment.gridstep_min = 1;
             sc.scenario.environment.gridstep_max = 100;
             sc.scenario.environment.gridstep = 50;
 
-            sc.scenario.time_config.duration = 100;
+            sc.scenario.time_config.duration = 200;
             sc.scenario.time_config.rendering_interval = 0.3;
             sc.scenario.time_config.sampling_interval = 1440;
 
@@ -147,72 +150,78 @@ namespace Daphne
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
-            box.x_scale = 200;
-            box.y_scale = 200;
-            box.z_scale = 200;
-            box.x_trans = 500;
-            box.y_trans = 500;
-            box.z_trans = 500;
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            box.x_trans = 250;
+            box.y_trans = 250;
+            box.z_trans = 250;
             sc.entity_repository.box_specifications.Add(box);
             gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
+            //gg.gaussian_spec_name = "Off-center gaussian";
+
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             sc.entity_repository.gaussian_specifications.Add(gg);
 
             var query =
                 from mol in sc.entity_repository.molecules
-                where mol.Name == "CXCL13"
+                where (mol.Name == "CXCL13" && mol.molecule_location == MoleculeLocation.Bulk)
                 select mol;
 
             ConfigMolecularPopulation gmp = null;
             // ecs
             foreach (ConfigMolecule gm in query)
             {
-                gmp = new ConfigMolecularPopulation();                
+                gmp = new ConfigMolecularPopulation();
                 gmp.molecule_guid_ref = gm.molecule_guid;
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
+                gmp.mpInfo = new MolPopInfo(gm.Name);
+                gmp.Name = gm.Name;
+                gmp.mpInfo.mp_dist_name = "Gaussian";
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
+                //gmp.mpInfo.mp_type_guid_ref = gm.Name;
+
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopGaussian sgg = new MolPopGaussian();
-
-                sgg.peak_concentration = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23; //3.6132 // 10;              
+                sgg.peak_concentration = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;      
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;                                               
+                gmp.mpInfo.mp_distribution = sgg;
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
 
             //ADD CELLS AND CELL MOLECULES
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
-            ConfigCell gc = findCell("BCell", sc);            
+            ConfigCell gc = findCell("Leukocyte_staticReceptor_motile", sc);
             CellPopulation cp = new CellPopulation();
 
-            cp.cellpopulation_name = "My-B-Cell";
+            cp.cellpopulation_name = "Motile_leukocytes";
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cp.cell_guid_ref = gc.cell_guid;
             CellLocation cl = new CellLocation();
-            cl.X = 10;
-            cl.Y = 100;
-            cl.Z = 1000;
+            cl.X = 400;
+            cl.Y = 250;
+            cl.Z = 250;
             cp.cell_locations.Add(cl);
-
-            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
             sc.scenario.cellpopulations.Add(cp);
 
-            //-------------------------------------------------------------
-
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            string guid = findReactionGuid(ReactionType.BoundaryAssociation, sc);
-            sc.scenario.environment.ecs.reactions_guid_ref.Add(guid);
-            guid = findReactionGuid(ReactionType.BoundaryDissociation, sc);
-            sc.scenario.environment.ecs.reactions_guid_ref.Add(guid);
+
+            string[] type = new string[2] {"CXCR5_membrane + CXCL13 -> CXCR5:CXCL13_membrane",
+                                  "CXCR5:CXCL13_membrane -> CXCR5_membrane + CXCL13"};
+            ConfigReaction reac;
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    sc.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
         }
 
         /// <summary>
@@ -307,7 +316,198 @@ namespace Daphne
         }
 
         private static void PredefinedCellsCreator(SimConfiguration sc)
-        {           
+        {
+            ConfigCell gc;
+            double[] conc;
+            //ReactionType[] reacType;
+            string[] type;
+            ConfigMolecularPopulation gmp;
+            ConfigMolecule cm;
+            ConfigReaction reac;
+
+            //
+            // Leukocyte_staticReceptor
+            // Leukocyte with fixed number of receptor molecules and no locomotion
+            //
+            gc = new ConfigCell();
+            gc.CellName = "Leukocyte_staticReceptor";
+            gc.CellRadius = 10.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[2] { 250, 0 };
+            type = new string[2] { "CXCR5_membrane", "CXCR5:CXCL13_membrane" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation();
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+            sc.entity_repository.cells.Add(gc);
+
+            //
+            // Leukocyte_staticReceptor_motile
+            // Leukocyte with fixed number of receptor molecules with locomotion driven by A*.
+            //
+            gc = new ConfigCell();
+            gc.CellName = "Leukocyte_staticReceptor_motile";
+            gc.CellRadius = 10.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[2] { 250, 0 };
+            type = new string[2] { "CXCR5_membrane", "CXCR5:CXCL13_membrane" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation();
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[2] { 250, 0 };
+            type = new string[2] { "A", "A*" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation();
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
+
+            // Reactions in Cytosol
+            type = new string[2] {"A + CXCR5:CXCL13_membrane -> A* + CXCR5:CXCL13_membrane",
+                                          "A* -> A"};
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
+
+            gc.DragCoefficient = 2.0;
+            gc.TransductionConstant = 1e6;
+
+            sc.entity_repository.cells.Add(gc);
+
+            //
+            // Leukocyte_dynamicReceptor_motile
+            // Leukocyte with dynamic concentration of receptor molecules with locomotion driven by A*.
+            //
+            gc = new ConfigCell();
+            gc.CellName = "Leukocyte_dynamicReceptor_motile";
+            gc.CellRadius = 10.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[2] { 250, 0 };
+            type = new string[2] { "CXCR5_membrane", "CXCR5:CXCL13_membrane" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation();
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[5] { 250, 0, 1, 0, 0 };
+            type = new string[5] { "A", "A*", "gCXCR5", "CXCR5", "CXCR5:CXCL13" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation();
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
+
+            // Reactions in Cytosol
+            type = new string[8] {"A + CXCR5:CXCL13_membrane -> A* + CXCR5:CXCL13_membrane",
+                                  "A* -> A",
+                                  "gCXCR5 -> CXCR5 + gCXCR5",
+                                  "CXCR5 -> CXCR5_membrane",
+                                  "CXCR5_membrane -> CXCR5",
+                                  "CXCR5 ->",
+                                  "CXCR5:CXCL13_membrane -> CXCR5:CXCL13", 
+                                  "CXCR5:CXCL13 ->" 
+                                };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
+
+            gc.DragCoefficient = 2.0;
+            gc.TransductionConstant = 1e6;
+
+            sc.entity_repository.cells.Add(gc);
+
 
             //Some input Grace sent on 6/19/13
            
@@ -324,7 +524,7 @@ namespace Daphne
             //---------------------------------------------------------------------------------------
             //BCell 
 
-            ConfigCell gc = new ConfigCell();
+            gc = new ConfigCell();
             gc.CellName = "BCell";
             gc.CellRadius = 5.0;
             gc.TransductionConstant = 1e4;
@@ -336,7 +536,7 @@ namespace Daphne
                 where mol.Name == "CXCR5_membrane" || mol.Name == "CXCR5:CXCL13_membrane"
                 select mol;
 
-            ConfigMolecularPopulation gmp = null;
+            gmp = null;
             foreach (ConfigMolecule gm in query1)
             {
                 gmp = new ConfigMolecularPopulation();
@@ -828,6 +1028,7 @@ namespace Daphne
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // BoundaryDissociation:  CXCR5:CXCL13_membrane ->  CXCR5_membrane + CXCL13
@@ -839,6 +1040,7 @@ namespace Daphne
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 1.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             /////////////////////////////////////////////
@@ -852,6 +1054,7 @@ namespace Daphne
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // Dissociation: CXCR5:CXCL13 -> CXCR5 + CXCL13
@@ -863,6 +1066,7 @@ namespace Daphne
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
             //////////////////////////////////////////////////
 
@@ -872,6 +1076,7 @@ namespace Daphne
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCR5:CXCL13 -> 
@@ -880,6 +1085,7 @@ namespace Daphne
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // CatalyzedBoundaryActivation: CXCR5:CXCL13_membrane + A -> CXCR5:CXCL13_membrane + A*
@@ -892,6 +1098,7 @@ namespace Daphne
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // Transformation: A -> A*
@@ -902,6 +1109,7 @@ namespace Daphne
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
             cr.rate_const = 10.0;
+            cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             // Catalyzed Creation: gCXCR5 -> gCXCR5 + CXCR5
@@ -1049,5 +1257,18 @@ namespace Daphne
 
         }
 
+        // given a string description of a reaction, return the ConfigReaction that matches
+        public static ConfigReaction findReaction(string rt, SimConfiguration sc)
+        {
+            foreach (ConfigReaction cr in sc.entity_repository.reactions)
+            {
+                if (cr.TotalReactionString == rt) //cr.reaction_template_guid_ref == template_guid)
+                {
+                    return cr;
+                }
+            }
+            return null;
+        }
     }
+
 }
