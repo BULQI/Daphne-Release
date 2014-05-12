@@ -391,7 +391,6 @@ namespace Daphne
 
     /// <summary>
     /// Appropriate for boundary manifolds that are not zero-dimensional.
-    /// For boundary association on TinySphere, use TinyBoundaryAssociation
     /// </summary>
     public class BoundaryAssociation : Reaction
     {

@@ -121,9 +121,26 @@ namespace Daphne
                 r.Step(dt);
             }
 
+            double[] pos;
             foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
+                // Update boundary concentrations
                 molpop.Value.Step(dt);
+ 
+                // Diffusion
+
+                //// molpop.Value.Conc += dt * molpop.Value.Molecule.DiffusionCoefficient * molpop.Value.Conc.Laplacian();
+                //foreach (KeyValuePair<int, Compartment> kvp in Boundaries)
+                //{
+                //    pos = BoundaryTransforms[kvp.Key].Translation;
+                //    molpop.Value.Conc += -dt * molpop.Value.Conc.DiffusionFluxTerm(molpop.Value.BoundaryFluxes[kvp.Key], pos);
+                //}
+
+                //foreach (KeyValuePair<int, Manifold> kvp in NaturalBoundaries)
+                //{
+                //    pos = NaturalBoundaryTransforms[kvp.Key].Translation;
+                //    molpop.Value.Conc += -dt * molpop.Value.Conc.DiffusionFluxTerm(molpop.Value.NaturalBoundaryFluxes[kvp.Key], pos);
+                //}
             }
         }
 
@@ -140,6 +157,7 @@ namespace Daphne
     public class ExtraCellularSpace
     {
         private Compartment space;
+        private Dictionary<string, int> sides;
 
         public ExtraCellularSpace(Manifold m)
         {
@@ -150,6 +168,8 @@ namespace Daphne
             }
 
             space = new Compartment(m);
+            sides = new Dictionary<string, int>();
+
             // add the sides and transforms
             
             InterpolatedRectangle r;
@@ -165,6 +185,7 @@ namespace Daphne
             t.translate(new double[] { 0, 0, m.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("front", r.Id);
 
             // back: rotate by pi about y, translate +x
             r = new InterpolatedRectangle(nodes, m.StepSize());
@@ -174,6 +195,7 @@ namespace Daphne
             t.translate(new double[] { m.Extent(0), 0, 0 });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("back", r.Id);
 
             // right: rotate by pi/2 about y, translate +x, +z
             nodes[0] = m.NodesPerSide(2);
@@ -184,6 +206,7 @@ namespace Daphne
             t.translate(new double[] { m.Extent(0), 0, m.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("right", r.Id);
 
             // left: rotate by -pi/2 about y, no translation
             r = new InterpolatedRectangle(nodes, m.StepSize());
@@ -191,6 +214,7 @@ namespace Daphne
             t.rotate(axis, -Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("left", r.Id);
 
             // top: rotate by -pi/2 about x, translate +y, +z
             nodes[0] = m.NodesPerSide(0);
@@ -203,6 +227,7 @@ namespace Daphne
             t.translate(new double[] { 0, m.Extent(1), m.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("top", r.Id);
 
             // bottom: rotate by pi/2 about x, no translation
             r = new InterpolatedRectangle(nodes, m.StepSize());
@@ -210,12 +235,19 @@ namespace Daphne
             t.rotate(axis, Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
+            sides.Add("bottom", r.Id);
         }
 
         public Compartment Space
         {
             get { return space; }
         }
+        public Dictionary<string, int> Sides
+        {
+            get { return sides; }
+        }
+
+
     }
 
 }

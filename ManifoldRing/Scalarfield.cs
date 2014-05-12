@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using System.IO;
+
 namespace ManifoldRing
 {
     /// <summary>
@@ -179,9 +181,9 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public ScalarField DiffusionFluxTerm(ScalarField flux)
+        public ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            return m.DiffusionFluxTerm(flux);
+            return m.DiffusionFluxTerm(flux,t);
         }
 
         /// <summary>
@@ -198,30 +200,34 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="from">field to convert</param>
         /// <param name="pos">position at which to convert</param>
-        public void Convert(ScalarField from, double[] pos)
-        {
-            if(from.M.GetType() == typeof(InterpolatedRectangularPrism) && m.GetType() == typeof(TinySphere))
-            {
-                double[] grad = m.Grad(pos, from);
+        //public void Convert(ScalarField from, double[] pos)
+        //{
+        //    if(from.M.GetType() == typeof(InterpolatedRectangularPrism) && m.GetType() == typeof(TinySphere))
+        //    {
+        //        double[] grad = m.Grad(pos, from);
 
-                array[0] = from.Value(pos);
-                array[1] = grad[0];
-                array[2] = grad[1];
-                array[3] = grad[2];
-            }
-            else if (from.M.GetType() == typeof(TinyBall) && m.GetType() == typeof(TinySphere))
-            {
-                // same representation
-                for (int i = 0; i < m.ArraySize; i++)
-                {
-                    array[i] = from.array[i];
-                }
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
+        //        array[0] = from.Value(pos);
+        //        array[1] = grad[0];
+        //        array[2] = grad[1];
+        //        array[3] = grad[2];
+        //    }
+        //    else if (from.M.GetType() == typeof(TinyBall) && m.GetType() == typeof(TinySphere))
+        //    {
+        //        // same representation
+        //        for (int i = 0; i < m.ArraySize; i++)
+        //        {
+        //            array[i] = from.array[i];
+        //        }
+        //    }
+        //    else if (from.M.GetType() == typeof(InterpolatedRectangle) && m.GetType() == typeof(InterpolatedRectangularPrism))
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //    else
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
 
         /// <summary>
         /// multiply the field by a scalar
@@ -402,6 +408,51 @@ namespace ManifoldRing
         public static ScalarField operator -(ScalarField f1, ScalarField f2)
         {
             return f1.Subtract(f2);
+        }
+
+        /// <summary>
+        /// Restrict the scalar field to a boundary
+        /// </summary>
+        /// <param name="from">The scalar field to be restricted</param>
+        /// <param name="pos">The position of the restricted manifold in the space</param>
+        public void Restrict(ScalarField from, double[] pos)
+        {
+            this.M.Restrict(from, pos, this);
+        }
+
+        /// <summary>
+        /// For debugging purposes
+        /// </summary>
+        /// <param name="filename"></param>
+        public void WriteToFile(string filename)
+        {
+
+            if (M.GetType() == typeof(InterpolatedRectangle) || M.GetType() == typeof(InterpolatedRectangularPrism)) 
+            {
+                using (StreamWriter writer = File.CreateText(filename))
+                {
+                    int n = 0;
+                    MathNet.Numerics.LinearAlgebra.Vector v;
+
+                    InterpolatedNodes m;
+                    m = (InterpolatedNodes)M;
+
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        writer.Write(n + "\t");
+
+                        v = m.indexArrayToLocal(m.linearIndexToIndexArray(i));
+
+                        for (int j = 0; j < M.Dim; j++)
+                        {
+                            writer.Write(v[j] + "\t");
+                        }
+                        writer.Write(array[n] + "\n");
+
+                        n++;
+                    }
+                }
+            }
         }
     }
 }

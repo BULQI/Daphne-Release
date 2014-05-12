@@ -8,239 +8,6 @@ using MathNet.Numerics.LinearAlgebra;
 namespace ManifoldRing
 {
     /// <summary>
-    /// describes the position and orientation of an object;
-    /// the rotation matrix denotes a coordinate frame (x, y, z); always 3d
-    /// </summary>
-    public class Transform
-    {
-        private Vector pos;
-        private Matrix rot;
-        /// <summary>
-        /// true when rotation is present
-        /// </summary>
-        public bool HasRot { get; private set; }
-        public static int Dim = 3;
-
-        /// <summary>
-        /// constructor
-        /// </summary>
-        /// <param name="hasRot">true when the transform has rotation</param>
-        public Transform(bool hasRot = true)
-        {
-            pos = new Vector(Dim);
-            this.HasRot = hasRot;
-
-            if (HasRot == true)
-            {
-                // set up the rotation to be aligned with the canonical world coordinates
-                Vector tmp = new double[] { 1, 0, 0 };
-
-                rot = new Matrix(Dim, Dim);
-
-                // 1 0 0
-                rot.SetColumnVector(tmp, 0);
-                tmp[0] = 0;
-                tmp[1] = 1;
-                // 0 1 0
-                rot.SetColumnVector(tmp, 1);
-                tmp[1] = 0;
-                tmp[2] = 1;
-                // 0 0 1
-                rot.SetColumnVector(tmp, 2);
-            }
-        }
-
-        /// <summary>
-        /// retrieve the translation component
-        /// </summary>
-        public Vector Translation
-        {
-            get { return pos; }
-            set
-            {
-                if (pos.Length != value.Length)
-                {
-                    throw new Exception("Dimension mismatch.");
-                }
-
-                pos[0] = value[0]; pos[1] = value[1]; pos[2] = value[2];
-            }
-        }
-
-        /// <summary>
-        /// make the tranlation point to an external position vector; will stay in synch
-        /// </summary>
-        /// <param name="x">the position vector to synch with</param>
-        public void setTranslationByReference(Vector x)
-        {
-            if (pos.Length != x.Length)
-            {
-                throw new Exception("Dimension mismatch.");
-            }
-
-            pos = x;
-        }
-
-        /// <summary>
-        /// retrieve the rotation component
-        /// </summary>
-        public Matrix Rotation
-        {
-            get { return rot; }
-            set
-            {
-                if (HasRot == true)
-                {
-                    if (rot.ColumnCount != value.ColumnCount || rot.RowCount != value.RowCount)
-                    {
-                        throw new Exception("Dimension mismatch.");
-                    }
-
-                    rot[0, 0] = value[0, 0]; rot[1, 0] = value[1, 0]; rot[2, 0] = value[2, 0];
-                    rot[0, 1] = value[0, 1]; rot[1, 1] = value[1, 1]; rot[2, 1] = value[2, 1];
-                    rot[0, 2] = value[0, 2]; rot[1, 2] = value[1, 2]; rot[2, 2] = value[2, 2];
-                }
-            }
-        }
-
-        /// <summary>
-        /// make the rotation matrix point to an external rotation matrix; will stay in synch
-        /// </summary>
-        /// <param name="m">the rotation matrix to synch with</param>
-        public void setRotationByReference(Matrix m)
-        {
-            if (HasRot == true)
-            {
-                if (rot.ColumnCount != m.ColumnCount || rot.RowCount != m.RowCount)
-                {
-                    throw new Exception("Dimension mismatch.");
-                }
-
-                rot = m;
-            }
-        }
-
-        /// <summary>
-        /// translate by x
-        /// </summary>
-        /// <param name="x">delta x</param>
-        public void translate(Vector x)
-        {
-            if (pos.Length != x.Length)
-            {
-                throw new Exception("Dimension mismatch.");
-            }
-
-            pos += x;
-        }
-
-        /// <summary>
-        /// rotate by rad about axis
-        /// </summary>
-        /// <param name="axis">rotation axis</param>
-        /// <param name="rad">rotation angle in radians</param>
-        public void rotate(Vector axis, double rad)
-        {
-            if (HasRot == true)
-            {
-                if (axis.Length != Dim)
-                {
-                    throw new Exception("Dimension mismatch.");
-                }
-
-                Matrix tmp = new Matrix(Dim, Dim);
-
-                // make sure the axis is normalized
-                axis = axis.Normalize();
-                // column 0
-                tmp[0, 0] = Math.Cos(rad) + axis[0] * axis[0] * (1 - Math.Cos(rad));
-                tmp[1, 0] = axis[1] * axis[0] * (1 - Math.Cos(rad)) + axis[2] * Math.Sin(rad);
-                tmp[2, 0] = axis[2] * axis[0] * (1 - Math.Cos(rad)) - axis[1] * Math.Sin(rad);
-
-                // column 1
-                tmp[0, 1] = axis[0] * axis[1] * (1 - Math.Cos(rad)) - axis[2] * Math.Sin(rad);
-                tmp[1, 1] = Math.Cos(rad) + axis[1] * axis[1] * (1 - Math.Cos(rad));
-                tmp[2, 1] = axis[2] * axis[1] * (1 - Math.Cos(rad)) + axis[0] * Math.Sin(rad);
-
-                // column 2
-                tmp[0, 2] = axis[0] * axis[2] * (1 - Math.Cos(rad)) + axis[1] * Math.Sin(rad);
-                tmp[1, 2] = axis[1] * axis[2] * (1 - Math.Cos(rad)) - axis[0] * Math.Sin(rad);
-                tmp[2, 2] = Math.Cos(rad) + axis[2] * axis[2] * (1 - Math.Cos(rad));
-
-                rot = rot.Multiply(tmp);
-            }
-        }
-
-        /// <summary>
-        /// convert the argument into the parent frame
-        /// </summary>
-        /// <param name="x">vector to be converted</param>
-        /// <returns>the resulting vector in the parent frame</returns>
-        public Vector toContaining(Vector x)
-        {
-            if (x.Length != Dim)
-            {
-                throw new Exception("Dimension mismatch.");
-            }
-
-            if (HasRot == true)
-            {
-                Matrix tmp = new Matrix(Dim, 1);
-
-                tmp[0, 0] = x[0];
-                tmp[1, 0] = x[1];
-                tmp[2, 0] = x[2];
-
-                tmp = rot.Multiply(tmp);
-
-                tmp[0, 0] += pos[0];
-                tmp[1, 0] += pos[1];
-                tmp[2, 0] += pos[2];
-
-                return tmp.GetColumnVector(0);
-            }
-            else
-            {
-                return x + pos;
-            }
-        }
-
-        /// <summary>
-        /// convert the argument into the local frame
-        /// </summary>
-        /// <param name="x">vector to be converted</param>
-        /// <returns>the resulting vector in the local frame</returns>
-        public Vector toLocal(Vector x)
-        {
-            if (HasRot == true)
-            {
-                if (x.Length != Dim)
-                {
-                    throw new Exception("Dimension mismatch.");
-                }
-
-                Matrix tmp = new Matrix(Dim, 1);
-
-                tmp[0, 0] = x[0];
-                tmp[1, 0] = x[1];
-                tmp[2, 0] = x[2];
-
-                tmp[0, 0] -= pos[0];
-                tmp[1, 0] -= pos[1];
-                tmp[2, 0] -= pos[2];
-
-                tmp = rot.Inverse().Multiply(tmp);
-
-                return tmp.GetColumnVector(0);
-            }
-            else
-            {
-                return x - pos;
-            }
-        }
-    }
-
-    /// <summary>
     /// This puts the responsibility for scalar field multiplication in the manifold class.
     /// We may regard this as the specification of a scalar field handling class.
     /// </summary>
@@ -337,7 +104,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public abstract ScalarField DiffusionFluxTerm(ScalarField flux);
+        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t);
         /// <summary>
         /// integrate over the whole field
         /// </summary>
@@ -359,6 +126,17 @@ namespace ManifoldRing
         /// </summary>
         /// <returns>voxel volume as double</returns>
         public abstract double VoxelVolume();
+        /// <summary>
+        /// Restriction of a scalar field to a manifold
+        /// </summary>
+        /// <param name="from">Scalar field being restricted</param>
+        /// <param name="to">Scalar field in restricted space</param>
+        /// <returns></returns>
+        public abstract ScalarField Restrict(ScalarField from, double[] pos, ScalarField to);
+        /// <summary>
+        /// The points on a manifold that are used to exchange flux
+        /// </summary>
+        public Vector[] PrincipalPoints { get; set; }
     }
 
     /// <summary>
@@ -373,6 +151,8 @@ namespace ManifoldRing
         public MomentExpansionManifold(int dim) : base(dim)
         {
             ArraySize = 4;
+            PrincipalPoints = new Vector[1];
+            PrincipalPoints[0] = new Vector(3, 0.0);
         }
 
         /// <summary>
@@ -417,6 +197,18 @@ namespace ManifoldRing
             }
 
             return c;
+        }
+
+        public override ScalarField Restrict(ScalarField from, double[] pos, ScalarField to)
+        {
+            double[] grad = from.M.Grad(pos, from);
+
+            to.array[0] = from.Value(pos);
+            to.array[1] = grad[0];
+            to.array[2] = grad[1];
+            to.array[3] = grad[2];
+
+            return to;
         }
     }
 
@@ -521,7 +313,7 @@ namespace ManifoldRing
             norm = 1.0 / Math.Sqrt(norm);
             for (int i = 1; i < 4; i++)
             {
-                value += norm * x[i - 1] * sf.array[i];
+                value += radius * norm * x[i - 1] * sf.array[i];
             }
 
             return value;
@@ -567,7 +359,10 @@ namespace ManifoldRing
             Vector u = new Vector(x);
 
             u = u.Normalize();
-            return new double[] { sf.array[1] - u[0] * u[0] * sf.array[1], sf.array[2] - u[1] * u[1] * sf.array[2], sf.array[3] - u[2] * u[2] * sf.array[3] };
+
+            double d = u[0] * sf.array[1] + u[1] * sf.array[2] + u[2] * sf.array[3];
+
+            return new double[] { sf.array[1] - u[0] * d, sf.array[2] - u[1] * d, sf.array[3] - u[2] * d };
         }
 
         /// <summary>
@@ -575,7 +370,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
             throw new NotImplementedException();
         }
@@ -742,8 +537,9 @@ namespace ManifoldRing
         /// TinyBall field diffusion, flux term
         /// </summary>
         /// <param name="flux">flux involved</param>
+        /// <param name="t">Transform - not used</param>
         /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux)
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
             if(flux.M.GetType() != typeof(TinySphere))
             {
@@ -779,6 +575,7 @@ namespace ManifoldRing
         protected int[] nNodesPerSide;
         protected double stepSize;
         protected double[] extent;
+        public NodeInterpolation Interpolation;
 
         /// <summary>
         /// constructor
@@ -802,6 +599,12 @@ namespace ManifoldRing
             {
                 ArraySize *= nNodesPerSide[i];
                 extent[i] = (nNodesPerSide[i] - 1) * stepSize;
+            }
+
+            PrincipalPoints = new Vector[ArraySize];
+            for (int i = 0; i < ArraySize; i++)
+            {
+                PrincipalPoints[i] = linearIndexToLocal(i);
             }
         }
 
@@ -1009,6 +812,65 @@ namespace ManifoldRing
             }
             return true;
         }
+
+        /// <summary>
+        /// IL value at position, delegates to scalar field and interpolates
+        /// </summary>
+        /// <param name="x">position</param>
+        /// <param name="sf">underlying scalar field</param>
+        /// <returns>value as double</returns>
+        public override double Value(double[] x, ScalarField sf)
+        {
+            // machinery for interpolation
+            // test for out of bounds
+            if (localIsOn(x) == false)
+            {
+                // Note: is returning zero the right thing to do when x is out of bounds?
+                return 0;
+            }
+            return Interpolation.Interpolate(x, sf);
+        }
+
+        /// <summary>
+        /// IL Laplacian field
+        /// </summary>
+        /// <param name="sf">field operand</param>
+        /// <returns>resulting field</returns>
+        public override ScalarField Laplacian(ScalarField sf)
+        {
+            return Interpolation.Laplacian(sf);
+        }
+
+        /// <summary>
+        /// IL gradient
+        /// </summary>
+        /// <param name="x">local position</param>
+        /// <param name="sf">field operand</param>
+        /// <returns>gradient vector</returns>
+        public override double[] Grad(double[] x, ScalarField sf)
+        {
+            if (localIsOn(x) == false)
+            {
+                return new double[Dim];
+            }
+            return Interpolation.Gradient(x, sf);
+        }
+
+        public override ScalarField Restrict(ScalarField from, double[] pos, ScalarField to)
+        {
+            Vector x;
+            for (int i = 0; i < ArraySize; i++)
+            {
+                x = this.linearIndexToLocal(i);
+                to.array[i] = this.Value(x, from);
+            }
+            return to;
+        }
+
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        {
+            return Interpolation.DiffusionFlux(flux, t, this);
+        }
     }
 
     /// <summary>
@@ -1024,6 +886,8 @@ namespace ManifoldRing
         /// <param name="dim">dimension</param>
         public InterpolatedRectangle(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 2)
         {
+            // The right side should be specified by a parameter
+            Interpolation = new Trilinear2D(this);
         }
 
         /// <summary>
@@ -1051,146 +915,6 @@ namespace ManifoldRing
         public override double VoxelVolume()
         {
             return 0;
-        }
-
-        /// <summary>
-        /// IL rectangle value at position, delegates to scalar field and interpolates
-        /// </summary>
-        /// <param name="x">position</param>
-        /// <param name="sf">underlying scalar field</param>
-        /// <returns>value as double</returns>
-        public override double Value(double[] x, ScalarField sf)
-        {
-            // machinery for interpolation
-            // test for out of bounds
-            if (localIsOn(x) == false)
-            {
-                // Note: is returning zero the right thing to do when x is out of bounds?
-                return 0;
-            }
-
-            int[] idx = localToIndexArray(x);
-
-            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
-            // In this case we can decrement the origin of the interpolation voxel and get the same result
-            // When we decrement i -> i-1, then dx = 1, similarly for j
-            if (idx[0] == nNodesPerSide[0] - 1)
-            {
-                idx[0]--;
-            }
-            if (idx[1] == nNodesPerSide[1] - 1)
-            {
-                idx[1]--;
-            }
-
-            double dx = x[0] / stepSize - idx[0],
-                   dy = x[1] / stepSize - idx[1],
-                   dxmult, dymult,
-                   value = 0;
-
-            for (int di = 0; di < 2; di++)
-            {
-                for (int dj = 0; dj < 2; dj++)
-                {
-                    dxmult = di == 0 ? (1 - dx) : dx;
-                    dymult = dj == 0 ? (1 - dy) : dy;
-                    value += dxmult * dymult * sf.array[(idx[0] + di) + (idx[1] + dj) * nNodesPerSide[0]];
-                }
-            }
-
-            return value;
-        }
-
-        /// <summary>
-        /// IL rectangle Laplacian field
-        /// </summary>
-        /// <param name="sf">field operand</param>
-        /// <returns>resulting field</returns>
-        public override ScalarField Laplacian(ScalarField sf)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// IL rectangle gradient
-        /// </summary>
-        /// <param name="x">local position</param>
-        /// <param name="sf">field operand</param>
-        /// <returns>gradient vector</returns>
-        public override double[] Grad(double[] x, ScalarField sf)
-        {
-            double[] grad = new double[] { 0, 0, 0 };
-
-            // test for out of bounds
-            if (localIsOn(x) == false)
-            {
-                // Note: is returning the null vector the right thing to do when x is out of bounds?
-                return grad;
-            }
-
-            int[] idx = localToIndexArray(x);
-
-            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
-            // In this case we can decrement the origin of the interpolation voxel and get the same result
-            // When we decrement i -> i-1, then dx = 1, similarly for j
-            if (idx[0] == nNodesPerSide[0] - 1)
-            {
-                idx[0]--;
-            }
-            if (idx[1] == nNodesPerSide[1] - 1)
-            {
-                idx[1]--;
-            }
-
-            double dx = x[0] / stepSize - idx[0],
-                   dy = x[1] / stepSize - idx[1],
-                   dxmult, dymult;
-            int[] di = new int[2], dj = new int[2];
-
-            for (int i = 0; i < 2; i++)
-            {
-                for (int d = 0; d < 2; d++)
-                {
-                    // x-direction
-                    if (i == 0)
-                    {
-                        // interpolation multipliers
-                        dxmult = 1;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        // index differences
-                        di[0] = 1;
-                        di[1] = 0;
-                        dj[0] = d;
-                        dj[1] = d;
-                    }
-                    else // y-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = 1;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = 1;
-                        dj[1] = 0;
-                    }
-                    grad[i] += dxmult * dymult *
-                               (sf.array[(idx[0] + di[0]) + (idx[1] + dj[0]) * nNodesPerSide[0]] - sf.array[(idx[0] + di[1]) + (idx[1] + dj[1]) * nNodesPerSide[0]]);
-                }
-                grad[i] /= stepSize;
-            }
-
-            return grad;
-        }
-
-        /// <summary>
-        /// IL rectangle field diffusion, flux term
-        /// </summary>
-        /// <param name="flux">flux involved</param>
-        /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -1233,6 +957,8 @@ namespace ManifoldRing
         /// <param name="dim">dimension</param>
         public InterpolatedRectangularPrism(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 3)
         {
+            // The right side should be specified by a parameter
+            Interpolation = new Trilinear3D(this);
         }
 
         /// <summary>
@@ -1260,182 +986,6 @@ namespace ManifoldRing
         public override double VoxelVolume()
         {
             return stepSize * stepSize * stepSize;
-        }
-
-        /// <summary>
-        /// IL prism value at position, delegates to scalar field and interpolates
-        /// </summary>
-        /// <param name="x">position</param>
-        /// <param name="sf">underlying scalar field</param>
-        /// <returns>value as double</returns>
-        public override double Value(double[] x, ScalarField sf)
-        {
-            // machinery for interpolation
-            // test for out of bounds
-            if (localIsOn(x) == false)
-            {
-                // Note: is returning zero the right thing to do when x is out of bounds?
-                return 0;
-            }
-
-            int[] idx = localToIndexArray(x);
-
-            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
-            // In this case we can decrement the origin of the interpolation voxel and get the same result
-            // When we decrement i -> i-1, then dx = 1
-            // Similarly, for j and k.
-            if (idx[0] == nNodesPerSide[0] - 1)
-            {
-                idx[0]--;
-            }
-            if (idx[1] == nNodesPerSide[1] - 1)
-            {
-                idx[1]--;
-            }
-            if (idx[2] == nNodesPerSide[2] - 1)
-            {
-                idx[2]--;
-            }
-
-            double dx = x[0] / stepSize - idx[0],
-                   dy = x[1] / stepSize - idx[1],
-                   dz = x[2] / stepSize - idx[2],
-                   dxmult, dymult, dzmult,
-                   value = 0;
-
-            for (int di = 0; di < 2; di++)
-            {
-                for (int dj = 0; dj < 2; dj++)
-                {
-                    for (int dk = 0; dk < 2; dk++)
-                    {
-                        dxmult = di == 0 ? (1 - dx) : dx;
-                        dymult = dj == 0 ? (1 - dy) : dy;
-                        dzmult = dk == 0 ? (1 - dz) : dz;
-                        value += dxmult * dymult * dzmult * sf.array[(idx[0] + di) + (idx[1] + dj) * nNodesPerSide[0] + (idx[2] + dk) * nNodesPerSide[0] * nNodesPerSide[1]];
-                    }
-                }
-            }
-
-            return value;
-        }
-
-        /// <summary>
-        /// IL prism Laplacian field
-        /// </summary>
-        /// <param name="sf">field operand</param>
-        /// <returns>resulting field</returns>
-        public override ScalarField Laplacian(ScalarField sf)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// IL prism gradient
-        /// </summary>
-        /// <param name="x">local position</param>
-        /// <param name="sf">field operand</param>
-        /// <returns>gradient vector</returns>
-        public override double[] Grad(double[] x, ScalarField sf)
-        {
-            double[] grad = new double[] { 0, 0, 0 };
-
-            // test for out of bounds
-            if (localIsOn(x) == false)
-            {
-                // Note: is returning the null vector the right thing to do when x is out of bounds?
-                return grad;
-            }
-
-            int[] idx = localToIndexArray(x);
-
-            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
-            // In this case we can decrement the origin of the interpolation voxel and get the same result
-            // When we decrement i -> i-1, then dx = 1, similarly for j and k
-            if (idx[0] == nNodesPerSide[0] - 1)
-            {
-                idx[0]--;
-            }
-            if (idx[1] == nNodesPerSide[1] - 1)
-            {
-                idx[1]--;
-            }
-            if (idx[2] == nNodesPerSide[2] - 1)
-            {
-                idx[2]--;
-            }
-
-            double dx = x[0] / stepSize - idx[0],
-                   dy = x[1] / stepSize - idx[1],
-                   dz = x[2] / stepSize - idx[2],
-                   dxmult, dymult, dzmult;
-            int[] di = new int[2], dj = new int[2], dk = new int[2];
-
-            for (int i = 0; i < 3; i++)
-            {
-                for (int d = 0; d < 2; d++)
-                {
-                    // x-direction
-                    if (i == 0)
-                    {
-                        // interpolation multipliers
-                        dxmult = 1;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        dzmult = d == 0 ? (1 - dz) : dz;
-                        // index differences
-                        di[0] = 1;
-                        di[1] = 0;
-                        dj[0] = d;
-                        dj[1] = d;
-                        dk[0] = d;
-                        dk[1] = d;
-                    }
-                    else if (i == 1) // y-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = 1;
-                        dzmult = d == 0 ? (1 - dz) : dz;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = 1;
-                        dj[1] = 0;
-                        dk[0] = d;
-                        dk[1] = d;
-                    }
-                    else // z-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        dzmult = 1;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = d;
-                        dj[1] = d;
-                        dk[0] = 1;
-                        dk[1] = 0;
-                    }
-                    grad[i] += dxmult * dymult * dzmult *
-                               (sf.array[(idx[0] + di[0]) + (idx[1] + dj[0]) * nNodesPerSide[0] + (idx[2] + dk[0]) * nNodesPerSide[0] * nNodesPerSide[1]] -
-                                sf.array[(idx[0] + di[1]) + (idx[1] + dj[1]) * nNodesPerSide[0] + (idx[2] + dk[1]) * nNodesPerSide[0] * nNodesPerSide[1]]);
-                }
-                grad[i] /= stepSize;
-            }
-
-            return grad;
-        }
-
-        /// <summary>
-        /// IL prism field diffusion, flux term
-        /// </summary>
-        /// <param name="flux">flux involved</param>
-        /// <returns>diffusion flux term as field</returns>
-        public override ScalarField DiffusionFluxTerm(ScalarField flux)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

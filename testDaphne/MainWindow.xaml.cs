@@ -11,7 +11,6 @@ using Daphne;
 using ManifoldRing;
 using Newtonsoft.Json;
 
-
 namespace testDaphne
 {
     /// <summary>
@@ -267,21 +266,41 @@ namespace testDaphne
 
         private void go()
         {
-            double T = 100;   // minutes
+            double T = 50;   // minutes
             double dt = 0.001;
             int nSteps = (int)(T / dt);
 
             initialize();
             // step();
 
+            //// ECM: single molecular population, diffusing with zero flux at the natural boundary
+            //// Cells: none
+            //// Reactions: none
             //DiffusionScenario();
             //TestStepperDiffusion(nSteps, dt);
 
-            LigandReceptorScenario();
-            TestStepperLigandReceptor(nSteps, dt);
+            //// ECM: single lingand molecular population, diffusing with zero flux (natural boundary conditions).
+            //// Cells: one, receptor and complex molecular populations
+            //// Reactions: boundary association and dissociation
+            //LigandReceptorScenario();
+            //TestStepperLigandReceptor(nSteps, dt);
 
+            //// Not implemented yet
             //DriverLocomotionScenario();
             //TestStepperLocomotion(nSteps, dt);
+
+            //// Displays ECM natural boundary coordinates
+            // ECM_NaturalBoundaries_Test();
+
+            // ECM: single molecular population, diffusing with applied flux at the natural boundary
+            // Cells: none
+            // Reactions: none
+            FluxNaturalBoundaryConditions();
+            FluxNaturalBC_Stepper(nSteps, dt);
+
+            //// Not implemented yet
+            //DirichletBoundaryConditions();
+            //Dirichlet_Stepper(nSteps, dt);
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
@@ -295,12 +314,13 @@ namespace testDaphne
             string output;
 
             initQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
-            //sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
+            sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
 
             for (int i = 0; i < nSteps; i++)
             {
                 sim.ECS.Space.Step(dt);
                 sim.CMGR.Step(dt);
+                // Console.WriteLine(i);
             }
 
             finalQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
@@ -310,7 +330,7 @@ namespace testDaphne
             output = output + "\t" + initQ.ToString("F2") + "\t" + finalQ.ToString("F2") + "\t" + relDiff.ToString("E2");
             Console.WriteLine(output);
 
-            //sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
+            sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
         }
 
         private void TestStepperLigandReceptor(int nSteps, double dt)
@@ -445,6 +465,7 @@ namespace testDaphne
             // Add all molecular populations
             //
 
+
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
@@ -465,7 +486,8 @@ namespace testDaphne
             }
 
             // Add Cytosol molecular populations
-            // Start with a non-zero (activated) driver concentration
+            // Start with a non-zero (activated) driver concentration and global gradient
+            double[] initGrad = new double[3] { 0, 2.0, 2.0 };
             double initConc = 250;
 
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
@@ -570,8 +592,10 @@ namespace testDaphne
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
             double maxConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
-                     center = new double[sim.ECS.Space.Interior.Dim];
+
+            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 };
+
+            double[] center = new double[sim.ECS.Space.Interior.Dim];
 
             center[0] = extent[0] / 2.0;
             center[1] = extent[1] / 2.0;
@@ -614,6 +638,7 @@ namespace testDaphne
                 sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 kvp.Value.IsMotile = false;
+
             }
         }
 
@@ -667,8 +692,219 @@ namespace testDaphne
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
             sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new GaussianFieldInitializer(center, sigma, maxConc));
+            sim.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
+
         }
-        
+
+        public void ECM_NaturalBoundaries_Test()
+        {
+            int[] numGridPts = { 3, 4, 5 };
+            double gridStep = 2;
+
+            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+
+            InterpolatedNodes m;
+            double[] x = new double[3];
+            double[] X = new double[3];
+            int[] indices = new int[2];
+
+            foreach (KeyValuePair<string, int> kvp in sim.ECS.Sides)
+            {
+                Console.WriteLine(kvp.Key);
+                m = (InterpolatedNodes)sim.ECS.Space.NaturalBoundaries[kvp.Value];
+
+                for (int i = 0; i < m.ArraySize; i++)
+                {
+                    indices = m.linearIndexToIndexArray(i);
+                    x = m.linearIndexToLocal(i);
+                    X = sim.ECS.Space.NaturalBoundaryTransforms[kvp.Value].toContaining(x); 
+
+                    Console.WriteLine("\t" + i + "\t" + indices[0] 
+                                        + ", " + indices[1] + "\t" + x[0] + ", " + x[1]
+                                        + "\t" + X[0] + ", " + X[1] + ", " + X[2]);
+                }
+            }
+
+        }
+
+        public void FluxNaturalBoundaryConditions()
+        {
+            // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
+            // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
+            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            MolDict = MoleculeBuilder.Go(molSpec);
+
+            config = new ReactionsConfigurator();
+            config.deserialize("ReacSpecFile1.xml");
+            config.TemplReacType(config.content.listOfReactions);
+
+            //
+            // Scenario: Diffusion dynamics test
+            //      extracellular fluid with CXCL13 and no cells
+            // CXCL13 diffuses
+            // Input flux at right face of ECM
+            // Equal output flux at left face.
+
+            //
+            // Create Extracellular fluid
+            // 
+
+            //int[] numGridPts = { 31, 21, 11 };
+            int[] numGridPts = { 21, 21, 21 };
+            double gridStep = 50;
+
+            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+
+            //
+            // Add all molecular populations
+            //
+
+            double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
+                                             sim.ECS.Space.Interior.Extent(1), 
+                                             sim.ECS.Space.Interior.Extent(2) },
+                     sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
+                     center = new double[sim.ECS.Space.Interior.Dim];
+
+            center[0] = extent[0] / 2.0;
+            center[1] = extent[1] / 2.0;
+            center[2] = extent[2] / 2.0;
+
+            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new ConstFieldInitializer(10.0));
+            //sim.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
+
+            Manifold m;
+
+            int n = sim.ECS.Sides["right"];
+            ConstFieldInitializer cfi = new ConstFieldInitializer(100.0);
+            m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
+            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            // A hack
+            sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
+
+            n = sim.ECS.Sides["left"];
+            cfi = new ConstFieldInitializer(-100.0);
+            m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
+            sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
+
+        }
+
+        private void FluxNaturalBC_Stepper(int nSteps, double dt)
+        {
+            double initQ, finalQ, relDiff;
+            string output;
+
+            initQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
+            sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
+
+            for (int i = 0; i < nSteps; i++)
+            {
+                sim.ECS.Space.Step(dt);
+                sim.CMGR.Step(dt);
+                // Console.WriteLine(i);
+            }
+
+            finalQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
+            relDiff = (initQ - finalQ) / initQ;
+            output = dt.ToString("E2") + "\t" + sim.ECS.Space.Populations["CXCL13"].Molecule.DiffusionCoefficient.ToString("E2");
+            output = output + "\t" + sim.ECS.Space.Interior.StepSize().ToString("F4");
+            output = output + "\t" + initQ.ToString("F2") + "\t" + finalQ.ToString("F2") + "\t" + relDiff.ToString("E2");
+            Console.WriteLine(output);
+
+            sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
+        }
+
+
+        public void DirichletBoundaryConditions()
+        {
+            //// Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
+            //// Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
+            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            //MolDict = MoleculeBuilder.Go(molSpec);
+
+            //config = new ReactionsConfigurator();
+            //config.deserialize("ReacSpecFile1.xml");
+            //config.TemplReacType(config.content.listOfReactions);
+
+            ////
+            //// Scenario: Diffusion dynamics test
+            ////      extracellular fluid with CXCL13 and no cells
+            //// CXCL13 diffuses
+            //// Fix CXCL13 at right and left faces of ECM to maintain a concentration gradient
+
+            ////
+            //// Create Extracellular fluid
+            //// 
+
+            ////int[] numGridPts = { 31, 21, 11 };
+            //int[] numGridPts = { 21, 21, 21 };
+            //double gridStep = 50;
+
+            //sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+
+            ////
+            //// Add all molecular populations
+            ////
+
+            //double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
+            //                                 sim.ECS.Space.Interior.Extent(1), 
+            //                                 sim.ECS.Space.Interior.Extent(2) },
+            //         sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
+            //         center = new double[sim.ECS.Space.Interior.Dim];
+
+            //center[0] = extent[0] / 2.0;
+            //center[1] = extent[1] / 2.0;
+            //center[2] = extent[2] / 2.0;
+
+            //// Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            //sim.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], new ConstFieldInitializer(10.0));
+            ////sim.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
+
+            //Manifold m;
+
+            //int n = sim.ECS.Sides["right"];
+            //ConstFieldInitializer cfi = new ConstFieldInitializer(100.0);
+            //m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
+            //sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            //// A hack
+            //sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
+
+            //n = sim.ECS.Sides["left"];
+            //cfi = new ConstFieldInitializer(-100.0);
+            //m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
+            //sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
+            //sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
+
+        }
+
+        private void Dirichlet_Stepper(int nSteps, double dt)
+        {
+            //double initQ, finalQ, relDiff;
+            //string output;
+
+            //initQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
+            //sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
+
+            //for (int i = 0; i < nSteps; i++)
+            //{
+            //    sim.ECS.Space.Step(dt);
+            //    sim.CMGR.Step(dt);
+            //    // Console.WriteLine(i);
+            //}
+
+            //finalQ = sim.ECS.Space.Populations["CXCL13"].Conc.Integrate();
+            //relDiff = (initQ - finalQ) / initQ;
+            //output = dt.ToString("E2") + "\t" + sim.ECS.Space.Populations["CXCL13"].Molecule.DiffusionCoefficient.ToString("E2");
+            //output = output + "\t" + sim.ECS.Space.Interior.StepSize().ToString("F4");
+            //output = output + "\t" + initQ.ToString("F2") + "\t" + finalQ.ToString("F2") + "\t" + relDiff.ToString("E2");
+            //Console.WriteLine(output);
+
+            //sim.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
+        }
+
+
+
     }
 
 }

@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interpolation.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="Scalarfield.cs" />
     <Compile Include="Manifolds.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

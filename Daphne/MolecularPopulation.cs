@@ -115,11 +115,11 @@ namespace Daphne
         /// </summary>
         public void UpdateBoundary()
         {
-            // take the bulk at each boundary's location and write it into the boundary space, converting to the boundary scalar field type if needed
-            // translation is already the position of the boundary in the containing frame; no coordinate conversion needed
-            foreach(KeyValuePair<int, ScalarField> kvp in boundaryConcs)
+            //take the bulk at each boundary's location and write it into the boundary space, converting to the boundary scalar field type if needed
+            //translation is already the position of the boundary in the containing frame; no coordinate conversion needed
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
             {
-                kvp.Value.Convert(concentration, compartment.BoundaryTransforms[kvp.Key].Translation);
+                kvp.Value.Restrict(concentration, compartment.BoundaryTransforms[kvp.Key]);
             }
         }
 
@@ -133,56 +133,22 @@ namespace Daphne
             // Update boundary concentrations and global gradients
             UpdateBoundary();
 
-            if (IsDiffusing == true)
+            concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
+            // boundary fluxes
+            foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
             {
-                concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
-                // boundary fluxes
-                foreach (ScalarField boundaryFlux in boundaryFluxes.Values)
+                //concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key].Translation);
+                concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
+            }
+
+            foreach (KeyValuePair<int, ScalarField> kvp in NaturalBoundaryFluxes)
+            {
+                // NOTE: This loop is computationally expensive for molecules in the ECM, especially when most faces have zero flux.
+                if (compartment.NaturalBoundaryTransforms[kvp.Key].IsFluxing)
                 {
-                    concentration += -dt * concentration.DiffusionFluxTerm(boundaryFlux);
+                    // concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key].Translation);
+                    concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]) / Molecule.DiffusionCoefficient;
                 }
-
-                //this.Conc.WriteToFile("CXCL13 final.txt");
-
-                // TODO: Implement diffusion of gradients
-
-                // The code below is intended to impose the flux boundary conditions
-
-                // The surface area of the flux
-
-                /* NOTE: needs flux distribution
-                double cellSurfaceArea;
-                double voxelVolume = manifold.VoxelVolume();
-                int n = 0;
-
-                foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
-                {
-                    if (manifold.GetType() == typeof(InterpolatedRectangularPrism) && kvp.Value.M.GetType() == typeof(TinySphere))
-                    {
-                        if (voxelVolume == 0)
-                        {
-                            throw new Exception("Molecular population Step division by zero.");
-                        }
-
-                        cellSurfaceArea = kvp.Value.M.Area();
-
-                        // Returns an interpolation stencil for the 8 grid points surrounding the cell position
-                        lm = manifold.Interpolation(manifold.Boundaries[kvp.Key].WhereIs(n));
-                        // Distribute the flux to or from the cell surface to the surrounding nodes
-                        for (int k = 0; k < lm.Length; k++)
-                        {
-                            concentration[lm[k].Index] += lm[k].Coefficient * kvp.Value[n] * cellSurfaceArea / voxelVolume;
-                        }
-                    }
-                    else if (manifold.Boundaries[kvp.Key].NeedsInterpolation())
-                    {
-                        // TODO: implement in general case
-                    }
-                    else
-                    {
-                        // TODO: implement in general case
-                    }
-                }*/
             }
         }
     }
