@@ -4,48 +4,49 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
+
 namespace Daphne
 {
-    public struct SpatialState
+    /*public struct SpatialState
     {
         public double[] X;
         public double[] V;
-    }
+    }*/
 
     public class CellManager
     {
-        private Dictionary<Cell, SpatialState> spatialStates;
+        //private Dictionary<Cell, SpatialState> spatialStates;
 
         public CellManager()
         {
-            spatialStates = new Dictionary<Cell, SpatialState>();
+            //spatialStates = new Dictionary<Cell, SpatialState>();
         }
 
-        public void AddState(Cell c, SpatialState s)
-        {
-            spatialStates.Add(c, s);
-        }
+        //public void AddState(Cell c, SpatialState s)
+        //{
+        //    spatialStates.Add(c, s);
+        //}
 
-        public Dictionary<Cell, SpatialState> States
-        {
-            get { return spatialStates; }
-        }
+        //public Dictionary<Cell, SpatialState> States
+        //{
+        //    get { return spatialStates; }
+        //}
 
         public void Step(double dt)
         {
-            foreach (KeyValuePair<Cell, SpatialState> kvp in spatialStates)
+            foreach (KeyValuePair<int, Cell> kvp in Sim.Cells)
             {
-                kvp.Key.Step(dt);
+                kvp.Value.Step(dt);
 
-                if (kvp.Key.IsMotile == true)
+                if (kvp.Value.IsMotile == true)
                 {
-                    double[] force = kvp.Key.Force(dt, kvp.Value.X);
+                    double[] force = kvp.Value.Force(dt, kvp.Value.State.X);
 
                     // A simple implementation of movement. For testing.
-                    for (int i = 0; i < kvp.Value.X.Length; i++)
+                    for (int i = 0; i < kvp.Value.State.X.Length; i++)
                     {
-                        kvp.Value.X[i] += kvp.Value.V[i] * dt;
-                        kvp.Value.V[i] += -1.0 * kvp.Value.V[i] + force[i] * dt;
+                        kvp.Value.State.X[i] += kvp.Value.State.V[i] * dt;
+                        kvp.Value.State.V[i] += -1.0 * kvp.Value.State.V[i] + force[i] * dt;
                     }
                 }
             }
@@ -56,19 +57,19 @@ namespace Daphne
             using (StreamWriter writer = File.CreateText(filename))
             {
                 int n = 0;
-                foreach (KeyValuePair<Cell, SpatialState> kvp in spatialStates)
+                foreach (KeyValuePair<int, Cell> kvp in Sim.Cells)
                 {
                     writer.Write(n + "\t"
-                        + kvp.Value.X[0] + "\t" + kvp.Value.X[1] + "\t" + kvp.Value.X[2] + "\t"
-                        + kvp.Value.V[0] + "\t" + kvp.Value.V[1] + "\t" + kvp.Value.V[2]
+                        + kvp.Value.State.X[0] + "\t" + kvp.Value.State.X[1] + "\t" + kvp.Value.State.X[2] + "\t"
+                        + kvp.Value.State.V[0] + "\t" + kvp.Value.State.V[1] + "\t" + kvp.Value.State.V[2]
                         + "\n");
 
                     n++;
-
                 }
             }
-
         }
+
+        public Simulation Sim { get; set; }
     }
 
     public class Simulation
@@ -76,6 +77,7 @@ namespace Daphne
         public Simulation()
         {
             cellManager = new CellManager();
+            cellManager.Sim = this;
             cells = new Dictionary<int, Cell>();
         }
 
@@ -86,7 +88,8 @@ namespace Daphne
 
             s.X = pos;
             s.V = vel;
-            cellManager.AddState(c, s);
+            //cellManager.AddState(c, s);
+            c.State = s;
             cells.Add(c.Index, c);
         }
 
@@ -97,7 +100,8 @@ namespace Daphne
 
             s.X = pos;
             s.V = vel;
-            cellManager.AddState(c, s);
+            //cellManager.AddState(c, s);
+            c.State = s;
             cells.Add(c.Index, c);
         }
 

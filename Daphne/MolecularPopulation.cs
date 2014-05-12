@@ -64,15 +64,15 @@ namespace Daphne
         // so that the fluxes and boundary concentrations can be identified as sharing a manifold
         // These keep track of the fluxes and concentrations at the boundaries of the manifold 
         // that contains the molecular population
-        public Dictionary<DiscretizedManifold,ScalarField> Fluxes;
-        public Dictionary<DiscretizedManifold,ScalarField> BoundaryConcs;
+        public Dictionary<int, ScalarField> Fluxes;
+        public Dictionary<int, ScalarField> BoundaryConcs;
 
         // Gradient relative to the 3D extracellular environment (global)
         public VectorField GlobalGrad;
 
         // Similar to BoundaryConcs, but for global gradients of boundary concentrations
         // Used to update the receptor gradient in the BoundaryAssociation class
-        public Dictionary<DiscretizedManifold, VectorField> BoundaryGlobalGrad;
+        public Dictionary<int, VectorField> BoundaryGlobalGrad;
         public int globalGradDim = 3;
 
         // Switch that allows us to turn off diffusion.
@@ -93,15 +93,15 @@ namespace Daphne
 
             if (Man.Boundaries != null)
             {
-                Fluxes = new Dictionary<DiscretizedManifold, ScalarField>();
-                BoundaryConcs = new Dictionary<DiscretizedManifold, ScalarField>();
-                BoundaryGlobalGrad = new Dictionary<DiscretizedManifold,VectorField>();
+                Fluxes = new Dictionary<int, ScalarField>();
+                BoundaryConcs = new Dictionary<int, ScalarField>();
+                BoundaryGlobalGrad = new Dictionary<int, VectorField>();
 
-                foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+                foreach (Embedding e in Man.Boundaries.Values)
                 {
-                    Fluxes.Add(m, new ScalarField(m));
-                    BoundaryConcs.Add(m, new ScalarField(m));
-                    BoundaryGlobalGrad.Add(m, new VectorField(m, globalGradDim));
+                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
                 }
             }
         }
@@ -115,15 +115,15 @@ namespace Daphne
 
             if (Man.Boundaries != null)
             {
-                Fluxes = new Dictionary<DiscretizedManifold, ScalarField>();
-                BoundaryConcs = new Dictionary<DiscretizedManifold, ScalarField>();
-                BoundaryGlobalGrad = new Dictionary<DiscretizedManifold, VectorField>();
+                Fluxes = new Dictionary<int, ScalarField>();
+                BoundaryConcs = new Dictionary<int, ScalarField>();
+                BoundaryGlobalGrad = new Dictionary<int, VectorField>();
 
-                foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+                foreach (Embedding e in Man.Boundaries.Values)
                 {
-                    Fluxes.Add(m, new ScalarField(m));
-                    BoundaryConcs.Add(m, new ScalarField(m));
-                    BoundaryGlobalGrad.Add(m, new VectorField(m, globalGradDim));
+                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
                 }
             }
 
@@ -196,7 +196,7 @@ namespace Daphne
         {
             if (Man.Boundaries != null)
             {
-                foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+                foreach (Embedding e in Man.Boundaries.Values)
                 {
                     // Cases:
                     //
@@ -212,21 +212,23 @@ namespace Daphne
                     // correspondance between the array points of the embedding and embedded manifolds
 
                     // Feed embedded manifold array index k to WhereIs and return a double[] point in the embedding manifold
-                    // request interpolation if needed                   
-                    if (Man.Boundaries[m].NeedsInterpolation() == true)
+                    // request interpolation if needed
+                    int id = e.Domain.Id;
+
+                    if (Man.Boundaries[id].NeedsInterpolation() == true)
                     {
-                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
+                        for (int k = 0; k < BoundaryConcs[id].array.Length; k++)
                         {
-                            BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIs(k));
-                            BoundaryGlobalGrad[m].vector[k] = GlobalGradient(Man.Boundaries[m].WhereIs(k));
+                            BoundaryConcs[id].array[k] = Concentration(Man.Boundaries[id].WhereIs(k));
+                            BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIs(k));
                         }
                     }
                     else
                     {
-                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
+                        for (int k = 0; k < BoundaryConcs[id].array.Length; k++)
                         {
-                            BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIsIndex(k));
-                            BoundaryGlobalGrad[m].vector[k] = GlobalGradient(Man.Boundaries[m].WhereIsIndex(k));
+                            BoundaryConcs[id].array[k] = Concentration(Man.Boundaries[id].WhereIsIndex(k));
+                           BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIsIndex(k));
                         }
                     }
                 }
@@ -348,12 +350,12 @@ namespace Daphne
                 int n = 0;
                 LocalMatrix[] lm;
 
-                foreach (KeyValuePair<DiscretizedManifold, ScalarField> kvp in Fluxes)
+                foreach (KeyValuePair<int, ScalarField> kvp in Fluxes)
                 {
                    
                     if ( kvp.Key.GetType() == typeof(TinySphere ) && Man.GetType() == typeof(BoundedRectangularPrism) )
                     {
-                        cellSurfaceArea = 4 * Math.PI * kvp.Key.Extents[0] * kvp.Key.Extents[0];
+                        cellSurfaceArea = 4 * Math.PI * kvp.Value.M.Extents[0] * kvp.Value.M.Extents[0];
                         
                         // Returns an interpolation stencil for the 8 grid points surrounding the cell position
                         lm = Man.Interpolation(Man.Boundaries[kvp.Key].WhereIs(n));

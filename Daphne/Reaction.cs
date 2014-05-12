@@ -491,7 +491,7 @@ namespace Daphne
             fluxIntensityConstant = 1.0 / ligand.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
-            if (ligand.BoundaryConcs[boundary].M != receptor.Man)
+            if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
                 throw (new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
 
@@ -504,14 +504,14 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * receptor.Conc * ligand.BoundaryConcs[boundary];
+            intensity = (RateConstant * dt) * receptor.Conc * ligand.BoundaryConcs[boundary.Id];
 
-            ligand.Fluxes[boundary] += fluxIntensityConstant * intensity;
+            ligand.Fluxes[boundary.Id] += fluxIntensityConstant * intensity;
             receptor.Conc -= intensity;
             complex.Conc += intensity;
 
-            gradIntensity = (RateConstant * dt) * ( ligand.BoundaryConcs[boundary] * receptor.GlobalGrad 
-                + receptor.Conc * ligand.BoundaryGlobalGrad[boundary]); 
+            gradIntensity = (RateConstant * dt) * ( ligand.BoundaryConcs[boundary.Id] * receptor.GlobalGrad 
+                + receptor.Conc * ligand.BoundaryGlobalGrad[boundary.Id]); 
             receptor.GlobalGrad -= gradIntensity;
             complex.GlobalGrad += gradIntensity;
 
@@ -540,7 +540,7 @@ namespace Daphne
         {
             intensity = (RateConstant * dt) * complex.Conc;
 
-            ligand.Fluxes[boundary] -= fluxIntensityConstant * intensity;
+            ligand.Fluxes[boundary.Id] -= fluxIntensityConstant * intensity;
             receptor.Conc += intensity;
             complex.Conc -= intensity;
 
@@ -586,7 +586,7 @@ namespace Daphne
             RateConstant = _RateConst;
             cellRadius = complex.Man.Extents[0];
 
-            if (ligand.BoundaryConcs[boundary].M != receptor.Man)
+            if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
                 throw (new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
 
@@ -600,14 +600,14 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * receptor.Conc * ligand.BoundaryConcs[boundary];
+            intensity = (RateConstant * dt) * receptor.Conc * ligand.BoundaryConcs[boundary.Id];
 
-            ligand.Fluxes[boundary] += fluxIntensityConstant * intensity;
+            ligand.Fluxes[boundary.Id] += fluxIntensityConstant * intensity;
             receptor.Conc -= intensity;
             complex.Conc += intensity;
 
-            gradIntensity = (RateConstant * dt) * (ligand.BoundaryConcs[boundary] * receptor.GlobalGrad
-                + cellRadius * receptor.Conc * ligand.BoundaryGlobalGrad[boundary]); 
+            gradIntensity = (RateConstant * dt) * (ligand.BoundaryConcs[boundary.Id] * receptor.GlobalGrad
+                + cellRadius * receptor.Conc * ligand.BoundaryGlobalGrad[boundary.Id]); 
             receptor.GlobalGrad -= gradIntensity;
             complex.GlobalGrad += gradIntensity;
 

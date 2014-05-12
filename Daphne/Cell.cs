@@ -6,6 +6,12 @@ using Troschuetz.Random;
 
 namespace Daphne
 {
+    public struct SpatialState
+    {
+        public double[] X;
+        public double[] V;
+    }
+
     /// <summary>
     /// The basic representation of a biological cell. 
     /// </summary>
@@ -35,8 +41,8 @@ namespace Daphne
 
             OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
 
-            Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, cellEmbed);
+            Cytosol.Interior.Boundaries = new Dictionary<int, Embedding>();
+            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior.Id, cellEmbed);
 
             Index = safeIndex++;
         }
@@ -51,8 +57,8 @@ namespace Daphne
 
             OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
 
-            Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, cellEmbed);
+            Cytosol.Interior.Boundaries = new Dictionary<int, Embedding>();
+            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior.Id, cellEmbed);
 
             Index = safeIndex++;
         }
@@ -104,6 +110,8 @@ namespace Daphne
 
         public int Index;
         private static int safeIndex = 0;
+
+        public SpatialState State { get; set; }
 
         public bool IsMotile = true;
 

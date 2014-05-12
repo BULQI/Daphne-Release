@@ -27,7 +27,13 @@ namespace testDaphne
         private ReactionsConfigurator config;
 
         private Dictionary<string, Molecule> MolDict;
-        private Simulation sim;
+        private static Simulation sim;
+
+        public static Simulation Sim
+        {
+            get { return MainWindow.sim; }
+            set { MainWindow.sim = value; }
+        }
 
         public MainWindow()
         {
@@ -280,7 +286,7 @@ namespace testDaphne
 
                     foreach (KeyValuePair<int,Cell> kvp in sim.Cells)
                     {
-                       sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior].position = sim.CMGR.States[kvp.Value].X;
+                       sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior.Id].position = kvp.Value.State.X;
                     }
                 }
             }
@@ -328,7 +334,7 @@ namespace testDaphne
 
                     foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
                     {
-                        sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior].position = sim.CMGR.States[kvp.Value].X;
+                        sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior.Id].position = kvp.Value.State.X;
                     }
                  }
 
@@ -359,14 +365,14 @@ namespace testDaphne
                 {
                     receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc.array[0];
                     complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.array[0];
-                    ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior].array[0];
+                    ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id].array[0];
 
                     sim.ECS.Step(dt);
                     sim.CMGR.Step(dt);
 
                     foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
                     {
-                        sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior].position = sim.CMGR.States[kvp.Value].X;
+                        sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior.Id].position = kvp.Value.State.X;
                         // XHist[i] = sim.CMGR.States[kvp.Value].X;
                     }
 
@@ -389,7 +395,7 @@ namespace testDaphne
                 double[][] driverLoc = new double[nSteps][];
 
                 string output;
-                string datDir = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+                string datDir = "";// @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
                 string filename = "DriverDynamics.txt";
 
                 using (StreamWriter writer = File.CreateText(datDir + filename))
@@ -399,15 +405,15 @@ namespace testDaphne
                         receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc.array[0];
                         complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.array[0];
                         driverConc[i] = sim.Cells[0].Cytosol.Populations["driver"].Conc.array[0];
-                        ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior].array[0];
-                        driverLoc[i] =  sim.CMGR.States[sim.Cells[0]].X ;
+                        ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id].array[0];
+                        driverLoc[i] =  sim.Cells[0].State.X ;
 
                         sim.ECS.Step(dt);
                         sim.CMGR.Step(dt);
 
                         foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
                         {
-                            sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior].position = sim.CMGR.States[kvp.Value].X;
+                            sim.ECS.Interior.Boundaries[kvp.Value.PlasmaMembrane.Interior.Id].position = kvp.Value.State.X;
                             // XHist[i] = sim.CMGR.States[kvp.Value].X;
                         }
 
@@ -486,8 +492,8 @@ namespace testDaphne
             // Add the cell plasma membrane as an embedded boundary manifold in the extracellular compartment
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                TranslEmbedding cellMembraneEmbed = new TranslEmbedding(kvp.Value.PlasmaMembrane.Interior, (BoundedRectangularPrism)sim.ECS.Interior, new int[1] { 0 }, sim.CMGR.States[kvp.Value].X);
-                sim.ECS.Interior.Boundaries.Add(kvp.Value.PlasmaMembrane.Interior, cellMembraneEmbed);
+                TranslEmbedding cellMembraneEmbed = new TranslEmbedding(kvp.Value.PlasmaMembrane.Interior, (BoundedRectangularPrism)sim.ECS.Interior, new int[1] { 0 }, kvp.Value.State.X);
+                sim.ECS.Interior.Boundaries.Add(kvp.Value.PlasmaMembrane.Interior.Id, cellMembraneEmbed);
             }
 
             //
@@ -627,8 +633,8 @@ namespace testDaphne
             // Add the cell plasma membrane as an embedded boundary manifold in the extracellular compartment
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                TranslEmbedding cellMembraneEmbed = new TranslEmbedding(kvp.Value.PlasmaMembrane.Interior, (BoundedRectangularPrism)sim.ECS.Interior, new int[1] { 0 }, sim.CMGR.States[kvp.Value].X);
-                sim.ECS.Interior.Boundaries.Add(kvp.Value.PlasmaMembrane.Interior, cellMembraneEmbed);
+                TranslEmbedding cellMembraneEmbed = new TranslEmbedding(kvp.Value.PlasmaMembrane.Interior, (BoundedRectangularPrism)sim.ECS.Interior, new int[1] { 0 }, kvp.Value.State.X);
+                sim.ECS.Interior.Boundaries.Add(kvp.Value.PlasmaMembrane.Interior.Id, cellMembraneEmbed);
             }
 
             //

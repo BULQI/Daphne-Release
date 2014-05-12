@@ -40,7 +40,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Daphne">
+    <Reference Include="Daphne, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Daphne\bin\Debug\Daphne.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">

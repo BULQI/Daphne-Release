@@ -245,14 +245,21 @@ namespace Daphne
 
     public abstract class Manifold
     {
+        public Manifold()
+        {
+            Id = safeId++;
+        }
+
         public int Dim;
+        public int Id;
+        private static int safeId = 0;
     }
 
     public abstract class DiscretizedManifold : Manifold
     {
         public int ArraySize;
         public LocalMatrix[][] Laplacian;
-        public Dictionary<Manifold,Embedding> Boundaries;
+        public Dictionary<int, Embedding> Boundaries;
         public int[] NumPoints;
         protected LocalMatrix[] interpolator;
         protected LocalMatrix[][] gradientOperator;
@@ -638,7 +645,9 @@ namespace Daphne
             Debug.Assert(Dim == numGridPts.Length && Dim == extent.Length);
             NumPoints = (int[])numGridPts.Clone();
             ArraySize = NumPoints[0] * NumPoints[1];
-            Boundaries = new Dictionary<Manifold, Embedding>();
+            Boundaries = new Dictionary<int, Embedding>();
+
+            // TODO: Implement these properly
             Laplacian = new LocalMatrix[ArraySize][];
             interpolator = new LocalMatrix[4];
 
@@ -925,7 +934,7 @@ namespace Daphne
             NumPoints = (int[])numGridPts.Clone();
             ArraySize = NumPoints[0] * NumPoints[1] * NumPoints[2];
             Coordinates = new double[ArraySize, 3];
-            Boundaries = new Dictionary<Manifold, Embedding>();
+            Boundaries = new Dictionary<int, Embedding>();
             Laplacian = new LocalMatrix[ArraySize][];
             interpolator = new LocalMatrix[8];
 
@@ -1138,12 +1147,12 @@ namespace Daphne
             //origin = new double[3] { Extents[0], 0, 0 };
             //DirectTranslEmbedding yzUpperEmbed = new DirectTranslEmbedding(yzUpper, this, dimensionsMap, origin);
 
-            //Boundaries.Add(xyLower, xyLowerEmbed);
-            //Boundaries.Add(xyUpper, xyUpperEmbed);
-            //Boundaries.Add(xzLower, xzLowerEmbed);
-            //Boundaries.Add(xzUpper, xzUpperEmbed);
-            //Boundaries.Add(yzLower, yzLowerEmbed);
-            //Boundaries.Add(yzUpper, yzUpperEmbed);
+            //Boundaries.Add(xyLower.Id, xyLowerEmbed);
+            //Boundaries.Add(xyUpper.Id, xyUpperEmbed);
+            //Boundaries.Add(xzLower.Id, xzLowerEmbed);
+            //Boundaries.Add(xzUpper.Id, xzUpperEmbed);
+            //Boundaries.Add(yzLower.Id, yzLowerEmbed);
+            //Boundaries.Add(yzUpper.Id, yzUpperEmbed);
         }
 
         public override int[] localToArr(double[] loc)
