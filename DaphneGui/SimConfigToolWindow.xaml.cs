@@ -96,16 +96,7 @@ namespace DaphneGui
         {
             CellsDetailsExpander.IsExpanded = true;
             CellPopulation cs = new CellPopulation();
-            cs.cellpopulation_name = "New motile cell";
-            // Make sure there is at least one cell type in repository
-            if (MainWindow.SC.SimConfig.entity_repository.cell_subsets.Count == 0)
-            {
-                CellSubset ct = new CellSubset();
-                //ct.cell_subset_name = "bcell";  //skg 5/25/12
-                ct.InitializeReceptorLevels(MainWindow.SC.SimConfig.entity_repository.solfac_types);
-                MainWindow.SC.SimConfig.entity_repository.cell_subsets.Add(ct);
-            }
-            cs.cell_subset_guid_ref = MainWindow.SC.SimConfig.entity_repository.cell_subsets[0].cell_subset_guid;
+            cs.cellpopulation_name = "New motile cell";           
             cs.number = 50;
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
@@ -117,172 +108,6 @@ namespace DaphneGui
         {
             CellPopulation current_item = (CellPopulation)CellSetsListBox.SelectedItem;
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
-        }
-
-        //private void AddSolfacButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    SolfacsDetailsExpander.IsExpanded = true;
-        //    // Default to HomogeneousLevel for now...
-        //    MolPopInfo mpi = new MolPopInfo("New Soluble Factor");
-        //    //mpi.mp_name = "New Soluble Factor";
-        //    mpi.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-        //    if (MainWindow.SC.SimConfig.entity_repository.solfac_types.Count > 0)
-        //    {
-        //        mpi.mp_type_guid_ref = MainWindow.SC.SimConfig.entity_repository.solfac_types[0].solfac_type_guid;
-        //    }
-        //    mpi.mp_is_time_varying = false;
-        //    //MainWindow.SC.SimConfig.scenario.solfacs.Add(solfac);
-        //    MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;
-        //}
-
-        //private void RemoveSolfacButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    MolPopInfo current_item = (MolPopInfo)MolPopsListBox.SelectedItem;
-        //    //MainWindow.SC.SimConfig.scenario.solfacs.Remove(current_item);
-        //}
-
-        //private void AddSolfacTypeButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    SolfacType st = new SolfacType();
-        //    st.solfac_type_name = "solfac";
-        //    st.solfac_type_receptor_name = "receptor";
-        //    MainWindow.SC.SimConfig.entity_repository.solfac_types.Add(st);
-        //    SolfacTypesListBox.SelectedIndex = SolfacTypesListBox.Items.Count - 1;
-        //    // Also need to update cell types receptor levels
-        //    foreach (CellSubset ct in MainWindow.SC.SimConfig.entity_repository.cell_subsets)
-        //    {
-        //        //skg 6/1/12 changed
-        //        if (ct.cell_subset_type is BCellSubsetType)
-        //        {
-        //            BCellSubsetType bcst = (BCellSubsetType)ct.cell_subset_type;
-        //            bcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-        //        }
-        //        else if (ct.cell_subset_type is TCellSubsetType)
-        //        {
-        //            TCellSubsetType tcst = (TCellSubsetType)ct.cell_subset_type;
-        //            tcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-        //        }
-        //    }
-        //}
-
-        //private void RemoveSolfacTypeButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    // NOTE: Right now this allows users to delete any solfac type that isn't currently being used.
-        //    //   We should probably start implementing a "protected" list of core solfac types
-        //    //   that users can't delete.
-        //    SolfacType current_item = (SolfacType)SolfacTypesListBox.SelectedItem;
-        //    string current_guid = current_item.solfac_type_guid;
-        //    bool being_used = false;
-
-        //    // Check to make sure no solfacs are using this solfac type
-        //    //////////for (int ii = 0; ii < MainWindow.SC.SimConfig.scenario.solfacs.Count; ii++)
-        //    //////////{
-        //    //////////    //if (MainWindow.SC.SimConfig.scenario.solfacs[ii].mp_type_guid_ref == current_item.solfac_type_guid)
-        //    //////////        being_used = true;
-        //    //////////}
-        //    if (being_used)
-        //    {
-        //        // Pop up notice
-        //        MessageBoxResult tmp = MessageBox.Show("The soluble factor type you are trying to delete is being used by a soluble factor.");
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        MainWindow.SC.SimConfig.entity_repository.solfac_types.Remove(current_item);
-        //        // Also need to update cell types receptor levels
-        //        foreach (CellSubset ct in MainWindow.SC.SimConfig.entity_repository.cell_subsets)
-        //        {
-        //            int relp_to_remove_idx = -1;
-
-        //            ////skg 6/1/12 changed
-
-        //            if (ct.cell_subset_type is BCellSubsetType)
-        //            {
-        //                BCellSubsetType bcst = (BCellSubsetType)ct.cell_subset_type;
-        //                for (int jj = 0; jj < bcst.cell_subset_type_receptor_params.Count; jj++)
-        //                {
-        //                    //skg 5/27/12 changed
-        //                    if (bcst.cell_subset_type_receptor_params[jj].receptor_solfac_type_guid_ref == current_guid)
-        //                    {
-        //                        relp_to_remove_idx = jj;
-        //                        break;
-        //                    }
-        //                }
-        //                if (relp_to_remove_idx >= 0)
-        //                {
-        //                    bcst.cell_subset_type_receptor_params.Remove(bcst.cell_subset_type_receptor_params[relp_to_remove_idx]);
-        //                }
-        //            }
-        //            else if (ct.cell_subset_type is TCellSubsetType)
-        //            {
-        //                TCellSubsetType tcst = (TCellSubsetType)ct.cell_subset_type;
-        //                for (int jj = 0; jj < tcst.cell_subset_type_receptor_params.Count; jj++)
-        //                {
-        //                    //skg 5/27/12 changed
-        //                    if (tcst.cell_subset_type_receptor_params[jj].receptor_solfac_type_guid_ref == current_guid)
-        //                    {
-        //                        relp_to_remove_idx = jj;
-        //                        break;
-        //                    }
-        //                }
-        //                if (relp_to_remove_idx >= 0)
-        //                {
-        //                    tcst.cell_subset_type_receptor_params.Remove(tcst.cell_subset_type_receptor_params[relp_to_remove_idx]);
-        //                }
-        //            }
-        //            else 
-        //            {
-        //                //TO DO?
-        //            }
-        //        }
-        //    }
-        //}
-        private void AddSolfacTimeAmpButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Implement...
-        }
-
-        private void RemoveSolfacTimeAmpButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Implement...
-        }
-
-        private void AddCellTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Also add a "duplicate" button for making a copy of an existing cell type
-            CellSubset ct = new CellSubset();
-
-            //skg 6/6/12 - Should InitializeReceptorLevels be moved to CellSubtype?
-            
-            ct.InitializeReceptorLevels(MainWindow.SC.SimConfig.entity_repository.solfac_types);
-            MainWindow.SC.SimConfig.entity_repository.cell_subsets.Add(ct);
-            CellTypesListBox.SelectedIndex = CellTypesListBox.Items.Count - 1;
-        }
-
-        private void RemoveCellTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            // NOTE: Right now this allows users to delete any cell type that isn't currently being used.
-            //   We should probably start implementing a "protected" list of core cell types
-            //   that users can't delete.
-            CellSubset current_item = (CellSubset)CellTypesListBox.SelectedItem;
-            bool being_used = false;
-
-            // Check to make sure no cellpopulations are using this cell type
-            for (int ii = 0; ii < MainWindow.SC.SimConfig.scenario.cellpopulations.Count; ii++)
-            {
-                if (MainWindow.SC.SimConfig.scenario.cellpopulations[ii].cell_subset_guid_ref == current_item.cell_subset_guid)
-                    being_used = true;
-            }
-            if (being_used)
-            {
-                // Pop up notice
-                MessageBoxResult tmp = MessageBox.Show("The cell type you are trying to delete is being used by a cell set.");
-                return;
-            }
-            else
-            {
-                MainWindow.SC.SimConfig.entity_repository.cell_subsets.Remove(current_item);
-            }
         }
 
         private void AddGaussSpecButton_Click(object sender, RoutedEventArgs e)
@@ -329,17 +154,7 @@ namespace DaphneGui
             GaussianSpecification current_item = (GaussianSpecification)GaussianSpecsListBox.SelectedItem;
             string current_guid = current_item.gaussian_spec_box_guid_ref;
             bool being_used = false;
-
-            // Check to make sure no solfacs are using this gauss_spec
-            ////////for (int ii = 0; ii < MainWindow.SC.SimConfig.scenario.solfacs.Count; ii++)
-            ////////{
-            ////////    if (MainWindow.SC.SimConfig.scenario.solfacs[ii].mp_distribution is MolPopGaussianGradient)
-            ////////    {
-            ////////        MolPopGaussianGradient sgg = MainWindow.SC.SimConfig.scenario.solfacs[ii].mp_distribution as MolPopGaussianGradient;
-            ////////        if (sgg != null && sgg.gaussgrad_gauss_spec_guid_ref == current_guid)
-            ////////            being_used = true;
-            ////////    }
-            ////////}
+            
             if (being_used)
             {
                 // Pop up notice
@@ -593,78 +408,6 @@ namespace DaphneGui
         //////////    }
         //////////}
 
-        private void CellSubsetTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Only want to respond to purposeful user interaction, not just population and depopulation
-            // of cell subsets list
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-                return;
-
-            CellSubset current_item = (CellSubset)CellTypesListBox.SelectedItem;
-            CellBaseTypeLabel new_base_type = (CellBaseTypeLabel)e.AddedItems[0];
-
-            // Only want to change cell_subset_type if the combo box isn't just selecting 
-            // the type of current item in the cell subsets list box (i.e. when list selection is changed)
-          
-            if (current_item.cell_subset_type.baseCellType == new_base_type)
-            {
-                return;
-            }
-            else
-            {
-                switch (new_base_type)
-                {
-                    case CellBaseTypeLabel.BCell:
-                        CellSubsetType bc = new BCellSubsetType();
-                        current_item.cell_subset_type = bc;
-                        current_item.InitializeReceptorLevels(MainWindow.SC.SimConfig.entity_repository.solfac_types);
-                        break;
-                    case  CellBaseTypeLabel.TCell:
-                        CellSubsetType tc = new TCellSubsetType();
-                        current_item.cell_subset_type = tc;
-                        current_item.InitializeReceptorLevels(MainWindow.SC.SimConfig.entity_repository.solfac_types);
-                        break;
-                    case  CellBaseTypeLabel.FDC:
-                        CellSubsetType fd = new FDCellSubsetType();
-                        current_item.cell_subset_type = fd;
-                        break;
-                    
-                    default:
-                        throw new ArgumentException("Base cell type out of range");
-                }
-           }
-        }
-
-        private void BindTestButton_Click(object sender, RoutedEventArgs e)
-        {
-            CellSubset current_item = (CellSubset)CellTypesListBox.SelectedItem;
-             
-            if (current_item.cell_subset_type.baseCellType == CellBaseTypeLabel.FDC)
-            {
-                //FDCellSubsetType fd = (FDCellSubsetType)current_item.cell_subset_type;
-                //fd.FCReceptorDensity = 333;
-            }
-        }
-
-        private void CellSubsetTypePhenotypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CellSubset current_item = (CellSubset)CellTypesListBox.SelectedItem;
-
-            if (current_item != null)
-            {
-                if (current_item.cell_subset_type.baseCellType == CellBaseTypeLabel.BCell)
-                {
-                    //BCellSubsetType bcst = (BCellSubsetType)(current_item.cell_subset_type);
-                    //BCellPhenotype bp = bcst.Phenotype;
-                }
-            }
-        }
-
-        private void CellSubsetTypePhenotypeComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
         private void btnAddMolec_Click(object sender, RoutedEventArgs e)
         {
             int i = 0;
@@ -686,10 +429,6 @@ namespace DaphneGui
             gmp.mpInfo = new MolPopInfo();
             gmp.mpInfo.mp_name = "New Soluble Factor";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            if (MainWindow.SC.SimConfig.entity_repository.solfac_types.Count > 0)
-            {
-                gmp.mpInfo.mp_type_guid_ref = MainWindow.SC.SimConfig.entity_repository.solfac_types[0].solfac_type_guid;
-            }
             gmp.mpInfo.mp_is_time_varying = false;
             MainWindow.SC.SimConfig.scenario.MolPops.Add(gmp);
             MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;

@@ -235,6 +235,7 @@ namespace DaphneGui
             //skg daphne Thursday, April 18, 2013
             //CreateAndSerializeDiffusionScenario();
             CreateAndSerializeLigandReceptorScenario();
+            //CreateAndSerializeDriverLocomotionScenario();
             //CreateAndSerializeTestScenario();
 
             //CreateAndSerializeDefaultScenario();
@@ -453,7 +454,6 @@ namespace DaphneGui
             //THIS LINE IS ONLY FOR TESTING
             //config.DeserializeSimConfig();
 
-
             var sim_config = config.SimConfig;
 
             // Experiment
@@ -470,56 +470,7 @@ namespace DaphneGui
             // Entity Repository
             EntityRepository repository = new EntityRepository();
 
-            // Possible solfac types - Do we still need these?
-            SolfacType st = new SolfacType();
-            st.solfac_type_name = "cxcl13";
-            st.solfac_type_receptor_name = "cxcr5";
-            repository.solfac_types.Add(st);
-
-            st = new SolfacType();
-            st.solfac_type_name = "ccl19";
-            st.solfac_type_receptor_name = "ccr7";
-            repository.solfac_types.Add(st);
-
-            //sim_config.entity_repository = repository;
-
-            CellSubset ct = new CellSubset();
-            BCellSubsetType cb = new BCellSubsetType();
-            ct.cell_subset_type = cb;
-            //ct.cell_subset_name = "Centroblast";
-            repository.cell_subsets.Add(ct);
-
-            ct = new CellSubset();
-            TCellSubsetType tc = new TCellSubsetType();
-            ct.cell_subset_type = tc;
-            //ct.cell_subset_name = "T Follicular Helper";
-            repository.cell_subsets.Add(ct);
-
-            // Calling Reset on cell_subsets all at once, but could have called
-            // ct.InitializeReceptorLevels(repository.solfac_types) on each right after 
-            // each was created...
-            repository.ResetCellTypesReceptorsLists();
-
-            // Changing defaults for receptor params on each cell type
-
-            //skg 6/1/12 changed
-
-            // bcell cxcl13 receptor
-            BCellSubsetType bcst = (BCellSubsetType)(repository.cell_subsets[0].cell_subset_type);
-            bcst.cell_subset_type_receptor_params[0].receptor_params.ckr_u = 6;
-            bcst.cell_subset_type_receptor_params[1].receptor_params.ckr_pi = 0.0;
-
-            // tcell ccl19 receptor                       
-            TCellSubsetType tcst = (TCellSubsetType)(repository.cell_subsets[1].cell_subset_type);
-            tcst.cell_subset_type_receptor_params[0].receptor_params.ckr_pi = 0.0;
-            tcst.cell_subset_type_receptor_params[1].receptor_params.ckr_u = 6;
-
             sim_config.entity_repository = repository;
-
-            
-            //***********************************************************************************
-            //***********************************************************************************
-            
 
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
@@ -568,7 +519,6 @@ namespace DaphneGui
             //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
             var query =
                 from mol in sim_config.PredefMolecules
-                //where mol.Name == "CXCL13" || mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13" || mol.Name == "driver" || mol.Name == "CXCL12"
                 where mol.Name == "CXCL13"
                 select mol;
 
@@ -579,10 +529,8 @@ namespace DaphneGui
                 gmp.Molecule = new GuiMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
-                gmp.InMembrane = false;
-                gmp.InCytosol = false;
+                gmp.Location = MolPopPosition.ECS;
                 gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -595,11 +543,9 @@ namespace DaphneGui
             //ADD CELLS AND MOLECULES IN THE CELLS
             CellPopulation cp = new CellPopulation();
             cp.cellpopulation_name = "Bcells starting in ellipsoid";
-            cp.cell_subset_guid_ref = sim_config.entity_repository.cell_subsets[0].cell_subset_guid;
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
-            ////////cs.cellpopulation_region_guid_ref = sim_config.scenario.regions[0].region_box_spec_guid_ref;
-            cp.wrt_region = RelativePosition.Cytosol;
+            //cp.wrt_region = MolPopPosition.Cytosol;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
 
             var query1 =
@@ -614,17 +560,12 @@ namespace DaphneGui
                 gmp.Molecule = new GuiMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
-                gmp.InCytosol = false;
-                gmp.InMembrane = true;
                 if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
                 {
-                    gmp.InMembrane = true;
-                    gmp.InCytosol = false;
-                    gmp.Location = RelativePosition.Membrane;
+                    gmp.Location = MolPopPosition.Membrane;
                 }
                 
                 gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -650,89 +591,213 @@ namespace DaphneGui
             //---------------------------------------------------------------
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiReactionTemplate grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[0];    //The 0'th reaction is Boundary Association
-            var qsr = from species in grt.listOfReactants
-                      where species.species == "CXCR5"
-                      select species;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("receptor", sp);
-                }
-            }
-            qsr = from sp in grt.listOfReactants
-                  where sp.species == "CXCL13"
-                  select sp;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("ligand", sp);
-                }
-            }
-            qsr = from sp in grt.listOfProducts
-                  where sp.species == "CXCR5:CXCL13"
-                  select sp;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("complex", sp);
-                }
-            }
-            //grt.ElementsByName.Add("receptor", grt.listOfReactants[1]);
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(sim_config.PredefReactions[0]);    //The 0'th reaction is Boundary Association
             sim_config.scenario.Reactions.Add(grt);
 
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
-
-            qsr = from species in grt.listOfReactants
-                  where species.species == "CXCR5:CXCL13"
-                  select species;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("complex", sp);
-                }
-            }
-            qsr = from sp in grt.listOfProducts
-                  where sp.species == "CXCL13"
-                  select sp;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("ligand", sp);
-                }
-            }
-            qsr = from sp in grt.listOfProducts
-                  where sp.species == "CXCR5"
-                  select sp;
-            if (qsr.Count() > 0)
-            {
-                foreach (var sp in qsr)
-                {
-                    grt.MolsByType.Add("receptor", sp);
-                }
-            }
+            grt = (GuiBoundaryReactionTemplate)sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
             sim_config.scenario.Reactions.Add(grt);
 
             //End skg daphne
 
-            // Serialize to XML file - REMOVE THIS
+            // Serialize to JSON file
             config.SerializeSimConfigToFile();
 
-            //skg daphne serialize to json Thursday, April 18, 2013
+            ////skg daphne serialize to json Thursday, April 18, 2013
+            //var Settings = new JsonSerializerSettings();
+            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            //Settings.TypeNameHandling = TypeNameHandling.Auto;
+            //string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
+            //string jsonFile = config.FileName;
+            //File.WriteAllText(jsonFile, jsonSpec);
+
+        }
+
+        /// <summary>
+        /// Test scenario for first pass of Daphne
+        /// </summary>
+        public void CreateAndSerializeDriverLocomotionScenario()
+        {
+            var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
+            var sim_config = config.SimConfig;
+
+            // Experiment
+            sim_config.experiment_name = "Driver Locomotion Scenario";
+            sim_config.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor";
+            sim_config.scenario.time_config.duration = 100;
+            sim_config.scenario.time_config.rendering_interval = 0.3;
+            sim_config.scenario.time_config.sampling_interval = 1440;
+
+            // Global Paramters
+            sim_config.LoadDefaultGlobalParameters();
+            sim_config.ChartWindow = ReacComplexChartWindow;
+
+            // Entity Repository
+            EntityRepository repository = new EntityRepository();
+            sim_config.entity_repository = repository;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sim_config.entity_repository.gaussian_specifications.Add(gg);
+
+            // Regions
+            box = new BoxSpecification();
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            box.x_trans = 300;
+            box.y_trans = 300;
+            box.z_trans = 300;
+            repository.box_specifications.Add(box);
+            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
+            sim_config.scenario.regions.Add(reg);
+
+            box = new BoxSpecification();
+            box.x_scale = 50;
+            box.y_scale = 50;
+            box.z_scale = 300;
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 200;
+            repository.box_specifications.Add(box);
+            reg = new Region("Box region", RegionShape.Rectangular);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
+            sim_config.scenario.regions.Add(reg);
+
+            var query =
+                from mol in sim_config.PredefMolecules
+                where mol.Name == "CXCL13"
+                select mol;
+
+            GuiMolecularPopulation gmp = null;
+            foreach (GuiMolecule gm in query)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                gmp.Location = MolPopPosition.ECS;
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+                sim_config.scenario.MolPops.Add(gmp);
+            }
+
+            //ADD CELLS AND MOLECULES IN THE CELLS
+            CellPopulation cp = new CellPopulation();
+            cp.cellpopulation_name = "Bcells starting in ellipsoid";
+            cp.number = 1;
+            cp.cellpopulation_constrained_to_region = true;
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
+
+            //MOLECULES IN MEMBRANE
+            var query1 =
+                from mol in sim_config.PredefMolecules
+                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query1)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
+                {
+                    gmp.Location = MolPopPosition.Membrane;
+                }
+
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                if (gm.Name == "CXCR5")
+                    sgg.peak_concentration = 125;
+                else 
+                    sgg.peak_concentration = 130;
+                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+
+                cp.CellMolPops.Add(gmp);
+            }
+
+            //MOLECULES IN CYTOSOL
+            var query2 =
+                from mol in sim_config.PredefMolecules
+                where mol.Name == "driver"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query2)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "driver")
+                {
+                    gmp.Location = MolPopPosition.Cytosol;
+                }
+
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 250;
+                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+
+                cp.CellMolPops.Add(gmp);
+            }
+
+            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
+
+            sim_config.scenario.cellpopulations.Add(cp);
+
+            //-------------------------------------------------------------
+            int[] nGridPts = { 21, 21, 21 };
+            sim_config.scenario.NumGridPts = nGridPts;
+            sim_config.scenario.GridStep = 50;
+
+            // spatial extent in each dimension
+            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
+
+            //---------------------------------------------------------------
+
+            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(sim_config.PredefReactions[0]);    //The 0'th reaction is Boundary Association
+
+            sim_config.scenario.Reactions.Add(grt);
+            grt = new GuiBoundaryReactionTemplate();
+            grt = (GuiBoundaryReactionTemplate)sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
+
+            sim_config.scenario.Reactions.Add(grt);
+
+            //skg daphne serialize to json Thursday, June 9, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = config.FileName;
             File.WriteAllText(jsonFile, jsonSpec);
-
         }
 
         /// <summary>
@@ -759,10 +824,10 @@ namespace DaphneGui
             EntityRepository repository = new EntityRepository();
 
             ////////// Possible solfac types
-            SolfacType st = new SolfacType();
-            st.solfac_type_name = "cxcl13";
-            st.solfac_type_receptor_name = "cxcr5";
-            repository.solfac_types.Add(st);
+            ////SolfacType st = new SolfacType();
+            ////st.solfac_type_name = "cxcl13";
+            ////st.solfac_type_receptor_name = "cxcr5";
+            //repository.solfac_types.Add(st);
 
             sim_config.entity_repository = repository;
 
@@ -828,7 +893,7 @@ namespace DaphneGui
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
+                //gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -924,10 +989,10 @@ namespace DaphneGui
             EntityRepository repository = new EntityRepository();
 
             // Possible solfac types - Do we still need these?
-            SolfacType st = new SolfacType();
-            st.solfac_type_name = "cxcl13";
-            st.solfac_type_receptor_name = "cxcr5";
-            repository.solfac_types.Add(st);
+            ////SolfacType st = new SolfacType();
+            ////st.solfac_type_name = "cxcl13";
+            ////st.solfac_type_receptor_name = "cxcr5";
+            //repository.solfac_types.Add(st);
 
             sim_config.entity_repository = repository;
 
@@ -987,7 +1052,7 @@ namespace DaphneGui
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
+                //gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -2176,6 +2241,8 @@ namespace DaphneGui
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             sim.CreateECS(new InterpolatedRectangularPrism(scenario.NumGridPts, configurator.SimConfig.scenario.GridStep));
 
+            sim.Cells.Clear();            
+
             double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
                                              sim.ECS.Space.Interior.Extent(1), 
                                              sim.ECS.Space.Interior.Extent(2) };
@@ -2187,12 +2254,13 @@ namespace DaphneGui
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
+                double transductionConstant = 1e4;
                 for (int i = 0; i < cp.number; i++)
                 {
                     Cell cell = new Cell(cellRadius);
-                    cellPos[0] = extent[0] / 3.0;
-                    cellPos[1] = extent[1] / 3.0;
-                    cellPos[2] = extent[2] / 3.0;
+                    cellPos[0] = extent[0] / 4.0;
+                    cellPos[1] = extent[1] / 2.0;
+                    cellPos[2] = extent[2] / 2.0;
                     cell.setState(cellPos, new double[] { 0, 0, 0 });
                     cell.IsMotile = false;
 
@@ -2211,21 +2279,28 @@ namespace DaphneGui
                             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
                             Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
 
-                            if (gmp.InMembrane)
+                            //if (gmp.InMembrane)
+                            if (gmp.Location == MolPopPosition.Membrane)
                             {
                                 //cell.PlasmaMembrane.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
                                 if (mol.Name == "CXCR5")
                                 {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 255.0);
+                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 125.0);
                                 }
-                                else
+                                else if (mol.Name == "CXCR5:CXCL13")
+                                {
+                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 130.0);
+                                }
+                                else 
                                 {
                                     cell.PlasmaMembrane.AddMolecularPopulation(mol, 0.0);
                                 }
                             }
                             else  
                             {
-                                cell.Cytosol.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
+                                double initConc = 250;
+                                cell.Cytosol.AddMolecularPopulation(mol, initConc);
+                                //cell.Cytosol.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
                             }
                         }
                         
@@ -2236,89 +2311,74 @@ namespace DaphneGui
                     {
                         foreach (GuiReactionTemplate grt in cp.CellReactions)
                         {
-                            if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
+                            //if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
+                            if (grt.ReacType == ReactionType.Association)
                             {
-                                MolecularPopulation receptor, ligand, complex;
-                                double k1plus = 2.0, k1minus = 1;
-                                string rec, lig, comp;
-                                string recLocation, ligLocation, compLocation;
-
-                                GuiSpeciesReference gsr = grt.MolsByType["receptor"];
-                                rec = gsr.species;
-                                recLocation = gsr.Location;
-
-                                gsr = grt.MolsByType["ligand"];
-                                lig = gsr.species;
-                                ligLocation = gsr.Location;
-
-                                gsr = grt.MolsByType["complex"];
-                                comp = gsr.species;
-                                compLocation = gsr.Location;
-
-                                // add receptor ligand boundary association and dissociation
-                                ////////    // R+L-> C
-                                ////////    // C -> R+L
-                                receptor = cell.Cytosol.Populations[rec];
-                                ligand = cell.Cytosol.Populations[lig];
-                                complex = cell.Cytosol.Populations[comp];
-
-                                if (grt.TypeOfReaction == "association")
-                                {
-                                    cell.Cytosol.Reactions.Add(new Association(receptor, ligand, complex, k1plus));
-                                }
-                                else
-                                {
-                                    cell.Cytosol.Reactions.Add(new Dissociation(receptor, ligand, complex, k1minus));
-                                }
+                                double k1plus = 2.0;
+                                cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species], 
+                                                                            cell.Cytosol.Populations[grt.listOfReactants[1].species], 
+                                                                            cell.Cytosol.Populations[grt.listOfProducts[0].species], 
+                                                                            k1plus));
                             }
-                            else if (grt.TypeOfReaction == "annihilation") {
-                                cell.Cytosol.Reactions.Add(new Annihilation( cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                            else if (grt.ReacType == ReactionType.Dissociation)
+                            {
+                                double k1minus = 1;
+                                cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species],
+                                                                            cell.Cytosol.Populations[grt.listOfProducts[0].species], 
+                                                                            cell.Cytosol.Populations[grt.listOfProducts[1].species],
+                                                                            k1minus));
                             }
-                            else if (grt.TypeOfReaction == "dimerization")
+                            else if (grt.ReacType == ReactionType.Dimerization)
                             {
                                 cell.Cytosol.Reactions.Add(new Dimerization(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "dimerdissociation")
+                            else if (grt.ReacType == ReactionType.DimerDissociation)
                             {
                                 cell.Cytosol.Reactions.Add(new DimerDissociation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "transformation")
+                            else if (grt.ReacType == ReactionType.Transformation)
                             {
                                 cell.Cytosol.Reactions.Add(new Transformation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "autocatalytictransformation")
+                            else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
                             {
                                 cell.Cytosol.Reactions.Add(new AutocatalyticTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "catalyzedannihilation")
+                            else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "catalyzedassociation")
+                            else if (grt.ReacType == ReactionType.CatalyzedAssociation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedAssociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfReactants[1].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "catalyzedcreation")
+                            else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
                             }
-                            else if (grt.TypeOfReaction == "catalyzeddimerization")
+                            else if (grt.ReacType == ReactionType.CatalyzedDimerization)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedDimerization(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
                             }
-                            else if (grt.TypeOfReaction == "catalyzeddimerdissociation")
+                            else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedDimerDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
                             }
-                            else if (grt.TypeOfReaction == "catalyzeddissociation")
+                            else if (grt.ReacType == ReactionType.CatalyzedDissociation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], cell.Cytosol.Populations[grt.listOfProducts[1].species], grt.RateConst));                            
                             }
-                            else if (grt.TypeOfReaction == "catalyzedtransformation")
+                            else if (grt.ReacType == ReactionType.CatalyzedTransformation)
                             {
                                 cell.Cytosol.Reactions.Add(new CatalyzedTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
                             }
                         }
+                    }
+
+                    if (cell.Cytosol.Populations.ContainsKey("driver"))
+                    {
+                        MolecularPopulation driver = driver = cell.Cytosol.Populations["driver"];
+                        cell.Locomotor = new Locomotor(driver, transductionConstant);
                     }
 
                     sim.AddCell(cell);
@@ -2356,33 +2416,18 @@ namespace DaphneGui
             {
                 MolecularPopulation receptor, ligand, complex;
                 double k1plus = 2.0, k1minus = 1;
+                
                 foreach (GuiReactionTemplate grt in scenario.Reactions)
                 {
-                    if (grt.TypeOfReaction == "boundaryassociation" || grt.TypeOfReaction == "boundarydissociation")
+                    if (grt.ReacType == ReactionType.BoundaryAssociation || grt.ReacType == ReactionType.BoundaryDissociation)
                     {
-                        string rec, lig, comp;
-                        string recLocation, ligLocation, compLocation;
+                        GuiBoundaryReactionTemplate gbrt = (GuiBoundaryReactionTemplate)grt;
+                        
+                        receptor = kvp.Value.PlasmaMembrane.Populations[gbrt.receptor.species];
+                        ligand = sim.ECS.Space.Populations[gbrt.ligand.species];
+                        complex = kvp.Value.PlasmaMembrane.Populations[gbrt.complex.species];
 
-                        GuiSpeciesReference gsr = grt.MolsByType["receptor"];
-                        rec = gsr.species;
-                        recLocation = gsr.Location;
-
-                        gsr = grt.MolsByType["ligand"];
-                        lig = gsr.species;
-                        ligLocation = gsr.Location;
-
-                        gsr = grt.MolsByType["complex"];
-                        comp = gsr.species;
-                        compLocation = gsr.Location;
-
-                        // add receptor ligand boundary association and dissociation
-                        ////////    // R+L-> C
-                        ////////    // C -> R+L
-                        receptor = kvp.Value.PlasmaMembrane.Populations[rec];
-                        ligand = sim.ECS.Space.Populations[lig];
-                        complex = kvp.Value.PlasmaMembrane.Populations[comp];
-
-                        if (grt.TypeOfReaction == "boundaryassociation")
+                        if (grt.ReacType == ReactionType.BoundaryAssociation)
                         {
                             sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                         }
@@ -2391,84 +2436,65 @@ namespace DaphneGui
                             sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
                         }
                     }
-                    else if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
+                    else if (grt.ReacType == ReactionType.Association)
                     {
-                        string rec, lig, comp;
-                        string recLocation, ligLocation, compLocation;
-
-                        GuiSpeciesReference gsr = grt.MolsByType["receptor"];
-                        rec = gsr.species;
-                        recLocation = gsr.Location;
-
-                        gsr = grt.MolsByType["ligand"];
-                        lig = gsr.species;
-                        ligLocation = gsr.Location;
-
-                        gsr = grt.MolsByType["complex"];
-                        comp = gsr.species;
-                        compLocation = gsr.Location;
-
-                        // add receptor ligand association and dissociation
-                        ////////    // R+L-> C
-                        ////////    // C -> R+L
-                        receptor = sim.ECS.Space.Populations[rec];
-                        ligand = sim.ECS.Space.Populations[lig];
-                        complex = sim.ECS.Space.Populations[comp];
-
-                        if (grt.TypeOfReaction == "association")
-                        {
-                            sim.ECS.Space.Reactions.Add(new Association(receptor, ligand, complex, k1plus));
-                        }
-                        else
-                        {
-                            sim.ECS.Space.Reactions.Add(new Dissociation(receptor, ligand, complex, k1minus));
-                        }
+                        sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
+                                                                    sim.ECS.Space.Populations[grt.listOfReactants[1].species],
+                                                                    sim.ECS.Space.Populations[grt.listOfProducts[0].species],
+                                                                    k1plus));
                     }
-                    else if (grt.TypeOfReaction == "annihilation")
+                    else if (grt.ReacType == ReactionType.Dissociation)
+                    {
+                        sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
+                                                                    sim.ECS.Space.Populations[grt.listOfProducts[0].species],
+                                                                    sim.ECS.Space.Populations[grt.listOfProducts[1].species],
+                                                                    k1minus));
+                    }
+                    else if (grt.ReacType == ReactionType.Annihilation)
                     {
                         sim.ECS.Space.Reactions.Add(new Annihilation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "dimerization")
+                    else if (grt.ReacType == ReactionType.Dimerization)
                     {
                         sim.ECS.Space.Reactions.Add(new Dimerization(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "dimerdissociation")
+                    else if (grt.ReacType == ReactionType.DimerDissociation)
                     {
                         sim.ECS.Space.Reactions.Add(new DimerDissociation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "transformation")
+                    else if (grt.ReacType == ReactionType.Transformation)
                     {
                         sim.ECS.Space.Reactions.Add(new Transformation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "autocatalytictransformation")
+                    else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
                     {
                         sim.ECS.Space.Reactions.Add(new AutocatalyticTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzedannihilation")
+                    else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzedassociation")
+                    else if (grt.ReacType == ReactionType.CatalyzedAssociation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedAssociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfReactants[1].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzedcreation")
+                    else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzeddimerization")
+                    else if (grt.ReacType == ReactionType.CatalyzedDimerization)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedDimerization(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzeddimerdissociation")
+                    else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedDimerDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzeddissociation")
+                    else if (grt.ReacType == ReactionType.CatalyzedDissociation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], sim.ECS.Space.Populations[grt.listOfProducts[1].species], grt.RateConst));
                     }
-                    else if (grt.TypeOfReaction == "catalyzedtransformation")
+                    else if (grt.ReacType == ReactionType.CatalyzedTransformation)
                     {
                         sim.ECS.Space.Reactions.Add(new CatalyzedTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
@@ -2507,9 +2533,10 @@ namespace DaphneGui
 
 
             double T = 100;   // minutes
-            double dt = 0.01;  //0.001;
+            double dt = 0.01;  //0.01;
             int nSteps = (int)(T / dt);
             TestStepperLigandReceptor(nSteps, dt);
+            //TestStepperLocomotion(nSteps, dt);
 
 
             //***************************************************************************************************************
@@ -2639,6 +2666,8 @@ namespace DaphneGui
 
             using (StreamWriter writer = File.CreateText(filename))
             {
+                MessageBox.Show("Start processing Ligand Receptor...");
+                
                 for (int i = 0; i < nSteps; i++)
                 {
                     sim.ECS.Space.Step(dt);
@@ -2653,9 +2682,51 @@ namespace DaphneGui
                     complexConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc;
-                    //Console.WriteLine(output);
                     writer.WriteLine(output);
                 }
+
+                MessageBox.Show("Processing finished.");
+            }
+        }
+        private void TestStepperLocomotion(int nSteps, double dt)
+        {
+            double receptorConc,
+                   ligandBoundaryConc,
+                   complexConc,
+                   driverConc;
+            double[] driverLoc, convDriverLoc;
+
+            string output;
+            string filename = "Config\\DriverLocomotor.txt";
+
+            using (StreamWriter writer = File.CreateText(filename))
+            {
+                MessageBox.Show("Start processing Driver Locomotion...");
+
+                for (int i = 0; i < nSteps; i++)
+                {
+                    sim.ECS.Space.Step(dt);
+                    sim.CMGR.Step(dt);
+
+                    // ecs boundary; convert cell position to the membrane's coordinate system
+                    driverLoc = sim.Cells.First().Value.State.X;
+                    convDriverLoc = sim.ECS.Space.BoundaryTransforms[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(driverLoc);
+                    ligandBoundaryConc = sim.ECS.Space.Populations["CXCL13"].BoundaryConcs[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(convDriverLoc);
+
+                    // membrane; already in membrane's coordinate system
+                    receptorConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(convDriverLoc);
+                    complexConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(convDriverLoc);
+
+                    // cytosol; convert from the membrane's to the cytosol's system
+                    convDriverLoc = sim.Cells.First().Value.Cytosol.BoundaryTransforms[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
+                    driverConc = sim.Cells.First().Value.Cytosol.Populations["driver"].Conc.Value(convDriverLoc);
+
+                    output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
+                             driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];
+                    writer.WriteLine(output);
+                }
+
+                MessageBox.Show("Processing finished.");
             }
         }
 

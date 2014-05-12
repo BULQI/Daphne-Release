@@ -17,7 +17,6 @@ namespace DaphneGui
     public class SimConfigurator
     {
         public string FileName { get; set; }
-        //private XmlSerializer serializer = new XmlSerializer(typeof(SimConfiguration));
         public SimConfiguration SimConfig { get; set; }
 
         public SimConfigurator()
@@ -36,10 +35,6 @@ namespace DaphneGui
 
         public void SerializeSimConfigToFile()
         {
-            //TextWriter myWriter = new StreamWriter(FileName);
-            //serializer.Serialize(myWriter, SimConfig);
-            //myWriter.Close();
-
             //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -55,10 +50,6 @@ namespace DaphneGui
         /// <returns></returns>
         public string SerializeSimConfigToString()
         {
-            //StringWriter outStream = new StringWriter();
-            //serializer.Serialize(outStream, SimConfig);
-            //return outStream.ToString();
-
             //skg daphne serialize to json string Wednesday, May 08, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -90,14 +81,6 @@ namespace DaphneGui
             return ret;
         }
 
-        //skg daphne changes
-        //public void DeserializeSimConfig()
-        //{
-        //    FileStream myFileStream = new FileStream(FileName, FileMode.Open);
-        //    SimConfig = (SimConfiguration)serializer.Deserialize(myFileStream);
-        //    myFileStream.Close();
-        //    SimConfig.InitializeStorageClasses();
-        //}
         public void DeserializeSimConfig()
         {
             //Deserialize JSON - THIS CODE WORKS - PUT IT IN APPROPRIATE PLACE (INITIALSTATE OR SOMETHING) - REPLACE XML WITH THIS
@@ -109,14 +92,6 @@ namespace DaphneGui
             SimConfig.InitializeStorageClasses();
         }
 
-        //skg daphne changes
-        //public void DeserializeSimConfigFromString(string simConfigXML)
-        //{
-        //    StringReader configStringReader = new StringReader(simConfigXML);
-        //    SimConfig = (SimConfiguration)serializer.Deserialize(configStringReader);
-        //    configStringReader.Close();
-        //    SimConfig.InitializeStorageClasses();
-        //}
         public void DeserializeSimConfigFromString(string simConfigJson)
         {
             var settings = new JsonSerializerSettings();
@@ -125,7 +100,6 @@ namespace DaphneGui
             SimConfig.InitializeStorageClasses();
         }
 
-        
     }
 
     public class SimConfiguration
@@ -243,6 +217,381 @@ namespace DaphneGui
             bs.z_trans_min = -scenario.environment.extent_z / 2.0;
         }
 
+        //Following function needs to be called only once
+        private void PREDEFINEDREACTIONSCREATOR()
+        {
+
+            //Test code to read in json containing object "PredefinedReactions"
+            //string readText = File.ReadAllText("TESTER.TXT");
+            //PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText);
+
+            //---------------------------
+            //BoundaryAssociation
+            GuiBoundaryReactionTemplate gbrt = new GuiBoundaryReactionTemplate();
+
+            GuiSpeciesReference gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "membrane";
+            gbrt.listOfReactants.Add(gsr);
+            gbrt.receptor = gsr;
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "ecs";
+            gbrt.listOfReactants.Add(gsr);
+            gbrt.ligand = gsr;
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5:CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "membrane";
+            gbrt.listOfProducts.Add(gsr);
+            gbrt.complex = gsr;
+
+            gbrt.RateConst = 2.0;
+            gbrt.ReacType = ReactionType.BoundaryAssociation;
+
+            PredefReactions.Add(gbrt);
+
+            //----------------------------------------------
+            //BoundaryDissociation
+            gbrt = new GuiBoundaryReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "membrane";
+            gbrt.listOfProducts.Add(gsr);
+            gbrt.receptor = gsr;
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "ecs";
+            gbrt.listOfProducts.Add(gsr);
+            gbrt.ligand = gsr;
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5:CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "membrane";
+            gbrt.listOfReactants.Add(gsr);
+            gbrt.complex = gsr;
+
+            gbrt.RateConst = 2.0;
+            gbrt.ReacType = ReactionType.BoundaryDissociation;
+
+            PredefReactions.Add(gbrt);
+
+            //Association
+            GuiReactionTemplate grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5:CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 2.0;
+            grt.ReacType = ReactionType.Association;
+            PredefReactions.Add(grt);
+
+            //Dissociation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5:CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "none";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 2.0;
+            grt.ReacType = ReactionType.Dissociation;
+            PredefReactions.Add(grt);
+
+            //Dissociation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "E";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "A";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "E";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 1.0;
+            grt.ReacType = ReactionType.Dissociation;
+            PredefReactions.Add(grt);
+
+            //CatalyzedCreation
+            GuiCatalyzedReactionTemplate gcrt = new GuiCatalyzedReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfProducts.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "gCXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfModifiers.Add(gsr);
+
+            gcrt.RateConst = 2.0;
+            gcrt.catalyst = gsr;
+            gcrt.ReacType = ReactionType.CatalyzedCreation;
+            PredefReactions.Add(grt);
+
+            //CatalyzedCreation
+            gcrt = new GuiCatalyzedReactionTemplate();
+            
+            gsr = new GuiSpeciesReference();
+            gsr.species = "E";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfModifiers.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfProducts.Add(gsr);
+
+            gcrt.RateConst = 0.6;
+            gcrt.catalyst = gsr;
+            gcrt.ReacType = ReactionType.CatalyzedCreation;
+            
+            PredefReactions.Add(gcrt);
+
+            //Annihilation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            grt.RateConst = 2.0;
+            grt.ReacType = ReactionType.Annihilation;
+            
+            PredefReactions.Add(grt);
+
+            //Annihilation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            grt.RateConst = 2.0;
+            grt.ReacType = ReactionType.Annihilation;
+            PredefReactions.Add(grt);
+
+            //Annihilation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "Y";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            grt.RateConst = 1.0;
+            grt.ReacType = ReactionType.Annihilation;
+            PredefReactions.Add(grt);
+
+            //CatalyzedAnnihilation
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfModifiers.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            grt.RateConst = 2.0;
+            grt.ReacType = ReactionType.CatalyzedAnnihilation;
+            PredefReactions.Add(grt);
+
+            //CatalyzedAnnihilation
+            gcrt = new GuiCatalyzedReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "Y";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfModifiers.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfReactants.Add(gsr);
+
+            gcrt.RateConst = 2.0;
+            gcrt.ReacType = ReactionType.CatalyzedAnnihilation;
+
+            PredefReactions.Add(gcrt);
+
+            //CatalyzedDimerDissociation
+            gcrt = new GuiCatalyzedReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCR5:CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfProducts.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "CXCL13";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            gcrt.listOfModifiers.Add(gsr);
+
+            gcrt.RateConst = 2.0;
+            gcrt.ReacType = ReactionType.CatalyzedDimerDissociation;
+            gcrt.catalyst = gsr;
+            PredefReactions.Add(gcrt);
+
+            //Generalized
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "A";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 2;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 1.0;
+            grt.ReacType = ReactionType.Generalized;
+            PredefReactions.Add(grt);
+
+            //Generalized
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "Y";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "Y";
+            gsr.stoichiometry = 2;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 1.0;
+            grt.ReacType = ReactionType.Generalized;
+            PredefReactions.Add(grt);
+
+            //Generalized
+            grt = new GuiReactionTemplate();
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 2;
+            gsr.Location = "na";
+            grt.listOfReactants.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "X";
+            gsr.stoichiometry = 1;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            gsr = new GuiSpeciesReference();
+            gsr.species = "Y";
+            gsr.stoichiometry = 2;
+            gsr.Location = "na";
+            grt.listOfProducts.Add(gsr);
+
+            grt.RateConst = 1.0;
+            grt.ReacType = ReactionType.Generalized;
+            PredefReactions.Add(grt);
+
+
+            //Write out into json file!
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(PredefReactions, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonFile = "Config\\DaphnePredefinedReactions.txt";
+            File.WriteAllText(jsonFile, jsonSpec);
+
+        }
+
         public void LoadDefaultGlobalParameters()
         {
             var force_params = new ForceParams();
@@ -253,9 +602,19 @@ namespace DaphneGui
             global_parameters.Add(synapse_params);
 
             //skg daphne
+
+            PREDEFINEDREACTIONSCREATOR();
+
             string path = "Config\\DaphnePredefinedReactions.txt";
+            //string readText = File.ReadAllText(path);
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             string readText = File.ReadAllText(path);
-            PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText);
+            //SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
+            PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText, settings);
+
+            //GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)PredefReactions[0]; 
 
             path = "Config\\DaphnePredefinedMolecules.txt";
             readText = File.ReadAllText(path);
@@ -287,7 +646,7 @@ namespace DaphneGui
         {
             // GenerateNewExperimentGUID();
             FindNextSafeCellPopulationID();
-            InitCellSubsetGuidCellSubsetDict();
+            //InitCellSubsetGuidCellSubsetDict();
             InitBoxExtentsAndGuidBoxDict();
             InitCellPopulationIDCellPopulationDict();
             // Set callback to update box specification extents when environment extents change
@@ -318,15 +677,15 @@ namespace DaphneGui
             SafeCellPopulationID = max_id + 1;
         }
 
-        private void InitCellSubsetGuidCellSubsetDict()
-        {
-            cellsubset_guid_cellsubset_dict.Clear();
-            foreach (CellSubset ct in entity_repository.cell_subsets)
-            {
-                cellsubset_guid_cellsubset_dict.Add(ct.cell_subset_guid, ct);
-            }
-            entity_repository.cell_subsets.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsubsets_CollectionChanged); 
-        }
+        //private void InitCellSubsetGuidCellSubsetDict()
+        //{
+        //    cellsubset_guid_cellsubset_dict.Clear();
+        //    foreach (CellSubset ct in entity_repository.cell_subsets)
+        //    {
+        //        cellsubset_guid_cellsubset_dict.Add(ct.cell_subset_guid, ct);
+        //    }
+        //    entity_repository.cell_subsets.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsubsets_CollectionChanged); 
+        //}
 
         private void InitBoxExtentsAndGuidBoxDict()
         {
@@ -466,53 +825,20 @@ namespace DaphneGui
     
     public class EntityRepository
     {
-        public ObservableCollection<SolfacType> solfac_types { get; set; }
-        public ObservableCollection<CellSubset> cell_subsets { get; set; }
+        //public ObservableCollection<SolfacType> solfac_types { get; set; }
+        //public ObservableCollection<CellSubset> cell_subsets { get; set; }
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
         public ObservableCollection<BoxSpecification> box_specifications { get; set; }
 
         public EntityRepository()
         {
-            solfac_types = new ObservableCollection<SolfacType>();
-            cell_subsets = new ObservableCollection<CellSubset>();
+            //solfac_types = new ObservableCollection<SolfacType>();
+            //cell_subsets = new ObservableCollection<CellSubset>();
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
             box_specifications = new ObservableCollection<BoxSpecification>();
         }
 
-        /// <summary>
-        /// NOTE: This version clears out all existing entries!!
-        /// This needs to be called after all solfacs types have been added
-        /// to the repository so each cell type gets a duplicate list of receptors
-        /// and the correct length array of weights/expression levels.
-        /// </summary>
-        public void ResetCellTypesReceptorsLists()
-        {
-            foreach (CellSubset ct in cell_subsets)
-            {
-                //skg 5/31/12 changed                                
-                if (ct.cell_subset_type is BCellSubsetType)
-                {
-                    //ct.cell_subset_type.cell_subset_type_receptor_params.Clear();
-                    BCellSubsetType bcst = (BCellSubsetType)ct.cell_subset_type;
-                    bcst.cell_subset_type_receptor_params.Clear();
-                    foreach (SolfacType st in solfac_types)
-                    {
-                        //skg 5/31/12 changed
-                        //ct.cell_subset_type.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-                        bcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-                    }
-                }
-                else if (ct.cell_subset_type is TCellSubsetType)
-                {
-                    TCellSubsetType tcst = (TCellSubsetType)ct.cell_subset_type;
-                    tcst.cell_subset_type_receptor_params.Clear();
-                    foreach (SolfacType st in solfac_types)
-                    {
-                        tcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-                    }
-                }
-            }
-        }
+        
     }
 
     public class TimeConfig
@@ -677,6 +1003,43 @@ namespace DaphneGui
             region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
         }
     }
+    
+    public enum RelativePosition { Inside, Surface, Outside }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(RelativePosition), typeof(string))]
+    public class RelativePositionToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> _relative_position_strings = new List<string>()
+                                {
+                                    "in",
+                                    "on",
+                                    "outside"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _relative_position_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _relative_position_strings.FindIndex(item => item == str);
+            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
+        }
+    }
 
     //skg daphne
     public class GuiMolecule : EntityModelBase
@@ -697,7 +1060,8 @@ namespace DaphneGui
             DiffusionCoefficient = thisDiffCoeff;
         }
 
-        public GuiMolecule() : base()
+        public GuiMolecule()
+            : base()
         {
             Guid id = Guid.NewGuid();
             gui_molecule_guid = id.ToString();
@@ -731,7 +1095,7 @@ namespace DaphneGui
         public GuiMolecule Molecule { get; set; }
         public string Name { get; set; }
         private MolPopInfo _mp_Info;
-        public MolPopInfo mpInfo         
+        public MolPopInfo mpInfo
         {
             get { return _mp_Info; }
             set { _mp_Info = value; }
@@ -740,35 +1104,32 @@ namespace DaphneGui
         public string gui_mol_pop_guid { get; set; }
 
         //For molecules in cells
-        public bool InCytosol { get; set; }
-        public bool InMembrane { get; set; }
+        public MolPopPosition Location { get; set; }
 
-        public RelativePosition Location { get; set; }
-                   
     }
-    
-    public enum RelativePosition { Cytosol, Membrane, ECS }
+
+    public enum MolPopPosition { Cytosol, Membrane, ECS }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
-    [ValueConversion(typeof(RelativePosition), typeof(string))]
-    public class RelativePositionToShortStringConverter : IValueConverter
+    [ValueConversion(typeof(MolPopPosition), typeof(string))]
+    public class MolPopPositionToShortStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _relative_position_strings = new List<string>()
+        private List<string> _molpop_position_strings = new List<string>()
                                 {
-                                    "Cytosol",
-                                    "Membrane",
-                                    "ECS"
+                                    "cytosol",
+                                    "membrane",
+                                    "ecs"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             try
             {
-                return _relative_position_strings[(int)value];
+                return _molpop_position_strings[(int)value];
             }
             catch
             {
@@ -779,7 +1140,7 @@ namespace DaphneGui
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string str = (string)value;
-            int idx = _relative_position_strings.FindIndex(item => item == str);
+            int idx = _molpop_position_strings.FindIndex(item => item == str);
             return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
         }
     }
@@ -834,7 +1195,7 @@ namespace DaphneGui
             number = 100;
             cellpopulation_constrained_to_region = false;
             cellpopulation_region_guid_ref = "";
-            wrt_region = RelativePosition.Cytosol;
+            wrt_region = RelativePosition.Inside;
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
@@ -908,28 +1269,28 @@ namespace DaphneGui
             return idx;
         }
 
-        public void InitializeReceptorLevels(ObservableCollection<SolfacType> solfac_types)
-        {
-            //skg 6/1/12
-            if (cell_subset_type is BCellSubsetType)
-            {
-                BCellSubsetType bcst = (BCellSubsetType)cell_subset_type;
-                bcst.cell_subset_type_receptor_params.Clear();
-                foreach (SolfacType st in solfac_types)
-                {
-                    bcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-                }
-            }
-            else if (cell_subset_type is TCellSubsetType)
-            {
-                TCellSubsetType tcst = (TCellSubsetType)cell_subset_type;
-                tcst.cell_subset_type_receptor_params.Clear();
-                foreach (SolfacType st in solfac_types)
-                {
-                    tcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-                }
-            }
-        }
+        //public void InitializeReceptorLevels(ObservableCollection<SolfacType> solfac_types)
+        //{
+        //    //skg 6/1/12
+        //    if (cell_subset_type is BCellSubsetType)
+        //    {
+        //        BCellSubsetType bcst = (BCellSubsetType)cell_subset_type;
+        //        bcst.cell_subset_type_receptor_params.Clear();
+        //        foreach (SolfacType st in solfac_types)
+        //        {
+        //            bcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
+        //        }
+        //    }
+        //    else if (cell_subset_type is TCellSubsetType)
+        //    {
+        //        TCellSubsetType tcst = (TCellSubsetType)cell_subset_type;
+        //        tcst.cell_subset_type_receptor_params.Clear();
+        //        foreach (SolfacType st in solfac_types)
+        //        {
+        //            tcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
+        //        }
+        //    }
+        //}
     }
 
     //skg 5/24/12
@@ -1144,40 +1505,40 @@ namespace DaphneGui
     public class ReceptorParameters
     {
         public string receptor_solfac_type_guid_ref { get; set; }
-        public CkReceptorParams receptor_params { get; set; }
+        //public CkReceptorParams receptor_params { get; set; }
 
         public ReceptorParameters()
         {
             receptor_solfac_type_guid_ref = "";
-            receptor_params = new CkReceptorParams();
+            //receptor_params = new CkReceptorParams();
         }
 
         public ReceptorParameters(string guid)
         {
             receptor_solfac_type_guid_ref = guid;
-            receptor_params = new CkReceptorParams();
+            //receptor_params = new CkReceptorParams();
         }
     }
 
-    public class CkReceptorParams
-    {
-        public double ckr_epsilon { get; set; }
-        public double ckr_kappa { get; set; }
-        public double ckr_pi { get; set; }
-        public double ckr_tau { get; set; }
-        public double ckr_delta { get; set; }
-        public double ckr_u { get; set; }
+    //public class CkReceptorParams
+    //{
+    //    public double ckr_epsilon { get; set; }
+    //    public double ckr_kappa { get; set; }
+    //    public double ckr_pi { get; set; }
+    //    public double ckr_tau { get; set; }
+    //    public double ckr_delta { get; set; }
+    //    public double ckr_u { get; set; }
 
-        public CkReceptorParams()
-        {
-            ckr_epsilon = 0.1;
-            ckr_kappa = 0.1;
-            ckr_pi = 0.1;
-            ckr_tau = 0.0;
-            ckr_delta = 0.001;
-            ckr_u = 0.0;
-        }
-    }
+    //    public CkReceptorParams()
+    //    {
+    //        ckr_epsilon = 0.1;
+    //        ckr_kappa = 0.1;
+    //        ckr_pi = 0.1;
+    //        ckr_tau = 0.0;
+    //        ckr_delta = 0.001;
+    //        ckr_u = 0.0;
+    //    }
+    //}
 
 
     // skg daphne
@@ -1273,20 +1634,20 @@ namespace DaphneGui
 
     // Solfac type and receptor name are both keyed off of solfac_type_guid.
     // So, in reality, both names are just for human readability.
-    public class SolfacType
-    {
-        public string solfac_type_guid { get; set; }
-        public string solfac_type_name { get; set; }
-        public string solfac_type_receptor_name { get; set; }
+    ////public class SolfacType
+    ////{
+    ////    public string solfac_type_guid { get; set; }
+    ////    public string solfac_type_name { get; set; }
+    ////    public string solfac_type_receptor_name { get; set; }
 
-        public SolfacType()
-        {
-            Guid id = Guid.NewGuid();
-            solfac_type_guid = id.ToString();
-            solfac_type_name = "Solfac_A";
-            solfac_type_receptor_name = "Receptor_A";
-        }
-    }
+    ////    public SolfacType()
+    ////    {
+    ////        Guid id = Guid.NewGuid();
+    ////        solfac_type_guid = id.ToString();
+    ////        solfac_type_name = "Solfac_A";
+    ////        solfac_type_receptor_name = "Receptor_A";
+    ////    }
+    ////}
 
     /// <summary>
     /// Converter to go between cell type GUID references in CellSets
@@ -1364,71 +1725,71 @@ namespace DaphneGui
     /// Converter to go between solfac GUID references in CellSubset list of ReceptorExpressionLevelPairs
     /// and receptor names kept in the repository list of SolfacType(s).
     /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class SolfacGUIDtoReceptorNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string receptor_name = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
-            if (solfac_list != null)
-            {
-                foreach (SolfacType st in solfac_list)
-                {
-                    if (st.solfac_type_guid == guid)
-                    {
-                        receptor_name = st.solfac_type_receptor_name + " (" + st.solfac_type_name + ")";
-                        break;
-                    }
-                }
-            }
-            return receptor_name;
-        }
+    ////[ValueConversion(typeof(string), typeof(string))]
+    ////public class SolfacGUIDtoReceptorNameConverter : IValueConverter
+    ////{
+    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        string guid = value as string;
+    ////        string receptor_name = "";
+    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+    ////        ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
+    ////        if (solfac_list != null)
+    ////        {
+    ////            foreach (SolfacType st in solfac_list)
+    ////            {
+    ////                if (st.solfac_type_guid == guid)
+    ////                {
+    ////                    receptor_name = st.solfac_type_receptor_name + " (" + st.solfac_type_name + ")";
+    ////                    break;
+    ////                }
+    ////            }
+    ////        }
+    ////        return receptor_name;
+    ////    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
+    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        // TODO: Should probably put something real here, but right now it never gets called,
+    ////        // so I'm not sure what the value and parameter objects would be...
+    ////        return "y";
+    ////    }
+    ////}
 
     /// <summary>
     /// Converter to go between solfac GUID references in CellSubset list of ReceptorExpressionLevelPairs
     /// and receptor names kept in the repository list of SolfacType(s).
     /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class SolfacGUIDtoSolfacNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string receptor_name = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
-            if (solfac_list != null)
-            {
-                foreach (SolfacType st in solfac_list)
-                {
-                    if (st.solfac_type_guid == guid)
-                    {
-                        receptor_name = st.solfac_type_name;
-                        break;
-                    }
-                }
-            }
-            return receptor_name;
-        }
+    ////[ValueConversion(typeof(string), typeof(string))]
+    ////public class SolfacGUIDtoSolfacNameConverter : IValueConverter
+    ////{
+    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        string guid = value as string;
+    ////        string receptor_name = "";
+    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+    ////        ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
+    ////        if (solfac_list != null)
+    ////        {
+    ////            foreach (SolfacType st in solfac_list)
+    ////            {
+    ////                if (st.solfac_type_guid == guid)
+    ////                {
+    ////                    receptor_name = st.solfac_type_name;
+    ////                    break;
+    ////                }
+    ////            }
+    ////        }
+    ////        return receptor_name;
+    ////    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
+    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        // TODO: Should probably put something real here, but right now it never gets called,
+    ////        // so I'm not sure what the value and parameter objects would be...
+    ////        return "y";
+    ////    }
+    ////}
 
     /// <summary>
     /// Convert System.Windows.Media.Color to SolidBrush for rectangle fills
