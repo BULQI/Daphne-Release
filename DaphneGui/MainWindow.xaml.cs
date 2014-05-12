@@ -1814,7 +1814,7 @@ namespace DaphneGui
             if (sim.RunStatus == Simulation.RUNSTAT_RUN)
             {
                 //resetButton.IsEnabled = true;
-                resetButton.Content = "Reset";
+                resetButton.Content = "Abort";
                 sim.RunStatus = Simulation.RUNSTAT_PAUSE;
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
