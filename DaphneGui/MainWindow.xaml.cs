@@ -2044,7 +2044,7 @@ namespace DaphneGui
         private bool saveTempFiles()
         {
             // check if there were changes
-            if (configurator.SerializeSimConfigToStringSkipDeco() != orig_content)
+            if (configurator != null && configurator.SerializeSimConfigToStringSkipDeco() != orig_content)
             {
                 configurator.SerializeSimConfigToFile(true);
                 tempFileContent = true;
@@ -2458,7 +2458,7 @@ namespace DaphneGui
             //Grab the blank scenario
             string file = "daphne_blank_scenario.json";
             string filename = appPath + @"\Config\" + file;
-            Uri uri_path = new Uri(appPath + @"\Config\" + file);
+            Uri uri_path = new Uri(filename);
 
             bool file_exists = File.Exists(uri_path.LocalPath);
             if (!file_exists)
