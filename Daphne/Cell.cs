@@ -21,6 +21,11 @@ namespace Daphne
         /// </summary>
         public bool Cytokinetic;
 
+        /// <summary>
+        /// The radius of the cell
+        /// </summary>
+        private double radius;
+
         public Cell()
         {
             Alive = true;
@@ -36,6 +41,22 @@ namespace Daphne
             Index = safeIndex++;
         }
 
+        public Cell(double _radius)
+        {
+            Alive = true;
+            Cytokinetic = false;
+            radius = _radius;
+            PlasmaMembrane = new Compartment(new TinySphere(new double[1] {radius} ));
+            Cytosol = new Compartment(new TinyBall(new double[1] { radius }));
+
+            OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
+
+            Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
+            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, cellEmbed);
+
+            Index = safeIndex++;
+        }
+        
         /// <summary>
         /// Drives the cell's dynamics though time-step dt. The dyanamics is applied in-place: the
         /// cell's state is changed directly through this method.
@@ -53,9 +74,10 @@ namespace Daphne
         /// <summary>
         /// Returns the force the cell applies to the environment.
         /// </summary>
-        public double[] Force
+        public double[] Force(double dt, double[] position)
         {
-            get { return Locomotor.Force(); }
+            return Locomotor.Force();
+           // get { return Locomotor.Force(dt, position); }
         }
 
         /// <summary>
@@ -82,6 +104,9 @@ namespace Daphne
 
         public int Index;
         private static int safeIndex = 0;
+
+        public bool IsMotile = true;
+
 
         // There may be other components specific to a given cell type.
     }

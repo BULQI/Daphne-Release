@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MathNet.Numerics;
+using MathNet.Numerics.LinearAlgebra;
+using System.IO;
 
 using System.Diagnostics;
 
 namespace Daphne
 {
-
     //public class Vector
     //{
     //    public int Dim;
@@ -29,6 +30,11 @@ namespace Daphne
     //    {
     //        get { return array[i]; }
     //        set { array[i] = value; }
+    //    }
+
+    //    public double[] ToDouble()
+    //    {
+    //        return array;
     //    }
 
     //    public static Vector operator +(Vector a, Vector b)
@@ -74,7 +80,168 @@ namespace Daphne
     //        return product;
     //    }
 
+    //    public static Vector operator *(Vector a, Vector b)
+    //    {
+    //        Vector product = new Vector(b.Dim);
+    //        for (int i = 0; i < b.Dim; i++)
+    //        {
+    //            product[i] = a[i] * b[i];
+    //        }
+
+    //        return product;
+    //    }
+
     //}
+
+    public class VectorField
+    {
+        public DiscretizedManifold M;
+        public Vector[] vector;
+
+        public Vector Value(int i)
+        {
+            return this[i];
+        }
+
+        public Vector Value(double[] point)
+        {
+            LocalMatrix[] lm = M.Interpolation(point);
+            Vector value = new Vector(M.Dim);
+
+            if (lm != null)
+            {
+                for (int j = 0; j < M.Dim; j++)
+                {
+                    for (int i = 0; i < lm.Length; i++)
+                    {
+                        value[j] = value[j] + ( lm[i].Coefficient * vector[lm[i].Index][j]);
+                    }
+                }
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// The dimension of each vector in the vector field is determined by the dimension of the manifold
+        /// </summary>
+        /// <param name="m">Manifold on which the vector field resides</param>
+        public VectorField(DiscretizedManifold m)
+        {
+            M = m;
+            vector = new Vector[M.ArraySize];
+
+            for (int i = 0; i < M.ArraySize; i++)
+            {
+                vector[i] = new Vector(M.Dim);
+            }
+        }
+        
+        /// <summary>
+        /// The dimension of each vector in the vector field is determined by the integer input parameter
+        /// </summary>
+        /// <param name="m">Manifold on which the vector field resides</param>
+        /// <param name="i">The dimension of the vectors</param>
+        public VectorField(DiscretizedManifold m, int dim)
+        {
+            M = m;
+            vector = new Vector[M.ArraySize];
+
+            for (int i = 0; i < M.ArraySize; i++)
+            {
+                vector[i] = new Vector(dim);
+            }
+        }
+
+        public Vector this[int i]
+        {
+            get { return vector[i]; }
+            set { vector[i] = value; }
+        }
+
+        public static VectorField operator +(VectorField a, VectorField b)
+        {
+            if (a.M != b.M)
+            {
+                throw (new Exception("Manifolds must be identical for scalar field addition."));
+            }
+
+            VectorField c = new VectorField(a.M);
+
+            for (int i = 0; i < a.M.ArraySize; i++)
+            {
+                c.vector[i] = a.vector[i] + b.vector[i];
+            }
+
+            return c;
+        }
+
+        public static VectorField operator -(VectorField a, VectorField b)
+        {
+            if (a.M != b.M)
+            {
+                throw (new Exception("Manifolds must be identical for scalar field addition."));
+            }
+
+            VectorField c = new VectorField(a.M);
+
+            for (int i = 0; i < a.M.ArraySize; i++)
+            {
+                c.vector[i] = a.vector[i] - b.vector[i];
+            }
+
+            return c;
+        }
+
+        public static VectorField operator *(double a, VectorField b)
+        {
+            VectorField product = new VectorField(b.M);
+            for (int i = 0; i < b.M.ArraySize; i++)
+            {
+                product[i] = a * b[i];
+            }
+
+            return product;
+        }
+
+        public static VectorField operator *(ScalarField a, VectorField b)
+        {
+            VectorField product = new VectorField(b.M);
+            for (int i = 0; i < b.M.ArraySize; i++)
+            {
+                product[i] = a.array[i] * b[i];
+            }
+
+            return product;
+        }
+        
+        public static VectorField operator *(VectorField a, VectorField b)
+        {
+            VectorField product = new VectorField(b.M);
+            for (int i = 0; i < b.M.ArraySize; i++)
+            {
+                for (int j = 0; j < b.M.Dim; j++)
+                {
+                    product[i][j] = a[i][j] * b[i][j];
+                }
+            }
+
+            return product;
+        }
+
+        public static VectorField operator /(VectorField a, ScalarField b)
+        {
+            VectorField product = new VectorField(b.M);
+            for (int i = 0; i < b.M.ArraySize; i++)
+            {
+                product[i] = a[i] / b.array[i];
+            }
+
+            return product;
+        }
+
+    }
+
 
     public abstract class Manifold
     {
@@ -88,6 +255,7 @@ namespace Daphne
         public Dictionary<Manifold,Embedding> Boundaries;
         public int[] NumPoints;
         protected LocalMatrix[] interpolator;
+        protected LocalMatrix[][] gradientOperator;
 
         public double[,] Coordinates;
         // extent in each dimension
@@ -95,6 +263,7 @@ namespace Daphne
         public double[] StepSize;
 
         public abstract LocalMatrix[] Interpolation(double[] point);
+        public abstract LocalMatrix[][] GradientOperator(int index);
 
         public virtual int[] localToArr(double[] loc)
         {
@@ -113,12 +282,37 @@ namespace Daphne
             }
             return 0;
         }
+
+        // gmk NOTE: Calculate the total quantity on the manifold using a simple integration algorithm.
+        // Used to test diffusion with zero flux boundary conditions for "leaks".
+        // TinySphere.Integrate(s) returns s*4*pi*r^2
+        // TinyBall.Integrate(s) returns s*4*pi*r^3/3
+        public abstract double Integrate(ScalarField s);
+
     }
 
     public class ScalarField
     {
         public DiscretizedManifold M;
-        public double Value(double[] point) { return double.NaN; }
+        public double Value(double[] point)
+        {
+            LocalMatrix[] lm = M.Interpolation(point);
+            double value = 0;
+
+            if (lm != null)
+            {
+                for (int i = 0; i < lm.Length; i++)
+                {                   
+                    value += lm[i].Coefficient * array[lm[i].Index];
+
+                    //System.Console.WriteLine(lm[i].Index + "\t" + lm[i].Coefficient + "\t"
+                    //        + M.Coordinates[lm[i].Index, 0] + ", " + M.Coordinates[lm[i].Index, 1] + ", " + M.Coordinates[lm[i].Index, 2]);
+                }
+            }
+
+            return value;
+        }
+
         public double[] array;
 
         public ScalarField(DiscretizedManifold m)
@@ -208,6 +402,41 @@ namespace Daphne
             return c;
         }
 
+        public static ScalarField operator +(double a, ScalarField b)
+        {
+            ScalarField c = new ScalarField(b.M);
+            for (int i = 0; i < b.M.ArraySize; i++)
+            {
+                c.array[i] = a + b.array[i];
+            }
+
+            return c;
+        }
+
+
+        public void WriteToFile(string filename)
+        {
+            using (StreamWriter writer = File.CreateText(filename))
+            {
+                int n = 0;
+
+                for (int i = 0; i < M.ArraySize; i++)
+                {
+                    writer.Write(n + "\t");
+
+                    for (int j = 0; j < M.Dim; j++)
+                    {
+                        writer.Write(M.Coordinates[n,j] + "\t");
+                    }
+                    writer.Write(array[n] + "\n");
+
+                    n++;
+                }
+            
+            }
+            return;
+        }
+
     }
 
     public class GaussianScalarField : ScalarField
@@ -218,7 +447,7 @@ namespace Daphne
         }
 
         /// <summary>
-        /// Calculate and return values of a Gaussian density funtion at each array point in the manifold
+        /// Calculate and return values of a Gaussian scalar field at each array point in the manifold
         /// The value at the center is max
         /// </summary>
         public bool Initialize(double[] x0, double[] sigma, double max)
@@ -228,25 +457,19 @@ namespace Daphne
                 return false;
             }
 
-            // QUESTION: Do we need this to avoid negative concentrations in the diffusion algorithm?
-            double SMALL = 1e-4,
-                   f, d = 1.0;
-            //double d = Math.Pow(2.0 * Math.PI, 1.5) * Math.Sqrt(sigma[0] * sigma[1] * sigma[2]);
+            double f=0, d = 1.0;
+            // double d = Math.Pow(2.0 * Math.PI, 1.5) * sigma[0] * sigma[1] * sigma[2];
 
             for (int i = 0; i < M.ArraySize; i++)
             {
                 f = 0;
                 for (int j = 0; j < M.Dim; j++)
                 {
-                    f += (x0[j] - M.Coordinates[i, j]) * (x0[j] - M.Coordinates[i, j]) / (2 * sigma[j]);
+                    f += (x0[j] - M.Coordinates[i, j]) * (x0[j] - M.Coordinates[i, j]) / (2 * sigma[j] * sigma[j]);
                 }
                 array[i] = max * Math.Exp(-f) / d;
-
-                if (array[i] < SMALL)
-                {
-                    array[i] = 0;
-                }
             }
+
             return true;
         }
 
@@ -264,11 +487,42 @@ namespace Daphne
             Coordinates = new double[1, 1];
             Coordinates[0, 0] = 0.0;
             //StepSize = new double[1] { 1.0 };
+            gradientOperator = new LocalMatrix[1][];
+            gradientOperator[0] = new LocalMatrix[1];
+            gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
+        }
+
+        public TinySphere(double[] extent)
+        {
+            // The radius of the sphere
+            Extents = (double[])extent.Clone();
+
+            Dim = 0;
+            ArraySize = 1;
+            //Boundaries = null;
+            Laplacian = new LocalMatrix[0][];
+            interpolator = new LocalMatrix[1] { new LocalMatrix() { Coefficient = 1.0, Index = 0 } };
+            Coordinates = new double[1, 1];
+            Coordinates[0, 0] = 0.0;
+            //StepSize = new double[1] { 1.0 };
+            gradientOperator = new LocalMatrix[1][];
+            gradientOperator[0] = new LocalMatrix[1];
+            gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
         }
 
         public override LocalMatrix[] Interpolation(double[] point)
         {
             return interpolator;
+        }
+
+        public override LocalMatrix[][] GradientOperator(int index)
+        {
+            return gradientOperator;
+        }
+
+        public override double Integrate(ScalarField s)
+        {
+            return s.array[0] * Math.PI * Extents[0] * Extents[0];
         }
     }
 
@@ -284,12 +538,45 @@ namespace Daphne
             Coordinates = new double[1, 1];
             Coordinates[0, 0] = 0.0;
             //StepSize = new double[1] { 1.0 };
+            gradientOperator = new LocalMatrix[1][];
+            gradientOperator[0] = new LocalMatrix[1];
+            gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
         }
+
+        public TinyBall(double[] extent)
+        {
+            // The radius of the sphere
+            Extents = (double[])extent.Clone();
+
+            Dim = 0;
+            ArraySize = 1;
+            //Boundaries = null;
+            Laplacian = new LocalMatrix[0][];
+            interpolator = new LocalMatrix[1] { new LocalMatrix() { Coefficient = 1.0, Index = 0 } };
+            Coordinates = new double[1, 1];
+            Coordinates[0, 0] = 0.0;
+            //StepSize = new double[1] { 1.0 };
+            gradientOperator = new LocalMatrix[1][];
+            gradientOperator[0] = new LocalMatrix[1];
+            gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
+        }
+
 
         public override LocalMatrix[] Interpolation(double[] point)
         {
             return interpolator;
         }
+
+        public override LocalMatrix[][] GradientOperator(int index)
+        {
+            return gradientOperator;
+        }
+
+        public override double Integrate(ScalarField s)
+        {
+            return s.array[0] * 4.0 * Math.PI * Extents[0] * Extents[0] * Extents[0] / 3.0;
+        }
+
     }
 /*
     public class Rectangle : DiscretizedManifold
@@ -352,10 +639,14 @@ namespace Daphne
             NumPoints = (int[])numGridPts.Clone();
             ArraySize = NumPoints[0] * NumPoints[1];
             Boundaries = new Dictionary<Manifold, Embedding>();
-
-            // TODO: Implement these properly
             Laplacian = new LocalMatrix[ArraySize][];
             interpolator = new LocalMatrix[4];
+
+            gradientOperator = new LocalMatrix[Dim][];
+            for (int i = 0; i < Dim; i++)
+            {
+                gradientOperator[i] = new LocalMatrix[2];
+            }
 
             Coordinates = new double[ArraySize, 2];
             Extents = (double[])extent.Clone();
@@ -375,6 +666,90 @@ namespace Daphne
                 }
             }
 
+            // The Laplacian with zero gradient boundary conditions 
+
+            for (n = 0; n < ArraySize; n++)
+            {
+                Laplacian[n] = new LocalMatrix[5];
+            }
+            n = 0;
+
+            int idxplus, idxminus;
+            double coeff0, coeff;
+
+            for (int j = 0; j < NumPoints[1]; j++)
+            {
+                for (int i = 0; i < NumPoints[0]; i++)
+                {
+                    // Laplacian index n corresponds to grid indices (i,j)
+
+                        Laplacian[n][0].Coefficient = 0;
+                        Laplacian[n][0].Index = i + j * NumPoints[0];
+
+
+                        coeff0 = -2.0 / (StepSize[0] * StepSize[0]);
+                        coeff = 1.0 / (StepSize[0] * StepSize[0]);
+
+                        if (i == 0)
+                        {
+                            idxplus = (i + 1) + j * NumPoints[0];
+                            idxminus = idxplus;
+                        }
+                        else if (i == NumPoints[0] - 1)
+                        {
+                            idxminus = (i - 1) + j * NumPoints[0];
+                            idxplus = idxminus;
+                        }
+                        else
+                        {
+                            idxplus = (i + 1) + j * NumPoints[0];
+                            idxminus = (i - 1) + j * NumPoints[0];
+                        }
+
+                        // (i+1), j
+                        Laplacian[n][1].Coefficient = coeff;
+                        Laplacian[n][1].Index = idxplus;
+
+                        // (i-1), j
+                        Laplacian[n][2].Coefficient = coeff;
+                        Laplacian[n][2].Index = idxminus;
+
+                        // i,j
+                        Laplacian[n][0].Coefficient = Laplacian[n][0].Coefficient + coeff0;
+
+                        coeff0 = -2.0 / (StepSize[1] * StepSize[1]);
+                        coeff = 1.0 / (StepSize[1] * StepSize[1]);
+
+                        if (j == 0)
+                        {
+                            idxplus = i + (j + 1) * NumPoints[0];
+                            idxminus = idxplus;
+                        }
+                        else if (j == NumPoints[1] - 1)
+                        {
+                            idxminus = i + (j - 1) * NumPoints[0];
+                            idxplus = idxminus;
+                        }
+                        else
+                        {
+                            idxplus = i + (j + 1) * NumPoints[0];
+                            idxminus = i + (j - 1) * NumPoints[0];
+                        }
+
+                        // i, (j+1)
+                        Laplacian[n][3].Coefficient = coeff;
+                        Laplacian[n][3].Index = idxplus;
+
+                        // i, (j-1)
+                        Laplacian[n][4].Coefficient = coeff;
+                        Laplacian[n][4].Index = idxminus;
+
+                        // i,j
+                        Laplacian[n][0].Coefficient = Laplacian[n][0].Coefficient + coeff0;
+
+                        n++;
+                }
+            }
         }
 
         public override int[] localToArr(double[] loc)
@@ -448,6 +823,104 @@ namespace Daphne
 
             return interpolator;
         }
+        public override LocalMatrix[][] GradientOperator(int index)
+        {
+            // Linear estimate of gradient
+
+            //int[] idx = localToArr(point);
+
+            //if (idx == null)
+            //{
+            //    return null;
+            //}
+
+            int j = (int)(index / NumPoints[0]);
+            int i = (int)(index - j * NumPoints[0]);
+
+            if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1))
+            {
+                return null;
+            }
+
+            double fx = 1.0 / (2 * StepSize[0]);
+            double fy = 1.0 / (2 * StepSize[1]);
+
+            if (i == NumPoints[0] - 1)
+            {
+                // ( c[i,j] - c[i-1,j] ) / dx
+                gradientOperator[0][0].Index = i + j * NumPoints[0];
+                gradientOperator[0][0].Coefficient = 2 * fx;
+                gradientOperator[0][1].Index = (i - 1) + j * NumPoints[0];
+                gradientOperator[0][1].Coefficient = -2 * fx;
+            }
+            else if (i == 0)
+            {
+                // ( c[i+1,j] - c[i,j] ) / dx
+                gradientOperator[0][0].Index = (i + 1) + j * NumPoints[0];
+                gradientOperator[0][0].Coefficient = 2 * fx;
+                gradientOperator[0][1].Index = i + j * NumPoints[0];
+                gradientOperator[0][1].Coefficient = -2 * fx;
+            }
+            else
+            {
+                // ( c[i+1,j] - c[i-1,j] ) / 2*dx
+                gradientOperator[0][0].Index = (i + 1) + j * NumPoints[0];
+                gradientOperator[0][0].Coefficient = fx;
+                gradientOperator[0][1].Index = (i - 1) + j * NumPoints[0];
+                gradientOperator[0][1].Coefficient = -fx;
+            }
+
+
+            if (j == NumPoints[1] - 1)
+            {
+                // ( c[i,j] - c[i,j-1] ) / dy
+                gradientOperator[1][0].Index = i + j * NumPoints[0];
+                gradientOperator[1][0].Coefficient = 2 * fy;
+                gradientOperator[1][1].Index = i + (j - 1) * NumPoints[0];
+                gradientOperator[1][1].Coefficient = -2 * fy;
+            }
+            else if (j == 0)
+            {
+                // ( c[i,j+1] - c[i,j] ) / dy
+                gradientOperator[1][0].Index = i + (j + 1) * NumPoints[0];
+                gradientOperator[1][0].Coefficient = 2 * fy;
+                gradientOperator[1][1].Index = i + j * NumPoints[0];
+                gradientOperator[1][1].Coefficient = -2 * fy;
+            }
+            else
+            {
+                // ( c[i,j+1] - c[i,j-1] ) / 2*dy
+                gradientOperator[1][0].Index = i + (j + 1) * NumPoints[0];
+                gradientOperator[1][0].Coefficient = fy;
+                gradientOperator[1][1].Index = i + (j - 1) * NumPoints[0];
+                gradientOperator[1][1].Coefficient = -fy;
+            }
+
+            return gradientOperator;
+        }
+
+        public override double Integrate(ScalarField s)
+        {
+            double[] point = new double[Dim];
+            double quantity = 0;
+            int index;
+            double voxel = StepSize[0] * StepSize[1];
+
+                for (int j = 0; j < NumPoints[1] - 1; j++)
+                {
+                    for (int i = 0; i < NumPoints[0] - 1; i++)
+                    {
+                        index = i + j * NumPoints[0];
+                        point[0] = Coordinates[index, 0] + StepSize[0] / 2.0;
+                        point[1] = Coordinates[index, 1] + StepSize[1] / 2.0;
+
+                        // The value at the center of the voxel
+                        quantity += s.Value(point);
+                    }
+                }
+
+            return quantity * voxel;
+        }
 
     }
 
@@ -463,6 +936,12 @@ namespace Daphne
             Boundaries = new Dictionary<Manifold, Embedding>();
             Laplacian = new LocalMatrix[ArraySize][];
             interpolator = new LocalMatrix[8];
+
+            gradientOperator = new LocalMatrix[Dim][];
+            for (int i = 0; i < Dim; i++)
+            {
+                gradientOperator[i] = new LocalMatrix[2];
+            }
 
             Extents = (double[])extent.Clone();
 
@@ -487,43 +966,51 @@ namespace Daphne
                 }
             }
 
-            // TODO: this needs to be for correctness
+            // The Laplacian with zero gradient boundary conditions 
+
             for (n = 0; n < ArraySize; n++)
             {
                 Laplacian[n] = new LocalMatrix[7];
             }
+
             n = 0;
 
             int idxplus, idxminus;
             double coeff0, coeff;
+            int     N01 = NumPoints[0] * NumPoints[1];
 
-            for (int i = 0; i < NumPoints[0]; i++)
+            for (int k = 0; k < NumPoints[2]; k++)
             {
                 for (int j = 0; j < NumPoints[1]; j++)
                 {
-                    for (int k = 0; k < NumPoints[2]; k++)
+                    for (int i = 0; i < NumPoints[0]; i++)
                     {
+
                         // Laplacian index n corresponds to grid indices (i,j,k)
 
-                        // Intialize (i,j,k) coefficient to zero
                         Laplacian[n][0].Coefficient = 0;
-                        Laplacian[n][0].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                        Laplacian[n][0].Index = i + j * NumPoints[0] + k * N01;
 
-                        if ((i == 0) || (i == NumPoints[0] - 1))
+
+                        coeff = 1.0 / (StepSize[0] * StepSize[0]);
+                        coeff0 = -2.0 * coeff;
+
+                        if (i == 0) 
                         {
-                            // No flux BC
-                            coeff0 = 0;
-                            coeff = 0;
-                            idxplus = 0;
-                            idxminus = 0;
+                            idxplus = (i + 1) + j * NumPoints[0] + k * N01;
+                            idxminus = idxplus;
+                        }
+                        else if (i == NumPoints[0] - 1)
+                        {
+                            idxminus = (i - 1) + j * NumPoints[0] + k * N01;
+                            idxplus = idxminus;
                         }
                         else
                         {
-                            coeff0 = -2.0 / (StepSize[0] * StepSize[0]);
-                            coeff = 1.0 / (StepSize[0] * StepSize[0]);
-                            idxplus = (i + 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
-                            idxminus = (i - 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                            idxplus = (i + 1) + j * NumPoints[0] + k * N01;
+                            idxminus = (i - 1) + j * NumPoints[0] + k * N01;
                         }
+
                         // (i+1), j, k
                         Laplacian[n][1].Coefficient = coeff;
                         Laplacian[n][1].Index = idxplus;
@@ -535,20 +1022,24 @@ namespace Daphne
                         // i,j,k
                         Laplacian[n][0].Coefficient = Laplacian[n][0].Coefficient + coeff0;
 
-                        if ((j == 0) || (j == NumPoints[1] - 1))
+
+                        coeff = 1.0 / (StepSize[1] * StepSize[1]);
+                        coeff0 = -2.0 * coeff;
+
+                        if (j == 0)
                         {
-                            // No flux BC
-                            coeff0 = 0;
-                            coeff = 0;
-                            idxplus = 0;
-                            idxminus = 0;
+                            idxplus = i + (j + 1) * NumPoints[0] + k * N01;
+                            idxminus = idxplus;
+                        }
+                        else if (j == NumPoints[1] - 1)
+                        {
+                            idxminus = i + (j - 1) * NumPoints[0] + k * N01;
+                            idxplus = idxminus;
                         }
                         else
                         {
-                            coeff0 = -2.0 / (StepSize[1] * StepSize[1]);
-                            coeff = 1.0 / (StepSize[1] * StepSize[1]);
-                            idxplus = i + (j + 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
-                            idxminus = i + (j - 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                            idxplus = i + (j + 1) * NumPoints[0] + k * N01;
+                            idxminus = i + (j - 1) * NumPoints[0] + k * N01;
                         }
 
                         // i, (j+1), k
@@ -562,21 +1053,26 @@ namespace Daphne
                         // i,j,k
                         Laplacian[n][0].Coefficient = Laplacian[n][0].Coefficient + coeff0;
 
-                        if ((k == 0) || (k == NumPoints[2] - 1))
+
+                        coeff = 1.0 / (StepSize[2] * StepSize[2]);
+                        coeff0 = -2.0 * coeff;
+
+                        if (k == 0)
                         {
-                            // No flux BC
-                            coeff0 = 0;
-                            coeff = 0;
-                            idxplus = 0;
-                            idxminus = 0;
+                            idxplus = i + k * NumPoints[0] + (k + 1) * N01;
+                            idxminus = idxplus;
+                        }
+                        else if (k == NumPoints[2] - 1)
+                        {
+                            idxminus = i + j * NumPoints[0] + (k - 1) * N01;
+                            idxplus = idxminus;
                         }
                         else
                         {
-                            coeff0 = -2.0 / (StepSize[2] * StepSize[2]);
-                            coeff = 1.0 / (StepSize[2] * StepSize[2]);
-                            idxplus = i + j * NumPoints[0] + (k + 1) * NumPoints[0] * NumPoints[1];
-                            idxminus = i + j * NumPoints[0] + (k + 1) * NumPoints[0] * NumPoints[1];
+                            idxplus = i + j * NumPoints[0] + (k + 1) * N01;
+                            idxminus = i + j * NumPoints[0] + (k - 1) * N01;
                         }
+
 
                         // i, j, (k+1)
                         Laplacian[n][5].Coefficient = coeff;
@@ -594,63 +1090,68 @@ namespace Daphne
                 }
             }
 
-            double[] rectSpatialExtents;
-            int[] numRectGridPts = new int[2];
+            // NOTE: We don't require instantiation of these manifolds nor do we require the embeddings,
+            // since we are using zero flux boundary conditions for diffusion in the extracellular medium.
+            // Therefore, it's best to remove them. Otherwise, we waste time updating boundary concentrations
+            // for these embedded manifolds at each time step.
 
-            rectSpatialExtents = new double[2] { Extents[0], Extents[1] };
-            numRectGridPts[0] = numGridPts[0];
-            numRectGridPts[1] = numGridPts[1];
-            DiscretizedManifold xyLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
-            DiscretizedManifold xyUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //double[] rectSpatialExtents;
+            //int[] numRectGridPts = new int[2];
 
-            rectSpatialExtents = new double[2] { Extents[0], Extents[2] };
-            numRectGridPts[0] = numGridPts[0];
-            numRectGridPts[1] = numGridPts[2];
-            DiscretizedManifold xzLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
-            DiscretizedManifold xzUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //rectSpatialExtents = new double[2] { Extents[0], Extents[1] };
+            //numRectGridPts[0] = numGridPts[0];
+            //numRectGridPts[1] = numGridPts[1];
+            //DiscretizedManifold xyLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //DiscretizedManifold xyUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
 
-            rectSpatialExtents = new double[2] { Extents[1], Extents[2] };
-            numRectGridPts[0] = numGridPts[1];
-            numRectGridPts[1] = numGridPts[2];
-            DiscretizedManifold yzLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
-            DiscretizedManifold yzUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //rectSpatialExtents = new double[2] { Extents[0], Extents[2] };
+            //numRectGridPts[0] = numGridPts[0];
+            //numRectGridPts[1] = numGridPts[2];
+            //DiscretizedManifold xzLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //DiscretizedManifold xzUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
 
-            // Position of rectangle origin in the BoundedRectangularPrism
-            double[] origin;
+            //rectSpatialExtents = new double[2] { Extents[1], Extents[2] };
+            //numRectGridPts[0] = numGridPts[1];
+            //numRectGridPts[1] = numGridPts[2];
+            //DiscretizedManifold yzLower = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
+            //DiscretizedManifold yzUpper = new BoundedRectangle(numRectGridPts, rectSpatialExtents);
 
-            // Mapping of dimension in rectangle to dimensions in the BoundedRectangularPrism
-            int[] dimensionsMap;
+            //// Position of rectangle origin in the BoundedRectangularPrism
+            //double[] origin;
 
-            dimensionsMap = new int[2] { 0, 1 };
-            // xyLower
-            origin = new double[3] { 0, 0, 0 };
-            DirectTranslEmbedding xyLowerEmbed = new DirectTranslEmbedding(xyLower, this, dimensionsMap, origin);
-            // xyUpper
-            origin = new double[3] { 0, 0, Extents[2] };
-            DirectTranslEmbedding xyUpperEmbed = new DirectTranslEmbedding(xyUpper, this, dimensionsMap, origin);
+            //// Mapping of dimension in rectangle to dimensions in the BoundedRectangularPrism
+            //int[] dimensionsMap;
 
-            dimensionsMap = new int[2] { 0, 2 };
-            // xzLower
-            origin = new double[3] { 0, 0, 0 };
-            DirectTranslEmbedding xzLowerEmbed = new DirectTranslEmbedding(xzLower, this, dimensionsMap, origin);
-            // xzUpper
-            origin = new double[3] { 0, Extents[1], 0 };
-            DirectTranslEmbedding xzUpperEmbed = new DirectTranslEmbedding(xzUpper, this, dimensionsMap, origin);
+            //dimensionsMap = new int[2] { 0, 1 };
+            //// xyLower
+            //origin = new double[3] { 0, 0, 0 };
+            //DirectTranslEmbedding xyLowerEmbed = new DirectTranslEmbedding(xyLower, this, dimensionsMap, origin);
+            //// xyUpper
+            //origin = new double[3] { 0, 0, Extents[2] };
+            //DirectTranslEmbedding xyUpperEmbed = new DirectTranslEmbedding(xyUpper, this, dimensionsMap, origin);
 
-            dimensionsMap = new int[2] { 1, 2 };
-            // yzLower
-            origin = new double[3] { 0, 0, 0 };
-            DirectTranslEmbedding yzLowerEmbed = new DirectTranslEmbedding(yzLower, this, dimensionsMap, origin);
-            // yzLower
-            origin = new double[3] { Extents[0], 0, 0 };
-            DirectTranslEmbedding yzUpperEmbed = new DirectTranslEmbedding(yzUpper, this, dimensionsMap, origin);
+            //dimensionsMap = new int[2] { 0, 2 };
+            //// xzLower
+            //origin = new double[3] { 0, 0, 0 };
+            //DirectTranslEmbedding xzLowerEmbed = new DirectTranslEmbedding(xzLower, this, dimensionsMap, origin);
+            //// xzUpper
+            //origin = new double[3] { 0, Extents[1], 0 };
+            //DirectTranslEmbedding xzUpperEmbed = new DirectTranslEmbedding(xzUpper, this, dimensionsMap, origin);
 
-            Boundaries.Add(xyLower, xyLowerEmbed);
-            Boundaries.Add(xyUpper, xyUpperEmbed);
-            Boundaries.Add(xzLower, xzLowerEmbed);
-            Boundaries.Add(xzUpper, xzUpperEmbed);
-            Boundaries.Add(yzLower, yzLowerEmbed);
-            Boundaries.Add(yzUpper, yzUpperEmbed);
+            //dimensionsMap = new int[2] { 1, 2 };
+            //// yzLower
+            //origin = new double[3] { 0, 0, 0 };
+            //DirectTranslEmbedding yzLowerEmbed = new DirectTranslEmbedding(yzLower, this, dimensionsMap, origin);
+            //// yzLower
+            //origin = new double[3] { Extents[0], 0, 0 };
+            //DirectTranslEmbedding yzUpperEmbed = new DirectTranslEmbedding(yzUpper, this, dimensionsMap, origin);
+
+            //Boundaries.Add(xyLower, xyLowerEmbed);
+            //Boundaries.Add(xyUpper, xyUpperEmbed);
+            //Boundaries.Add(xzLower, xzLowerEmbed);
+            //Boundaries.Add(xzUpper, xzUpperEmbed);
+            //Boundaries.Add(yzLower, yzLowerEmbed);
+            //Boundaries.Add(yzUpper, yzUpperEmbed);
         }
 
         public override int[] localToArr(double[] loc)
@@ -742,6 +1243,214 @@ namespace Daphne
 
             return interpolator;
         }
+
+
+        //public override LocalMatrix[][] GradientOperator(double[] point)
+        /// <summary>
+        /// Return the local gradient stencil for array point n
+        /// </summary>
+        /// <param name="n">index into array</param>
+        /// <returns>LocalMatrix for interpolating the local gradient</returns>
+        public override LocalMatrix[][] GradientOperator(int index)
+        {
+            // Linear estimate of gradient
+
+            int k = (int)(index / (NumPoints[0] * NumPoints[1]));
+            int j = (int)((index - k * NumPoints[0] * NumPoints[1]) / NumPoints[0]);
+            int i = (int)(index - k * NumPoints[0] * NumPoints[1] - j * NumPoints[0]);
+
+            //System.Console.WriteLine(index + "\t" + Coordinates[index, 0] + ", " + Coordinates[index, 1] + ", " + Coordinates[index, 2]
+            //                        + "\t" + i + ", " + j + ", " + k);
+
+            if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1) || (k < 0) || (k > Extents[2] - 1))
+            {
+                return null;
+            }
+
+            double fx = 1.0 / (2 * StepSize[0]);
+            double fy = 1.0 / (2 * StepSize[1]);
+            double fz = 1.0 / (2 * StepSize[2]);
+
+            if (i == NumPoints[0] - 1)
+            {
+                // ( c[i,j] - c[i-1,j] ) / dx
+                gradientOperator[0][0].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][0].Coefficient = 2 * fx;
+                gradientOperator[0][1].Index = (i - 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][1].Coefficient = -2 * fx;
+            }
+            else if (i == 0)
+            {
+                // ( c[i+1,j] - c[i,j] ) / dx
+                gradientOperator[0][0].Index = (i + 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][0].Coefficient = 2 * fx;
+                gradientOperator[0][1].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][1].Coefficient = -2 * fx;
+            }
+            else
+            {
+                // ( c[i+1,j] - c[i-1,j] ) / 2*dx
+                gradientOperator[0][0].Index = (i + 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][0].Coefficient = fx;
+                gradientOperator[0][1].Index = (i - 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[0][1].Coefficient = -fx;
+            }
+
+
+            if (j == NumPoints[1] - 1)
+            {
+                // ( c[i,j] - c[i,j-1] ) / dy
+                gradientOperator[1][0].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][0].Coefficient = 2 * fy;
+                gradientOperator[1][1].Index = i + (j - 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][1].Coefficient = -2 * fy;
+            }
+            else if (j == 0)
+            {
+                // ( c[i,j+1] - c[i,j] ) / dy
+                gradientOperator[1][0].Index = i + (j + 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][0].Coefficient = 2 * fy;
+                gradientOperator[1][1].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][1].Coefficient = -2 * fy;
+            }
+            else
+            {
+                // ( c[i,j+1] - c[i,j-1] ) / 2*dy
+                gradientOperator[1][0].Index = i + (j + 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][0].Coefficient = fy;
+                gradientOperator[1][1].Index = i + (j - 1) * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[1][1].Coefficient = -fy;
+            }
+
+            if (k == NumPoints[2] - 1)
+            {
+                // ( c[i,j,k] - c[i,j,k-1] ) / dz
+                gradientOperator[2][0].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][0].Coefficient = 2 * fz;
+                gradientOperator[2][1].Index = i + j * NumPoints[0] + (k - 1) * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][1].Coefficient = -2 * fy;
+            }
+            else if (k == 0)
+            {
+                // ( c[i,j,k+1] - c[i,j,k] ) / dz
+                gradientOperator[2][0].Index = i + j * NumPoints[0] + (k + 1) * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][0].Coefficient = 2 * fz;
+                gradientOperator[2][1].Index = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][1].Coefficient = -2 * fz;
+            }
+            else
+            {
+                // ( c[i,j,k+1] - c[i,j,k-1] ) / 2*dz
+                gradientOperator[2][0].Index = i + j * NumPoints[0] + (k + 1) * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][0].Coefficient = fz;
+                gradientOperator[2][1].Index = i + j * NumPoints[0] + (k - 1) * NumPoints[0] * NumPoints[1];
+                gradientOperator[2][1].Coefficient = -fz;
+            }
+
+            return gradientOperator;
+        }
+
+        /// <summary>
+        /// Builds a stencil for diffusion of the gradient (of a molecular population).
+        /// Zero flux boundary conditions equate to (zero) Dirichlet boundary conditions for the gradient.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>LocalVectorMatrix[Dim][] GradDiffStencil</returns>
+        public LocalVectorMatrix[][] GradDiffusionStencil(int index)
+        {
+            // Return the diffusion stencil for the nth component of the gradient at 
+            // the grid point corresponding to index
+
+            LocalVectorMatrix[][] GradDiffStencil = new LocalVectorMatrix[Dim][];
+
+            // TODO: complete this
+
+            //int k = (int)(index / (Extents[0] * Extents[1]));
+            //int j = (int)(index / Extents[0]);
+            //int i = (int)(index - k * Extents[0] * Extents[1] - j * Extents[0]);
+
+            //if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1) || (k < 0) || (k > Extents[2] - 1))
+            //{
+            //    return null;
+            //}
+
+            //LocalVectorMatrix[] lm = new LocalVectorMatrix[11];
+            //double h0, h1, h2;
+            //int idx, idxplus, idxminus;
+
+            //GradDiffStencil[0] = new LocalVectorMatrix[11];
+
+            //// Stencil for component 0 (x-direction)
+
+            //h0 = 1.0 / (StepSize[0] * StepSize[0]);
+            //h1 = 1.0 / (4 * StepSize[0] * StepSize[1]);
+            //h2 = 1.0 / (4 * StepSize[0] * StepSize[2]);
+
+            //if (i == 0)
+            //{
+            //    idxplus = (i + 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+            //    idxminus = idxplus;
+            //}
+            //else if (i == NumPoints[0] - 1)
+            //{
+            //    idxminus = (i - 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+            //    idxplus = idxminus;
+            //}
+            //else
+            //{
+            //    lm = new LocalVectorMatrix[11];
+            //    idx = i + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+
+            //    idxplus = (i + 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+            //    idxminus = (i - 1) + j * NumPoints[0] + k * NumPoints[0] * NumPoints[1];
+            //    lm[0] = new LocalVectorMatrix() { Index = idx, Coefficient = -2 * h0, Component = 0 };
+            //    lm[1].Index = idxplus;
+            //    lm[1].Coefficient = h1;
+            //    lm[1].Component = 0;
+            //    lm[2].Index = idxminus;
+            //    lm[2].Coefficient = h2;
+            //    lm[2].Component = 0;
+
+            //    lm[3].Index = idxminus;
+            //    lm[3].Coefficient = h2;
+            //    lm[3].Component = 0;
+
+            //}
+
+            return GradDiffStencil;
+        }
+
+        /// <summary>
+        /// A simple integration scheme.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public override double Integrate(ScalarField s)
+        {
+            double[] point = new double[Dim];
+            double quantity = 0;
+            int index;
+            double voxel = StepSize[0] * StepSize[1] * StepSize[2];
+
+            for (int k = 0; k < NumPoints[2] - 1; k++)
+            {
+                for (int j = 0; j < NumPoints[1] - 1; j++)
+                {
+                    for (int i = 0; i < NumPoints[0] - 1; i++)
+                    {
+                        index = i + j*NumPoints[0] + k*NumPoints[0]*NumPoints[1];
+                        point[0] = Coordinates[index, 0] + StepSize[0] / 2.0;
+                        point[1] = Coordinates[index, 1] + StepSize[1] / 2.0;
+                        point[2] = Coordinates[index, 2] + StepSize[2] / 2.0;
+
+                        // The value at the center of the voxel
+                        quantity += s.Value(point);
+                    }
+                }
+            }
+            return quantity*voxel;
+        }
+
     }   
 
     /// <summary>
@@ -754,10 +1463,16 @@ namespace Daphne
         public double Coefficient;
     }
 
-    public class VectorField
+    /// <summary>
+    /// LocalVectorMatrix is similar to local matrix, but indicates which component of a vector to use 
+    /// </summary>
+    public struct LocalVectorMatrix 
     {
-
+        public int Index;
+        public double Coefficient;
+        public int Component;
     }
+
 
     abstract public class Embedding
     {
@@ -780,6 +1495,13 @@ namespace Daphne
         public abstract double[] WhereIs(int index);
 
         public abstract bool NeedsInterpolation();
+
+        // Coordinates in the embedding manifold of the embedded manifolds origin
+        // Has Range.Dim elements
+        // This field will probably be used by TranslEmbedding.
+        // This field needs to be accessible from the extracellular mediums list of boundary manifolds,
+        // so we can update this field as the cell position changes
+        public double[] position;
     }
 
     /// <summary>
@@ -794,8 +1516,8 @@ namespace Daphne
         // dimensionsMap has Domain.Dim elements, except for embedded manifolds like TinySphere or TinyBall, in which case it has length 1
         public int[] dimensionsMap;
 
-        // Coordinates in the embedding manifold of the embedded manifolds origin
-        // Has Range.Dim elements
+        //// Coordinates in the embedding manifold of the embedded manifolds origin
+        //// Has Range.Dim elements
         public double[] position;
 
         public TranslEmbedding(DiscretizedManifold domain, DiscretizedManifold range, int[] _dimMap, double[] _pos)

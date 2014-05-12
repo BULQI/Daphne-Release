@@ -185,7 +185,48 @@ namespace Daphne
 
                 case ("generalized"):
 
-                    // TODO: implement generalized reactions
+                    double rateConstant = rt.rateConst;
+                    Dictionary<MolecularPopulation,int[]> genReac = new Dictionary<MolecularPopulation,int[]>();
+
+                    // Add reactant MolecularPopulation and stoichiometry
+                    foreach (SpeciesReference sp in rt.listOfReactants)
+                    {
+                        // product stoichiometries initialized to zero
+                        genReac.Add(C.Populations[sp.species], new int[2] {sp.stoichiometry,0} );
+                    }
+
+                    // Add product information
+                    foreach (SpeciesReference sp in rt.listOfProducts)
+                    {
+                        bool match = false;
+                        foreach (KeyValuePair<MolecularPopulation, int[]> kvp in genReac)
+                        {
+                            if (C.Populations[sp.species] == kvp.Key)
+                            {
+                                // This MolecularPopulation already accounted for
+                                // Add product stoichiometry
+                                kvp.Value[1] = sp.stoichiometry;
+                                match = true;
+                                break;
+                            }
+                        }
+
+                        if (match == false)
+                        {
+                            // No matching MolecularPopulation among reactants
+                            // Add product MolecularPopulation and stoichiometry
+                            genReac.Add(C.Populations[sp.species],new int[2] {0, sp.stoichiometry} );
+                        }
+                    }
+
+                    // Add catalysts
+                    foreach (SpeciesReference sp in rt.listOfModifiers)
+                    {
+                        genReac.Add(C.Populations[sp.species], new int[2] { sp.stoichiometry, sp.stoichiometry });
+                    }
+
+                    //C.reactions.Add(new GeneralizedReaction(molpopD, rateConstant);
+
                     C.rtList.Add(rt);
                     break;
 
@@ -480,7 +521,7 @@ namespace Daphne
                     complex = prodComp[0].Populations[rt.listOfProducts[0].species];
 
                     // boundary association  receptor + ligand	→	comples
-                    embeddedComp.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, rt.rateConst));
+                    embeddedComp.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, rt.rateConst));
                     embeddedComp.rtList.Add(rt);
 
                     break;

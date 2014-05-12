@@ -10,7 +10,7 @@ namespace Daphne
     /// </summary>
     public class Locomotor
     {
-        // driver is the molecular population that provide locomotor with a gradient
+        //driver is the molecular population that provide locomotor with a gradient
         private MolecularPopulation driver;
 
         /// <summary>
@@ -26,13 +26,18 @@ namespace Daphne
 
         public double[] Force()
         {
-            double[] force = driver.Gradient(null);
+            double[] force = new double[3];
+            for (int i = 0; i < 3; i++)
+            {
+                force[i] = driver.GlobalGrad[0][i];
+            }
+
             for (int i = 0; i < force.Length; i++)
             {
                 force[i] *= TransductionConstant;
             }
+
             return force;
         }
     }
-
 }
