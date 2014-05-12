@@ -25,6 +25,9 @@ namespace Daphne
 
             // cells
             PredefinedCellsCreator(sc);
+
+            //reaction complexes
+            PredefinedReactionComplexesCreator(sc);
         }
 
         public static void CreateAndSerializeLigandReceptorScenario(SimConfiguration sc)
@@ -330,7 +333,7 @@ namespace Daphne
             //MOLECULES IN MEMBRANE
             var query1 =
                 from mol in sc.entity_repository.molecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
+                where mol.Name == "CXCR5_membrane" || mol.Name == "CXCR5:CXCL13_membrane"
                 select mol;
 
             ConfigMolecularPopulation gmp = null;
@@ -347,7 +350,7 @@ namespace Daphne
 
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
-                if (gm.Name == "CXCR5")
+                if (gm.Name == "CXCR5_membrane")
                 {
                     hl.concentration = 125;
                 }
@@ -419,23 +422,43 @@ namespace Daphne
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
         {
             ConfigMolecule cm;
-            
+
             cm = new ConfigMolecule("CXCL13", 1.0, 1.0, 6e3);
             sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCR5", 1.0, 1.0, 0.0);
+            cm = new ConfigMolecule("CXCR5_membrane", 1.0, 1.0, 1e-7);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCR5:CXCL13", 1.0, 1.0, 0.0);
+            cm = new ConfigMolecule("CXCR5:CXCL13_membrane", 1.0, 1.0, 1e-7);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             cm = new ConfigMolecule("A", 1.0, 1.0, 6e3);
             sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             cm = new ConfigMolecule("A*", 1.0, 1.0, 6e3);
             sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            cm = new ConfigMolecule("gCXCR5", 1.0, 1.0, 1e-7);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // CXCR5 in the cytosol
+            cm = new ConfigMolecule("CXCR5", 1.0, 1.0, 1e3);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // CXCR5:CXCL13 in the cytosol
+            cm = new ConfigMolecule("CXCR5:CXCL13", 1.0, 1.0, 1e3);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
@@ -480,6 +503,45 @@ namespace Daphne
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
 
+            //Association
+            crt = new ConfigReactionTemplate();
+
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.Association;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            //Dissociation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.Dissociation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            //Annihilation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            //crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.Annihilation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
             // CatalyzedBoundaryActivation
             crt = new ConfigReactionTemplate();
 
@@ -493,6 +555,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedBoundaryActivation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
             // Transformation
             crt = new ConfigReactionTemplate();
@@ -505,6 +568,58 @@ namespace Daphne
             crt.reac_type = ReactionType.Transformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // BoundaryTransportFrom
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            // products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.BoundaryTransportFrom;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // BoundaryTransportTo
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            // products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.BoundaryTransportTo;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Catalyzed Annihilation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedAnnihilation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Catalyzed Creation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedCreation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
@@ -579,44 +694,84 @@ namespace Daphne
             //string readText = File.ReadAllText("TESTER.TXT");
             //entity_repository.reactions = JsonConvert.DeserializeObject<ObservableCollection<ConfigReaction>>(readText);
 
-            // BoundaryAssociation
+            // BoundaryAssociation: CXCR5_membrane + CXCL13 -> CXCR5:CXCL13_membrane
             ConfigReaction cr = new ConfigReaction();
 
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Boundary, sc));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Boundary, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
             cr.rate_const = 2.0;
             sc.entity_repository.reactions.Add(cr);
 
-            // BoundaryDissociation
+            // BoundaryDissociation:  CXCR5:CXCL13_membrane ->  CXCR5_membrane + CXCL13
             cr = new ConfigReaction();
 
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Boundary, sc));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Boundary, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 1.0;
             sc.entity_repository.reactions.Add(cr);
 
-            // CatalyzedBoundaryActivation
+            // Association: CXCR5 + CXCL13 -> CXCR5:CXCL13
+            cr = new ConfigReaction();
+
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 2.0;
+            sc.entity_repository.reactions.Add(cr);
+
+            // Dissociation: CXCR5:CXCL13 -> CXCR5 + CXCL13
+            cr = new ConfigReaction();
+
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Dissociation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 2.0;
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 2.0;
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCR5:CXCL13 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 2.0;
+            sc.entity_repository.reactions.Add(cr);
+
+            // CatalyzedBoundaryActivation: CXCR5:CXCL13_membrane + A -> CXCR5:CXCL13_membrane + A*
             cr = new ConfigReaction();
 
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Boundary, sc));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Boundary, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
             sc.entity_repository.reactions.Add(cr);
 
-            // Transformation
+            // Transformation: A -> A*
             cr = new ConfigReaction();
 
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
@@ -627,6 +782,52 @@ namespace Daphne
             cr.rate_const = 10.0;
             sc.entity_repository.reactions.Add(cr);
 
+            // Catalyzed Creation: gCXCR5 -> gCXCR5 + CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 10.0;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // BoundaryTransportTo: CXCR5 -> CXCR5_membrane
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // BoundaryTransportFrom: CXCR5_membrane -> CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 1.0e-1;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // BoundaryTransportFrom: CXCR5:CXCL13_membrane -> CXCR5:CXCL13
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 1.0e-1;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -635,5 +836,98 @@ namespace Daphne
             string jsonFile = "Config\\DaphnePredefinedReactions.txt";
             File.WriteAllText(jsonFile, jsonSpec);
         }
+
+        private static void PredefinedReactionComplexesCreator(SimConfiguration sc)
+        {
+            ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
+
+            //MOLECULES
+            var query =
+                from mol in sc.entity_repository.molecules
+                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13" || mol.Name == "CXCL13"
+                select mol;
+
+            ConfigMolecularPopulation cmp = null;
+            foreach (ConfigMolecule cm in query)
+            {
+                cmp = new ConfigMolecularPopulation();
+                cmp.molecule_guid_ref = cm.molecule_guid;
+                cmp.mpInfo = new MolPopInfo("My " + cm.Name);
+                cmp.Name = "My " + cm.Name;
+                cmp.mpInfo.mp_dist_name = "Constant level";
+                cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                cmp.mpInfo.mp_render_blending_weight = 2.0;
+                cmp.mpInfo.mp_type_guid_ref = cm.Name;
+
+                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                if (cm.Name == "CXCR5")
+                {
+                    hl.concentration = 125;
+                }
+                else
+                {
+                    hl.concentration = 130;
+                }
+                cmp.mpInfo.mp_distribution = hl;
+
+                crc.molpops.Add(cmp);
+            }
+
+            //REACTIONS
+            string guid = findReactionGuid(ReactionType.Association, sc);
+            crc.reactions_guid_ref.Add(guid);
+            guid = findReactionGuid(ReactionType.Dissociation, sc);
+            crc.reactions_guid_ref.Add(guid);
+
+            foreach (ConfigReaction cr in sc.entity_repository.reactions)
+            {
+                foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
+                {
+                    if (cr.reaction_template_guid_ref == crt.reaction_template_guid && crt.reac_type == ReactionType.Annihilation)
+                    {
+                        crc.reactions_guid_ref.Add(cr.reaction_guid);
+                    }
+                }                
+            }
+
+            sc.entity_repository.reaction_complexes.Add(crc);
+
+            //----------------------------
+
+            crc = new ConfigReactionComplex("Bistable");
+            foreach (ConfigMolecule cm in query)
+            {
+                cmp = new ConfigMolecularPopulation();
+                cmp.molecule_guid_ref = cm.molecule_guid;
+                cmp.mpInfo = new MolPopInfo("My " + cm.Name);
+                cmp.Name = "My " + cm.Name;
+                cmp.mpInfo.mp_dist_name = "Constant level";
+                cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                cmp.mpInfo.mp_render_blending_weight = 2.0;
+                cmp.mpInfo.mp_type_guid_ref = cm.Name;
+
+                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                if (cm.Name == "CXCR5")
+                {
+                    hl.concentration = 125;
+                }
+                else
+                {
+                    hl.concentration = 130;
+                }
+                cmp.mpInfo.mp_distribution = hl;
+
+                crc.molpops.Add(cmp);
+            }
+
+            guid = findReactionGuid(ReactionType.Association, sc);
+            crc.reactions_guid_ref.Add(guid);
+            guid = findReactionGuid(ReactionType.Dissociation, sc);
+            crc.reactions_guid_ref.Add(guid);
+
+            sc.entity_repository.reaction_complexes.Add(crc);
+
+        }
+
     }
 }

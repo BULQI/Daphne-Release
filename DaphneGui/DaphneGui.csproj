@@ -144,7 +144,6 @@
     </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
-    <Compile Include="Workbench\ReactionComplexSimulation.cs" />
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

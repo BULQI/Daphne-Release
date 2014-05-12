@@ -24,7 +24,7 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-        public EditRCReactions(GuiReactionComplex rc)
+        public EditRCReactions(ConfigReactionComplex rc)
         {
             InitializeComponent();
             lbRC.DataContext = rc;

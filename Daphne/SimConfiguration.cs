@@ -216,6 +216,7 @@ namespace Daphne
             InitCellIDConfigCellDict();
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
+            InitReactionComplexIDConfigReactionComplexDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -300,6 +301,17 @@ namespace Daphne
             entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
 
         }
+        private void InitReactionComplexIDConfigReactionComplexDict()
+        {
+            entity_repository.reaction_complexes_dict.Clear();
+            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
+            {
+                entity_repository.reaction_complexes_dict.Add(crc.reaction_complex_guid, crc);
+            }
+            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+
+        }
+        //
 
         private void InitReactionTemplateIDConfigReactionTempalteDict()
         {
@@ -434,6 +446,26 @@ namespace Daphne
             }
         }
 
+        private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReactionComplex crc = nn as ConfigReactionComplex;
+                    entity_repository.reaction_complexes_dict.Add(crc.reaction_complex_guid, crc);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReactionComplex crt = dd as ConfigReactionComplex;
+                    entity_repository.reaction_complexes_dict.Remove(crt.reaction_complex_guid);
+                }
+            }
+        }
+
         public ConfigMolecule FindMolecule(string name)
         {
             ConfigMolecule gm = null;
@@ -517,20 +549,20 @@ namespace Daphne
     {
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
         public ObservableCollection<BoxSpecification> box_specifications { get; set; }
-       
-        //STILL HAVE TO DEAL WITH THESE PREDEF OBJECTS
-        //[JsonIgnore]
-        //public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
+        public ObservableCollection<ConfigReactionComplex> reaction_complexes { get; set; }
+
+        //All molecules, reactions, cells - Combined Predefined and User defined
         public ObservableCollection<ConfigCell> cells { get; set; }
-        //All molecules and reactions - Combined Predefined and User defined         
         public ObservableCollection<ConfigMolecule> molecules { get; set; }
         public ObservableCollection<ConfigReaction> reactions { get; set; }
+
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
 
         public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
         public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
         public Dictionary<string, ConfigReaction> reactions_dict;
         public Dictionary<string, ConfigCell> cells_dict;
+        public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
 
         public EntityRepository()
         {
@@ -544,6 +576,8 @@ namespace Daphne
             reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reactions_dict = new Dictionary<string, ConfigReaction>();
             cells_dict = new Dictionary<string, ConfigCell>();
+            reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
+            reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
         }
         
     }
@@ -1002,11 +1036,13 @@ namespace Daphne
                 }
             }
         }
+        public ObservableCollection<string> reaction_complexes_guid_ref { get; set; }
 
         public ConfigCompartment()
         {
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             reactions_guid_ref = new ObservableCollection<string>();
+            reaction_complexes_guid_ref = new ObservableCollection<string>();
         }
     }
 
@@ -1015,7 +1051,8 @@ namespace Daphne
         Association = 0, Dissociation, Annihilation, Dimerization, DimerDissociation,
         Transformation, AutocatalyticTransformation, CatalyzedAnnihilation,
         CatalyzedAssociation, CatalyzedCreation, CatalyzedDimerization, CatalyzedDimerDissociation,
-        CatalyzedDissociation, CatalyzedTransformation, CatalyzedBoundaryActivation, BoundaryAssociation, BoundaryDissociation, Generalized
+        CatalyzedDissociation, CatalyzedTransformation, CatalyzedBoundaryActivation, BoundaryAssociation, 
+        BoundaryDissociation, BoundaryTransportFrom, BoundaryTransportTo, Generalized
     }
 
     /// <summary>
@@ -1189,6 +1226,103 @@ namespace Daphne
         }
     }
 
+    public class ConfigReactionComplex
+    {
+        public string Name { get; set; }
+        public string reaction_complex_guid { get; set; }
+        public ObservableCollection<string> reactions_guid_ref { get; set; }
+        public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+
+        [JsonIgnore]
+        //public ObservableCollection<ConfigReaction> Reactions { get; set; }
+        //public ObservableCollection<ConfigMolecule> Molecules { get; set; }
+
+        public bool ReadOnly { get; set; }
+        public Color ForegroundColor { get; set; }
+
+        //public ConfigCompartment ball { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<string, Molecule> MolDict { get; set; }
+
+        public ConfigReactionComplex()
+        {
+            Guid id = Guid.NewGuid();
+            reaction_complex_guid = id.ToString();
+            Name = "NewRC";
+            reactions_guid_ref = new ObservableCollection<string>();
+            molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            ReadOnly = true;
+            ForegroundColor = Colors.Red;
+        }
+        public ConfigReactionComplex(string name)
+        {
+            Guid id = Guid.NewGuid();
+            reaction_complex_guid = id.ToString();
+            Name = name;
+            ReadOnly = true;
+            ForegroundColor = Colors.Red;
+            reactions_guid_ref = new ObservableCollection<string>();
+            molpops = new ObservableCollection<ConfigMolecularPopulation>();
+        }
+        public ConfigReactionComplex(ConfigReactionComplex src)
+        {
+            Guid id = Guid.NewGuid();
+            reaction_complex_guid = id.ToString();
+            Name = "NewRC";
+            ReadOnly = false;
+            ForegroundColor = Colors.Black;
+            reactions_guid_ref = new ObservableCollection<string>();
+            reactions_guid_ref = src.reactions_guid_ref;
+            molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            molpops = src.molpops;
+        }
+
+        //public void ParseForMolecules()
+        //{
+        //    MolDict = new Dictionary<string, Molecule>();
+        //    foreach (ConfigReaction grt in Reactions)
+        //    {
+        //        foreach (SpeciesReference sr in grt.listOfReactants)
+        //        {
+        //            ConfigMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null) {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //        foreach (SpeciesReference sr in grt.listOfProducts)
+        //        {
+        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null)
+        //            {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //        foreach (SpeciesReference sr in grt.listOfModifiers)
+        //        {
+        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null)
+        //            {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //}
+
+    }
 
     //////public class GuiBoundaryReactionTemplate : ConfigReaction
     //////{
@@ -1617,7 +1751,19 @@ namespace Daphne
             }
         }
         public double mp_render_blending_weight { get; set; }
-        public bool mp_render_on { get; set; }
+        private bool _mp_render_on;
+        public bool mp_render_on 
+        { 
+            get
+            {
+                return _mp_render_on;
+            }
+            set {
+                _mp_render_on = value;                
+                OnPropertyChanged("mp_render_on");
+            }
+        }
+
 
         public MolPopInfo()
         {            
@@ -1764,31 +1910,32 @@ namespace Daphne
     }
 
     /// <summary>
-    /// Converter to go between reaction GUID references in ECS
-    /// and reaction info kept in the repository of reactions.
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
     /// </summary>
     [ValueConversion(typeof(string), typeof(string))]
-    public class ReacGUIDtoReacStringConverter : IValueConverter
+    public class ReactionComplexGUIDtoReactionComplexStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string guid = value as string;
-            string reac_string = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            string rc_string = "";
 
-            ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
-            if (reac_list != null)
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigReactionComplex> rc_list = cvs.Source as ObservableCollection<ConfigReactionComplex>;
+            if (rc_list != null)
             {
-                foreach (ConfigReaction cr in reac_list)
+                foreach (ConfigReactionComplex crc in rc_list)
                 {
-                    if (cr.reaction_guid == guid)
+                    if (crc.reaction_complex_guid == guid)
                     {
-                        reac_string = cr.TotalReactionString;
+                        //This next if is a complete hack!
+                        rc_string = crc.Name;
                         break;
                     }
                 }
             }
-            return reac_string;
+            return rc_string;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2726,6 +2873,7 @@ namespace Daphne
             {
                 var e = new PropertyChangedEventArgs(propertyName);
                 handler(this, e);
+
             }
         }
 

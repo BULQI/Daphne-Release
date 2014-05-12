@@ -44,9 +44,35 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Orientation="Vertical">
+            <StackPanel.Resources>
+                <Style x:Key="TextBoxStyle1" TargetType="{x:Type TextBox}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type TextBox}">
+                                <Grid>
+                                    <!--<ScrollViewer x:Name="PART_ContentHost" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="2,2,1,1"/>-->
+                                    <Border BorderBrush="#FFBAB7B7" BorderThickness="0,0,1,1" Margin="1,1,0,0"/>
+                                    <Border BorderBrush="Gray" BorderThickness="1,1,0,0" Width="Auto"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style x:Key="TextBoxStyle2" TargetType="{x:Type TextBox}">
+                    <Style.Triggers>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect Opacity="1" ShadowDepth="0" Color="Red" BlurRadius="10" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Resources>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,4,0" Text="Reactants:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtReac" Width="320"/>
+                <TextBox x:Name="txtReac" Width="320" />
                 <Button x:Name="btnRClear" Content="Clear" Width="40" Click="btnRClear_Click" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -56,7 +82,24 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtRate" Width="60" Text="{Binding Path=inputRateConstant, Mode=TwoWay}"/>
+                <TextBox x:Name="txtRate" Width="60" Text="{Binding Path=inputRateConstant, Mode=TwoWay}">
+                    <!--<TextBox.BitmapEffect>
+                        <DropShadowBitmapEffect ShadowDepth=".4" Softness=".1"></DropShadowBitmapEffect>
+                    </TextBox.BitmapEffect>-->
+                    <!--<TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Opacity="1" ShadowDepth="0" Color="Gray" BlurRadius="10" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>-->
+                </TextBox>
             </StackPanel>
         </StackPanel>
 
@@ -108,7 +151,11 @@
 
         </GroupBox>
         <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" Canvas.ZIndex="10">
+            
+           
+                        
             <Button x:Name="btnSave" Content="Save Reaction" Width="100" Height="24"  HorizontalAlignment="Right" Click="btnSave_Click"/>
+            <!--<TextBox Style="{StaticResource TextBoxStyle1}"/>-->
             <!--<ListBox 
                       Grid.Row="3" Margin="10,10,0,0"
                       DataContext="{StaticResource WordList}" 

@@ -48,11 +48,11 @@ namespace DaphneGui
         public static double cellOpacity = 1.0;
 
         private static Simulation sim;
-        //public static Simulation Sim
-        //{
-        //    get { return MainWindow.sim; }
-        //    set { MainWindow.sim = value; }
-        //}
+        public static Simulation Sim
+        {
+            get { return MainWindow.sim; }
+            set { MainWindow.sim = value; }
+        }
 
         private bool blueHandToolButton_IsChecked = false;
 
@@ -309,7 +309,8 @@ namespace DaphneGui
                 //file = "daphne_test_scenario.xml";
                 //file = "default_scenario.xml";
                 //file = "daphne_test_scenario.json";
-                file = "daphne_driver_locomotion_scenario.json";
+                //file = "daphne_driver_locomotion_scenario.json";
+                file = "daphne_blank_scenario.json";
             }
 
             // attempt to load a default simulation file; if it doesn't exist disable the gui
@@ -1447,8 +1448,10 @@ namespace DaphneGui
                         configurator.DeserializeSimConfig();
                         //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        string output = string.Format("Error deserializing: {0}", e.Message);
+                        MessageBox.Show(output);
                         //MessageBox.Show("There is a problem loading the configuration file.\nPress OK, then try to load another.", "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
                         handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
                         return;

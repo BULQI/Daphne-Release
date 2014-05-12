@@ -15,6 +15,10 @@ using Microsoft.Win32;
 using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Linq;
+
+using Ninject;
+using Ninject.Parameters;
 
 namespace DaphneGui
 {
@@ -583,74 +587,182 @@ namespace DaphneGui
             }
         }
 
-
-
-
-        private void AddReacCompButton_Click(object sender, RoutedEventArgs e)
+        private void AddEcsReacCompButton_Click(object sender, RoutedEventArgs e)
         {
-            ////GuiReactionComplex grc = new GuiReactionComplex();
-            ////GuiReactionComplex sel = (GuiReactionComplex)lbAvailableReacCx.SelectedItem;
-            ////grc = sel;
-            ////MainWindow.SC.SimConfig.scenario.ReactionComplexes.Add(grc);
-            ////AddReacCxExpander.IsExpanded = !AddReacCxExpander.IsExpanded;
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
+            if (crc != null)
+            {
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.reaction_complex_guid))
+                {
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.reaction_complex_guid);
+                }
+            }
         }
+
         private void RemoveReacCompButton_Click(object sender, RoutedEventArgs e)
         {
-            ////int nIndex = ReactionComplexListBox.SelectedIndex;
-            ////if (nIndex >= 0)
-            ////{
-            ////    GuiReactionComplex grc = (GuiReactionComplex)ReactionComplexListBox.SelectedValue;
-            ////    MainWindow.SC.SimConfig.scenario.ReactionComplexes.Remove(grc);
-            ////}
-        }
-        private void AddReacCompExpandButton_Click(object sender, RoutedEventArgs e)
-        {            
-            AddReacCxExpander.IsExpanded = !AddReacCxExpander.IsExpanded;
+            int nIndex = ReactionComplexListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                string guid = (string)ReactionComplexListBox.SelectedValue;
+                MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Remove(guid);
+            }
         }
 
-        //Reaction Complexes/Differentiation Schemes tab
-        private void btnAddComplex_Click(object sender, RoutedEventArgs e)
-        {
-            ////AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
-            ////if (arc.ShowDialog() == true)
-            ////{
-            ////    ////////lbComplexes.ItemsSource = null;
-            ////    ////////lbComplexes.ItemsSource = Sim.RCList;
-            ////    ////////lbComplexes.Focus();
-            ////    ////////lbComplexes.SelectedItem = 0;
-            ////}
-        }
+        //LIBRARIES REACTION COMPLEXES HANDLERS
 
-        private void btnEditComplex_Click(object sender, RoutedEventArgs e)
+        private void btnCopyComplex_Click(object sender, RoutedEventArgs e)
         {
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to copy from.");
+                return;
+            }
+
+            ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
+            ConfigReactionComplex crcNew = new ConfigReactionComplex(crcCurr);
+
+            MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Add(crcNew);
+            
             ////AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
             ////if (arc.ShowDialog() == true)
             ////{
             ////    ////////lbComplexes.ItemsSource = null;
             ////    ////////lbComplexes.ItemsSource = Sim.RCList;
-            ////}
+            ////}    
+            
+        }
+
+        //Reaction Complexes/Differentiation Schemes tab
+        private void btnAddComplex_Click(object sender, RoutedEventArgs e)
+        {
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
+            if (arc.ShowDialog() == true)
+            {
+                ////////lbComplexes.ItemsSource = null;
+                ////////lbComplexes.ItemsSource = Sim.RCList;
+                ////////lbComplexes.Focus();
+                ////////lbComplexes.SelectedItem = 0;
+            }
+        }
+
+        private void btnEditComplex_Click(object sender, RoutedEventArgs e)
+        {
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
+            if (arc.ShowDialog() == true)
+            {
+                ////////lbComplexes.ItemsSource = null;
+                ////////lbComplexes.ItemsSource = Sim.RCList;
+            }
         }
 
         private void btnRemoveComplex_Click(object sender, RoutedEventArgs e)
         {
-            ////////ReactionComplex rc = (ReactionComplex)(lbComplexes.SelectedItem);
-            ////////if (rc != null)
-            ////////{
-            ////////    Sim.RCList.Remove(rc);
-            ////////    lbComplexes.ItemsSource = null;
-            ////////    lbComplexes.ItemsSource = Sim.RCList;
-            ////////    lbComplexes.SelectedItem = 0;
-            ////////}
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+            if (crc != null)
+            {
+                if (crc.ReadOnly == false)
+                {
+                    int index = lbComplexes.SelectedIndex;
+                    MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Remove(crc);
+
+                    lbComplexes.SelectedIndex = index;
+
+                    if (index >= lbComplexes.Items.Count)
+                        lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+
+                    if (lbComplexes.Items.Count == 0)
+                        lbComplexes.SelectedIndex = -1;
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined reaction complex.");
+                }
+            }
         }
 
         private void btnGraphComplex_Click(object sender, RoutedEventArgs e)
         {
-            ////GuiReactionComplex grc = (GuiReactionComplex)(lbComplexes.SelectedItem);
-            ////ReactionComplexSimulation rcs = new ReactionComplexSimulation(grc);
-            ////rcs.Go();
-            //grc.Run();
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to process.");
+                return;
+            }
+            
+            ConfigReactionComplex grc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
-            //DependencyObject do = this.Parent;
+            ////// executes the ninject bindings; call this after the config is initialized with valid values
+            ////SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
+
+            // Create Cells
+            //
+            double[] state = new double[SpatialState.Dim];
+            double[] cellPos = new double[Simulation.dataBasket.ECS.Space.Interior.Dim],
+                     extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
+                                             Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
+                                             Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
+            double cellRadius = 5.0;
+
+            // One cell
+            Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
+
+            state[0] = extent[0] / 3.0;
+            state[1] = extent[1] / 3.0;
+            state[2] = extent[2] / 3.0;
+            cell.setState(state);
+            MainWindow.Sim.AddCell(cell);
+
+
+            foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+            {
+                foreach (ConfigMolecularPopulation cmp in grc.molpops)
+                {
+                    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref];
+                    //Molecule mol = new Molecule(cm.Name, cm.MolecularWeight, cm.EffectiveRadius, cm.DiffusionCoefficient);
+                    kvp.Value.Cytosol.AddMolecularPopulation(cm.molecule_guid, "const", new double[] { 2.0 }); 
+                }
+                foreach (string rguid in grc.reactions_guid_ref)
+                {
+                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                    ConfigReaction cr = er.reactions_dict[rguid];
+                    Compartment comp = kvp.Value.Cytosol;
+                    if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
+                    {
+                        //comp.Reactions.Add(new Association(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                        //                               comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name],
+                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                        //                               cr.rate_const));
+                        comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                       cr.rate_const));
+                    }
+                    else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
+                    {
+                        //comp.Reactions.Add(new Dissociation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name],
+                        //                               cr.rate_const));
+                        comp.Reactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[1]],
+                                                       cr.rate_const));
+                    }
+                    else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Annihilation)
+                    {
+                        //comp.Reactions.Add(new Annihilation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                        //                               cr.rate_const));
+                        comp.Reactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
+                    }
+                }
+                kvp.Value.IsMotile = false;  
+            }
+
+
+            double T = 5;   // minutes
+            double dt = 0.001;
+            int nSteps = (int)(T / dt);
+            TestStepperReactionComplex(MainWindow.Sim, grc, nSteps, dt, 2.0, 1.0);
 
 
 
@@ -682,6 +794,37 @@ namespace DaphneGui
 
         }
 
+        private void TestStepperReactionComplex(Simulation sim, ConfigReactionComplex grc, int nSteps, double dt, double k1plus, double k1minus)
+        {
+            double mol1Conc,
+                   mol2Conc,
+                   mol3Conc;
+
+            double[] defaultLoc = {0.0, 0.0, 0.0};
+
+            string output;
+            string filename = "Config\\ReactionComplexOutput.txt";
+
+            using (StreamWriter writer = File.CreateText(filename))
+            {
+                for (int i = 0; i < nSteps; i++)
+                {
+                    sim.Step(dt);
+
+                    // cytosol
+                    mol1Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[0].molecule_guid_ref].Conc.Value(defaultLoc);
+                    mol2Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[1].molecule_guid_ref].Conc.Value(defaultLoc);
+                    mol3Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[2].molecule_guid_ref].Conc.Value(defaultLoc);
+
+                    output = i * dt + "\t" + mol1Conc + "\t" + mol2Conc + "\t" + mol3Conc;
+                    writer.WriteLine( output );
+                }
+            }
+
+            MessageBox.Show("Finished processing reaction complex.");
+
+        }
+
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
@@ -705,7 +848,7 @@ namespace DaphneGui
         {
             ////if (lbCellAvailableReacCx.SelectedIndex != -1)
             ////{
-            ////    GuiReactionComplex grc = (GuiReactionComplex)lbCellAvailableReacCx.SelectedValue;
+            ////    ConfigReactionComplex grc = (ConfigReactionComplex)lbCellAvailableReacCx.SelectedValue;
             ////    if (!MainWindow.SC.SimConfig.scenario.ReactionComplexes.Contains(grc))
             ////        MainWindow.SC.SimConfig.scenario.ReactionComplexes.Add(grc);
             ////}
@@ -930,6 +1073,28 @@ namespace DaphneGui
                     e.Accepted = true;
                 }
                 
+            }
+        }
+
+        private void ecmReactionComplexReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            if (ReactionComplexListBox.SelectedIndex < 0)
+                return;
+
+            ConfigReaction cr = e.Item as ConfigReaction;
+            string guidRC = (string)ReactionComplexListBox.SelectedItem;
+
+            e.Accepted = true;
+
+            if (guidRC != null && cr != null)
+            {
+                ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
+                e.Accepted = false;
+                // Filter out cr if not in ecm reaction list 
+                if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+                {
+                    e.Accepted = true;
+                }
             }
         }
 
@@ -1228,23 +1393,23 @@ namespace DaphneGui
 
         private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
         {
-            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
-            if (cp == null)
-                return;
+            //CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            //if (cp == null)
+            //    return;
 
-            string s = (string)Clipboard.GetData(DataFormats.Text);
+            //string s = (string)Clipboard.GetData(DataFormats.Text);
 
-            char[] delim = { '\t', '\r', '\n' };
-            string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+            //char[] delim = { '\t', '\r', '\n' };
+            //string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-            cp.cell_locations.Clear();
-            for (int i = 0; i < paste.Length-2; i += 3)
-            {
-                CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
-                cp.cell_locations.Add(cl);
-            }
-            cp.number = cp.cell_locations.Count;
-            e.Handled = true;
+            //cp.cell_locations.Clear();
+            //for (int i = 0; i < paste.Length-2; i += 3)
+            //{
+            //    CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
+            //    cp.cell_locations.Add(cl);
+            //}
+            //cp.number = cp.cell_locations.Count;
+            //e.Handled = true;
 
         }
 
@@ -1280,7 +1445,7 @@ namespace DaphneGui
             {
                 dgData.Items.Refresh();
             }
-            catch 
+            catch
             {
             }
         }

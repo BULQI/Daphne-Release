@@ -167,8 +167,8 @@ namespace testDaphne
                     ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(driverLoc);
 
                     // membrane; already in membrane's coordinate system
-                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(driverLoc);
-                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
+                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5_membrane"].Conc.Value(driverLoc);
+                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13_membrane"].Conc.Value(driverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc;
                     //Console.WriteLine(output);
@@ -177,8 +177,8 @@ namespace testDaphne
             }
 
             driverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(Simulation.dataBasket.Cells.First().Value.State.X);
-            complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
-            receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(driverLoc);
+            complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13_membrane"].Conc.Value(driverLoc);
+            receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5_membrane"].Conc.Value(driverLoc);
             ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(driverLoc);
             double pred = ligandBoundaryConc / (ligandBoundaryConc + (k1minus / k1plus));
             double actual = complexConc / (complexConc + receptorConc);
