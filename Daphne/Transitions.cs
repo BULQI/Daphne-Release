@@ -149,7 +149,7 @@ namespace Daphne
         /// <param name="dt">The time interval for the evolution (double).</param>
         public override void Step(double dt)
         {
-            if (drivers.Count == 0)
+            if ( (drivers.Count == 0) || (!drivers.ContainsKey(CurrentState)) )
             {
                 return;
             }

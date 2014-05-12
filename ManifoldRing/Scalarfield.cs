@@ -603,6 +603,16 @@ namespace ManifoldRing
         }
 
         /// <summary>
+        /// addition of a constant to this scalar field
+        /// </summary>
+        /// <param name="d">constant</param>
+        /// <returns></returns>
+        public ScalarField Add(double d)
+        {
+            return m.Add(this, d);
+        }
+
+        /// <summary>
         /// field addition operator
         /// </summary>
         /// <param name="f1">field 1</param>
@@ -611,6 +621,28 @@ namespace ManifoldRing
         public static ScalarField operator +(ScalarField f1, ScalarField f2)
         {
             return f1.Add(f2);
+        }
+
+        /// <summary>
+        /// addition of constant to scalar field
+        /// </summary>
+        /// <param name="f">scalar field</param>
+        /// <param name="d">constant</param>
+        /// <returns></returns>
+        public static ScalarField operator +(ScalarField f, double d)
+        {
+            return f.Add(d);
+        }
+
+        /// <summary>
+        /// addition of constant to scalar field
+        /// </summary>
+        /// <param name="d">constant</param>
+        /// <param name="f">scalar field</param>
+        /// <returns></returns>
+        public static ScalarField operator +(double d, ScalarField f)
+        {
+            return f.Add(d);
         }
 
         /// <summary>

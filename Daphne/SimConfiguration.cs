@@ -572,27 +572,6 @@ namespace Daphne
         /// <param name="e"></param>
         void environment_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Update all BoxSpecifications
-            ////foreach (BoxSpecification bs in entity_repository.box_specifications)
-            ////{
-            ////    // NOTE: Uncomment and add in code if really need to adjust directions independently for efficiency
-            ////    //if (e.PropertyName == "extent_x")
-            ////    //{
-            ////    //    // set x direction
-            ////    //}
-            ////    //if (e.PropertyName == "extent_y")
-            ////    //{
-            ////    //    // set x direction
-            ////    //}
-            ////    //if (e.PropertyName == "extent_z")
-            ////    //{
-            ////    //    // set x direction
-            ////    //}
-
-            ////    // For now just setting all every time...
-            ////    SetBoxSpecExtents(bs);
-            ////}
-
             // Check that cells are still inside the simulation space.
             foreach (CellPopulation cellPop in scenario.cellpopulations)
             {
@@ -1238,21 +1217,28 @@ namespace Daphne
             return gm;
         }
 
-        public List<ConfigReaction> GetBoundaryReactions(ConfigCompartment configComp)
+        /// <summary>
+        /// Select transcription reactions in the compartment.
+        /// </summary>
+        /// <param name="configComp">the compartment</param>
+        /// <returns></returns>
+        public List<ConfigReaction> GetTranscriptionReactions(ConfigCompartment configComp)
         {
             List<string> reac_guids = new List<string>();
             List<ConfigReaction> config_reacs = new List<ConfigReaction>();
 
+            // Compartment reactions
             foreach (string rguid in configComp.reactions_guid_ref)
             {
                 ConfigReaction cr = entity_repository.reactions_dict[rguid];
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
                 {
                     reac_guids.Add(rguid);
                     config_reacs.Add(cr);
                 }
             }
 
+            // Compartment reaction templates
             foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             {
                 ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
@@ -1261,32 +1247,40 @@ namespace Daphne
                     if (reac_guids.Contains(rguid) == false)
                     {
                         ConfigReaction cr = entity_repository.reactions_dict[rguid];
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
                         {
-                            //reac_guids.Add(rguid);
                             config_reacs.Add(cr);
                         }
                     }
                 }
             }
+
             return config_reacs;
         }
 
-        public List<ConfigReaction> GetBulkReactions(ConfigCompartment configComp)
+        /// <summary>
+        /// Select boundary or bulk reactions in the compartment.
+        /// </summary>
+        /// <param name="configComp">the compartment</param>
+        /// <param name="boundMol">boolean: true to select boundary, false to select bulk</param>
+        /// <returns></returns>
+        public List<ConfigReaction> GetReactions(ConfigCompartment configComp, bool boundMol)
         {
             List<string> reac_guids = new List<string>();
             List<ConfigReaction> config_reacs = new List<ConfigReaction>();
 
+            // Compartment reactions
             foreach (string rguid in configComp.reactions_guid_ref)
             {
                 ConfigReaction cr = entity_repository.reactions_dict[rguid];
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
                 {
                     reac_guids.Add(rguid);
                     config_reacs.Add(cr);
                 }
             }
 
+            // Compartment reaction templates
             foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             {
                 ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
@@ -1295,16 +1289,84 @@ namespace Daphne
                     if (reac_guids.Contains(rguid) == false)
                     {
                         ConfigReaction cr = entity_repository.reactions_dict[rguid];
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
                         {
-                            //reac_guids.Add(rguid);
                             config_reacs.Add(cr);
                         }
                     }
                 }
             }
+
             return config_reacs;
         }
+
+        //public List<ConfigReaction> GetBoundaryReactions(ConfigCompartment configComp)
+        //{
+        //    List<string> reac_guids = new List<string>();
+        //    List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+
+        //    foreach (string rguid in configComp.reactions_guid_ref)
+        //    {
+        //        ConfigReaction cr = entity_repository.reactions_dict[rguid];
+        //        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+        //        {
+        //            reac_guids.Add(rguid);
+        //            config_reacs.Add(cr);
+        //        }
+        //    }
+
+        //    foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+        //    {
+        //        ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+        //        foreach (string rguid in crc.reactions_guid_ref)
+        //        {
+        //            if (reac_guids.Contains(rguid) == false)
+        //            {
+        //                ConfigReaction cr = entity_repository.reactions_dict[rguid];
+        //                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+        //                {
+        //                    //reac_guids.Add(rguid);
+        //                    config_reacs.Add(cr);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return config_reacs;
+        //}
+
+        //public List<ConfigReaction> GetBulkReactions(ConfigCompartment configComp)
+        //{
+        //    List<string> reac_guids = new List<string>();
+        //    List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+
+        //    foreach (string rguid in configComp.reactions_guid_ref)
+        //    {
+        //        ConfigReaction cr = entity_repository.reactions_dict[rguid];
+        //        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+        //        {
+        //            reac_guids.Add(rguid);
+        //            config_reacs.Add(cr);
+        //        }
+        //    }
+
+        //    foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+        //    {
+        //        ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+        //        foreach (string rguid in crc.reactions_guid_ref)
+        //        {
+        //            if (reac_guids.Contains(rguid) == false)
+        //            {
+        //                ConfigReaction cr = entity_repository.reactions_dict[rguid];
+        //                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+        //                {
+        //                    //reac_guids.Add(rguid);
+        //                    config_reacs.Add(cr);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return config_reacs;
+        //}
 
         public CellPopulation GetCellPopulation(int key)
         {
@@ -2362,7 +2424,6 @@ namespace Daphne
         public string StateName { get; set; }
         
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
-        //public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
         public ObservableCollection<string> states;
 
         public ConfigTransitionDriver()
@@ -2370,7 +2431,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             driver_guid = id.ToString();
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
-            //DriverElements = new ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>>();
         }
     }
 
@@ -2404,12 +2464,22 @@ namespace Daphne
         public ObservableCollection<string> genes { get; set; }
         //  Gene activations for each state
         //  The order of states (rows) should match the order in Drive.states
-        public ObservableCollection<ObservableCollection<double>> activations { get; set; }
+        public ObservableCollection<ConfigActivationRow> activationRows { get; set; }
 
         public ConfigDiffScheme()
         {
             Guid id = Guid.NewGuid();
             diff_scheme_guid = id.ToString();
+        }
+    }
+
+    public class ConfigActivationRow
+    {
+        public ObservableCollection<double> activations;
+
+        public ConfigActivationRow()
+        {
+            activations = new ObservableCollection<double>();
         }
     }
 
@@ -2666,7 +2736,8 @@ namespace Daphne
         Transformation, AutocatalyticTransformation, CatalyzedAnnihilation,
         CatalyzedAssociation, CatalyzedCreation, CatalyzedDimerization, CatalyzedDimerDissociation,
         CatalyzedTransformation, CatalyzedDissociation, CatalyzedBoundaryActivation, BoundaryAssociation, 
-        BoundaryDissociation, Generalized, BoundaryTransportFrom, BoundaryTransportTo  
+        BoundaryDissociation, Generalized, BoundaryTransportFrom, BoundaryTransportTo,
+        Transcription
     }
 
     /// <summary>
@@ -2698,7 +2769,8 @@ namespace Daphne
                                     "BoundaryDissociation",
                                     "Generalized",
                                     "BoundaryTransportTo",
-                                    "BoundaryTransportFrom"
+                                    "BoundaryTransportFrom",
+                                    "Transcription"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2756,23 +2828,33 @@ namespace Daphne
             modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
         }
 
-
         public void GetTotalReactionString(EntityRepository repos)
         {
             string s = "";
             int i = 0;
 
-            foreach (string mol_guid_ref in reactants_molecule_guid_ref)
+            // Transcription reactions have a ConfigGene object as the reactant.
+            // Other reactions have ConfigMolecule objects as the reactants.
+            if (repos.reaction_templates_dict[reaction_template_guid_ref].reac_type == ReactionType.Transcription)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry
-                int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
-                i++;
-                if (n > 1)
-                    s += n;
-                s += cm.Name;
+                ConfigGene g = repos.genes_dict[reactants_molecule_guid_ref[0]];
+                s += g.Name;
                 s += " + ";
+            }
+            else
+            {
+                foreach (string mol_guid_ref in reactants_molecule_guid_ref)
+                {
+                    ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
+
+                    //stoichiometry
+                    int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
+                    i++;
+                    if (n > 1)
+                        s += n;
+                    s += cm.Name;
+                    s += " + ";
+                }
             }
             i = 0;
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)

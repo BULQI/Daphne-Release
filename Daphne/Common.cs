@@ -74,6 +74,10 @@ namespace Daphne
 
             // same transition for all
             Bind<ITransitionDriver>().To<TransitionDriver>();
+            // same differentiator for all
+            Bind<IDifferentiator>().To<Differentiator>();
+
+            Bind<Gene>().ToSelf();
 
             // bindings for simulation entities
             Bind<Cell>().ToSelf();

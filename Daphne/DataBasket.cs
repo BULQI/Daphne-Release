@@ -34,6 +34,10 @@ namespace Daphne
         /// </summary>
         private Dictionary<string, Molecule> molecules;
         /// <summary>
+        /// dictionary of genes
+        /// </summary>
+        private Dictionary<string, Gene> genes;
+        /// <summary>
         /// handle to the simulation
         /// </summary>
         private Simulation hSim;
@@ -63,6 +67,7 @@ namespace Daphne
             cells = new Dictionary<int,Cell>();
             populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
+            genes = new Dictionary<string, Gene>();
 #if ALL_DATA
             ResetTrackData();
 #endif
@@ -77,6 +82,7 @@ namespace Daphne
             Cell.SafeCell_id = 0;
             populations.Clear();
             molecules.Clear();
+            genes.Clear();
         }
 
         /// <summary>
@@ -112,6 +118,15 @@ namespace Daphne
         {
             get { return molecules; }
             set { molecules = value; }
+        }
+
+        /// <summary>
+        /// accessor for the dictionary of genes
+        /// </summary>
+        public Dictionary<string, Gene> Genes
+        {
+            get { return genes; }
+            set { genes = value; }
         }
 
 #if ALL_DATA

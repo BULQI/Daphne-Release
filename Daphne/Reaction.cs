@@ -11,7 +11,6 @@ namespace Daphne
     public abstract class Reaction : IDynamic
     {
         public double RateConstant;
-        protected ScalarField intensity;
         // to enable, remove all comments at line beginnings involving ReactionType
         //public ReactionType Type { get; set; }
 
@@ -19,10 +18,10 @@ namespace Daphne
     }
 
     // Fundamental reactions
-    // See 'Dynamics for MolPops.pdf' for mathematical detail on the gradient update equations.
 
     public class Annihilation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
 
         public Annihilation(MolecularPopulation _reactant, double _RateConst)
@@ -41,6 +40,7 @@ namespace Daphne
 
     public class Association : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant1 { get; set; }
         public MolecularPopulation reactant2 { get; set; }
         public MolecularPopulation product { get; set; }
@@ -65,6 +65,7 @@ namespace Daphne
 
     public class Dimerization : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
 
@@ -86,6 +87,7 @@ namespace Daphne
 
     public class DimerDissociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
 
@@ -107,6 +109,7 @@ namespace Daphne
 
     public class Dissociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product1 { get; set; }
         public MolecularPopulation product2 { get; set; }
@@ -131,6 +134,7 @@ namespace Daphne
 
     public class Transformation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
 
@@ -157,6 +161,7 @@ namespace Daphne
     /// </summary>
     public class AutocatalyticTransformation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation catalyst { get; set; }
 
@@ -186,6 +191,7 @@ namespace Daphne
 
     public class CatalyzedAnnihilation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation catalyst { get; set; }
         public MolecularPopulation reactant { get; set; }
 
@@ -206,6 +212,7 @@ namespace Daphne
 
     public class CatalyzedAssociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation catalyst { get; set; }
         public MolecularPopulation reactant1 { get; set; }
         public MolecularPopulation reactant2 { get; set; }
@@ -232,6 +239,7 @@ namespace Daphne
 
     public class CatalyzedCreation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation catalyst { get; set; }
         public MolecularPopulation product { get; set; }
 
@@ -257,6 +265,7 @@ namespace Daphne
 
     public class CatalyzedDimerization : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
         public MolecularPopulation catalyst { get; set; }
@@ -280,6 +289,7 @@ namespace Daphne
 
     public class CatalyzedDimerDissociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
         public MolecularPopulation catalyst { get; set; }
@@ -303,6 +313,7 @@ namespace Daphne
 
     public class CatalyzedDissociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation catalyst { get; set; }
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product1 { get; set; }
@@ -329,6 +340,7 @@ namespace Daphne
 
     public class CatalyzedTransformation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation catalyst { get; set; }
         public MolecularPopulation reactant { get; set; }
         public MolecularPopulation product { get; set; }
@@ -371,6 +383,7 @@ namespace Daphne
     /// </summary>
     public class GeneralizedReaction : Reaction
     {
+        private ScalarField intensity;
         // int[] = [reaction, product] stoichiometric coefficients for each MolecularPopulation
         Dictionary<MolecularPopulation, int[]> genReac;
 
@@ -431,6 +444,7 @@ namespace Daphne
     /// </summary>
     public class BoundaryAssociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation receptor { get; set; }
         public MolecularPopulation ligand { get; set; }
         public MolecularPopulation complex { get; set; }
@@ -467,6 +481,7 @@ namespace Daphne
 
     public class BoundaryDissociation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation receptor { get; set; }
         public MolecularPopulation ligand { get; set; }
         public MolecularPopulation complex { get; set; }
@@ -497,6 +512,7 @@ namespace Daphne
     /// </summary>
     public class BoundaryTransportFrom : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation membrane { get; set; }
         public MolecularPopulation bulk { get; set; }
         Manifold boundary;
@@ -529,6 +545,7 @@ namespace Daphne
     /// </summary>
     public class BoundaryTransportTo : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation membrane { get; set; }
         public MolecularPopulation bulk { get; set; }
         Manifold boundary;
@@ -558,6 +575,7 @@ namespace Daphne
 
     public class CatalyzedBoundaryActivation : Reaction
     {
+        private ScalarField intensity;
         public MolecularPopulation bulk { get; set; }
         public MolecularPopulation bulkActivated { get; set; }
         public MolecularPopulation receptor { get; set; }
@@ -570,7 +588,6 @@ namespace Daphne
             receptor = _receptor;
             boundary = receptor.Man;
             RateConstant = _RateConst;
-            //Type = ReactionType.CatalyzedBoundaryActivation;
 
             if (bulk.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
@@ -586,8 +603,34 @@ namespace Daphne
         {
             intensity = RateConstant * receptor.Conc * bulk.BoundaryConcs[boundary.Id];
 
+            // fluxes, so multiplication by time step in diffusion
             bulk.BoundaryFluxes[boundary.Id] += intensity;
             bulkActivated.BoundaryFluxes[boundary.Id] -= intensity ;
+        }
+
+    }
+
+    /// <summary>
+    /// Gene transcription with molecular population as a product.
+    /// The gene activation level may be modified during the simulation, depending on the state of the cell.
+    /// </summary>
+    public class Transcription : Reaction
+    {
+        private double intensity;
+        public Gene gene { get; set; }
+        public MolecularPopulation product {get; set; }
+
+        public Transcription(Gene _gene, MolecularPopulation _product, double _rate)
+        {
+            gene = _gene;
+            product = _product;
+            RateConstant = _rate;
+        }
+
+        public override void Step(double dt)
+        {
+            intensity = RateConstant * gene.CopyNumber * gene.ActivationLevel * dt;
+            product.Conc += intensity;
         }
 
     }

@@ -98,10 +98,6 @@ namespace Daphne
             boundaryConcs = new Dictionary<int, ScalarField>();
             foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
             {
-                //ScalarField boundFlux = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
-                //boundaryFluxes.Add(kvp.Key, boundFlux);
-                //ScalarField boundConc = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
-                //boundaryConcs.Add(kvp.Key, boundConc);
                 AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
             }
 

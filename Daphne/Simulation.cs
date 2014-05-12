@@ -433,6 +433,17 @@ namespace Daphne
             }
         }
 
+        public static void AddCellTranscriptionReactions(Cell cell, EntityRepository er, List<ConfigReaction> config_reacs)
+        {
+            foreach (ConfigReaction cr in config_reacs)
+            {
+                cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.reactants_molecule_guid_ref[0]],
+                                                                cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
+                                                                cr.rate_const));
+            }
+
+        }
+
         public void Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex = false)
         {
             Scenario scenario = sc.scenario;
@@ -480,6 +491,17 @@ namespace Daphne
                 dataBasket.Molecules.Add(cm.molecule_guid, mol);
             }
 
+            // genes
+            foreach (ConfigGene cg in sc.entity_repository.genes)
+            {
+                Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
+                                             new ConstructorArgument("copyNumber", cg.CopyNumber),
+                                             new ConstructorArgument("actLevel", cg.ActivationLevel));
+
+
+                dataBasket.Genes.Add(cg.gene_guid, gene);
+            }
+
             // set up the collision manager
             MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             
@@ -500,6 +522,7 @@ namespace Daphne
             Compartment[] simComp = new Compartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+            List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenario.cellpopulations)
@@ -510,9 +533,10 @@ namespace Daphne
                 configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
                 configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
 
-                bulk_reacs[0] = sc.GetBulkReactions(configComp[0]);
-                bulk_reacs[1] = sc.GetBulkReactions(configComp[1]);
-                boundary_reacs = sc.GetBoundaryReactions(configComp[0]);
+                bulk_reacs[0] = sc.GetReactions(configComp[0], false);
+                bulk_reacs[1] = sc.GetReactions(configComp[1], false);
+                boundary_reacs = sc.GetReactions(configComp[0], true);
+                transcription_reacs = sc.GetTranscriptionReactions(configComp[0]);
                 
                 for (int i = 0; i < cp.number; i++)
                 {
@@ -544,12 +568,24 @@ namespace Daphne
                         addCompartmentMolpops(simComp[comp], configComp[comp], sc);
                     }
 
+                    // cell genes
+                    foreach (string s in sc.entity_repository.cells_dict[cp.cell_guid_ref].genes_guid_ref)
+                    {
+                        ConfigGene cg = sc.entity_repository.genes_dict[s];
+
+                        Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
+                                                     new ConstructorArgument("copyNumber", cg.CopyNumber),
+                                                     new ConstructorArgument("actLevel", cg.ActivationLevel));
+                        cell.AddGene(cg.gene_guid, gene);
+                    }
+
                     //CELL REACTIONS
                     AddCompartmentBulkReactions(cell.Cytosol, sc.entity_repository, bulk_reacs[0]);
                     AddCompartmentBulkReactions(cell.PlasmaMembrane, sc.entity_repository, bulk_reacs[1]);
                     // membrane; no boundary
                     AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository, boundary_reacs);
-
+                    AddCellTranscriptionReactions(cell, sc.entity_repository, transcription_reacs);
+                    
                     // locomotion
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != null)
                     {
@@ -564,7 +600,38 @@ namespace Daphne
                         cell.IsMotile = false;
                     }
 
+
+                    //TRANSITION DRIVERS
                     // death behavior
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid != null)
+                    {
+                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid;
+                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
+                    }
+
+                    // Differentiation
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != null)
+                    {
+                        string diff_scheme_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref;
+                        ConfigDiffScheme config_diffScheme = sc.entity_repository.diff_schemes_dict[diff_scheme_guid];
+                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[config_diffScheme.Driver.driver_guid];
+                        cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
+
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
+
+                        // Epigenetic information
+                        for (int ii = 0; ii < cell.Differentiator.nStates; ii++)
+                        {
+                            cell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
+
+                            for (int j = 0; j < cell.Differentiator.nStates; j++)
+                            {
+                                cell.Differentiator.AddActivity(ii, j, config_diffScheme.activationRows[ii].activations[j]);
+                            }
+                        }
+                    }
+
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != null)
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
@@ -576,16 +643,12 @@ namespace Daphne
                         cell.DeathBehavior.AddDriverElement(0, 1, tde);
                     }
                     // division behavior
-                    //if()
-                    //{
-                    //    TransitionDriverElement tde = new TransitionDriverElement();
-
-                    //    tde.DriverPop = ...;
-                    //    tde.Alpha = ...;
-                    //    tde.Beta = ...;
-
-                    //    cell.DivisionBehavior.AddDriverElement(0, 1, tde);
-                    //}
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid != null)
+                    {
+                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid;
+                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
+                    }
 
                     AddCell(cell);
                 }
@@ -629,9 +692,9 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = sc.GetBulkReactions(scenario.environment.ecs);
+            reacs = sc.GetReactions(scenario.environment.ecs, false);
             AddCompartmentBulkReactions(dataBasket.ECS.Space, sc.entity_repository,reacs);
-            reacs = sc.GetBoundaryReactions(scenario.environment.ecs);
+            reacs = sc.GetReactions(scenario.environment.ecs, true);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
                 AddCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, sc.entity_repository, reacs);
@@ -640,6 +703,25 @@ namespace Daphne
             // general parameters
             Pair.Phi1 = sc.sim_params.phi1;
             Pair.Phi2 = sc.sim_params.phi2;
+        }
+
+        public void LoadTransitionDriverElements(ConfigTransitionDriver config_td, Dictionary<string,MolecularPopulation> population, ITransitionDriver behavior)
+        {
+            foreach (ConfigTransitionDriverRow row in config_td.DriverElements)
+            {
+                foreach (ConfigTransitionDriverElement config_tde in row.elements)
+                {
+                    if (config_tde.driver_mol_guid_ref != null)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+                        tde.Alpha = config_tde.Alpha;
+                        tde.Beta = config_tde.Beta;
+                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
+                        behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
+                    }
+                }                        
+            }
+
         }
         
         public void RunForward()

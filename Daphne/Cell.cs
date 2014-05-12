@@ -49,7 +49,22 @@ namespace Daphne
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
         private ITransitionDriver deathBehavior, divisionBehavior;
+        private IDifferentiator differentiator;
 
+        /// <summary>
+        /// the genes in a cell
+        /// NOTE: should these be in the cytoplasm
+        /// </summary>
+        //public List<Gene> genes;
+        private Dictionary<string, Gene> genes;
+        public Dictionary<string, Gene> Genes
+        {
+            get { return genes; }
+        }
+        public void AddGene(string gene_guid, Gene gene)
+        {
+            genes.Add(gene_guid, gene);
+        }
 
         public Cell(double radius)
         {
@@ -60,6 +75,7 @@ namespace Daphne
             alive = true;
             cytokinetic = false;
             this.radius = radius;
+            genes = new Dictionary<string, Gene>();
 
             Cell_id = SafeCell_id++;
         }
@@ -109,6 +125,18 @@ namespace Daphne
         {
             get { return divisionBehavior; }
         }
+
+        [Inject]
+        public void InjectDifferentiator(IDifferentiator diff)
+        {
+            differentiator = diff;
+        }
+
+        public IDifferentiator Differentiator
+        {
+            get { return differentiator; }
+        }
+
 
         private void initBoundary()
         {
@@ -164,8 +192,18 @@ namespace Daphne
                 divisionBehavior.CurrentState = 0;
             }
 
-            // Note: other behaviors to be updated here
-            //Differentiator.Step(dt);
+            Differentiator.Step(dt);
+
+            if (Differentiator.TransitionOccurred == true)
+            {
+                // Epigentic changes
+                for (int i = 0; i < Differentiator.gene_guid.Length; i++)
+                {
+                    Genes[Differentiator.gene_guid[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
+                }
+                Differentiator.TransitionOccurred = false;
+            }
+
         }
 
         /// <summary>
@@ -235,19 +273,28 @@ namespace Daphne
                     newMP.Initialize("explicit", kvp.Value.CopyArray());
                     daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
                 }
+                // genes
+                foreach (KeyValuePair<string, Gene> kvp in Genes)
+                {
+                    Gene newGene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", kvp.Value.Name), new ConstructorArgument("copyNumber", kvp.Value.CopyNumber), new ConstructorArgument("actLevel", kvp.Value.ActivationLevel));
+                    daughter.Genes.Add(kvp.Key, newGene);
+                }
 
                 // reactions
                 ConfigCompartment[] configComp = new ConfigCompartment[2];
                 List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
                 List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+                List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+
                 CellPopulation cp = Simulation.SimConfigHandle.GetCellPopulation(daughter.Population_id);
 
                 configComp[0] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
                 configComp[1] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
 
-                bulk_reacs[0] = Simulation.SimConfigHandle.GetBulkReactions(configComp[0]);
-                bulk_reacs[1] = Simulation.SimConfigHandle.GetBulkReactions(configComp[1]);
-                boundary_reacs = Simulation.SimConfigHandle.GetBoundaryReactions(configComp[0]);
+                bulk_reacs[0] = Simulation.SimConfigHandle.GetReactions(configComp[0], false);
+                bulk_reacs[1] = Simulation.SimConfigHandle.GetReactions(configComp[1], false);
+                boundary_reacs = Simulation.SimConfigHandle.GetReactions(configComp[0], true);
+                transcription_reacs = Simulation.SimConfigHandle.GetTranscriptionReactions(configComp[0]);
 
                 // cytosol bulk reactions
                 Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.SimConfigHandle.entity_repository, bulk_reacs[0]);
@@ -255,6 +302,8 @@ namespace Daphne
                 Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, bulk_reacs[1]);
                 // boundary reactions
                 Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, boundary_reacs);
+                // transcription reactions
+                Simulation.AddCellTranscriptionReactions(daughter, Simulation.SimConfigHandle.entity_repository, transcription_reacs);
 
                 // behaviors
 
@@ -297,6 +346,22 @@ namespace Daphne
                         daughter.DivisionBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                     }
                 }
+
+                // differentiation
+                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
+                {
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+
+                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                        tde.Alpha = kvp_inner.Value.Alpha;
+                        tde.Beta = kvp_inner.Value.Beta;
+                        // add it to the daughter
+                        daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
+                }
+
             }
             
             return daughter;
