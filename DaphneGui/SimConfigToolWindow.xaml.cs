@@ -290,7 +290,7 @@ namespace DaphneGui
             ConfigReaction selected_grt = (ConfigReaction)lbAvailableReacs.SelectedItem;
             if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(selected_grt.reaction_guid))
             {
-                selected_grt.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                //selected_grt.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                 MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(selected_grt.reaction_guid);
             }
 
@@ -464,10 +464,10 @@ namespace DaphneGui
 
         private void ReactionsExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            {
-                cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            }
+            ////foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
+            ////{
+            ////    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            ////}
 
         }
 
@@ -484,18 +484,18 @@ namespace DaphneGui
 
         private void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            {
-                cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            }
+            //foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
+            //{
+            //    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            //}
         }
 
         private void ECMReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            {
-                cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            }
+            //foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
+            //{
+            //    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            //}
         }
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -565,7 +565,7 @@ namespace DaphneGui
                 // Filter out cr if not in ecm reaction list 
                 if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
                 else
@@ -581,16 +581,14 @@ namespace DaphneGui
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
             if (cr != null && cc != null)
             {
+                e.Accepted = false;
                 // Filter out cr if not in ecm reaction list 
                 if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
-                else
-                {
-                    e.Accepted = false;
-                }
+                
             }
         }
 
@@ -603,7 +601,7 @@ namespace DaphneGui
                 // Filter out cr if not in ecm reaction list 
                 if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
                 else
@@ -666,6 +664,19 @@ namespace DaphneGui
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             string name = cell.membrane.molpops[0].Name;
+        }
+
+        private void AddLibReactionsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            ////foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
+            ////{
+            ////    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            ////}
+        }
+
+        private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //MembReacListBox.Items.Clear();
         }
 
         

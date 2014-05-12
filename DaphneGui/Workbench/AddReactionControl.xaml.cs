@@ -171,6 +171,7 @@ namespace DaphneGui
 
 
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+            //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
 
         }
     }

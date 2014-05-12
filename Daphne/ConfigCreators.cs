@@ -81,46 +81,23 @@ namespace Daphne
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
 
-            //ADD CELLS AND MOLECULES IN THE CELLS
-            ConfigCell gc = new ConfigCell();
-            gc.CellName = "BCell";
-            gc.CellRadius = 4.0;
 
+            //ADD CELLS AND CELL MOLECULES
+            //This code will add the cell and the predefined ConfigCell already has the molecules needed
+            ConfigCell gc = findCell("BCell", sc);
             CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "My BCell";
+
+            cp.cellpopulation_name = "My-B-Cell";
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cp.CellType = gc;
-
-            var query1 =
-                from mol in sc.entity_repository.molecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            // membrane
-            foreach (ConfigMolecule gm in query1)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.molecule_guid_ref = gm.molecule_guid;
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                //sgg.peak_concentration = 10;
-                //sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                //gmp.mpInfo.mp_distribution = sgg;
-                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                hl.concentration = 10;
-                gmp.mpInfo.mp_distribution = hl;
-
-                gc.membrane.molpops.Add(gmp);
-            }
+            CellLocation cl = new CellLocation();
+            cl.X = 10;
+            cl.Y = 100;
+            cl.Z = 1000;
+            cp.cell_locations.Add(cl);
 
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
@@ -201,7 +178,8 @@ namespace Daphne
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
 
-            //ADD CELLS AND MOLECULES IN THE CELLS
+            //ADD CELLS AND CELL MOLECULES
+            //This code will add the cell and the predefined ConfigCell already has the molecules needed
             ConfigCell gc = findCell("BCell", sc);            
             CellPopulation cp = new CellPopulation();
 
@@ -217,86 +195,13 @@ namespace Daphne
             cl.Z = 1000;
             cp.cell_locations.Add(cl);
 
-            //MOLECULES IN MEMBRANE
-            /**var query1 =
-                from mol in sc.entity_repository.molecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query1)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.molecule_guid_ref = gm.molecule_guid;
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                //if (gm.Name == "CXCR5")
-                //    sgg.peak_concentration = 125;
-                //else
-                //    sgg.peak_concentration = 130;
-                //sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                //gmp.mpInfo.mp_distribution = sgg;
-                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                if (gm.Name == "CXCR5")
-                {
-                    hl.concentration = 125;
-                }
-                else
-                {
-                    hl.concentration = 130;
-                }
-                gmp.mpInfo.mp_distribution = hl;
-
-                gc.membrane.molpops.Add(gmp);
-            }
-
-            //MOLECULES IN CYTOSOL
-            var query2 =
-                from mol in sc.entity_repository.molecules
-                where mol.molecule_guid == gc.locomotor_mol_guid_ref
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query2)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.molecule_guid_ref = gm.molecule_guid;
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-
-                gmp.mpInfo.mp_dist_name = "Constant level";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                //sgg.peak_concentration = 250;
-                //sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                //gmp.mpInfo.mp_distribution = sgg;
-                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                hl.concentration = 250;
-                gmp.mpInfo.mp_distribution = hl;
-
-                gc.cytosol.molpops.Add(gmp);
-            }*/
-
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
             sc.scenario.cellpopulations.Add(cp);
 
             //-------------------------------------------------------------
 
-            ////////EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            //////GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.AllReactions[0]);    //The 0'th reaction is Boundary Association
-
-            //////scenario.Reactions.Add(grt);
-            //////grt = new GuiBoundaryReactionTemplate();
-            //////grt = (GuiBoundaryReactionTemplate)entity_repository.AllReactions[1];    //The 1st reaction is Boundary Dissociation
-
-            //////scenario.Reactions.Add(grt);
+            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             string guid = findReactionGuid(ReactionType.BoundaryAssociation, sc);
             sc.scenario.environment.ecs.reactions_guid_ref.Add(guid);
             guid = findReactionGuid(ReactionType.BoundaryDissociation, sc);

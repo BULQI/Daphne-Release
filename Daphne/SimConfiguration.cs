@@ -284,6 +284,7 @@ namespace Daphne
             foreach (ConfigReaction cr in entity_repository.reactions)
             {
                 entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+                cr.GetTotalReactionString(entity_repository);
             }
             entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
 
@@ -369,6 +370,7 @@ namespace Daphne
                 {
                     ConfigReaction cr = nn as ConfigReaction;
                     entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+                    cr.GetTotalReactionString(entity_repository);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -484,8 +486,8 @@ namespace Daphne
             //////ReactionComplexes = new ObservableCollection<GuiReactionComplex>();
         }
     }
-    
-    public class EntityRepository
+
+    public class EntityRepository 
     {
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
         public ObservableCollection<BoxSpecification> box_specifications { get; set; }
@@ -515,6 +517,7 @@ namespace Daphne
             reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reactions_dict = new Dictionary<string, ConfigReaction>();
         }
+        
     }
 
     public class TimeConfig
