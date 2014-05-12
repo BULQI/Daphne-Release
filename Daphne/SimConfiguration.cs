@@ -4192,6 +4192,33 @@ namespace Daphne
             x1 = 0;
             boundaryCondition = new List<BoundaryCondition>();
         }
+
+        public void Initalize(BoundaryFace b_face)
+        {
+            boundary_face = b_face;
+            dim = (int)boundary_face - 1;
+
+            switch (boundary_face)
+            {
+                case BoundaryFace.X:
+                    boundaryCondition[0].boundary = Boundary.left;
+                    boundaryCondition[1].boundary = Boundary.right;
+                    break;
+
+                case BoundaryFace.Y:
+                    boundaryCondition[0].boundary = Boundary.bottom;
+                    boundaryCondition[1].boundary = Boundary.top;
+                    break;
+
+                case BoundaryFace.Z:
+                    boundaryCondition[0].boundary = Boundary.back;
+                    boundaryCondition[1].boundary = Boundary.front;
+                    break;
+                case BoundaryFace.None:
+                    break;
+
+            }
+        }
     }
 
     public class MolPopGaussian : MolPopDistribution
