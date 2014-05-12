@@ -131,7 +131,15 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Slider x:Name="slConc" 
+                                        <uc:DoublesBox x:Name="dblConcs" HorizontalAlignment="Left" Margin="4,0"
+                                                Number="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                                RangeFactor="1"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000">
+
+                                        </uc:DoublesBox>
+
+                                        <!--<Slider x:Name="slConc" 
                                                 Orientation="Horizontal"
                                                 Width="100"
                                                 RenderTransform="1.0,0,0,0.5,0,4"
@@ -143,7 +151,7 @@
                                                 ValueChanged="slConc_ValueChanged"
                                                 >
                                         </Slider>
-                                        <TextBox Width="150" TextAlignment="Center" Margin="20,0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                        <TextBox Width="150" TextAlignment="Center" Margin="20,0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />-->
                                     </StackPanel>    
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
