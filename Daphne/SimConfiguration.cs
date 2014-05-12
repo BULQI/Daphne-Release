@@ -2254,49 +2254,55 @@ namespace Daphne
 
     public class MolPopLinear : MolPopDistribution
     {
-        public double[] gradient_direction { get; set; }
-        public double min_concentration { get; set; }
-        public double max_concentration { get; set; }
-        public double x_direction
-        {
-            get { return gradient_direction[0]; }
-            set
-            {
-                if (value != gradient_direction[0])
-                {
-                    gradient_direction[0] = value;
-                }
-            }
-        }
-        public double y_direction
-        {
-            get { return gradient_direction[1]; }
-            set
-            {
-                if (value != gradient_direction[1])
-                {
-                    gradient_direction[1] = value;
-                }
-            }
-        }
-        public double z_direction
-        {
-            get { return gradient_direction[2]; }
-            set
-            {
-                if (value != gradient_direction[2])
-                {
-                    gradient_direction[2] = value;
-                }
-            }
-        }
+        public double c1 { get; set; }
+        public double c2 { get; set; }
+        public double x1 { get; set; }
+        public double x2 { get; set; }
+        public int dim { get; set; }
+        //public double[] gradient_direction { get; set; }
+        //public double min_concentration { get; set; }
+        //public double max_concentration { get; set; }
+        //public double x_direction
+        //{
+        //    get { return gradient_direction[0]; }
+        //    set
+        //    {
+        //        if (value != gradient_direction[0])
+        //        {
+        //            gradient_direction[0] = value;
+        //        }
+        //    }
+        //}
+        //public double y_direction
+        //{
+        //    get { return gradient_direction[1]; }
+        //    set
+        //    {
+        //        if (value != gradient_direction[1])
+        //        {
+        //            gradient_direction[1] = value;
+        //        }
+        //    }
+        //}
+        //public double z_direction
+        //{
+        //    get { return gradient_direction[2]; }
+        //    set
+        //    {
+        //        if (value != gradient_direction[2])
+        //        {
+        //            gradient_direction[2] = value;
+        //        }
+        //    }
+        //}
 
         public MolPopLinear()
         {
-            mp_distribution_type = MolPopDistributionType.Linear;
-            gradient_direction = new double[3] { 1.0, 0.0, 0.0 };
-            min_concentration = 0.0;
-            max_concentration = 100.0;
+            //mp_distribution_type = MolPopDistributionType.Linear;
+            //gradient_direction = new double[3] { 1.0, 0.0, 0.0 };
+            //min_concentration = 0.0;
+            //max_concentration = 100.0;
+            x1 = 0.0;
         }
     }
 

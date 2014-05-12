@@ -770,7 +770,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopLinear}">
-                <Grid>
+                <!--<Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
                         <ColumnDefinition Width="Auto" />
@@ -873,7 +873,7 @@
                                                 Value="{Binding Path=z_direction, UpdateSourceTrigger=PropertyChanged}"
                                                 />
                     </Grid>
-                </Grid>
+                </Grid>-->
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
@@ -1924,21 +1924,35 @@
                                 <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
                             </StackPanel>
                             <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" >
-                                <TextBlock Text="specify value at boundary faces" Margin="0,0" 
+                                <TextBlock x:Name="tbSpecify" Text="specify value at boundary faces" Margin="0,0" 
                                            Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100"/>
+                                           Width="100">
+                                    
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    
+                                </TextBlock>
                                 <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
-                                           SelectedValue="{Binding Path=boundary_face}"
-                                           SelectionChanged="cbBoundFace_SelectionChanged"
-                                           
-                                           
-                                                                                     >
+                                           SelectedValue="{Binding Path=boundary_face}" >
                                     <ComboBox.Style>
                                         <Style TargetType="ComboBox">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" >
-                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

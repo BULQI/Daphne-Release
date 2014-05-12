@@ -138,6 +138,18 @@ namespace Daphne
 
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
                 }
+                else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                {
+                    MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "linear", new double[] {       
+                                mpl.c1, 
+                                mpl.c2,
+                                mpl.x1, 
+                                mpl.x2, 
+                                mpl.dim,});
+
+                }
+
                 else
                 {
                     throw new Exception("Molecular population distribution type not implemented.");

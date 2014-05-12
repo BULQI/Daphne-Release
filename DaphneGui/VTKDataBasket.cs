@@ -111,27 +111,23 @@ namespace DaphneGui
     /// </summary>
     public class MolpopTypeLinearController : MolPopTypeController
     {
-        /// <summary>
-        /// gradient direction
-        /// </summary>
-        public double[] gradient { get; set; }
-        /// <summary>
-        /// minimum concentration
-        /// </summary>
-        public double min { get; set; }
-        /// <summary>
-        /// maximum concentration
-        /// </summary>
-        public double max { get; set; }
+        
+        public double c1 { get; set; }  //1st face of boundary
+        public double c2 { get; set; }  //2nd face of boundary
+        public double x1 { get; set; }  //0
+        public double x2 { get; set; }  //max extent of cube
+        public int dim { get; set; }    //0=YZ plane, 1=XZ plane, 2=XY plane
 
         /// <summary>
         /// constructor
         /// </summary>
-        public MolpopTypeLinearController(double[] grad, double min, double max)
+        public MolpopTypeLinearController(double a, double b, double c, double d, int e)
         {
-            gradient = new double[] { grad[0], grad[1], grad[2] };
-            this.min = min;
-            this.max = max;
+            c1 = a;
+            c2 = b;
+            x1 = c;
+            x2 = d;
+            dim = e;
             type = MolPopDistributionType.Linear;
         }
     }
@@ -304,9 +300,11 @@ namespace DaphneGui
             }
             else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).gradient_direction,
-                                                               ((MolPopLinear)molpop.mp_distribution).min_concentration,
-                                                               ((MolPopLinear)molpop.mp_distribution).max_concentration);
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).c1,
+                                                               ((MolPopLinear)molpop.mp_distribution).c2,
+                                                               ((MolPopLinear)molpop.mp_distribution).x1,
+                                                               ((MolPopLinear)molpop.mp_distribution).x2,
+                                                               ((MolPopLinear)molpop.mp_distribution).dim);
             }
             else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {
@@ -377,7 +375,7 @@ namespace DaphneGui
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Linear)
                 {
-                    div = ((MolpopTypeLinearController)kvp.Value).max;
+                    div = ((MolpopTypeLinearController)kvp.Value).c2;
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Gaussian)
                 {
