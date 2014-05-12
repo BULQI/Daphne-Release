@@ -333,9 +333,9 @@ namespace Daphne
                             }
                         }
                     }
+                    // terminate the line
+                    cell_files[cp.cellpopulation_id].WriteLine();
                 }
-                // terminate the line
-                cell_files[cp.cellpopulation_id].WriteLine();
             }
         }
 
