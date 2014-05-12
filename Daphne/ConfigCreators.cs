@@ -289,7 +289,7 @@ namespace Daphne
             sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Gaussian initial distribution. No flux BCs.";
             sc.scenario.time_config.duration = 10;
             sc.scenario.time_config.rendering_interval = 1;
-            sc.scenario.time_config.sampling_interval = 5.0;
+            sc.scenario.time_config.sampling_interval = 1.0;
 
             sc.scenario.environment.extent_x = 500;
             sc.scenario.environment.extent_y = 500;
@@ -303,7 +303,7 @@ namespace Daphne
             // Gaussian Distrtibution
             // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
             // box x,y,z_scale parameters are 2*sigma
-            GaussianSpecification gg = new GaussianSpecification();
+            GaussianSpecification gaussSpec = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
             box.x_trans = sc.scenario.environment.extent_x / 2;
             box.y_trans = sc.scenario.environment.extent_y / 2;
@@ -312,40 +312,39 @@ namespace Daphne
             box.y_scale = sc.scenario.environment.extent_y / 5;
             box.z_scale = sc.scenario.environment.extent_z / 5;
             sc.entity_repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
             //gg.gaussian_spec_name = "gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            sc.entity_repository.gaussian_specifications.Add(gg);
+            gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gaussSpec);
 
             var query =
                 from mol in sc.entity_repository.molecules
                 where mol.Name == "CXCL13"
                 select mol;
 
-            ConfigMolecularPopulation gmp = null;
+            ConfigMolecularPopulation configMolPop = null;
             // ecs
-            foreach (ConfigMolecule gm in query)
+            foreach (ConfigMolecule cm in query)
             {
-                gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                gmp.molecule_guid_ref = gm.molecule_guid;
-                gmp.mpInfo = new MolPopInfo(gm.Name);
-                gmp.Name = gm.Name;
-                gmp.mpInfo.mp_dist_name = "Gaussian";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                configMolPop.molecule_guid_ref = cm.molecule_guid;
+                configMolPop.mpInfo = new MolPopInfo(cm.Name);
+                configMolPop.Name = cm.Name;
+                configMolPop.mpInfo.mp_dist_name = "Gaussian";
+                configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                configMolPop.mpInfo.mp_render_blending_weight = 2.0;
 
-                MolPopGaussian sgg = new MolPopGaussian();
-
-                sgg.peak_concentration = 100;
-                sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
+                MolPopGaussian molPopGaussian = new MolPopGaussian();
+                molPopGaussian.peak_concentration = 100;
+                molPopGaussian.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                configMolPop.mpInfo.mp_distribution = molPopGaussian;
 
                 // Reporting
-                gmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
-                ReportECM r = gmp.report_mp as ReportECM;
+                configMolPop.report_mp.mp_extended = ExtendedReport.COMPLETE;
+                ReportECM r = configMolPop.report_mp as ReportECM;
                 r.mean = true;
 
-                sc.scenario.environment.ecs.molpops.Add(gmp);
+                sc.scenario.environment.ecs.molpops.Add(configMolPop);
             }
         }
 

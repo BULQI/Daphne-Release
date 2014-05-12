@@ -147,7 +147,7 @@ namespace Daphne
                         // gradient
                         if (c.report_mp.mp_extended == ExtendedReport.COMPLETE)
                         {
-                            double[] grad = mp.Conc.Gradient(pos);
+                            double[] grad = mp.Conc.LatticeGradient(i);
 
                             writer.Write("\t{0}\t{1}\t{2}", grad[0], grad[1], grad[2]);
                         }

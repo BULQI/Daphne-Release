@@ -105,11 +105,19 @@ namespace ManifoldRing
         public abstract ScalarField Laplacian(ScalarField sf);
         /// <summary>
         /// gradient
+        /// not appropriate for points on the lattice if the underlying manifold is of type InterpolatedNodes
         /// </summary>
         /// <param name="x">local position</param>
         /// <param name="sf">field operand</param>
         /// <returns>gradient vector</returns>
         public abstract double[] Grad(double[] x, ScalarField sf);
+        /// <summary>
+        /// field gradient at lattice points when the underlying manifold is of type InterpolatedNodes
+        /// </summary>
+        /// <param name="n">array index</param>
+        /// <param name="sf">field operand</param>
+        /// <returns></returns>
+        public abstract double[] LatticeGrad(int n, ScalarField sf);
         /// <summary>
         /// field diffusion, flux term
         /// </summary>
@@ -252,6 +260,11 @@ namespace ManifoldRing
         public override double MeanValue(ScalarField sf)
         {
             return sf.array[0];
+        }
+
+        public override double[] LatticeGrad(int n, ScalarField sf)
+        {
+            throw new Exception("LatticeGrad not implemented for Moment Expansion fields");
         }
     }
 
@@ -925,14 +938,7 @@ namespace ManifoldRing
         /// <returns>the mean value</returns>
         public override double MeanValue(ScalarField sf)
         {
-            double accumulate = 0;
-
-            for(int i = 0; i < ArraySize; i++)
-            {
-                accumulate += sf.array[i];
-            }
-
-            return accumulate / ArraySize;
+            return interpolator.Integration(sf) / (sf.M.Extent(0) * sf.M.Extent(1) * sf.M.Extent(2));
         }
 
         /// <summary>
@@ -958,6 +964,21 @@ namespace ManifoldRing
                 return new double[Dim];
             }
             return interpolator.Gradient(x, sf);
+        }
+
+        /// <summary>
+        /// field gradient at lattice point n
+        /// </summary>
+        /// <param name="n">array index</param>
+        /// <param name="sf">field operand</param>
+        /// <returns></returns>
+        public override double[] LatticeGrad(int n, ScalarField sf)
+        {
+            if (n < 0 || n > ArraySize - 1)
+            {
+                return new double[Dim];
+            }
+            return interpolator.LatticeGradient(n, sf);
         }
 
         /// <summary>

@@ -14,7 +14,9 @@ namespace ManifoldRing
     {
         void Init(InterpolatedNodes m, bool toroidal);
         double Interpolate(double[] x, ScalarField sf);
+        double Integration(ScalarField sf);
         double[] Gradient(double[] x, ScalarField sf);
+        double[] LatticeGradient(int n, ScalarField sf);
         ScalarField Laplacian(ScalarField sf);
         ScalarField DiffusionFlux(ScalarField flux, Transform t);
         ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to);
@@ -42,10 +44,17 @@ namespace ManifoldRing
         protected abstract LocalMatrix[][] laplacianMatrix();
         /// <summary>
         /// Calculate sparse matrix for computing the gradient at arbitrary position x.
+        /// Not valid for lattice points.
         /// </summary>
         /// <param name="x">Spatial point for gradient calculation</param>
         /// <returns></returns>
         protected abstract LocalMatrix[][] gradientMatrix(double[] x);
+        ///// <summary>
+        ///// Calculate sparse matrix for computing the gradient at lattice points.
+        ///// </summary>
+        ///// <param name="point"></param>
+        ///// <returns></returns>
+        protected abstract LocalMatrix[][] latticeGradientMatrix(int n);
 
         // Used to compute value, gradient, and laplacian
         protected LocalMatrix[] interpolationOperator;
@@ -90,6 +99,25 @@ namespace ManifoldRing
         public double[] Gradient(double[] x, ScalarField sf)
         {
             LocalMatrix[][] lm = gradientMatrix(x);
+
+            if (lm != null)
+            {
+                for (int i = 0; i < m.Dim; i++)
+                {
+                    gradient[i] = 0.0;
+
+                    for (int j = 0; j < lm[i].Length; j++)
+                    {
+                        gradient[i] += lm[i][j].Coefficient * sf.array[lm[i][j].Index];
+                    }
+                }
+            }
+            return gradient;
+        }
+
+        public double[] LatticeGradient(int n, ScalarField sf)
+        {
+            LocalMatrix[][] lm = latticeGradientMatrix(n);
 
             if (lm != null)
             {
@@ -225,7 +253,7 @@ namespace ManifoldRing
             }
             return interpolationOperator;
         }
-        
+
         // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
@@ -245,9 +273,9 @@ namespace ManifoldRing
             }
 
             double dx = x[0] / m.StepSize() - idx[0],
-                   dy = x[1] / m.StepSize() - idx[1],
-                   dz = x[2] / m.StepSize() - idx[2],
-                   dxmult, dymult, dzmult;
+                    dy = x[1] / m.StepSize() - idx[1],
+                    dz = x[2] / m.StepSize() - idx[2],
+                    dxmult, dymult, dzmult;
 
             int n = 0;
             for (int di = 0; di < 2; di++)
@@ -257,31 +285,137 @@ namespace ManifoldRing
                     for (int dk = 0; dk < 2; dk++)
                     {
                         // 0th element:
-                        dxmult = (-1 + 2*di )/m.StepSize();
+                        dxmult = (-1 + 2 * di) / m.StepSize();
                         dymult = dj == 0 ? (1 - dy) : dy;
                         dzmult = dk == 0 ? (1 - dz) : dz;
                         gradientOperator[0][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
                         gradientOperator[0][n].Coefficient = dxmult * dymult * dzmult;
-                    
+
                         // 1st element:
                         dxmult = di == 0 ? (1 - dx) : dx;
-                        dymult = (-1 + 2*dj )/m.StepSize();
+                        dymult = (-1 + 2 * dj) / m.StepSize();
                         dzmult = dk == 0 ? (1 - dz) : dz;
                         gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
                         gradientOperator[1][n].Coefficient = dxmult * dymult * dzmult;
-                        
+
                         // 2nd element:
                         dxmult = di == 0 ? (1 - dx) : dx;
                         dymult = dj == 0 ? (1 - dy) : dy;
-                        dzmult = (-1 + 2*dk )/m.StepSize();
+                        dzmult = (-1 + 2 * dk) / m.StepSize();
                         gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
                         gradientOperator[2][n].Coefficient = dxmult * dymult * dzmult;
-                        
+
                         n++;
                     }
                 }
             }
 
+            return gradientOperator;
+        }
+
+        protected override LocalMatrix[][] latticeGradientMatrix(int n)
+        {
+            // Second order accuracy at all points.
+            // Uses 2nd order polynomial approximation of field at the boundaries to get second order accuracy at the boundaries
+
+            int[] idx = m.linearIndexToIndexArray(n);
+
+            int i = idx[0];
+            int j = idx[1];
+            int k = idx[2];
+
+            double fx = 1.0 / (2 * m.StepSize());
+            double fy = 1.0 / (2 * m.StepSize());
+            double fz = 1.0 / (2 * m.StepSize());
+
+            int N01 = m.NodesPerSide(0) * m.NodesPerSide(1);
+
+            if (i == m.NodesPerSide(0) - 1)
+            {
+                gradientOperator[0][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][0].Coefficient = 3 * fx;
+                gradientOperator[0][1].Index = (i - 1) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][1].Coefficient = -4 * fx;
+                gradientOperator[0][2].Index = (i - 2) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][2].Coefficient = fx;
+
+            }
+            else if (i == 0)
+            {
+                gradientOperator[0][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][0].Coefficient = -3 * fx;
+                gradientOperator[0][1].Index = (i + 1) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][1].Coefficient = 4 * fx;
+                gradientOperator[0][2].Index = (i + 2) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][2].Coefficient = - fx;
+            }
+            else
+            {
+                // ( c[i+1,j] - c[i-1,j] ) / 2*dx
+                gradientOperator[0][0].Index = (i + 1) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][0].Coefficient = fx;
+                gradientOperator[0][1].Index = (i - 1) + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[0][1].Coefficient = -fx;
+                gradientOperator[0][2].Index = 0;
+                gradientOperator[0][2].Coefficient = 0;
+            }
+
+            if (j == m.NodesPerSide(1) - 1)
+            {
+                gradientOperator[1][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][0].Coefficient = 3 * fy;
+                gradientOperator[1][1].Index = i + (j - 1) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][1].Coefficient = -4 * fy;
+                gradientOperator[1][2].Index = i + (j - 2) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][2].Coefficient = fy;
+            }
+            else if (j == 0)
+            {
+                gradientOperator[1][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][0].Coefficient = -3 * fy;
+                gradientOperator[1][1].Index = i + (j + 1) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][1].Coefficient = 4 * fy;
+                gradientOperator[1][2].Index = i + (j + 2) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][2].Coefficient = -fy;
+            }
+            else
+            {
+                // ( c[i,j+1] - c[i,j-1] ) / 2*dy
+                gradientOperator[1][0].Index = i + (j + 1) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][0].Coefficient = fy;
+                gradientOperator[1][1].Index = i + (j - 1) * m.NodesPerSide(0) + k * N01;
+                gradientOperator[1][1].Coefficient = -fy;
+                gradientOperator[1][2].Index = 0;
+                gradientOperator[1][2].Coefficient = 0;
+            }
+
+            if (k == m.NodesPerSide(2) - 1)
+            {
+                gradientOperator[2][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[2][0].Coefficient = 3 * fz;
+                gradientOperator[2][1].Index = i + j * m.NodesPerSide(0) + (k - 1) * N01;
+                gradientOperator[2][1].Coefficient = -4 * fz;
+                gradientOperator[2][2].Index = i + j * m.NodesPerSide(0) + (k - 2) * N01;
+                gradientOperator[2][2].Coefficient = fz;
+            }
+            else if (k == 0)
+            {
+                gradientOperator[2][0].Index = i + j * m.NodesPerSide(0) + k * N01;
+                gradientOperator[2][0].Coefficient = -3 * fz;
+                gradientOperator[2][1].Index = i + j * m.NodesPerSide(0) + (k + 1) * N01;
+                gradientOperator[2][1].Coefficient = 4 * fz;
+                gradientOperator[2][2].Index = i + j * m.NodesPerSide(0) + (k + 2) * N01;
+                gradientOperator[2][2].Coefficient = -fz;
+            }
+            else
+            {
+                gradientOperator[2][0].Index = i + j * m.NodesPerSide(0) + (k + 1) * N01;
+                gradientOperator[2][0].Coefficient = fz;
+                gradientOperator[2][1].Index = i + j * m.NodesPerSide(0) + (k - 1) * N01;
+                gradientOperator[2][1].Coefficient = -fz;
+                gradientOperator[2][2].Index = 0;
+                gradientOperator[2][2].Coefficient = 0;
+            }
             return gradientOperator;
         }
 
@@ -293,9 +427,9 @@ namespace ManifoldRing
             }
 
             int n = 0;
-
             int idxplus, idxminus;
-            double coeff0, coeff;
+            double  coeff = 1.0 / (m.StepSize() * m.StepSize()),
+                    coeff0 = -2.0 * coeff;
             int N01 = m.NodesPerSide(0) * m.NodesPerSide(1);
 
             for (int k = 0; k < m.NodesPerSide(2); k++)
@@ -308,10 +442,6 @@ namespace ManifoldRing
 
                         laplacianOperator[n][0].Coefficient = 0;
                         laplacianOperator[n][0].Index = i + j * m.NodesPerSide(0) + k * N01;
-
-
-                        coeff = 1.0 / (m.StepSize() * m.StepSize());
-                        coeff0 = -2.0 * coeff;
 
                         if (i == 0)
                         {
@@ -338,7 +468,7 @@ namespace ManifoldRing
                         laplacianOperator[n][2].Index = idxminus;
 
                         // i,j,k
-                        laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
+                        laplacianOperator[n][0].Coefficient += coeff0;
 
                         if (j == 0)
                         {
@@ -365,11 +495,11 @@ namespace ManifoldRing
                         laplacianOperator[n][4].Index = idxminus;
 
                         // i,j,k
-                        laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
+                        laplacianOperator[n][0].Coefficient += coeff0;
 
                         if (k == 0)
                         {
-                            idxplus = i + k * m.NodesPerSide(0) + (k + 1) * N01;
+                            idxplus = i + j * m.NodesPerSide(0) + (k + 1) * N01;
                             idxminus = toroidal ? i + j * m.NodesPerSide(0) + (m.NodesPerSide(1) - 2) * N01 : idxplus;
                         }
                         else if (k == m.NodesPerSide(2) - 1)
@@ -392,7 +522,7 @@ namespace ManifoldRing
                         laplacianOperator[n][6].Index = idxminus;
 
                         // i,j,k
-                        laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
+                        laplacianOperator[n][0].Coefficient += coeff0;
 
                         n++;
                     }
@@ -403,9 +533,28 @@ namespace ManifoldRing
 
         public override double Integration(ScalarField sf)
         {
-            return 0.0;
+            double[] point = new double[3];
+            double sum = 0;
+            for (int k = 0; k < m.NodesPerSide(2) - 1; k++)
+            {
+                for (int j = 0; j < m.NodesPerSide(1) - 1; j++)
+                {
+                    for (int i = 0; i < m.NodesPerSide(0) - 1; i++)
+                    {
+                        point[0] = (i + 0.5) * m.StepSize();
+                        point[1] = (j + 0.5) * m.StepSize();
+                        point[2] = (k + 0.5) * m.StepSize();
+
+                        // The value at the center of the voxel
+                        sum += sf.Value(point);
+                    }
+                }
+            }
+            return sum * m.StepSize() * m.StepSize() * m.StepSize();
         }
     }
+
+
 
 
     /// <summary>
@@ -478,59 +627,102 @@ namespace ManifoldRing
             }
 
             double dx = x[0] / m.StepSize() - idx[0],
-                   dy = x[1] / m.StepSize() - idx[1],
-                   dxmult, dymult;
+                    dy = x[1] / m.StepSize() - idx[1],
+                    dxmult, dymult;
+
             int n = 0;
-            int[] di = new int[2], dj = new int[2];
-
-            for (int i = 0; i < 2; i++)
+            for (int di = 0; di < 2; di++)
             {
-                for (int d = 0; d < 2; d++)
+                for (int dj = 0; dj < 2; dj++)
                 {
-                    // x-direction
-                    if (i == 0)
-                    {
-                        // interpolation multipliers
-                        dxmult = 1;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        // index differences
-                        di[0] = 1;
-                        di[1] = 0;
-                        dj[0] = d;
-                        dj[1] = d;
-                    }
-                    else if (i == 1) // y-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = 1;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = 1;
-                        dj[1] = 0;
-                    }
-                    else // z-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = d;
-                        dj[1] = d;
-                    }
+                        // 0th element:
+                        dxmult = (-1 + 2 * di) / m.StepSize();
+                        dymult = dj == 0 ? (1 - dy) : dy;
+                        gradientOperator[0][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0);
+                        gradientOperator[0][n].Coefficient = dxmult * dymult;
 
-                    gradientOperator[i][n].Index = (idx[0] + di[0]) + (idx[1] + dj[0]) * m.NodesPerSide(0);
-                    gradientOperator[i][n].Coefficient = dxmult * dymult / m.StepSize();
-                    n++;
+                        // 1st element:
+                        dxmult = di == 0 ? (1 - dx) : dx;
+                        dymult = (-1 + 2 * dj) / m.StepSize();
+                        gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0);
+                        gradientOperator[1][n].Coefficient = dxmult * dymult;
 
-                    gradientOperator[i][n].Index = (idx[0] + di[1]) + (idx[1] + dj[1]) * m.NodesPerSide(0);
-                    gradientOperator[i][n].Coefficient = -dxmult * dymult / m.StepSize();
-                    n++;
+                        n++;
+                    }
+            }
 
-                }
+            return gradientOperator;
+        }
+
+        protected override LocalMatrix[][] latticeGradientMatrix(int n)
+        {
+            // Second order accuracy at all points.
+            // Uses 2nd order polynomial approximation of field at the boundaries to get second order accuracy at the boundaries
+
+            int[] idx = m.linearIndexToIndexArray(n);
+
+            int i = idx[0];
+            int j = idx[1];
+
+            double fx = 1.0 / (2 * m.StepSize());
+            double fy = 1.0 / (2 * m.StepSize());
+
+            if (i == m.NodesPerSide(0) - 1)
+            {
+                gradientOperator[0][0].Index = i + j * m.NodesPerSide(0);
+                gradientOperator[0][0].Coefficient = 3 * fx;
+                gradientOperator[0][1].Index = (i - 1) + j * m.NodesPerSide(0) ;
+                gradientOperator[0][1].Coefficient = -4 * fx;
+                gradientOperator[0][2].Index = (i - 2) + j * m.NodesPerSide(0);
+                gradientOperator[0][2].Coefficient = fx;
+            }
+            else if (i == 0)
+            {
+                gradientOperator[0][0].Index = i + j * m.NodesPerSide(0);
+                gradientOperator[0][0].Coefficient = -3 * fx;
+                gradientOperator[0][1].Index = (i + 1) + j * m.NodesPerSide(0);
+                gradientOperator[0][1].Coefficient = 4 * fx;
+                gradientOperator[0][2].Index = (i + 2) + j * m.NodesPerSide(0);
+                gradientOperator[0][2].Coefficient = -fx;
+            }
+            else
+            {
+                // ( c[i+1,j] - c[i-1,j] ) / 2*dx
+                gradientOperator[0][0].Index = (i + 1) + j * m.NodesPerSide(0);
+                gradientOperator[0][0].Coefficient = fx;
+                gradientOperator[0][1].Index = (i - 1) + j * m.NodesPerSide(0);
+                gradientOperator[0][1].Coefficient = -fx;
+                gradientOperator[0][2].Index = 0;
+                gradientOperator[0][2].Coefficient = 0;
+            }
+
+            if (j == m.NodesPerSide(1) - 1)
+            {
+                gradientOperator[1][0].Index = i + j * m.NodesPerSide(0);
+                gradientOperator[1][0].Coefficient = 3 * fy;
+                gradientOperator[1][1].Index = i + (j - 1) * m.NodesPerSide(0);
+                gradientOperator[1][1].Coefficient = -4 * fy;
+                gradientOperator[1][2].Index = i + (j - 2) * m.NodesPerSide(0);
+                gradientOperator[1][2].Coefficient = fy;
+            }
+            else if (j == 0)
+            {
+                gradientOperator[1][0].Index = i + j * m.NodesPerSide(0);
+                gradientOperator[1][0].Coefficient = -3 * fy;
+                gradientOperator[1][1].Index = i + (j + 1) * m.NodesPerSide(0);
+                gradientOperator[1][1].Coefficient = 4 * fy;
+                gradientOperator[1][2].Index = i + (j + 2) * m.NodesPerSide(0);
+                gradientOperator[1][2].Coefficient = -fy;
+            }
+            else
+            {
+                // ( c[i,j+1] - c[i,j-1] ) / 2*dy
+                gradientOperator[1][0].Index = i + (j + 1) * m.NodesPerSide(0);
+                gradientOperator[1][0].Coefficient = fy;
+                gradientOperator[1][1].Index = i + (j - 1) * m.NodesPerSide(0);
+                gradientOperator[1][1].Coefficient = -fy;
+                gradientOperator[1][2].Index = 0;
+                gradientOperator[1][2].Coefficient = 0;
             }
             return gradientOperator;
         }
@@ -545,7 +737,8 @@ namespace ManifoldRing
             int n = 0;
 
             int idxplus, idxminus;
-            double coeff0, coeff;
+            double  coeff=1.0 / (m.StepSize() * m.StepSize()),
+                    coeff0=-2.0 * coeff;
 
             for (int j = 0; j < m.NodesPerSide(1); j++)
             {
@@ -555,10 +748,6 @@ namespace ManifoldRing
 
                     laplacianOperator[n][0].Coefficient = 0;
                     laplacianOperator[n][0].Index = i + j * m.NodesPerSide(0);
-
-
-                    coeff = 1.0 / (m.StepSize() * m.StepSize());
-                    coeff0 = -2.0 * coeff;
 
                     if (i == 0)
                     {
@@ -623,7 +812,22 @@ namespace ManifoldRing
 
         public override double Integration(ScalarField sf)
         {
-            throw new NotImplementedException();
+            double[] point = new double[3];
+            double sum = 0;
+            point[2] = 0;
+
+            for (int j = 0; j < m.NodesPerSide(1) - 1; j++)
+            {
+                for (int i = 0; i < m.NodesPerSide(0) - 1; i++)
+                {
+                    point[0] = (i + 0.5) * m.StepSize();
+                    point[1] = (j + 0.5) * m.StepSize();
+
+                    // The value at the center of the pixel
+                    sum += sf.Value(point);
+                }
+            }
+            return sum * m.StepSize() * m.StepSize();
         }
     }
 
@@ -663,6 +867,11 @@ namespace ManifoldRing
         {
             throw new NotImplementedException();
             //return gradient;
+        }
+
+        protected override LocalMatrix[][] latticeGradientMatrix(int n)
+        {
+            return gradientOperator;
         }
 
         protected override LocalMatrix[][] laplacianMatrix()
@@ -707,6 +916,11 @@ namespace ManifoldRing
         {
             throw new NotImplementedException();
             //return gradient;
+        }
+
+        protected override LocalMatrix[][] latticeGradientMatrix(int n)
+        {
+            return gradientOperator;
         }
 
         protected override LocalMatrix[][] laplacianMatrix()
