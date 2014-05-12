@@ -11,6 +11,19 @@
 
     <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Bottom">
         <TabControl.Resources>
+            <!-- For changing color of alternating rows of ListBox -->
+            <Style  TargetType="{x:Type ListBoxItem}">
+                <Style.Triggers>
+                    <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                        <Setter Property="Background" Value="White"></Setter>
+                    </Trigger>
+                    <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                        <Setter Property="Background" Value="Beige"></Setter>
+                        <Setter Property="BorderBrush" Value="Black" />
+                        <Setter Property="BorderThickness" Value="1" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
 
             <local:GlobalParamTypeToStringConverter x:Key="GlobalParameterTypeEnumConv" />
             <local:SolfacDistributionTypeToStringConverter x:Key="SolfacDistTypeEnumConv" />
@@ -38,7 +51,7 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <ObjectDataProvider x:Key="solfacDistributionTypes"
+            <ObjectDataProvider x:Key="molpopDistributionTypes"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
                 <ObjectDataProvider.MethodParameters>
@@ -838,7 +851,7 @@
                                                   DisplayMemberPath="gaussian_spec_name"
                                                   SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref}"
                                                   SelectedValuePath="gaussian_spec_box_guid_ref"
-                                                  MaxWidth="120"
+                                                  MaxWidth="150"
                                                   />
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
@@ -1036,27 +1049,23 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Text="name" Margin="6,0"
                                    Grid.Column="0" Grid.Row="0"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
                     <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
-                                 Grid.Column="1" Grid.Row="0"
-                             Margin="0,2"
-                                 />
+                                 Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
                     <TextBlock Text="subset" Margin="6,0"
                                    Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"  />
                     
                     <!-- skg 5/25/12  -->
                     <ComboBox Name="cell_type_cbox"
@@ -1066,13 +1075,11 @@
                                     DisplayMemberPath="cell_subset_type.cell_subset_name"
                                     SelectedValue="{Binding Path=cell_subset_guid_ref}"
                                     SelectedValuePath="cell_subset_guid"
-                              Margin="0,2"
-                                    />
+                                    Margin="0,2"  />
                     <!-- end skg -->
                     <TextBlock Text="number" Margin="6,0"
                                    Grid.Column="0" Grid.Row="2"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"  />
                     <StackPanel Orientation="Horizontal"
                                 Grid.Column="1" Grid.Row="2"
                                 Margin="0,4">
@@ -1981,7 +1988,7 @@
 
             <!-- =========================== -->
             <!-- Solfacs -->            
-            <DataTemplate x:Key="solfacDistributionTypeTemplate">
+            <DataTemplate x:Key="molpopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Converter={StaticResource SolfacDistTypeEnumConv}}"/>
                 </StackPanel>
@@ -2027,7 +2034,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate x:Key="solfacNameTypeDetailsTemplate">
+            <DataTemplate x:Key="MolPopDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -2760,9 +2767,9 @@
                                               >
 
                                 <StackPanel Orientation="Vertical">
-                                    <ContentControl Name="SolfacNameTypeDetails"
+                                    <ContentControl Name="MolPopDetails"
                                                 Content="{Binding ElementName=MolPopsListBox, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource solfacNameTypeDetailsTemplate}" 
+                                                ContentTemplate="{StaticResource MolPopDetailsTemplate}" 
                                                 Margin="6"/>
                                     <Grid Margin="6,2">
                                         <Grid.ColumnDefinitions>
@@ -2783,17 +2790,21 @@
                                         Grid.Column="1" Grid.Row="0" Margin="0,2"
                                         MinWidth="80"
                                         ItemsSource="{Binding PredefMolecules}" 
-                                        DisplayMemberPath="Name"
-                                          SelectedIndex="1"    />
+                                                                                
+                                        SelectedItem="{Binding ElementName=MolPopsListBox, Path=SelectedItem.Molecule,  Mode=TwoWay}"
+                                        DisplayMemberPath="Name"  
+                                          
+                                        />
                                 <!---->
+                                        <!--SelectedValue="{Binding Path=Molecule.Name, Mode=TwoWay}"-->
 
                                         <TextBlock Text="dist" Margin="6,0" 
                                                Grid.Column="0" Grid.Row="1" 
                                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                         <ComboBox Grid.Column="1" Grid.Row="1"
                                                 Name="SolfacDistributionTypeComboBox"
-                                                ItemsSource="{Binding Source={StaticResource solfacDistributionTypes}}"
-                                                ItemTemplate="{Binding Source={StaticResource solfacDistributionTypeTemplate}}"
+                                                ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
+                                                ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=mp_distribution_type, Mode=OneWay}"
                                                 SelectionChanged="SolfacDistributionComboBox_SelectionChanged"
                                                 MinWidth="120"
@@ -3045,86 +3056,261 @@
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
 
                     <!-- Regions -->
-                    <StackPanel>
-                        <StackPanel.ToolTip>
-                            <StackPanel Width="200" Orientation="Horizontal">
-                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
-                                                        VerticalAlignment="Top" Padding="5" Width="200">
-                                            Click Add button to define a 3D region inside the big cube.  This region will be populated with cells defined below.
-                                </TextBlock>
+                    <Expander ExpandDirection="Down" Padding="10"
+                            IsExpanded="False"
+                            Header="Regions"
+                            x:Name="RegionsExpander"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <StackPanel>
+                            <StackPanel>
+                                <StackPanel.ToolTip>
+                                    <StackPanel Width="200" Orientation="Horizontal">
+                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                            VerticalAlignment="Top" Padding="5" Width="200">
+                                                Click Add button to define a 3D region inside the big cube.  This region will be populated with cells defined below.
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel.ToolTip>
+                                <!--<TextBlock Text="Regions" FontWeight="Bold" Margin="0,5,0,0"  />-->
                             </StackPanel>
-                        </StackPanel.ToolTip>
-                        <TextBlock Text="Regions" FontWeight="Bold" Margin="0,5,0,0"  />
-                    </StackPanel>
-                    <ListBox x:Name="RegionsListBox" MinHeight="50" 
-                                             ItemsSource="{Binding Path=scenario.regions}"
-                                             ItemTemplate="{Binding Source={StaticResource regionListItemTemplate}}"
-                                             SelectedIndex="0"
-                                            />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">                        
-                        <Button Name="AddRegionButton" Width="50" Content="Add" Click="AddRegionButton_Click" />
-                        <Button Name="RemoveRegionButton" Width="50" Content="Remove" Click="RemoveRegionButton_Click" />
-                    </StackPanel>
-                    <Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Details"
-                                              x:Name="RegionsDetailsExpander"
-                                              Margin="0,-15,0,0" 
-                                              Canvas.ZIndex="1"
-                                              >
-                        <StackPanel Orientation="Vertical">
-                            <ContentControl Name="RegionDetails"
-                                                            Content="{Binding ElementName=RegionsListBox, Path=SelectedItem}" 
-                                                            ContentTemplate="{StaticResource regionDetailsTemplate}" 
-                                                            Margin="8"/>
+                            <ListBox x:Name="RegionsListBox" MinHeight="50" 
+                                                 ItemsSource="{Binding Path=scenario.regions}"
+                                                 ItemTemplate="{Binding Source={StaticResource regionListItemTemplate}}"
+                                                 SelectedIndex="0"
+                                                />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="AddRegionButton" Width="50" Content="Add" Click="AddRegionButton_Click" />
+                                <Button Name="RemoveRegionButton" Width="50" Content="Remove" Click="RemoveRegionButton_Click" />
+                            </StackPanel>
+                            <Expander ExpandDirection="Down"
+                                    IsExpanded="False"
+                                    Header="Details"
+                                    x:Name="RegionsDetailsExpander"
+                                    Margin="0,-15,0,0" 
+                                    Canvas.ZIndex="1"
+                                    >
+                                <StackPanel Orientation="Vertical">
+                                    <ContentControl Name="RegionDetails"
+                                                                Content="{Binding ElementName=RegionsListBox, Path=SelectedItem}" 
+                                                                ContentTemplate="{StaticResource regionDetailsTemplate}" 
+                                                                Margin="8"/>
+                                </StackPanel>
+                            </Expander>
                         </StackPanel>
                     </Expander>
 
-                    <!-- Cell Populations -->
-                    <Line Margin="0,5" SnapsToDevicePixels="True" Stroke="LightGray"
-                                                  Stretch="Fill" X1="0" X2="10" />
+                    <!-- CELL POPULATIONS -->
+                    <!--<Line Margin="0,5" SnapsToDevicePixels="True" Stroke="LightGray"
+                                                  Stretch="Fill" X1="0" X2="10" />-->
 
-                    <StackPanel>
-                        <StackPanel.ToolTip>
-                            <StackPanel Width="200" Orientation="Horizontal">
-                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                    <Expander ExpandDirection="Down" Padding="10"
+                            IsExpanded="False"
+                            Header="Cell Populations"
+                            x:Name="CellPopsExpander"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                        <!--<StackPanel>
+                            <StackPanel.ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
                                                 Click Add button to create a population of cells from a subset defined below. 
                                     Specify the number of cells, their color and the region (from above) that will contain these cells.
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel.ToolTip>
-                        <TextBlock Text="Cell Populations" FontWeight="Bold" Margin="0,5,0,0" >
-                                                         
-                        </TextBlock>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel.ToolTip>
+                            <TextBlock Text="Cell Populations" FontWeight="Bold" Margin="0,5,0,0" >
+                            </TextBlock>
 
-                    </StackPanel>
-                    <ListBox x:Name="CellSetsListBox" MinHeight="50" 
-                                         ItemsSource="{Binding Path=scenario.cellpopulations}" 
-                                         ItemTemplate="{Binding Source={StaticResource cellListItemTemplate}}"
-                                             SelectedIndex="0"
-                                         />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                        <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click"/>
-                        <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
-                    </StackPanel>
-                    <Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Details"
-                                              x:Name="CellsDetailsExpander"
-                                              Margin="0,-15,0,0" 
-                                              Canvas.ZIndex="1"
-                                              >
-                        <StackPanel Orientation="Vertical">
-                            <ContentControl Name="CellDetails"
+                        </StackPanel>-->
+
+                        <StackPanel>
+                            <StackPanel.ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                Click Add button to create a population of cells from a subset defined below. 
+                                    Specify the number of cells, their color and the region (from above) that will contain these cells.
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel.ToolTip>
+                            <ListBox x:Name="CellSetsListBox" MinHeight="50" 
+                                             ItemsSource="{Binding Path=scenario.cellpopulations}" 
+                                             ItemTemplate="{Binding Source={StaticResource cellListItemTemplate}}"
+                                                 SelectedIndex="0"
+                                             />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click"/>
+                                <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
+                            </StackPanel>
+                            <Expander ExpandDirection="Down" Padding="6"
+                                    IsExpanded="False"
+                                    Header="Cell Population Details"
+                                    x:Name="CellsDetailsExpander"
+                                    Margin="0,-15,0,0" 
+                                    Canvas.ZIndex="1"
+                                    
+                                    >
+                            <StackPanel Orientation="Horizontal">
+
+                                <ContentControl Name="CellDetails"
                                                 Content="{Binding ElementName=CellSetsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellDetailsTemplate}" 
+                                                Margin="6,-4"/>
+
+                                    <StackPanel Orientation="Vertical">
+                                        <!-- This is for Mol Pop display and whether it is in cytoplasm or membrane -->
+                                        <Expander ExpandDirection="Down" Padding="6"
+                                            IsExpanded="False"
+                                            Header="Molecular Populations"
+                                            x:Name="MolPopExpander"
+                                            Margin="0,-4,0,0" 
+                                            Canvas.ZIndex="1"
+                                            >
+                                            <Grid>
+                                                <Grid.Resources>
+                                                    <DataTemplate x:Key="col2ListItemTemplate">
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=InCytosol}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="col3ListItemTemplate">
+                                                        <CheckBox HorizontalContentAlignment="Center" IsChecked="{Binding Path=InMembrane}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="mpInfoDetailsTemplate">
+                                                        <ListView Grid.Row="1" x:Name="lbMols" AlternationCount="2" ItemsSource="{Binding CellMolPops}">
+                                                            <ListView.View>
+                                                                <GridView x:Name="gvMols" >
+                                                                    <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Cytosol" CellTemplate="{Binding Source={StaticResource col2ListItemTemplate}}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Membrane" CellTemplate="{Binding Source={StaticResource col3ListItemTemplate}}"   />
+                                                                </GridView>
+                                                            </ListView.View>
+                                                        </ListView>
+                                                    </DataTemplate>
+                                                </Grid.Resources>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition MinHeight="170" Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition MaxWidth="250" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!--<TextBlock Grid.Row="0" Text="Molecular Populations" FontWeight="Bold" Margin="6,5,0,0" >
+                                            </TextBlock>-->
+
+
+                                                <ContentControl Grid.Row="1" Name="mpInfo"
+                                                Content="{Binding ElementName=CellSetsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource mpInfoDetailsTemplate}" 
                                                 Margin="6"/>
+                                            </Grid>
+                                        </Expander>
+                                        <!-- This is for Reactions display and whether they are is in cytoplasm or membrane -->
+                                        <Expander ExpandDirection="Down" Padding="6"
+                                            IsExpanded="False"
+                                            Header="Reactions"
+                                            x:Name="ReactionExpander"
+                                            Margin="0,-4,0,0" 
+                                            Canvas.ZIndex="1"
+                                            >
+                                            <Grid>
+                                                <Grid.Resources>
+                                                    <DataTemplate x:Key="col2ListItemTemplate">
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=InCytosol}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="col3ListItemTemplate">
+                                                        <CheckBox HorizontalContentAlignment="Center" IsChecked="{Binding Path=InMembrane}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="reacInfoDetailsTemplate">
+                                                        <ListView Grid.Row="1" x:Name="lbMols" AlternationCount="2" ItemsSource="{Binding CellMolPops}">
+                                                            <ListView.View>
+                                                                <GridView x:Name="gvMols" >
+                                                                    <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Cytosol" CellTemplate="{Binding Source={StaticResource col2ListItemTemplate}}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Membrane" CellTemplate="{Binding Source={StaticResource col3ListItemTemplate}}"   />
+                                                                </GridView>
+                                                            </ListView.View>
+                                                        </ListView>
+                                                    </DataTemplate>
+                                                </Grid.Resources>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition MinHeight="170" Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition MaxWidth="250" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <ContentControl Grid.Row="1" Name="reacInfo"
+                                                Content="{Binding ElementName=CellSetsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource reacInfoDetailsTemplate}" 
+                                                Margin="6"/>
+                                            </Grid>
+                                        </Expander>
+                                        <!-- This is for Reaction Complexes and whether they are is in cytoplasm or membrane -->
+                                        <Expander ExpandDirection="Down" Padding="6"
+                                            IsExpanded="False"
+                                            Header="Reaction Complexes"
+                                            x:Name="ReactionComplexExpander"
+                                            Margin="0,-4,0,0" 
+                                            Canvas.ZIndex="1"
+                                            >
+                                            <Grid>
+                                                <Grid.Resources>
+                                                    <DataTemplate x:Key="col2ListItemTemplate">
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=InCytosol}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="col3ListItemTemplate">
+                                                        <CheckBox HorizontalContentAlignment="Center" IsChecked="{Binding Path=InMembrane}" />
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="reacCxInfoDetailsTemplate">
+                                                        <ListView Grid.Row="1" x:Name="lbMols" AlternationCount="2" ItemsSource="{Binding CellMolPops}">
+                                                            <ListView.View>
+                                                                <GridView x:Name="gvMols" >
+                                                                    <GridViewColumn Width="Auto" Header="Name" DisplayMemberBinding="{Binding Name}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Cytosol" CellTemplate="{Binding Source={StaticResource col2ListItemTemplate}}"  />
+                                                                    <GridViewColumn Width="Auto" Header="Membrane" CellTemplate="{Binding Source={StaticResource col3ListItemTemplate}}"   />
+                                                                </GridView>
+                                                            </ListView.View>
+                                                        </ListView>
+                                                    </DataTemplate>
+                                                </Grid.Resources>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition MinHeight="170" Height="Auto"/>
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition MaxWidth="250" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <ContentControl Grid.Row="1" Name="reacComplexInfo"
+                                                Content="{Binding ElementName=CellSetsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource reacCxInfoDetailsTemplate}" 
+                                                Margin="6"/>
+                                            </Grid>
+                                        </Expander>
+                                    </StackPanel>
+                                </StackPanel>
+                        </Expander>
                         </StackPanel>
                     </Expander>
+                    
+                    <!-- ********************************************* -->
 
                     <!-- Cell Subsets -->
-                    <Line Margin="0,5" SnapsToDevicePixels="True" Stroke="LightGray"
-                                                  Stretch="Fill" X1="0" X2="10" />
+                    <!--<Line Margin="0,5" SnapsToDevicePixels="True" Stroke="LightGray"
+                                                  Stretch="Fill" X1="0" X2="10" />-->
                     <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               >
@@ -3170,16 +3356,11 @@
                     </Expander>
 
                     <!-- Solfacs -->
-                    <Line Margin="0,5" SnapsToDevicePixels="True" Stroke="LightGray"
-                                                  Stretch="Fill" X1="0" X2="10" />
-
-                    <!-- skg 7/26/12-->
-                    <StackPanel>
+                    <!--<StackPanel>
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
-                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
-                                                        VerticalAlignment="Top" Padding="5" Width="200">
-                                            Click Add button to define a soluble factor (such as a chemokine).  Click on Details to set the soluble factor parameters.
+                                <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                    Click Add button to define a soluble factor (such as a chemokine).  Click on Details to set the soluble factor parameters.
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel.ToolTip>
@@ -3197,9 +3378,7 @@
                                               Margin="0,-15,0,0" 
                                               Canvas.ZIndex="1"
                                               >
-                        <!--<StackPanel Orientation="Vertical">
-                        </StackPanel>-->
-                    </Expander>
+                    </Expander>-->
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -3290,18 +3469,18 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <Expander                                            
-                                            Padding="10" ExpandDirection="Down"
-                                                IsExpanded="False"
-                                                Header="Molecules"                                                  
-                                                x:Name="MoleculesExpander"
-                                                Margin="0,10,0,0" 
-                                                Canvas.ZIndex="1"
-                                            BorderThickness="1"
-                                            BorderBrush="Black"
-                                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                                                >
+                            Padding="10" ExpandDirection="Down"
+                            IsExpanded="False"
+                            Header="Molecules"                                                  
+                            x:Name="MoleculesExpander"
+                            Margin="0,2,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                >
 
-                        <Grid  >
+                        <Grid>
                             <Grid.Resources>
                                 <DataTemplate x:Key="molPopListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
@@ -3325,58 +3504,54 @@
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="32" />
-                                <RowDefinition Height="150" />
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
-                                <RowDefinition Height="32" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+
                             </Grid.RowDefinitions>
 
                             <!-- MOLECULES -->
-                            <!-- DisplayMemberPath="Name" -->
-                            <!--ItemTemplate="{Binding Source={StaticResource molPopListItemTemplate}}"
-                                                SelectedIndex="0" -->
-                            <TextBlock Text="Molecules" Grid.Column="0" Grid.Row="0"  FontWeight="Bold" Margin="0,10,0,0" />
+                            <TextBlock Text="Molecules" Grid.Column="0" Grid.Row="0" Margin="0,-6" FontWeight="Bold"  />
+                            <ListBox x:Name="lbMol" Visibility="Visible" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2"                                                     
+                                    ItemsSource="{Binding Path=PredefMolecules}" 
+                                    DisplayMemberPath="Name"
+                                    SelectedIndex="0" />
 
-                            <!--<ListBox x:Name="lbMol" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,10,0,0"  AlternationCount="2"                                                     
-                                                ItemsSource="{Binding Path=ObsMolPop}" SelectionChanged="lbMol_SelectionChanged"                                                     
-                                                DisplayMemberPath="Molecule.Name">
-                                                </ListBox>-->
+                            <Button x:Name="btnAddMolec" Grid.Column="1" Grid.Row="2" Width="80" Height="32" HorizontalAlignment="Right" Click="btnAddMolec_Click">Add</Button>
+                            <Button x:Name="btnRemoveMolec" Grid.Column="2" Grid.Row="2" Width="80" Height="32" HorizontalAlignment="Left" >Remove</Button>
 
-                            <ListBox x:Name="lbMol" Visibility="Visible" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,10,0,0"  AlternationCount="2"                                                     
-                                                    ItemsSource="{Binding Path=PredefMolecules}" 
-                                                    DisplayMemberPath="Name"
-                                         
-                                         SelectedIndex="0" 
-                            />
+                            <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Margin="0,8" Orientation="Vertical" DataContext="{Binding ElementName=lbMol, Path=SelectedItem}" >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <!-- Name -->
+                                    <TextBlock Text="Molecule Name" Margin="6,0" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="txtMolName" Text="{Binding Path=Name}" Grid.Column="1" Grid.Row="0"  Height="24" Margin="0,4" IsReadOnly="True"  ></TextBox>
+                                    <!-- Weight -->
+                                    <TextBlock Text="Molecular Weight" Margin="6,0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="txtMolWt" Grid.Column="1" Grid.Row="1" Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Width="80" Height="24" Margin="0,4"></TextBox>
+                                    <!-- Radius -->
+                                    <TextBlock Text="Molecular Radius"  Grid.Column="0" Grid.Row="2" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <TextBox x:Name="txtRadius" Grid.Column="1" Grid.Row="2" Text="{Binding Path=EffectiveRadius}" Width="80" Height="24" Margin="0,4" />
 
-                            <!-- ItemTemplate="{Binding Source={StaticResource predefMolListItemTemplate}}" -->
-                            
-                            
-                            
-                            <Button x:Name="btnAddMolec" Grid.Column="1" Grid.Row="2" Width="80" HorizontalAlignment="Right" Click="btnAddMolec_Click">Add</Button>
-                            <Button x:Name="btnRemoveMolec" Grid.Column="2" Grid.Row="2" Width="80" HorizontalAlignment="Left" >Remove</Button>
-
-                            <!-- Name -->
-                            <TextBlock Text="Molecule Name" Grid.Column="0" Grid.Row="4" FontWeight="Bold" Margin="0,10,0,0" />
-                            <!--<TextBox x:Name="txtMolName" Text="g_CXCR5" Width="80" Grid.Column="1" Grid.Row="4" Margin="0,10,0,22" Grid.RowSpan="2" ></TextBox>-->
-                            <TextBox x:Name="txtMolName" Text="{Binding Path=Name}"  Width="100" Height="24" Grid.Column="1" Grid.Row="4" Margin="0,10,0,0"  ></TextBox>
-
-                            <!-- Weight -->
-                            <TextBlock Text="Molecular Weight" Grid.Column="0" Grid.Row="5" FontWeight="Bold" Margin="0,10,0,0" />
-                            <TextBox x:Name="txtMolWt" Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Width="80" Height="24" Grid.Column="1" Grid.Row="5" Margin="0,10,0,0"></TextBox>
-
-                            <!-- Radius -->
-                            <TextBlock Text="Molecular Radius" Grid.Column="0" Grid.Row="6" FontWeight="Bold" Margin="0,10,0,0" />
-                            <TextBox x:Name="txtRadius" Text="{Binding Path=EffectiveRadius}" Width="80" Height="24" Grid.Column="1" Grid.Row="6" Margin="0,10,0,0" VerticalAlignment="Top"/>
+                                </Grid>
+                                
+                            </StackPanel>
 
                             <!-- Initial Conc -->
                             <!--<TextBlock Text="Initial Concentration" Grid.Column="0" Grid.Row="7" FontWeight="Bold" Margin="0,10,0,0" />
                                                 <TextBox x:Name="txtInitConc" Text="{Binding Path=Conc}" Width="80" Height="24" Grid.Column="1" Grid.Row="7" Margin="0,10,0,0" VerticalAlignment="Top"/>-->
 
-                            <TextBlock Text="Reactions using molecule" Grid.Column="3" Grid.Row="0" Margin="20,10,0,0" />
+                            <!--<TextBlock Text="Reactions using molecule" Grid.Column="3" Grid.Row="0" Margin="20,10,0,0" />
 
                             <Grid Grid.Column="3" Grid.Row="1"  Margin="20,0,0,0">
                                 <Grid.Resources>
@@ -3388,7 +3563,7 @@
                                 </Grid.Resources>
                                 <ListBox x:Name="lbUsage" Margin="0,10,0,0" AlternationCount="2">
                                 </ListBox>
-                            </Grid>
+                            </Grid>-->
                         </Grid>
                     </Expander>
                     <Expander

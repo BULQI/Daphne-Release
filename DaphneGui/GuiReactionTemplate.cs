@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
 
 using Daphne;
 
@@ -21,10 +22,17 @@ namespace DaphneGui
     //    public int stoichiometry;
     //}
 
+    public class GuiSpeciesReference : SpeciesReference
+    {
+        public string Location { get; set; }
+    }
+
     public class GuiReactionTemplate
     {
         public GuiReactionTemplate()
         {
+            Guid id = Guid.NewGuid();
+            gui_reaction_template_guid = id.ToString();
             listOfReactants = new List<SpeciesReference>();
             listOfProducts = new List<SpeciesReference>();
             rateConst = 0;
@@ -40,6 +48,15 @@ namespace DaphneGui
             rt.listOfProducts.AddRange(listOfProducts);
             rt.listOfReactants.AddRange(listOfReactants);
         }
+        
+        private Dictionary<string, SpeciesReference> molsByType = new Dictionary<string, SpeciesReference>();        
+        public Dictionary<string, SpeciesReference> MolsByType
+        {
+            get
+            {
+                return molsByType;
+            }
+        }
 
         public double RateConst
         {
@@ -53,6 +70,10 @@ namespace DaphneGui
             get
             {
                 return typeOfReaction;
+            }
+            set
+            {
+                typeOfReaction = value;
             }
         }
 
@@ -130,10 +151,11 @@ namespace DaphneGui
         public List<SpeciesReference> listOfProducts;
         public double rateConst;
         public List<SpeciesReference> listOfModifiers;
-        public string typeOfReaction;
+        private string typeOfReaction;
         private string reactantsString;
         private string productsString;
         private string totalReactionString;
+        public string gui_reaction_template_guid { get; set; }
 
     }
 
@@ -205,13 +227,13 @@ namespace DaphneGui
                 if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 0) && (rStoichSum == 1))
                 {
                     // annihilation a	→	0
-                    rt.typeOfReaction = "annihilation";
+                    rt.TypeOfReaction = "annihilation";
 
                 }
                 else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
                 {
                     // association  a + b	→	c
-                    rt.typeOfReaction = "association";
+                    rt.TypeOfReaction = "association";
                 }
                 //else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
                 //{
@@ -222,41 +244,41 @@ namespace DaphneGui
                 {
                     // creation (not allowed)  0 →	a
                     // TODO: handle this error properly
-                    rt.typeOfReaction = "creation";
+                    rt.TypeOfReaction = "creation";
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
                 {
                     // dimerizaton 2a → b
-                    rt.typeOfReaction = "dimerization";
+                    rt.TypeOfReaction = "dimerization";
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
                 {
                     // dimer dissociation b → 2a
-                    rt.typeOfReaction = "dimerDissociation";
+                    rt.TypeOfReaction = "dimerDissociation";
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 2) && (rStoichSum == 1) && (pStoichSum == 2))
                 {
                     // dissociation c →	a + b
-                    rt.typeOfReaction = "dissociation";
+                    rt.TypeOfReaction = "dissociation";
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 1))
                 {
                     // transformation   a →	b
-                    rt.typeOfReaction = "transformation";
+                    rt.TypeOfReaction = "transformation";
                 }
                 else
                 {
                     // generalized reaction 
                     // to do: check for nonsense coefficient combos?
                     // not implemented yet.
-                    rt.typeOfReaction = "generalized";
+                    rt.TypeOfReaction = "generalized";
                 }
                 // Every reaction has a catalyzed counterpart
                 // Keep the same basic reaction types and account for catalyzers later when the reactions are created
                 // See ReactionSwithch() in ReactionBuilder.cs
                 if (rt.listOfModifiers.Count > 0)
                 {
-                    rt.typeOfReaction = rt.typeOfReaction + "_cat";
+                    rt.TypeOfReaction = rt.TypeOfReaction + "_cat";
                 }
 
             }

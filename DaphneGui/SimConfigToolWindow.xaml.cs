@@ -119,27 +119,27 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
         }
 
-        private void AddSolfacButton_Click(object sender, RoutedEventArgs e)
-        {
-            SolfacsDetailsExpander.IsExpanded = true;
-            // Default to HomogeneousLevel for now...
-            MolPopInfo mpi = new MolPopInfo("New Soluble Factor");
-            //mpi.mp_name = "New Soluble Factor";
-            mpi.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            if (MainWindow.SC.SimConfig.entity_repository.solfac_types.Count > 0)
-            {
-                mpi.mp_type_guid_ref = MainWindow.SC.SimConfig.entity_repository.solfac_types[0].solfac_type_guid;
-            }
-            mpi.mp_is_time_varying = false;
-            //MainWindow.SC.SimConfig.scenario.solfacs.Add(solfac);
-            MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;
-        }
+        //private void AddSolfacButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    SolfacsDetailsExpander.IsExpanded = true;
+        //    // Default to HomogeneousLevel for now...
+        //    MolPopInfo mpi = new MolPopInfo("New Soluble Factor");
+        //    //mpi.mp_name = "New Soluble Factor";
+        //    mpi.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+        //    if (MainWindow.SC.SimConfig.entity_repository.solfac_types.Count > 0)
+        //    {
+        //        mpi.mp_type_guid_ref = MainWindow.SC.SimConfig.entity_repository.solfac_types[0].solfac_type_guid;
+        //    }
+        //    mpi.mp_is_time_varying = false;
+        //    //MainWindow.SC.SimConfig.scenario.solfacs.Add(solfac);
+        //    MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;
+        //}
 
-        private void RemoveSolfacButton_Click(object sender, RoutedEventArgs e)
-        {
-            MolPopInfo current_item = (MolPopInfo)MolPopsListBox.SelectedItem;
-            //MainWindow.SC.SimConfig.scenario.solfacs.Remove(current_item);
-        }
+        //private void RemoveSolfacButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    MolPopInfo current_item = (MolPopInfo)MolPopsListBox.SelectedItem;
+        //    //MainWindow.SC.SimConfig.scenario.solfacs.Remove(current_item);
+        //}
 
         //private void AddSolfacTypeButton_Click(object sender, RoutedEventArgs e)
         //{
@@ -678,7 +678,7 @@ namespace DaphneGui
 
         private void AddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            SolfacsDetailsExpander.IsExpanded = true;
+            //SolfacsDetailsExpander.IsExpanded = true;
             // Default to HomogeneousLevel for now...
 
             GuiMolecularPopulation gmp = new GuiMolecularPopulation();

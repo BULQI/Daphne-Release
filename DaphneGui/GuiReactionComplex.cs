@@ -14,12 +14,15 @@ namespace DaphneGui
         public string Name { get; set; }
         public ObservableCollection<GuiReactionTemplate> Reactions { get; set; }
         public ObservableCollection<GuiMolecule> Molecules { get; set; }
+        public string gui_reaction_complex_guid { get; set; }
 
         [XmlIgnore]
         public Dictionary<string, Molecule> MolDict { get; set; }
 
         public GuiReactionComplex()
         {
+            Guid id = Guid.NewGuid();
+            gui_reaction_complex_guid = id.ToString();
             Reactions = new ObservableCollection<GuiReactionTemplate>();
         }
 

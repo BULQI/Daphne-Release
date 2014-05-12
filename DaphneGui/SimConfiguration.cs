@@ -10,7 +10,6 @@ using System.Windows.Data;
 using System.Xml.Serialization;
 using Daphne;
 using Newtonsoft.Json;
-
 using Workbench;
 
 namespace DaphneGui
@@ -18,7 +17,7 @@ namespace DaphneGui
     public class SimConfigurator
     {
         public string FileName { get; set; }
-        private XmlSerializer serializer = new XmlSerializer(typeof(SimConfiguration));
+        //private XmlSerializer serializer = new XmlSerializer(typeof(SimConfiguration));
         public SimConfiguration SimConfig { get; set; }
 
         public SimConfigurator()
@@ -104,6 +103,7 @@ namespace DaphneGui
             //Deserialize JSON - THIS CODE WORKS - PUT IT IN APPROPRIATE PLACE (INITIALSTATE OR SOMETHING) - REPLACE XML WITH THIS
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             string readText = File.ReadAllText(FileName);
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
             SimConfig.InitializeStorageClasses();
@@ -152,10 +152,13 @@ namespace DaphneGui
         // Convenience utility storage (not serialized)
         // NOTE: These could be moved to entity_repository...
         [XmlIgnore]
-        public Dictionary<string, CellSubset> cellsubset_guid_cellsubset_dict;   
+        [JsonIgnore]
+        public Dictionary<string, CellSubset> cellsubset_guid_cellsubset_dict;
         [XmlIgnore]
+        [JsonIgnore]
         public Dictionary<string, BoxSpecification> box_guid_box_dict;
         [XmlIgnore]
+        [JsonIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
 
         public SimConfiguration()
@@ -441,6 +444,9 @@ namespace DaphneGui
         public ObservableCollection<GuiReactionTemplate> Reactions { get; set; }
         public ObservableCollection<GuiMolecularPopulation> MolPops { get; set; }
         public ObservableCollection<GuiReactionComplex> ReactionComplexes { get; set; }
+        public int[] NumGridPts { get; set; } // = { 21, 21, 21 };
+        public double GridStep { get; set; }    //= 50;
+        public double CellRadius { get; set; }
 
         public Scenario()
         {
@@ -679,9 +685,12 @@ namespace DaphneGui
         public double MolecularWeight { get; set; }
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
+        public string gui_molecule_guid { get; set; }
 
         public GuiMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
         {
+            Guid id = Guid.NewGuid();
+            gui_molecule_guid = id.ToString();
             Name = thisName;
             MolecularWeight = thisMW;
             EffectiveRadius = thisEffRad;
@@ -690,6 +699,8 @@ namespace DaphneGui
 
         public GuiMolecule() : base()
         {
+            Guid id = Guid.NewGuid();
+            gui_molecule_guid = id.ToString();
             Name = "MolName";
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
@@ -698,6 +709,8 @@ namespace DaphneGui
 
         public GuiMolecule(GuiMolecule gm)
         {
+            Guid id = Guid.NewGuid();
+            gui_molecule_guid = id.ToString();
             Name = gm.Name;
             MolecularWeight = gm.MolecularWeight;
             EffectiveRadius = gm.EffectiveRadius;
@@ -712,6 +725,8 @@ namespace DaphneGui
         public GuiMolecularPopulation()
             : base()
         {
+            Guid id = Guid.NewGuid();
+            gui_mol_pop_guid = id.ToString();
         }
         public GuiMolecule Molecule { get; set; }
         public string Name { get; set; }
@@ -721,10 +736,18 @@ namespace DaphneGui
             get { return _mp_Info; }
             set { _mp_Info = value; }
         }
+
+        public string gui_mol_pop_guid { get; set; }
+
+        //For molecules in cells
+        public bool InCytosol { get; set; }
+        public bool InMembrane { get; set; }
+
+        public RelativePosition Location { get; set; }
                    
     }
-
-    public enum RelativePosition { Inside, Surface, Outside }
+    
+    public enum RelativePosition { Cytosol, Membrane, ECS }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -736,9 +759,9 @@ namespace DaphneGui
         // correspond in length and index with the GlobalParameterType enum...
         private List<string> _relative_position_strings = new List<string>()
                                 {
-                                    "in",
-                                    "on",
-                                    "outside"
+                                    "Cytosol",
+                                    "Membrane",
+                                    "ECS"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -793,6 +816,15 @@ namespace DaphneGui
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
 
+        //skg Daphne
+        public double CellRadius { get; set; }
+        public double MaxConc { get; set; }
+        public double[] Sigma { get; set; }
+        public double[] Center { get; set; }
+        public ObservableCollection<GuiMolecularPopulation> CellMolPops { get; set; }
+        public ObservableCollection<GuiReactionTemplate> CellReactions { get; set; }
+        public ObservableCollection<GuiReactionComplex> CellReactionComplexes { get; set; }
+
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -802,11 +834,13 @@ namespace DaphneGui
             number = 100;
             cellpopulation_constrained_to_region = false;
             cellpopulation_region_guid_ref = "";
-            wrt_region = RelativePosition.Inside;
+            wrt_region = RelativePosition.Cytosol;
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
+
+            CellMolPops = new ObservableCollection<GuiMolecularPopulation>();
         }
     }
 
@@ -837,7 +871,9 @@ namespace DaphneGui
         {
             Guid id = Guid.NewGuid();
             cell_subset_guid = id.ToString();
-            cell_subset_type = new BCellSubsetType();            
+            
+            //SKG REMOVED THIS LINE - IT WAS CAUSING A PROBLEM DURING JSON DESERIALIZATION - Monday, May 13, 2013
+            //cell_subset_type = new BCellSubsetType();            
         }
 
         public int FindSolfacIndex(string guid)
@@ -900,7 +936,7 @@ namespace DaphneGui
     //base class for BCellSubsetType , TCellSubsetType , FDCellSubsetType 
     [XmlInclude(typeof(BCellSubsetType)),
      XmlInclude(typeof(TCellSubsetType)),
-     XmlInclude(typeof(FDCellSubsetType))]    
+     XmlInclude(typeof(FDCellSubsetType))]
     public class CellSubsetType
     {
         //public ObservableCollection<ReceptorParameters> cell_subset_type_receptor_params { get; set; }
@@ -910,7 +946,8 @@ namespace DaphneGui
         //Common Activation parameters
         public double initialActivationSignal { get; set; }
 
-        [XmlIgnore] 
+        [XmlIgnore]
+        [JsonIgnore] 
         public bool cell_subset_type_divides { get; set; }
         
         //[XmlIgnore]
@@ -933,6 +970,7 @@ namespace DaphneGui
         public ObservableCollection<ReceptorParameters> cell_subset_type_receptor_params { get; set; }
 
         [XmlIgnore]
+        [JsonIgnore]
         public int cell_subset_type_receptor_index { get; set; }
 
         public BCellPhenotype Phenotype { get; set; }
@@ -1028,6 +1066,7 @@ namespace DaphneGui
         public TCellPhenotype Phenotype { get; set; }
 
         [XmlIgnore]
+        [JsonIgnore]
         public int cell_subset_type_receptor_index { get; set; }
 
         //Activation parameters  - //SET TO ZERO
