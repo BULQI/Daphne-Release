@@ -1956,7 +1956,8 @@
                                 </TextBlock>
                                 <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
-                                           SelectedValue="{Binding Path=boundary_face}" >
+                                           SelectedValue="{Binding Path=boundary_face}" 
+                                           SelectionChanged="cbBoundFace_SelectionChanged">
                                     <ComboBox.Style>
                                         <Style TargetType="ComboBox">
                                             <Style.Triggers>

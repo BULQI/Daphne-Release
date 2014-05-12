@@ -1412,9 +1412,11 @@ namespace DaphneGui
 
             if (cb.SelectedIndex == 0)
             {
+                MainWindow.GC.OrientationMarker_IsChecked = false;
             }
             else
             {
+                MainWindow.GC.OrientationMarker_IsChecked = true;
             }
         }
 
@@ -1441,6 +1443,7 @@ namespace DaphneGui
                 cbi.IsEnabled = false;
             }
         }
+        
     }                   
 
     public class DataGridBehavior
