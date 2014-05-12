@@ -2160,7 +2160,7 @@
                         <Slider Name="time_step_slider"
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center"
-                                                Width="200"
+                                                Width="100"
                                                 RenderTransform="1.0,0,0,0.5,0,7"
                                                 Minimum="0.001" 
                                                 Maximum="{Binding ElementName=time_duration_slider, Path=Value}" 
