@@ -20,6 +20,7 @@ namespace DaphneUserControlLib
     /// </summary>
     public partial class DoublesBox : UserControl, INotifyPropertyChanged
     {
+        private bool SliderInitialized = false;
         private double min;                         //minimum value allowed
         private double max;                         //maximum value allowed 
         public double Tick { get; set; }            //slider/edit box increment if applicable
@@ -106,8 +107,8 @@ namespace DaphneUserControlLib
 
         private void SetMinMax()
         {
-            Minimum = 1;
-            Maximum = 1;
+            Minimum = 1;    //dummy
+            Maximum = 1;    //dummy
         }
 
         /// <summary>
@@ -116,12 +117,6 @@ namespace DaphneUserControlLib
         public DoublesBox()
         {
             InitializeComponent();
-            //stpMainPanel.DataContext = this;
-            //DataContext = this;
-            //Number = 3.14159;
-            //_decimal_places = 3;
-            //SNUpperThreshold = 100;
-            //SNLowerThreshold = 0.01;
             Format = "-";
             SetMinMax();
         }
@@ -200,7 +195,11 @@ namespace DaphneUserControlLib
                 SetValue(NumberProperty, value);
                 Format = "";
                 FNumber = string.Format(_format, Number);
-                SetMinMax();
+                if (!SliderInitialized)
+                {
+                    SetMinMax();
+                    SliderInitialized = true;
+                }
                 OnPropertyChanged("Number");
             }
         }
@@ -238,7 +237,7 @@ namespace DaphneUserControlLib
         {
             get { return (int)GetValue(RangeFactorProperty); }
             set
-            {
+            {                
                 SetValue(RangeFactorProperty, value);
                 SetMinMax();
                 OnPropertyChanged("RangeFactor");
