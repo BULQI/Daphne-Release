@@ -44,7 +44,7 @@ namespace DaphneGui
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
-            CellsDetailsExpander.IsExpanded = true;
+            CellPopsDetailsExpander.IsExpanded = true;
 
             // Some relevant CellPopulation constructor defaults: 
             //      number = 1
@@ -1208,6 +1208,8 @@ namespace DaphneGui
 
             ConfigReaction crNew = new ConfigReaction(cr);
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(crNew);
+
+            ReacComplexExpander.IsExpanded = true;
         }
 
         //CELLS EVENT HANDLERS
@@ -2410,6 +2412,9 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cellNew);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
             CellsListBox.ScrollIntoView(CellsListBox.SelectedItem);
+
+            
+
         }
 
         private string GenerateNewCellName(ConfigCell cell)
@@ -3783,6 +3788,30 @@ namespace DaphneGui
                     diff_scheme.RemoveActivationRow(diffrow);
                 }
             }
+        }
+
+        private void ReacComplexExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void menuAddState_Click(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            diff_scheme.AddState("NewlyCreatedState");
+
+            
+
         }
     }    
 

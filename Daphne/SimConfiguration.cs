@@ -2447,6 +2447,31 @@ namespace Daphne
                 Driver.DriverElements.RemoveAt(index);
             }
         }
+
+        public void AddState(string sname)
+        {
+            ConfigActivationRow row = new ConfigActivationRow();
+            for (int i = 0; i < genes.Count; i++)
+            {
+                row.activations.Add(1);
+            }
+
+            Driver.states.Add(sname);
+            activationRows.Add(row);
+
+            ConfigTransitionDriverRow trow = new ConfigTransitionDriverRow();
+            for (int j = 0; j < Driver.states.Count; j++ )
+            {
+                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                e.Alpha = 0;
+                e.Beta = 0;
+                e.driver_mol_guid_ref = "";
+                e.CurrentStateName = sname;
+                e.CurrentState = Driver.states.Count - 1;
+            }
+
+            Driver.DriverElements.Add(trow);
+        }
         
     }
 
