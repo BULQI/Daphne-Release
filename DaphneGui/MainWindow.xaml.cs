@@ -414,6 +414,18 @@ namespace DaphneGui
             {
                 SimConfigToolWindow.IsEnabled = false;
                 saveScenario.IsEnabled = false;
+
+                // notify the user; loading will always fail for protocols from the UserScenarios folder
+                if (openLastScenarioMenu.IsChecked == true)
+                {
+                    string messageBoxText = "Opening the last protocol failed. Starting up with blank window.\nFunction only supported for files in the \\Config folder.";
+                    string caption = "Protocol load failure";
+                    MessageBoxButton button = MessageBoxButton.OK;
+                    MessageBoxImage icon = MessageBoxImage.Error;
+
+                    // Display message box
+                    MessageBox.Show(messageBoxText, caption, button, icon);
+                }
             }
 
             SimConfigToolWindow.MW = this;
