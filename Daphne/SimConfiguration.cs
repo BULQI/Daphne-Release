@@ -390,7 +390,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     GaussianSpecification gs = nn as GaussianSpecification;
-                    entity_repository.gauss_guid_gauss_dict.Add(gs.gauss_spec_guid, gs);
+                    entity_repository.gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -398,7 +398,7 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     GaussianSpecification gs = dd as GaussianSpecification;
-                    entity_repository.gauss_guid_gauss_dict.Remove(gs.gauss_spec_guid);
+                    entity_repository.gauss_guid_gauss_dict.Remove(gs.gaussian_spec_box_guid_ref);
                 }
             }
         }
@@ -692,7 +692,38 @@ namespace Daphne
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
             gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
         }
-        
+
+        public ObservableCollection<string> GetCellReactions()
+        {
+            if (cells.Count == 0)
+                return null;
+
+            ////ObservableCollection<string> cellReacStrings = new ObservableCollection<string>();
+            ////ConfigCell cc = cells_dict[cguid];
+            ////foreach (string rguid in cc.membrane.reactions_guid_ref) {
+            ////    ConfigReaction cr = reactions_dict[rguid];
+            ////    string reacString = cr.TotalReactionString;
+            ////    cellReacStrings.Add(reacString);
+            ////}
+            ////foreach (string rguid in cc.cytosol.reactions_guid_ref)
+            ////{
+            ////    ConfigReaction cr = reactions_dict[rguid];
+            ////    string reacString = cr.TotalReactionString;
+            ////    cellReacStrings.Add(reacString);
+            ////}
+
+            ////return cellReacStrings;
+
+
+
+            ObservableCollection<string> cellNames = new ObservableCollection<string>();
+            foreach (ConfigCell cc in cells)
+            {
+                string cname = cc.CellName;
+                cellNames.Add(cname);
+            }
+            return cellNames;
+        }
     }
 
     public class TimeConfig
@@ -2349,6 +2380,41 @@ namespace Daphne
         }
     }
 
+    /////// <summary>
+    /////// Converter to go between cell pop and cell reaction strings
+    /////// </summary>
+    ////[ValueConversion(typeof(string), typeof(ObservableCollection<string>))]
+    ////public class CellGuidToCellReactionsPopsConverter : IValueConverter
+    ////{
+    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        string guid = value as string;
+    ////        ObservableCollection<string> reacStrings = new ObservableCollection<string>();
+    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+    ////        ObservableCollection<ConfigCell> cell_list = cvs.Source as ObservableCollection<ConfigCell>;
+    ////        if (cell_list != null)
+    ////        {
+    ////            foreach (ConfigCell cel in cell_list)
+    ////            {
+    ////                if (cel.cell_guid == guid)
+    ////                {
+    ////                    foreach (string rguid in cel.membrane.reactions_guid_ref)
+    ////                    {
+    ////                    }
+    ////                }
+    ////            }
+    ////        }
+    ////        return null;
+    ////    }
+
+    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        // TODO: Should probably put something real here, but right now it never gets called,
+    ////        // so I'm not sure what the value and parameter objects would be...
+    ////        return "y";
+    ////    }
+    ////}
+
 
 
     /// <summary>
@@ -2499,7 +2565,7 @@ namespace Daphne
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian)),
      XmlInclude(typeof(MolPopCustom))]
-    public abstract class MolPopDistribution //: EntityModelBase
+    public abstract class MolPopDistribution : EntityModelBase
     {
         [XmlIgnore]
         public MolPopDistributionType mp_distribution_type { get; protected set; }
@@ -2677,7 +2743,6 @@ namespace Daphne
                 }
             }
         }
-        public string gauss_spec_guid { get; set; }
 
         public GaussianSpecification()
         {
@@ -2686,9 +2751,6 @@ namespace Daphne
             gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
             gaussian_spec_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-
-            Guid id = Guid.NewGuid();
-            gauss_spec_guid = id.ToString(); 
         }
     }
 

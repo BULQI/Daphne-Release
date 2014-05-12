@@ -47,6 +47,7 @@
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
             <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
+            <!--<daph:CellGuidToCellReactionsPopsConverter x:Key="CellGuidToCellReactionsPopsConv" />-->
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -104,6 +105,9 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
+            
+
+
             <CollectionViewSource x:Key="cellsetRegionsListView"  
                                   Source="{Binding Path=scenario.regions}"/>
 
@@ -139,16 +143,7 @@
                                   />
             <CollectionViewSource x:Key="ecmReactionComplexesListView"  
                                   Source="{Binding Path=entity_repository.reaction_complexes}"
-                                  />
-            <!--<CollectionViewSource x:Key="ecmReactionComplexReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  />-->
-            <!--<CollectionViewSource x:Key="ecmReactionComplexReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="ecmReactionComplexReactionCollectionViewSource_Filter"/>-->
-            
-
-            
+                                  />            
             <CollectionViewSource x:Key="membraneMolPopsListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="membraneMolPopsCollectionViewSource_Filter"/>
@@ -591,7 +586,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_visibility}"
+                                        IsChecked="{Binding Path=box_visibility}"                                      
                                         />                                                
                         </Grid>
                         <Grid VerticalAlignment="Center">
@@ -635,12 +630,12 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
                                         Value="{Binding ElementName=x_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
+                                        />                    
                     <Slider x:Name="x_scale_slider"
                             Grid.Column="3" Grid.Row="2"
                             Orientation="Horizontal"
@@ -655,11 +650,11 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=x_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        Value="{Binding ElementName=x_scale_slider, Path=Value, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}"
                                         />
                     <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
                     <Slider x:Name="y_trans_slider"
@@ -676,7 +671,7 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
@@ -696,7 +691,7 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
@@ -717,7 +712,7 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
@@ -737,7 +732,7 @@
                                         CheckBoxVisibility="Collapsed" 
                                         SpinnerVisibility="Collapsed"
                                         HorizontalAlignment="Left"
-                                        Format="G"
+                                        Format="F2"
                                         StepValue="10"
                                         Width="50" 
                                         CenterSlotHorizontalAlignment="Right"
@@ -777,110 +772,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopLinear}">
-                <!--<Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="min conc" Margin="6,0"
-                               Grid.Column="0" Grid.Row="0"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               />
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1" Grid.Row="0"
-                                Margin="0,2">
-                        <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="G"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=min_concentration, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <TextBlock Text="max conc" Margin="6,0"
-                               Grid.Column="0" Grid.Row="1"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               />
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1" Grid.Row="1"
-                                Margin="0,2">
-                        <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="G"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=max_concentration, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <TextBlock Text="direction" Margin="6,0"
-                               Grid.Column="0" Grid.Row="2"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               />
-                    <Grid Grid.Column="1" Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="X" 
-                               Grid.Column="0" Grid.Row="0"  
-                               HorizontalAlignment="Right" Margin="6,0"
-                               />
-                        <TextBlock Text="Y" 
-                               Grid.Column="1" Grid.Row="0"  
-                               HorizontalAlignment="Right" Margin="6,0"
-                               />
-                        <TextBlock Text="Z" 
-                               Grid.Column="2" Grid.Row="0"  
-                               HorizontalAlignment="Right" Margin="6,0"
-                               />
-                        <editors:DoubleEditBox Grid.Column="0" Grid.Row="1"
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="G"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=x_direction, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <editors:DoubleEditBox Grid.Column="1" Grid.Row="1"
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="G"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=y_direction, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        <editors:DoubleEditBox Grid.Column="2" Grid.Row="1"
-                                                CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="G"
-                                                StepValue="0.1"
-                                                Width="50" 
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=z_direction, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                    </Grid>
-                </Grid>-->
+                
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
@@ -913,22 +805,10 @@
                                                     Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
                                                     />
                             <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                        </StackPanel>
-                        <!--<TextBlock Text="gauss" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                        <ComboBox Name="gaussian_gradients_cbox"
-                                                  Grid.Column="1" Grid.Row="1" 
-                                                  ItemsSource="{Binding Source={StaticResource molpopGaussianSpecsListView}}" 
-                                                  DisplayMemberPath="gaussian_spec_name"
-                                                  SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref}"
-                                                  SelectedValuePath="gaussian_spec_box_guid_ref"
-                                                  MaxWidth="150"
-                                                  />-->
+                        </StackPanel>                        
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-                    <ListView x:Name="solfacGaussianBoxSpecsListView"
+                    <ListView x:Name="molpopGaussianBoxSpecsListView"
                                               ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
                                               DisplayMemberPath="box_guid"
                                               SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
@@ -936,7 +816,7 @@
                                               Visibility="Collapsed"
                                               />
                     <ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding ElementName=solfacGaussianBoxSpecsListView, Path=SelectedItem}" 
+                                                    Content="{Binding ElementName=molpopGaussianBoxSpecsListView, Path=SelectedItem}" 
                                                     HorizontalAlignment="Center"
                                                     ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
                                                     Margin="0,2"/>
@@ -1088,7 +968,7 @@
                         
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-                    <ListView x:Name="solfacGaussianBoxSpecsListView"
+                    <ListView x:Name="molPopGaussianBoxSpecsListView"
                                               ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
                                               DisplayMemberPath="box_guid"
                                               SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
@@ -1096,7 +976,7 @@
                                               Visibility="Collapsed"
                                               />
                     <ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding ElementName=solfacGaussianBoxSpecsListView, Path=SelectedItem}" 
+                                                    Content="{Binding ElementName=molPopGaussianBoxSpecsListView, Path=SelectedItem}" 
                                                     HorizontalAlignment="Center"
                                                     ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
                                                     Margin="0,2"/>
@@ -1217,12 +1097,17 @@
                             Content="{Binding Path=cellPopDist}"
                             />
                 </Grid>
-            </DataTemplate>
+            </DataTemplate>            
 
             <DataTemplate x:Key="cellPopDetailsTemplate">
                 <DataTemplate.Resources>
-                    <CollectionViewSource x:Key="cellCoordinates"  
-                                  Source="{Binding Path=cell_list}"/>
+                    <CollectionViewSource x:Key="cellCoordinates"  Source="{Binding Path=cell_list}"/>
+                    <ObjectDataProvider x:Key="odpTester"
+                             ObjectType="{x:Type daph:EntityRepository}"
+                             MethodName="GetCellReactions">
+                        
+                    </ObjectDataProvider>
+                    
                 </DataTemplate.Resources>
                 <StackPanel>
                     <Grid>
@@ -1244,25 +1129,32 @@
                                         Grid.Column="0" Grid.Row="0"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
-                                        Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
-
-                        
+                                        Grid.Column="1" Grid.Row="0"  Margin="0,2"   />                        
                         
                         <TextBlock Text="cell type" Margin="6,0"
                                         Grid.Column="0" Grid.Row="1"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
+                        
                         <ComboBox x:Name="cell_type_combo_box"
                                         Grid.Column="1" Grid.Row="1" Margin="0,2"
                                         MinWidth="80"
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
-                                        
+                                        ToolTipOpening="cell_type_combo_box_ToolTipOpening"
+                                        ToolTipClosing="cell_type_combo_box_ToolTipClosing"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                  
-                                  SelectedValue="{Binding Path=cell_guid_ref}"
-                                    SelectedValuePath="cell_guid"
-                                  
-                                    />
+                                        SelectedValue="{Binding Path=cell_guid_ref}"
+                                        SelectedValuePath="cell_guid">
+                            <ComboBox.ToolTip>
+                                    <StackPanel Tag="{Binding Source={StaticResource odpTester}}">
+                                        <ListBox x:Name="lbTT" Width="200" Height="100"
+                                            ItemsSource="{Binding Path=Tag}">                                        
+                                        </ListBox>
+                                    </StackPanel>
+                            </ComboBox.ToolTip>
+
+                        </ComboBox>
+                        
                         <TextBlock Text="number" Margin="6,0"
                                         Grid.Column="0" Grid.Row="2"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
@@ -2061,28 +1953,7 @@
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
                                 <TextBlock Text="initial distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                <!--<ComboBox Margin="10,0" 
-                                        Name="MolPopDistributionTypeComboBox"
-                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
-                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
-                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        MinWidth="120">
-
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="{x:Type ComboBoxItem}">
-                                            <Style.Triggers>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
-                                                        <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </MultiDataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
-                                </ComboBox>-->
+                                
                                 <ComboBox Margin="10,0" 
                                         Name="MolPopDistributionTypeComboBox"
                                         ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
@@ -2137,70 +2008,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-
-            <DataTemplate x:Key="MolPopDetailsTemplate">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="name" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="0"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                    <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
-                                 Grid.Column="1" Grid.Row="0"
-                             Margin="0,2"
-                                 />
-                    
-                    <TextBlock Text="color" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="2"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                    <editors:ColorEditBox x:Name="solfacColorEditBox"
-                                          Grid.Column="1" Grid.Row="2"
-                                          CheckBoxVisibility="Collapsed"
-                                          SpinnerVisibility="Collapsed"
-                                          Width="140"
-                                          HorizontalAlignment="Left" 
-                                          Format="a r g b"
-                                          Value="{Binding Path=mpInfo.mp_color}"
-                                          Margin="0,2"
-                                          />
-                    <TextBlock Text="render wt" Margin="6,0"
-                               Grid.Column="0" Grid.Row="3"
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   TextAlignment="Right"
-                                    />
-                    <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="3"
-                                IsEnabled="{Binding Path=mp_render_on}">
-                        <Slider x:Name="solfac_weight_slider"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    Width="50"
-                                    RenderTransform="1.0,0,0,0.5,0,7"
-                                    Minimum="0" 
-                                    Maximum="5" 
-                                    Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
-                                    IsSnapToTickEnabled="True" 
-                                    TickFrequency="0.1" 
-                                    />
-                        <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                   VerticalAlignment="Center"
-                                   TextAlignment="Right"
-                                   Margin="5,0,0,0"
-                                   MinWidth="20"
-                                   />
-                    </StackPanel>
-                </Grid>
-            </DataTemplate>
-
+            
             <DataTemplate x:Key="reactionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>

@@ -63,14 +63,14 @@ namespace DaphneGui
         private void AddGaussianSpecification(MolPopGaussian mpg)
         {
             BoxSpecification box = new BoxSpecification();
-            box.x_trans = 200;
-            box.y_trans = 200;
-            box.z_trans = 200;
-            box.x_scale = 200;
-            box.y_scale = 200;
-            box.z_scale = 200;
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 100;
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
             // Add box GUI property changed to VTK callback
-            //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
+            box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
             MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
 
             GaussianSpecification gg = new GaussianSpecification();
@@ -112,8 +112,8 @@ namespace DaphneGui
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of solfacs list
-            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            ////////    return;
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+                return;
 
 
             ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
@@ -121,7 +121,7 @@ namespace DaphneGui
             if (current_mol != null)
             {
                 MolPopInfo current_item = current_mol.mpInfo;
-                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+                MolPopDistributionType new_dist_type = MolPopDistributionType.Homogeneous; // = MolPopDistributionType.Gaussian;
 
                 if (e.AddedItems.Count > 0)
                 {
@@ -1342,7 +1342,7 @@ namespace DaphneGui
             if (cp == null)
                 return;
             cp.number = cp.cell_list.Count;
-        }
+        }        
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
@@ -1438,6 +1438,31 @@ namespace DaphneGui
                 cbi.IsEnabled = false;
             }
         }
+        
+        private void cell_type_combo_box_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            CellPopulation pop = (CellPopulation)(CellPopsListBox.SelectedItem);
+            string guid = pop.cell_guid_ref;
+            
+
+            //ObservableCollection<string> reacStrings = MainWindow.SC.SimConfig.entity_repository.GetCellReactions(guid);
+            //ComboBox combo = (ComboBox)sender;
+            //ToolTip tt = (ToolTip)(combo.ToolTip);
+            //tt.Inv
+
+            //tt.DataContext = reacStrings;
+            //combo.ToolTip.
+
+            //combo.
+        }
+
+        private void cell_type_combo_box_ToolTipClosing(object sender, ToolTipEventArgs e)
+        {
+            //ToolTip tt = sender as ToolTip;
+            //tt.IsLoaded = false;
+        }
+
+        
         
     }                   
 

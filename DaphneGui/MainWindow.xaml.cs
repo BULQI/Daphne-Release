@@ -56,6 +56,7 @@ namespace DaphneGui
         private DocWindow dw;
         private Thread simThread;
         private VCRControl vcrControl;
+        public static Cell selectedCell = null;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
 
