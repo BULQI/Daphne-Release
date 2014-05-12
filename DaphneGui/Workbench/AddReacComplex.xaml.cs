@@ -195,8 +195,9 @@ namespace DaphneGui
                     pair.Guid = reac.reaction_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
-                    selectedRC.ReactionRates.Add(pair);
+                    selectedRC.ReactionRates.Add(pair);                    
                 }
+                selectedRC.RefreshMolPops(er);
             }
             else
             {
@@ -212,6 +213,7 @@ namespace DaphneGui
                     crc.ReactionRates.Add(pair);
                 }
                 er.reaction_complexes.Add(crc);
+                crc.RefreshMolPops(er);
             }
         }
 
