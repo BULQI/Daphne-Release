@@ -61,8 +61,17 @@ namespace DaphneGui
 
         private void RemoveCellButton_Click(object sender, RoutedEventArgs e)
         {
+            int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
+
+            CellPopsListBox.SelectedIndex = index;
+
+            if (index >= CellPopsListBox.Items.Count)
+                CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
+
+            if (CellPopsListBox.Items.Count == 0)
+                CellPopsListBox.SelectedIndex = -1;
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
@@ -533,12 +542,20 @@ namespace DaphneGui
         }
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
-            int nIndex = lbEcsMolPops.SelectedIndex;
-            if (nIndex >= 0)
+            int index = lbEcsMolPops.SelectedIndex;
+            if (index >= 0)
             {
                 ConfigMolecularPopulation gmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(gmp);
             }
+
+            lbEcsMolPops.SelectedIndex = index;
+
+            if (index >= lbEcsMolPops.Items.Count)
+                lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
+
+            if (lbEcsMolPops.Items.Count == 0)
+                lbEcsMolPops.SelectedIndex = -1;
         }
 
         private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
@@ -1718,8 +1735,22 @@ namespace DaphneGui
                 int rows_to_add = numNew - numOld;
                 for (int i = 0; i < rows_to_add; i++)
                 {
-                    cp.cell_list.Add(new CellState());                          
+                    CellState cs = new CellState();
+                    cp.cell_list.Add(cs);
+                    //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+                    //{
+                    //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                    //    cps.spec_cell_list.Add(cs);
+                    //}
                 }
+                //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+                //{
+                //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                //    for (int i = 0; i < rows_to_add; i++)
+                //    {
+                //        cps.spec_cell_list.Add(new CellState());
+                //    }
+                //}
             }
             else if (numNew < numOld)
             {
@@ -1731,7 +1762,21 @@ namespace DaphneGui
                 for (int i = rows_to_delete; i > 0; i--)
                 {
                     cp.cell_list.RemoveAt(numNew + i - 1);
+                    //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+                    //{
+                    //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                    //    cps.spec_cell_list.RemoveAt(numNew + i - 1);
+                    //}
+
                 }
+                //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+                //{
+                //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                //    for (int i = rows_to_delete; i > 0; i--)
+                //    {
+                //        cps.spec_cell_list.RemoveAt(numNew + i - 1);
+                //    }
+                //}
             }
             cp.number = cp.cell_list.Count;
             if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
@@ -2057,6 +2102,12 @@ namespace DaphneGui
                 }
             }
             return false;
+        }
+
+        private void cbCellColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox ColorComboBox = sender as ComboBox;
+            int n = ColorComboBox.SelectedIndex;
         }
 
         //private ComboBox MolPopDistComboBox;

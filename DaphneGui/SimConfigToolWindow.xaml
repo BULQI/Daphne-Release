@@ -12,6 +12,7 @@
     
     <!-- xmlns:daph="clr-namespace:Daphne"-->
 
+    
     <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top">
         <TabControl.Resources>
             <!-- For changing color of alternating rows of ListBox -->
@@ -49,6 +50,8 @@
             <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
             <daph:CellGuidToCellReactionsConverter x:Key="CellGuidToCellReactionsConv" />
             <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
+            <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
+            <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -82,13 +85,13 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <!--<ObjectDataProvider x:Key="cellPopProbDistributionTypes"
+            <ObjectDataProvider x:Key="colorList"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
                 <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="daph:CellPopProbDistributionType" />
+                    <x:Type TypeName="daph:ColorList" />
                 </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>-->
+            </ObjectDataProvider>
 
             <ObjectDataProvider x:Key="boundaryTypes"
                     MethodName="GetValues" 
@@ -834,10 +837,12 @@
                 </StackPanel>
             </DataTemplate>
 
+            <!--"{Binding Path=spec_cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
+            
             <DataTemplate DataType="{x:Type daph:CellPopSpecific}">                            
                 <StackPanel x:Name="panelCoordinates" Grid.Row="1" Grid.Column="0">
                     <StackPanel  Margin="0,6,0,0">
-                        <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=spec_cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -1296,20 +1301,29 @@
                                     />
                         </StackPanel>
 
-                        <TextBlock Text="color" Margin="6,0"
-                                        Grid.Column="0" Grid.Row="4"  
-                                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        />
-                        <!--<ComboBox x:Name="cbCellColor" Grid.Column="1" Grid.Row="4" SelectedIndex="{Binding Path=cellpopulation_color,UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBoxItem>Red</ComboBoxItem>
-                            <ComboBoxItem>Orange</ComboBoxItem>
-                            <ComboBoxItem>Yellow</ComboBoxItem>
-                            <ComboBoxItem>Green</ComboBoxItem>
-                            <ComboBoxItem>Blue</ComboBoxItem>
-                            <ComboBoxItem>Custom</ComboBoxItem>
-                        </ComboBox>-->
-                        <editors:ColorEditBox x:Name="cellColorEditBox" 
-                                        Grid.Column="1" Grid.Row="4"
+                        <TextBlock Text="color" Margin="6,0" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <ComboBox x:Name="cbCellColor"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
+                                        ItemsSource="{Binding Source={StaticResource colorList}}"                                        
+                                        SelectedIndex="{Binding Path=cellpopulation_color2, Converter={StaticResource ColorListToIntConv}, 
+                                           Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        >
+                           
+                            <!--SelectedIndex="{Binding Path=cellpopulation_color2, Converter={StaticResource textToColorConv}, UpdateSourceTrigger=PropertyChanged}">-->
+                        </ComboBox>
+
+                        <StackPanel Grid.Column="1" Grid.Row="5" >
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=cbCellColor, Path=SelectedIndex}" Value="7">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <editors:ColorEditBox x:Name="cellColorEditBox" 
                                         CheckBoxVisibility="Collapsed"
                                         SpinnerVisibility="Collapsed"
                                         Width="140"
@@ -1317,48 +1331,9 @@
                                         Format="a r g b"
                                         Value="{Binding Path=cellpopulation_color}"
                                         Margin="0,2">
-                            
-                            <!--<editors:ColorEditBox.Style>
-                                <Style TargetType="{x:Type editors:ColorEditBox}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=cbCellColor, Path=SelectedIndex}" Value="5">
-                                            <Setter Property="editors:ColorEditBox.Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="0" />
-                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="1" />
-                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="2" />
-                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="3" />
-                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="4" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter  Property="editors:ColorEditBox.Visibility" Value="Hidden"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                    
-                                </Style>
-                            </editors:ColorEditBox.Style>-->
-                            
-                        </editors:ColorEditBox>
-                                
 
-                        <!--<TextBox.Style>
-                            <Style TargetType="{x:Type TextBox}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </DataTrigger>
-                        
-                                    <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
-                                        <Setter  Property="StackPanel.IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                        
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>-->
+                            </editors:ColorEditBox>
+                        </StackPanel>
 
                         <!-- Show GUID - for debugging only -->
                         <!-- <TextBlock Text="guid_ref" Margin="6,0"
@@ -4611,7 +4586,7 @@
         </TabItem>
 
         <!-- GUID VIEWER -->
-        <TabItem Header="GUID Viewer">
+        <TabItem Header="GUID Viewer" Visibility="Hidden">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
                     <StackPanel.Resources>

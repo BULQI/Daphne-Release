@@ -86,7 +86,7 @@ namespace Daphne
 
         public void DeserializeSimConfig()
         {
-            //Deserialize JSON - THIS CODE WORKS - PUT IT IN APPROPRIATE PLACE (INITIALSTATE OR SOMETHING) - REPLACE XML WITH THIS
+            //Deserialize JSON
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -962,6 +962,144 @@ namespace Daphne
             return (RelativePosition)Enum.ToObject(typeof(RelativePosition), (int)idx);
         }
     }
+    public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(ColorList), typeof(int))]
+    public class ColorListToIntConverter : IValueConverter
+    {        
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return 1;
+
+            try
+            {
+                int index = (int)value;
+                return index;
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return ColorList.Orange;
+
+            int idx = (int)value;
+            return (ColorList)Enum.ToObject(typeof(ColorList), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(ColorList), typeof(string))]
+    public class ColorListToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the MoleculeLocation enum...
+        private List<string> _color_strings = new List<string>()
+                                {
+                                    "Red",
+                                    "Orange",
+                                    "Yellow",
+                                    "Green",
+                                    "Blue",
+                                    "Indigo",
+                                    "Violet",
+                                    "Custom"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _color_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return ColorList.Orange;
+
+            int idx = (int)value;
+            return (ColorList)Enum.ToObject(typeof(ColorList), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Convert color enum to type Color
+    /// </summary>
+    [ValueConversion(typeof(ColorList), typeof(Color))]
+    public class ColorListToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {            
+            if (value == null)
+                return 1;
+
+            Color col = Color.FromRgb(255, 0, 0);
+
+            try
+            {
+                int index = (int)value;
+                ColorList colEnum = (ColorList)Enum.ToObject(typeof(ColorList), (int)index);
+                //ColorList colEnum = (ColorList)value;
+
+                switch (colEnum)
+                {
+                    case ColorList.Red:
+                        col = Color.FromRgb(255, 0, 0);
+                        break;
+                    case ColorList.Orange:
+                        col = Colors.Orange;
+                        break;
+                    case ColorList.Yellow:
+                        col = Color.FromRgb(255, 255, 0);
+                        break;
+                    case ColorList.Green:
+                        col = Color.FromRgb(0, 255, 0);
+                        break;
+                    case ColorList.Blue:
+                        col = Color.FromRgb(0, 0, 255);
+                        break;
+                    case ColorList.Indigo:
+                        col = Color.FromRgb(64, 0, 192);
+                        break;
+                    case ColorList.Violet:
+                        col = Color.FromRgb(192, 0, 255);
+                        break;
+                    case ColorList.Custom:
+                        col = (Color)parameter;
+                        break;
+                    default:
+                        break;
+                }
+
+                return col;
+            }
+            catch
+            {
+                return col;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return 0;
+        }
+    }
 
     [ValueConversion(typeof(Color), typeof(string))]
     public class TextToColorConverter : IValueConverter
@@ -970,10 +1108,23 @@ namespace Daphne
         {
             string ret = "Red";
             Color col = (Color)value;
+
             if (col == Colors.Red)
                 ret = "Red";
+            else if (col == Colors.Orange)
+                ret = "Orange";
+            else if (col == Colors.Yellow)
+                ret = "Yellow";
+            else if (col == Colors.Green)
+                ret = "Green";
+            else if (col == Colors.Blue)
+                ret = "Blue";
+            else if (col == Colors.Indigo)
+                ret = "Indigo";
+            else if (col == Colors.Violet)
+                ret = "Violet";            
             else
-                ret = "Black";
+                ret = "Custom";
 
             return ret;
         }
@@ -983,6 +1134,8 @@ namespace Daphne
             return null;
         }
     }
+
+   
 
     public enum MoleculeLocation { Bulk = 0, Boundary }
 
@@ -2215,6 +2368,21 @@ namespace Daphne
         public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
+        private ColorList _cellpopulation_color2;
+        public ColorList cellpopulation_color2 
+        {
+            get
+            {
+                return _cellpopulation_color2;
+            }
+            set
+            {
+                _cellpopulation_color2 = value;
+                ColorListToColorConverter conv = new ColorListToColorConverter();
+                Color cc = (Color)conv.Convert(value, typeof(Color), cellpopulation_color, System.Globalization.CultureInfo.CurrentCulture);
+                cellpopulation_color = cc;                
+            }
+        }
         
         private CellPopDistribution _cellPopDist;
         public CellPopDistribution cellPopDist
@@ -2289,6 +2457,7 @@ namespace Daphne
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+            cellpopulation_color2 = ColorList.Orange;
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
             //cellPopDist = new CellPopSpecific();
