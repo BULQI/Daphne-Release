@@ -21,7 +21,7 @@ namespace DaphneGui
         /// <summary>
         /// save simulation state, enabled when simulaiton is paused.
         /// </summary>
-        public void save_simululation_state()
+        public void save_simulation_state()
         {
             runButton.IsEnabled = false;
             resetButton.IsEnabled = false;

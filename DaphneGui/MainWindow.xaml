@@ -101,11 +101,12 @@
                     <MenuItem Header="Load Scenario..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
                     <MenuItem Header="Save Scenario..." Name="saveScenario" Command="ApplicationCommands.Save" />
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
+                    <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding ElementName=runButton, Path=Content, UpdateSourceTrigger=PropertyChanged, Converter={local:PauseButtonTextToBoolConverter}}" Click="saveState_Click" />
                     <!--><Separator />
                     <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
                     <Separator />
                     <MenuItem Header="Load past experiment" Name="loadExp" Click="OpenExpSelectWindow" />
-                    <local:RecentFileList x:Name="RecentFileList" />
+                    <local:RecentFileList x:Name="recentFileList" />
                     <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
                 </MenuItem>
                 <MenuItem Header="Analysis" Name="analysisMenu">
@@ -219,21 +220,6 @@
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
                                                         VerticalAlignment="Top" Padding="5" Width="200">
                                         Start the simulation.
-                                    </TextBlock>
-                                </StackPanel>
-                            </ToolTip>
-                        </Button.ToolTip>
-                    </Button>
-                    <Button Content="Save" HorizontalAlignment="Right" Name="saveButton" 
-                            IsEnabled="{Binding ElementName=runButton, Path=Content, UpdateSourceTrigger=PropertyChanged, Converter={local:PauseButtonTextToBoolConverter}}"
-                            Width="60" ToolTipService.InitialShowDelay="1500"
-                            Margin="0" Click="saveButton_Click">
-                        <Button.ToolTip>
-                            <ToolTip>
-                                <StackPanel Width="200" Orientation="Horizontal">
-                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
-                                                        VerticalAlignment="Top" Padding="5" Width="200">
-                                        Save simulation State.
                                     </TextBlock>
                                 </StackPanel>
                             </ToolTip>

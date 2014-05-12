@@ -615,7 +615,7 @@ namespace DaphneGui
                     //resetButton.IsEnabled = false;
                     resetButton.Content = "Abort";
                     //runButton.IsEnabled = false;
-                    fileMenu.IsEnabled = false;
+                    enableFileMenu(false);
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
                     gc.ToolsToolbar_IsEnabled = false;
@@ -629,6 +629,20 @@ namespace DaphneGui
                     ExportMenu.IsEnabled = false;
                 }
             }
+        }
+
+        /// <summary>
+        /// enable/disable items on the file menu
+        /// </summary>
+        /// <param name="enable">false to disable</param>
+        private void enableFileMenu(bool enable)
+        {
+            loadScenario.IsEnabled = enable;
+            saveScenario.IsEnabled = enable;
+            saveScenarioAs.IsEnabled = enable;
+            loadExp.IsEnabled = enable;
+            recentFileList.IsEnabled = enable;
+            //exitApp.IsEnabled = enable;
         }
 
         /// <summary>
@@ -1240,9 +1254,9 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void saveButton_Click(object sender, RoutedEventArgs e)
+        private void saveState_Click(object sender, RoutedEventArgs e)
         {
-            save_simululation_state();
+            save_simulation_state();
         }
 
         private void BlueHandToolButton_Click(object sender, RoutedEventArgs e)
@@ -1717,7 +1731,7 @@ namespace DaphneGui
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready";
             //runButton.IsEnabled = true;
-            fileMenu.IsEnabled = true;
+            enableFileMenu(true);
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
             gc.ToolsToolbar_IsEnabled = true;
