@@ -3024,6 +3024,23 @@
                         
                     </StackPanel.Resources>
 
+                    <!-- Report Settings -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Report Settings"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <StackPanel>
+                            <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
+                            <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>
+                        </StackPanel>
+                    </Expander>
+
+
                     <!-- Molecules in Extracellular Medium -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
