@@ -61,11 +61,7 @@
     <Compile Include="Chemistry.cs" />
     <Compile Include="Compartment.cs" />
     <Compile Include="Differentiator.cs" />
-    <Compile Include="Embeddings.cs" />
-    <Compile Include="Fields.cs" />
     <Compile Include="Locomotor.cs" />
-    <Compile Include="Manifolds.cs" />
-    <Compile Include="Math.cs" />
     <Compile Include="MolecularPopulation.cs" />
     <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
