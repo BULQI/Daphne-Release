@@ -3159,7 +3159,7 @@ namespace DaphneGui
 
                 //Expander
                 FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
-                expAlphaBeta.SetValue(Expander.HeaderProperty, "Production rate values");
+                expAlphaBeta.SetValue(Expander.HeaderProperty, "Transition rate values");
                 expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
                 expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
                 expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
@@ -3321,7 +3321,7 @@ namespace DaphneGui
 
             //Expander
             FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
-            expAlphaBeta.SetValue(Expander.HeaderProperty, "Production rate values");
+            expAlphaBeta.SetValue(Expander.HeaderProperty, "Transition rate values");
             expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
             expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
             expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
