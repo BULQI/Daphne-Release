@@ -93,20 +93,27 @@ namespace Daphne
                 }
             }
 
-            //ADD CELLS AND CELL MOLECULES
+            // Add cell type
             ConfigCell configCell = findCell("Leukocyte_staticReceptor", sc);
+            sc.entity_repository.cells_dict.Add(configCell.cell_guid, configCell);
+
+            // Add cell population
+            // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cellpopulation_name = "Leukocyte_staticReceptor";
-            cellPop.number = 1;
-            cellPop.cellpopulation_constrained_to_region = true;
-            cellPop.wrt_region = RelativePosition.Inside;
-            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cellPop.cell_guid_ref = configCell.cell_guid;
-
-            cellPop.cell_list.Add(new CellState(sc.scenario.environment.extent_x / 2, 
-                                                sc.scenario.environment.extent_y / 2, 
-                                                sc.scenario.environment.extent_z / 2));
-
+            cellPop.cellpopulation_name = configCell.CellName;
+            cellPop.number = 1;
+            double[] extents = new double[3] { sc.scenario.environment.extent_x, 
+                                               sc.scenario.environment.extent_y, 
+                                               sc.scenario.environment.extent_z };
+            double minDisSquared = 2 * sc.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+            cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.CellStates[0] = new CellState(  sc.scenario.environment.extent_x / 2,
+                                                                sc.scenario.environment.extent_y / 2,
+                                                                sc.scenario.environment.extent_z / 2);
+            cellPop.cellpopulation_constrained_to_region = false;
+            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             sc.scenario.cellpopulations.Add(cellPop);
 
             // Cell reporting
@@ -232,33 +239,31 @@ namespace Daphne
                 }
             }
 
-
-            //ADD CELLS AND CELL MOLECULES
+            // Add cell
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
             ConfigCell configCell = findCell("Leukocyte_staticReceptor_motile", sc);
-            CellPopulation cellPop = new CellPopulation();
-            cellPop.cellpopulation_name = "Motile_leukocytes";
-            cellPop.number = 1;
-            cellPop.cellpopulation_constrained_to_region = true;
-            cellPop.wrt_region = RelativePosition.Inside;
-            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-            cellPop.cell_guid_ref = configCell.cell_guid;
+            sc.entity_repository.cells_dict.Add(configCell.cell_guid, configCell);
 
+            // Add cell population
+            CellPopulation cellPop = new CellPopulation();
+            cellPop.cell_guid_ref = configCell.cell_guid;
+            cellPop.cellpopulation_name = configCell.CellName;
+            cellPop.number = 1;
+            double[] extents = new double[3] { sc.scenario.environment.extent_x, 
+                                               sc.scenario.environment.extent_y, 
+                                               sc.scenario.environment.extent_z };
+            double minDisSquared = 2*sc.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+            cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+            cellPop.cellPopDist.CellStates[0] = new CellState(  sc.scenario.environment.extent_x,
+                                                                sc.scenario.environment.extent_y / 2,
+                                                                sc.scenario.environment.extent_z / 2);
+            cellPop.cellpopulation_constrained_to_region = false;
+            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            sc.scenario.cellpopulations.Add(cellPop);
             cellPop.report_xvf.position = true;
             cellPop.report_xvf.velocity = true;
             cellPop.report_xvf.force = true;
-
-            //cellPop.cell_list.Add(new CellState(sc.scenario.environment.extent_x / 2,
-            //                                    sc.scenario.environment.extent_y / 2,
-            //                                    sc.scenario.environment.extent_z / 2)); 
-            cellPop.cell_list.Add(new CellState(sc.scenario.environment.extent_x,
-                                                sc.scenario.environment.extent_y / 2,
-                                                sc.scenario.environment.extent_z / 2));
-
-            //set up the cell distribution parameters
-            cellPop.cellPopDist = new CellPopSpecific();
-            CellPopSpecific cps = cellPop.cellPopDist as CellPopSpecific;
-            cps.CopyLocations(cellPop);
 
             foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
             {
@@ -278,9 +283,6 @@ namespace Daphne
                 cellPop.ecm_probe.Add(reportECM);
                 cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
-
-
-            sc.scenario.cellpopulations.Add(cellPop);
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
@@ -495,7 +497,7 @@ namespace Daphne
             }
 
             gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 1e9;
+            gc.TransductionConstant = 1e5;
 
             sc.entity_repository.cells.Add(gc);
 
@@ -574,7 +576,7 @@ namespace Daphne
             }
 
             gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 1e9;
+            gc.TransductionConstant = 1e5;
 
             sc.entity_repository.cells.Add(gc);
 

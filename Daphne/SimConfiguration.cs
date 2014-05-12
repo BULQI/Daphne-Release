@@ -153,6 +153,7 @@ namespace Daphne
         /// Routine called when the environment extent changes
         /// Updates all box specifications in repository with correct max & min for sliders in GUI
         /// Also updates VTK visual environment box
+        /// Also updates cell coordinates
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -178,6 +179,12 @@ namespace Daphne
             ////    // For now just setting all every time...
             ////    SetBoxSpecExtents(bs);
             ////}
+
+            // Check that cells are still inside the simulation space.
+            foreach (CellPopulation cellPop in scenario.cellpopulations)
+            {
+                cellPop.cellPopDist.Resize(new double[3] { scenario.environment.extent_x, scenario.environment.extent_y, scenario.environment.extent_z});
+            }
 
             // Update VTK environment box 
             var env = scenario.environment;
@@ -224,6 +231,7 @@ namespace Daphne
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
+            InitGaussCellPopulationUpdates();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -279,9 +287,27 @@ namespace Daphne
             cellpopulation_id_cellpopulation_dict.Clear();  
             foreach (CellPopulation cs in scenario.cellpopulations)
             {
-                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs); 
+                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+
+                if (cs.cellPopDist != null)
+                {
+                    cs.cellPopDist.cellPop = cs;
+                }
             }
             scenario.cellpopulations.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsets_CollectionChanged);
+        }
+
+        private void InitGaussCellPopulationUpdates()
+        {
+            foreach (CellPopulation cs in scenario.cellpopulations)
+            {
+                if (cs.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+                {
+                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).box_guid];
+                    ((CellPopGaussian)cs.cellPopDist).ParamReset(box);
+                    box.PropertyChanged += new PropertyChangedEventHandler(((CellPopGaussian)cs.cellPopDist).CellPopGaussChanged);
+                }
+            }
         }
 
         private void InitMoleculeIDConfigMoleculeDict()
@@ -2232,7 +2258,16 @@ namespace Daphne
         }
     }
 
-    public abstract class CellPopDistribution : EntityModelBase
+    public interface ProbDistribution3D
+    {
+        /// <summary>
+        /// Return x,y,z coordinates for the next cell using the appropriate probability density distribution.
+        /// </summary>
+        /// <returns>double[3] {x,y,z}</returns>
+        double[] nextPosition();
+    }
+
+    public abstract class CellPopDistribution : EntityModelBase, ProbDistribution3D
     {
         private CellPopDistributionType _DistType;
         public CellPopDistributionType DistType
@@ -2249,62 +2284,279 @@ namespace Daphne
                 }
             }
         }
-
-        private ObservableCollection<CellState> _spec_cell_list;
-        public ObservableCollection<CellState> spec_cell_list
+        private ObservableCollection<CellState> cellStates;
+        public ObservableCollection<CellState> CellStates
         {
-            get { return _spec_cell_list; }
+            get { return cellStates; }
             set
             {
-                _spec_cell_list = value;
-                OnPropertyChanged("spec_cell_list");
+                cellStates = value;
+                OnPropertyChanged("CellStates");
             }
-        } 
+        }
 
-        public CellPopDistribution()
+        // We need to update (reduce) cellPop.number if we reach the maximum tries 
+        // for cell placement before all the cells are placed
+        public CellPopulation cellPop;
+
+        // Limits for placing cells
+        private double[] extents;
+        public double[] Extents 
+        { 
+            get { return extents; }
+            set { extents=value; }
+        }
+        // Minimum separation (squared) for cells
+        private double minDisSquared;
+        public double MinDisSquared 
+        { 
+            get { return minDisSquared; }
+            set { minDisSquared = value; }
+        }
+
+        public CellPopDistribution(double[] _extents, double _minDisSquared, CellPopulation _cellPop)
         {
+            cellStates = new ObservableCollection<CellState>();
+            extents = (double[])_extents.Clone();
+            MinDisSquared = _minDisSquared;
+
+            // null case when deserializing Json
+            // correct CellPopulation pointer added in SimConfiguration.InitCellPopulationIDCellPopulationDict
+            if (_cellPop != null)
+            {
+                cellPop = _cellPop;
+            }
+        }
+
+        /// <summary>
+        /// Check that the new cell position is within the specified bounds.
+        /// </summary>
+        /// <param name="pos">the position of the next cell</param>
+        /// <returns></returns>
+        protected bool inBounds(double[] pos)
+        {
+            if ( (pos[0] < 0 || pos[0] > Extents[0]) || (pos[1] < 0 || pos[1] > Extents[1]) || (pos[2] < 0 || pos[2] > Extents[2]) )
+            {
+                return false;
+            } 
+            return true;
+        }
+        /// <summary>
+        /// Return true if the position of the new cell doesn't overlap with existing cell positions.
+        /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
+        /// </summary>
+        /// <param name="pos">the position of the next cell</param>
+        /// <returns></returns>
+        protected bool noOverlap(double[] pos)
+        {
+            double disSquared = 0;
+            foreach (CellState cellState in this.cellStates)
+            {
+                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0]) 
+                           + (cellState.Y - pos[1]) * (cellState.Y - pos[1])
+                           + (cellState.Z - pos[2]) * (cellState.Z - pos[2]);
+                if (disSquared < minDisSquared)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+ 
+        /// <summary>
+        /// Remove n cells from the end of the list
+        /// </summary>
+        /// <param name="num"></param>
+        public void RemoveCells(int num)
+        {
+            int i = 0;
+            while ( (i < num) && (cellStates.Count > 0))
+            {
+                cellStates.RemoveAt(cellStates.Count - 1);
+                i++;
+            }
+        }
+
+        /// <summary>
+        /// Check that position is in-bounds and doesn't overlap.
+        /// If so, add to cell location list.
+        /// </summary>
+        /// <param name="pos">x,y,z coordinates</param>
+        /// <returns></returns>
+        public bool AddByPosition(double[] pos)
+        {
+            if (inBounds(pos) && noOverlap(pos))
+            {
+                cellStates.Add(new CellState(pos[0], pos[1], pos[2]));
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Add n cells using the appropriate probability density distribution.
+        /// </summary>
+        /// <param name="n"></param>
+        public void AddByDistr(int n)
+        {
+            // NOTE: The maxTry settings has been arbitrarily chosen and may need to be adjusted.
+            int maxTry = 1000;
+            int i = 0;
+
+            int tries = 0; 
+            while (i < n)
+            {
+
+                if (AddByPosition(nextPosition()))
+                {
+                    i++;
+                    tries = 0;
+                }
+                else
+                {
+                    tries++;
+                    if (tries > maxTry)
+                    {
+                        // Avoid infinite loops. Excessive iterations may indicate the cells density is too high.
+                        System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Reduce cell density.");
+                        OnPropertyChanged("CellStates");
+                        cellPop.number = CellStates.Count;
+                        return;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return x,y,z coordinates for the next cell using the appropriate probability density distribution.
+        /// </summary>
+        /// <returns>double[3] {x,y,z}</returns>
+        public abstract double[] nextPosition();
+
+        // Clear the current cell states and repopulate
+        // Needed if Gaussian/Box parameters change.
+        public void Reset()
+        {
+            int number = CellStates.Count;
+            CellStates.Clear();
+            AddByDistr(number);
+        }
+
+        /// <summary>
+        /// Update extents and check whether all cells are still within the specified bounds.
+        /// </summary>
+        /// <param name="newExtents"></param>
+        public void Resize(double[] newExtents)
+        {
+            extents = (double[])newExtents.Clone();
+            double[] pos;
+            int number = CellStates.Count;
+
+            // Remove out-of-bounds cells
+            for (int i = CellStates.Count - 1; i >= 0; i-- )
+            {
+                pos = new double[3] { CellStates[i].X, CellStates[i].Y, CellStates[i].Z };
+                if (!inBounds(pos))
+                {
+                    cellStates.RemoveAt(i);
+                }
+            }
+
+            // Replace removed cells
+            int cellsToAdd = number - CellStates.Count;
+            if (cellsToAdd > 0)
+            {
+                AddByDistr(cellsToAdd);
+            }
         }
     }
 
+    /// <summary>
+    /// Uses uniform probability density for initial placement of cells. 
+    /// NOTE: It may make more sense to have this be the (non-abstract) base class.
+    /// </summary>
     public class CellPopSpecific : CellPopDistribution
     {
-        //private ObservableCollection<CellState> _spec_cell_list;
-        //public ObservableCollection<CellState> spec_cell_list
-        //{
-        //    get { return _spec_cell_list; }
-        //    set
-        //    {
-        //        _spec_cell_list = value;
-        //        OnPropertyChanged("spec_cell_list");
-        //    }
-        //} 
-        public CellPopSpecific()
+        // Used for populating initial values, then user can modify.
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistX;
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistY;
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistZ;
+
+        public CellPopSpecific(double[] extents, double minDisSquared, CellPopulation _cellPop)
+            : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-            spec_cell_list = new ObservableCollection<CellState>();
+
+            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
+            uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
+            uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
+            uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
+            if (_cellPop != null)
+            {
+                AddByDistr(cellPop.number);
+            }
+            else
+            {
+                // json deserialization gets us here
+                AddByDistr(1);
+            }
+            OnPropertyChanged("CellStates");
         }
-        public void CopyLocations(CellPopulation cp)
+
+        public override double[] nextPosition()
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(cp.cell_list, Newtonsoft.Json.Formatting.Indented, Settings);
-            spec_cell_list = JsonConvert.DeserializeObject<ObservableCollection<CellState>>(jsonSpec, Settings);
-            OnPropertyChanged("spec_cell_list");
+            return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
         }
     }
 
+    /// <summary>
+    /// Placement of cells via uniform probability density.
+    /// </summary>
     public class CellPopUniform : CellPopDistribution
     {
-        public CellPopUniform()
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistX;
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistY;
+        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistZ;
+
+        public CellPopUniform(double[] extents, double minDisSquared, CellPopulation _cellPop)
+            : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
+
+            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();   
+            uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
+            uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
+            uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
+            if (_cellPop != null)
+            {
+                AddByDistr(_cellPop.number);
+            }
+            else
+            {
+                // json deserialization gets us here
+                AddByDistr(1);
+            }
+            OnPropertyChanged("CellStates");
+        }
+
+        public override double[] nextPosition()
+        {
+            return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
         }
     }
 
+    /// <summary>
+    /// Placement of cells via normal probability density.
+    /// Cell placement updates as box center and width changes.
+    /// </summary>
     public class CellPopGaussian : CellPopDistribution
     {
-        //public double peak_concentration { get; set; }
         private string _gauss_spec_guid_ref;
         public string gauss_spec_guid_ref
         {
@@ -2319,12 +2571,119 @@ namespace Daphne
                 }
             }
         }
+        private string _box_guid;
+        public string box_guid
+        {
+            get { return _box_guid; }
+            set
+            {
+                if (_box_guid == value)
+                    return;
+                else
+                {
+                    _box_guid = value;
+                }
+            }
+        }
 
-        public CellPopGaussian()            
+        // transformation matrix for converting from absolute (simulation) 
+        // to local (box) coordinates
+        private double[][] ATL = new double[][] {   new double[]{1.0, 0.0, 0.0, 0.0},
+                                                    new double[]{0.0, 1.0, 0.0, 0.0},
+                                                    new double[]{0.0, 0.0, 1.0, 0.0},
+                                                    new double[]{0.0, 0.0, 0.0, 1.0} };
+
+        private MathNet.Numerics.Distributions.NormalDistribution normProbDistX;
+        private MathNet.Numerics.Distributions.NormalDistribution normProbDistY;
+        private MathNet.Numerics.Distributions.NormalDistribution normProbDistZ;
+
+        public CellPopGaussian(double[] extents, double minDisSquared, BoxSpecification _box, CellPopulation _cellPop)
+            : base(extents, minDisSquared, _cellPop)  
         {
             DistType = CellPopDistributionType.Gaussian;
-            //peak_concentration = 100.0;
             gauss_spec_guid_ref = "";
+            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
+            normProbDistX = new MathNet.Numerics.Distributions.NormalDistribution(ran);
+            normProbDistY = new MathNet.Numerics.Distributions.NormalDistribution(ran);
+            normProbDistZ = new MathNet.Numerics.Distributions.NormalDistribution(ran);
+
+            if (_box != null)
+            {
+                _box_guid = _box.box_guid;
+                _box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
+                normProbDistX.SetDistributionParameters(0, _box.x_scale / 2);
+                normProbDistY.SetDistributionParameters(0, _box.y_scale / 2);
+                normProbDistZ.SetDistributionParameters(0, _box.z_scale / 2);
+                setRotationMatrix(_box);
+            }
+            else
+            {
+                // We get here when deserializing from json
+                // The box settings and PropertyChanged update will be re-applied in SimConfig.InitGaussCellPopulationUpdates()
+                normProbDistX.SetDistributionParameters(0, extents[0] / 4);
+                normProbDistY.SetDistributionParameters(0, extents[1] / 4);
+                normProbDistZ.SetDistributionParameters(0, extents[2] / 4);
+            }
+            if (_cellPop != null)
+            {
+                AddByDistr(_cellPop.number);
+            }
+            else
+            {
+                // json deserialization gets us here
+                AddByDistr(1);
+            }
+ 
+            OnPropertyChanged("CellStates");
+        }
+
+
+        public void ParamReset(BoxSpecification box)
+        {
+            normProbDistX.SetDistributionParameters(0, box.x_scale / 2);
+            normProbDistY.SetDistributionParameters(0, box.y_scale / 2);
+            normProbDistZ.SetDistributionParameters(0, box.z_scale / 2);
+            setRotationMatrix(box);
+        }
+
+        private void setRotationMatrix(BoxSpecification box)
+        {
+            // 4x4 transformation matrix comprising:
+            //      normalized 3x3 rotation matrix
+            //      translation information
+            for (int i = 0; i < 3; i++)
+            {
+                ATL[i][0] = box.transform_matrix[i][0] / box.getScale((byte)0);
+                ATL[i][1] = box.transform_matrix[i][1] / box.getScale((byte)1);
+                ATL[i][2] = box.transform_matrix[i][2] / box.getScale((byte)2);
+                ATL[i][3] = box.transform_matrix[i][3];
+            }
+        }
+
+        public void CellPopGaussChanged(object sender, PropertyChangedEventArgs e)
+        {
+            BoxSpecification box = (BoxSpecification)sender;
+            ParamReset(box);
+            Reset();
+        }
+
+        public override double[] nextPosition()
+        {
+            // Draw three random coordinates from normal distributions centered at the origin of the simulation coordinate system.
+            // Sigma values are half the box widths.
+            double[] pos = new double[3] { normProbDistX.NextDouble(), normProbDistY.NextDouble(), normProbDistZ.NextDouble() };
+
+            // The new position rotated and translated  with the box coordinate system
+            double[] posRotated = new double[3];
+
+            for (int i = 0; i < 3; i++)
+            {
+                posRotated[i] = pos[0] * ATL[i][0] +
+                                pos[1] * ATL[i][1] +
+                                pos[2] * ATL[i][2] +
+                                ATL[i][3];
+            }
+            return posRotated;
         }
     }
 
@@ -2446,7 +2805,7 @@ namespace Daphne
                 else
                 {
                     _number = value;
-                    //OnPropertyChanged("number");
+                    OnPropertyChanged("number");
                 }
             }
         }
@@ -2520,25 +2879,13 @@ namespace Daphne
             }
         }
 
-        private ObservableCollection<CellState> _cell_list;
-        public ObservableCollection<CellState> cell_list
-        {
-            get { return _cell_list; }
-            set
-            {
-                _cell_list = value;
-                number = value == null ? 0 : _cell_list.Count;
-                OnPropertyChanged("cell_list");
-            }
-        } 
-
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
             cellpopulation_guid = id.ToString();
             cellpopulation_name = "";
             cell_subset_guid_ref = "";
-            number = 100;
+            number = 1;
             cellpopulation_constrained_to_region = false;
             cellpopulation_region_guid_ref = "";
             wrt_region = RelativePosition.Inside;
@@ -2547,15 +2894,11 @@ namespace Daphne
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_predef_color = ColorList.Orange;
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
-
-            cell_list = new ObservableCollection<CellState>();
-
             // reporting
             reportXVF = new ReportXVF();
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
-        }
-        
+        }  
     }
 
     // MolPopInfo ==================================
@@ -3311,7 +3654,7 @@ namespace Daphne
 
         public GaussianSpecification()
         {
-            gaussian_spec_name = "Default gaussian gradient name";
+            gaussian_spec_name = "";
             gaussian_spec_box_guid_ref = "";
             gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
@@ -3705,7 +4048,7 @@ namespace Daphne
             }
         }
 
-        private double getScale(byte i)
+        public double getScale(byte i)
         {
             if (i >= 3)
             {
@@ -3842,43 +4185,13 @@ namespace Daphne
                 base.OnPropertyChanged("half_z_scale");
             }
         }
+
+        public void BoxChangedEventHandler(object obj, EventArgs e)
+        {
+            // not sure if anything goes here.
+        }
     }
 
-    ////public enum CellPopDistributionType { Uniform, Gaussian }
-
-    /////// <summary>
-    /////// Converter to go between enum values and "human readable" strings for GUI
-    /////// </summary>
-    ////[ValueConversion(typeof(CellPopDistributionType), typeof(string))]
-    ////public class CellPopDistributionTypeToStringConverter : IValueConverter
-    ////{
-    ////    // NOTE: This method is a bit fragile since the list of strings needs to 
-    ////    // correspond in length and index with the GlobalParameterType enum...
-    ////    private List<string> _cell_pop_dist_type_strings = new List<string>()
-    ////                            {
-    ////                                "Homogeneous",
-    ////                                "Gaussian"
-    ////                            };
-
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        try
-    ////        {
-    ////            return _cell_pop_dist_type_strings[(int)value];
-    ////        }
-    ////        catch
-    ////        {
-    ////            return "";
-    ////        }
-    ////    }
-
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        string str = (string)value;
-    ////        int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
-    ////        return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
-    ////    }
-    ////}
 
     public class TimeAmpPair
     {

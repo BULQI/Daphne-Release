@@ -408,7 +408,7 @@ namespace Daphne
             ligand = _ligand;
             complex = _complex;
             boundary = complex.Man;
-            fluxIntensityConstant = 1.0 / ligand.Molecule.DiffusionCoefficient;
+            fluxIntensityConstant = 1.0; // / ligand.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
@@ -445,7 +445,7 @@ namespace Daphne
             ligand = _ligand;
             complex = _complex;
             boundary = complex.Man;
-            fluxIntensityConstant = 1.0 / ligand.Molecule.DiffusionCoefficient;
+            fluxIntensityConstant = 1.0; // / ligand.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
         }
 
@@ -474,7 +474,7 @@ namespace Daphne
             bulk = _bulk;
             membrane = _membrane;
             boundary = membrane.Man;
-            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
@@ -507,7 +507,7 @@ namespace Daphne
             bulk = _bulk;
             membrane = _membrane;
             boundary = membrane.Man;
-            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
@@ -539,7 +539,7 @@ namespace Daphne
             bulkActivated = _bulkActivated;
             receptor = _receptor;
             boundary = receptor.Man;
-            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != receptor.Man)

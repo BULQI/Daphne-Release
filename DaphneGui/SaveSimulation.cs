@@ -35,7 +35,8 @@ namespace DaphneGui
             //clear the contents from last save
             foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
             {
-                item.Value.cell_list.Clear();
+                // item.Value.cell_list.Clear();
+                item.Value.cellPopDist.CellStates.Clear();
             }
 
             //get filename to save
@@ -96,7 +97,8 @@ namespace DaphneGui
                     MolecularPopulation mp = kvpair.Value;
                     cell_state.addMolPopulation(kvpair.Key, mp);
                 }
-                target_cp.cell_list.Add(cell_state);
+                target_cp.cellPopDist.CellStates.Add(cell_state);
+                //target_cp.cell_list.Add(cell_state);
             }
 
             SimConfigSaver.SerializeSimConfigToFile();

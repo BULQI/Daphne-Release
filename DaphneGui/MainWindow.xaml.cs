@@ -219,7 +219,6 @@ namespace DaphneGui
 
             this.ToolWinCellInfo.Close();
 
-            //skg Wednesday, June 12, 2013
             CreateAndSerializeDaphneScenarios();
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
@@ -302,7 +301,6 @@ namespace DaphneGui
             }
             else
             {
-                //skg daphne Thursday, April 18, 2013
                 file = "daphne_driver_locomotion_scenario.json";
                 //file = "daphne_blank_scenario.json";
             }
@@ -427,10 +425,16 @@ namespace DaphneGui
         /// </summary>
         public void CreateAndSerializeDaphneScenarios()
         {
-            //DRIVER-LOCOMOTOR SCENARIO
-            var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-            ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config.SimConfig);
+            //BLANK SCENARIO
+            var config = new SimConfigurator("Config\\daphne_blank_scenario.json");
+            ConfigCreators.CreateAndSerializeBlankScenario(config.SimConfig);
             //serialize to json
+            config.SerializeSimConfigToFile();
+
+            //DRIVER-LOCOMOTOR SCENARIO
+            config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
+            ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config.SimConfig);
+            // serialize to json
             config.SerializeSimConfigToFile();
 
             //DIFFUSIION SCENARIO
@@ -445,11 +449,6 @@ namespace DaphneGui
             //serialize to json
             config.SerializeSimConfigToFile();
 
-            //BLANK SCENARIO
-            config = new SimConfigurator("Config\\daphne_blank_scenario.json");
-            ConfigCreators.CreateAndSerializeBlankScenario(config.SimConfig);
-            //serialize to json
-            config.SerializeSimConfigToFile();
 
         }
 

@@ -551,7 +551,7 @@ namespace testDaphne
                 ligand = Simulation.dataBasket.ECS.Space.Populations["CXCL13"];
                 complex = kvp.Value.PlasmaMembrane.Populations["CXCR5:CXCL13"];
 
-                Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+                //Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                 Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 // Choose false to have the driver dynamics, but no movement
@@ -662,7 +662,7 @@ namespace testDaphne
                 //kvp.Value.PlasmaMembrane.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, k1plus));
                 //kvp.Value.PlasmaMembrane.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
                 // sim.ECS.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-                Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+                //Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                 Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 kvp.Value.IsMotile = false;

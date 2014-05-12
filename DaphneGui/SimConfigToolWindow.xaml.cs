@@ -43,18 +43,24 @@ namespace DaphneGui
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             CellsDetailsExpander.IsExpanded = true;
-            CellPopulation cs = new CellPopulation();
-            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
-            cs.cellpopulation_name = "New cell";
-            cs.number = 1;
 
-            cs.cell_list.Add(new CellState(0, 0, 0));
-            cs.cellPopDist = new CellPopSpecific();
-            if (cs.cellPopDist.DistType == CellPopDistributionType.Specific)
-            {
-                CellPopSpecific cps = cs.cellPopDist as CellPopSpecific;
-                cps.CopyLocations(cs);
-            }
+            // Some relevant CellPopulation constructor defaults: 
+            //      number = 1
+            //      no instantiation of cellPopDist
+            CellPopulation cs = new CellPopulation();
+
+            // Default cell type and name to first entry in the cell repository
+            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
+            cs.cellpopulation_name = MainWindow.SC.SimConfig.entity_repository.cells[0].CellName;
+
+            double[] extents = new double[3] { MainWindow.SC.SimConfig.scenario.environment.extent_x, 
+                                               MainWindow.SC.SimConfig.scenario.environment.extent_y, 
+                                               MainWindow.SC.SimConfig.scenario.environment.extent_z };
+            double minDisSquared = 2*MainWindow.SC.SimConfig.entity_repository.cells_dict[cs.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+
+            // Default is uniform probability distribution
+            cs.cellPopDist = new CellPopUniform(extents, minDisSquared, cs);
 
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
@@ -132,28 +138,34 @@ namespace DaphneGui
 
         }
 
-        // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification(CellPopGaussian cpg)
+        /// <summary>
+        /// Add an instance of the default box to the entity repository.
+        /// Default values: box center at center of ECS, box widths are 1/4 of ECS extents
+        /// </summary>
+        /// <param name="box"></param>
+        private void AddDefaultBoxSpec(BoxSpecification box)
         {
-            BoxSpecification box = new BoxSpecification();
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 100;
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
+            box.x_trans = MainWindow.SC.SimConfig.scenario.environment.extent_x / 2;
+            box.y_trans = MainWindow.SC.SimConfig.scenario.environment.extent_y / 2;
+            box.z_trans = MainWindow.SC.SimConfig.scenario.environment.extent_z / 2; ;
+            box.x_scale = MainWindow.SC.SimConfig.scenario.environment.extent_x / 4; ;
+            box.y_scale = MainWindow.SC.SimConfig.scenario.environment.extent_x / 4; ;
+            box.z_scale = MainWindow.SC.SimConfig.scenario.environment.extent_x / 4; ;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
             MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+        }
 
-            GaussianSpecification gg = new GaussianSpecification();
+        // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
+        private void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
+        {
             gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            gg.gaussian_spec_name = "";
+            gg.gaussian_region_visibility = false;
+            // gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
-            cpg.gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -177,6 +189,13 @@ namespace DaphneGui
                 MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(gs);
                 MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.Remove(guid);
                 MainWindow.GC.RemoveRegionWidget(guid);
+
+                //// Remove box
+                //BoxSpecification box = MainWindow.SC.SimConfig.box_guid_box_dict[gs.gaussian_spec_box_guid_ref];
+                //MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(box);
+                //MainWindow.SC.SimConfig.box_guid_box_dict.Remove(gs.gaussian_spec_box_guid_ref);
+                //// box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
+                //MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(box);
             }
 
         }
@@ -1064,7 +1083,8 @@ namespace DaphneGui
             cp.cell_guid_ref = cc.cell_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
-            cp.cell_list.Add(new CellState());
+            // cp.cell_list.Add(new CellState());
+            cp.cellPopDist.CellStates.Add(new CellState());
             cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
@@ -1091,7 +1111,23 @@ namespace DaphneGui
             MainWindow.ST_ReacComplexChartWindow.Activate();
             
         }
-               
+
+
+        private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            //CellPopDistributionType distType = (CellPopDistributionType)e.AddedItems[0];
+
+            //if (distType == CellPopDistributionType.Uniform)
+            //{
+            //    //cp.cellPopDist = new CellPopUniform();
+            //}
+        }
+
+        private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+        }
+
         private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)
         {
             ////if (lbCellAvailableReacCx.SelectedIndex != -1)
@@ -1691,30 +1727,26 @@ namespace DaphneGui
             ComboBox cb = sender as ComboBox;
             if (cb.SelectedIndex == -1)
                 return;
-
-            
-            
-
+  
             // Only want to respond to purposeful user interaction, not just population and depopulation
-            // of solfacs list
-            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            // of cell population distribution type list
+            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count == 0)
                 return;
 
+            // cellPop points to the current CellPopulation
             CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cellPop == null)
-                return;
-
-            CellPopDistributionType new_dist_type = CellPopDistributionType.Uniform;
-            CellPopDistribution current_dist = cellPop.cellPopDist;
-
-            if (e.AddedItems.Count > 0)
             {
-                new_dist_type = (CellPopDistributionType)e.AddedItems[0];
+                return;
             }
+            // current_dist points to the current distribution in cellPop
+            CellPopDistribution current_dist = cellPop.cellPopDist;
+            
+            // The new Distribtuion TYPE 
+            CellPopDistributionType new_dist_type = (CellPopDistributionType)e.AddedItems[0];
 
-                // Only want to change distribution type if the combo box isn't just selecting 
-                // the type of current item in the solfacs list box (e.g. when list selection is changed)
-
+            // Only want to change distribution type if the combo box isn't just selecting 
+            // the type of current item in the list box (e.g. when list selection is changed)
             if (current_dist == null)
             {
             }
@@ -1723,35 +1755,76 @@ namespace DaphneGui
                 return;
             }
 
-            if (current_dist != null)
+            double[] extents = new double[3] { MainWindow.SC.SimConfig.scenario.environment.extent_x, 
+                                               MainWindow.SC.SimConfig.scenario.environment.extent_y, 
+                                               MainWindow.SC.SimConfig.scenario.environment.extent_z };
+            double minDisSquared = 2*MainWindow.SC.SimConfig.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+
+            MessageBoxResult res;
+            CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
+            if (cpdt == CellPopDistributionType.Uniform)
             {
-                if (new_dist_type != CellPopDistributionType.Gaussian && current_dist.DistType == CellPopDistributionType.Gaussian)
+                res = MessageBox.Show("The current cell positions will be changed. Continue?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                {
+                    cb.SelectedItem = current_dist.DistType;
+                    return;
+                }
+                // Only remove box and Gaussian if the user answered yes to the above.
+                if (current_dist.DistType == CellPopDistributionType.Gaussian)
                 {
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
                     cpg.gauss_spec_guid_ref = "";
                     MainWindow.GC.Rwc.Invalidate();
                 }
-            }
-
-            CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
-
-            if (cpdt == CellPopDistributionType.Specific)
-            {
-                CellPopSpecific cps = new CellPopSpecific();
-                cellPop.cellPopDist = cps;
-                cps.CopyLocations(cellPop);                
-            }
-            else if (cpdt == CellPopDistributionType.Uniform)
-            {
-                CellPopUniform cpu = new CellPopUniform();
-                cellPop.cellPopDist = cpu;
+                cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
             }
             else if (cpdt == CellPopDistributionType.Gaussian)
             {
-                CellPopGaussian cpg = new CellPopGaussian();
-                AddGaussianSpecification(cpg);
-                cellPop.cellPopDist = cpg;
+                res = MessageBox.Show("The current cell positions will be changed. Continue?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                {
+                    cb.SelectedItem = current_dist.DistType;
+                    return;
+                }
+
+                BoxSpecification box = new BoxSpecification();
+                AddDefaultBoxSpec(box);
+                GaussianSpecification gg = new GaussianSpecification();
+                AddGaussianSpecification(gg, box);
+
+                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
+                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+
+                // Connect the VTK callback
+                MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+                MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+
+            }
+            else  if (cpdt == CellPopDistributionType.Specific)
+            {
+                res = MessageBox.Show("Keep current cell locations?", "", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                {
+                    cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                }
+                else
+                {
+                    CellPopulation tempCellPop = new CellPopulation();
+                    tempCellPop.cellPopDist = cellPop.cellPopDist;
+                    cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                    cellPop.cellPopDist.CellStates = tempCellPop.cellPopDist.CellStates;
+                }
+                // Remove box and Gaussian if applicable.
+                if (current_dist.DistType == CellPopDistributionType.Gaussian)
+                {
+                    DeleteGaussianSpecification(current_dist);
+                    CellPopGaussian cpg = current_dist as CellPopGaussian;
+                    cpg.gauss_spec_guid_ref = "";
+                    MainWindow.GC.Rwc.Invalidate();
+                }
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
             ToolBarTray tr = new ToolBarTray();
@@ -1772,13 +1845,16 @@ namespace DaphneGui
         {
             bool isBoxInCell = false;
 
-            foreach (CellPopulation cp in MainWindow.SC.SimConfig.scenario.cellpopulations) 
+            foreach (CellPopulation cp in MainWindow.SC.SimConfig.scenario.cellpopulations)
             {
                 CellPopDistribution cpd = cp.cellPopDist;
-                if (cpd.DistType == CellPopDistributionType.Gaussian) {
+                if (cpd.DistType == CellPopDistributionType.Gaussian)
+                {
                     CellPopGaussian cpg = cpd as CellPopGaussian;
                     if (cpg.gauss_spec_guid_ref == guid)
                     {
+                        //BoxSpecification box = MainWindow.SC.SimConfig.box_guid_box_dict[guid];
+                        //cpg.Reset();
                         isBoxInCell = true;
                         break;
                     }
@@ -1883,6 +1959,11 @@ namespace DaphneGui
 
         }
 
+        /// <summary>
+        /// Called when the number of cells in the Cell Population changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void numberBox_ValueChanged(object sender, ActiproSoftware.Windows.PropertyChangedRoutedEventArgs<int?> e)
         {
             if (e.OldValue == null || e.NewValue == null)
@@ -1898,50 +1979,23 @@ namespace DaphneGui
             if (cp == null)
                 return;
 
-            if (numNew > numOld && numNew > cp.cell_list.Count)
+            cp.number = numNew;
+            if (numNew > numOld && numNew > cp.cellPopDist.CellStates.Count)
             {
                 int rows_to_add = numNew - numOld;
-                for (int i = 0; i < rows_to_add; i++)
-                {
-                    CellState cs = new CellState();
-
-                    int count = cp.cell_list.Count;
-                    if (count > 0)
-                    {
-                        cs.X = cp.cell_list[count - 1].X;
-                        cs.Y = cp.cell_list[count - 1].Y;
-                        cs.Z = cp.cell_list[count - 1].Z;
-                    }
-                    cs.X += 7;
-                    cs.Y += 11;
-                    cs.Z += 13;
-                    if (cs.X > MainWindow.SC.SimConfig.scenario.environment.extent_x)
-                        cs.X = 1;
-                    if (cs.Y > MainWindow.SC.SimConfig.scenario.environment.extent_y)
-                        cs.Y = 1;
-                    if (cs.Z > MainWindow.SC.SimConfig.scenario.environment.extent_z)
-                        cs.Z = 1;
-                    cp.cell_list.Add(cs);                    
-                }                
+                cp.cellPopDist.AddByDistr(rows_to_add);
             }
             else if (numNew < numOld)
             {
-                if (numOld > cp.cell_list.Count)
-                    numOld = cp.cell_list.Count;
+                if (numOld > cp.cellPopDist.CellStates.Count)
+                {
+                    numOld = cp.cellPopDist.CellStates.Count;
+                }
 
                 int rows_to_delete = numOld - numNew;
-
-                for (int i = rows_to_delete; i > 0; i--)
-                {
-                    cp.cell_list.RemoveAt(numNew + i - 1);
-                }
+                cp.cellPopDist.RemoveCells(rows_to_delete);
             }
-            cp.number = cp.cell_list.Count;
-            if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
-            {
-                CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                cps.CopyLocations(cp);
-            }
+            cp.number = cp.cellPopDist.CellStates.Count;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -1968,17 +2022,15 @@ namespace DaphneGui
                 char[] delim = { '\t', '\r', '\n' };
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-                cp.cell_list.Clear();
+                cp.cellPopDist.CellStates.Clear();
                 for (int i = 0; i < paste.Length; i += 3)
                 {
-                    cp.cell_list.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
+                    cp.cellPopDist.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
 
-                cp.number = cp.cell_list.Count;
+                cp.number = cp.cellPopDist.CellStates.Count;
 
             }
-
-
         }
 
         private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
@@ -2000,7 +2052,6 @@ namespace DaphneGui
             //}
             //cp.number = cp.cell_locations.Count;
             //e.Handled = true;
-
         }
 
         private void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
@@ -2040,17 +2091,23 @@ namespace DaphneGui
             }
         }
 
+        /// <summary>
+        ///  Called when user selects "Specific" for cell population locations.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgLocations_Unloaded(Object sender, RoutedEventArgs e)
         {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
                 return;
-            cp.number = cp.cell_list.Count;
+            //cp.number = cp.cell_list.Count;
+            cp.number = cp.cellPopDist.CellStates.Count;
 
             if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
             {
                 CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                cps.CopyLocations(cp);
+                //cps.CopyLocations(cp);
             }
         }        
 

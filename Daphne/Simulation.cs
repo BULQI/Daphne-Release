@@ -468,9 +468,7 @@ namespace Daphne
 
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
-
-                    //set location etc, keep remaining state variables equal to zero
-                    cell.setState(cp.cell_list[i].ConfigState);
+                    cell.setState(cp.cellPopDist.CellStates[i].ConfigState);
 
                     simComp[0] = cell.Cytosol;
                     simComp[1] = cell.PlasmaMembrane;
@@ -482,9 +480,13 @@ namespace Daphne
                         {
                             //config_comp's distriubution changed. may need to keep 
                             //it for not customized cell later(?)
-                            if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+
+                            // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+
                             MolPopExplicit mp_explicit = new MolPopExplicit();
-                            mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
+                            // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
+                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
                             cmp.mpInfo.mp_distribution = mp_explicit;                              
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], sc);
