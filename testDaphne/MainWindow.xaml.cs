@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Daphne;
+//using libsbmlcs;
 
 namespace testDaphne
 {
@@ -34,9 +35,18 @@ namespace testDaphne
 
         private void initialize()
         {
+            
+            double[] foo = new double[3] {1.2, 1.5, 1.7 };
+            int[] ii = new int[3] {(int)foo[0], (int)foo[1], (int)foo[2]};
+
+
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t\nCXCR5:CXCL13\t\t\t\ngCXCR5\t\t\t\n";
             MolDict = MoleculeBuilder.Go(molSpec);
+
+            // TODO: 
+            // Add reference to libsbmlcs.dll, use SBML XML reader, and reformat our XML file to look more like SBML
+            // Add molSpec info in XML file as SBML-lke Species references
 
             // Build array of ReactionTemplates from the specified XML file 
             //List<ReactionTemplate> ReacTempl =  ReactionTemplateBuilder.Go("ReacSpecFile1.xml"/*, Mol*/);
@@ -44,85 +54,66 @@ namespace testDaphne
 
             config.deserialize("ReacSpecFile1.xml");
 
+            config.TemplReacType(config.content.listOfReactions);
+
             // Later, we should define a compartment class -   ExtracelluarSpaceTypeI,
             // which has as it's interior manifold BoundedRectangularPrism.
-            // The class BoundedRectangularPrism : DiscreteManifold also needs to be defined.
-            int[] numDivisions = {5, 5, 5};
-            Compartment XCellSpace = new Compartment(new RectangularPrism(numDivisions));
+
+            int[] numGridPts = {5, 5, 5};
+            // min and max spatial extent in each dimension
+            double[] XCellSpatialExtent = { 0.0, 10.0, 0.0, 10.0, 0.0, 10.0 };
+            Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellSpatialExtent));
 
             // Creates Cytoplasm and PlasmaMembrane compartments
             Cell cell_1 = new Cell();
 
             // Add the cell plasma membrane as a boundary in the extracellular compartment
             Embedding cellMembraneEmbed = new Embedding(cell_1.PlasmaMembrane.Interior, XCellSpace.Interior);
-            XCellSpace.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
             XCellSpace.Interior.Boundaries.Add(cell_1.PlasmaMembrane.Interior, cellMembraneEmbed);
 
             // Adds new MolecularPopulation with intial concentration 1.0
-            XCellSpace.Populations = new List<MolecularPopulation>();
+            //XCellSpace.Populations = new List<MolecularPopulation>();
             XCellSpace.AddMolecularPopulation("Extracellular_CXCL13", MolDict["CXCL13"], 1.0);
 
-            cell_1.Cytosol.Populations = new List<MolecularPopulation>();
+            //cell_1.Cytosol.Populations = new List<MolecularPopulation>();
             cell_1.Cytosol.AddMolecularPopulation("Cytosolic_CXCR5", MolDict["CXCR5"], 1.0);
-            cell_1.PlasmaMembrane.Populations = new List<MolecularPopulation>();
+            cell_1.Cytosol.AddMolecularPopulation("Cytosolic_gCXCR5", MolDict["gCXCR5"], 1.0);
+            //cell_1.PlasmaMembrane.Populations = new List<MolecularPopulation>();
             cell_1.PlasmaMembrane.AddMolecularPopulation("Membrane_CXCR5", MolDict["CXCR5"], 1.0);
 
-            MolecularPopulation molpop;
 
-            cell_1.Cytosol.reactions = new List<Reaction>();
-            // Find CXCR5 in the cytosol population list and add reactions
-            molpop = cell_1.Cytosol.Populations.Find(delegate(MolecularPopulation mp)
-            {
-                return mp.Molecule.Name == "CXCR5";
-            });
-            if (molpop != null)
-            {
-                cell_1.Cytosol.reactions.Add(new Annihilation(molpop));
-                // Check to see if CXCR5 is in the boundary (plasma membrane) and
-                // add CXCR5 transport to and from the cell membrane, if so.
-                // Ultimately, we need to add CXCR5:CXCL13 transport from the membrane into the cytoplasm,
-                // but if we only specify CXCR5 in the membrane, we don't know yet that it can
-                // bind to CXCL13.
-            }
+            // Iterate through compartments and add reactions until there aren't any more changes
+            // TO DO: change from simple 3 iterations, to sensing when there are no more changes
+            // TO DO: add Boundary reactions 
 
-            XCellSpace.reactions = new List<Reaction>();
-            // Find CXCR5 in the extracelluar population list and add reactions
-            molpop = XCellSpace.Populations.Find(delegate(MolecularPopulation mp)
+            bool tf;
+            for (int i = 0; i < 2; i++)
             {
-                return mp.Molecule.Name == "CXCR5";
-            });
-            if (molpop != null)
-            {
-                // Add CXCL13 association and dissociation with the cell memebrane CXCR5
+
+                tf = ReactionBuilder.CompartReactions(XCellSpace, config.content.listOfReactions, MolDict);
+                tf = ReactionBuilder.CompartReactions(cell_1.Cytosol, config.content.listOfReactions, MolDict);
+                tf = ReactionBuilder.CompartReactions(cell_1.PlasmaMembrane, config.content.listOfReactions, MolDict);
+
+                tf = ReactionBuilder.CompartBoundaryReactions(XCellSpace, config.content.listOfReactions, MolDict);
+
             }
             
-            // Add reaction(s) to the extracelluar compartment
-            //foreach (MolecularPopulation molpop in XCellSpace.Populations)
-            //{
-                // look at all the molecular populations in this compartment
-                // look at the molecule name associated with a molecular population
-                // find all the reactions in which this molecule name is a reactant
-                // look to see whether the other reactants in that reaction are also contained in this compartment
-                // if so add this reaction
-
-                // look to see whether one or more of the reactants are in an embedded manifold
-                // if so add this reaction
-
-                // look at the products of a reaction
-                // if the product molecules are not specified in a molecular population, then add this molecular population to the appropriate compartment
-                // specify the initial concentration as zero
-                // How do we know to which compartment to add the reaction? 
-                // For example, cxcr5 (membrane) + cxcL13 (extracelluar) -> cxcr5:cxcl13 (membrane)
-                // For example, cxcr5:cxc113 (membrane) -> cxcr5:cxcl13 (cytoplaxm)
-            //}
-
-            // Add reaction(s) to the Cytosol compartment
-            // Add reaction(s) to the PlasmaMembrane compartment
-
             // create the simulation
             sim = new Simulation();
             // this needs to go into the simulation's variable for that
             sim.ExtracellularSpace = XCellSpace;
+
+            sim.cells = new Dictionary<int, Cell>();
+            sim.cells.Add(1, cell_1);
+
+            nSteps = 3;
+            dt = 1.0e-3;
+            for (int i = 0; i < nSteps; i++)
+            {
+                XCellSpace.Step(dt);
+                cell_1.Step(dt);
+            }
+
         }
 
         private void go()

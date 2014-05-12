@@ -14,7 +14,11 @@ namespace Daphne
         public Compartment(DiscretizedManifold interior)
         {
             Interior = interior;
-        }
+            Populations = new List<MolecularPopulation>();
+            reactions = new List<Reaction>();
+            rtList = new List<ReactionTemplate>();
+            molpopDict = new Dictionary<string,MolecularPopulation>();
+       }
 
         public void AddMolecule(Molecule molecule)
         {
@@ -24,13 +28,16 @@ namespace Daphne
         public void AddMolecularPopulation(MolecularPopulation molpop)
         {
             Populations.Add(molpop);
+            molpopDict.Add(molpop.Name, molpop);
         }
 
         // gmk
         public void AddMolecularPopulation(string name, Molecule mol, double initConc)
         {
             ScalarField s = new ScalarField(Interior, initConc);
-            Populations.Add(new MolecularPopulation(name, mol, Interior, s));
+            MolecularPopulation molpop = new MolecularPopulation(name, mol, Interior, s);
+            Populations.Add(molpop);
+            molpopDict.Add(molpop.Molecule.Name, molpop);
         }
 
         /// <summary>
@@ -45,11 +52,17 @@ namespace Daphne
             {
                 r.Step(dt);
             }
+
+            foreach (MolecularPopulation molpop in Populations)
+            {
+                molpop.Step(dt);
+            }
         }
 
         public List<MolecularPopulation> Populations;
         public List<Reaction> reactions;
         public DiscretizedManifold Interior;
-
+        public List<ReactionTemplate> rtList;
+        public Dictionary<string, MolecularPopulation> molpopDict;
     }
 }

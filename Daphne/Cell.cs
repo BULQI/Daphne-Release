@@ -23,14 +23,6 @@ namespace Daphne
 
         public Cell()
         {
-            // Original
-            //Alive = true;
-            //Cytokinetic = false;
-            //Cytosol = new Compartment(new TinyBall());
-            //PlasmaMembrane = new Compartment(new TinySphere());
-            //Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, new Embedding());
-
-            // gmk
             Alive = true;
             Cytokinetic = false;
             PlasmaMembrane = new Compartment(new TinySphere());
@@ -52,7 +44,7 @@ namespace Daphne
             // we are using the simplest kind of integrator here. It should be made more sophisticated at some point.
             Cytosol.Step(dt);
             PlasmaMembrane.Step(dt);
-            Differentiator.Step(dt);
+            //Differentiator.Step(dt);
         }
 
         /// <summary>

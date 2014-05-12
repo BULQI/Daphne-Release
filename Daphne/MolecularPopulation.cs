@@ -13,7 +13,6 @@ namespace Daphne
         public double DiffusionCoefficient;
         private static double boltzmannConstant = 0;
 
-        // gmk
         public Molecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
         {
             Name = thisName;
@@ -48,40 +47,53 @@ namespace Daphne
             Molecule = mol;
             Man = man;
             Conc = new ScalarField(man);
-            foreach (DiscretizedManifold m in Man.Boundaries.Keys)
-            {
-                Fluxes.Add(m, new ScalarField(m));
-                BoundaryConcs.Add(m, new ScalarField(m));
-            }
+
+            // This isn't working yet - gmk 10/2/2012
+            //foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+            //{
+            //    Fluxes.Add(m, new ScalarField(m));
+            //    BoundaryConcs.Add(m, new ScalarField(m));
+            //}
         }
 
-        // gmk
         public MolecularPopulation(string name, Molecule mol, DiscretizedManifold man, ScalarField initConc)
         {
             Name = name;
             Molecule = mol;
             Man = man;
             Conc = new ScalarField(man);
-            Initialize(initConc);
 
-            // gmk
             if (man.Boundaries != null)
             {
-                // gmk
-                Dictionary<Manifold, ScalarField> Fluxes = new Dictionary<Manifold, ScalarField>();
-                Dictionary<Manifold, ScalarField> BoundaryConcs = new Dictionary<Manifold, ScalarField>();
+                Fluxes = new Dictionary<Manifold, ScalarField>();
+                BoundaryConcs = new Dictionary<Manifold, ScalarField>();
 
                 foreach (DiscretizedManifold m in Man.Boundaries.Keys)
                 {
                     Fluxes.Add(m, new ScalarField(m));
                     BoundaryConcs.Add(m, new ScalarField(m));
+
+                    // Initializing BoundaryConc
+                    for (int i = 0; i < BoundaryConcs[m].array.Length; i++)
+                    {
+                        BoundaryConcs[m].array[i] = Conc.array[Man.Boundaries[m].WhereIs(i)];
+                    }
                 }
             }
+
+            Initialize(initConc);
+
         }
 
         public void Initialize(ScalarField initialConcentration)
         {
             Conc = initialConcentration;
+
+            // Initializing BoundaryConcs doesn't seem to fit here
+            //foreach (Manifold m in Man.Boundaries.Keys)
+            //{
+            //    BoundaryConcs[m] = initialConcentration;
+            //}
             // NB! also need to initialize bondary concentrations and fluxes
         }
 
@@ -120,11 +132,19 @@ namespace Daphne
             }
             Conc.array = temparray;
 
-            foreach (Manifold m in Man.Boundaries.Keys)
+            // TODO: This if statement is here because TinySphere and TinyBall have Boundaries = null
+            // This requires a similar if statement in the contructor
+            //     MolecularPopulation(string name, Molecule mol, DiscretizedManifold man, ScalarField initConc),
+            // so BoundaryConcs are null for those manifolds
+            // Is this correct?
+            if (Man.Boundaries != null)
             {
-                for (int i = 0; i < BoundaryConcs[m].array.Length; i++)
+                foreach (Manifold m in Man.Boundaries.Keys)
                 {
-                    BoundaryConcs[m].array[i] = Conc.array[Man.Boundaries[m].WhereIs(i)];
+                    for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
+                    {
+                        BoundaryConcs[m].array[k] = Conc.array[Man.Boundaries[m].WhereIs(k)];
+                    }
                 }
             }
 
