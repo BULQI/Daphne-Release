@@ -257,15 +257,20 @@ namespace DaphneGui
                         //    MessageBox.Show("Specify values for boundary conditions first.");
                         //    return;
                         //}
-                        MolPopLinear molpoplin = new MolPopLinear();                        
+                        MolPopLinear molpoplin = new MolPopLinear();
+                        // X face is default
+                        molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0));
+                        molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
+                        molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        molpoplin.dim = 0;
-                        molpoplin.x1 = 0;
-                        molpoplin.boundaryCondition = new List<BoundaryCondition>(); 
-                        BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0);                    
-                        molpoplin.boundaryCondition.Add(bc);
-                        bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
-                        molpoplin.boundaryCondition.Add(bc);
+                       //molpoplin.dim = 0;
+                        //molpoplin.x1 = 0;
+                        //molpoplin.boundaryCondition = new List<BoundaryCondition>(); 
+                        //BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0);                    
+                        //molpoplin.boundaryCondition.Add(bc);
+                        //bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+                        //molpoplin.boundaryCondition.Add(bc);
+
                         current_item.mp_dist_name = "Linear";
                         current_item.mp_distribution = molpoplin;
                         current_item.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2230,6 +2235,13 @@ namespace DaphneGui
             else
             {
                 MainWindow.GC.OrientationMarker_IsChecked = true;
+                ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
+                if (cmp == null)
+                    return;
+                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                {
+                    ((MolPopLinear) cmp.mpInfo.mp_distribution).Initalize((BoundaryFace) cb.SelectedItem);
+                }
             }
         }
 
