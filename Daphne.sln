@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daphne", "Daphne\Daphne.csproj", "{B88B4859-8E76-41ED-AA84-6B48A90EA338}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testDaphne", "testDaphne\testDaphne.csproj", "{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://hippocrates.bumc.bu.edu:8080/tfs/galapagos
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = Daphne\\Daphne.csproj
+		SccProjectName1 = Daphne
+		SccLocalPath1 = Daphne
+		SccProjectUniqueName2 = testDaphne\\testDaphne.csproj
+		SccProjectName2 = testDaphne
+		SccLocalPath2 = testDaphne
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|x86.ActiveCfg = Release|Any CPU
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|x86.ActiveCfg = Debug|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|x86.Build.0 = Debug|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Any CPU.ActiveCfg = Release|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Mixed Platforms.Build.0 = Release|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.ActiveCfg = Release|x86
+		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
