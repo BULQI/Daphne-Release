@@ -1595,7 +1595,7 @@ namespace DaphneGui
             if (lvCytosolAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
 
-            LoadDiffScheme();
+            DiffSchemeExpander_Expanded(null, null);
 
         }
 
@@ -2931,7 +2931,7 @@ namespace DaphneGui
             }
         }
 
-        private void LoadDiffScheme()
+        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
@@ -2947,6 +2947,10 @@ namespace DaphneGui
                 //MessageBox.Show("No cell selected.");
                 return;
             }
+
+            //Clear the grids
+            //EpigeneticMapGrid.Columns.Clear();
+            //DiffRegGrid.Columns.Clear();
 
             //if cell does not have a diff scheme, return
             if (cell.diff_scheme_guid_ref == "" || cell.diff_scheme == null)
@@ -3494,6 +3498,8 @@ namespace DaphneGui
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             comboCol = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(comboCol);
+
+            //DiffSchemeExpander_Expanded(null, null);
         }
 
         /// <summary>
@@ -3698,7 +3704,6 @@ namespace DaphneGui
             if (scheme == null)
                 return;
 
-
             int rowcount = DiffRegGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
             {
@@ -3729,6 +3734,7 @@ namespace DaphneGui
                 return;
 
             ConfigDiffScheme scheme = cell.diff_scheme;
+
             if (scheme == null)
                 return;
 
@@ -3778,18 +3784,6 @@ namespace DaphneGui
             DataGridColumn col = selected.Column;
             //ConfigTransitionDriverRow row = (ConfigTransitionDriverRow)selected.Item;
 
-        }
-
-        private void comboDeathMolPop_DropDownOpened(object sender, EventArgs e)
-        {
-            ComboBox combo = sender as ComboBox;
-            ConfigMolecularPopulation dummy = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            dummy.Name = "None";
-            combo.Items.Add(dummy);
-        }
-
-        private void comboDeathMolPop_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {            
         }
 
         // given a molecule name and location, find its guid
@@ -3918,6 +3912,7 @@ namespace DaphneGui
             else
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+
                 if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
                     return;
 
@@ -4027,16 +4022,6 @@ namespace DaphneGui
 
             return driver;
         }
-
-        private void comboDeathMolPop2_DropDownClosed(object sender, EventArgs e)
-        {
-            ComboBox combo = sender as ComboBox;
-            ComboBoxItem item = (ComboBoxItem)combo.Items[combo.Items.Count - 1];
-
-
-        }
-
-        
     }    
 
     public class DataGridBehavior
