@@ -104,7 +104,6 @@ namespace ManifoldRing
         /// <param name="d">constant</param>
         /// <returns></returns>
         public abstract ScalarField Add(ScalarField sf, double d);
-
         /// <summary>
         /// Laplacian field
         /// </summary>
@@ -126,7 +125,12 @@ namespace ManifoldRing
         /// <param name="sf">field operand</param>
         /// <returns></returns>
         public abstract double[] LatticeGrad(int n, ScalarField sf);
-
+        /// <summary>
+        /// field diffusion, flux term
+        /// </summary>
+        /// <param name="flux">flux involved</param>
+        /// <returns>diffusion flux term as field</returns>
+        public abstract ScalarField DiffusionFluxTerm(ScalarField flux, Transform t);
         /// <summary>
         /// integrate over the whole field
         /// </summary>
@@ -168,7 +172,6 @@ namespace ManifoldRing
         /// <param name="to">Field specified on the interior manifold</param>
         /// <returns>The field after imposing Dirichlet boundary conditions</returns>
         public abstract ScalarField DirichletBC(ScalarField from, Transform t, ScalarField to);
-
     }
 
     /// <summary>
@@ -195,15 +198,15 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
+            ScalarField product = new ScalarField(this);
 
-            double s1 = sf1.array[0];
-            double s2 = sf2.array[0];
-            sf1.array[0] *= sf2.array[0];
-            for (int i = 1; i < sf1.array.Length; i++)
+            product.array[0] = sf1.array[0] * sf2.array[0];
+            for (int i = 1; i < ArraySize; i++)
             {
-                sf1.array[i] = sf1.array[i] * s2 + s1 * sf2.array[i];
+                product.array[i] = sf1.array[0] * sf2.array[i] + sf1.array[i] * sf2.array[0];
             }
-            return sf1;
+
+            return product;
         }
 
         /// <summary>
@@ -240,10 +243,15 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Add(ScalarField sf, double d)
         {
-            sf.array[0] += d;
-            return sf;
-        }
+            ScalarField c = new ScalarField(this);
+            
+            c.array[0] = sf.array[0] + d;
+            c.array[1] = sf.array[1];
+            c.array[2] = sf.array[2];
+            c.array[3] = sf.array[3];
 
+            return c;
+        }
 
         /// <summary>
         /// Restriction of a scalar field to an ME boundary manifold
@@ -453,6 +461,16 @@ namespace ManifoldRing
         }
 
         /// <summary>
+        /// TinySphere field diffusion, flux term
+        /// </summary>
+        /// <param name="flux">flux involved</param>
+        /// <returns>diffusion flux term as field</returns>
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// TinySphere integrate over the whole field
         /// </summary>
         /// <param name="sf">field parameter</param>
@@ -633,6 +651,29 @@ namespace ManifoldRing
         }
 
         /// <summary>
+        /// TinyBall field diffusion, flux term
+        /// The flux scalar field has already been divided by the diffusion coefficient in the boundary reaction Step() method.
+        /// </summary>
+        /// <param name="flux">flux involved</param>
+        /// <param name="t">Transform - not used</param>
+        /// <returns>diffusion flux term as field</returns>
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        {
+            if (flux.M is TinySphere == false)
+            {
+                throw new Exception("Manifold mismatch: flux for TinyBall must be on TinySphere.");
+            }
+
+            double[] array = diffusionField.array;
+            array[0] = 3 * flux.array[0] / radius;
+            array[1] = 5 * flux.array[1] / radius;
+            array[2] = 5 * flux.array[2] / radius;
+            array[3] = 5 * flux.array[3] / radius;
+
+            return diffusionField;
+        }
+
+        /// <summary>
         /// TinyBall integrate over the whole field
         /// </summary>
         /// <param name="sf">field parameter</param>
@@ -651,7 +692,7 @@ namespace ManifoldRing
         protected int[] nNodesPerSide;
         protected double stepSize;
         protected double[] extent;
-        public Interpolator interpolator;
+        protected Interpolator interpolator;
 
         /// <summary>
         /// constructor
@@ -749,12 +790,14 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
+            ScalarField product = new ScalarField(this);
+
             for (int i = 0; i < ArraySize; i++)
             {
-                sf1.array[i] *= sf2.array[i];
+                product.array[i] = sf1.array[i] * sf2.array[i];
             }
 
-            return sf1;
+            return product;
         }
 
         /// <summary>
@@ -787,13 +830,15 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Add(ScalarField sf, double d)
         {
+            ScalarField c = new ScalarField(this);
+
             for (int i = 0; i < ArraySize; i++)
             {
-                sf.array[i] += d;
+                c.array[i] = sf.array[i] + d;
             }
-            return sf;
-        }
 
+            return c;
+        }
 
         /// <summary>
         /// local point to multidimensional index
@@ -1009,6 +1054,11 @@ namespace ManifoldRing
                 to.array[i] = from.M.Value(x+pos, from);
             }
             return to;
+        }
+
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        {
+            return interpolator.DiffusionFlux(flux, t);
         }
 
         /// <summary>
@@ -1270,8 +1320,10 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
-            sf1.array[0] *= sf2.array[0];
-            return sf1;
+            ScalarField c = new ScalarField(this);
+            c.array[0] = sf1.array[0] * sf2.array[0];
+
+            return c;
         }
 
         /// <summary>
@@ -1301,8 +1353,10 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField  Add(ScalarField sf, double d)
         {
-            sf.array[0] += d;
-            return sf;
+            ScalarField c = new ScalarField(this);
+            c.array[0] = sf.array[0] + d;
+
+            return c;
         }
 
         /// <summary>
@@ -1335,6 +1389,16 @@ namespace ManifoldRing
         public override double[] LatticeGrad(int n, ScalarField sf)
         {
             throw new Exception("LatticeGrad not implemented for PointManifold fields");
+        }
+
+        /// <summary>
+        /// field diffusion, flux term
+        /// </summary>
+        /// <param name="flux">flux involved</param>
+        /// <returns>diffusion flux term as field</returns>
+        public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
+        {
+            throw new Exception("DiffusionFluxTerm not implemented for PointManifold fields");
         }
 
         /// <summary>
