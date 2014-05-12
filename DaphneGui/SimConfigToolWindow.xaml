@@ -62,11 +62,11 @@
             <daph:DeathDriverGuidToAlphaConverter x:Key="DeathDriverGuidToAlphaConv" />
             <daph:DeathDriverGuidToBetaConverter x:Key="DeathDriverGuidToBetaConv" />
             <daph:DeathDriverGuidToDriverElementConverter x:Key="DeathDriverGuidToDriverElementConv" />
-            <daph:DiffGUIDtoDiffNameConverter x:Key="DiffGUIDtoDiffNameConv" />
 
             <daph:GuidToBoolConverter x:Key="GuidToBoolConv" />
             <daph:TransitionDriverToBoolConverter x:Key="TransitionDriverToBoolConv" />
             <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
+            <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -4300,53 +4300,24 @@
                                                 </Grid.RowDefinitions>
 
                                                 <!-- DIFFERENTIATION SCHEME -->
-                                                <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                                    <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
-                                                        <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="False"
-                                                                Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.diff_scheme_guid_ref, 
-                                                                                Converter={StaticResource DiffGUIDtoDiffNameConv}, 
-                                                                                ConverterParameter={StaticResource diffSchemesListView}}" >
+                                                    <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                        <CheckBox Width="180" 
+                                                                  IsChecked="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Mode=TwoWay, Converter={StaticResource DiffSchemeToBoolConv}, UpdateSourceTrigger=Explicit}"
+                                                                  Click="CheckBox_Click">Has Differentiation Scheme</CheckBox>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
+                                                        <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
+                                                        <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
+                                                                Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.diff_scheme.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                                         </TextBox>
-                                                </StackPanel>
+                                                        
+                                                    </StackPanel>
 
                                                 <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
-                                                <!-- Differentiation Matrix for selected Differentiation Scheme-->
-                                                <!--<DataGrid Visibility="Hidden" x:Name="dgDiffScheme" Height="100" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10,0,0" AlternatingRowBackground="Beige"
-                                                                ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="MolName">
-
-                                                    <DataGrid.ColumnHeaderStyle>
-                                                        <Style  TargetType="DataGridColumnHeader" >
-                                                            <Setter Property="FontSize" Value="14" />
-                                                            <Setter Property="Background" Value="Beige" />
-                                                            <Setter Property="BorderBrush" Value="Black" />
-                                                            <Setter Property="BorderThickness" Value="1" />
-                                                            <Setter Property="MinWidth" Value="50" />
-                                                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                                            <Setter Property="ContentTemplate" >
-                                                                <Setter.Value>
-                                                                    <DataTemplate >
-                                                                        <StackPanel>
-                                                                            <TextBlock Text="Header" />
-                                                                        </StackPanel>
-                                                                    </DataTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </Style>
-                                                    </DataGrid.ColumnHeaderStyle>
-                                                </DataGrid>-->
-
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
                                                     
-                                                    <!--<ListBox Visibility="Hidden"  Height="144" HorizontalAlignment="Left" Margin="0,10,0,0" Name="lbScheme" VerticalAlignment="Top" Width="250" VerticalContentAlignment="Top" 
-                                                                ItemsSource="{Binding Path=States}"
-                                                                ItemTemplate="{Binding Source={StaticResource stateListItemTemplate}}">
-                                                        <ListBox.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel IsItemsHost="True" />
-                                                            </ItemsPanelTemplate>
-                                                        </ListBox.ItemsPanel>
-                                                    </ListBox>-->
                                                 </StackPanel>
 
                                             </Grid>
@@ -4450,6 +4421,12 @@
                                                                                         Path=Item.Name}"/>
                                                                 </DataTemplate>
                                                             </DataGrid.RowHeaderTemplate>-->
+
+                                                    <!--<DataGrid.RowHeaderTemplate>
+                                                        <DataTemplate>
+                                                            <TextBox x:Name="txtRowHeader"></TextBox>
+                                                        </DataTemplate>
+                                                    </DataGrid.RowHeaderTemplate>-->
 
                                                 </DataGrid>
                                                 <!-- This is the Differentiation Regulators datagrid -->

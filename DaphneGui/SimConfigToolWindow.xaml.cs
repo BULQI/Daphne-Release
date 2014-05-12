@@ -2997,12 +2997,12 @@ namespace DaphneGui
             //Clear the grids
             EpigeneticMapGrid.ItemsSource = null;
             EpigeneticMapGrid.Columns.Clear();
+
             DiffRegGrid.ItemsSource = null;
             DiffRegGrid.Columns.Clear();
 
             if (cell == null)
             {
-                //MessageBox.Show("No cell selected.");
                 return;
             }
 
@@ -3012,7 +3012,6 @@ namespace DaphneGui
                 //Create a column that allows the user to add genes to the grid
                 DataGridTextColumn combo_col = CreateUnusedGenesColumn(er);
                 EpigeneticMapGrid.Columns.Add(combo_col);
-                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
                 return;
             }
 
@@ -3020,13 +3019,13 @@ namespace DaphneGui
             ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
             //EPIGENETIC MAP SECTION
-            //EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
+            EpigeneticMapGrid.DataContext = diff_scheme;
             EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
 
             int nn = 0;
             foreach (string gene_guid in diff_scheme.genes)
             {
-                //SET UP COLUMN HEADINGS
+                //SET UP COLUMNS
                 ConfigGene gene = er.genes_dict[gene_guid];
                 DataGridTextColumn col = new DataGridTextColumn();
                 col.Header = gene.Name;                
@@ -3058,7 +3057,37 @@ namespace DaphneGui
             {
                 //SET UP COLUMN HEADINGS
                 DataGridTemplateColumn col2 = new DataGridTemplateColumn();
-                col2.Header = s;
+
+                //New
+                string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", i);
+                Binding bcol = new Binding(sbind);
+                bcol.ElementName = "CellsListBox";
+                bcol.Path = new PropertyPath(sbind);
+                bcol.Mode = BindingMode.OneWay;
+
+                //Create a TextBox so the state name is editable
+                FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
+                txtStateName.SetValue(TextBlock.StyleProperty, null);
+                txtStateName.SetBinding(TextBlock.TextProperty, bcol);
+
+                //DataGridRowHeader header = new DataGridRowHeader();
+                DataTemplate colHeaderTemplate = new DataTemplate();
+
+                colHeaderTemplate.VisualTree = txtStateName;
+                col2.HeaderStyle = null;
+                col2.HeaderTemplate = colHeaderTemplate;
+                //col2.HeaderStyle = null;
+                //col2.Header = header;
+                //End New
+
+
+
+                //Old
+                //col2.Header = s;
+
+
+
+
                 col2.CanUserSort = false;                
                 col2.MinWidth = 50;
 
@@ -3067,7 +3096,7 @@ namespace DaphneGui
                 //NON-EDITING TEMPLATE
                 DataTemplate cellTemplate = new DataTemplate();
                 
-                //SET UP A TEXTBLOCK ONLY
+                //SET UP A TEXTBLOCK
                 Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
                 bn.Mode = BindingMode.TwoWay;
                 bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -3270,7 +3299,30 @@ namespace DaphneGui
         {
             DataGridTemplateColumn col = new DataGridTemplateColumn();
 
-            col.Header = state;
+            //New
+            string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", DiffRegGrid.Columns.Count);
+            Binding bcol = new Binding(sbind);
+            bcol.ElementName = "CellsListBox";
+            bcol.Path = new PropertyPath(sbind);
+            bcol.Mode = BindingMode.OneWay;
+
+            //Create a TextBox so the state name is editable
+            FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
+            txtStateName.SetValue(TextBlock.StyleProperty, null);
+            txtStateName.SetBinding(TextBlock.TextProperty, bcol);
+
+            //DataGridRowHeader header = new DataGridRowHeader();
+            DataTemplate colHeaderTemplate = new DataTemplate();
+
+            colHeaderTemplate.VisualTree = txtStateName;
+            col.HeaderStyle = null;
+            col.HeaderTemplate = colHeaderTemplate;
+            //End New
+
+            //Old
+            ////col.Header = state;
+
+
             col.CanUserSort = false;
             col.MinWidth = 50;
 
@@ -3524,10 +3576,7 @@ namespace DaphneGui
 
             }
 
-
-
             ConfigDiffScheme scheme = cell.diff_scheme;
-            
             ConfigGene gene = null;
 
             if (combo != null && combo.Items.Count > 0)
@@ -3541,6 +3590,15 @@ namespace DaphneGui
 
                     if (!scheme.genes.Contains(gene.gene_guid))
                     {
+                        //If no states exist, then create at least 2 new ones
+                        if (scheme.Driver.states.Count == 0)
+                        {
+                            AddDifferentiationState("State1");
+                            AddDifferentiationState("State2");
+                            //menuAddState_Click(null, null);
+                            //menuAddState_Click(null, null);
+                        }
+
                         scheme.genes.Add(gene.gene_guid);
                         foreach (ConfigActivationRow row in scheme.activationRows)
                         {
@@ -3565,6 +3623,9 @@ namespace DaphneGui
                 b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 col.Binding = b;
             }
+
+            //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
+            //    return;                        
 
             //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
             //    return;                        
@@ -3672,7 +3733,27 @@ namespace DaphneGui
             }
         }
         
+        /// <summary>
+        /// This method is called when the user clicks on Add State menu item for Epigenetic Map grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void menuAddState_Click(object sender, RoutedEventArgs e)
+        {
+            //Show a dialog that gets the new state's name
+            AddDiffState ads = new AddDiffState();
+
+            if (ads.ShowDialog() == true)
+            {
+                AddDifferentiationState(ads.StateName);
+            }
+        }
+
+        /// <summary>
+        /// This method adds a differentiation state given a name 
+        /// </summary>
+        /// <param name="name"></param>
+        private void AddDifferentiationState(string name)
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
@@ -3680,6 +3761,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            //If no diff scheme defined for this cell, create one
             if (cell.diff_scheme == null)
             {
                 ConfigDiffScheme ds = new ConfigDiffScheme();
@@ -3691,34 +3773,40 @@ namespace DaphneGui
                 cell.diff_scheme = ds;
             }
 
-            //Show a dialog that gets the new state's name
-            AddDiffState ads = new AddDiffState();
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
+            diff_scheme.AddState(name);
+            DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, name));
 
-            if (ads.ShowDialog() == true)
+            EpigeneticMapGrid.ItemsSource = null;
+            EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
+            EpigeneticMapGenerateRowHeaders();
+
+            //if adding first row, then need to add the columns too - one for each gene
+            if (diff_scheme.activationRows.Count == 1)
             {
-                //DiffRegGrid.ItemContainerGenerator.ItemsChanged += new ItemsChangedEventHandler(DiffRegGridItemContainerGenerator_ItemsChanged);
+                foreach (string gene_guid in diff_scheme.genes)
+                {
+                    DataGridTextColumn col = new DataGridTextColumn();
+                    col.Header = er.genes_dict[gene_guid].Name;
+                    col.CanUserSort = false;
+                    Binding b = new Binding(string.Format("activations[{0}]", diff_scheme.activationRows[0].activations.Count - 1));
+                    b.Mode = BindingMode.TwoWay;
+                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                    col.Binding = b;
+                }
 
-                ConfigDiffScheme diff_scheme = cell.diff_scheme;
-                diff_scheme.AddState(ads.StateName);
-                DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, ads.StateName));
-                EpigeneticMapGrid.ItemsSource = null;
-                EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
-
-                DiffRegGrid.ItemsSource = null;
-                DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
-                UpdateDiffRegGrid();
-                                
-                //int rowcount = DiffRegGrid.Items.Count;
-                //DataGridRow row = DiffRegGrid.GetRow(rowcount-1);
-                //if (row != null)
-                //{
-                //    row.SetValue(DataGridRow.HeaderProperty, diff_scheme.Driver.states[rowcount - 1]);
-                //}
             }
+
+            DiffRegGrid.ItemsSource = null;
+            DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
+            UpdateDiffRegGrid();
 
         }
 
-        //private void DiffRegGridItemContainerGenerator_ItemsChanged(object sender, EventArgs e)
+        /// <summary>
+        /// This method updates the differentiation regulators grid.
+        /// It is meant to be called after the user adds a new diff state.
+        /// </summary>
         private void UpdateDiffRegGrid()
         {
             if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
@@ -3749,31 +3837,8 @@ namespace DaphneGui
                 }
             }
 
-            //The code below sets the row headers
-            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            if (cell == null)
-                return;
-
-            if (cell.diff_scheme == null)
-                return;
-
-            ConfigDiffScheme scheme = cell.diff_scheme;
-
-            if (scheme == null)
-                return;
-
-            int rowcount = DiffRegGrid.Items.Count;
-            for (int ii = 0; ii < rowcount; ii++)
-            {
-                if (ii >= scheme.Driver.states.Count)
-                    break;
-
-                DataGridRow row = DiffRegGrid.GetRow(ii);
-                if (row != null)
-                {
-                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
-                }
-            }
+            //Generate the row headers
+            DiffRegGenerateRowHeaders();
         }
 
         /// <summary>
@@ -3830,6 +3895,7 @@ namespace DaphneGui
         {
             if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
             {
+                DiffRegGrid.ItemContainerGenerator.StatusChanged -= DiffRegItemContainerGenerator_StatusChanged;
                 int nRows = DiffRegGrid.Items.Count;
                 for (int j = 0; j < nRows; j++)
                 {
@@ -3856,7 +3922,13 @@ namespace DaphneGui
                 }
             }
 
-            //The code below sets the row headers
+            //Generate the row headers
+            DiffRegGenerateRowHeaders();
+        }
+
+        private void DiffRegGenerateRowHeaders()
+        {
+            //The code below generates the row headers
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
@@ -3878,7 +3950,26 @@ namespace DaphneGui
                 DataGridRow row = DiffRegGrid.GetRow(ii);
                 if (row != null)
                 {
-                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
+                    string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", ii);
+                    Binding b = new Binding(sbind);
+                    b.ElementName = "CellsListBox";
+                    b.Path = new PropertyPath(sbind);
+                    b.Mode = BindingMode.OneWay;
+
+                    //Create a TextBox so the state name is editable
+                    FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
+                    txtStateName.SetValue(TextBlock.StyleProperty, null);
+                    txtStateName.SetValue(TextBlock.WidthProperty, 120D);
+                    txtStateName.SetBinding(TextBlock.TextProperty, b);
+
+                    DataGridRowHeader header = new DataGridRowHeader();
+                    DataTemplate rowHeaderTemplate = new DataTemplate();
+
+                    rowHeaderTemplate.VisualTree = txtStateName;
+                    header.Style = null;
+                    header.ContentTemplate = rowHeaderTemplate;
+                    row.HeaderStyle = null;
+                    row.Header = header;
                 }
             }
         }
@@ -3891,19 +3982,30 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void EpigeneticItemContainerGenerator_StatusChanged(object sender, EventArgs e)
         {
+            if (EpigeneticMapGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            {
+                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged -= EpigeneticItemContainerGenerator_StatusChanged;
+                EpigeneticMapGenerateRowHeaders();
+            }
+        }
+
+        /// <summary>
+        /// This generates the row headers for the Epigenetic Map grid.
+        /// These headers represent differentiation state names and are editable.
+        /// </summary>
+        private void EpigeneticMapGenerateRowHeaders()
+        {
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
-
             if (cell.diff_scheme == null)
                 return;
-
             ConfigDiffScheme scheme = cell.diff_scheme;
-
             if (scheme == null)
                 return;
-
+            
             int rowcount = EpigeneticMapGrid.Items.Count;
+
             for (int ii = 0; ii < rowcount; ii++)
             {
                 if (ii >= scheme.Driver.states.Count)
@@ -3912,12 +4014,32 @@ namespace DaphneGui
                 DataGridRow row = EpigeneticMapGrid.GetRow(ii);
                 if (row != null)
                 {
-                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
+                    string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", ii);
+                    Binding b = new Binding(sbind);
+                    b.ElementName = "CellsListBox";
+                    b.Path = new PropertyPath(sbind);
+                    b.Mode = BindingMode.TwoWay;
+                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+                    //Create a TextBox so the state name is editable
+                    FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBox));
+                    txtStateName.SetValue(TextBox.StyleProperty, null);
+                    //txtStateName.SetValue(TextBox.WidthProperty, 120D);
+                    txtStateName.SetValue(TextBox.WidthProperty, 120D);
+                    Thickness th = new Thickness(0D);
+                    txtStateName.SetValue(TextBox.BorderThicknessProperty, th);
+                    txtStateName.SetBinding(TextBox.TextProperty, b);
+
+                    DataGridRowHeader header = new DataGridRowHeader();
+                    DataTemplate rowHeaderTemplate = new DataTemplate();
+
+                    rowHeaderTemplate.VisualTree = txtStateName;
+                    header.Style = null;
+                    header.ContentTemplate = rowHeaderTemplate;
+                    row.HeaderStyle = null;
+                    row.Header = header;
                 }
             }
-
-            EpigeneticMapGrid.ToolTip = "Activation Level";
-
         }
 
         /// <summary>
@@ -3927,28 +4049,14 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void DiffRegGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            //ConfigMolecularPopulation molpop = e.AddedCells[0].Item as ConfigMolecularPopulation;
-            //string guid = molpop.molecule_guid_ref;
-
-            //ConfigTransitionDriverElement elem = entity_repository.transition_drivers_dict[death_driver_guid].DriverElements[0].elements[1];
-
-
-
             var selectedRow = DiffRegGrid.GetSelectedRow();
             if (selectedRow == null)
                 return;
 
-            //CellState cs = (CellState)selectedRow.Item;
-            //int row = CellStateGrid.Items.IndexOf(cs);
             int row = DiffRegGrid.SelectedIndex;
-
-
-            //List<DataGridCellInfo> sel_list = (List<DataGridCellInfo>)DiffRegGrid.SelectedCells;
 
             DataGridCellInfo selected = DiffRegGrid.SelectedCells[0];
             DataGridColumn col = selected.Column;
-            //ConfigTransitionDriverRow row = (ConfigTransitionDriverRow)selected.Item;
-
         }
 
         // given a molecule name and location, find its guid
@@ -4187,6 +4295,45 @@ namespace DaphneGui
 
             return driver;
         }
+
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+
+            if (cb.IsChecked == false)
+            {
+                MessageBoxResult res;
+                res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                    return;
+
+                ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+                if (cell == null)
+                    return;
+
+                cell.diff_scheme = null;
+
+                //Clear the grids
+                EpigeneticMapGrid.ItemsSource = null;
+                EpigeneticMapGrid.Columns.Clear();
+                DiffRegGrid.ItemsSource = null;
+                DiffRegGrid.Columns.Clear();
+
+                //Still want 'Add Genes' combo box
+                DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
+                EpigeneticMapGrid.Columns.Add(combo_col);
+                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
+
+            }
+            else
+            {
+                //Here Add two new states
+                AddDifferentiationState("State1");
+                AddDifferentiationState("State2");
+                //menuAddState_Click(null, null);
+                //menuAddState_Click(null, null);
+            }
+        }
     }    
 
     public class DataGridBehavior
@@ -4311,8 +4458,6 @@ namespace DaphneGui
                         currentCell.SetValue(DataGridBehavior.IsCellHighlightedProperty, e.NewValue);
                     }
                 }
-
-
             }
         }
 

@@ -2042,6 +2042,28 @@ namespace Daphne
         }
     }
 
+    public class DiffSchemeToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bResult = true;
+            ConfigDiffScheme ds = value as ConfigDiffScheme;
+
+            if (ds == null)
+            {
+                bResult = false;
+            }
+
+            return bResult;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigDiffScheme ds = null;
+
+            return ds;
+        }
+    }
+
     public class DiffSchemeToDiffNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2598,11 +2620,13 @@ namespace Daphne
             Driver.states.Add(sname);
             activationRows.Add(row);
 
+            OnPropertyChanged("activationRows");
+
             //Add a row AND a column in Differentiation Table
             ConfigTransitionDriverRow trow; 
 
             //Add a column to existing rows
-            for (int k = 0; k < Driver.states.Count - 1; k++)
+            for (int k = 0; k < Driver.states.Count-1; k++)
             {
                 trow = Driver.DriverElements[k];
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
@@ -2632,6 +2656,8 @@ namespace Daphne
             }
 
             Driver.DriverElements.Add(trow);
+
+            OnPropertyChanged("Driver");
         }
 
         public ConfigDiffScheme Clone()
@@ -4892,45 +4918,6 @@ namespace Daphne
             }
 
             return retval;
-        }
-    }
-
-    /// <summary>
-    /// Differentiation Scheme Guid to Differentiation Scheme Name converter
-    /// 
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class DiffGUIDtoDiffNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string diff_name = "";
-
-            if (parameter == null || guid == "")
-                return diff_name;
-
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigDiffScheme> diff_list = cvs.Source as ObservableCollection<ConfigDiffScheme>;
-            if (diff_list != null)
-            {
-                foreach (ConfigDiffScheme d in diff_list)
-                {
-                    if (d.diff_scheme_guid == guid)
-                    {
-                        diff_name = d.Name;
-                        break;
-                    }
-                }
-            }
-            return diff_name;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
         }
     }
 
