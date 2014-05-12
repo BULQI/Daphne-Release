@@ -119,7 +119,6 @@
     <Compile Include="Workbench\EditRCReactions.xaml.cs">
       <DependentUpon>EditRCReactions.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Grid.cs" />
     <Compile Include="GuiExtension.cs" />
     <Compile Include="GuiReactionTemplate.cs" />
     <Compile Include="Workbench\ReactionComplex.cs" />
