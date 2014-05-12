@@ -63,7 +63,7 @@ namespace testDaphne
 
             // Run through scenarios to make sure nothing crashes after changes
             for (int n=1; n<=6; n++)
-            // int n = 6;
+            // int n = 2;
             {
                 switch (n)
                 {
@@ -285,9 +285,10 @@ namespace testDaphne
                      extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
+            double cellRadius = 5.0;
 
             // One cell
-            Cell cell = SimulationModule.kernel.Get<Cell>();
+            Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
 
             cellPos[0] = extent[0] / 4.0;
             cellPos[1] = extent[1] / 2.0;
@@ -406,9 +407,10 @@ namespace testDaphne
                      extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
+            double cellRadius = 5.0;
 
             // One cell
-            Cell cell = SimulationModule.kernel.Get<Cell>();
+            Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
 
             cellPos[0] = extent[0] / 3.0;
             cellPos[1] = extent[1] / 3.0;
