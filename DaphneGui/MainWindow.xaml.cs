@@ -1803,7 +1803,7 @@ namespace DaphneGui
                         {
                             reporter.CloseReporter();
                         }
-                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(applyChanges));
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
                         sim.RunStatus = Simulation.RUNSTAT_OFF;
                     }
                     //else if (vcrControl != null && vcrControl.IsActive() == true)
@@ -1932,6 +1932,11 @@ namespace DaphneGui
                 }
             }
 
+            updateGraphicsAndGUI();
+        }
+
+        private void updateGraphicsAndGUI()
+        {
             lockAndResetSim(false, "");
             //also need to delete every for this experiment in database.
             //DataBaseTools.DeleteExperiment(configurator.SimConfig.experiment_db_id);
@@ -2007,14 +2012,6 @@ namespace DaphneGui
                 {
                     vcrControl.SetInactive();
                 }
-                if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
-                {
-                    sim.RunStatus = Simulation.RUNSTAT_OFF;
-                }
-                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
-                {
-                    reporter.StartReporter(configurator.SimConfig);
-                }
 
                 // only check for unique names if database writing is on and the unique names option is on
                 /*if (skipDataWriteMenu.IsChecked == false && uniqueNamesMenu.IsChecked == true)
@@ -2089,17 +2086,16 @@ namespace DaphneGui
                     }
                 }
 
-                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
+                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
                 {
-                    reporter.StartReporter(configurator.SimConfig);
-                }
-                else
-                    if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                    if(Properties.Settings.Default.skipDataBaseWrites == false)
                     {
-                        runButton.Content = "Pause";
-                        runButton.ToolTip = "Pause the Simulation.";
-                        statusBarMessagePanel.Content = "Running...";
+                        reporter.StartReporter(configurator.SimConfig);
                     }
+                    runButton.Content = "Pause";
+                    runButton.ToolTip = "Pause the Simulation.";
+                    statusBarMessagePanel.Content = "Running...";
+                }
             }
         }
 
