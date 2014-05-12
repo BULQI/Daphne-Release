@@ -234,23 +234,56 @@ namespace Interface
     /* Reaction */
     public class Reaction : IDynamic
     {
-        private int[] sigmas;
-        private int[] taus;
-        private MolecularPopulation[] reactants;
-        private double rate;
+        private double[] reactantStoichiometricCoefficients;
+        private double[] productStoichiometricCoefficients;
+        private double rateConstant;
 
-        public Reaction(int[] sigmas, int[] taus, MolecularPopulation[] reactants, double rate)
+        public Reaction(double[] reactantStoichiometricCoefficients, double[] productStoichiometricCoefficients, double rateConstant)
         {
-            this.sigmas = sigmas;
-            this.taus = taus;
-            this.reactants = reactants;
-            this.rate = rate;
+            this.reactantStoichiometricCoefficients = reactantStoichiometricCoefficients;
+            this.productStoichiometricCoefficients = productStoichiometricCoefficients;
+            this.rateConstant = rateConstant;
         }
 
         public void step(double dt)
         {
         }
     }
+
+    /* Concrete Reaction classes */
+    public class InteriorReaction : Reaction
+    {
+        private List<MolecularPopulation> reactants;
+        private List<MolecularPopulation> products;
+
+        public InteriorReaction(double[] reactantStoichiometricCoefficients, double[] productStoichiometricCoefficients,
+            List<MolecularPopulation> reactants, List<MolecularPopulation> products, double rateConstant) :
+            base(reactantStoichiometricCoefficients, productStoichiometricCoefficients, rateConstant)
+        {
+            this.reactants = reactants;
+            this.products = products;
+        }
+    }
+
+    public class BoundaryReaction : Reaction
+    {
+        private List<MolecularPopulation> interiorReactants;
+        private List<MolecularPopulation> interiorProducts;
+        private List<MolecularPopulation> boundaryReactants;
+        private List<MolecularPopulation> boundaryProducts;
+
+        public BoundaryReaction(double[] reactantStoichiometricCoefficients, double[] productStoichiometricCoefficients,
+            List<MolecularPopulation> interiorReactants, List<MolecularPopulation> interiorProducts,
+            List<MolecularPopulation> boundaryReactants, List<MolecularPopulation> boundaryProducts, double rateConstant) :
+            base(reactantStoichiometricCoefficients, productStoichiometricCoefficients, rateConstant)
+        {
+            this.interiorReactants = interiorReactants;
+            this.interiorProducts = interiorProducts;
+            this.boundaryReactants = boundaryReactants;
+            this.boundaryProducts = boundaryProducts;
+        }
+    }
+
 
     /* Reaaction Complex */
     public class ReactionComplex : IDynamic
@@ -290,13 +323,18 @@ namespace Interface
             MolecularPopulation molecularPopulationA = new DiscreteMolecularPopulation(a, concentration, flux);
             MolecularPopulation molecularPopulationB = new DiscreteMolecularPopulation(b, concentration, flux);
             MolecularPopulation molecularPopulationC = new ContinuousMolecularPopulation(c, concentration, flux);
-            int[] sigmas = new int[] { 1, 1, 1 };
-            int[] taus = new int[] { 0, 0, 0 };
-            MolecularPopulation[] reactants = new MolecularPopulation[] { 
-				molecularPopulationA, molecularPopulationB, molecularPopulationC };
+            double[] sigmas = new double[] { 1, 1, 1 };
+            double[] taus = new double[] { 0, 0, 0 };
+            List<MolecularPopulation> reactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
+            List<MolecularPopulation> products = new List<MolecularPopulation> { molecularPopulationC };
+            List<MolecularPopulation> inteiriorReactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
+            List<MolecularPopulation> interiorRroducts = new List<MolecularPopulation> { molecularPopulationC };
+            List<MolecularPopulation> boundaryReactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
+            List<MolecularPopulation> boundaryProducts = new List<MolecularPopulation> { molecularPopulationC };
             double rate = 1.0;
-            Reaction reaction = new Reaction(sigmas, taus, reactants, rate);
-            Reaction[] reactions = new Reaction[] { reaction };
+            Reaction interiorReaction = new InteriorReaction(sigmas, taus, reactants, products, rate);
+            Reaction boundaryReaction = new BoundaryReaction(sigmas, taus, inteiriorReactants, interiorRroducts, boundaryReactants, boundaryProducts, rate);
+            Reaction[] reactions = new Reaction[] { interiorReaction, boundaryReaction };
             ReactionComplex reactionComplex = new ReactionComplex(reactions);
 
             Debug.Print("Construction success!");
