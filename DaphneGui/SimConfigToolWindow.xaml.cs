@@ -568,6 +568,22 @@ namespace DaphneGui
                 }
             }
         }
+        private void cytoBulkMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol != null)
+            {
+                // Filter out mol if membrane bound 
+                if (mol.molecule_location == MoleculeLocation.Bulk)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
 
         
 
