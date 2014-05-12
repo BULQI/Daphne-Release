@@ -1463,275 +1463,277 @@ namespace DaphneGui
         {
             //MessageBox.Show("In runSim()");
 
-            Scenario scenario = configurator.SimConfig.scenario;
+            Sim.Load(configurator.SimConfig);
 
-            FakeConfig.numGridPts = scenario.NumGridPts;
-            FakeConfig.gridStep = scenario.GridStep;
+            ////////Scenario scenario = configurator.SimConfig.scenario;
 
-            // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+            ////////FakeConfig.numGridPts = scenario.NumGridPts;
+            ////////FakeConfig.gridStep = scenario.GridStep;
 
-            //INSTANTIATE EXTRA CELLULAR MEDIUM
-            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            ////////// executes the ninject bindings; call this after the config is initialized with valid values
+            ////////SimulationModule.kernel = new StandardKernel(new SimulationModule());
 
-            sim.Cells.Clear();            
+            //////////INSTANTIATE EXTRA CELLULAR MEDIUM
+            ////////sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
-            double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
-                                             sim.ECS.Space.Interior.Extent(1), 
-                                             sim.ECS.Space.Interior.Extent(2) };
+            ////////sim.Cells.Clear();            
 
-            // ADD CELLS            
-            double[] cellPos = new double[sim.ECS.Space.Interior.Dim];
+            ////////double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
+            ////////                                 sim.ECS.Space.Interior.Extent(1), 
+            ////////                                 sim.ECS.Space.Interior.Extent(2) };
+
+            ////////// ADD CELLS            
+            ////////double[] cellPos = new double[sim.ECS.Space.Interior.Dim];
                      
-            // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
-            foreach (CellPopulation cp in scenario.cellpopulations)
-            {
-                double transductionConstant = 1e4;
-                for (int i = 0; i < cp.number; i++)
-                {
-                    Cell cell = SimulationModule.kernel.Get<Cell>();
+            ////////// INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
+            ////////foreach (CellPopulation cp in scenario.cellpopulations)
+            ////////{
+            ////////    double transductionConstant = 1e4;
+            ////////    for (int i = 0; i < cp.number; i++)
+            ////////    {
+            ////////        Cell cell = SimulationModule.kernel.Get<Cell>();
 
-                    cellPos[0] = extent[0] / 4.0;
-                    cellPos[1] = extent[1] / 2.0;
-                    cellPos[2] = extent[2] / 2.0;
-                    cell.setState(cellPos, new double[] { 0, 0, 0 });
-                    cell.IsMotile = false;
+            ////////        cellPos[0] = extent[0] / 4.0;
+            ////////        cellPos[1] = extent[1] / 2.0;
+            ////////        cellPos[2] = extent[2] / 2.0;
+            ////////        cell.setState(cellPos, new double[] { 0, 0, 0 });
+            ////////        cell.IsMotile = false;
 
-                    foreach (GuiMolecularPopulation gmp in cp.CellMolPops)
-                    {
-                        if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                        {
-                            MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
-                            double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
+            ////////        foreach (GuiMolecularPopulation gmp in cp.CellMolPops)
+            ////////        {
+            ////////            if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            ////////            {
+            ////////                MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
+            ////////                double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
+            ////////                double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
 
-                            center[0] = extent[0] / 2.0;
-                            center[1] = extent[1] / 2.0;
-                            center[2] = extent[2] / 2.0;
+            ////////                center[0] = extent[0] / 2.0;
+            ////////                center[1] = extent[1] / 2.0;
+            ////////                center[2] = extent[2] / 2.0;
 
-                            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-                            Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
+            ////////                // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            ////////                Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
 
-                            //if (gmp.InMembrane)
-                            if (gmp.Location == MolPopPosition.Membrane)
-                            {
-                                //cell.PlasmaMembrane.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
-                                if (mol.Name == "CXCR5")
-                                {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 125.0);
-                                }
-                                else if (mol.Name == "CXCR5:CXCL13")
-                                {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 130.0);
-                                }
-                                else 
-                                {
-                                    cell.PlasmaMembrane.AddMolecularPopulation(mol, 0.0);
-                                }
-                            }
-                            else  
-                            {
-                                double initConc = 250;
-                                cell.Cytosol.AddMolecularPopulation(mol, initConc);
-                            }
-                        }
+            ////////                //if (gmp.InMembrane)
+            ////////                if (gmp.Location == MolPopPosition.Membrane)
+            ////////                {
+            ////////                    //cell.PlasmaMembrane.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
+            ////////                    if (mol.Name == "CXCR5")
+            ////////                    {
+            ////////                        cell.PlasmaMembrane.AddMolecularPopulation(mol, 125.0);
+            ////////                    }
+            ////////                    else if (mol.Name == "CXCR5:CXCL13")
+            ////////                    {
+            ////////                        cell.PlasmaMembrane.AddMolecularPopulation(mol, 130.0);
+            ////////                    }
+            ////////                    else 
+            ////////                    {
+            ////////                        cell.PlasmaMembrane.AddMolecularPopulation(mol, 0.0);
+            ////////                    }
+            ////////                }
+            ////////                else  
+            ////////                {
+            ////////                    double initConc = 250;
+            ////////                    cell.Cytosol.AddMolecularPopulation(mol, initConc);
+            ////////                }
+            ////////            }
                         
-                    }
+            ////////        }
 
-                    //CELL REACTIONS
-                    if (cp.CellReactions != null)
-                    {
-                        foreach (GuiReactionTemplate grt in cp.CellReactions)
-                        {
-                            if (grt.ReacType == ReactionType.Association)
-                            {
-                                double k1plus = 2.0;
-                                cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species], 
-                                                                            cell.Cytosol.Populations[grt.listOfReactants[1].species], 
-                                                                            cell.Cytosol.Populations[grt.listOfProducts[0].species], 
-                                                                            k1plus));
-                            }
-                            else if (grt.ReacType == ReactionType.Dissociation)
-                            {
-                                double k1minus = 1;
-                                cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species],
-                                                                            cell.Cytosol.Populations[grt.listOfProducts[0].species], 
-                                                                            cell.Cytosol.Populations[grt.listOfProducts[1].species],
-                                                                            k1minus));
-                            }
-                            else if (grt.ReacType == ReactionType.Dimerization)
-                            {
-                                cell.Cytosol.Reactions.Add(new Dimerization(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.DimerDissociation)
-                            {
-                                cell.Cytosol.Reactions.Add(new DimerDissociation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.Transformation)
-                            {
-                                cell.Cytosol.Reactions.Add(new Transformation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
-                            {
-                                cell.Cytosol.Reactions.Add(new AutocatalyticTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedAssociation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedAssociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfReactants[1].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedDimerization)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedDimerization(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedDimerDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedDissociation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], cell.Cytosol.Populations[grt.listOfProducts[1].species], grt.RateConst));                            
-                            }
-                            else if (grt.ReacType == ReactionType.CatalyzedTransformation)
-                            {
-                                cell.Cytosol.Reactions.Add(new CatalyzedTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
-                            }
-                        }
-                    }
+            ////////        //CELL REACTIONS
+            ////////        if (cp.CellReactions != null)
+            ////////        {
+            ////////            foreach (GuiReactionTemplate grt in cp.CellReactions)
+            ////////            {
+            ////////                if (grt.ReacType == ReactionType.Association)
+            ////////                {
+            ////////                    double k1plus = 2.0;
+            ////////                    cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species], 
+            ////////                                                                cell.Cytosol.Populations[grt.listOfReactants[1].species], 
+            ////////                                                                cell.Cytosol.Populations[grt.listOfProducts[0].species], 
+            ////////                                                                k1plus));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.Dissociation)
+            ////////                {
+            ////////                    double k1minus = 1;
+            ////////                    cell.Cytosol.Reactions.Add(new Association( cell.Cytosol.Populations[grt.listOfReactants[0].species],
+            ////////                                                                cell.Cytosol.Populations[grt.listOfProducts[0].species], 
+            ////////                                                                cell.Cytosol.Populations[grt.listOfProducts[1].species],
+            ////////                                                                k1minus));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.Dimerization)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new Dimerization(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.DimerDissociation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new DimerDissociation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.Transformation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new Transformation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new AutocatalyticTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedAssociation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedAssociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfReactants[1].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedDimerization)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedDimerization(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedDimerDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedDissociation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], cell.Cytosol.Populations[grt.listOfProducts[1].species], grt.RateConst));                            
+            ////////                }
+            ////////                else if (grt.ReacType == ReactionType.CatalyzedTransformation)
+            ////////                {
+            ////////                    cell.Cytosol.Reactions.Add(new CatalyzedTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+            ////////                }
+            ////////            }
+            ////////        }
 
-                    if (cell.Cytosol.Populations.ContainsKey("driver"))
-                    {
-                        MolecularPopulation driver = driver = cell.Cytosol.Populations["driver"];
-                        cell.Locomotor = new Locomotor(driver, transductionConstant);
-                    }
+            ////////        if (cell.Cytosol.Populations.ContainsKey("driver"))
+            ////////        {
+            ////////            MolecularPopulation driver = driver = cell.Cytosol.Populations["driver"];
+            ////////            cell.Locomotor = new Locomotor(driver, transductionConstant);
+            ////////        }
 
-                    sim.AddCell(cell);
+            ////////        sim.AddCell(cell);
 
-                }
-            }
+            ////////    }
+            ////////}
 
-            // ADD ECS MOLECULAR POPULATIONS
+            ////////// ADD ECS MOLECULAR POPULATIONS
 
-            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
+            ////////// Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+            ////////// Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+            ////////// 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
 
-            foreach (GuiMolecularPopulation gmp in scenario.MolPops)
-            {
-                if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                {
-                    MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
-                    double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                    double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
+            ////////foreach (GuiMolecularPopulation gmp in scenario.MolPops)
+            ////////{
+            ////////    if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            ////////    {
+            ////////        MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
+            ////////        double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
+            ////////        double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
 
-                    center[0] = extent[0] / 2.0;
-                    center[1] = extent[1] / 2.0;
-                    center[2] = extent[2] / 2.0;
+            ////////        center[0] = extent[0] / 2.0;
+            ////////        center[1] = extent[1] / 2.0;
+            ////////        center[2] = extent[2] / 2.0;
 
-                    // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-                    Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
-                    sim.ECS.Space.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
-                    sim.ECS.Space.Populations[mol.Name].IsDiffusing = false;
-                }
-            }
+            ////////        // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            ////////        Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
+            ////////        sim.ECS.Space.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
+            ////////        sim.ECS.Space.Populations[mol.Name].IsDiffusing = false;
+            ////////    }
+            ////////}
 
-            // ADD ECS REACTIONS
-            foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
-            {
-                MolecularPopulation receptor, ligand, complex;
-                double k1plus = 2.0, k1minus = 1;
+            ////////// ADD ECS REACTIONS
+            ////////foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
+            ////////{
+            ////////    MolecularPopulation receptor, ligand, complex;
+            ////////    double k1plus = 2.0, k1minus = 1;
                 
-                foreach (GuiReactionTemplate grt in scenario.Reactions)
-                {
-                    if (grt.ReacType == ReactionType.BoundaryAssociation || grt.ReacType == ReactionType.BoundaryDissociation)
-                    {
-                        GuiBoundaryReactionTemplate gbrt = (GuiBoundaryReactionTemplate)grt;
+            ////////    foreach (GuiReactionTemplate grt in scenario.Reactions)
+            ////////    {
+            ////////        if (grt.ReacType == ReactionType.BoundaryAssociation || grt.ReacType == ReactionType.BoundaryDissociation)
+            ////////        {
+            ////////            GuiBoundaryReactionTemplate gbrt = (GuiBoundaryReactionTemplate)grt;
                         
-                        receptor = kvp.Value.PlasmaMembrane.Populations[gbrt.receptor.species];
-                        ligand = sim.ECS.Space.Populations[gbrt.ligand.species];
-                        complex = kvp.Value.PlasmaMembrane.Populations[gbrt.complex.species];
+            ////////            receptor = kvp.Value.PlasmaMembrane.Populations[gbrt.receptor.species];
+            ////////            ligand = sim.ECS.Space.Populations[gbrt.ligand.species];
+            ////////            complex = kvp.Value.PlasmaMembrane.Populations[gbrt.complex.species];
 
-                        if (grt.ReacType == ReactionType.BoundaryAssociation)
-                        {
-                            sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-                        }
-                        else
-                        {
-                            sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
-                        }
-                    }
-                    else if (grt.ReacType == ReactionType.Association)
-                    {
-                        sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
-                                                                    sim.ECS.Space.Populations[grt.listOfReactants[1].species],
-                                                                    sim.ECS.Space.Populations[grt.listOfProducts[0].species],
-                                                                    k1plus));
-                    }
-                    else if (grt.ReacType == ReactionType.Dissociation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
-                                                                    sim.ECS.Space.Populations[grt.listOfProducts[0].species],
-                                                                    sim.ECS.Space.Populations[grt.listOfProducts[1].species],
-                                                                    k1minus));
-                    }
-                    else if (grt.ReacType == ReactionType.Annihilation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new Annihilation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.Dimerization)
-                    {
-                        sim.ECS.Space.Reactions.Add(new Dimerization(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.DimerDissociation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new DimerDissociation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.Transformation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new Transformation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new AutocatalyticTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedAssociation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedAssociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfReactants[1].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedDimerization)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedDimerization(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedDimerDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedDissociation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], sim.ECS.Space.Populations[grt.listOfProducts[1].species], grt.RateConst));
-                    }
-                    else if (grt.ReacType == ReactionType.CatalyzedTransformation)
-                    {
-                        sim.ECS.Space.Reactions.Add(new CatalyzedTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
-                    }
+            ////////            if (grt.ReacType == ReactionType.BoundaryAssociation)
+            ////////            {
+            ////////                sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+            ////////            }
+            ////////            else
+            ////////            {
+            ////////                sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+            ////////            }
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.Association)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
+            ////////                                                        sim.ECS.Space.Populations[grt.listOfReactants[1].species],
+            ////////                                                        sim.ECS.Space.Populations[grt.listOfProducts[0].species],
+            ////////                                                        k1plus));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.Dissociation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new Association(sim.ECS.Space.Populations[grt.listOfReactants[0].species],
+            ////////                                                        sim.ECS.Space.Populations[grt.listOfProducts[0].species],
+            ////////                                                        sim.ECS.Space.Populations[grt.listOfProducts[1].species],
+            ////////                                                        k1minus));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.Annihilation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new Annihilation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.Dimerization)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new Dimerization(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.DimerDissociation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new DimerDissociation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.Transformation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new Transformation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.AutocatalyticTransformation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new AutocatalyticTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedAssociation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedAssociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfReactants[1].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedAnnihilation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedDimerization)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedDimerization(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedDimerDissociation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedDimerDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedDissociation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], sim.ECS.Space.Populations[grt.listOfProducts[1].species], grt.RateConst));
+            ////////        }
+            ////////        else if (grt.ReacType == ReactionType.CatalyzedTransformation)
+            ////////        {
+            ////////            sim.ECS.Space.Reactions.Add(new CatalyzedTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+            ////////        }
 
-                }
-            }
+            ////////    }
+            ////////}
 
             double T = 100;   // minutes
             double dt = 0.01;  //0.01;
