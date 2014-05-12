@@ -12,9 +12,11 @@ namespace Daphne
     public class Terminator
     {
         static private Troschuetz.Random.MT19937Generator gen;
+        static private Troschuetz.Random.ContinuousUniformDistribution uniGen;
         static Terminator()
         {
             gen = new MT19937Generator();
+            uniGen = new ContinuousUniformDistribution(gen);
         }
         /// <summary>
         /// Constructor. Sets the death flag to zero and initializes the signaling components.
@@ -53,7 +55,7 @@ namespace Daphne
         /// <param name="dt">The time interval for the evolution (double).</param>
         public void Step(double dt)
         {
-            if (gen.Next() < dt * (Alpha + Beta * SignalingMolecule.Conc.MeanValue()))
+            if (uniGen.NextDouble() < dt * (Alpha + Beta * SignalingMolecule.Conc.MeanValue()))
             {
                 Flag = 1;
             }
