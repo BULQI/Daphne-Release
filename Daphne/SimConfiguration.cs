@@ -2347,15 +2347,16 @@ namespace Daphne
         public int CurrentState { get; set; }
         public string StateName { get; set; }
         
-        public ObservableCollection<ConfigTransitionDriverElement> DriverElements { get; set; }
-        //public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
+        //public ObservableCollection<ConfigTransitionDriverElement> DriverElements { get; set; }
+        public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
         //public ObservableCollection<string> states;
 
         public ConfigTransitionDriver()
         {
             Guid id = Guid.NewGuid();
             driver_guid = id.ToString();
-            DriverElements = new ObservableCollection<ConfigTransitionDriverElement>();
+            //DriverElements = new ObservableCollection<ConfigTransitionDriverElement>();
+            DriverElements = new ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>>();
         }
     }
 
@@ -2382,7 +2383,7 @@ namespace Daphne
         public string Name { get; set; }
 
         //For regulators
-        public ObservableCollection<ConfigTransitionDriver> Drivers { get; set; }
+        public ConfigTransitionDriver Driver { get; set; }
    
         //For epigenetic map
         //TBD
@@ -2391,7 +2392,6 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             diff_scheme_guid = id.ToString();
-            Drivers = new ObservableCollection<ConfigTransitionDriver>();
         }
     }
 
