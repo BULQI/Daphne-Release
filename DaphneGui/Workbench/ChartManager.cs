@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using DaphneGui;
+using Daphne;
 
 namespace Workbench
 {
@@ -115,7 +116,8 @@ namespace Workbench
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
             {
                 y = entry.Value.ToArray();
-                drawSeries(x, y, chartArear1, TitleXY, entry.Key, count, DrawLine);
+                string molname = ConvertMolGuidToMolName(entry.Key);  // MainWindow.SC.SimConfig.entity_repository.molecules_dict[entry.Key].Name;
+                drawSeries(x, y, chartArear1, TitleXY, /*entry.Key*/molname, count, DrawLine);
                 count++;
             }
             //**********
@@ -289,7 +291,25 @@ namespace Workbench
             return max;
         }
 
-        
+        private string ConvertMolGuidToMolName(string guid)
+        {
+            string ret = "";
+            if (MainWindow.SC.SimConfig.entity_repository.molecules_dict.ContainsKey(guid))
+                ret = MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].Name;
+            return ret;
+        }
+
+        private string ConvertMolNameToMolGuid(string name)
+        {
+            string ret = "";
+            foreach (KeyValuePair<string, ConfigMolecule> kvp in MainWindow.SC.SimConfig.entity_repository.molecules_dict)
+            {
+                if (kvp.Value.Name == name)
+                    return kvp.Key;
+            }
+            return ret;
+        }
+
         private void cChart_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             HitTestResult result = cChart.HitTest(e.X, e.Y);
@@ -400,7 +420,10 @@ namespace Workbench
                 if (valu > 0)
                 {
                     ToolWin.txtMouseHover.Text = valu.ToString("#.00000");
-                    ToolWin.RC.EditConc(SeriesToDrag.Name, valu);
+
+                    string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
+                    ToolWin.RC.EditConc(guid, valu);
+                    //ToolWin.RC.EditConc(SeriesToDrag.Name, valu);
                     RedrawSeries();
                 }
             }
@@ -500,7 +523,7 @@ namespace Workbench
                     if (dist < lowest)
                     {
                         lowest = dist;
-                        seriesName = entry.Key;
+                        seriesName = ConvertMolGuidToMolName(entry.Key);
                         s = cChart.Series.FindByName(seriesName);
                     }
                     //break;
@@ -527,7 +550,8 @@ namespace Workbench
                 foreach (Series s in cChart.Series)
                 {
                     s.Points.Clear();
-                    List<double> values = DictConcs[s.Name];
+                    string guid = ConvertMolNameToMolGuid(s.Name);
+                    List<double> values = DictConcs[guid];
                     y = values.ToArray();
 
                     int n = x.Count() <= y.Count() ? x.Count() : y.Count();

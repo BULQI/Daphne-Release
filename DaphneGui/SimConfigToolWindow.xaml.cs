@@ -1430,6 +1430,18 @@ namespace DaphneGui
             cp.number = cp.cell_locations.Count;
         }
 
+        private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
+            string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+            if (guid.Length > 0)
+            {
+                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+                gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
+            }
+        }
+
         static DataGridCell TryToFindGridCell(DataGrid grid, DataGridCellInfo cellInfo)
         {
             DataGridCell result = null;

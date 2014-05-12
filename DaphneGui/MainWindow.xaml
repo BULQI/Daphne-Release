@@ -314,7 +314,7 @@
 
             <docking:SplitContainer x:Name="SimConfigSplitContainer">
                 <!-- Sim Config Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="520,1" x:Name="leftTWContainer">
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
                     <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Sim Setup" />
                 </docking:ToolWindowContainer>
 

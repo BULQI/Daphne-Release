@@ -122,6 +122,7 @@ namespace Daphne
         // NOTE: These could be moved to entity_repository...
         [XmlIgnore]
         public Dictionary<string, BoxSpecification> box_guid_box_dict;
+        
         [XmlIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
 
@@ -144,7 +145,7 @@ namespace Daphne
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
+            box_guid_box_dict = new Dictionary<string, BoxSpecification>();            
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();   
         }
 
@@ -215,6 +216,7 @@ namespace Daphne
             // GenerateNewExperimentGUID();
             FindNextSafeCellPopulationID();
             InitBoxExtentsAndGuidBoxDict();
+            InitGaussSpecsAndGuidGaussDict();
             InitCellPopulationIDCellPopulationDict();
             InitMoleculeIDConfigMoleculeDict();
             InitCellIDConfigCellDict();
@@ -260,6 +262,15 @@ namespace Daphne
                 SetBoxSpecExtents(bs);
             }
             entity_repository.box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
+        }
+        private void InitGaussSpecsAndGuidGaussDict()
+        {
+            entity_repository.gauss_guid_gauss_dict.Clear();
+            foreach (GaussianSpecification gs in entity_repository.gaussian_specifications)
+            {
+                entity_repository.gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
+            }
+            entity_repository.gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
         }
 
         private void InitCellPopulationIDCellPopulationDict()
@@ -346,6 +357,26 @@ namespace Daphne
                 {
                     BoxSpecification bs = dd as BoxSpecification;
                     box_guid_box_dict.Remove(bs.box_guid);
+                }
+            }
+        }
+
+        private void gaussian_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    GaussianSpecification gs = nn as GaussianSpecification;
+                    entity_repository.gauss_guid_gauss_dict.Add(gs.gauss_spec_guid, gs);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    GaussianSpecification gs = dd as GaussianSpecification;
+                    entity_repository.gauss_guid_gauss_dict.Remove(gs.gauss_spec_guid);
                 }
             }
         }
@@ -568,6 +599,7 @@ namespace Daphne
         public Dictionary<string, ConfigReaction> reactions_dict;
         public Dictionary<string, ConfigCell> cells_dict;
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
+        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
 
         public EntityRepository()
         {
@@ -583,6 +615,7 @@ namespace Daphne
             cells_dict = new Dictionary<string, ConfigCell>();
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
+            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
         }
         
     }
@@ -1898,6 +1931,41 @@ namespace Daphne
     /// and molecule names kept in the repository of molecules.
     /// </summary>
     [ValueConversion(typeof(string), typeof(string))]
+    public class CellGUIDtoCellNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string cell_name = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigCell> cell_list = cvs.Source as ObservableCollection<ConfigCell>;
+            if (cell_list != null)
+            {
+                foreach (ConfigCell cel in cell_list)
+                {
+                    if (cel.cell_guid == guid)
+                    {
+                        cell_name = cel.CellName;
+                        break;
+                    }
+                }
+            }
+            return cell_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
     public class ReactionGUIDtoReactionStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2260,6 +2328,7 @@ namespace Daphne
         public string box_guid { get; set; }
         public double[][] transform_matrix { get; set; }
         private bool _box_visibility = true;
+        private bool _blob_visibility = true;
         
         // Range values calculated based on environment extents
         private double _x_trans_max;
@@ -2494,6 +2563,20 @@ namespace Daphne
                 {
                     _box_visibility = value;
                     OnPropertyChanged("box_visibility");
+                }
+            }
+        }
+        public bool blob_visibility
+        {
+            get { return _blob_visibility; }
+            set
+            {
+                if (_blob_visibility == value)
+                    return;
+                else
+                {
+                    _blob_visibility = value;
+                    OnPropertyChanged("blob_visibility");
                 }
             }
         }
@@ -2820,6 +2903,39 @@ namespace Daphne
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Convert Reporter enum to boolean
+    /// </summary>
+    [ValueConversion(typeof(ExtendedReport), typeof(bool))]
+    public class RptEnumBooleanConverter : IValueConverter
+    {
+        #region IValueConverter Members
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+                return DependencyProperty.UnsetValue;
+
+            object parameterValue = Enum.Parse(value.GetType(), parameterString);
+
+            bool ret = parameterValue.Equals(value);
+            return ret;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            return Enum.Parse(targetType, parameterString);
+        }
+        #endregion
     }
 
     /// <summary>
