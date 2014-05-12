@@ -2272,6 +2272,7 @@ namespace Daphne
             reaction_guid = id.ToString();
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
+            daph_rate_const = new DaphneDouble();
             rate_const = reac.rate_const;
             ReadOnly =false;
 

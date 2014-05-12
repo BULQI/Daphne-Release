@@ -3,7 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daphne", "Daphne\Daphne.csproj", "{B88B4859-8E76-41ED-AA84-6B48A90EA338}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B} = {A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}
 		{621278E2-936D-4F67-B2B2-B4E2705DE5BA} = {621278E2-936D-4F67-B2B2-B4E2705DE5BA}
 		{858658F6-6BD4-4009-A49D-AB893B266755} = {858658F6-6BD4-4009-A49D-AB893B266755}
 	EndProjectSection
@@ -27,6 +26,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaphneGui", "DaphneGui\Daph
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SBMLayer", "SBMLayer\SBMLayer.csproj", "{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B88B4859-8E76-41ED-AA84-6B48A90EA338} = {B88B4859-8E76-41ED-AA84-6B48A90EA338}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution

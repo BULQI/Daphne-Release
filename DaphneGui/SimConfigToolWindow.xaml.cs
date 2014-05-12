@@ -2385,6 +2385,7 @@ namespace DaphneGui
         private void TabItem_Loaded(object sender, RoutedEventArgs e)
         {
             lbRptCellPops.SelectedIndex = 0;
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
