@@ -2907,13 +2907,28 @@ namespace DaphneGui
 
         }
 
-        private void GeneAddMolButton_Click(object sender, RoutedEventArgs e)
+        private void NucleusAddGeneButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void GeneRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+
+            if (gene_guid == "")
+                return;
+
+            MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.No)
+                return;
+
+            if (cell.genes_guid_ref.Contains(gene_guid))
+            {
+                cell.genes_guid_ref.Remove(gene_guid);
+            }
         }
 
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
@@ -2931,7 +2946,7 @@ namespace DaphneGui
             DiffRegGrid.Columns.Clear();
 
             //if cell does not have a diff scheme, return
-            if (cell.diff_scheme_guid_ref == "")
+            if (cell.diff_scheme_guid_ref == "" || cell.diff_scheme == null)
                 return;
 
             //Get the diff_scheme using the guid
@@ -3871,25 +3886,37 @@ namespace DaphneGui
             //Don't want to do anything when first display this combo box
             //Only do something if user really clicked and selected a different scheme
 
-            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            //    return;
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+                return;
 
             ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
             if (cell == null)
                 return;
 
             ComboBox combo = sender as ComboBox;
-            ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-            //if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
-            //    return;
+            if (combo.SelectedIndex == -1)
+                return;
 
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-
-            if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
+            if (combo.SelectedIndex == 0)
             {
-                cell.diff_scheme = er.diff_schemes_dict[diffNew.diff_scheme_guid].Clone();
+                cell.diff_scheme = null;
+                cell.diff_scheme_guid_ref = "";
+                combo.Text = "None";
             }
+            else
+            {
+                ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+                EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
+                {
+                    cell.diff_scheme_guid_ref = diffNew.diff_scheme_guid;
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.diff_scheme_guid].Clone();
+                }
+            }
+            int nIndex = CellsListBox.SelectedIndex;
+            CellsListBox.SelectedIndex = -1;
+            CellsListBox.SelectedIndex = nIndex;
         }
 
         private void chkHasDeathDriver_Click(object sender, RoutedEventArgs e)
@@ -3910,7 +3937,7 @@ namespace DaphneGui
                     EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                     //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
                     cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
-                    if (cell.death_driver_guid_ref == null)
+                    if (cell.death_driver_guid_ref == "")
                     {
                         MessageBox.Show("No death drivers are defined");
                         return;
@@ -3941,7 +3968,7 @@ namespace DaphneGui
                     EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                     //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
                     cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
-                    if (cell.div_driver_guid_ref == null)
+                    if (cell.div_driver_guid_ref == "")
                     {
                         MessageBox.Show("No division drivers are defined");
                         return;

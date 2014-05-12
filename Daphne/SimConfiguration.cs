@@ -2001,7 +2001,7 @@ namespace Daphne
             bool bResult = true;
             string guid = value as string;
 
-            if (guid == "" || guid == null)
+            if (guid == "")
             {
                 bResult = false;
             }
@@ -2039,6 +2039,28 @@ namespace Daphne
             ConfigTransitionDriver ds = null;
 
             return ds;
+        }
+    }
+
+    public class DiffSchemeToDiffNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string name = "";
+            ConfigDiffScheme scheme = value as ConfigDiffScheme;
+
+            if (scheme != null)
+            {
+                name = scheme.Name;
+            }
+
+            return name;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigDiffScheme scheme = null;
+
+            return scheme;
         }
     }
 
@@ -4308,7 +4330,7 @@ namespace Daphne
             string guid = value as string;
             string mol_name = "";
 
-            if (parameter == null || guid == null)
+            if (parameter == null || guid == "")
                 return mol_name;
 
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
@@ -4460,7 +4482,7 @@ namespace Daphne
         {
             string guid = value as string;
 
-            if (guid == null || guid.Length == 0)
+            if (guid == "")
                 return null;
 
             ConfigGene thisGene = null;
@@ -4742,7 +4764,7 @@ namespace Daphne
             ConfigMolecularPopulation MyMolPop = null;
             string mol_guid = "";
 
-            if (death_guid == "" || death_guid == null)
+            if (death_guid == "" || death_guid == "")
                 return mol_guid;
 
             if (drivers != null)
@@ -4803,7 +4825,7 @@ namespace Daphne
             string guid = value as string;
             string diff_name = "";
 
-            if (parameter == null || guid == null)
+            if (parameter == null || guid == "")
                 return diff_name;
 
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
@@ -4838,7 +4860,7 @@ namespace Daphne
             ConfigCompartment cc =parameter as ConfigCompartment;
             ConfigMolecularPopulation MyMolPop = null;
 
-            if (driver_mol_guid == null || cc == null || driver_mol_guid.Length == 0)
+            if (driver_mol_guid == "" || cc == null)
                 return MyMolPop;
 
             foreach (ConfigMolecularPopulation molpop in cc.molpops)
@@ -4873,7 +4895,7 @@ namespace Daphne
             string driver_mol_guid = value as string;
             bool enabled = true;
 
-            if (driver_mol_guid == null || driver_mol_guid.Length == 0)
+            if (driver_mol_guid == "")
                 enabled = false;
             
             return enabled;
@@ -4899,7 +4921,7 @@ namespace Daphne
 
             ConfigMolecularPopulation MyMolPop = null;
 
-            if (driver_mol_guid == null || cc == null)
+            if (driver_mol_guid == "" || cc == null)
                 return MyMolPop;
             
             foreach (ConfigMolecularPopulation molpop in cc.molpops)
@@ -5200,7 +5222,7 @@ namespace Daphne
         {
             string guid = value as string;
 
-            if (guid == null)
+            if (guid == "")
                 return null;
 
             ConfigReactionComplex rcReturn = null;

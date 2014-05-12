@@ -171,7 +171,7 @@ namespace DaphneGui
             cr.rate_const = inputRateConstant;
 
             cr.reaction_template_guid_ref = IdentifyReactionType();
-            if (cr.reaction_template_guid_ref == null)
+            if (cr.reaction_template_guid_ref == "")
             {
                 string msg = string.Format("Unsupported reaction.");
                 MessageBox.Show(msg);
@@ -186,7 +186,7 @@ namespace DaphneGui
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
-                if (guid == null)  //this should never happen
+                if (guid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
@@ -211,7 +211,7 @@ namespace DaphneGui
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
-                if (guid == null)  //this should never happen
+                if (guid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
@@ -236,7 +236,7 @@ namespace DaphneGui
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
-                if (guid == null)  //this should never happen
+                if (guid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
@@ -417,7 +417,7 @@ namespace DaphneGui
         private bool ValidateMoleculeName(string sMol)
         {
             string molGuid = findMoleculeGuidByName(sMol);
-            if (molGuid == null)
+            if (molGuid == "")
             {
                 string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", sMol);
                 MessageBox.Show(msg);

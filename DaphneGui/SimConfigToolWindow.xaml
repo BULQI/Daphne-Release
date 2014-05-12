@@ -66,6 +66,7 @@
 
             <daph:GuidToBoolConverter x:Key="GuidToBoolConv" />
             <daph:TransitionDriverToBoolConverter x:Key="TransitionDriverToBoolConv" />
+            <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1371,7 +1372,8 @@
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="differentiator" Margin="6,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox x:Name="txtCellDiff" Width="120" IsEnabled="False" IsReadOnly="True" Text="{Binding Path=diff_scheme.Name, Mode=OneWay}" />
+                            <TextBox x:Name="txtCellDiff" Width="120" IsEnabled="False" IsReadOnly="True" 
+                                     Text="{Binding Path=diff_scheme, Mode=OneWay, Converter={StaticResource DiffSchemeToDiffNameConv}}" />
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
@@ -1385,12 +1387,24 @@
                                 Width="Auto"
                                 Visibility="Visible"
                                 >
-                                
+
+
+                                <!--ItemsSource="{Binding Source={StaticResource diffSchemesListView}}"-->
+                                                                
                                 <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
-                                       ItemsSource="{Binding Source={StaticResource diffSchemesListView}}"
-                                       DisplayMemberPath="Name"
-                                       SelectionChanged="cbCellDiffSchemes_SelectionChanged"
-                                       />
+                                        DisplayMemberPath="Name"
+                                        SelectedValue="{Binding Path=diff_scheme_guid_ref}"
+                                        SelectedValuePath="diff_scheme_guid"
+                                        SelectionChanged="cbCellDiffSchemes_SelectionChanged"
+                                        >
+                                        <ComboBox.ItemsSource>
+                                            <CompositeCollection>
+                                                <ComboBoxItem>None</ComboBoxItem>
+                                                <CollectionContainer Collection="{Binding Source={StaticResource diffSchemesListView}}" />
+                                            </CompositeCollection>
+                                        </ComboBox.ItemsSource>
+
+                                </ComboBox>
                             </Expander>
                             
                         </StackPanel>
@@ -3365,7 +3379,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="btnCopyGene"  Width="50" Content="Copy" Click="btnCopyGene_Click"></Button>
                                 <Button Name="btnAddGene"  Width="50" Content="Add" Click="btnAddGene_Click"></Button>
-                                <!--<Button Name="btnRemoveGene" Width="50" Content="Remove"  Click="btnRemoveGene_Click"></Button>-->
+                                <Button Name="btnRemoveGene" Width="50" Content="Remove"  Click="btnRemoveGene_Click"></Button>
                             </StackPanel>
                         </StackPanel>
 
@@ -3894,8 +3908,8 @@
                                                                     SelectedIndex="-1"
                                                                      SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                                <Button Name="GeneAddMolButton"  Width="50" Content="Add" Click="GeneAddMolButton_Click"/>
-                                                                <Button Name="GeneRemoveMolButton" Width="50" Content="Remove" Click="GeneRemoveMolButton_Click"/>
+                                                                <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click"/>
+                                                                <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click"/>
                                                             </StackPanel>
                                                             <!-- Gene Details-->
                                                             <ContentControl Name="CytoGeneDetails"
@@ -4131,7 +4145,7 @@
                                                            />
                                                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
                                                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
-                                                          ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
+                                                          ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"
                                                           DisplayMemberPath="Name" 
                                                           DropDownOpened="comboDeathMolPop_DropDownOpened"
                                                           SelectionChanged="comboDeathMolPop_SelectionChanged"
@@ -4139,6 +4153,10 @@
                                                           SelectedValuePath="molecule_guid_ref"
                                                           IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"
                                                           >
+
+                                                    <!--ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"-->
+
+                                                    
                                                 </ComboBox>
                                                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
@@ -4184,11 +4202,11 @@
                                                           SelectedValuePath="molecule_guid_ref"
                                                           >
                                                 </ComboBox>
-                                                <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
+                                                <Label Content="Background Division Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDivRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
                                                         Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
 
-                                                <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDiv2" VerticalAlignment="Top" Width="200" />
+                                                <Label Content="Division Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDiv2" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtDivRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
                                                         Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
 
@@ -4292,7 +4310,7 @@
                                                 <!-- DIFFERENTIATION SCHEME -->
                                                 <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
                                                     <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
-                                                        <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" 
+                                                        <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="False"
                                                                 Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.diff_scheme_guid_ref, 
                                                                                 Converter={StaticResource DiffGUIDtoDiffNameConv}, 
                                                                                 ConverterParameter={StaticResource diffSchemesListView}}" >
