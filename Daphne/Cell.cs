@@ -14,6 +14,9 @@ namespace Daphne
     {
         public double[] X;
         public double[] V;
+        public double[] F;
+
+        public static int Dim = 9;
     }
 
     public class Cytosol : Attribute { }
@@ -41,10 +44,6 @@ namespace Daphne
         /// The radius of the cell
         /// </summary>
         private double radius;
-        /// <summary>
-        /// force resulting from pair interaction
-        /// </summary>
-        private double[] pairForce;
 
 
         public Cell(double radius)
@@ -56,7 +55,6 @@ namespace Daphne
             Alive = true;
             Cytokinetic = false;
             this.radius = radius;
-            pairForce = new double[3];
 
             Index = SafeCellIndex++;
         }
@@ -92,10 +90,15 @@ namespace Daphne
             Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
         }
 
-        public void setState(double[] pos, double[] vel)
+        public void setState(double[] s)
         {
-            state.X = pos;
-            state.V = vel;
+            if(s.Length != SpatialState.Dim)
+            {
+                throw new Exception("Cell state length implausible.");
+            }
+            state.X = new double[] { s[0], s[1], s[2] };
+            state.V = new double[] { s[3], s[4], s[5] };
+            state.F = new double[] { s[6], s[7], s[8] };
         }
         
         /// <summary>
@@ -114,10 +117,9 @@ namespace Daphne
         /// <summary>
         /// Returns the force the cell applies to the environment.
         /// </summary>
-        public double[] Force(double dt, double[] position)
+        public double[] Force(double[] position)
         {
             return Locomotor.Force(position);
-           // get { return Locomotor.Force(dt, position); }
         }
 
         /// <summary>
@@ -179,7 +181,7 @@ namespace Daphne
         /// </summary>
         public void resetForce()
         {
-            pairForce[0] = pairForce[1] = pairForce[2] = 0;
+            state.F[0] = state.F[1] = state.F[2] = 0;
         }
 
         /// <summary>
@@ -188,9 +190,9 @@ namespace Daphne
         /// <param name="f"></param>
         public void addForce(double[] f)
         {
-            pairForce[0] += f[0];
-            pairForce[1] += f[1];
-            pairForce[2] += f[2];
+            state.F[0] += f[0];
+            state.F[1] += f[1];
+            state.F[2] += f[2];
         }
 
         // There may be other components specific to a given cell type.

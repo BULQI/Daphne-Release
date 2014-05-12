@@ -151,6 +151,7 @@ namespace Daphne
     {
         private Compartment space;
         private Dictionary<string, int> sides;
+        public double Gamma { get; set; }
 
         public ExtraCellularSpace(int[] numGridPts, double gridStep, IKernel kernel)
         {
@@ -234,6 +235,9 @@ namespace Daphne
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("bottom", r.Id);
+
+            // drag coefficient
+            Gamma = 0;
         }
 
         public Compartment Space

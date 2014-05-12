@@ -20,17 +20,19 @@ namespace Daphne
 
                 if (kvp.Value.IsMotile == true)
                 {
-                    //double[] force = kvp.Value.Force(dt, kvp.Value.State.X);
                     // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                    double[] force = kvp.Value.Force(dt, new double[3] { 0.0, 0.0, 0.0 });
+                    // add the chemotactic force (accumulate it into the force variable)
+                    kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
 
                     // A simple implementation of movement. For testing.
                     for (int i = 0; i < kvp.Value.State.X.Length; i++)
                     {
                         kvp.Value.State.X[i] += kvp.Value.State.V[i] * dt;
-                        kvp.Value.State.V[i] += -1.0 * kvp.Value.State.V[i] + force[i] * dt;
+                        kvp.Value.State.V[i] += (-Simulation.dataBasket.ECS.Gamma * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
                 }
+                // after the cell had its update applied, reset the force for the next simulation step
+                kvp.Value.resetForce();
             }
         }
 

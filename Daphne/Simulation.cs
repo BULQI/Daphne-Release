@@ -429,7 +429,7 @@ namespace Daphne
                                              dataBasket.ECS.Space.Interior.Extent(2) };
 
             // ADD CELLS            
-            double[] cellPos = new double[dataBasket.ECS.Space.Interior.Dim];
+            double[] state = new double[SpatialState.Dim];
             // convenience arrays to save code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             Compartment[] simComp = new Compartment[2];
@@ -444,10 +444,11 @@ namespace Daphne
                 {
                     Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
 
-                    cellPos[0] = cp.cell_locations[i].X;
-                    cellPos[1] = cp.cell_locations[i].Y;
-                    cellPos[2] = cp.cell_locations[i].Z;
-                    cell.setState(cellPos, new double[] { 0, 0, 0 });
+                    // set location, keep remaining state variables equal to zero
+                    state[0] = cp.cell_locations[i].X;
+                    state[1] = cp.cell_locations[i].Y;
+                    state[2] = cp.cell_locations[i].Z;
+                    cell.setState(state);
 
                     simComp[0] = cell.Cytosol;
                     simComp[1] = cell.PlasmaMembrane;

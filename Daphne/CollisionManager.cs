@@ -414,14 +414,6 @@ namespace Daphne
             }
         }
 
-        private void resetCellForces()
-        {
-            foreach (KeyValuePair<int, Cell> kvpc in Simulation.dataBasket.Cells)
-            {
-                kvpc.Value.resetForce();
-            }
-        }
-
         private void pairInteractions(double dt)
         {
             foreach (KeyValuePair<int, Pair> kvp in pairs)
@@ -446,8 +438,6 @@ namespace Daphne
         {
             // update cell locations in the grid tiles and update pairs
             updateGridAndPairs();
-            // reset the cell forces
-            resetCellForces();
             // handle all pairs and find the forces
             pairInteractions(dt);
         }
@@ -459,7 +449,6 @@ namespace Daphne
         public void updateIntermediateRK(double dt)
         {
             updateExistingPairs();
-            resetCellForces();
             pairInteractionsIntermediateRK(dt);
         }
 #endif

@@ -437,8 +437,7 @@ namespace testDaphne
             
             // Create Cells
             //
-            double[] cellPos = new double[3],
-                     veloc = new double[3] { 0.0, 0.0, 0.0 },
+            double[] state = new double[SpatialState.Dim],
                      extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
@@ -447,10 +446,11 @@ namespace testDaphne
             // One cell
             Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
 
-            cellPos[0] = extent[0] / 2.0;
-            cellPos[1] = extent[1] / 2.0;
-            cellPos[2] = extent[2] / 2.0;
-            cell.setState(cellPos, veloc);
+            // set location; keep remaining state variables equal to zero
+            state[0] = extent[0] / 2.0;
+            state[1] = extent[1] / 2.0;
+            state[2] = extent[2] / 2.0;
+            cell.setState(state);
             sim.AddCell(cell);
 
             //
@@ -597,7 +597,7 @@ namespace testDaphne
 
             // Create Cells
             //
-            double[] cellPos = new double[Simulation.dataBasket.ECS.Space.Interior.Dim],
+            double[] state = new double[SpatialState.Dim],
                      extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
                                              Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
@@ -606,10 +606,11 @@ namespace testDaphne
             // One cell
             Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
 
-            cellPos[0] = extent[0] / 3.0;
-            cellPos[1] = extent[1] / 3.0;
-            cellPos[2] = extent[2] / 3.0;
-            cell.setState(cellPos, new double[] { 0, 0, 0 });
+            // set position; keep remaining state variable equal to zero
+            state[0] = extent[0] / 3.0;
+            state[1] = extent[1] / 3.0;
+            state[2] = extent[2] / 3.0;
+            cell.setState(state);
             sim.AddCell(cell);
 
             //
