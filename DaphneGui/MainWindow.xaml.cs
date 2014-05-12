@@ -2213,7 +2213,7 @@ namespace DaphneGui
             Cell selectedCell = Simulation.dataBasket.Cells[cellID];
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
-            labelMolConcs.Content = labelMolConcs.Content + cellID.ToString();
+            txtCellId.Content = cellID.ToString();
 
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
