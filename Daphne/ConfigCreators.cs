@@ -599,11 +599,6 @@ namespace Daphne
 
             sc.entity_repository.cells.Add(gc);
 
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.cells, Newtonsoft.Json.Formatting.Indented, Settings);
         }
 
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
@@ -710,12 +705,6 @@ namespace Daphne
             cm = new ConfigMolecule("gCXCR4", 1.0, 1.0, 1e-7);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.molecules, Newtonsoft.Json.Formatting.Indented, Settings);
         }
 
         //Following function needs to be called only once
@@ -1000,11 +989,6 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
             
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.reaction_templates, Newtonsoft.Json.Formatting.Indented, Settings);
         }
 
         // given a molecule name and location, find its guid
@@ -1429,11 +1413,6 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
 
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(sc.entity_repository.reactions, Newtonsoft.Json.Formatting.Indented, Settings);
         }
 
         private static void PredefinedReactionComplexesCreator(SimConfiguration sc)
