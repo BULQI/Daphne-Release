@@ -1498,10 +1498,19 @@ namespace Daphne
                     return;
                 else
                 {
+                    int saveValue = _extent_x;
                     _extent_x = value;
-                    CalculateNumGridPts();
-                    OnPropertyChanged("extent_x");
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("extent_x");
+                    }
+                    else
+                    {
+                        _extent_x = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
                 }
+            
             }
         }
         public int extent_y
@@ -1513,9 +1522,17 @@ namespace Daphne
                     return;
                 else
                 {
+                    int saveValue = _extent_y;
                     _extent_y = value;
-                    CalculateNumGridPts();
-                    OnPropertyChanged("extent_y");
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("extent_y");
+                    }
+                    else
+                    {
+                        _extent_y = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
                 }
             }
         }
@@ -1528,9 +1545,17 @@ namespace Daphne
                     return;
                 else
                 {
+                    int saveValue = _extent_z;
                     _extent_z = value;
-                    CalculateNumGridPts();
-                    OnPropertyChanged("extent_z");
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("extent_z");
+                    }
+                    else
+                    {
+                        _extent_z = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
                 }
             }
         }
@@ -1543,9 +1568,17 @@ namespace Daphne
                     return;
                 else
                 {
+                    double saveValue = _gridstep;
                     _gridstep = value;
-                    CalculateNumGridPts();
-                    OnPropertyChanged("gridstep");
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("gridstep");
+                    }
+                    else
+                    {
+                        _gridstep = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
                 }
             }
         }
@@ -1591,6 +1624,7 @@ namespace Daphne
             initialized = true;
             toroidal = false;
 
+            // Don't need to check the boolean returned, since we know these values are okay.
             CalculateNumGridPts();
 
             ecs = new ConfigCompartment();
@@ -1598,11 +1632,11 @@ namespace Daphne
 
         private bool initialized = false;
         
-        private void CalculateNumGridPts()
+        private bool CalculateNumGridPts()
         {
             if (initialized == false)
             {
-                return;
+                return true;
             }
 
             int[] pt = new int[3];
@@ -1611,10 +1645,16 @@ namespace Daphne
             pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
             pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;
 
-            NumGridPts = pt;
-        }
+            // Must have at least 3 grid points for gradient routines at boundary points
+            if ((pt[0] < 3) || (pt[1] < 3) || (pt[2] < 3))
+            {
+                return false;
+            }
 
-    
+            NumGridPts = pt;
+
+            return true;
+        }
     }
 
     
@@ -3746,7 +3786,10 @@ namespace Daphne
             set 
             { 
                 minDisSquared = value;
-                wallDis = Math.Sqrt(minDisSquared);
+                //// Generally, minDisSquared is the square of the cell diameter.
+                //// Then, center of cell can be one radius from the ECS boundary.
+                // wallDis = Math.Sqrt(minDisSquared) / 2.0;
+                wallDis = 0;
             }
         }
 
@@ -3852,11 +3895,15 @@ namespace Daphne
                 }
                 else
                 {
+                    // Avoid infinite loops. Excessive iterations may indicate the cells density is too high.
                     tries++;
                     if (tries > maxTry)
                     {
-                        // Avoid infinite loops. Excessive iterations may indicate the cells density is too high.
-                        System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Reduce cell density.");
+                        if (CellStates.Count < 1)
+                        {
+                            AddByPosition( new double[] {Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 } );
+                        }
+                        System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellStates.Count + ".");
                         OnPropertyChanged("CellStates");
                         cellPop.number = CellStates.Count;
                         return;
