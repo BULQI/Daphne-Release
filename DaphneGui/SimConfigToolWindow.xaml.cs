@@ -207,6 +207,21 @@ namespace DaphneGui
             MainWindow.GC.Rwc.Invalidate();
         }
 
+        private void DeleteGaussianSpecification(MolPopDistribution dist)
+        {
+            MolPopGaussian mpg = dist as MolPopGaussian;
+            string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+
+            if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+            {
+                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+                MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(gs);
+                MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.Remove(guid);
+                MainWindow.GC.RemoveRegionWidget(guid);
+            }
+
+        }
+
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
@@ -238,88 +253,66 @@ namespace DaphneGui
                 {
                     return;
                 }
-                //else
-                //{
-                    switch (new_dist_type)
-                    {
-                        case MolPopDistributionType.Homogeneous:
-                            MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                            current_item.mp_distribution = shl;
-                            break;
-                        case MolPopDistributionType.Linear:
-                            MolPopLinear slg = new MolPopLinear();
-                            current_item.mp_distribution = slg;
-                            break;
-                        case MolPopDistributionType.Gaussian:
-                            // Make sure there is at least one gauss_spec in repository
-                            ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                            ////{
-                            ////    this.AddGaussianSpecification();
-                            ////}
-                            MolPopGaussian mpg = new MolPopGaussian();                            
-                            ////BoxSpecification box = new BoxSpecification();
-                            ////box.x_scale = 200;
-                            ////box.y_scale = 200;
-                            ////box.z_scale = 200;
-                            ////box.x_trans = 500;
-                            ////box.y_trans = 500;
-                            ////box.z_trans = 500;
-                            ////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
 
-                            ////GaussianSpecification gg = new GaussianSpecification();
-                            ////gg.gaussian_spec_box_guid_ref = box.box_guid;
-                            ////gg.gaussian_spec_name = "On-center gaussian";
-                            ////gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-                            ////gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-                            ////MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
-                            ////mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+                if (new_dist_type != MolPopDistributionType.Gaussian && current_item.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    DeleteGaussianSpecification(current_item.mp_distribution);
+                    MolPopGaussian mpg = current_item.mp_distribution as MolPopGaussian;
+                    mpg.gaussgrad_gauss_spec_guid_ref = "";
+                    MainWindow.GC.Rwc.Invalidate();
+                }
+                switch (new_dist_type)
+                {
+                    case MolPopDistributionType.Homogeneous:
+                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        current_item.mp_distribution = shl;
+                        break;
+                    case MolPopDistributionType.Linear:
+                        MolPopLinear slg = new MolPopLinear();
+                        current_item.mp_distribution = slg;
+                        break;
+                    case MolPopDistributionType.Gaussian:
+                        // Make sure there is at least one gauss_spec in repository
+                        ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                        ////{
+                        ////    this.AddGaussianSpecification();
+                        ////}
+                        MolPopGaussian mpg = new MolPopGaussian();                            
+                            
+                        AddGaussianSpecification(mpg);
+                        current_item.mp_distribution = mpg;
 
-                            //////sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                            ////current_item.mp_distribution = mpg;
+                        break;
+                    case MolPopDistributionType.Custom:
 
-                            ////// Add RegionControl & RegionWidget for the new gauss_spec
-                            ////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-                            ////MainWindow.GC.AddGaussSpecRegionWidget(gg);
-                            ////// Connect the VTK callback
-                            ////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-                            ////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-                            ////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+                        var prev_distribution = current_item.mp_distribution;
+                        MolPopCustom scg = new MolPopCustom();
+                        current_item.mp_distribution = scg;
 
-                            ////MainWindow.GC.Rwc.Invalidate();
-                            AddGaussianSpecification(mpg);
-                            current_item.mp_distribution = mpg;
+                        // Configure open file dialog box
+                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                        dlg.InitialDirectory = MainWindow.appPath;
+                        dlg.DefaultExt = ".txt"; // Default file extension
+                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-                            break;
-                        case MolPopDistributionType.Custom:
+                        // Show open file dialog box
+                        Nullable<bool> result = dlg.ShowDialog();
 
-                            var prev_distribution = current_item.mp_distribution;
-                            MolPopCustom scg = new MolPopCustom();
-                            current_item.mp_distribution = scg;
-
-                            // Configure open file dialog box
-                            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                            dlg.InitialDirectory = MainWindow.appPath;
-                            dlg.DefaultExt = ".txt"; // Default file extension
-                            dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
-
-                            // Show open file dialog box
-                            Nullable<bool> result = dlg.ShowDialog();
-
-                            // Process open file dialog box results
-                            if (result == true)
-                            {
-                                // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                                string filename = dlg.FileName;
-                                scg.custom_gradient_file_string = filename;
-                            }
-                            else
-                            {
-                                current_item.mp_distribution = prev_distribution;
-                            }
-                            break;
-                        default:
-                            throw new ArgumentException("MolPopInfo distribution type out of range");
-                    }
+                        // Process open file dialog box results
+                        if (result == true)
+                        {
+                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                            string filename = dlg.FileName;
+                            scg.custom_gradient_file_string = filename;
+                        }
+                        else
+                        {
+                            current_item.mp_distribution = prev_distribution;
+                        }
+                        break;
+                    default:
+                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                }
                 //}
             }
         }
@@ -1437,8 +1430,11 @@ namespace DaphneGui
             string guid = mpg.gaussgrad_gauss_spec_guid_ref;
             if (guid.Length > 0)
             {
-                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
-                gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
+                if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+                {
+                    GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+                    gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
+                }
             }
         }
 
