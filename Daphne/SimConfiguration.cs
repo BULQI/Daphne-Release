@@ -914,9 +914,21 @@ namespace Daphne
 
         public ConfigCompartment ecs { get; set; }
 
-        public bool toroidal { get; set; }
-
-        
+        private bool _toroidal;
+        public bool toroidal
+        {
+            get { return _toroidal; }
+            set
+            {
+                if (_toroidal == value)
+                    return;
+                else
+                {
+                    _toroidal = value;
+                    OnPropertyChanged("toroidal");
+                }
+            }
+        }
 
         public ConfigEnvironment()
         {
@@ -1347,7 +1359,8 @@ namespace Daphne
         #endregion
     }
 
-    public enum BoundaryType { NoFlux = 0, Toroidal }
+
+    public enum BoundaryType { Zero_Flux = 0, Toroidal }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1356,10 +1369,10 @@ namespace Daphne
     public class BoundaryTypeToShortStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the MoleculeLocation enum...
+        // correspond in length and index with the BoundaryType enum...
         private List<string> _boundary_type_strings = new List<string>()
                                 {
-                                    "no flux",
+                                    "zero flux",
                                     "toroidal"
                                 };
 
@@ -1382,13 +1395,33 @@ namespace Daphne
             return (BoundaryType)Enum.ToObject(typeof(BoundaryType), (int)idx);
         }
     }
+    
+    [ValueConversion(typeof(bool), typeof(int))]
+    public class BoolToIndexConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return 0;
+
+            return ((bool)value == true) ? 1 : 0;   
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return ((int)value == 1) ? true : false;
+        }
+    }
+
+
+
 
     public enum BoundaryFace {None=0, X, Y, Z }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
-    [ValueConversion(typeof(BoundaryType), typeof(string))]
+    [ValueConversion(typeof(BoundaryFace), typeof(string))]
     public class BoundaryFaceToShortStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 

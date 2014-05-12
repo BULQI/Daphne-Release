@@ -55,6 +55,8 @@
             <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
             <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
             <daph:IsNullConverter x:Key="IsNullConv" />
+            <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
+            
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1956,120 +1958,137 @@
                                                     
                                 <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
                             </StackPanel>
-                            <StackPanel  Grid.Column="0" Grid.Row="4">
-                                <TextBlock Text="impose gradient" Margin="0,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
-                                <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
-                                           Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100">
+
+
+                            <StackPanel Grid.Column="0" Grid.Row="4">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <StackPanel  >
+                                    <TextBlock Text="impose gradient" Margin="0,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,-4">
+                                    <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
+                                               Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
+                                               Width="100">
                                     
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                    
-                                </TextBlock>
-                                <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
-                                           ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
-                                           SelectedValue="{Binding Path=boundary_face}" 
-                                           SelectionChanged="cbBoundFace_SelectionChanged">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
-                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
-                                    
-                                </ComboBox>
-                            </StackPanel>
-                            <StackPanel Grid.Column="0" Grid.Row="6" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
-                                <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
-                                           HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="160"/>
-                            </StackPanel>
-                            <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
-                                <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
-                                                    <Setter Property="Text" Value="x=0"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
-                                                    <Setter Property="Text" Value="y=0"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
-                                                    <Setter Property="Text" Value="z=0"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1}">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
-                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                                
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </StackPanel>
-                            <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
-                                    <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
                                         <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
-                                                    <Setter Property="Text" Value="{Binding ElementName=extent_x_slider, Path=Value, StringFormat='x={0}'}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
-                                                    <Setter Property="Text" Value="{Binding ElementName=extent_y_slider, Path=Value, StringFormat='y={0}'}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
-                                                    <Setter Property="Text" 
-                                                            Value="{Binding ElementName=extent_z_slider, Path=Value, StringFormat='z={0}'}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+
+                                    </TextBlock>
+                                    <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
+                                               ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
+                                               SelectedValue="{Binding Path=boundary_face}" 
+                                               SelectionChanged="cbBoundFace_SelectionChanged">
+                                        <ComboBox.Style>
+                                            <Style TargetType="ComboBox">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ComboBox.Style>
+
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel  Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
+                                    <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
+                                               HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
+                                               Width="160"/>
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Orientation="Horizontal"  >
+                                    <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                                        <Setter Property="Text" Value="x=0"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                                        <Setter Property="Text" Value="y=0"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                                        <Setter Property="Text" Value="z=0"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+                                </StackPanel>
+                                <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Orientation="Horizontal" >
+                                    <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                                            <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                                        <Setter Property="Text" Value="{Binding ElementName=extent_x_slider, Path=Value, StringFormat='x={0}'}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                                        <Setter Property="Text" Value="{Binding ElementName=extent_y_slider, Path=Value, StringFormat='y={0}'}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                                        <Setter Property="Text" 
+                                                                Value="{Binding ElementName=extent_z_slider, Path=Value, StringFormat='z={0}'}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
                                     </TextBlock>
 
-                                <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
-                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
+                                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+                                </StackPanel>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -2392,13 +2411,20 @@
                                                 />
                         <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
                     </StackPanel>
+
+                    <!-- Toroidal BoundaryTypeToBooleanConv
+                    SelectedIndex="{Binding Path=scenario.environment.toroidal, Converter=BoolToIndexConv}"
+                    -->
                     <StackPanel Orientation="Horizontal">                        
                         <TextBlock Text="Toroidal Boundary" FontWeight="Bold" Margin="0,20,0,0" />
-                        <CheckBox x:Name="cbToroidal" Margin="10,22" IsChecked="{Binding Path=scenario.environment.toroidal}"/>
-                        <!--<ComboBox x:Name="cbBoundCond" MinWidth="120" Margin="16,16" Height="22"
-                                  ItemsSource="{Binding Source={StaticResource boundaryTypes}}">
+                        <CheckBox x:Name="cbToroidal" Margin="10,22" Visibility="Hidden" IsChecked="{Binding Path=scenario.environment.toroidal}"/>
+                        <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="16,16" Height="22"
+                                  SelectedIndex="{Binding scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
+                                  ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
+                                  
+                                  >
                         </ComboBox>
-                        <Button Click="Button_Click"></Button>-->
+                        <!--<Button Click="Button_Click"></Button>-->
                     </StackPanel>
 
                     <!-- Cell interaction -->

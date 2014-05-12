@@ -2098,7 +2098,8 @@ namespace DaphneGui
             ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
 
             cbi.IsEnabled = true;
-            if (cbToroidal.IsChecked == true)
+            if (comboToroidal.SelectedIndex > 0)
+            //if (cbToroidal.IsChecked == true)
             {
                 cbi.IsEnabled = false;
             }
@@ -2213,8 +2214,9 @@ namespace DaphneGui
         private void AddReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
             //lvAvailableReacs.InvalidateVisual();
+            lvAvailableReacs.ClearValue(ListView.ItemsSourceProperty);
             //lvAvailableReacs.DataContext = null;
-            //lvAvailableReacs.DataContext = MainWindow.SC.SimConfig.entity_repository.reactions;
+            //lvAvailableReacs.DataContext = MainWindow.SC.SimConfig.entity_repository.molecules;
             //EcmAvailableReactions.Refresh();
         }
 
