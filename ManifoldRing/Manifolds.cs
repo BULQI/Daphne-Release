@@ -198,15 +198,15 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
-            ScalarField product = new ScalarField(this);
 
-            product.array[0] = sf1.array[0] * sf2.array[0];
-            for (int i = 1; i < ArraySize; i++)
+            double s1 = sf1.array[0];
+            double s2 = sf2.array[0];
+            sf1.array[0] *= sf2.array[0];
+            for (int i = 1; i < sf1.array.Length; i++)
             {
-                product.array[i] = sf1.array[0] * sf2.array[i] + sf1.array[i] * sf2.array[0];
+                sf1.array[i] = sf1.array[i] * s2 + s1 * sf2.array[i];
             }
-
-            return product;
+            return sf1;
         }
 
         /// <summary>
@@ -243,15 +243,10 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Add(ScalarField sf, double d)
         {
-            ScalarField c = new ScalarField(this);
-            
-            c.array[0] = sf.array[0] + d;
-            c.array[1] = sf.array[1];
-            c.array[2] = sf.array[2];
-            c.array[3] = sf.array[3];
-
-            return c;
+            sf.array[0] += d;
+            return sf;
         }
+            
 
         /// <summary>
         /// Restriction of a scalar field to an ME boundary manifold
@@ -790,14 +785,11 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
-            ScalarField product = new ScalarField(this);
-
             for (int i = 0; i < ArraySize; i++)
             {
-                product.array[i] = sf1.array[i] * sf2.array[i];
+                sf1.array[i] *= sf2.array[i];
             }
-
-            return product;
+            return sf1;
         }
 
         /// <summary>
@@ -830,15 +822,13 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Add(ScalarField sf, double d)
         {
-            ScalarField c = new ScalarField(this);
-
             for (int i = 0; i < ArraySize; i++)
             {
-                c.array[i] = sf.array[i] + d;
+                sf.array[i] += d;
+            }
+            return sf;
             }
 
-            return c;
-        }
 
         /// <summary>
         /// local point to multidimensional index
@@ -1320,10 +1310,8 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Multiply(ScalarField sf1, ScalarField sf2)
         {
-            ScalarField c = new ScalarField(this);
-            c.array[0] = sf1.array[0] * sf2.array[0];
-
-            return c;
+            sf1.array[0] *= sf2.array[0];
+            return sf1;
         }
 
         /// <summary>
@@ -1353,10 +1341,8 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField  Add(ScalarField sf, double d)
         {
-            ScalarField c = new ScalarField(this);
-            c.array[0] = sf.array[0] + d;
-
-            return c;
+            sf.array[0] += d;
+            return sf;
         }
 
         /// <summary>
