@@ -617,6 +617,7 @@ namespace ManifoldRing
 
         /// <summary>
         /// TinyBall field diffusion, flux term
+        /// The flux scalar field has already been divided by the diffusion coefficient in the boundary reaction Step() method.
         /// </summary>
         /// <param name="flux">flux involved</param>
         /// <param name="t">Transform - not used</param>
@@ -631,9 +632,9 @@ namespace ManifoldRing
             ScalarField s = new ScalarField(this);
 
             s.array[0] = 3 * flux.array[0] / radius;
-            s.array[1] = 5 * flux.array[1] / (radius * radius * radius);
-            s.array[2] = 5 * flux.array[2] / (radius * radius * radius);
-            s.array[3] = 5 * flux.array[3] / (radius * radius * radius);
+            s.array[1] = 5 * flux.array[1] / radius;
+            s.array[2] = 5 * flux.array[2] / radius;
+            s.array[3] = 5 * flux.array[3] / radius;
             
             return s;
         }

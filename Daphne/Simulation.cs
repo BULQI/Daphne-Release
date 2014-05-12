@@ -239,7 +239,7 @@ namespace Daphne
                     {
                         continue;
                     }
-                    comp.Reactions.Add(new BoundaryAssociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
+                    comp.Reactions.Add(new BoundaryDissociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                 boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
                 }

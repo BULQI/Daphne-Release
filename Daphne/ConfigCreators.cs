@@ -1329,6 +1329,31 @@ namespace Daphne
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
+            /////////////////////////////////////////////////////////////////////////////
+            // The A* gradient drives the locomotion force, but encompasses many processes, including tubulin network growth.
+            // The rate constant has units min^{-1}, similar to the units for dissociation.
+            // Choose activation rate that is significantly less than simple dissocation rates 
+            // (1/0.1 min^{-1} for CXCL12:CXCR4 )
+            // k_activation ~ 1 min^{-1}
+            // Choose much slower deactivation rate k_deactivation = k_activation / 100;
+            //
+            kf = 1;
+            kr = kf / 100;
+            // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            // Transformation: A* -> A  (Already implemented)
+            ////////////////////////////////////////////////////////////////
+
 
             ///////////////////////////////////////////////
             // NOTE: These reactions may not be biologically meaningful, but are used for reaction complexes

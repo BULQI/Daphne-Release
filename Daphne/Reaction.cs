@@ -460,7 +460,7 @@ namespace Daphne
     }
 
     /// <summary>
-    /// Transport of material from bulk to boundary
+    /// Transport of material from boundary to bulk
     /// </summary>
     public class BoundaryTransportFrom : Reaction
     {
