@@ -3390,7 +3390,21 @@ namespace Daphne
             return newcell;
         }
 
-        public string CellName { get; set; }
+        private string cellName;
+        public string CellName
+        {
+            get
+            {
+                return cellName;
+            }
+
+            set
+            {
+                cellName = value;
+                OnPropertyChanged("CellName");
+            }
+        }
+
         public double CellRadius { get; set; }
         private string _locomotor_mol_guid_ref;
         public string locomotor_mol_guid_ref

@@ -1361,12 +1361,12 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox Text="{Binding Path=CellName, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120"  />
+                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120"  />
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <uc:DoublesBox SliderEnabled="False" Width="100" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius}">
+                            <uc:DoublesBox SliderEnabled="False" Width="100" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             </uc:DoublesBox>
                         </StackPanel>
                         
@@ -1455,14 +1455,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                                 <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
-                                    Number="{Binding Path=TransductionConstant, UpdateSourceTrigger=PropertyChanged}"    />
+                                    Number="{Binding Path=TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                                 
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                                 <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
-                                    Number="{Binding Path=DragCoefficient, UpdateSourceTrigger=PropertyChanged}"    />
+                                    Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                             </StackPanel>
 
                         </StackPanel>
