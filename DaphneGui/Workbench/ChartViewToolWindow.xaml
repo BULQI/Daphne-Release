@@ -114,7 +114,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="150" MaxWidth="250">
+                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="270" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -130,7 +130,7 @@
                                                 ValueChanged="slConc_ValueChanged"
                                                 >
                                         </Slider>
-                                        <TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                        <TextBox Width="150" TextAlignment="Center" Margin="20,0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
                                     </StackPanel>    
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -190,8 +190,6 @@
                         <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="250" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <!--<TextBox Width="{Binding ElementName=rate_const, Path=Width}" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" 
-                                        Text="{Binding rate_const, StringFormat={}{0:#.00}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
                                     <StackPanel Orientation="Horizontal">
                                         <Slider x:Name="slRate" 
                                                 Orientation="Horizontal"
@@ -199,28 +197,18 @@
                                                 RenderTransform="1.0,0,0,0.5,0,4"
                                                 Minimum="0.00" 
                                                 Maximum="1000.00"
-                                                Value="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Value="{Binding Path=daph_rate_const.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                                 Margin="0,0,0,0" IsSnapToTickEnabled="True" 
                                                 TickFrequency="0.1"
                                                 ValueChanged="slRate_ValueChanged"
                                                 MouseLeftButtonUp="slRate_MouseLeftButtonUp"
                                                 MouseLeftButtonDown="slRate_MouseLeftButtonDown"
                                                 >
-                                            
                                         </Slider>
 
-                                        <editors:DoubleEditBox 
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            StepValue="10"
-                                            Width="100" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                                        
-                                        <!--<TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />-->
+                                        <TextBox Height="24" Margin="20,0" Name="txtFormattedValue" Width="150" 
+                                            Text="{Binding Path=daph_rate_const.FValue}" 
+                                            GotFocus="txtFormattedValue_GotFocus" LostFocus="txtFormattedValue_LostFocus"/>
                                         
                                     </StackPanel>
                                 </DataTemplate>

@@ -15,6 +15,8 @@ using DaphneGui;
 using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
 
+using Daphne;
+
 namespace Workbench
 {
     /// <summary>
@@ -31,22 +33,11 @@ namespace Workbench
         public ToggleButton toggleButton { get; set; }
         private bool dragging = false;
 
-        public ObservableCollection<MolConcInfo> tester { get; set; }
-
         public ChartViewToolWindow()
         {
             InitializeComponent();
             chartSize = new System.Drawing.Size(500, 300);
             DataContext = RC;
-            //ChartMainGrid.DataContext = RC;
-            
-            //txtTestBox.DataContext = RC;
-            tester = new ObservableCollection<MolConcInfo>();
-
-            
-
-            
-       
         }
 
         public void ClearChart()
@@ -59,11 +50,8 @@ namespace Workbench
         
         public void Render()
         {
-            tester = RC.initConcs;
-
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
-            //txtTest2.Text = RC.nTestVariable.ToString();
 
             if (lTimes.Count > 0 && dictConcs.Count > 0)
             {
@@ -94,7 +82,6 @@ namespace Workbench
                 menu.MenuItems[1].Click += new System.EventHandler(this.btnDecSize_Click);                
                 menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
                 menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
-                //menu.MenuItems[4].Click += new System.EventHandler(this.btnChange_Click);
 
                 btnIncSize.IsEnabled = true;
                 btnDecSize.IsEnabled = true;
@@ -255,24 +242,9 @@ namespace Workbench
                 cm.SaveChanges();
             }
         }
-        private void btnChange_Click(object sender, EventArgs e)
-        {
-            //////////EditRCReactions er = new EditRCReactions(RC);
-
-            //////////if (er.ShowDialog() == true)
-            //////////{
-            //////////}
-        }
-
+        
         private void btnRedraw_Click(object sender, RoutedEventArgs e)
         {
-            ////foreach (MolConcInfo mci in RC.initConcs)
-            ////{
-            ////    RC.EditConc(mci.molguid, mci.conc);
-            ////}
-            
-            ////cm.RedrawSeries();
-
             if (toggleButton != null)
                 toggleButton.IsChecked = true;
         }
@@ -290,12 +262,6 @@ namespace Workbench
 
         private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            ////if (toggleButton != null)
-            ////    toggleButton.IsChecked = true;
-            //cm.RedrawSeries();
-            //if (IsMouseCaptured == true)
-            //    return;
-
             Slider sl = sender as Slider;
 
             if (dragging == false)
@@ -303,11 +269,6 @@ namespace Workbench
                 sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
                 sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
             }
-
-            dragging = true;
-
-            //if (toggleButton != null &&)
-            //    toggleButton.IsChecked = true;
         }
 
         private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -317,8 +278,6 @@ namespace Workbench
             if (toggleButton != null && dragging == true)
             {
                 dragging = false;
-                //sl.RemoveHandler(MouseLeftButtonDownEvent, null);
-                //sl.RemoveHandler(MouseLeftButtonUpEvent, null);
 
                 //This causes a redraw
                 toggleButton.IsChecked = true;
@@ -330,7 +289,37 @@ namespace Workbench
             dragging = true;
         }
 
-              
+        private void txtFormattedValue_GotFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            ConfigReaction reac = (ConfigReaction)tb.DataContext;
+            tb.Text = reac.daph_rate_const.Value.ToString();
+        }
+
+        private void txtFormattedValue_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            string token = tb.Text;
+            token = GetNumerics(token);
+
+            double d = double.Parse(token);
+
+            ConfigReaction reac = (ConfigReaction)tb.DataContext;
+            reac.daph_rate_const.Value = d;
+        }
+
+        private string GetNumerics(string input)
+        {
+            var sb = new StringBuilder();
+            string goodChars = "0123456789.eE+-";
+            foreach (var c in input)
+            {                
+                if (goodChars.IndexOf(c) >=0 )
+                    sb.Append(c);
+            }
+            string output = sb.ToString();
+            return output;
+        }
         
     }
 }
