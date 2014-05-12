@@ -75,9 +75,11 @@
                 </TextBox>-->
 
                 <uc:DoublesBox x:Name="dblMaxTime" HorizontalAlignment="Left" Margin="4,0"
-                                                Number="{Binding Path=dInitialTime}"                                                   
+                                                Number="{Binding Path=dInitialTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                   
                                                 SNLowerThreshold="0.001"
-                                                SNUpperThreshold="1000">
+                                                SNUpperThreshold="1000"
+                                                PropertyChanged="dblMaxTime_PropertyChanged"
+                               >
 
                 </uc:DoublesBox>
 
@@ -251,7 +253,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click">Redraw</Button>
+                <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>
             </StackPanel>
 
                 <!--<Menu DockPanel.Dock="Top">

@@ -2748,9 +2748,6 @@ namespace Daphne
 
         public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
 
-        [JsonIgnore]
-        public ReactionComplexProcessor Processor { get; set; }
-
         public ConfigReactionComplex()
         {
             Guid id = Guid.NewGuid();
@@ -2837,12 +2834,6 @@ namespace Daphne
                 AddMolsToReaction(er, reac, reac.modifiers_molecule_guid_ref);
             }
         }
-
-        public void PrepareToRun()
-        {
-            Processor = new ReactionComplexProcessor();
-        }
-
     }
 
     public class ConfigCell

@@ -2487,7 +2487,6 @@ namespace DaphneGui
         private void DrawSelectedReactionComplex()
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-            crc.PrepareToRun();
 
             //Cleanup any previous RC stuff
             foreach (ConfigCell cell in MainWindow.SC.SimConfig.entity_repository.cells.ToList())
@@ -2512,7 +2511,6 @@ namespace DaphneGui
                 cc.cytosol.reactions_guid_ref.Add(rguid);
             }
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
-            //MainWindow.SC.SimConfig.entity_repository.cells_dict.Add(cc.cell_guid, cc);
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
@@ -2534,41 +2532,22 @@ namespace DaphneGui
             cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
-            //
 
-            ////Simulation rcSim = new Simulation();
-            ////rcSim.Load(MainWindow.SC.SimConfig, true, true);
-            //rcSim.LoadReactionComplex(MainWindow.SC.SimConfig, grc, true);
-
-            ////ReactionComplexProcessor rcp = new ReactionComplexProcessor();
-            ////rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
-
-            //crc.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            ReactionComplexProcessor Processor = new ReactionComplexProcessor();
             MainWindow.Sim.Load(MainWindow.SC.SimConfig, true, true);
 
-
-            crc.Processor.Initialize(MainWindow.SC.SimConfig, crc, MainWindow.Sim);
-            crc.Processor.Go();
+            Processor.Initialize(MainWindow.SC.SimConfig, crc, MainWindow.Sim);
+            Processor.Go();
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
-            MainWindow.ST_ReacComplexChartWindow.RC = crc.Processor;
-            MainWindow.ST_ReacComplexChartWindow.DataContext = crc.Processor;
+            MainWindow.ST_ReacComplexChartWindow.RC = Processor;  //crc.Processor;
+            MainWindow.ST_ReacComplexChartWindow.DataContext = Processor; //crc.Processor;
             MainWindow.ST_ReacComplexChartWindow.Render();
 
-            //MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = crc.Processor.dMaxTime;
-            //MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = crc.Processor.dInitialTime;
-            MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = crc.Processor.dInitialTime;
-
-            //MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
-
+            MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
             MW.VTKDisplayDocWindow.Activate();
-            
             MainWindow.ST_ReacComplexChartWindow.Activate();
-
             MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
-
-            
-
         }
 
         private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)

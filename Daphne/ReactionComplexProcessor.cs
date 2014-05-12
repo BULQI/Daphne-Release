@@ -61,6 +61,7 @@ namespace Daphne
 
         public int nTestVariable { get; set; }
 
+        //List of times that will be graphed on x-axis. There is only one times list no matter how many molecules
         protected List<double> listTimes = new List<double>();
         public List<double> ListTimes
         {
@@ -88,7 +89,10 @@ namespace Daphne
             }
         }
 
+        //save the original concentrations
         protected Dictionary<string, double> dictOriginalConcs = new Dictionary<string, double>();
+
+        //Initial concentrations - user can change initial concentrations of molecules
         protected Dictionary<string, double> dictInitialConcs = new Dictionary<string, double>();
         
         //for wpf binding
@@ -105,8 +109,10 @@ namespace Daphne
             } 
         }
 
+        //Convenience dictionary of initial concs and mol info
         public Dictionary<string, MolConcInfo> initConcsDict; 
 
+        //The following collection may not be needed any more
         private ObservableCollection<ConfigReaction> reacs = new ObservableCollection<ConfigReaction>();
         public ObservableCollection<ConfigReaction> ReactionsInComplex
         {
@@ -131,25 +137,12 @@ namespace Daphne
 
         private void initConcs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                }
-            }
-            //else 
-            //if (e.Action == NotifyCollectionChangedAction.Remove)
+            //if (e.Action == NotifyCollectionChangedAction.Add)
             //{
-            //    foreach (var oo in e.OldItems)
+            //    foreach (var nn in e.NewItems)
             //    {
-            //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
-            //        if (entity_repository.reactions_dict(reactions_guid_ref).)
-            //        {
-            //            reactions_guid_ref.Remove(cmp.molecule_guid_ref);
-            //        }
             //    }
-            //}
-
+            //}            
             OnPropertyChanged("initConcs");
         }
 
@@ -162,7 +155,6 @@ namespace Daphne
             double minVal = 1e7;
             foreach (ConfigReactionGuidRatePair grp in crc.ReactionRates)
             {
-                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
@@ -173,8 +165,6 @@ namespace Daphne
             SaveOriginalConcs();
             SaveInitialConcs();
             SaveReactions(crc);
-            
-
         }
 
         public void Reinitialize()
@@ -205,22 +195,10 @@ namespace Daphne
             MaxTime = (int)dMaxTime;
         }
 
-
         //*************************************************************************
         //This runs the simulation and calculates the concentrations with each step
         public void Go()
         {
-
-            ////double minVal = 1e7;
-            ////foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
-            ////{
-            ////    minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
-            ////}
-
-            ////dInitialTime = 5 / minVal;
-            ////dMaxTime = 2 * dInitialTime;
-            ////MaxTime = (int)dMaxTime;
-
             dictGraphConcs.Clear();
             listTimes.Clear();
 
@@ -265,60 +243,40 @@ namespace Daphne
 
             listTimes.Add(0);
 
-            //string concString = "";
             TimeSpan total = new TimeSpan(0, 0, 0);
             double[] defaultLoc = { 0.0, 0.0, 0.0 };
 
-            //string output;
-            //string filename = "Config\\new_reaction_complex_output.txt";
-
-
-            //using (StreamWriter writer = File.CreateText(filename))
-            //{
-                for (int i = 1; i < nSteps; i++)
+            for (int i = 1; i < nSteps; i++)
+            {
+                //Add to graph only if it is at an interval
+                bool AtInterval = (i % interval == 0);
+                if (AtInterval)
                 {
-                    //Add to graph only if it is at an interval
-                    bool AtInterval = (i % interval == 0);
-                    if (AtInterval)
-                        listTimes.Add(dt * i);
-
-
-                    //Stopwatch sw = new Stopwatch();
-                    //sw.Start();
-                    Sim.Step(dt);    //**************************STEP**********************************
-                    //sw.Stop();
-                    //Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                    //total += sw.Elapsed;
-
-                    //sw.Restart();
-                   // double currtime = i * dt;
-                    //output = currtime.ToString();
-
-                    //Add to graph, only if it is at interval
-                    if (AtInterval)
-                    {
-                        foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
-                        {
-                            string molguid = kvp.Key;
-                            double conc = comp.Populations[molguid].Conc.Value(defaultLoc);
-                            dictGraphConcs[molguid].Add(conc);
-                            //output += "\t" + conc;
-                        }
-                        //writer.WriteLine(output);
-                    }
-                    //sw.Stop();
-                    //Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                    //total += sw.Elapsed;
-
+                    listTimes.Add(dt * i);
                 }
-            //}
+#if false       
+                //stopwatch example code
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
+                //sw.Stop();
+                //sw.Restart();
+                //total += sw.Elapsed;  
+#endif
+                Sim.Step(dt);    //**************************STEP**********************************
 
+                //Add to graph, only if it is at interval
+                if (AtInterval)
+                {
+                    foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+                    {
+                        string molguid = kvp.Key;
+                        double conc = comp.Populations[molguid].Conc.Value(defaultLoc);
+                        dictGraphConcs[molguid].Add(conc);
+                    }
+                }
+
+            }
             //At this point, the list of times is populated and so is the dictionary of concentrations by molecule
-            //string path = @"c:\temp\concs.txt";            
-            //File.AppendAllText(path, concString);    
-
-            //MessageBox.Show("Finished processing reaction complex.");
-
         }
 
         public void SetTimeMinMax()
@@ -326,11 +284,8 @@ namespace Daphne
             double minVal = 1e7;
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
-
-            
             //MaxTime = (int)dMaxTime;
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
@@ -340,10 +295,11 @@ namespace Daphne
         public void EditConc(string moleculeKey, double conc)
         {
             dictInitialConcs[moleculeKey] = conc;
-            //initConcsDict[moleculeKey].conc = conc;
+            initConcsDict[moleculeKey].conc = conc;
             OnPropertyChanged("initConcs");
+            //Go();
+            
         }
-
 
         //Save the original concs in a temp array in case user wants to discard the changes
         public void SaveOriginalConcs()
@@ -399,13 +355,7 @@ namespace Daphne
                 //Now overwrite the concs in SimConfiguration
                 ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
                 MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mpInfo.mp_distribution;
-                homo.concentration = kvp.Value;
-                
-                //initArray[0] = kvp.Value;
-                //ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-                //sf.Initialize("const", initArray);
-                //comp.Populations[kvp.Key].Conc *= 0;
-                //comp.Populations[kvp.Key].Conc += sf;
+                homo.concentration = kvp.Value;                
             }           
         }
 
@@ -443,19 +393,6 @@ namespace Daphne
             {
                 ReactionsInComplex.Add(SC.entity_repository.reactions_dict[rguid]);
             }
-
-            //foreach (string rguid in crc.reactions_guid_ref)
-            //{
-            //    ConfigReaction r = new ConfigReaction();
-            //    r = SC.entity_repository.reactions_dict[rguid];
-            //    ReactionsInComplex.Add(r);
-            //}
-
-            //var Settings = new JsonSerializerSettings();
-            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //Settings.TypeNameHandling = TypeNameHandling.Auto;
-            //string jsonSpec = JsonConvert.SerializeObject(, Newtonsoft.Json.Formatting.Indented, Settings);
-            //ConfigReactionComplex newcrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
         }        
 
         public void UpdateRateConstants()
@@ -464,7 +401,6 @@ namespace Daphne
             {
                 string guid = grp.Guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
-                //cr.rate_const = grp.ReactionComplexRate2.Value;
                 cr.rate_const = grp.ReactionComplexRate;
             }
         }
@@ -477,13 +413,8 @@ namespace Daphne
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.OriginalRate;
                 grp.ReactionComplexRate = grp.OriginalRate;
-                ////////cr.rate_const = grp.OriginalRate2.Value;
-                ////////grp.ReactionComplexRate2.Value = grp.OriginalRate2.Value;
             }            
         }
-
-        
-        
     }
 
     public class MolConcInfo

@@ -106,9 +106,11 @@ namespace Workbench
             }
         }
 
-        //This function creates and draws the entire graph.  It uses ListTimes and DictConcs to draw all the series in the graph.
-        //Each molecule's concentrations are drawn as a series.  It calls the DrawSeries function to draw each series. 
-        //We are using only 1 chart area.  If we use more than 1, then the DrawSeries function should be made more general.
+        /// <summary>
+        /// This function creates and draws the entire graph.  It uses ListTimes and DictConcs to draw all the series in the graph.
+        /// Each molecule's concentrations are drawn as a series.  It calls the DrawSeries function to draw each series. 
+        /// We are using only 1 chart area.  If we use more than 1, then the DrawSeries function should be made more general!
+        /// </summary>
         public void DrawChart()
         {
             foreach (Control c in PChart.Controls)
@@ -225,8 +227,17 @@ namespace Workbench
             return;
         }
 
-        //This function draws one series whose points are passed in the "x" and "y" arrays.  
-        //"x" has time points, "y" has concs.
+        /// <summary>
+        /// This function draws one series whose points are passed in the "x" and "y" arrays.  
+        /// "x" has time points, "y" has concs.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="cA"></param>
+        /// <param name="title"></param>
+        /// <param name="seriesName"></param>
+        /// <param name="_color"></param>
+        /// <param name="drawLine"></param>
         private void drawSeries(double[] x, double[] y, ChartArea cA, string title, string seriesName = "", int _color = 0, bool drawLine = false)
         {
             if (x.Count() == 0 && y.Count() == 0)
@@ -379,6 +390,11 @@ namespace Workbench
             return ret;
         }
 
+        /// <summary>
+        /// On a mouse down, see if user clicked on the y-axis on a series' y-intercept which is its initial concentration
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cChart_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             HitTestResult result = cChart.HitTest(e.X, e.Y);
@@ -461,12 +477,13 @@ namespace Workbench
         {
             //Update the mouse path that is drawn onto the Panel. 
 
+#if false
             //These 4 lines are only for debugging - they can be removed later on
             int mouseX = e.X;
             int mouseY = e.Y;
             string output = mouseX.ToString() + ", " + mouseY.ToString();
-            //ToolWin.txtMouseHover.Text = output;
-            
+            //ToolWin.txtMouseHover.Text = output;  
+#endif
 
             if (bDrag)
             {
@@ -481,68 +498,20 @@ namespace Workbench
 
                 if (valu > 0)
                 {
-                    //ToolWin.txtMouseHover.Text = valu.ToString("#.00000");
                     ToolWin.dblMouseHover.Number = valu;
 
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
                     ToolWin.RC.EditConc(guid, valu);
-                    //ToolWin.RC.EditConc(SeriesToDrag.Name, valu);
                     RedrawSeries();
                 }
-            }
-            
-
-
-
-
-
-
-
-            //HitTestResult result;
-            //try
-            //{
-            //   result = cChart.HitTest(e.X, e.Y);               
-            //}
-            //catch (Exception ex)
-            //{
-            //    System.Windows.MessageBox.Show(ex.ToString());
-            //    return;
-            //}
-
-            ////if we're dragging something, then draw it here and erase from previous location            
-            //if (bDrag)
-            //{
-            //    if (result.ChartElementType == ChartElementType.Axis)
-            //    {
-            //        //ONLY DO THIS IF MOUSE IS ON Y AXIS
-            //        Object obj = result.Object;
-            //        if (((Axis)(obj)).AxisName == AxisName.Y)
-            //        {
-            //            double val = result.Axis.PixelPositionToValue(e.Y);
-
-            //            //THE FOLLOWING HAS TO BE DONE TO REDRAW THE WHOLE GRAPH UPON MOUSE MOVE
-            //            if (val > 0 && val <= 100000)
-            //            {
-            //                ToolWin.txtMouseHover.Text = val.ToString("#.00000");
-            //                ToolWin.RC.EditConc(SeriesToDrag.Name, val);
-            //                RedrawSeries();
-            //            }
-            //        }
-            //    }
-            //    else 
-            //    {
-            //        double val = cChart.ChartAreas[0].AxisY.PixelPositionToValue(e.Y);
-            //        if (val > 0 && val <= 100000)
-            //        {
-            //            ToolWin.txtMouseHover.Text = val.ToString("#.00000");
-            //            ToolWin.RC.EditConc(SeriesToDrag.Name, val);
-            //            RedrawSeries();
-            //        }
-            //    }
-            //}
+            }            
         }
-        
-        //On mouse up, not much to do.  Just reset a couple of things.
+
+        /// <summary>
+        /// On mouse up, not much to do.  Just reset a couple of things.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cChart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             bDrag = false;
@@ -555,11 +524,10 @@ namespace Workbench
             }
             
             SeriesToDrag = null;
-            //ToolWin.txtMouseHover.Text = "";
             ToolWin.dblMouseHover.Number = 0;
             cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
-            //cChart.Focus();
-            //cChart.Invalidate();
+
+            ToolWin.UpdateGrids();
         }
 
         public void RecalculateYMax()
@@ -567,7 +535,9 @@ namespace Workbench
             cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
         }
 
-        //This function finds a series at the given point on the y-axis, if user clicks "near" it
+        /// <summary>
+        /// This function finds a series at the given point on the y-axis, if user clicks "near" it
+        /// </summary>
         private Series FindSeriesAtPoint(double startY)
         {
             Series s = null;
@@ -599,7 +569,6 @@ namespace Workbench
                         seriesName = ConvertMolGuidToMolName(entry.Key);
                         s = cChart.Series.FindByName(seriesName);
                     }
-                    //break;
                 }
 
                 //Must find the closest series, not the first one 'near' the click
@@ -608,6 +577,9 @@ namespace Workbench
             return s;
         }        
 
+        /// <summary>
+        /// Redraw the series for example after a mouse move
+        /// </summary>
         public void RedrawSeries()
         {
             ToolWin.RC.Go();
@@ -664,7 +636,7 @@ namespace Workbench
             CalculateXMax();
 
             cChart.Focus();
-            cChart.Invalidate(); 
+            cChart.Invalidate();
             
         }
 
@@ -675,7 +647,8 @@ namespace Workbench
             {
                 foreach (Series s in cChart.Series)
                 {
-                    ToolWin.RC.EditConc(s.Name, s.Points[0].YValues[0]);                    
+                    string guid = ConvertMolNameToMolGuid(s.Name);
+                    ToolWin.RC.EditConc(guid, s.Points[0].YValues[0]);                    
                 }
 
                 //ToolWin.RC.SaveOriginalConcs();
@@ -684,19 +657,8 @@ namespace Workbench
         }    
    
         public void SetContextMenu(MenuItem[] menuItems)
-        {
-            //MenuItem[] menuItems = 
-            //    {   
-            //        new MenuItem("Bigger"),
-            //        new MenuItem("Smaller"),
-            //        new MenuItem("Save Changes"),
-            //        new MenuItem("Discard Changes"),
-            //        new MenuItem("Change Rate Constants..."),
-            //        new MenuItem("View Initial Concentrations...") 
-            //    }; 
-            
+        {            
             cChart.ContextMenu = new ContextMenu(menuItems);
-            
         }
         public System.Windows.Forms.ContextMenu GetContextMenu()
         {

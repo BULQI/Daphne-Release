@@ -3515,7 +3515,7 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         
-                                                        <TextBlock Text="{Binding Path=ReactionComplexRate}">
+                                                        <TextBlock Text="{Binding Path=ReactionComplexRate, StringFormat=G3}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
