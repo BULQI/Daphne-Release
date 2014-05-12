@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Data;
 using System.Windows;
 
+using ManifoldRing;
+
 namespace Daphne
 {
     public class SimConfigurator
@@ -213,6 +215,7 @@ namespace Daphne
             InitBoxExtentsAndGuidBoxDict();
             InitCellPopulationIDCellPopulationDict();
             InitMoleculeIDConfigMoleculeDict();
+            InitCellIDConfigCellDict();
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
             // Set callback to update box specification extents when environment extents change
@@ -278,6 +281,16 @@ namespace Daphne
 
         }
 
+        private void InitCellIDConfigCellDict()
+        {
+            entity_repository.cells_dict.Clear();
+            foreach (ConfigCell cc in entity_repository.cells)
+            {
+                entity_repository.cells_dict.Add(cc.cell_guid, cc);
+            }
+            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
+
+        }
         private void InitReactionIDConfigReactionDict()
         {
             entity_repository.reactions_dict.Clear();
@@ -362,6 +375,26 @@ namespace Daphne
                 }
             }
         }
+        private void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigCell cc = nn as ConfigCell;
+                    entity_repository.cells_dict.Add(cc.cell_guid, cc);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigCell cc = dd as ConfigCell;
+                    entity_repository.cells_dict.Remove(cc.cell_guid);
+                }
+            }
+        }
+
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -504,6 +537,7 @@ namespace Daphne
         public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
         public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
         public Dictionary<string, ConfigReaction> reactions_dict;
+        public Dictionary<string, ConfigCell> cells_dict;
 
         public EntityRepository()
         {
@@ -516,6 +550,7 @@ namespace Daphne
             molecules_dict = new Dictionary<string, ConfigMolecule>();
             reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reactions_dict = new Dictionary<string, ConfigReaction>();
+            cells_dict = new Dictionary<string, ConfigCell>();
         }
         
     }
@@ -1133,6 +1168,9 @@ namespace Daphne
             CellName = "Default Cell";
             CellRadius = 5.0;
 
+            Guid id = Guid.NewGuid();
+            cell_guid = id.ToString();
+
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
@@ -1142,6 +1180,7 @@ namespace Daphne
         public double CellRadius { get; set; }
         public string locomotor_mol_guid_ref { get; set; }
         public double TransductionConstant { get; set; }
+        public string cell_guid { get; set; }
 
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
@@ -1187,6 +1226,7 @@ namespace Daphne
         {
             try
             {
+                int n = (int)value;
                 return _cell_pop_dist_type_strings[(int)value];
             }
             catch
@@ -1200,6 +1240,38 @@ namespace Daphne
             string str = (string)value;
             int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
             return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
+        }
+    }
+
+    [ValueConversion(typeof(CellPopDistributionType), typeof(bool))]
+    public class CellPopDistributionTypeToBoolConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool retval = true;
+            try
+            {
+                if ((int)value == 0)
+                    retval = true;
+                else
+                    retval = false;
+            }
+            catch
+            {
+                return true;
+            }
+            return retval;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            return str;
+            //int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
+            //return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
         }
     }
 
@@ -1301,19 +1373,34 @@ namespace Daphne
 
     public class CellLocation
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
     }
 
     public class CellPopulation
     {
-        public ConfigCell CellType { get; set; }
+        public string cell_guid_ref { get; set; }
         public string cellpopulation_name { get; set; }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
         public string cell_subset_guid_ref { get; set; }
-        public int number { get; set; }
+
+        private int _number;
+        public int number
+        {
+            get { return _number; }
+            set
+            {
+                if (_number == value)
+                    return;
+                else
+                {
+                    _number = value;                    
+                }
+            }
+        }
+
         // TODO: Need to abstract out positioning to include pos specification for single cell...
         private bool _cellpopulation_constrained_to_region = false;
         public bool cellpopulation_constrained_to_region 
@@ -1338,10 +1425,8 @@ namespace Daphne
         public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
-        public CellPopDistribution cellPopDist;
-        public ObservableCollection<CellLocation> cell_locations { get; set; }  //number of items = 'number' from above
-
-
+        public CellPopDistribution cellPopDist { get; set; }
+        public ObservableCollection<CellLocation> cell_locations { get; set; }  //number of items = 'number' from above       
         public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
         private void InitDistTypes()
         {
@@ -1389,7 +1474,7 @@ namespace Daphne
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
-            cellPopDist = new CellPopUniformDistribution(10.0);            
+            cellPopDist = new CellPopSpecifyLocation();
             CellPopDistTypes = new ObservableCollection<CellPopDistType>();
             InitDistTypes();
 
@@ -2387,6 +2472,42 @@ namespace Daphne
             }
         }
     }
+
+    ////public enum CellPopDistributionType { Uniform, Gaussian }
+
+    /////// <summary>
+    /////// Converter to go between enum values and "human readable" strings for GUI
+    /////// </summary>
+    ////[ValueConversion(typeof(CellPopDistributionType), typeof(string))]
+    ////public class CellPopDistributionTypeToStringConverter : IValueConverter
+    ////{
+    ////    // NOTE: This method is a bit fragile since the list of strings needs to 
+    ////    // correspond in length and index with the GlobalParameterType enum...
+    ////    private List<string> _cell_pop_dist_type_strings = new List<string>()
+    ////                            {
+    ////                                "Homogeneous",
+    ////                                "Gaussian"
+    ////                            };
+
+    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        try
+    ////        {
+    ////            return _cell_pop_dist_type_strings[(int)value];
+    ////        }
+    ////        catch
+    ////        {
+    ////            return "";
+    ////        }
+    ////    }
+
+    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        string str = (string)value;
+    ////        int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
+    ////        return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
+    ////    }
+    ////}
 
     public class TimeAmpPair
     {

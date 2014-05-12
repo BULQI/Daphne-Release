@@ -16,6 +16,35 @@ using Microsoft.Win32;
 
 namespace DaphneGui
 {
+    public class RowToIndexConverter : MarkupExtension, IValueConverter
+    {
+        static RowToIndexConverter converter;
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            DataGridRow row = value as DataGridRow;
+            if (row != null)
+                return row.GetIndex() + 1;
+            else
+                return -1;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (converter == null) converter = new RowToIndexConverter();
+            return converter;
+        }
+
+        public RowToIndexConverter()
+        {
+        }
+    }
+
     /// <summary>
     /// Interaction logic for SimConfigToolWindow.xaml
     /// </summary>
@@ -30,8 +59,12 @@ namespace DaphneGui
         {
             CellsDetailsExpander.IsExpanded = true;
             CellPopulation cs = new CellPopulation();
-            cs.cellpopulation_name = "New motile cell";           
+            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
+            cs.cellpopulation_name = "New cell";           
             cs.number = 50;
+            CellLocation cl = new CellLocation();
+            cl.X = 0; cl.Y = 0; cl.Z = 0;
+            cs.cell_locations.Add(cl);
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.scenario.cellpopulations.Add(cs);
@@ -90,16 +123,24 @@ namespace DaphneGui
             if (current_mol != null)
             {
                 MolPopInfo current_item = current_mol.mpInfo;
-                MolPopDistributionType new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
+                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+                if (e.AddedItems.Count > 0)
+                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+
+                
                 // Only want to change distribution type if the combo box isn't just selecting 
                 // the type of current item in the solfacs list box (e.g. when list selection is changed)
-                if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+
+                if (current_item.mp_distribution == null)
+                {
+                }
+                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
-                else
-                {
+                //else
+                //{
                     switch (new_dist_type)
                     {
                         case MolPopDistributionType.Homogeneous:
@@ -150,7 +191,7 @@ namespace DaphneGui
                         default:
                             throw new ArgumentException("MolPopInfo distribution type out of range");
                     }
-                }
+                //}
             }
         }
 
@@ -242,7 +283,7 @@ namespace DaphneGui
 
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
             gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo();
+            gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mpInfo.mp_is_time_varying = false;
@@ -577,7 +618,7 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
             gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo();
+            gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mpInfo.mp_is_time_varying = false;
@@ -632,62 +673,94 @@ namespace DaphneGui
             //MembMolPopDetails.Content = cont
         }
 
-        private void btnBrowseCoordFile_Click(object sender, RoutedEventArgs e)
+        private void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Configure open file dialog box
-            OpenFileDialog dlg = new OpenFileDialog();
-            //dlg.InitialDirectory = @"c:\datarpa\";
-            dlg.DefaultExt = ".csv"; // Default file extension
-            dlg.Filter = "csv files (.csv)|*.csv"; // Filter files by extension
+            ComboBox cb = sender as ComboBox;
+            if (cb.SelectedIndex == -1)
+                return;
 
-            // Show open file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
-            
-
-            // Process open file dialog box results            
-            if (result == true)
+            CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
+            if (cpdt == CellPopDistributionType.Probability)
             {
-                // Save filename here
-                coordInputFile = dlg.FileName;
-
-                if (!File.Exists(coordInputFile))
-                {
-                    Console.WriteLine("[Error] {0} : No such file.", coordInputFile);
-                }
+                
             }
+            //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
+
         }
 
-        public string coordInputFile { get; set; }
+        private void CellPopDistributionTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Only want to respond to purposeful user interaction, not just population and depopulation
+            // of solfacs list
+
+            ////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            ////    return;
+
+            ////CellPopulation current_cell_pop = (CellPopulation)CellPopsListBox.SelectedItem;
+
+            ////if (current_cell_pop != null)
+            ////{
+            ////    MolPopInfo current_item = current_cell_pop.cpProbInfo;
+            ////    CellPopProbDistributionType new_dist_type = (CellPopProbDistributionType)e.AddedItems[0];
+
+            ////    // Only want to change distribution type if the combo box isn't just selecting 
+            ////    // the type of current item in the solfacs list box (e.g. when list selection is changed)
+                
+            ////    if (current_item.mp_distribution.mp_distribution_type == null) {
+            ////    }
+            ////    else { 
+            ////        MolPopDistributionType m = current_item.mp_distribution.mp_distribution_type;
+            ////        if ((m == MolPopDistributionType.Homogeneous && new_dist_type == CellPopProbDistributionType.Uniform) || 
+            ////            (m == MolPopDistributionType.Gaussian && new_dist_type == CellPopProbDistributionType.Gaussian))
+            ////            return;
+            ////    }
+            ////    switch (new_dist_type)
+            ////    {
+            ////        case CellPopProbDistributionType.Uniform:
+            ////            MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+            ////            current_item.mp_distribution = shl;
+            ////            break;
+            ////        case CellPopProbDistributionType.Gaussian:
+            ////            // Make sure there is at least one gauss_spec in repository
+            ////            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+            ////            {
+            ////                this.AddGaussianSpecification();
+            ////            }
+            ////            MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+            ////            sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+            ////            current_item.mp_distribution = sgg;
+            ////            break;
+            ////        default:
+            ////            throw new ArgumentException("CellPopProbInfo distribution type out of range");
+            ////    }
+                
+            ////}
+        }
+
+        private void cell_type_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //ConfigCell cc 
+
+            ComboBox cb = (ComboBox)e.Source;
+            if (cb == null)
+                return;
+
+            //ConfigCell cc = (ConfigCell)cb.SelectedItem;
+            //string cellname = MainWindow.SC.SimConfig.entity_repository.cells_dict[cc.cell_guid].CellName;
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+
+            int nIndex = cb.SelectedIndex;
+            if (nIndex < 0)
+                return;
+
+            cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].cell_guid;
+
+        }
 
         
     }
 
-    public class RowToIndexConverter : MarkupExtension, IValueConverter
-    {
-        static RowToIndexConverter converter;
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            DataGridRow row = value as DataGridRow;
-            if (row != null)
-                return row.GetIndex() + 1;
-            else
-                return -1;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            if (converter == null) converter = new RowToIndexConverter();
-            return converter;
-        }
-
-        public RowToIndexConverter()
-        {
-        }
-    }
+    
 }

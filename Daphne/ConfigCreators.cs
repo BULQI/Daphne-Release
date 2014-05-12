@@ -90,7 +90,7 @@ namespace Daphne
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-            cp.CellType = gc;
+            cp.cell_guid_ref = gc.cell_guid;
             CellLocation cl = new CellLocation();
             cl.X = 10;
             cl.Y = 100;
@@ -186,7 +186,7 @@ namespace Daphne
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-            cp.CellType = gc;
+            cp.cell_guid_ref = gc.cell_guid;
             CellLocation cl = new CellLocation();
             cl.X = 10;
             cl.Y = 100;

@@ -38,6 +38,10 @@
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
             <daph:MolGUIDtoMolIndexConverter x:Key="MolGUIDtoMolIndexConv" />
             <daph:ReacGUIDtoReacStringConverter x:Key="ReacGUIDtoReacStringConv" />
+            <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
+
+            <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
+            
 
 
             <!--<daph:GlobalParamTypeToStringConverter x:Key="GlobalParameterTypeEnumConv" />-->
@@ -912,6 +916,24 @@
                 </Grid>
             </DataTemplate>
 
+            <DataTemplate x:Key="cellPopProbDistributionDetailsTemplate">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ContentControl Name="cell_pop_dist_cc"
+                                    Grid.ColumnSpan="2" Grid.Row="0"
+                                    Margin="0,6"
+                                    BorderBrush="DarkGray" BorderThickness="1"
+                                    Content="{Binding Path=cpProbInfo.mp_distribution}"
+                                    />
+                </Grid>
+            </DataTemplate>
 
             <!-- =========================== -->
             <!-- Mol Pops -->
@@ -937,6 +959,12 @@
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="cellPopProbDistributionTypeTemplate">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Converter={StaticResource CellPopProbDistTypeEnumConv}}"/>
                 </StackPanel>
             </DataTemplate>
 
@@ -1148,6 +1176,9 @@
                                         HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
                                         Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
+
+                        
+                        
                         <TextBlock Text="cell type" Margin="6,0"
                                         Grid.Column="0" Grid.Row="1"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
@@ -1156,7 +1187,12 @@
                                         MinWidth="80"
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
-                                        SelectedValue="{Binding Path=CellType}"
+                                        
+                                        SelectionChanged="cell_type_combo_box_SelectionChanged"
+                                  
+                                  SelectedValue="{Binding Path=cell_guid_ref}"
+                                    SelectedValuePath="cell_guid"
+                                  
                                     />
                         <TextBlock Text="number" Margin="6,0"
                                         Grid.Column="0" Grid.Row="2"  
@@ -1201,6 +1237,14 @@
                                         Value="{Binding Path=cellpopulation_color}"
                                         Margin="0,2"
                                 />
+
+                        <!-- Show GUID - for debugging only -->
+                        <!-- <TextBlock Text="guid_ref" Margin="6,0"
+                                        Grid.Column="0" Grid.Row="4"  
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+
+                        <TextBox Text="{Binding Path=cell_guid_ref, UpdateSourceTrigger=PropertyChanged}"
+                                        Grid.Column="1" Grid.Row="4"  Margin="0,2"   />-->
                     </Grid>
                     <Grid>
                         <Expander ExpandDirection="Down" Padding="6"
@@ -1213,77 +1257,114 @@
                                 >
 
                             <StackPanel Orientation="Vertical">
+                                
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel>
-                                        <RadioButton x:Name="rbByDistribution" IsChecked="True" Margin="8, 4">By distribution</RadioButton>
-                                        <StackPanel Orientation="Horizontal" Margin="20,0">
-                                            <RadioButton  IsChecked="True" Margin="4, 4" IsEnabled="{Binding ElementName=rbByDistribution, Path=IsChecked}">Uniform</RadioButton>
-                                            <RadioButton Margin="10,4" IsEnabled="{Binding ElementName=rbByDistribution, Path=IsChecked}">Gaussian</RadioButton>
-                                        </StackPanel>
                                         
-                                        <StackPanel >
-                                            
-                                        </StackPanel>
-                                        <StackPanel>
-                                            
-                                        </StackPanel>
-                                        <RadioButton x:Name="rbByLocation" Margin="8, 4">By specific location</RadioButton>
-                                        <StackPanel Orientation="Horizontal" Margin="20,0">
-                                            <RadioButton x:Name="rbByCoord" Margin="4, 4" IsEnabled="{Binding ElementName=rbByLocation, Path=IsChecked}">By coordinates</RadioButton>
-                                            <RadioButton x:Name="rbByFile" Margin="10,4" IsEnabled="{Binding ElementName=rbByLocation, Path=IsChecked}">By location file</RadioButton>
+                                        <StackPanel Margin="8,0">
+                                            <TextBlock>Cell placement method</TextBlock>
+                                            <ComboBox x:Name="cbCellLocationType" Margin="0,4"
+                                                ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
+                                                ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
+                                                SelectedValue="{Binding Path=cellPopDist.cpDistributionType, Mode=OneWay}"
+                                                      SelectionChanged="cbCellLocationType_SelectionChanged">
+                                            </ComboBox>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="16,0">
-                                            <Expander ExpandDirection="Down" Padding="6"                                    
-                                                IsExpanded="False"
-                                                Header="Coordinates"
-                                                x:Name="CoordinatesExpander"
-                                                Margin="0,0,0,0" 
-                                                Canvas.ZIndex="1"
-                                                IsEnabled="{Binding ElementName=rbByCoord, Path=IsChecked}"
-                                                >
-                                                
-                                                <StackPanel>
-                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=cell_locations}"
-                                                                Height="100" MinWidth="170" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="50" MaxColumnWidth="80" 
-                                                                CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False"
-                                                                CanUserSortColumns="False" RowHeaderWidth="0"
-                                                                VerticalContentAlignment="Center">
-                                                        <DataGrid.ColumnHeaderStyle>
-                                                            <Style TargetType="DataGridColumnHeader" >
-                                                                <Setter Property="FontSize" Value="14" />
-                                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                                            </Style>
-                                                        </DataGrid.ColumnHeaderStyle>
-                                                        <DataGrid.RowStyle>
-                                                            <Style TargetType="DataGridRow">
-                                                                <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
-                                                            </Style>
+                                            
+                                            <StackPanel>
+                                                <!--<StackPanel.Style>
+                                                    <Style>
+                                                        <Setter Property="StackPanel.IsEnabled" Value="True"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=rbByCoord , Path=IsChecked}" Value="True">
+                                                                <Setter  Property="StackPanel.IsEnabled" Value="True"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                                                <Setter  Property="StackPanel.IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>-->
+                                                <StackPanel.Style>
+                                                    <Style>
+                                                        <Setter Property="StackPanel.IsEnabled" Value="True"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                                                <Setter  Property="StackPanel.IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </StackPanel.Style>
+                                                <Expander ExpandDirection="Down" Padding="6"                                    
+                                                    IsExpanded="False"
+                                                    Header="Coordinates"
+                                                    x:Name="CoordinatesExpander"
+                                                    Margin="0,0,0,0" 
+                                                    Canvas.ZIndex="1"
+                                                    >
+                                                    <StackPanel>
+                                                        <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=cell_locations}"
+                                                                    Height="100" MinWidth="170" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="50" MaxColumnWidth="80"
+                                                                    CanUserReorderColumns="False" CanUserResizeRows="False"
+                                                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                                                    VerticalContentAlignment="Center">
+                                                            <DataGrid.ColumnHeaderStyle>
+                                                                <Style TargetType="DataGridColumnHeader" >
+                                                                    <Setter Property="FontSize" Value="12" />
+                                                                    <Setter Property="Height" Value="24" />
+                                                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                                </Style>
+                                                            </DataGrid.ColumnHeaderStyle>
+                                                            <DataGrid.RowStyle>
+                                                                <Style TargetType="DataGridRow">
+                                                                    <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+                                                                </Style>
                                                             
-                                                        </DataGrid.RowStyle>
+                                                            </DataGrid.RowStyle>
 
-                                                        <DataGrid.Columns>
-                                                            <DataGridTextColumn Width="20" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
-                                                        </DataGrid.Columns>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Width="20" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
+                                                            </DataGrid.Columns>
                                                             
-                                                    </DataGrid>
-                                                </StackPanel>
+                                                        </DataGrid>
+                                                    </StackPanel>
                                                 
-                                            </Expander>
-
-                                            <Expander ExpandDirection="Down" Padding="6"                                    
-                                                IsExpanded="False"
-                                                Header="File"
-                                                x:Name="CoordFileExpander"
-                                                Margin="4,0,0,0" 
-                                                Canvas.ZIndex="1"
-                                                IsEnabled="{Binding ElementName=rbByFile, Path=IsChecked}"
-                                                >
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBox x:Name="txtFileName" Width="300">File Name</TextBox>
-                                                    <Button x:Name="btnBrowseCoordFile" Width="60" Click="btnBrowseCoordFile_Click">Browse...</Button>
-                                                </StackPanel>
-                                            </Expander>
+                                                </Expander>
+                                            </StackPanel>
                                         </StackPanel>
+                                        <StackPanel Margin="10,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,6">
+                                                    <TextBlock Text="distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                    <ComboBox Margin="10,0"
+                                                    Name="CellPopDistributionTypeComboBox"
+                                                    ItemsSource="{Binding Source={StaticResource cellPopProbDistributionTypes}}"
+                                                    ItemTemplate="{Binding Source={StaticResource cellPopProbDistributionTypeTemplate}}"
+                                                    SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"  
+                                                    SelectionChanged="CellPopDistributionTypeComboBox_SelectionChanged"
+                                                    MinWidth="120"
+                                                    />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="0" Grid.Row="1">
+                                                    <ContentControl Name="CellPopProbDistributionDetails"
+                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                    Margin="6,2"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+
+
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -1323,7 +1404,7 @@
                                 >
 
                             <StackPanel Orientation="Vertical" Margin="0,-10">
-                                <StackPanel Orientation="Horizontal" Width="400">
+                                <StackPanel Orientation="Horizontal" Width="240">
                                     <StackPanel.Resources>
                                         <DataTemplate x:Key="libMolListItemTemplate">
                                             <StackPanel Orientation="Horizontal">
@@ -1333,14 +1414,15 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </StackPanel.Resources>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
-                                    <ComboBox  MinWidth="100"
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                                        <ComboBox  MinWidth="100"
                                                 ItemsSource="{Binding Source={StaticResource moleculesListView}}"
                                                 DisplayMemberPath="Name"
                                                 />
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
+                                
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                                     <TextBox Text="{Binding Path=TransductionConstant, UpdateSourceTrigger=PropertyChanged}"  Margin="0,2" Width="100"  />
@@ -2021,10 +2103,10 @@
 
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellDetails"
+                                        <ContentControl Name="CellDetails" Height="76"
                                                 Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellDetailsTemplate}" 
-                                                Margin="6,-4"/>
+                                                Margin="6,4"/>
                                     </StackPanel>
 
                                     <!-- Mol Pops in this cell by their location, i.e. cytoplasm or membrane -->
@@ -2075,8 +2157,6 @@
                                                     </StackPanel>
 
                                             </StackPanel>
-                                            
-                                            
                                             
                                             <!-- Cell Mol Pop Details -->
                                             <StackPanel>
@@ -2498,7 +2578,7 @@
                                 <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
 
                                 <!-- Differentiation Matrix for selected Differentiation Scheme-->
-                                <DataGrid Visibility="Hidden" x:Name="dgDiffScheme"  Height="100" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10,0,0" AlternatingRowBackground="Beige"
+                                <DataGrid Visibility="Hidden" x:Name="dgDiffScheme" Height="100" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10,0,0" AlternatingRowBackground="Beige"
                                                                 ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="MolName">
 
                                     <DataGrid.ColumnHeaderStyle>
@@ -2797,7 +2877,7 @@
                             </StackPanel>
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
                                     ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" 
-                                         ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
+                                    ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
                                     SelectedIndex="-1"
                             />
 

@@ -378,12 +378,12 @@ namespace Daphne
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
-                configComp[0] = cp.CellType.cytosol;
-                configComp[1] = cp.CellType.membrane;
+                configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
+                configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.CellType.CellRadius));
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
 
                     cellPos[0] = cp.cell_locations[i].X;
                     cellPos[1] = cp.cell_locations[i].Y;
@@ -400,15 +400,15 @@ namespace Daphne
 
                     //CELL REACTIONS
                     // cytosol; has boundary
-                    addCompartmentReactions(cell.Cytosol, cell.PlasmaMembrane, cp.CellType.cytosol, sc.entity_repository);
+                    addCompartmentReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol, sc.entity_repository);
                     // membrane; no boundary
-                    addCompartmentReactions(cell.PlasmaMembrane, null, cp.CellType.membrane, sc.entity_repository);
+                    addCompartmentReactions(cell.PlasmaMembrane, null, sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane, sc.entity_repository);
 
-                    if (cp.CellType.locomotor_mol_guid_ref != "")
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "")
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.molecules_dict[cp.CellType.locomotor_mol_guid_ref].Name];
+                        MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.molecules_dict[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref].Name];
 
-                        cell.Locomotor = new Locomotor(driver, cp.CellType.TransductionConstant);
+                        cell.Locomotor = new Locomotor(driver, sc.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
                         cell.IsMotile = true;
                     }
                     else
