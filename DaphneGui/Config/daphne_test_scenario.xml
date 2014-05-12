@@ -1,0 +1,1025 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SimConfiguration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <experiment_db_id>0</experiment_db_id>
+  <experiment_name>Extracellular Medium Scenario</experiment_name>
+  <experiment_reps>1</experiment_reps>
+  <experiment_guid>b00995f3-3047-4619-b4b4-d601230177ba</experiment_guid>
+  <experiment_description>Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold</experiment_description>
+  <scenario>
+    <description>Scenario description</description>
+    <time_config>
+      <duration>100</duration>
+      <rendering_interval>0.3</rendering_interval>
+      <sampling_interval>1440</sampling_interval>
+    </time_config>
+    <environment>
+      <extent_x>400</extent_x>
+      <extent_y>400</extent_y>
+      <extent_z>400</extent_z>
+    </environment>
+    <regions>
+      <Region>
+        <region_name>Ellipsoidal region</region_name>
+        <region_type>Ellipsoid</region_type>
+        <region_box_spec_guid_ref>ccba8394-5ee5-44d7-a888-60074ebf0a65</region_box_spec_guid_ref>
+        <region_visibility>true</region_visibility>
+        <region_color>
+          <A>77</A>
+          <R>188</R>
+          <G>255</G>
+          <B>188</B>
+          <ScA>0.3</ScA>
+          <ScR>0.5</ScR>
+          <ScG>1</ScG>
+          <ScB>0.5</ScB>
+        </region_color>
+      </Region>
+      <Region>
+        <region_name>Box region</region_name>
+        <region_type>Rectangular</region_type>
+        <region_box_spec_guid_ref>36a5f135-34f2-4627-9a68-bd48056c6326</region_box_spec_guid_ref>
+        <region_visibility>true</region_visibility>
+        <region_color>
+          <A>77</A>
+          <R>188</R>
+          <G>218</G>
+          <B>255</B>
+          <ScA>0.3</ScA>
+          <ScR>0.5</ScR>
+          <ScG>0.7</ScG>
+          <ScB>1</ScB>
+        </region_color>
+      </Region>
+    </regions>
+    <solfacs />
+    <cellpopulations />
+    <Reactions>
+      <GuiReactionTemplate>
+        <listOfReactants>
+          <SpeciesReference>
+            <species>CXCR5:CXCL13</species>
+            <stoichiometry>1</stoichiometry>
+          </SpeciesReference>
+        </listOfReactants>
+        <listOfProducts>
+          <SpeciesReference>
+            <species>CXCR5</species>
+            <stoichiometry>1</stoichiometry>
+          </SpeciesReference>
+          <SpeciesReference>
+            <species>CXCL13</species>
+            <stoichiometry>1</stoichiometry>
+          </SpeciesReference>
+        </listOfProducts>
+        <rateConst>2</rateConst>
+        <listOfModifiers />
+        <typeOfReaction>dissociation</typeOfReaction>
+        <ReactantsString>CXCR5:CXCL13</ReactantsString>
+        <ProductsString>CXCR5 + CXCL13</ProductsString>
+        <TotalReactionString>CXCR5:CXCL13 -&gt; CXCR5 + CXCL13</TotalReactionString>
+      </GuiReactionTemplate>
+      <GuiReactionTemplate>
+        <listOfReactants />
+        <listOfProducts>
+          <SpeciesReference>
+            <species>CXCR5</species>
+            <stoichiometry>1</stoichiometry>
+          </SpeciesReference>
+        </listOfProducts>
+        <rateConst>2</rateConst>
+        <listOfModifiers>
+          <SpeciesReference>
+            <species>gCXCR5</species>
+            <stoichiometry>1</stoichiometry>
+          </SpeciesReference>
+        </listOfModifiers>
+        <typeOfReaction>creation_cat</typeOfReaction>
+        <ReactantsString>gCXCR5</ReactantsString>
+        <ProductsString>CXCR5 + gCXCR5</ProductsString>
+        <TotalReactionString>gCXCR5 -&gt; CXCR5 + gCXCR5</TotalReactionString>
+      </GuiReactionTemplate>
+    </Reactions>
+    <MolPops>
+      <GuiMolecularPopulation>
+        <Molecule>
+          <Name>CXCR5</Name>
+          <MolecularWeight>1</MolecularWeight>
+          <EffectiveRadius>0</EffectiveRadius>
+          <DiffusionCoefficient>1</DiffusionCoefficient>
+        </Molecule>
+        <Name>My CXCR5</Name>
+        <mpInfo>
+          <mp_guid>a2044e6f-4795-4041-bc4a-b8aff1a2511d</mp_guid>
+          <solfac_name>Gaussian gradient</solfac_name>
+          <mp_type_guid_ref>f1512d83-d8e1-4c32-8b18-4818e7afd7f4</mp_type_guid_ref>
+          <mp_distribution xsi:type="MolPopGaussianGradient">
+            <peak_concentration>10</peak_concentration>
+            <gaussgrad_gauss_spec_guid_ref>539e47f3-9ad4-4e12-ae77-f99fb88c37ee</gaussgrad_gauss_spec_guid_ref>
+          </mp_distribution>
+          <solfac_is_time_varying>false</solfac_is_time_varying>
+          <solfac_amplitude_keyframes />
+          <mp_color>
+            <A>77</A>
+            <R>242</R>
+            <G>93</G>
+            <B>93</B>
+            <ScA>0.3</ScA>
+            <ScR>0.89</ScR>
+            <ScG>0.11</ScG>
+            <ScB>0.11</ScB>
+          </mp_color>
+          <mp_render_blending_weight>2</mp_render_blending_weight>
+          <mp_render_on>true</mp_render_on>
+        </mpInfo>
+      </GuiMolecularPopulation>
+      <GuiMolecularPopulation>
+        <Molecule>
+          <Name>CXCL13</Name>
+          <MolecularWeight>0</MolecularWeight>
+          <EffectiveRadius>0</EffectiveRadius>
+          <DiffusionCoefficient>6000</DiffusionCoefficient>
+        </Molecule>
+        <Name>My CXCL13</Name>
+        <mpInfo>
+          <mp_guid>0ea08b9b-03bc-40f8-87ca-c0bfe6f84de0</mp_guid>
+          <solfac_name>Gaussian gradient</solfac_name>
+          <mp_type_guid_ref>f1512d83-d8e1-4c32-8b18-4818e7afd7f4</mp_type_guid_ref>
+          <mp_distribution xsi:type="MolPopGaussianGradient">
+            <peak_concentration>10</peak_concentration>
+            <gaussgrad_gauss_spec_guid_ref>539e47f3-9ad4-4e12-ae77-f99fb88c37ee</gaussgrad_gauss_spec_guid_ref>
+          </mp_distribution>
+          <solfac_is_time_varying>false</solfac_is_time_varying>
+          <solfac_amplitude_keyframes />
+          <mp_color>
+            <A>77</A>
+            <R>242</R>
+            <G>93</G>
+            <B>93</B>
+            <ScA>0.3</ScA>
+            <ScR>0.89</ScR>
+            <ScG>0.11</ScG>
+            <ScB>0.11</ScB>
+          </mp_color>
+          <mp_render_blending_weight>2</mp_render_blending_weight>
+          <mp_render_on>true</mp_render_on>
+        </mpInfo>
+      </GuiMolecularPopulation>
+    </MolPops>
+    <ReactionComplexes>
+      <GuiReactionComplex>
+        <Name>RC1</Name>
+        <Reactions>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>E</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts>
+              <SpeciesReference>
+                <species>A</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+              <SpeciesReference>
+                <species>E</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfProducts>
+            <rateConst>1</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>dissociation</typeOfReaction>
+            <ReactantsString>E</ReactantsString>
+            <ProductsString>A + E</ProductsString>
+            <TotalReactionString>E -&gt; A + E</TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>A</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+              <SpeciesReference>
+                <species>X</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts>
+              <SpeciesReference>
+                <species>X</species>
+                <stoichiometry>2</stoichiometry>
+              </SpeciesReference>
+            </listOfProducts>
+            <rateConst>1</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>generalized</typeOfReaction>
+            <ReactantsString>A + X</ReactantsString>
+            <ProductsString>2X</ProductsString>
+            <TotalReactionString>A + X -&gt; 2X</TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>X</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+              <SpeciesReference>
+                <species>Y</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts>
+              <SpeciesReference>
+                <species>Y</species>
+                <stoichiometry>2</stoichiometry>
+              </SpeciesReference>
+            </listOfProducts>
+            <rateConst>1</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>generalized</typeOfReaction>
+            <ReactantsString>X + Y</ReactantsString>
+            <ProductsString>2Y</ProductsString>
+            <TotalReactionString>X + Y -&gt; 2Y</TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>Y</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts />
+            <rateConst>1</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>annihilation</typeOfReaction>
+            <ReactantsString>Y</ReactantsString>
+            <ProductsString />
+            <TotalReactionString>Y -&gt; </TotalReactionString>
+          </GuiReactionTemplate>
+        </Reactions>
+      </GuiReactionComplex>
+      <GuiReactionComplex>
+        <Name>RC2</Name>
+        <Reactions>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>CXCR5:CXCL13</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts>
+              <SpeciesReference>
+                <species>CXCR5</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+              <SpeciesReference>
+                <species>CXCL13</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfProducts>
+            <rateConst>2</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>dissociation</typeOfReaction>
+            <ReactantsString>CXCR5:CXCL13</ReactantsString>
+            <ProductsString>CXCR5 + CXCL13</ProductsString>
+            <TotalReactionString>CXCR5:CXCL13 -&gt; CXCR5 + CXCL13</TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants />
+            <listOfProducts>
+              <SpeciesReference>
+                <species>CXCR5</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfProducts>
+            <rateConst>2</rateConst>
+            <listOfModifiers>
+              <SpeciesReference>
+                <species>gCXCR5</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfModifiers>
+            <typeOfReaction>creation_cat</typeOfReaction>
+            <ReactantsString>gCXCR5</ReactantsString>
+            <ProductsString>CXCR5 + gCXCR5</ProductsString>
+            <TotalReactionString>gCXCR5 -&gt; CXCR5 + gCXCR5</TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>CXCR5</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts />
+            <rateConst>2</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>annihilation</typeOfReaction>
+            <ReactantsString>CXCR5</ReactantsString>
+            <ProductsString />
+            <TotalReactionString>CXCR5 -&gt; </TotalReactionString>
+          </GuiReactionTemplate>
+          <GuiReactionTemplate>
+            <listOfReactants>
+              <SpeciesReference>
+                <species>CXCL13</species>
+                <stoichiometry>1</stoichiometry>
+              </SpeciesReference>
+            </listOfReactants>
+            <listOfProducts />
+            <rateConst>2</rateConst>
+            <listOfModifiers />
+            <typeOfReaction>annihilation</typeOfReaction>
+            <ReactantsString>CXCL13</ReactantsString>
+            <ProductsString />
+            <TotalReactionString>CXCL13 -&gt; </TotalReactionString>
+          </GuiReactionTemplate>
+        </Reactions>
+      </GuiReactionComplex>
+    </ReactionComplexes>
+  </scenario>
+  <global_parameters>
+    <GlobalParameter xsi:type="ForceParams">
+      <force_delta>15</force_delta>
+      <force_phi1>300</force_phi1>
+      <force_phi2>0.44</force_phi2>
+    </GlobalParameter>
+    <GlobalParameter xsi:type="LocomotorParams">
+      <loco_gamma>1</loco_gamma>
+      <loco_sigma>10</loco_sigma>
+      <loco_zeta>1</loco_zeta>
+      <loco_chi>30</loco_chi>
+    </GlobalParameter>
+    <GlobalParameter xsi:type="SynapseParams">
+      <Alpha>15</Alpha>
+      <Beta>300</Beta>
+      <Kappa>0.44</Kappa>
+      <Delta>0.44</Delta>
+      <Epsilon>0.44</Epsilon>
+    </GlobalParameter>
+  </global_parameters>
+  <entity_repository>
+    <solfac_types>
+      <SolfacType>
+        <solfac_type_guid>f1512d83-d8e1-4c32-8b18-4818e7afd7f4</solfac_type_guid>
+        <solfac_type_name>cxcl13</solfac_type_name>
+        <solfac_type_receptor_name>cxcr5</solfac_type_receptor_name>
+      </SolfacType>
+    </solfac_types>
+    <cell_subsets />
+    <gaussian_specifications>
+      <GaussianSpecification>
+        <gaussian_spec_name>Off-center gaussian</gaussian_spec_name>
+        <gaussian_spec_box_guid_ref>539e47f3-9ad4-4e12-ae77-f99fb88c37ee</gaussian_spec_box_guid_ref>
+        <gaussian_region_visibility>true</gaussian_region_visibility>
+        <gaussian_spec_color>
+          <A>77</A>
+          <R>255</R>
+          <G>188</G>
+          <B>188</B>
+          <ScA>0.3</ScA>
+          <ScR>1</ScR>
+          <ScG>0.5</ScG>
+          <ScB>0.5</ScB>
+        </gaussian_spec_color>
+      </GaussianSpecification>
+    </gaussian_specifications>
+    <box_specifications>
+      <BoxSpecification>
+        <box_guid>539e47f3-9ad4-4e12-ae77-f99fb88c37ee</box_guid>
+        <transform_matrix>
+          <ArrayOfDouble>
+            <double>125</double>
+            <double>0</double>
+            <double>0</double>
+            <double>100</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>125</double>
+            <double>0</double>
+            <double>300</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>125</double>
+            <double>100</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>0</double>
+            <double>1</double>
+          </ArrayOfDouble>
+        </transform_matrix>
+        <box_visibility>true</box_visibility>
+        <x_scale>125</x_scale>
+        <y_scale>125</y_scale>
+        <z_scale>125</z_scale>
+        <x_trans>100</x_trans>
+        <y_trans>300</y_trans>
+        <z_trans>100</z_trans>
+      </BoxSpecification>
+      <BoxSpecification>
+        <box_guid>ccba8394-5ee5-44d7-a888-60074ebf0a65</box_guid>
+        <transform_matrix>
+          <ArrayOfDouble>
+            <double>100</double>
+            <double>0</double>
+            <double>0</double>
+            <double>300</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>100</double>
+            <double>0</double>
+            <double>300</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>100</double>
+            <double>300</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>0</double>
+            <double>1</double>
+          </ArrayOfDouble>
+        </transform_matrix>
+        <box_visibility>true</box_visibility>
+        <x_scale>100</x_scale>
+        <y_scale>100</y_scale>
+        <z_scale>100</z_scale>
+        <x_trans>300</x_trans>
+        <y_trans>300</y_trans>
+        <z_trans>300</z_trans>
+      </BoxSpecification>
+      <BoxSpecification>
+        <box_guid>36a5f135-34f2-4627-9a68-bd48056c6326</box_guid>
+        <transform_matrix>
+          <ArrayOfDouble>
+            <double>50</double>
+            <double>0</double>
+            <double>0</double>
+            <double>100</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>50</double>
+            <double>0</double>
+            <double>100</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>300</double>
+            <double>200</double>
+          </ArrayOfDouble>
+          <ArrayOfDouble>
+            <double>0</double>
+            <double>0</double>
+            <double>0</double>
+            <double>1</double>
+          </ArrayOfDouble>
+        </transform_matrix>
+        <box_visibility>true</box_visibility>
+        <x_scale>50</x_scale>
+        <y_scale>50</y_scale>
+        <z_scale>300</z_scale>
+        <x_trans>100</x_trans>
+        <y_trans>100</y_trans>
+        <z_trans>200</z_trans>
+      </BoxSpecification>
+    </box_specifications>
+  </entity_repository>
+  <PredefReactions>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>CXCR5</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>CXCL13</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>CXCR5:CXCL13</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>2</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>association</typeOfReaction>
+      <ReactantsString>CXCR5 + CXCL13</ReactantsString>
+      <ProductsString>CXCR5:CXCL13</ProductsString>
+      <TotalReactionString>CXCR5 + CXCL13 -&gt; CXCR5:CXCL13</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>CXCR5:CXCL13</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>CXCR5</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>CXCL13</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>2</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>dissociation</typeOfReaction>
+      <ReactantsString>CXCR5:CXCL13</ReactantsString>
+      <ProductsString>CXCR5 + CXCL13</ProductsString>
+      <TotalReactionString>CXCR5:CXCL13 -&gt; CXCR5 + CXCL13</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants />
+      <listOfProducts>
+        <SpeciesReference>
+          <species>CXCR5</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>2</rateConst>
+      <listOfModifiers>
+        <SpeciesReference>
+          <species>gCXCR5</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfModifiers>
+      <typeOfReaction>creation_cat</typeOfReaction>
+      <ReactantsString>gCXCR5</ReactantsString>
+      <ProductsString>CXCR5 + gCXCR5</ProductsString>
+      <TotalReactionString>gCXCR5 -&gt; CXCR5 + gCXCR5</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>CXCR5</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts />
+      <rateConst>2</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>annihilation</typeOfReaction>
+      <ReactantsString>CXCR5</ReactantsString>
+      <ProductsString />
+      <TotalReactionString>CXCR5 -&gt; </TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>CXCL13</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts />
+      <rateConst>2</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>annihilation</typeOfReaction>
+      <ReactantsString>CXCL13</ReactantsString>
+      <ProductsString />
+      <TotalReactionString>CXCL13 -&gt; </TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>E</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>A</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>E</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>1</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>dissociation</typeOfReaction>
+      <ReactantsString>E</ReactantsString>
+      <ProductsString>A + E</ProductsString>
+      <TotalReactionString>E -&gt; A + E</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>A</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>2</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>1</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>generalized</typeOfReaction>
+      <ReactantsString>A + X</ReactantsString>
+      <ProductsString>2X</ProductsString>
+      <TotalReactionString>A + X -&gt; 2X</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>2</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>1</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>generalized</typeOfReaction>
+      <ReactantsString>X + Y</ReactantsString>
+      <ProductsString>2Y</ProductsString>
+      <TotalReactionString>X + Y -&gt; 2Y</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts />
+      <rateConst>1</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>annihilation</typeOfReaction>
+      <ReactantsString>Y</ReactantsString>
+      <ProductsString />
+      <TotalReactionString>Y -&gt; </TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants />
+      <listOfProducts>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>0.6</rateConst>
+      <listOfModifiers>
+        <SpeciesReference>
+          <species>E</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfModifiers>
+      <typeOfReaction>creation_cat</typeOfReaction>
+      <ReactantsString>E</ReactantsString>
+      <ProductsString>X + E</ProductsString>
+      <TotalReactionString>E -&gt; X + E</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>2</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>8</rateConst>
+      <listOfModifiers>
+        <SpeciesReference>
+          <species>S</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfModifiers>
+      <typeOfReaction>dimerDissociation_cat</typeOfReaction>
+      <ReactantsString>Y + S</ReactantsString>
+      <ProductsString>2X + S</ProductsString>
+      <TotalReactionString>Y + S -&gt; 2X + S</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>2</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfProducts>
+      <rateConst>1</rateConst>
+      <listOfModifiers />
+      <typeOfReaction>generalized</typeOfReaction>
+      <ReactantsString>2X</ReactantsString>
+      <ProductsString>X + Y</ProductsString>
+      <TotalReactionString>2X -&gt; X + Y</TotalReactionString>
+    </GuiReactionTemplate>
+    <GuiReactionTemplate>
+      <listOfReactants>
+        <SpeciesReference>
+          <species>X</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfReactants>
+      <listOfProducts />
+      <rateConst>1</rateConst>
+      <listOfModifiers>
+        <SpeciesReference>
+          <species>Y</species>
+          <stoichiometry>1</stoichiometry>
+        </SpeciesReference>
+      </listOfModifiers>
+      <typeOfReaction>annihilation_cat</typeOfReaction>
+      <ReactantsString>X + Y</ReactantsString>
+      <ProductsString>Y</ProductsString>
+      <TotalReactionString>X + Y -&gt; Y</TotalReactionString>
+    </GuiReactionTemplate>
+  </PredefReactions>
+  <PredefMolecules>
+    <GuiMolecule>
+      <Name>A</Name>
+      <MolecularWeight>2</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>2</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>B</Name>
+      <MolecularWeight>3</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>2</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>E</Name>
+      <MolecularWeight>5</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>1</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>X</Name>
+      <MolecularWeight>3.5</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>2</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>Y</Name>
+      <MolecularWeight>4</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>2</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>CXCR5</Name>
+      <MolecularWeight>1</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>1</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>CXCL13</Name>
+      <MolecularWeight>0</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>6000</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>CXCR5:CXCL13</Name>
+      <MolecularWeight>0</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>0</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>gCXCR5</Name>
+      <MolecularWeight>0</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>0</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>driver</Name>
+      <MolecularWeight>0</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>0</DiffusionCoefficient>
+    </GuiMolecule>
+    <GuiMolecule>
+      <Name>CXCL12</Name>
+      <MolecularWeight>7.96</MolecularWeight>
+      <EffectiveRadius>0</EffectiveRadius>
+      <DiffusionCoefficient>6000</DiffusionCoefficient>
+    </GuiMolecule>
+  </PredefMolecules>
+  <PredefReactionComplexes>
+    <GuiReactionComplex>
+      <Name>Bistable</Name>
+      <Reactions>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>E</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts>
+            <SpeciesReference>
+              <species>A</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+            <SpeciesReference>
+              <species>E</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>1</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>dissociation</typeOfReaction>
+          <ReactantsString>E</ReactantsString>
+          <ProductsString>A + E</ProductsString>
+          <TotalReactionString>E -&gt; A + E</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>A</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+            <SpeciesReference>
+              <species>X</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts>
+            <SpeciesReference>
+              <species>X</species>
+              <stoichiometry>2</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>1</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>generalized</typeOfReaction>
+          <ReactantsString>A + X</ReactantsString>
+          <ProductsString>2X</ProductsString>
+          <TotalReactionString>A + X -&gt; 2X</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>X</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+            <SpeciesReference>
+              <species>Y</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts>
+            <SpeciesReference>
+              <species>Y</species>
+              <stoichiometry>2</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>1</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>generalized</typeOfReaction>
+          <ReactantsString>X + Y</ReactantsString>
+          <ProductsString>2Y</ProductsString>
+          <TotalReactionString>X + Y -&gt; 2Y</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>Y</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts />
+          <rateConst>1</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>annihilation</typeOfReaction>
+          <ReactantsString>Y</ReactantsString>
+          <ProductsString />
+          <TotalReactionString>Y -&gt; </TotalReactionString>
+        </GuiReactionTemplate>
+      </Reactions>
+    </GuiReactionComplex>
+    <GuiReactionComplex>
+      <Name>Receptor/Ligand</Name>
+      <Reactions>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>CXCR5</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+            <SpeciesReference>
+              <species>CXCL13</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts>
+            <SpeciesReference>
+              <species>CXCR5:CXCL13</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>2</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>association</typeOfReaction>
+          <ReactantsString>CXCR5 + CXCL13</ReactantsString>
+          <ProductsString>CXCR5:CXCL13</ProductsString>
+          <TotalReactionString>CXCR5 + CXCL13 -&gt; CXCR5:CXCL13</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>CXCR5:CXCL13</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts>
+            <SpeciesReference>
+              <species>CXCR5</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+            <SpeciesReference>
+              <species>CXCL13</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>2</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>dissociation</typeOfReaction>
+          <ReactantsString>CXCR5:CXCL13</ReactantsString>
+          <ProductsString>CXCR5 + CXCL13</ProductsString>
+          <TotalReactionString>CXCR5:CXCL13 -&gt; CXCR5 + CXCL13</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants />
+          <listOfProducts>
+            <SpeciesReference>
+              <species>CXCR5</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfProducts>
+          <rateConst>2</rateConst>
+          <listOfModifiers>
+            <SpeciesReference>
+              <species>gCXCR5</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfModifiers>
+          <typeOfReaction>creation_cat</typeOfReaction>
+          <ReactantsString>gCXCR5</ReactantsString>
+          <ProductsString>CXCR5 + gCXCR5</ProductsString>
+          <TotalReactionString>gCXCR5 -&gt; CXCR5 + gCXCR5</TotalReactionString>
+        </GuiReactionTemplate>
+        <GuiReactionTemplate>
+          <listOfReactants>
+            <SpeciesReference>
+              <species>CXCR5</species>
+              <stoichiometry>1</stoichiometry>
+            </SpeciesReference>
+          </listOfReactants>
+          <listOfProducts />
+          <rateConst>2</rateConst>
+          <listOfModifiers />
+          <typeOfReaction>annihilation</typeOfReaction>
+          <ReactantsString>CXCR5</ReactantsString>
+          <ProductsString />
+          <TotalReactionString>CXCR5 -&gt; </TotalReactionString>
+        </GuiReactionTemplate>
+      </Reactions>
+    </GuiReactionComplex>
+  </PredefReactionComplexes>
+</SimConfiguration>

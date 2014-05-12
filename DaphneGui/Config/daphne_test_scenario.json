@@ -1,0 +1,1101 @@
+{
+  "cellsubset_guid_cellsubset_dict": {},
+  "box_guid_box_dict": {},
+  "cellpopulation_id_cellpopulation_dict": {},
+  "experiment_db_id": 0,
+  "experiment_name": "Extracellular Medium Scenario",
+  "experiment_reps": 1,
+  "experiment_guid": "448c02ec-3592-4e93-9b35-dd55bb0d094e",
+  "experiment_description": "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold",
+  "scenario": {
+    "description": "Scenario description",
+    "time_config": {
+      "duration": 100.0,
+      "rendering_interval": 0.3,
+      "sampling_interval": 1440.0
+    },
+    "environment": {
+      "extent_x": 400,
+      "extent_y": 400,
+      "extent_z": 400,
+      "extent_min": 5,
+      "extent_max": 1000
+    },
+    "regions": [
+      {
+        "region_name": "Ellipsoidal region",
+        "region_type": 1,
+        "region_box_spec_guid_ref": "50f8da29-4966-4872-a025-4a2d2ff9c93c",
+        "region_visibility": true,
+        "region_color": "sc#0.3, 0.5, 1, 0.5"
+      },
+      {
+        "region_name": "Box region",
+        "region_type": 0,
+        "region_box_spec_guid_ref": "6e4011ad-3703-44ac-bf56-94604f78833f",
+        "region_visibility": true,
+        "region_color": "sc#0.3, 0.5, 0.7, 1"
+      }
+    ],
+    "cellpopulations": [],
+    "Reactions": [
+      {
+        "listOfReactants": [
+          {
+            "species": "CXCR5:CXCL13",
+            "stoichiometry": 1
+          }
+        ],
+        "listOfProducts": [
+          {
+            "species": "CXCR5",
+            "stoichiometry": 1
+          },
+          {
+            "species": "CXCL13",
+            "stoichiometry": 1
+          }
+        ],
+        "rateConst": 2.0,
+        "listOfModifiers": [],
+        "typeOfReaction": "dissociation",
+        "RateConst": 2.0,
+        "TypeOfReaction": "dissociation",
+        "ReactantsString": "CXCR5:CXCL13",
+        "ProductsString": "CXCR5 + CXCL13",
+        "TotalReactionString": "CXCR5:CXCL13 -> CXCR5 + CXCL13"
+      },
+      {
+        "listOfReactants": [],
+        "listOfProducts": [
+          {
+            "species": "CXCR5",
+            "stoichiometry": 1
+          }
+        ],
+        "rateConst": 2.0,
+        "listOfModifiers": [
+          {
+            "species": "gCXCR5",
+            "stoichiometry": 1
+          }
+        ],
+        "typeOfReaction": "creation_cat",
+        "RateConst": 2.0,
+        "TypeOfReaction": "creation_cat",
+        "ReactantsString": "gCXCR5",
+        "ProductsString": "CXCR5 + gCXCR5",
+        "TotalReactionString": "gCXCR5 -> CXCR5 + gCXCR5"
+      }
+    ],
+    "MolPops": [
+      {
+        "Molecule": {
+          "Name": "CXCR5",
+          "MolecularWeight": 1.0,
+          "EffectiveRadius": 0.0,
+          "DiffusionCoefficient": 1.0
+        },
+        "Name": "My CXCR5",
+        "mpInfo": {
+          "mp_guid": "37807c30-a0fb-4f90-8601-a085511cdcd0",
+          "mp_name": "Gaussian gradient",
+          "mp_type_guid_ref": "4a8044eb-4f37-4cec-b204-715a4b6672a6",
+          "mp_distribution": {
+            "$type": "DaphneGui.MolPopGaussianGradient, DaphneGui",
+            "peak_concentration": 10.0,
+            "gaussgrad_gauss_spec_guid_ref": "e0e78692-c90a-4e3a-a81f-3fb7bd73e2b1",
+            "mp_distribution_type": 2
+          },
+          "mp_is_time_varying": false,
+          "mp_amplitude_keyframes": [],
+          "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+          "mp_render_blending_weight": 2.0,
+          "mp_render_on": true
+        },
+        "Mpi": null
+      },
+      {
+        "Molecule": {
+          "Name": "CXCL13",
+          "MolecularWeight": 0.0,
+          "EffectiveRadius": 0.0,
+          "DiffusionCoefficient": 6000.0
+        },
+        "Name": "My CXCL13",
+        "mpInfo": {
+          "mp_guid": "006fe974-cc51-4f0a-81b1-303306c16035",
+          "mp_name": "Gaussian gradient",
+          "mp_type_guid_ref": "4a8044eb-4f37-4cec-b204-715a4b6672a6",
+          "mp_distribution": {
+            "$type": "DaphneGui.MolPopGaussianGradient, DaphneGui",
+            "peak_concentration": 10.0,
+            "gaussgrad_gauss_spec_guid_ref": "e0e78692-c90a-4e3a-a81f-3fb7bd73e2b1",
+            "mp_distribution_type": 2
+          },
+          "mp_is_time_varying": false,
+          "mp_amplitude_keyframes": [],
+          "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+          "mp_render_blending_weight": 2.0,
+          "mp_render_on": true
+        },
+        "Mpi": null
+      }
+    ],
+    "ReactionComplexes": [
+      {
+        "Name": "RC1",
+        "Reactions": [
+          {
+            "listOfReactants": [
+              {
+                "species": "E",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [
+              {
+                "species": "A",
+                "stoichiometry": 1
+              },
+              {
+                "species": "E",
+                "stoichiometry": 1
+              }
+            ],
+            "rateConst": 1.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "dissociation",
+            "RateConst": 1.0,
+            "TypeOfReaction": "dissociation",
+            "ReactantsString": "E",
+            "ProductsString": "A + E",
+            "TotalReactionString": "E -> A + E"
+          },
+          {
+            "listOfReactants": [
+              {
+                "species": "A",
+                "stoichiometry": 1
+              },
+              {
+                "species": "X",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [
+              {
+                "species": "X",
+                "stoichiometry": 2
+              }
+            ],
+            "rateConst": 1.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "generalized",
+            "RateConst": 1.0,
+            "TypeOfReaction": "generalized",
+            "ReactantsString": "A + X",
+            "ProductsString": "2X",
+            "TotalReactionString": "A + X -> 2X"
+          },
+          {
+            "listOfReactants": [
+              {
+                "species": "X",
+                "stoichiometry": 1
+              },
+              {
+                "species": "Y",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [
+              {
+                "species": "Y",
+                "stoichiometry": 2
+              }
+            ],
+            "rateConst": 1.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "generalized",
+            "RateConst": 1.0,
+            "TypeOfReaction": "generalized",
+            "ReactantsString": "X + Y",
+            "ProductsString": "2Y",
+            "TotalReactionString": "X + Y -> 2Y"
+          },
+          {
+            "listOfReactants": [
+              {
+                "species": "Y",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [],
+            "rateConst": 1.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "annihilation",
+            "RateConst": 1.0,
+            "TypeOfReaction": "annihilation",
+            "ReactantsString": "Y",
+            "ProductsString": "",
+            "TotalReactionString": "Y -> "
+          }
+        ],
+        "Molecules": null,
+        "MolDict": null
+      },
+      {
+        "Name": "RC2",
+        "Reactions": [
+          {
+            "listOfReactants": [
+              {
+                "species": "CXCR5:CXCL13",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [
+              {
+                "species": "CXCR5",
+                "stoichiometry": 1
+              },
+              {
+                "species": "CXCL13",
+                "stoichiometry": 1
+              }
+            ],
+            "rateConst": 2.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "dissociation",
+            "RateConst": 2.0,
+            "TypeOfReaction": "dissociation",
+            "ReactantsString": "CXCR5:CXCL13",
+            "ProductsString": "CXCR5 + CXCL13",
+            "TotalReactionString": "CXCR5:CXCL13 -> CXCR5 + CXCL13"
+          },
+          {
+            "listOfReactants": [],
+            "listOfProducts": [
+              {
+                "species": "CXCR5",
+                "stoichiometry": 1
+              }
+            ],
+            "rateConst": 2.0,
+            "listOfModifiers": [
+              {
+                "species": "gCXCR5",
+                "stoichiometry": 1
+              }
+            ],
+            "typeOfReaction": "creation_cat",
+            "RateConst": 2.0,
+            "TypeOfReaction": "creation_cat",
+            "ReactantsString": "gCXCR5",
+            "ProductsString": "CXCR5 + gCXCR5",
+            "TotalReactionString": "gCXCR5 -> CXCR5 + gCXCR5"
+          },
+          {
+            "listOfReactants": [
+              {
+                "species": "CXCR5",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [],
+            "rateConst": 2.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "annihilation",
+            "RateConst": 2.0,
+            "TypeOfReaction": "annihilation",
+            "ReactantsString": "CXCR5",
+            "ProductsString": "",
+            "TotalReactionString": "CXCR5 -> "
+          },
+          {
+            "listOfReactants": [
+              {
+                "species": "CXCL13",
+                "stoichiometry": 1
+              }
+            ],
+            "listOfProducts": [],
+            "rateConst": 2.0,
+            "listOfModifiers": [],
+            "typeOfReaction": "annihilation",
+            "RateConst": 2.0,
+            "TypeOfReaction": "annihilation",
+            "ReactantsString": "CXCL13",
+            "ProductsString": "",
+            "TotalReactionString": "CXCL13 -> "
+          }
+        ],
+        "Molecules": null,
+        "MolDict": null
+      }
+    ]
+  },
+  "global_parameters": [
+    {
+      "$type": "DaphneGui.ForceParams, DaphneGui",
+      "force_delta": 15.0,
+      "force_phi1": 300.0,
+      "force_phi2": 0.44,
+      "global_parameter_type": 0
+    },
+    {
+      "$type": "DaphneGui.LocomotorParams, DaphneGui",
+      "loco_gamma": 1.0,
+      "loco_sigma": 10.0,
+      "loco_zeta": 1.0,
+      "loco_chi": 30.0,
+      "global_parameter_type": 1
+    },
+    {
+      "$type": "DaphneGui.SynapseParams, DaphneGui",
+      "Alpha": 15.0,
+      "Beta": 300.0,
+      "Kappa": 0.44,
+      "Delta": 0.44,
+      "Epsilon": 0.44,
+      "global_parameter_type": 2
+    }
+  ],
+  "entity_repository": {
+    "solfac_types": [
+      {
+        "solfac_type_guid": "4a8044eb-4f37-4cec-b204-715a4b6672a6",
+        "solfac_type_name": "cxcl13",
+        "solfac_type_receptor_name": "cxcr5"
+      }
+    ],
+    "cell_subsets": [],
+    "gaussian_specifications": [
+      {
+        "gaussian_spec_name": "Off-center gaussian",
+        "gaussian_spec_box_guid_ref": "e0e78692-c90a-4e3a-a81f-3fb7bd73e2b1",
+        "gaussian_region_visibility": true,
+        "gaussian_spec_color": "sc#0.3, 1, 0.5, 0.5"
+      }
+    ],
+    "box_specifications": [
+      {
+        "box_guid": "e0e78692-c90a-4e3a-a81f-3fb7bd73e2b1",
+        "transform_matrix": [
+          [
+            125.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            125.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            125.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 0.0,
+        "x_trans_min": 0.0,
+        "x_scale_max": 0.0,
+        "x_scale_min": 0.0,
+        "y_trans_max": 0.0,
+        "y_trans_min": 0.0,
+        "y_scale_max": 0.0,
+        "y_scale_min": 0.0,
+        "z_trans_max": 0.0,
+        "z_trans_min": 0.0,
+        "z_scale_max": 0.0,
+        "z_scale_min": 0.0,
+        "box_visibility": true,
+        "x_scale": 125.0,
+        "y_scale": 125.0,
+        "z_scale": 125.0,
+        "x_trans": 100.0,
+        "y_trans": 300.0,
+        "z_trans": 100.0
+      },
+      {
+        "box_guid": "50f8da29-4966-4872-a025-4a2d2ff9c93c",
+        "transform_matrix": [
+          [
+            100.0,
+            0.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            100.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            100.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 0.0,
+        "x_trans_min": 0.0,
+        "x_scale_max": 0.0,
+        "x_scale_min": 0.0,
+        "y_trans_max": 0.0,
+        "y_trans_min": 0.0,
+        "y_scale_max": 0.0,
+        "y_scale_min": 0.0,
+        "z_trans_max": 0.0,
+        "z_trans_min": 0.0,
+        "z_scale_max": 0.0,
+        "z_scale_min": 0.0,
+        "box_visibility": true,
+        "x_scale": 100.0,
+        "y_scale": 100.0,
+        "z_scale": 100.0,
+        "x_trans": 300.0,
+        "y_trans": 300.0,
+        "z_trans": 300.0
+      },
+      {
+        "box_guid": "6e4011ad-3703-44ac-bf56-94604f78833f",
+        "transform_matrix": [
+          [
+            50.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            50.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            300.0,
+            200.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 0.0,
+        "x_trans_min": 0.0,
+        "x_scale_max": 0.0,
+        "x_scale_min": 0.0,
+        "y_trans_max": 0.0,
+        "y_trans_min": 0.0,
+        "y_scale_max": 0.0,
+        "y_scale_min": 0.0,
+        "z_trans_max": 0.0,
+        "z_trans_min": 0.0,
+        "z_scale_max": 0.0,
+        "z_scale_min": 0.0,
+        "box_visibility": true,
+        "x_scale": 50.0,
+        "y_scale": 50.0,
+        "z_scale": 300.0,
+        "x_trans": 100.0,
+        "y_trans": 100.0,
+        "z_trans": 200.0
+      }
+    ]
+  },
+  "PredefReactions": [
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 2.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "association",
+      "RateConst": 2.0,
+      "TypeOfReaction": "association",
+      "ReactantsString": "CXCR5 + CXCL13",
+      "ProductsString": "CXCR5:CXCL13",
+      "TotalReactionString": "CXCR5 + CXCL13 -> CXCR5:CXCL13"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 2.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "dissociation",
+      "RateConst": 2.0,
+      "TypeOfReaction": "dissociation",
+      "ReactantsString": "CXCR5:CXCL13",
+      "ProductsString": "CXCR5 + CXCL13",
+      "TotalReactionString": "CXCR5:CXCL13 -> CXCR5 + CXCL13"
+    },
+    {
+      "listOfReactants": [],
+      "listOfProducts": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 2.0,
+      "listOfModifiers": [
+        {
+          "species": "gCXCR5",
+          "stoichiometry": 1
+        }
+      ],
+      "typeOfReaction": "creation_cat",
+      "RateConst": 2.0,
+      "TypeOfReaction": "creation_cat",
+      "ReactantsString": "gCXCR5",
+      "ProductsString": "CXCR5 + gCXCR5",
+      "TotalReactionString": "gCXCR5 -> CXCR5 + gCXCR5"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [],
+      "rateConst": 2.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "annihilation",
+      "RateConst": 2.0,
+      "TypeOfReaction": "annihilation",
+      "ReactantsString": "CXCR5",
+      "ProductsString": "",
+      "TotalReactionString": "CXCR5 -> "
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [],
+      "rateConst": 2.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "annihilation",
+      "RateConst": 2.0,
+      "TypeOfReaction": "annihilation",
+      "ReactantsString": "CXCL13",
+      "ProductsString": "",
+      "TotalReactionString": "CXCL13 -> "
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "E",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "A",
+          "stoichiometry": 1
+        },
+        {
+          "species": "E",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 1.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "dissociation",
+      "RateConst": 1.0,
+      "TypeOfReaction": "dissociation",
+      "ReactantsString": "E",
+      "ProductsString": "A + E",
+      "TotalReactionString": "E -> A + E"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "A",
+          "stoichiometry": 1
+        },
+        {
+          "species": "X",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 2
+        }
+      ],
+      "rateConst": 1.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "generalized",
+      "RateConst": 1.0,
+      "TypeOfReaction": "generalized",
+      "ReactantsString": "A + X",
+      "ProductsString": "2X",
+      "TotalReactionString": "A + X -> 2X"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 1
+        },
+        {
+          "species": "Y",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "Y",
+          "stoichiometry": 2
+        }
+      ],
+      "rateConst": 1.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "generalized",
+      "RateConst": 1.0,
+      "TypeOfReaction": "generalized",
+      "ReactantsString": "X + Y",
+      "ProductsString": "2Y",
+      "TotalReactionString": "X + Y -> 2Y"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "Y",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [],
+      "rateConst": 1.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "annihilation",
+      "RateConst": 1.0,
+      "TypeOfReaction": "annihilation",
+      "ReactantsString": "Y",
+      "ProductsString": "",
+      "TotalReactionString": "Y -> "
+    },
+    {
+      "listOfReactants": [],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 0.6,
+      "listOfModifiers": [
+        {
+          "species": "E",
+          "stoichiometry": 1
+        }
+      ],
+      "typeOfReaction": "creation_cat",
+      "RateConst": 0.6,
+      "TypeOfReaction": "creation_cat",
+      "ReactantsString": "E",
+      "ProductsString": "X + E",
+      "TotalReactionString": "E -> X + E"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "Y",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 2
+        }
+      ],
+      "rateConst": 8.0,
+      "listOfModifiers": [
+        {
+          "species": "S",
+          "stoichiometry": 1
+        }
+      ],
+      "typeOfReaction": "dimerDissociation_cat",
+      "RateConst": 8.0,
+      "TypeOfReaction": "dimerDissociation_cat",
+      "ReactantsString": "Y + S",
+      "ProductsString": "2X + S",
+      "TotalReactionString": "Y + S -> 2X + S"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 2
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 1
+        },
+        {
+          "species": "Y",
+          "stoichiometry": 1
+        }
+      ],
+      "rateConst": 1.0,
+      "listOfModifiers": [],
+      "typeOfReaction": "generalized",
+      "RateConst": 1.0,
+      "TypeOfReaction": "generalized",
+      "ReactantsString": "2X",
+      "ProductsString": "X + Y",
+      "TotalReactionString": "2X -> X + Y"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 1
+        }
+      ],
+      "listOfProducts": [],
+      "rateConst": 1.0,
+      "listOfModifiers": [
+        {
+          "species": "Y",
+          "stoichiometry": 1
+        }
+      ],
+      "typeOfReaction": "annihilation_cat",
+      "RateConst": 1.0,
+      "TypeOfReaction": "annihilation_cat",
+      "ReactantsString": "X + Y",
+      "ProductsString": "Y",
+      "TotalReactionString": "X + Y -> Y"
+    }
+  ],
+  "PredefMolecules": [
+    {
+      "Name": "A",
+      "MolecularWeight": 2.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0
+    },
+    {
+      "Name": "B",
+      "MolecularWeight": 3.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0
+    },
+    {
+      "Name": "E",
+      "MolecularWeight": 5.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 1.0
+    },
+    {
+      "Name": "X",
+      "MolecularWeight": 3.5,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0
+    },
+    {
+      "Name": "Y",
+      "MolecularWeight": 4.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0
+    },
+    {
+      "Name": "CXCR5",
+      "MolecularWeight": 1.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 1.0
+    },
+    {
+      "Name": "CXCL13",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 6000.0
+    },
+    {
+      "Name": "CXCR5:CXCL13",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0
+    },
+    {
+      "Name": "gCXCR5",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0
+    },
+    {
+      "Name": "driver",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0
+    },
+    {
+      "Name": "CXCL12",
+      "MolecularWeight": 7.96,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 6000.0
+    }
+  ],
+  "PredefReactionComplexes": [
+    {
+      "Name": "Bistable",
+      "Reactions": [
+        {
+          "listOfReactants": [
+            {
+              "species": "E",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "A",
+              "stoichiometry": 1
+            },
+            {
+              "species": "E",
+              "stoichiometry": 1
+            }
+          ],
+          "rateConst": 1.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "dissociation",
+          "RateConst": 1.0,
+          "TypeOfReaction": "dissociation",
+          "ReactantsString": "E",
+          "ProductsString": "A + E",
+          "TotalReactionString": "E -> A + E"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "A",
+              "stoichiometry": 1
+            },
+            {
+              "species": "X",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "X",
+              "stoichiometry": 2
+            }
+          ],
+          "rateConst": 1.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "generalized",
+          "RateConst": 1.0,
+          "TypeOfReaction": "generalized",
+          "ReactantsString": "A + X",
+          "ProductsString": "2X",
+          "TotalReactionString": "A + X -> 2X"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "X",
+              "stoichiometry": 1
+            },
+            {
+              "species": "Y",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "Y",
+              "stoichiometry": 2
+            }
+          ],
+          "rateConst": 1.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "generalized",
+          "RateConst": 1.0,
+          "TypeOfReaction": "generalized",
+          "ReactantsString": "X + Y",
+          "ProductsString": "2Y",
+          "TotalReactionString": "X + Y -> 2Y"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "Y",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [],
+          "rateConst": 1.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "annihilation",
+          "RateConst": 1.0,
+          "TypeOfReaction": "annihilation",
+          "ReactantsString": "Y",
+          "ProductsString": "",
+          "TotalReactionString": "Y -> "
+        }
+      ],
+      "Molecules": null,
+      "MolDict": null
+    },
+    {
+      "Name": "Receptor/Ligand",
+      "Reactions": [
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1
+            }
+          ],
+          "rateConst": 2.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "association",
+          "RateConst": 2.0,
+          "TypeOfReaction": "association",
+          "ReactantsString": "CXCR5 + CXCL13",
+          "ProductsString": "CXCR5:CXCL13",
+          "TotalReactionString": "CXCR5 + CXCL13 -> CXCR5:CXCL13"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1
+            }
+          ],
+          "rateConst": 2.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "dissociation",
+          "RateConst": 2.0,
+          "TypeOfReaction": "dissociation",
+          "ReactantsString": "CXCR5:CXCL13",
+          "ProductsString": "CXCR5 + CXCL13",
+          "TotalReactionString": "CXCR5:CXCL13 -> CXCR5 + CXCL13"
+        },
+        {
+          "listOfReactants": [],
+          "listOfProducts": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1
+            }
+          ],
+          "rateConst": 2.0,
+          "listOfModifiers": [
+            {
+              "species": "gCXCR5",
+              "stoichiometry": 1
+            }
+          ],
+          "typeOfReaction": "creation_cat",
+          "RateConst": 2.0,
+          "TypeOfReaction": "creation_cat",
+          "ReactantsString": "gCXCR5",
+          "ProductsString": "CXCR5 + gCXCR5",
+          "TotalReactionString": "gCXCR5 -> CXCR5 + gCXCR5"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1
+            }
+          ],
+          "listOfProducts": [],
+          "rateConst": 2.0,
+          "listOfModifiers": [],
+          "typeOfReaction": "annihilation",
+          "RateConst": 2.0,
+          "TypeOfReaction": "annihilation",
+          "ReactantsString": "CXCR5",
+          "ProductsString": "",
+          "TotalReactionString": "CXCR5 -> "
+        }
+      ],
+      "Molecules": null,
+      "MolDict": null
+    }
+  ]
+}

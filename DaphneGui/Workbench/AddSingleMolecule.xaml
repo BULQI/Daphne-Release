@@ -1,0 +1,81 @@
+﻿<Window x:Class="GuiDaphneApp.AddSingleMolecule"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Define a new molecule" Height="400" Width="600">
+    <StackPanel>
+        <!-- Title -->
+        <Label  Grid.Column="0" Grid.Row="0" 
+                Content="Add a new molecule" 
+                Height="40" HorizontalAlignment="Left" Margin="0,0,0,0" 
+                Name="label01" VerticalAlignment="Center" FontSize="20" FontFamily="Verdana" FontWeight="Bold"
+                />        
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="40*" />
+                <RowDefinition Height="60*" />
+            </Grid.RowDefinitions>
+
+            <Button x:Name="btnSave" Grid.Column="0" Grid.Row="5" Width="80" HorizontalAlignment="Right" Click="btnSave_Click">Save</Button>
+            <Button x:Name="btnCancel" Grid.Column="1" Grid.Row="5" Width="80" HorizontalAlignment="Left" Click="btnCancel_Click">Cancel</Button>
+
+            <!-- Name -->
+            <TextBlock Text="Molecule Name" Grid.Column="0" Grid.Row="1" FontWeight="Bold" Margin="0,10,0,0" />
+            <TextBox x:Name="txtMolName" Text="g_CXCR5" Width="80" Height="32" Grid.Column="1" Grid.Row="1" Margin="0,10,0,0"></TextBox>
+
+            <!--<TextBlock Text="Molecule(s)" Grid.Column="0" Grid.Row="1" FontWeight="Bold" Margin="0,10,0,0" />
+            <ComboBox x:Name="cbMols" Width="80" Height="24" Grid.Column="1" Grid.Row="1" Margin="0,10,0,0"></ComboBox>-->
+
+            <!-- Weight -->
+            <TextBlock Text="Molecular Weight" Grid.Column="0" Grid.Row="2" FontWeight="Bold" Margin="0,10,0,0" />
+            <TextBox x:Name="txtMolWt" Text="10.5" Width="80" Height="32" Grid.Column="1" Grid.Row="2" Margin="0,10,0,0"></TextBox>
+
+            <!-- Radius -->
+            <TextBlock Text="Molecular Radius" Grid.Column="0" Grid.Row="3" FontWeight="Bold" Margin="0,10,0,0" />                        
+            <!--<StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="3">
+            </StackPanel>-->
+            <!--<Slider Name="extent_x_slider"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Width="100"
+                                                    Height="32"
+                                                    Margin="0,10,0,0"
+                                                    RenderTransform="1.0,0,0,0.5,0,7"
+                                                    Minimum="1" 
+                                                    Maximum="1000" 
+                                                    Value="200" 
+                                                    IsSnapToTickEnabled="True" 
+                                                    TickFrequency="1" 
+                                                    KeyboardNavigation.IsTabStop="False"
+                                                    />-->
+            <editors:DoubleEditBox x:Name="txtRadius" 
+                                       Grid.Column="1" Grid.Row="3"
+                                                                  CheckBoxVisibility="Collapsed" 
+                                                                  SpinnerVisibility="Collapsed"
+                                                                  HorizontalAlignment="Center"
+                                                                  Format="N0"
+                                                                  StepValue="1"
+                                                                  Width="80" 
+                                                                   Height="24"
+                                                                  Value="200" 
+                                                                  CenterSlotHorizontalAlignment="Right"
+                                                                  
+                                                                  />
+            <!-- Initial Conc -->
+            <!--<TextBlock Text="Initial Concentration" Grid.Column="0" Grid.Row="4" FontWeight="Bold" Margin="0,10,0,0" />
+            <TextBox x:Name="txtInitConc" Text="10.5" Width="80" Height="32" Grid.Column="1" Grid.Row="4" Margin="0,10,0,0"></TextBox>-->
+
+
+        </Grid>
+    </StackPanel>
+</Window>

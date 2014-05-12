@@ -1,0 +1,60 @@
+﻿<Window x:Class="GuiDaphneApp.AddDiffScheme"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Differentiation Scheme" Height="600" Width="400">
+    <Grid Height="600" Width="400">
+
+        <Grid.Resources>
+            <DataTemplate x:Key="molPopListItemTemplate">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=Molecule.Name}" />
+
+                </StackPanel>
+            </DataTemplate>
+
+        </Grid.Resources>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="80" />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32" />
+            <RowDefinition Height="32" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="Bold" Margin="10,10,0,0" Text="Select States and Molecules for this Scheme" />
+        <TextBlock Grid.Column="0" Grid.Row="1" FontWeight="Bold" Margin="10,10,0,0"  Text="Scheme Name" />
+        <TextBox Grid.Column="0" Grid.Row="2" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0" Name="txtSchemeName" Text="NewScheme" 
+                 Grid.ColumnSpan="1" VerticalAlignment="Center" Width="280"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="3" FontWeight="Bold" Margin="10,10,0,0" Text="Select states to add to scheme" />
+        <ListBox Grid.Column="0" Grid.Row="4" Margin="0,10,0,0" Height="150"  Name="lbAllStates" SelectedIndex="-1" SelectionMode="Multiple" 
+                 ItemsSource="{Binding Path=DiffStateNames}" Grid.ColumnSpan="1" Width="280"/>
+
+        <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal">
+        <TextBox  Height="24" HorizontalAlignment="Right" Margin="10,10,0,0" Name="txtStateName" Text="NewState" 
+                 Grid.ColumnSpan="1" VerticalAlignment="Center" Width="150"/>
+        <Button Content="Create New State" Height="24" HorizontalAlignment="Left" Margin="10,10,0,0" Name="btnSaveState" Width="120" Click="btnSaveState_Click"  />
+        </StackPanel>
+        
+        <TextBlock Grid.Column="0" Grid.Row="7" FontWeight="Bold" Margin="10,10,0,0" Text="Select molecules to add to scheme" />
+        <ListBox Grid.Column="0" Grid.Row="8" Height="150" HorizontalAlignment="Left" Margin="10,10,0,0" Name="lbAllMol" SelectionMode="Multiple"
+                 ItemsSource="{Binding Path=Molecules}" DisplayMemberPath="Name" Grid.ColumnSpan="1" Width="280"                                                  
+                 />
+        <Button Grid.Column="0" Grid.Row="9"  Content="Save" Height="24" HorizontalAlignment="Left" Margin="10,10,0,0" Name="btnSave" Width="80" Click="btnSave_Click" />
+        <Button Grid.Column="0" Grid.Row="9" Content="Cancel" Height="24" HorizontalAlignment="Right" Margin="10,10,0,0" Name="btnCancel" Width="80" Click="btnCancel_Click" />
+        
+        
+    </Grid>
+</Window>
