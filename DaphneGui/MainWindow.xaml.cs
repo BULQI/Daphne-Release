@@ -792,7 +792,7 @@ namespace DaphneGui
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
-            abortButton.IsEnabled = enable;
+            abortButton.IsEnabled = false;
         }
 
         /// <summary>
@@ -2068,7 +2068,6 @@ namespace DaphneGui
 
         private void simControlUpdate()
         {
-            abortButton.IsEnabled = true;
             runButton.IsEnabled = true;
         }
 
@@ -2169,12 +2168,10 @@ namespace DaphneGui
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
-
-
             }
             else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
-                abortButton.IsEnabled = false;
+                abortButton.IsEnabled = true;
                 sim.RunStatus = Simulation.RUNSTAT_RUN;
                 runButton.Content = "Pause";
                 statusBarMessagePanel.Content = "Running...";
@@ -2272,6 +2269,7 @@ namespace DaphneGui
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";
                     statusBarMessagePanel.Content = "Running...";
+                    abortButton.IsEnabled = true;
                     sim.RunStatus = Simulation.RUNSTAT_RUN;
                 }
             }
@@ -2579,7 +2577,7 @@ namespace DaphneGui
         {
             runButton.IsEnabled = false;
             mutex = true;
-            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            if (sim.RunStatus == Simulation.RUNSTAT_RUN || sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
                 sim.RunStatus = Simulation.RUNSTAT_ABORT;
             }
