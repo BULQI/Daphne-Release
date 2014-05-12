@@ -72,7 +72,7 @@ namespace DaphneGui
         private Process devHelpProc;
         private static SimConfigurator configurator = null;
         private static int repetition;
-        private static bool argDev = false, argBatch = false;
+        private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
 
         /// <summary>
@@ -267,6 +267,7 @@ namespace DaphneGui
                         Console.WriteLine("\n -help or -h displays this online help.");
                         Console.WriteLine("\n -batch or -b causes the simulation to start running after it loads\n  and will close the application upon simulation finish.");
                         Console.WriteLine("\n -dev or -d sets the application path to the Visual Studio project;\n  omit when running a non-developer (installer) version.");
+                        Console.WriteLine("\n -save or -s saves the simulation state upon termination;\n  uses the reporter name if one is entered.");
                         Console.WriteLine("\n -file:name or -f:name specifies the simulation file by name.");
                         Console.WriteLine("\nPress Enter to return to the DOS prompt.");
                         Environment.Exit(-1);
@@ -279,6 +280,10 @@ namespace DaphneGui
                     else if (s == "-dev" || s == "-d")
                     {
                         argDev = true;
+                    }
+                    else if (s == "-save" || s == "-s")
+                    {
+                        argSave = true;
                     }
                     else if (s.StartsWith("-file") == true || s.StartsWith("-f") == true)
                     {
@@ -1741,14 +1746,21 @@ namespace DaphneGui
                             {
                                 runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                             }
-                            // for profiling: close the application after a completed experiment
-                            else if (ControlledProfiling() == true && sim.RunStatus == Simulation.RUNSTAT_FINISHED && repetition >= configurator.SimConfig.experiment_reps)
-                            {
-                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
-                                return;
-                            }
                             else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
                             {
+                                // autosave the state
+                                if(argSave == true)
+                                {
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
+                                }
+                                // for profiling: close the application after a completed experiment
+                                if (ControlledProfiling() == true && repetition >= configurator.SimConfig.experiment_reps)
+                                {
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
+                                    return;
+                                }
+
+                                // remaining: close reporter and update the gui
                                 if (Properties.Settings.Default.skipDataBaseWrites == false)
                                 {
                                     reporter.CloseReporter();

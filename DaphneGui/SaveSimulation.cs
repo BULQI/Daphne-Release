@@ -27,10 +27,8 @@ namespace DaphneGui
             {
                 //copy initial settings, only done once
                 SimConfigSaver = new SimConfigurator();
-                SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
-                string sp = configurator.FileName;
-                filepath_prefix = Path.Combine(System.IO.Path.GetDirectoryName(sp), System.IO.Path.GetFileNameWithoutExtension(sp));
             }
+            SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
  
             //clear the contents from last save
             foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
@@ -39,21 +37,42 @@ namespace DaphneGui
                 item.Value.cellPopDist.CellStates.Clear();
             }
 
-            //get filename to save
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.InitialDirectory = orig_path;
-            dlg.FileName = filepath_prefix + "-" + save_counter + ".json";
-            dlg.DefaultExt = ".json"; // Default file extension
-            dlg.Filter = "Sim State JSON docs (.json)|*.json"; // Filter files by extension
+            string sp = configurator.FileName;
 
-            // Show save file dialog box
-            if (dlg.ShowDialog() != true)
+            filepath_prefix = System.IO.Path.GetDirectoryName(sp);
+            if (argSave == false)
             {
-                runButton.IsEnabled = true;
-                resetButton.IsEnabled = true;
-                return;
+                //get filename to save
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+                filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp));
+                dlg.InitialDirectory = orig_path;
+                dlg.FileName = filepath_prefix + "-" + save_counter + ".json";
+                dlg.DefaultExt = ".json"; // Default file extension
+                dlg.Filter = "Sim State JSON docs (.json)|*.json"; // Filter files by extension
+
+                // Show save file dialog box
+                if (dlg.ShowDialog() != true)
+                {
+                    runButton.IsEnabled = true;
+                    resetButton.IsEnabled = true;
+                    return;
+                }
+                SimConfigSaver.FileName = dlg.FileName;
             }
-            SimConfigSaver.FileName = dlg.FileName;
+            else
+            {
+                if (reporter.FileName != "")
+                {
+                    filepath_prefix = Path.Combine(filepath_prefix, reporter.FileName);
+                }
+                else
+                {
+                    filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp)) + "-" + save_counter;
+                }
+                SimConfigSaver.FileName = filepath_prefix + ".json";
+            }
+
             save_counter++;
 
             SimConfiguration save_config = SimConfigSaver.SimConfig;
