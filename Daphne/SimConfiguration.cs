@@ -1739,8 +1739,8 @@ namespace Daphne
                 System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
                 ConfigReaction reac = (ConfigReaction)(fe.DataContext);
                 
-                ////output = string.Format(reac.daph_rate_const.Format, dd);
-                output = string.Format("", dd);
+                output = string.Format(reac.daph_rate_const.Format, dd);
+                //output = string.Format("", dd);
             }
             catch
             {
@@ -1755,8 +1755,8 @@ namespace Daphne
             double val = double.Parse((string)value);
             System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
             ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-            ////reac.daph_rate_const.Value = val;
-            reac.rate_const = val;
+            reac.daph_rate_const.Value = val;
+            //reac.rate_const = val;
 
             return val;
         }
