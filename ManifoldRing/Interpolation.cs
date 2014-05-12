@@ -83,7 +83,7 @@ namespace ManifoldRing
             return laplacian;
         }
 
-        public ScalarField DiffusionFlux(ScalarField flux, Transform t, InterpolatedNodes m)
+        public ScalarField DiffusionFlux(ScalarField flux, Transform t)
         {
             ScalarField temp = new ScalarField(m); 
             int n;

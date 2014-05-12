@@ -127,12 +127,12 @@ namespace ManifoldRing
         /// <returns>voxel volume as double</returns>
         public abstract double VoxelVolume();
         /// <summary>
-        /// Restriction of a scalar field to a manifold
+        /// Restriction of a scalar field to a boundary manifold
         /// </summary>
         /// <param name="from">Scalar field being restricted</param>
         /// <param name="to">Scalar field in restricted space</param>
         /// <returns></returns>
-        public abstract ScalarField Restrict(ScalarField from, double[] pos, ScalarField to);
+        public abstract ScalarField Restrict(ScalarField from, Transform t, ScalarField to);
         /// <summary>
         /// The points on a manifold that are used to exchange flux
         /// </summary>
@@ -199,8 +199,16 @@ namespace ManifoldRing
             return c;
         }
 
-        public override ScalarField Restrict(ScalarField from, double[] pos, ScalarField to)
+        /// <summary>
+        /// Restriction of a scalar field to an ME boundary manifold
+        /// </summary>
+        /// <param name="from">scalar field as represented on from.M, the interior manifold</param>
+        /// <param name="pos">scalar field as represented on to.M, the boundary manifold</param>
+        /// <param name="to">the location of the boundary manifold in the interior manifold</param>
+        /// <returns></returns>
+        public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
+            double[] pos = t.Translation;
             double[] grad = from.M.Grad(pos, from);
 
             to.array[0] = from.Value(pos);
@@ -856,20 +864,30 @@ namespace ManifoldRing
             return Interpolation.Gradient(x, sf);
         }
 
-        public override ScalarField Restrict(ScalarField from, double[] pos, ScalarField to)
+        /// <summary>
+        /// Restriction of a scalar field to an IL boundary manifold
+        /// </summary>
+        /// <param name="from">scalar field as represented on from.M, the interior manifold</param>
+        /// <param name="pos">scalar field as represented on to.M, the boundary manifold</param>
+        /// <param name="to">the location of the boundary manifold in the interior manifold</param>
+        /// <returns></returns>
+        public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
+            double[] pos = t.Translation;
             Vector x;
             for (int i = 0; i < ArraySize; i++)
             {
+                // the coordinates of this interpolation point in this boundary manifold
                 x = this.linearIndexToLocal(i);
-                to.array[i] = this.Value(x, from);
+                // x+pos are the coordinates of this interpolation point in the interior manifold
+                to.array[i] = from.M.Value(x+pos, from);
             }
             return to;
         }
 
         public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            return Interpolation.DiffusionFlux(flux, t, this);
+            return Interpolation.DiffusionFlux(flux, t);
         }
     }
 

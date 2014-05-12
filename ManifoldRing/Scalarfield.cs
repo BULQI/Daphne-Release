@@ -415,9 +415,11 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="from">The scalar field to be restricted</param>
         /// <param name="pos">The position of the restricted manifold in the space</param>
-        public void Restrict(ScalarField from, double[] pos)
+        // public void Restrict(ScalarField from, double[] pos)
+        public void Restrict(ScalarField from, Transform t)
         {
-            this.M.Restrict(from, pos, this);
+            // this.M.Restrict(from, pos, this);
+            this.M.Restrict(from, t, this);
         }
 
         /// <summary>
