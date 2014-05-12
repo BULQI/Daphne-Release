@@ -234,6 +234,11 @@ namespace ManifoldRing
         /// <param name="init">initializer object</param>
         public void Initialize(string type, double[] parameters)
         {
+            if (factory == null)
+            {
+                throw new Exception("Calling Initialize without a valid factory.");
+            }
+
             init = factory.Initialize(type);
             init.setParameters(parameters);
             if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
