@@ -2324,7 +2324,7 @@ namespace Daphne
     
     public class ConfigTransitionDriverElement
     {
-        public string driver_element_guid { get; set; }
+        //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
         public double Beta { get; set; }
         public string  driver_mol_guid_ref { get; set; }
@@ -2336,20 +2336,21 @@ namespace Daphne
 
         public ConfigTransitionDriverElement()
         {
-            Guid id = Guid.NewGuid();
-            driver_element_guid = id.ToString();
+            //Guid id = Guid.NewGuid();
+            //driver_element_guid = id.ToString();
         }
     }
 
     public class ConfigTransitionDriver
     {
+        public string Name { get; set; }
         public string driver_guid { get; set; }
         public int CurrentState { get; set; }
         public string StateName { get; set; }
         
         //public ObservableCollection<ConfigTransitionDriverElement> DriverElements { get; set; }
         public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
-        //public ObservableCollection<string> states;
+        public ObservableCollection<string> states;
 
         public ConfigTransitionDriver()
         {
@@ -2385,8 +2386,12 @@ namespace Daphne
         //For regulators
         public ConfigTransitionDriver Driver { get; set; }
    
-        //For epigenetic map
-        //TBD
+        //Epigenetic map information
+        //  Genes (guids) affected by differentiation states
+        public ObservableCollection<string> genes { get; set; }
+        //  Gene activations for each state
+        //  The order of states (rows) should match the order in Drive.states
+        public ObservableCollection<ObservableCollection<double>> activations { get; set; }
 
         public ConfigDiffScheme()
         {
@@ -3120,7 +3125,6 @@ namespace Daphne
 
             genes_guid_ref = new ObservableCollection<string>();
 
-            diff_scheme_guid_ref = new ObservableCollection<string>();
         }
 
         public ConfigCell Clone()
@@ -3170,7 +3174,7 @@ namespace Daphne
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
-        public ObservableCollection<string> diff_scheme_guid_ref { get; set; }
+        public string diff_scheme_guid_ref { get; set; }
     }
 
     public class CellPopDistType

@@ -563,7 +563,7 @@ namespace Daphne
 
             sc.entity_repository.cells.Add(gc);
 
-            //
+            /////////////////////////////////////////////
             // Leukocyte_dynamicReceptor_motile
             // Leukocyte with dynamic concentration of receptor molecules with locomotion driven by A*.
             //
@@ -639,104 +639,204 @@ namespace Daphne
                 }
             }
 
-            //HERE ADD GENES TO CELL
-            string gene = "gCXCR5";
-            string geneGuid = findGeneGuid(gene, sc);
-            if (geneGuid != null && geneGuid.Length > 0)
-            {
-                gc.genes_guid_ref.Add(geneGuid);
-            }
-
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 1e2;
 
-            string dsname = "DiffScheme1";
-            string ds_guid = findDiffSchemeGuid(dsname, sc);
-            gc.diff_scheme_guid_ref.Add(ds_guid);
+            sc.entity_repository.cells.Add(gc);
+
+
+            ///////////////////////////////////
+            // B cell
+            // B cell with differentiation states: 
+            //      Naive, Activated, Short-lived plasmacyte, Long-lived plasmacyte, Centroblast, Centrocyte, Memory
+            //
+            // TODO: add gene transcription
+
+            gc = new ConfigCell();
+            gc.CellName = "B cell";
+            gc.CellRadius = 5.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[4] { cxcr5Conc_5umRadius, 0, 0, 0};
+            type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[11] { 250,  0,     0,       1,       0,       0,       0,       0,        0,      0,       0};
+            type = new string[11] { "A", "A*", "Apop", "gApop", "Sdif1", "Sdif2", "Sdif3", "Sdif4", "Sdif5", "Sdif6", "Sdif7" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
+            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
+
+            // Genes
+            type = new string[8] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+            }
+
+            // Reactions in Cytosol
+            type = new string[3] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+                                          "A* -> A", "gApop -> Apop + gApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
+
+            gc.DragCoefficient = 1.0;
+            gc.TransductionConstant = 100;
+
+            // Add differentiatior
+            // Assumes all genes and signal molecules are present
+            gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell differentiation scheme", sc);
+
             sc.entity_repository.cells.Add(gc);
 
         }
 
-        //Only 1 diff scheme right now with three states
         private static void PredefinedDiffSchemesCreator(SimConfiguration sc)
         {
-            ConfigDiffScheme ds = new ConfigDiffScheme();     
-            ds.Name = "DiffScheme1";
+            // These can be reused to create other differentiation schemes
+            ConfigTransitionDriverElement driverElement;
+            ConfigTransitionDriver driver;
+            ConfigDiffScheme diffScheme;
+            ObservableCollection<ConfigTransitionDriverElement> row;
+            ObservableCollection<double> actRow;
+            string[] stateNames, geneNames;
+            double[,] activations, alpha, beta;
+            string[,] signal;
 
-            ConfigTransitionDriver dr = new ConfigTransitionDriver();
-            dr.StateName = "Centroblast";
+            ////////////////////////////
+            // B cell differentiatior 
+            ////////////////////////////
 
-            ConfigTransitionDriverElement de = new ConfigTransitionDriverElement();
-            de.Alpha = 10.10;
-            de.Beta = 20.20;
-            de.driver_mol_guid_ref = "";  // findMoleculeGuid("None", MoleculeLocation.Bulk, sc);            
-            dr.DriverElements.Add(de);
+            stateNames = new string[] { "naive", "activated", "short-lived plasmacyte", "centroblast", "centrocyte", "long-lived plasmacyte", "memory" };
+            geneNames = new string[]             { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII" };
+            activations = new double[,]          { { 0,        1,       1,      1,      0,       0,      0,      0 },  // naive
+                                                   { 0,        1,       1,      1,      0,       0,      1,      1 },  // activated
+                                                   { 0,        1,       1,      1,      1,       0,      0,      0 },  // slplasmacyte
+                                                   { 1,        0,       0,      0,      0,       1,      0,      0 },  // centroblast
+                                                   { 0,        1,       1,      1,      0,       0,      1,      1 },  // centrocyte
+                                                   { 0,        0,       1,      1,      1,       0,      0,      0 },  // llplasmacyte
+                                                   { 0,        0,       1,      1,      0,       0,      1,      1 },  // memory
+                                                };
+            //                                     naive    act       slp      cb       cc    llp     memory
+            signal = new string[,]          {     { "",   "sDif1",    "",     "",      "",    "",       ""      },  // naive
+                                                   { "",     "",     "sDif2", "sDif3",  "",    "",       ""      },  // activated
+                                                   { "",     "",       "",      "",     "",    "",       ""      },  // slplasmacyte
+                                                   { "",     "",       "",      "",   "sDif4", "",       ""      },  // centroblast
+                                                   { "",     "",       "",   "sDif5",   "",   "sDif6",  "sDif7"  },  // centrocyte
+                                                   { "",     "",       "",      "",     "",    "",       ""     },  // llplasmacyte
+                                                   { "",     "",       "",      "",     "",    "",       ""     },  // memory
+                                                };
+            //  need better values here             naive    act       slp      cb       cc    llp     memory
+            alpha = new double[,]          {       { 0,     1,        0,       0,      0,    0,       0   },  // naive
+                                                   { 0,     0,        1,       1,      0,    0,       0   },  // activated
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
+                                                   { 0,     0,        0,       0,      1,    0,       0   },  // centroblast
+                                                   { 0,     0,        0,       1,      0,    1,       1   },  // centrocyte
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // memory
+                                                };
+            //  need better values here             naive    act       slp      cb       cc    llp     memory
+            beta = new double[,]           {       { 0,     1,        0,       0,      0,    0,       0   },  // naive
+                                                   { 0,     0,        1,       1,      0,    0,       0   },  // activated
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // slplasmacyte
+                                                   { 0,     0,        0,       0,      1,    0,       0   },  // centroblast
+                                                   { 0,     0,        0,       1,      0,    1,       1   },  // centrocyte
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // llplasmacyte
+                                                   { 0,     0,        0,       0,      0,    0,       0   },  // memory
+                                                };
 
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 100.100;
-            de.Beta = 200.200;
-            de.driver_mol_guid_ref = findMoleculeGuid("A", MoleculeLocation.Bulk, sc);  //gsDif1
-            dr.DriverElements.Add(de);
+            diffScheme = new ConfigDiffScheme();
+            diffScheme.Name = "B cell differentiation scheme";
+            driver = new ConfigTransitionDriver();
+            driver.Name = "B cell drivers";
+            driver.CurrentState = 0;
+            driver.StateName = stateNames[driver.CurrentState];
 
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 300.100;
-            de.Beta = 300.200;
-            de.driver_mol_guid_ref = ""; // findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc);
-            dr.DriverElements.Add(de);
+            // Attach transition driver to differentiation scheme
+            diffScheme.Driver = driver;
+            // Transition Driver information
 
-            ds.Drivers.Add(dr);
+            // Add epigenetic map of activations
+            // Loop through states
+            diffScheme.genes = new ObservableCollection<string>();
+            diffScheme.activations = new ObservableCollection<ObservableCollection<double>>();
+            for (int i = 0; i < activations.GetLength(0); i++)
+            {
+                diffScheme.genes.Add(findGeneGuid(geneNames[i], sc));
+                actRow = new ObservableCollection<double>();
+                // Loop through genes
+                for (int j = 0; j < activations.GetLength(1); j++)
+                {
+                    actRow.Add(activations[i, j]);
+                }
+                diffScheme.activations.Add(actRow);
+            }
 
-            //----------------------------------------------------
+            // Add DriverElements to TransitionDriver
+            for (int i = 0; i < stateNames.Length; i++)
+            {
+                row = new ObservableCollection<ConfigTransitionDriverElement>();
+                for (int j = 0; j < stateNames.Length; j++)
+                {
+                    driverElement = new ConfigTransitionDriverElement();
+                    //if (signal[i, j] == "") continue;
+                    driverElement.CurrentState = i;
+                    driverElement.DestState = j;
+                    driverElement.CurrentStateName = stateNames[i];
+                    driverElement.DestStateName = stateNames[j];
+                    driverElement.Alpha = alpha[i,j];
+                    driverElement.Beta = beta[i,j];
+                    driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, sc);
+                    row.Add(driverElement);
+                }
+                driver.DriverElements.Add(row);
+            }
 
-            dr = new ConfigTransitionDriver();
-            dr.StateName = "Centrocyte";
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 10.10;
-            de.Beta = 20.20;
-            de.driver_mol_guid_ref = findMoleculeGuid("gCXCR4", MoleculeLocation.Bulk, sc);    //gsDif2        
-            dr.DriverElements.Add(de);
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 22.122;
-            de.Beta = 222.222;
-            de.driver_mol_guid_ref = ""; // findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc);
-            dr.DriverElements.Add(de);
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 333.300;
-            de.Beta = 333.333;
-            de.driver_mol_guid_ref = findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc);  //gsDif3
-            dr.DriverElements.Add(de);
-
-            ds.Drivers.Add(dr);
-
-            //-------------------------------------------------------
-
-            dr = new ConfigTransitionDriver();
-            dr.StateName = "Plasmacyte";
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 90.10;
-            de.Beta = 219.20;
-            de.driver_mol_guid_ref = "";  
-            dr.DriverElements.Add(de);
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 199.100;
-            de.Beta = 299.200;
-            de.driver_mol_guid_ref = ""; 
-            dr.DriverElements.Add(de);
-
-            de = new ConfigTransitionDriverElement();
-            de.Alpha = 39.100;
-            de.Beta = 390.200;
-            de.driver_mol_guid_ref = "";   
-            dr.DriverElements.Add(de);
-
-            ds.Drivers.Add(dr);
-
-            sc.entity_repository.diff_schemes.Add(ds);
+            // Add differentiation scheme to Entity Repository
+            sc.entity_repository.diff_schemes.Add(diffScheme);
         }
 
         private static void PredefinedGenesCreator(SimConfiguration sc)
@@ -748,13 +848,46 @@ namespace Daphne
 
             ConfigGene gene;
 
-            gene = new ConfigGene("gCXCR5", 1, 1.0);
+            gene = new ConfigGene("gCXCR5", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
             sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
 
-            gene = new ConfigGene("gCXCR4", 2, 2.0);
+            gene = new ConfigGene("gCXCR4", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
             sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gCXCL12", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gCXCL13", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gIgH", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+           
+            gene = new ConfigGene("gIgL", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gIgS", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gAID", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gBL1", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gMHCII", 2, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
         }
 
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
@@ -855,8 +988,38 @@ namespace Daphne
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
+
+            // Signaling (psuedo) molecules
+
+            // generic cell division
+            cm = new ConfigMolecule("Sdiv", 1.0, 1.0, 1.0);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // generic cell differentiation
+            for (int i = 1; i < 8; i++)
+            {
+                cm = new ConfigMolecule("Sdif" + i, 1.0, 1.0, 1.0);
+                sc.entity_repository.molecules.Add(cm);
+                sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            }
+
+            // generic cell apoptosis
+            cm = new ConfigMolecule("Sap", 1.0, 1.0, 1.0);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // generic t cell rescue
+            cm = new ConfigMolecule("SResc1", 1.0, 1.0, 1.0);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            cm = new ConfigMolecule("SResc2", 1.0, 1.0, 1.0);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
             //
-            // Genes
+            // Genes - these are molecular population versions that should be phased out (3-12-2014)
             //
 
             cm = new ConfigMolecule("gCXCR5", 1.0, 1.0, 1e-7);
@@ -870,6 +1033,8 @@ namespace Daphne
             cm = new ConfigMolecule("gApop", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+
         }
 
         //Following function needs to be called only once
