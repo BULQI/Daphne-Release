@@ -2341,11 +2341,6 @@ namespace Daphne
                     grp.OriginalRate = reac.rate_const;
                     grp.ReactionComplexRate = reac.rate_const;
 
-                    grp.OriginalRate2.Value = reac.daph_rate_const.Value;
-                    grp.OriginalRate2.SetMinMax();
-                    grp.ReactionComplexRate2.Value = reac.daph_rate_const.Value;
-                    grp.ReactionComplexRate2.SetMinMax();
-
                     crc.reactions_guid_ref.Add(reac.reaction_guid);
                     crc.ReactionRates.Add(grp);
                 }
@@ -2403,12 +2398,14 @@ namespace Daphne
                 for (int j = 0; j < signal.GetLength(1); j++)
                 {
                     ConfigTransitionDriverElement driverElement = new ConfigTransitionDriverElement();
+
+                    driverElement.CurrentState = i;
+                    driverElement.DestState = j;
+                    driverElement.CurrentStateName = stateName[i];
+                    driverElement.DestStateName = stateName[j];
+
                     if (signal[i, j] != "")
                     {
-                        driverElement.CurrentState = i;
-                        driverElement.DestState = j;
-                        driverElement.CurrentStateName = stateName[i];
-                        driverElement.DestStateName = stateName[j];
                         driverElement.Alpha = alpha[i, j];
                         driverElement.Beta = beta[i, j];
                         driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, sc);

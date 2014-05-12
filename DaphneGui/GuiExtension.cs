@@ -6,6 +6,8 @@ using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Daphne;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -30,7 +32,7 @@ namespace DaphneGui
            }
                return child;
         }
-
+        
         //There is a simple method for getting the current (selected) row of the DataGrid:
         public static DataGridRow GetSelectedRow(this DataGrid grid)
         {
@@ -64,6 +66,9 @@ namespace DaphneGui
                     presenter = GetVisualChild<DataGridCellsPresenter>(row);
                 }
 
+                if (presenter == null)
+                    return null;
+
                 DataGridCell cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
                 return cell;
             }
@@ -75,6 +80,12 @@ namespace DaphneGui
         {
             DataGridRow rowContainer = grid.GetRow(row);
             return grid.GetCell(rowContainer, column);
+        }
+
+        public static int FindRowIndex(this DataGrid grid, DataGridRow row)
+        {
+            int index = grid.ItemContainerGenerator.IndexFromContainer(row);
+            return index;
         }
 
         //The functions above are extension methods. Their use is simple:

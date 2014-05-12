@@ -580,6 +580,50 @@ namespace DaphneGui
             }
         }
 
+        private void selectedCellTransitionDriverListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
+            if (driver != null)
+            {
+                // Filter out driver if its guid does not match selected cell's driver guid
+                if (cell != null && driver.driver_guid == cell.death_driver_guid)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
+        private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme ds = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigGene gene = e.Item as ConfigGene;
+
+            if (ds != null)
+            {
+                if (ds.genes.Contains(gene.gene_guid))
+                {
+                    e.Accepted = false;
+                }
+                else
+                {
+                    e.Accepted = true;
+                }
+            }
+        }
+
         
 
         private bool EcmHasMolecule(string molguid)
@@ -1529,6 +1573,9 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
             if (lvCytosolAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+
+            DiffSchemeExpander_Expanded(null, null);
+
         }
 
         private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2815,54 +2862,494 @@ namespace DaphneGui
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            
             string diffGuid = er.diff_schemes[0].diff_scheme_guid;
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[diffGuid];
-
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+            {
+                //MessageBox.Show("No cell selected.");
+                return;
+            }
+
+
+            //EPIGENETIC MAP SECTION
+            EpigeneticMapGrid.Columns.Clear();
+            EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
+            EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
+
+            int nn = 0;
+            foreach (string gene_guid in diff_scheme.genes)
+            {
+                //SET UP COLUMN HEADINGS
+                ConfigGene gene = er.genes_dict[gene_guid];
+                DataGridTextColumn col = new DataGridTextColumn();
+                col.Header = gene.Name;
+                col.CanUserSort = false;
+                col.Binding = new Binding(string.Format("activations[{0}]", nn));
+                EpigeneticMapGrid.Columns.Add(col);
+                nn++;
+            }
+
+            //Begin - This code below adds an extra column to the epigenetic grid
+            //        This allows the user to add genes to the grid
+            DataGridTextColumn editor_col = new DataGridTextColumn();
+            editor_col.CanUserSort = false;
+            DataGridRowHeader header = new DataGridRowHeader();
+            DataTemplate rowHeaderTemplate = new DataTemplate();
+
+            CollectionViewSource cvs1 = new CollectionViewSource();
+            cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
+            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+            
+
+            CompositeCollection coll1 = new CompositeCollection();
+            ComboBoxItem nullItem1 = new ComboBoxItem();
+            nullItem1.IsEnabled = true;
+            nullItem1.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            //nullItem1.Content = "Add a gene";
+            nullItem1.SetValue(ComboBoxItem.ContentProperty, "Add a gene");
+            coll1.Add(nullItem1);
+            CollectionContainer cc1 = new CollectionContainer();
+            cc1.Collection = cvs1.View;
+            coll1.Add(cc1);
+
+            //Binding bb = new Binding("coll1");
+            //bb.Mode = BindingMode.TwoWay;
+            //bb.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+            FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
+            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
+            addGenesCombo.SetValue(ComboBox.SelectedValueProperty, nullItem1.Content);
+            //addGenesCombo.SetBinding(ComboBox.ItemsSourceProperty, coll1);
+            addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
+            
+            //addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, cvs1.View);
+
+            addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
+            addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
+            addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
+
+            rowHeaderTemplate.VisualTree = addGenesCombo;
+            header.ContentTemplate = rowHeaderTemplate;
+            editor_col.Header = header;
+            EpigeneticMapGrid.Columns.Add(editor_col);
+            //End 
+
+            EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
+
+            
+
+            //DIFFERENTIATION REGULATORS SECTION
+            ObservableCollection<ConfigTransitionDriverRow> TransitionData = diff_scheme.Driver.DriverElements;
 
             DiffRegGrid.Columns.Clear();
+            DiffRegGrid.DataContext = diff_scheme.Driver;
+            DiffRegGrid.ItemsSource = TransitionData;
 
-            ////ObservableCollection<ConfigTransitionDriver> TheData = diff_scheme.Drivers;
+            DiffRegGrid.CanUserAddRows = true;
+            DiffRegGrid.CanUserDeleteRows = true;
 
-            ////if (TheData.Count > 0)
-            ////{
-            ////    // Find num columns
-            ////    int numCols = TheData[0].DriverElements.Count;
-            ////    int i = 0;
-            ////    foreach (ConfigTransitionDriverElement driver_element in TheData[0].DriverElements)
-            ////    {
-            ////        DiffRegGrid.Columns.Add(
-            ////            new DataGridComboBoxColumn
-            ////            {
-            ////                Header = string.Format("{0}", TheData[i].StateName),
-            ////                ItemsSource = cell.cytosol.molpops,
-            ////                DisplayMemberPath = "Name",
-            ////                CanUserSort = false,
-            ////                //SelectedItemBinding = new Binding(string.Format("{0}", cs.MolName))                           
-            ////                //SelectedItemBinding = new Binding(string.Format("TheData[0].DriverElements[{0}].driver_mol_guid_ref", i))
-            ////                //SelectedItemBinding = new Binding("abcd")
-            ////                SelectedItemBinding = new Binding("Name")
-            ////            }
-            ////        );
-            ////        ////DiffRegGrid.Columns.Add(
-            ////        ////    new DataGridTemplateColumn
-            ////        ////    {
-            ////        ////        Header = string.Format("{0}", TheData[i].StateName),
-            ////        ////        CellTemplate = cellProductionDetailsTemplate,
-            ////        ////        CanUserSort = false
-            ////        ////    }
-            ////        ////);
+            int i = 0;
+            foreach (string s in diff_scheme.Driver.states)
+            {
+                //SET UP COLUMN HEADINGS
+                DataGridTemplateColumn col2 = new DataGridTemplateColumn();
+                col2.Header = s;
+                col2.CanUserSort = false;                
+                col2.MinWidth = 50;
 
-            ////        i++;
-            ////    }
-            ////}
+                //SET UP CELL LAYOUT
 
-            ////DiffRegGrid.ItemsSource = TheData;
-            ////DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(ItemContainerGenerator_StatusChanged);
+                //NON-EDITING TEMPLATE
+                DataTemplate cellTemplate = new DataTemplate();
+                
+                //SET UP A TEXTBLOCK ONLY
+                Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
+                bn.Mode = BindingMode.TwoWay;
+                bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
+                bn.Converter = c;
+                CollectionViewSource cvs = new CollectionViewSource();
+                cvs.Source = er.molecules;
+                bn.ConverterParameter = cvs;
+                FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
+                txtDriverMol.Name = "DriverTextBlock";
+                txtDriverMol.SetBinding(TextBlock.TextProperty, bn);
+                cellTemplate.VisualTree = txtDriverMol;
+
+                //EDITING TEMPLATE
+
+                //SET UP A STACK PANEL THAT WILL CONTAIN A COMBOBOX AND AN EXPANDER
+                FrameworkElementFactory spFactory = new FrameworkElementFactory(typeof(StackPanel));
+                spFactory.Name = "mySpFactory";
+                spFactory.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
+                
+                DataTemplate cellEditingTemplate = new DataTemplate();
+
+#if false
+                //This TextBlock is just for debugging
+                //SET UP THE TEXTBLOCK
+                Binding b = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
+                b.Mode = BindingMode.TwoWay;
+                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
+                b.Converter = c;
+                CollectionViewSource cvs = new CollectionViewSource();
+                cvs.Source = er.molecules;
+                b.ConverterParameter = cvs;
+                FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
+                txtDriverMol.Name = "DriverTextBlock";
+                txtDriverMol.SetBinding(TextBlock.TextProperty, b);
+                txtDriverMol.SetValue(TextBlock.MaxHeightProperty, 1);
+                txtDriverMol.SetValue(TextBlock.MaxWidthProperty, 1);
+                spFactory.AppendChild(txtDriverMol);     
+                
+                /* Sample XAML for MultiBinding
+                <MultiBinding 
+                    Converter="{StaticResource MolGuidToMolPopForDiffMultiConv}" 
+                    ConverterParameter="{StaticResource transitionDriversListView}">
+                    <Binding ElementName="CellsListBox" Path="SelectedItem.death_driver_guid"  />
+                    <Binding ElementName="CellsListBox" Path="SelectedItem.cytosol" />
+                </MultiBinding>
+                */
+           
+                //Sample code to create MultiBinding - not needed now but we might need to use something like this in the future
+                MolGuidToMolPopForDiffMultiConverter conv = new MolGuidToMolPopForDiffMultiConverter();
+                MultiBinding mb = new MultiBinding();
+                mb.Converter = conv;
+                //CollectionViewSource cvs2 = new CollectionViewSource();
+                //cvs2.Source = er.transition_drivers;
+                //mb.ConverterParameter = cvs2;
+
+                mb.ConverterParameter = cell.cytosol;
+
+                Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
+                b3.Mode = BindingMode.TwoWay;
+                b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                mb.Bindings.Add(b3);
+
+                Binding b4 = new Binding();
+                b4.Source = CellsListBox;
+                b4.Path = new PropertyPath("SelectedItem.cytosol");
+                b4.Mode = BindingMode.TwoWay;
+                b4.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+                mb.Bindings.Add(b4);
+                comboMolPops.SetBinding(ComboBox.SelectedValueProperty, mb);
+#endif
+                //SET UP THE COMBO BOX
+                FrameworkElementFactory comboMolPops = new FrameworkElementFactory(typeof(ComboBox));
+                comboMolPops.Name = "MolPopComboBox";
+
+                //------ Testing composite collection to insert "None" item
+                CompositeCollection coll = new CompositeCollection();
+                ComboBoxItem nullItem = new ComboBoxItem();
+                nullItem.IsEnabled = true;
+                nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+                nullItem.Content = "None";
+                coll.Add(nullItem);
+                CollectionContainer cc = new CollectionContainer();
+                cc.Collection = cell.cytosol.molpops;
+                coll.Add(cc);
+                comboMolPops.SetValue(ComboBox.ItemsSourceProperty, coll);
+                //--------------
+
+                ////comboMolPops.SetValue(ComboBox.ItemsSourceProperty, cell.cytosol.molpops);
+
+                //---------------------
+
+                comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
+                comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
+
+                //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
+                MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
+                Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
+                b3.Mode = BindingMode.TwoWay;
+                b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                b3.Converter = conv2;
+                b3.ConverterParameter = cell.cytosol;
+                comboMolPops.SetBinding(ComboBox.SelectedValueProperty, b3);
+                comboMolPops.SetValue(ComboBox.ToolTipProperty, "Mol Pop Name");
+
+                //comboMolPops.SetValue(ComboBox.DataContextProperty, elements[i]);
+                //comboMolPops.SetBinding(ComboBox.DataContextProperty, new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i)));
+
+                spFactory.AppendChild(comboMolPops);
+
+                //--------------------------------------------------
+
+                //SET UP AN EXPANDER THAT WILL CONTAIN ALPHA AND BETA
+
+                //This disables the expander if no driver molecule is selected
+                DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
+                Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
+                bEnabled.Mode = BindingMode.OneWay;
+                bEnabled.Converter = enabledConv;
+
+                //Expander
+                FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
+                expAlphaBeta.SetValue(Expander.HeaderProperty, "Values");
+                expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
+                expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
+                expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
+                expAlphaBeta.SetValue(Expander.BackgroundProperty, Brushes.White);
+                expAlphaBeta.SetBinding(Expander.IsEnabledProperty, bEnabled);
+
+                FrameworkElementFactory spProduction = new FrameworkElementFactory(typeof(StackPanel));
+                spProduction.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
+
+                FrameworkElementFactory spAlpha = new FrameworkElementFactory(typeof(StackPanel));
+                spAlpha.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+                FrameworkElementFactory tbAlpha = new FrameworkElementFactory(typeof(TextBlock));
+                tbAlpha.SetValue(TextBlock.TextProperty, "Background production rate:  ");
+                tbAlpha.SetValue(TextBlock.ToolTipProperty, "Background production rate");
+                tbAlpha.SetValue(TextBox.WidthProperty, 200D);
+                //tbAlpha.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
+                spAlpha.AppendChild(tbAlpha); 
+
+                //SET UP THE ALPHA TEXTBOX
+                Binding b = new Binding(string.Format("elements[{0}].Alpha", i));
+                b.Mode = BindingMode.TwoWay;
+                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                FrameworkElementFactory txtDriverAlpha = new FrameworkElementFactory(typeof(TextBox));
+                txtDriverAlpha.SetBinding(TextBox.TextProperty, b);
+
+                //Binding w = new Binding(string.Format("DiffRegGrid.Columns[{0}].ActualWidth", i));
+                //w.Mode = BindingMode.OneWay;
+                //txtDriverAlpha.SetBinding(TextBox.WidthProperty, w);
+                txtDriverAlpha.SetValue(TextBox.ToolTipProperty, "Background production rate");
+                txtDriverAlpha.SetValue(TextBox.WidthProperty, 50D);
+                spAlpha.AppendChild(txtDriverAlpha);
+                spProduction.AppendChild(spAlpha);
+
+                FrameworkElementFactory spBeta = new FrameworkElementFactory(typeof(StackPanel));
+                spBeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+                FrameworkElementFactory tbBeta = new FrameworkElementFactory(typeof(TextBlock));
+                tbBeta.SetValue(TextBlock.TextProperty, "Production rate linear coefficient:  ");
+                tbBeta.SetValue(TextBox.WidthProperty, 200D);
+                //tbBeta.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
+                tbBeta.SetValue(TextBlock.ToolTipProperty, "Production rate linear coefficient");
+                spBeta.AppendChild(tbBeta); 
+
+                //SET UP THE BETA TEXTBOX
+                Binding beta = new Binding(string.Format("elements[{0}].Beta", i));
+                beta.Mode = BindingMode.TwoWay;
+                beta.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                FrameworkElementFactory txtDriverBeta = new FrameworkElementFactory(typeof(TextBox));
+                txtDriverBeta.SetBinding(TextBox.TextProperty, beta);
+                txtDriverBeta.SetValue(TextBox.WidthProperty, 50D);
+                //txtDriverBeta.SetBinding(TextBox.WidthProperty, new Binding(""));
+                txtDriverBeta.SetValue(TextBox.ToolTipProperty, "Production rate linear coefficient");
+                spBeta.AppendChild(txtDriverBeta);
+                spProduction.AppendChild(spBeta);
+
+                expAlphaBeta.AppendChild(spProduction);
+                spFactory.AppendChild(expAlphaBeta);
+
+                //spFactory.AppendChild(spProduction);
+
+
+                //---------------------------
+
+                
+
+                //set the visual tree of the data template
+                cellEditingTemplate.VisualTree = spFactory;
+
+                //set cell layout
+                col2.CellTemplate = cellTemplate;
+                col2.CellEditingTemplate = cellEditingTemplate;
+
+                DiffRegGrid.Columns.Add(col2);
+                i++;
+            }
+
+            
+
+            DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(DiffRegItemContainerGenerator_StatusChanged);
+      
         }
 
-        private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		{
+            // TODO: Add event handler implementation here.
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+               
+            // iteratively traverse the visual tree
+            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+ 
+            if (dep == null)
+                return;
+ 
+            if (dep is DataGridColumnHeader)
+            {
+                DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
+                // do something
+                DataGridBehavior.SetHighlightColumn(columnHeader.Column, true);
+                //columnHeader.Column.SetValue(DataGridColumn.Highlight
+	            MessageBox.Show(columnHeader.Column.Header.ToString());
+		        //MessageBox.Show(columnHeader.Column.DisplayIndex.ToString());
+            }
+ 
+            if (dep is DataGridCell)
+            {
+                DataGridCell cell = dep as DataGridCell;
+                // do something
+            }
+	    }
+
+        private object ExtractBoundValue(DataGridRow row, DataGridCell cell)
+        {
+            // find the column that this cell belongs to
+            DataGridBoundColumn col = cell.Column as DataGridBoundColumn;
+            //DataGridTemplateColumn col = cell.Column as DataGridTemplateColumn;
+
+            if (col == null)
+                return null;
+
+            // find the property that this column is bound to
+            Binding binding = col.Binding as Binding;
+            //Binding binding = col.CellTemplate.
+            string boundPropertyName = binding.Path.Path;
+
+            // find the object that is related to this row
+            object data = row.Item;
+
+            // extract the property value
+            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(data);
+
+            PropertyDescriptor property = properties[boundPropertyName];
+            object value = property.GetValue(data);
+
+            return value;
+        }
+
+
+
+
+        //-----------------------------------------
+
+        /// <summary>
+        /// This handler gets called when user clicks on the "add genes" combo box in the upper right of the epigenetic map data grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void comboAddGeneToEpigeneticMap_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            if (combo != null && combo.Items.Count > 0)
+            {
+                if (combo.SelectedIndex > 0)
+                {
+                    ConfigGene gene = (ConfigGene)combo.SelectedItem;
+                    ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes[0];
+                    if (!scheme.genes.Contains(gene.gene_guid))
+                    {
+                        scheme.genes.Add(gene.gene_guid);
+                        foreach (ConfigActivationRow row in scheme.activationRows)
+                        {
+                            row.activations.Add(1.0);
+                        }
+                    }
+                }
+            }
+        }
+
+        //For adding a state
+        //ConfigActivationRow act = new ConfigActivationRow();
+        //scheme.activations.Add(act);
+        //int nRows = scheme.Driver.states.Count;
+        //                for (int i = 0; i < nRows; i++)
+        //                {
+        //                    act.values.Add(1.0);
+        //                }
+
+        /// <summary>
+        /// This method is called when the user changes a combo box selection in a grid cell
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void comboMolPops_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //This code is no good and is "iffed out". Was trying to get the grid cell where the user clicked.
+            //Apparently, this is very hard to do in wpf.  How nice!
+#if false
+            
+
+            ////ComboBox box = sender as ComboBox;
+            ////ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)box.SelectedItem;
+            ////string molguid = molpop.molecule_guid_ref;
+            ////DataGridTemplateColumn col = (DataGridTemplateColumn)(DiffRegGrid.Columns[0]);
+            ////DataTemplate dt = col.CellTemplate;
+            //ContentPresenter myContentPresenter = VisualTreeHelper.GetChild(   //FindVisualChild<ContentPresenter>(this);
+            //TextBlock tblock = dt.FindName("DriverTextBlock", (FrameworkElement)col.) as TextBlock;  //, (FrameworkElement)spFactory.) as TextBox;
+            //tbox.Text = molguid;
+
+            //DataGridColumn col2 = DiffRegGrid.CurrentColumn;
+            //DataGridRow row = DiffRegGrid.Items[0] as DataGridRow;
+            //DataGridCell cell = row.
+
+            //if (col2 == null)
+            //    return;
+
+            //ComboBoxItem  myComboBoxItem = (ComboBoxItem)(box.ItemContainerGenerator.ContainerFromItem(box.Items.CurrentItem));
+            //if (myComboBoxItem == null)
+            //    return;
+
+            //// Getting the ContentPresenter of myListBoxItem
+            //ContentPresenter myContentPresenter = GetVisualChild<ContentPresenter>(col2);
+
+            //// Finding textBlock from the DataTemplate that is set on that ContentPresenter
+            //DataTemplate myDataTemplate = myContentPresenter.ContentTemplate;
+            //TextBlock myTextBlock = (TextBlock)myDataTemplate.FindName("textBlock", myContentPresenter);
+#endif
+            //If there is no driver molecule defined for this transition element, then create one
+            ComboBox combo = sender as ComboBox;
+            //if (sender != null) 
+            //{
+
+            //    DataGridCellInfo cellInfo = DiffRegGrid.CurrentCell;
+            //    if (cellInfo == null)
+            //        return;
+
+            //    ConfigTransitionDriverRow driverRow = (ConfigTransitionDriverRow)cellInfo.Item;
+            //    //DataGridCell dgc = DiffRegGrid.CurrentCell.Ite
+
+            //    int nrow = -1;
+
+
+            //    if (nrow < 0)
+            //        return;
+
+            //    if (DiffRegGrid.CurrentColumn == null)
+            //        return;
+
+            //    int ncol = DiffRegGrid.CurrentColumn.DisplayIndex;
+            //    if (ncol < 0)
+            //        return;
+
+            //    ConfigTransitionDriver d = (ConfigTransitionDriver)(DiffRegGrid.DataContext);
+            //    if (d.DriverElements[nrow].elements[ncol] == null) {
+            //        ConfigTransitionDriverElement elem = new ConfigTransitionDriverElement();
+            //        ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)combo.SelectedItem;
+            //        elem.driver_mol_guid_ref = molpop.molecule_guid_ref;
+            //    }
+            //}
+        }
+
+        /// <summary>
+        /// This method gets called after the DiffRegGrid gui objects are generated. 
+        /// This is the place to disable the diagonal grid cells.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DiffRegItemContainerGenerator_StatusChanged(object sender, EventArgs e)
         {
             if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
             {
@@ -2882,14 +3369,226 @@ namespace DaphneGui
                                 columnCell.Background = Brushes.LightGray;
                             }
                         }
+                        else
+                        {
+                            //Trying to disable the expander here but this does not work, at least not yet.
+                            var columnCell = DiffRegGrid.GetCell(currRow, i);
+                            ComboBox cbx = FindChild<ComboBox>(columnCell, "comboMolPops");
+                        }
                     }
                 }
             }
         }
-       
-    }      
-    
-     
+
+        /// <summary>
+        /// This method gets called after the EpigeneticMapGrid gui objects are generated. 
+        /// Here we can set up the row headers.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EpigeneticItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            int rowcount = EpigeneticMapGrid.Items.Count;
+            for (int ii = 0; ii < rowcount; ii++)
+            {
+                if (ii >= MainWindow.SC.SimConfig.entity_repository.diff_schemes[0].Driver.states.Count)
+                    break;
+
+                DataGridRow row = EpigeneticMapGrid.GetRow(ii);
+                if (row != null)
+                {
+                    //HARD CODED RIGHT NOW TO USE diff_schemes[0]. THIS WILL HAVE TO BE UPDATED!!
+                    row.SetValue(DataGridRow.HeaderProperty, MainWindow.SC.SimConfig.entity_repository.diff_schemes[0].Driver.states[ii]);
+                }
+            }
+
+            EpigeneticMapGrid.ToolTip = "Activation Level";
+
+        }
+
+        /// <summary>
+        /// This method is called when the user clicks on a different row in the differentiation grid.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DiffRegGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            //ConfigMolecularPopulation molpop = e.AddedCells[0].Item as ConfigMolecularPopulation;
+            //string guid = molpop.molecule_guid_ref;
+
+            //ConfigTransitionDriverElement elem = entity_repository.transition_drivers_dict[death_driver_guid].DriverElements[0].elements[1];
+
+
+
+            var selectedRow = DiffRegGrid.GetSelectedRow();
+            if (selectedRow == null)
+                return;
+
+            //CellState cs = (CellState)selectedRow.Item;
+            //int row = CellStateGrid.Items.IndexOf(cs);
+            int row = DiffRegGrid.SelectedIndex;
+
+
+            //List<DataGridCellInfo> sel_list = (List<DataGridCellInfo>)DiffRegGrid.SelectedCells;
+
+            DataGridCellInfo selected = DiffRegGrid.SelectedCells[0];
+            DataGridColumn col = selected.Column;
+            //ConfigTransitionDriverRow row = (ConfigTransitionDriverRow)selected.Item;
+
+        }
+
+        private void comboDeathMolPop_DropDownOpened(object sender, EventArgs e)
+        {            
+        }
+
+        private void comboDeathMolPop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {            
+        }
+
+        // given a molecule name and location, find its guid
+        public static string findMoleculeGuid(string name, MoleculeLocation ml, SimConfiguration sc)
+        {
+            foreach (ConfigMolecule cm in sc.entity_repository.molecules)
+            {
+                if (cm.Name == name && cm.molecule_location == ml)
+                {
+                    return cm.molecule_guid;
+                }
+            }
+            return null;
+        }
+
+        private void DiffRegGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            //DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            //// iteratively traverse the visual tree
+            //while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
+            //{
+            //    dep = VisualTreeHelper.GetParent(dep);
+            //}
+
+            //if (dep == null)
+            //    return;
+
+            //if (dep is DataGridColumnHeader)
+            //{
+            //    DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
+            //    // do something
+            //}
+
+            //if (dep is DataGridCell)
+            //{
+            //    DataGridCell cell = dep as DataGridCell;
+            //    DataGridColumn col = cell.Column;
+            //    while ((dep != null) && !(dep is DataGridRow))
+            //    {
+            //        dep = VisualTreeHelper.GetParent(dep);
+            //    }
+
+            //    DataGridRow row = dep as DataGridRow;
+            //    int rownum = DiffRegGrid.FindRowIndex(row);
+            //    int colnum = cell.Column.DisplayIndex;
+
+            //    ConfigTransitionDriverRow driverRow = (ConfigTransitionDriverRow)(DiffRegGrid.Items[rownum]); //(ConfigTransitionDriverElement)ExtractBoundValue(row, cell);
+            //    ConfigTransitionDriverElement elem = driverRow.elements[colnum];
+            //    if (elem != null)
+            //    {
+            //        //txtAlpha.Text = elem.Alpha.ToString();
+            //        //txtBeta.Text = elem.Beta.ToString();
+
+            //        Binding b = new Binding("elem.Alpha");  //row.Item.elements[colnum]
+            //        b.Mode = BindingMode.TwoWay;
+            //        b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            //        txtAlpha.SetBinding(TextBox.TextProperty, b);
+                    
+            //    }
+            //}
+        }
+
+
+        public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
+        {
+            // Confirm parent and childName are valid. 
+            if (parent == null) return null;
+
+            T foundChild = null;
+
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                // If the child is not of the request child type child
+                T childType = child as T;
+                if (childType == null)
+                {
+                    // recursively drill down the tree
+                    foundChild = FindChild<T>(child, childName);
+
+                    // If the child is found, break so we do not overwrite the found child. 
+                    if (foundChild != null) break;
+                }
+                else if (!string.IsNullOrEmpty(childName))
+                {
+                    var frameworkElement = child as FrameworkElement;
+                    // If the child's name is set for search
+                    if (frameworkElement != null && frameworkElement.Name == childName)
+                    {
+                        // if the child's name is of the request name
+                        foundChild = (T)child;
+                        break;
+                    }
+                    else
+                    {
+                        // recursively drill down the tree
+                        foundChild = FindChild<T>(child, childName);
+
+                        // If the child is found, break so we do not overwrite the found child. 
+                        if (foundChild != null) break;
+                    }
+                }
+                else
+                {
+                    // child element found.
+                    foundChild = (T)child;
+                    break;
+                }
+            }
+
+            return foundChild;
+        }
+
+        public static T FindChild<T>(DependencyObject parent)  where T : DependencyObject
+        {
+            // Confirm parent is valid. 
+            if (parent == null) return null;
+
+            T foundChild = null;
+
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                // If the child is not of the request child type child
+                T childType = child as T;
+                if (childType == null)
+                {
+                    // recursively drill down the tree
+                    foundChild = FindChild<T>(child);
+
+                    // If the child is found, break so we do not overwrite the found child. 
+                    if (foundChild != null) break;
+                }
+                else
+                {
+                    // child element found.
+                    foundChild = (T)child;
+                    break;
+                }
+            }
+            return foundChild;
+        }
+    }    
 
     public class DataGridBehavior
     {
@@ -2943,8 +3642,120 @@ namespace DaphneGui
 
         #endregion // DisplayRowNumber
 
+        #region HighlightColumn
+
+        public static bool GetHighlightColumn(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(HighlightColumnProperty);
+        }
+
+        public static void SetHighlightColumn(DependencyObject obj, bool value)
+        {
+            obj.SetValue(HighlightColumnProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for HighlightColumn.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty HighlightColumnProperty =
+            DependencyProperty.RegisterAttached("HighlightColumn", typeof(bool),
+            typeof(DataGridBehavior), new FrameworkPropertyMetadata(false, OnHighlightColumnPropertyChanged));
+
+        public static bool GetIsCellHighlighted(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsCellHighlightedProperty);
+        }
+
+        public static void SetIsCellHighlighted(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IsCellHighlightedProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for IsCellHighlighted.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsCellHighlightedProperty =
+            DependencyProperty.RegisterAttached("IsCellHighlighted", typeof(bool), typeof(DataGridBehavior),
+            new UIPropertyMetadata(false));
+
+        private static void OnHighlightColumnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            Console.WriteLine(e.NewValue);
+            DataGridCell cell = sender as DataGridCell;
+
+            if (cell != null)
+            {
+                DataGrid dg = GetDataGridFromCell(cell);
+                DataGridColumn column = cell.Column;
+
+                for (int i = 0; i < dg.Items.Count; i++)
+                {
+                    DataGridRow row = dg.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
+                    DataGridCell currentCell = GetCell(row, column);
+                    if (currentCell != null)
+                    {
+                        currentCell.SetValue(DataGridBehavior.IsCellHighlightedProperty, e.NewValue);
+                    }
+                }
+
+            }
+        }
+
+        private static DataGrid GetDataGridFromCell(DataGridCell cell)
+        {
+            DataGrid retVal = null;
+            FrameworkElement fe = cell;
+            while ((retVal == null) && (fe != null))
+            {
+                if (fe is DataGrid)
+                    retVal = fe as DataGrid;
+                else
+                    fe = VisualTreeHelper.GetParent(fe) as FrameworkElement;
+            }
+            return retVal;
+        }
+
+        private static DataGridCell GetCell(DataGridRow row, DataGridColumn column)
+        {
+            DataGridCell retVal = null;
+            DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(row);
+            if (presenter != null)
+            {
+                for (int i = 0; i < presenter.Items.Count; i++)
+                {
+                    DataGridCell cell = presenter.ItemContainerGenerator.ContainerFromIndex(i) as DataGridCell;
+                    if ((cell != null) && (cell.Column == column))
+                    {
+                        retVal = cell;
+                        break;
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+        #endregion
+
+
         #region Get Visuals
-        
+
+        private static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = v as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(v);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+
         private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
         {
             List<T> visualCollection = new List<T>();

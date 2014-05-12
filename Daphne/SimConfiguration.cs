@@ -2319,7 +2319,7 @@ namespace Daphne
 
     }
     
-    public class ConfigTransitionDriverElement
+    public class ConfigTransitionDriverElement 
     {
         //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
@@ -2338,9 +2338,9 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriverRow
+    public class ConfigTransitionDriverRow 
     {
-        public ObservableCollection<ConfigTransitionDriverElement> elements;
+        public ObservableCollection<ConfigTransitionDriverElement> elements { get; set; }
 
         public ConfigTransitionDriverRow()
         {
@@ -2348,7 +2348,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriver
+    public class ConfigTransitionDriver 
     {
         public string Name { get; set; }
         public string driver_guid { get; set; }
@@ -2356,7 +2356,7 @@ namespace Daphne
         public string StateName { get; set; }
         
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
-        public ObservableCollection<string> states;
+        public ObservableCollection<string> states { get; set; }
 
         public ConfigTransitionDriver()
         {
@@ -2381,9 +2381,9 @@ namespace Daphne
     //    ------------------------------------------------------  
     //    Centroblast        none         gCXCR5       gIg       
     //    Centrocyte        gsDiv          none       gsDif2        
-    //    Plasmacyte        gsDif1        gsDif2       none        
-
-    public class ConfigDiffScheme
+    //    Plasmacyte        gsDif1        gsDif2       none   
+    
+    public class ConfigDiffScheme 
     {
         public string diff_scheme_guid { get; set; }
         public string Name { get; set; }
@@ -2407,7 +2407,7 @@ namespace Daphne
 
     public class ConfigActivationRow
     {
-        public ObservableCollection<double> activations;
+        public ObservableCollection<double> activations { get; set; }
 
         public ConfigActivationRow()
         {
@@ -2976,47 +2976,47 @@ namespace Daphne
             }
         }
 
-        [JsonIgnore]
-        private DaphneDouble originalRate2;
-        [JsonIgnore]
-        public DaphneDouble OriginalRate2
-        {
-            get
-            {
-                return originalRate2;
-            }
-            set
-            {
-                
-                    originalRate2 = value;
-                    OnPropertyChanged("OriginalRate2");
-                
-            }
-        }
-
-        [JsonIgnore]
-        private DaphneDouble reactionComplexRate2;
         //[JsonIgnore]
-        public DaphneDouble ReactionComplexRate2
-        {
-            get
-            {
-                return reactionComplexRate2;
-            }
-            set
-            {
+        //private DaphneDouble originalRate2;
+        //[JsonIgnore]
+        //public DaphneDouble OriginalRate2
+        //{
+        //    get
+        //    {
+        //        return originalRate2;
+        //    }
+        //    set
+        //    {
                 
-                    reactionComplexRate2 = value;
-                    OnPropertyChanged("ReactionComplexRate2");
-               
-            }
-        }
+        //            originalRate2 = value;
+        //            OnPropertyChanged("OriginalRate2");
+                
+        //    }
+        //}
 
-        public ConfigReactionGuidRatePair()
-        {
-            OriginalRate2 = new DaphneDouble();
-            ReactionComplexRate2 = new DaphneDouble();
-        }
+        //[JsonIgnore]
+        //private DaphneDouble reactionComplexRate2;
+        ////[JsonIgnore]
+        //public DaphneDouble ReactionComplexRate2
+        //{
+        //    get
+        //    {
+        //        return reactionComplexRate2;
+        //    }
+        //    set
+        //    {
+                
+        //            reactionComplexRate2 = value;
+        //            OnPropertyChanged("ReactionComplexRate2");
+               
+        //    }
+        //}
+
+        //public ConfigReactionGuidRatePair()
+        //{
+        //    OriginalRate2 = new DaphneDouble();
+        //    ReactionComplexRate2 = new DaphneDouble();
+        //}
     }
 
     public class ConfigReactionComplex : EntityModelBase
@@ -3143,7 +3143,7 @@ namespace Daphne
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
-            ReadOnly = true;
+            ReadOnly = false;
 
             genes_guid_ref = new ObservableCollection<string>();
             
@@ -3202,9 +3202,9 @@ namespace Daphne
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
-        public string death_driver_guid;
+        public string death_driver_guid { get; set; }
         // Guid for ConfigTransitionDriver that drives cell division
-        public string div_driver_guid;
+        public string div_driver_guid { get; set; }
 
         public int CurrentDeathState;
         public int CurrentDivState;
@@ -4063,6 +4063,10 @@ namespace Daphne
         {
             string guid = value as string;
             string mol_name = "";
+
+            if (parameter == null || guid == null)
+                return mol_name;
+
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
             ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
             if (mol_list != null)
@@ -4237,6 +4241,432 @@ namespace Daphne
             // TODO: Should probably put something real here, but right now it never gets called,
             // so I'm not sure what the value and parameter objects would be...
             return "y";
+        }
+    }
+
+    /// <summary>
+    /// Convert death driver guid to its driver_molecule_guid_ref
+    ///
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class DeathDriverGuidToMolGuidConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string mol_guid = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        break;
+                    }
+                }
+            }
+            return mol_guid;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Convert death driver guid to its alpha value
+    ///
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(double))]
+    public class DeathDriverGuidToAlphaConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            double retval = 0;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        retval = row.elements[1].Alpha;
+                        break;
+                    }
+                }
+            }
+            return retval;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: To go back from gui to simconfig
+            string token = value as string;
+            double newval = double.Parse(token);
+            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            //if (drivers != null)
+            //{
+            //    foreach (ConfigTransitionDriver driver in drivers)
+            //    {
+            //        if (driver.driver_guid == guid)
+            //        {
+            //            ConfigTransitionDriverRow row = driver.DriverElements[0];
+            //            row.elements[1].Alpha = newval;
+            //            break;
+            //        }
+            //    }
+            //}
+            return newval;
+        }
+    }
+
+    /// <summary>
+    /// Convert death driver guid to its beta value
+    ///
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(double))]
+    public class DeathDriverGuidToBetaConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            double retval = 0;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        retval = row.elements[1].Beta;
+                        break;
+                    }
+                }
+            }
+            return retval;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: To go bafrom gui to simconfig
+            string guid = value as string;
+            double newval = double.Parse(guid);
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        row.elements[1].Beta = newval;
+                        break;
+                    }
+                }
+            }
+            return newval;
+        }
+    }
+
+    /// <summary>
+    /// Convert death driver guid to its driver element (note only alive to dead)!
+    ///
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(ConfigTransitionDriverElement))]
+    public class DeathDriverGuidToDriverElementConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            ConfigTransitionDriverElement elem = null;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        elem = row.elements[1];
+                        break;
+                    }
+                }
+            }
+            return elem;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Convert death driver guid to its driver_molecule_guid_ref
+    ///
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class DeathDriverGuidToMolNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string mol_guid = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        break;
+                    }
+                }
+            }
+            return mol_guid;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    //MolGuidToMolPopNameConverter
+    /// <summary>
+    /// Converts a molecule guid to a mol pop name given a ConfigCompartment.
+    /// So in the compartment, whichever mol pop has the molecule guid, its name is returned.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class MolGuidToMolPopNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string mol_pop_name = "";
+            ConfigCompartment cc = parameter as ConfigCompartment;
+
+            foreach(ConfigMolecularPopulation molpop in cc.molpops) {
+                if (molpop.molecule_guid_ref == guid) {
+                    mol_pop_name = molpop.Name;
+                    break;
+                }
+            }
+            
+            return mol_pop_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    //MolGuidToMolPopNameMultiConverter
+    public class MolGuidToMolPopMultiConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string death_guid = (values[0] == null) ? string.Empty : values[0].ToString();
+            ConfigCompartment cc = values[1] as ConfigCompartment;
+
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+
+            ConfigMolecularPopulation MyMolPop = null;
+            string mol_guid = "";
+
+            if (drivers != null)
+            {
+                foreach (ConfigTransitionDriver driver in drivers)
+                {
+                    if (driver.driver_guid == death_guid)
+                    {
+                        ConfigTransitionDriverRow row = driver.DriverElements[0];
+                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        break;
+                    }
+                }
+            }
+
+            if (cc != null)
+            {
+                foreach (ConfigMolecularPopulation molpop in cc.molpops)
+                {
+                    if (molpop.molecule_guid_ref == mol_guid)
+                    {
+                        MyMolPop = molpop;
+                        break;
+                    }
+                }
+            }
+
+            return MyMolPop;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            object[] retval = new object[2];
+
+            if (value != null)
+            {
+                ConfigMolecularPopulation MyMolPop = value as ConfigMolecularPopulation;
+                if (MyMolPop != null)
+                {
+                    retval[0] = MyMolPop.molecule_guid_ref;
+                    retval[1] = value;
+                }
+            }
+
+            return retval;
+        }
+    }
+
+    public class MolGuidToMolPopForDiffConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string driver_mol_guid = value as string;
+            ConfigCompartment cc =parameter as ConfigCompartment;
+            ConfigMolecularPopulation MyMolPop = null;
+
+            if (driver_mol_guid == null || cc == null || driver_mol_guid.Length == 0)
+                return MyMolPop;
+
+            foreach (ConfigMolecularPopulation molpop in cc.molpops)
+            {
+                if (molpop.molecule_guid_ref == driver_mol_guid)
+                {
+                    MyMolPop = molpop;
+                    break;
+                }
+            }
+
+            return MyMolPop;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
+            string guid = "";
+            if (molpop != null)
+                guid = molpop.molecule_guid_ref;
+
+            return guid;
+        }
+
+    }
+
+    public class DriverElementToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string driver_mol_guid = value as string;
+            bool enabled = true;
+
+            if (driver_mol_guid == null || driver_mol_guid.Length == 0)
+                enabled = false;
+            
+            return enabled;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+
+    }
+
+    public class MolGuidToMolPopForDiffMultiConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string driver_mol_guid = (values[0] == null) ? string.Empty : values[0].ToString();
+            ConfigCompartment cc = values[1] as ConfigCompartment;
+
+            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+
+            ConfigMolecularPopulation MyMolPop = null;
+
+            if (driver_mol_guid == null || cc == null)
+                return MyMolPop;
+            
+            foreach (ConfigMolecularPopulation molpop in cc.molpops)
+            {
+                if (molpop.molecule_guid_ref == driver_mol_guid)
+                {
+                    MyMolPop = molpop;
+                    break;
+                }
+            }
+
+            return MyMolPop;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        {
+            //val = molpop
+            //targetTypes has some guid and compartment
+            //parameter has drivers
+            //where is death_guid??  death guid?
+
+
+            object[] retval = new object[2];
+
+            if (value != null)
+            {
+                ConfigMolecularPopulation MyMolPop = value as ConfigMolecularPopulation;
+                if (MyMolPop != null)
+                {
+                    retval[1] = MyMolPop.molecule_guid_ref;
+                    retval[0] = value;
+                }
+            }
+
+            return retval;
+
+
+            //ConfigCompartment cc = targetTypes[1] as ConfigCompartment;
+            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
+            //if (cc != null)
+            //{
+            //    foreach (ConfigMolecularPopulation molpop in cc.molpops)
+            //    {
+            //        if (molpop.molecule_guid_ref == mol_guid)
+            //        {
+            //            MyMolPop = molpop;
+            //            break;
+            //        }
+            //    }
+            //}
+
+            //throw new NotImplementedException();
         }
     }
 
