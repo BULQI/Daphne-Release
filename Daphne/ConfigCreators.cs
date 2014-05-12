@@ -12,8 +12,10 @@ namespace Daphne
 {
     public class ConfigCreators
     {
-        public static void LoadDefaultGlobalParameters(SimConfiguration sc)
+        public static void LoadDefaultGlobalParameters(SimConfigurator configurator)
         {
+            SimConfiguration sc = configurator.SimConfig;
+
             // molecules
             PredefinedMoleculesCreator(sc);
 
@@ -23,15 +25,30 @@ namespace Daphne
             //code to create reactions
             PredefinedReactionsCreator(sc);
 
-            // cells
+            //cells
             PredefinedCellsCreator(sc);
 
             //reaction complexes
             PredefinedReactionComplexesCreator(sc);
+
+            //deserialize user defined objects
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            if (File.Exists(userfilename))
+            {
+                string readText = File.ReadAllText(userfilename);
+
+                configurator.userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+                configurator.userDefGroup.CopyToConfig(sc);
+            }
         }
 
-        public static void CreateAndSerializeLigandReceptorScenario(SimConfiguration sc)
+        public static void CreateAndSerializeLigandReceptorScenario(SimConfigurator configurator)
         {
+            SimConfiguration sc = configurator.SimConfig;
+
             // Experiment
             sc.experiment_name = "Ligand Receptor Scenario";
             sc.experiment_description = "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.";
@@ -50,7 +67,7 @@ namespace Daphne
 
 
             // Global Paramters
-            LoadDefaultGlobalParameters(sc);
+            LoadDefaultGlobalParameters(configurator);
 
             // ECM MOLECULES
 
@@ -152,8 +169,10 @@ namespace Daphne
         /// <summary>
         /// 
         /// </summary>
-        public static void CreateAndSerializeDriverLocomotionScenario(SimConfiguration sc)
+        public static void CreateAndSerializeDriverLocomotionScenario(SimConfigurator configurator)
         {
+            SimConfiguration sc = configurator.SimConfig;
+
             // Experiment
             sc.experiment_name = "Cell locomotion with driver molecule.";
             sc.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) created by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
@@ -171,7 +190,7 @@ namespace Daphne
             sc.scenario.time_config.sampling_interval = sc.scenario.time_config.duration/100;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(sc);
+            LoadDefaultGlobalParameters(configurator);
 
             //// Gaussian Distrtibution
             //// Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
@@ -303,8 +322,10 @@ namespace Daphne
         /// <summary>
         /// New default scenario for first pass of Daphne
         /// </summary>
-        public static void CreateAndSerializeDiffusionScenario(SimConfiguration sc)
+        public static void CreateAndSerializeDiffusionScenario(SimConfigurator configurator)
         {
+            SimConfiguration sc = configurator.SimConfig;
+
             // Experiment
             sc.experiment_name = "Diffusion Scenario";
             sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Gaussian initial distribution. No flux BCs.";
@@ -318,7 +339,7 @@ namespace Daphne
             sc.scenario.environment.gridstep = 50;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(sc);
+            LoadDefaultGlobalParameters(configurator);
             //ChartWindow = ReacComplexChartWindow;
 
             // Gaussian Distrtibution
@@ -384,8 +405,10 @@ namespace Daphne
          /// <summary>
         /// New default scenario for first pass of Daphne
         /// </summary>
-        public static void CreateAndSerializeBlankScenario(SimConfiguration sc)
+        public static void CreateAndSerializeBlankScenario(SimConfigurator configurator)
         {
+            SimConfiguration sc = configurator.SimConfig;
+
             // Experiment
             sc.experiment_name = "Blank Scenario";
             sc.experiment_description = "Libraries only.";
@@ -394,7 +417,7 @@ namespace Daphne
             sc.scenario.time_config.sampling_interval = 1440;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(sc);
+            LoadDefaultGlobalParameters(configurator);
 
         }
 
@@ -1519,6 +1542,10 @@ namespace Daphne
                     grp.Guid = reac.reaction_guid;
                     grp.OriginalRate = reac.rate_const;
                     grp.ReactionComplexRate = reac.rate_const;
+
+                    grp.OriginalRate2.Value = reac.daph_rate_const.Value;
+                    grp.ReactionComplexRate2.Value = reac.daph_rate_const.Value;    
+
                     crc.reactions_guid_ref.Add(reac.reaction_guid);
                     crc.ReactionRates.Add(grp);
                 }

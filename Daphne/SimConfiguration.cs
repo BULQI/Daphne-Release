@@ -43,6 +43,15 @@ namespace Daphne
             this.SimConfig = new SimConfiguration();
 
             userDefGroup = new UserDefinedGroup();
+            string UserDefFileName = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            if (File.Exists(UserDefFileName))
+            {
+                string readText = File.ReadAllText(UserDefFileName);
+                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, Settings);
+            }
         }
 
         public void SerializeSimConfigToFile(bool tempFiles = false)
@@ -117,6 +126,9 @@ namespace Daphne
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
             SimConfig.InitializeStorageClasses();
 
+            //I think we need to remove the user def items if any, from SimConfig and copy latest userdefgroup items into the config
+            //SimConfig.RemoveUserDefinedItems();
+
             //deserialize user defined objects
             jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
             if (File.Exists(jsonFile))
@@ -125,6 +137,7 @@ namespace Daphne
                 userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
                 userDefGroup.CopyToConfig(SimConfig);
             }
+
         }
 
         public void DeserializeSimConfigFromString(string simConfigJson)
@@ -135,9 +148,10 @@ namespace Daphne
             SimConfig.InitializeStorageClasses();
 
             //deserialize user defined items
-            if (File.Exists("\\config\\UserDefinedGroup.json"))
+            string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            if (File.Exists(userfilename))
             {
-                string readText = File.ReadAllText("\\config\\UserDefinedGroup.json");
+                string readText = File.ReadAllText(userfilename);
                 userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
                 userDefGroup.CopyToConfig(SimConfig);
             }
@@ -190,6 +204,11 @@ namespace Daphne
             {
                 if (mol.ReadOnly == false)
                 {
+                    if (Contains(mol))
+                    {
+                        user_molecules.Remove(mol);
+                    }
+
                     user_molecules.Add(mol);                    
                 }
             }
@@ -197,17 +216,71 @@ namespace Daphne
             {
                 if (cell.ReadOnly == false)
                 {
+                    if (Contains(cell))
+                    {
+                        user_cells.Remove(cell);
+                    }
+
                     user_cells.Add(cell);
                 }
             }
             foreach (ConfigReaction reac in sc.entity_repository.reactions)
             {
-                if (reac.ReadOnly == false)
+                if (reac.ReadOnly == false && !Contains(reac))
                 {
+                    if (Contains(reac))
+                    {
+                        user_reactions.Remove(reac);
+                    }
+
                     user_reactions.Add(reac);
                 }
             }
 
+        }
+
+        public bool Contains(object userdefitem)
+        {
+            bool ret = false;
+
+            if (userdefitem.GetType() == typeof(ConfigMolecule))
+            {
+                ConfigMolecule inputmol = (ConfigMolecule)userdefitem;
+                foreach (ConfigMolecule mol in user_molecules)
+                {
+                    if (mol.molecule_guid == inputmol.molecule_guid)
+                    {
+                        ret = true;
+                        break;
+                    }
+                }
+            }
+            if (userdefitem.GetType() == typeof(ConfigCell))
+            {
+                ConfigCell inputcell = (ConfigCell)userdefitem;
+                foreach (ConfigCell cell in user_cells)
+                {
+                    if (cell.cell_guid == inputcell.cell_guid)
+                    {
+                        ret = true;
+                        break;
+                    }
+                }
+            }
+            if (userdefitem.GetType() == typeof(ConfigReaction))
+            {
+                ConfigReaction inputreac = (ConfigReaction)userdefitem;
+                foreach (ConfigReaction reac in user_reactions)
+                {
+                    if (reac.reaction_guid == inputreac.reaction_guid)
+                    {
+                        ret = true;
+                        break;
+                    }
+                }
+            }
+
+            return ret;
         }
 
     }
@@ -526,6 +599,35 @@ namespace Daphne
             bs.z_trans_max = 1.5 * scenario.environment.extent_z;
             bs.z_trans_min = -scenario.environment.extent_z / 2.0;
         }
+
+        public void RemoveUserDefinedItems()
+        {
+            foreach (ConfigMolecule mol in entity_repository.molecules.ToList())
+            {
+                if (mol.ReadOnly == false)
+                {
+                    entity_repository.molecules_dict.Remove(mol.molecule_guid);
+                    entity_repository.molecules.Remove(mol);
+                }
+            }
+            foreach (ConfigCell cell in entity_repository.cells.ToList())
+            {
+                if (cell.ReadOnly == false)
+                {
+                    entity_repository.cells_dict.Remove(cell.cell_guid);
+                    entity_repository.cells.Remove(cell);
+                }
+            }
+            foreach (ConfigReaction reac in entity_repository.reactions.ToList())
+            {
+                if (reac.ReadOnly == false)
+                {
+                    entity_repository.reactions_dict.Remove(reac.reaction_guid);
+                    entity_repository.reactions.Remove(reac);
+                }
+            }
+        }
+
 
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
@@ -2502,11 +2604,47 @@ namespace Daphne
         }
     }
 
-    public class ConfigReactionGuidRatePair
+    public class ConfigReactionGuidRatePair : EntityModelBase
     {
         public string Guid { get; set; }
-        public double OriginalRate { get; set; }
-        public double ReactionComplexRate { get; set; }
+
+        private double originalRate;
+        public double OriginalRate 
+        {
+            get
+            {
+                return originalRate;
+            }
+            set
+            {
+                originalRate = value;
+                OnPropertyChanged("OriginalRate");
+            }
+        }
+        private double reactionComplexRate;
+        public double ReactionComplexRate
+        {
+            get
+            {
+                return reactionComplexRate;
+            }
+            set
+            {
+                reactionComplexRate = value;
+                OnPropertyChanged("ReactionComplexRate");
+            }
+        }
+
+        [JsonIgnore]
+        public DaphneDouble OriginalRate2 { get; set; }
+        [JsonIgnore]
+        public DaphneDouble ReactionComplexRate2 { get; set; }
+
+        public ConfigReactionGuidRatePair()
+        {
+            OriginalRate2 = new DaphneDouble();
+            ReactionComplexRate2 = new DaphneDouble();
+        }
     }
 
     public class ConfigReactionComplex : EntityModelBase
@@ -2529,7 +2667,13 @@ namespace Daphne
         }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
         public bool ReadOnly { get; set; }
-        public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; }
+
+        public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
+
+        [JsonIgnore]
+        public ReactionComplexProcessor Processor { get; set; }
+        [JsonIgnore]
+        public Simulation RCSim { get; set; }
 
         public ConfigReactionComplex()
         {
@@ -2539,6 +2683,9 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReadOnly = true;
+            Processor = new ReactionComplexProcessor();
+            RCSim = new Simulation();
+            
         }
         public ConfigReactionComplex(string name)
         {
@@ -2549,6 +2696,9 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
+            Processor = new ReactionComplexProcessor();
+            RCSim = new Simulation();
+            
         }
         
         public ConfigReactionComplex Clone()

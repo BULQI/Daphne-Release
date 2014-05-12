@@ -147,14 +147,12 @@
       <DependentUpon>EditRCReactions.xaml</DependentUpon>
     </Compile>
     <Compile Include="GuiExtension.cs" />
-    <Compile Include="Workbench\ReactionComplex.cs" />
     <Compile Include="RecentFileList.cs" />
     <Compile Include="SimConfigToolWindow.xaml.cs">
       <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
-    <Compile Include="Workbench\ReactionComplexProcessor.cs" />
     <Page Include="Dictionary1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
