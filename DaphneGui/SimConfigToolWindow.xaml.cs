@@ -251,26 +251,12 @@ namespace DaphneGui
                         current_item.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
-                        //MolPopLinear cur = current_mol.mpInfo.mp_distribution as MolPopLinear;
-                        //if (cur.boundaryCondition.Count != 2)
-                        //{
-                        //    MessageBox.Show("Specify values for boundary conditions first.");
-                        //    return;
-                        //}
                         MolPopLinear molpoplin = new MolPopLinear();
                         // X face is default
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0));
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                       //molpoplin.dim = 0;
-                        //molpoplin.x1 = 0;
-                        //molpoplin.boundaryCondition = new List<BoundaryCondition>(); 
-                        //BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0);                    
-                        //molpoplin.boundaryCondition.Add(bc);
-                        //bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
-                        //molpoplin.boundaryCondition.Add(bc);
-
                         current_item.mp_dist_name = "Linear";
                         current_item.mp_distribution = molpoplin;
                         current_item.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -278,11 +264,6 @@ namespace DaphneGui
                         break;
 
                     case MolPopDistributionType.Gaussian:
-                        // Make sure there is at least one gauss_spec in repository
-                        ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                        ////{
-                        ////    this.AddGaussianSpecification();
-                        ////}
                         MolPopGaussian mpg = new MolPopGaussian();
 
                         AddGaussianSpecification(mpg);
@@ -296,7 +277,6 @@ namespace DaphneGui
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
                 }
-                //}
             }
         }
 
