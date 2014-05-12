@@ -2678,7 +2678,7 @@ namespace Daphne
         {
             // string msg = string.Format("{0} ({1}) ({2}) Finalized", this.GetType().Name, this.DisplayName, this.GetHashCode());
             // string msg = string.Format("{0} ({1}) Finalized", this.GetType().Name, this.GetHashCode());
-            // MainWindow.debugOut(String.Format(msg));
+            // Console.WriteLine(String.Format(msg));
         }
 #endif
 

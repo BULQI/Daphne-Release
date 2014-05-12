@@ -41,6 +41,10 @@ namespace Daphne
         /// The radius of the cell
         /// </summary>
         private double radius;
+        /// <summary>
+        /// force resulting from pair interaction
+        /// </summary>
+        private double[] pairForce;
 
 
         public Cell(double radius)
@@ -52,8 +56,9 @@ namespace Daphne
             Alive = true;
             Cytokinetic = false;
             this.radius = radius;
+            pairForce = new double[3];
 
-            Index = safeIndex++;
+            Index = SafeCellIndex++;
         }
 
         [Inject]
@@ -139,8 +144,10 @@ namespace Daphne
         private SpatialState state;
 
         public int Index { get; private set; }
-        private static int safeIndex = 0;
+        public static int SafeCellIndex = 0;
         public int CellSetId { get; set; }
+        protected int[] gridIndex = { -1, -1, -1 };
+        public static double defaultRadius = 5.0;
 
         public SpatialState State
         {
@@ -157,6 +164,33 @@ namespace Daphne
         public double Radius
         {
             get { return radius; }
+        }
+
+        /// <summary>
+        /// retrieve the cell's grid index
+        /// </summary>
+        public int[] GridIndex
+        {
+            get { return gridIndex; }
+        }
+
+        /// <summary>
+        /// set force to zero
+        /// </summary>
+        public void resetForce()
+        {
+            pairForce[0] = pairForce[1] = pairForce[2] = 0;
+        }
+
+        /// <summary>
+        /// accumulate the force vector
+        /// </summary>
+        /// <param name="f"></param>
+        public void addForce(double[] f)
+        {
+            pairForce[0] += f[0];
+            pairForce[1] += f[1];
+            pairForce[2] += f[2];
         }
 
         // There may be other components specific to a given cell type.

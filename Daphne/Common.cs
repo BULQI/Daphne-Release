@@ -101,6 +101,7 @@ namespace Daphne
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
             Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep);
+            Bind<CollisionManager>().ToSelf();
         }
     }
 }

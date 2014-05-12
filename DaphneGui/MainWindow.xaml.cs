@@ -695,7 +695,7 @@ namespace DaphneGui
         {
             #region MyRegion
             //LPManager lpm = new LPManager();
-            ////debugOut("ExpID is: " + sim.SC.id.ToString());
+            ////Console.WriteLine("ExpID is: " + sim.SC.id.ToString());
             //if (lpfw == null)
             //{
             //    lpfw = new LPFittingWindow(lpm, configurator.SimConfig.experiment_db_id);

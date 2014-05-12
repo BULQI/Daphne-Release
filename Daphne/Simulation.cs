@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using MathNet.Numerics.LinearAlgebra;
+
 using ManifoldRing;
 
 using Ninject;
@@ -26,6 +28,7 @@ namespace Daphne
         public byte RunStatus { get; set; }
         private int numSteps { get; set; }
         private int curStep;
+        private const double integratorStep = 0.001;
 
         public Simulation()
         {
@@ -364,8 +367,17 @@ namespace Daphne
                 dataBasket.Molecules.Add(cm.molecule_guid, mol);
             }
 
+            // set up the collision manager
+            Vector box = new Vector(3);
+            
+            box[0] = sc.scenario.environment.extent_x;
+            box[1] = sc.scenario.environment.extent_y;
+            box[2] = sc.scenario.environment.extent_z;
+            collisionManager = SimulationModule.kernel.Get<CollisionManager>(new ConstructorArgument("gridSize", box), new ConstructorArgument("gridStep", 2 * Cell.defaultRadius));
+
             // cells
             dataBasket.Cells.Clear();
+            Cell.SafeCellIndex = 0;
 
             double[] extent = new double[] { dataBasket.ECS.Space.Interior.Extent(0), 
                                              dataBasket.ECS.Space.Interior.Extent(1), 
@@ -447,8 +459,16 @@ namespace Daphne
         {
             if (RunStatus == RUNSTAT_RUN)
             {
-                dataBasket.ECS.Space.Step(dt);
-                cellManager.Step(dt);
+                double t = 0, localStep;
+
+                while (t < dt)
+                {
+                    localStep = Math.Min(integratorStep, dt - t);
+                    dataBasket.ECS.Space.Step(localStep);
+                    collisionManager.Step(localStep);
+                    cellManager.Step(localStep);
+                    t += localStep;
+                }
                 curStep++;
                 if (curStep >= numSteps)
                 {
@@ -488,5 +508,6 @@ namespace Daphne
         }
 
         private CellManager cellManager;
+        private CollisionManager collisionManager;
     }
 }

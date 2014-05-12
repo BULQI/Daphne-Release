@@ -1093,7 +1093,7 @@ namespace DaphneGui
         public void SetupVTKData(SimConfiguration sc)
         {
             double useThisZValue,
-                   gridStep = VTKCellController.defaultRadius * 2;
+                   gridStep = Cell.defaultRadius * 2;
 
             // clear VTK
             MainWindow.VTKBasket.Cleanup();

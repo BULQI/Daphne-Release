@@ -542,7 +542,6 @@ namespace DaphneGui
         /// accessor for the cell render method
         /// </summary>
         public CellRenderMethod render_method { get; set; }
-        public static double defaultRadius;
 
         /// <summary>
         /// constructor
@@ -556,7 +555,6 @@ namespace DaphneGui
             // cellAttributesColorTable = MainWindow.VTKBasket.CellController.CellAttributesColorTable;
             receptorCalculator = vtkArrayCalculator.New();
             render_method = CellRenderMethod.CELL_RENDER_SPHERES;
-            defaultRadius = 5.0;
         }
 
         /// <summary>
@@ -705,7 +703,7 @@ namespace DaphneGui
             else if (render_method == CellRenderMethod.CELL_RENDER_POLYS)
             {
                 source = vtkRegularPolygonSource.New();
-                ((vtkRegularPolygonSource)source).SetRadius(defaultRadius);
+                ((vtkRegularPolygonSource)source).SetRadius(Cell.defaultRadius);
             }
             // default: spheres
             else
@@ -713,7 +711,7 @@ namespace DaphneGui
                 source = vtkSphereSource.New();
                 ((vtkSphereSource)source).SetThetaResolution(16);
                 ((vtkSphereSource)source).SetPhiResolution(16);
-                ((vtkSphereSource)source).SetRadius(defaultRadius);
+                ((vtkSphereSource)source).SetRadius(Cell.defaultRadius);
             }
 
             GlyphFilter.SetSourceConnection(source.GetOutputPort(0));
@@ -1526,7 +1524,7 @@ namespace DaphneGui
             // picking
             if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == false)
             {
-                //debugOut("exit picking disabled");
+                //Console.WriteLine("exit picking disabled");
                 return;
             }
 
@@ -1562,7 +1560,7 @@ namespace DaphneGui
                             {
                                 if (lpm == null)
                                 {
-                                    //debugOut("Created new LPM");
+                                    //Console.WriteLine("Created new LPM");
                                     lpm = new LPManager();
                                 }
 
@@ -1640,7 +1638,7 @@ namespace DaphneGui
                 if (MainWindow.selectedCell != null)
                 {
                     MainWindow.fitStatus = MainWindow.PROGRESS_INIT;
-                    //debugOut("Performing fit!");
+                    //Console.WriteLine("Performing fit!");
                     if (lpm.fit(MainWindow.selectedCell.CellIndex, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE), out optStr, out paramStr) == true)
                     {
                         if (MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true)
@@ -1682,8 +1680,8 @@ namespace DaphneGui
 
                 bounds = p.GetBounds();
                 // increase z by cell radius
-                bounds[4] -= VTKCellController.defaultRadius;
-                bounds[5] += VTKCellController.defaultRadius;
+                bounds[4] -= Cell.defaultRadius;
+                bounds[5] += Cell.defaultRadius;
                 rwc.RenderWindow.GetRenderers().GetFirstRenderer().ResetCamera(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]);
                 rwc.RenderWindow.GetRenderers().GetFirstRenderer().ResetCameraClippingRange(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]);
             }
@@ -2037,7 +2035,7 @@ namespace DaphneGui
             // If cell picking is enabled, only then should we proceed, otherwise return
             if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == false)
             {
-                //debugOut("exit picking disabled");
+                //Console.WriteLine("exit picking disabled");
                 //return;  //skg temporarily removed this - allows us to view concs when paused.
 
                 if (MainWindow.CheckControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED) == false)
