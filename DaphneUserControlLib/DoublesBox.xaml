@@ -19,7 +19,7 @@
                 <Slider.Style>
                     <Style TargetType="Slider">
                         <Setter Property="Visibility" Value="Visible"/>
-                        <Setter Property="Width" Value="100"/>
+                        <Setter Property="Width" Value="{Binding Path=SliderWidth, Mode=OneWay, ElementName=UC}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Path=SliderEnabled, Mode=OneWay, ElementName=UC}" Value="false">
                                 <Setter Property="Visibility" Value="Hidden"/>

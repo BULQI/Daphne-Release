@@ -41,7 +41,6 @@
             <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
             <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
-            <!--<daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />-->
             <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
@@ -113,11 +112,6 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <!--<ObjectDataProvider x:Key="EcmAvailableReactions"
-                            MethodName="GetEcmAvailableReactions" 
-                            ObjectType="{x:Type daph:SimConfiguration}">                
-            </ObjectDataProvider>-->
-
             <CollectionViewSource x:Key="cellsetRegionsListView"  
                                   Source="{Binding Path=scenario.regions}"/>
 
@@ -157,9 +151,6 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
                                   />
-            <!--<CollectionViewSource x:Key="ecsReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="ecmReactionCollectionViewSource_Filter"/>-->
             <CollectionViewSource x:Key="ecmReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   />
@@ -586,10 +577,10 @@
                 <Grid Margin="0,6">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="30" />
-                        <ColumnDefinition Width="60" />
-                        <ColumnDefinition Width="50" />
-                        <ColumnDefinition Width="60" />
-                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -641,128 +632,72 @@
                           SnapsToDevicePixels="True" Stroke="LightGray"
                           Stretch="Fill" X1="0" X2="10" />-->
                     <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
-                    <Slider x:Name="x_trans_slider"
-                            Grid.Column="1" Grid.Row="2"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=x_trans_min}" 
-                            Maximum="{Binding Path=x_trans_max}"
-                            Value="{Binding Path=x_trans, Mode=TwoWay}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="2" Grid.Row="2"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=x_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />                    
-                    <Slider x:Name="x_scale_slider"
-                            Grid.Column="3" Grid.Row="2"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=x_scale_min}" 
-                            Maximum="{Binding Path=x_scale_max}"
-                            Value="{Binding Path=half_x_scale}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="4" Grid.Row="2"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=x_scale_slider, Path=Value, StringFormat=F2, UpdateSourceTrigger=PropertyChanged}"
-                                        />
+                    <uc:DoublesBox x:Name="dbl_x_trans"
+                                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"     
+                                   Number="{Binding Path=x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+                        
+                    </uc:DoublesBox>                                        
+                    <uc:DoublesBox x:Name="dbl_x_scale"
+                                   Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
                     <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
-                    <Slider x:Name="y_trans_slider"
-                            Grid.Column="1" Grid.Row="3"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=y_trans_min}" 
-                            Maximum="{Binding Path=y_trans_max}"
-                            Value="{Binding Path=y_trans}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="2" Grid.Row="3"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=y_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
-                    <Slider x:Name="y_scale_slider"
-                            Grid.Column="3" Grid.Row="3"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=y_scale_min}" 
-                            Maximum="{Binding Path=y_scale_max}"
-                            Value="{Binding Path=half_y_scale}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="4" Grid.Row="3"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=y_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
+                    <uc:DoublesBox x:Name="dbl_y_trans"
+                                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    
+                    <uc:DoublesBox x:Name="dbl_y_scale"
+                                   Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    
                     <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
-                    <Slider x:Name="z_trans_slider"
-                            Grid.Column="1" Grid.Row="4"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=z_trans_min}" 
-                            Maximum="{Binding Path=z_trans_max}"
-                            Value="{Binding Path=z_trans, UpdateSourceTrigger=PropertyChanged}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="2" Grid.Row="4"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=z_trans_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
-                    <Slider x:Name="z_scale_slider"
-                            Grid.Column="3" Grid.Row="4"
-                            Orientation="Horizontal"
-                            Width="60"
-                            RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=z_scale_min}" 
-                            Maximum="{Binding Path=z_scale_max}"
-                            Value="{Binding Path=half_z_scale}" 
-                            KeyboardNavigation.IsTabStop="False"
-                            />
-                    <editors:DoubleEditBox Grid.Column="4" Grid.Row="4"
-                                        CheckBoxVisibility="Collapsed" 
-                                        SpinnerVisibility="Collapsed"
-                                        HorizontalAlignment="Left"
-                                        Format="F2"
-                                        StepValue="10"
-                                        Width="50" 
-                                        CenterSlotHorizontalAlignment="Right"
-                                        Value="{Binding ElementName=z_scale_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                        />
+                    <uc:DoublesBox x:Name="dbl_z_trans"
+                                   Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                                       <uc:DoublesBox x:Name="dbl_z_scale"
+                                   Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
                 </Grid>
             </DataTemplate>
 
@@ -778,24 +713,7 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
-                        <!--<StackPanel Orientation="Horizontal"
-                                >
-                            <TextBlock Text="concentration-old" Margin="0,0" 
-                               Grid.Column="0" Grid.Row="0"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               />
-                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                SpinnerVisibility="Collapsed"
-                                                HorizontalAlignment="Right"
-                                                Format="F2"
-                                                StepValue="10"
-                                                Width="50" 
-                                                Margin="4,0"
-                                                CenterSlotHorizontalAlignment="Right"
-                                                Value="{Binding Path=concentration, UpdateSourceTrigger=PropertyChanged}"
-                                                />
-                        </StackPanel>-->
-                        
+                       
                         <StackPanel Orientation="Horizontal" Margin="20,0">
                             
                             <uc:DoublesBox      HorizontalAlignment="Left"
@@ -1061,37 +979,16 @@
 
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <!--<CheckBox IsChecked="{Binding Path=cellpopulation_render_on}" Style="{StaticResource EyeballCheckboxStyle}"/>-->
                     <Rectangle Width="10" Height="10"
                                                Margin="5,0,0,0"
                                                VerticalAlignment="Center"
                                                Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
                                                Stroke="Black" StrokeThickness="0.5"/>
 
-                    <!--Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"-->
-
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
-                    
-                    <!--<TextBlock Text=" " />
-                    <TextBlock Text="{Binding Path=number}" />
-                    <TextBlock Text=" " />
-                    <TextBlock Text="{Binding Path=CellType.CellName}" />-->
-                    
+
                     <StackPanel Orientation="Horizontal">
-                        <!-- Only want an "s" to show up if more than one cell -->
-                        <!--<StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=number, Converter={StaticResource ManyConv}}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=number, Converter={StaticResource ManyConv}}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="s" />-->
+                        
                     </StackPanel>
 
                 </StackPanel>
@@ -1387,35 +1284,6 @@
                                                                 Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" 
                                                             />
 
-                                                            <!--<DataGridTemplateColumn x:Name="colX" Header="X"  Width="110" MinWidth="100" MaxWidth="200">
-                                                                <DataGridTemplateColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                                                                Text="{Binding Path=X, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
-                                                                        </TextBox>
-                                                                    </DataTemplate>
-                                                                </DataGridTemplateColumn.CellTemplate>
-                                                            </DataGridTemplateColumn>
-                                                            <DataGridTemplateColumn x:Name="colY" Header="Y"  Width="110" MinWidth="100" MaxWidth="200">
-                                                                <DataGridTemplateColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                                                                Text="{Binding Path=Y, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
-                                                                        </TextBox>
-                                                                    </DataTemplate>
-                                                                </DataGridTemplateColumn.CellTemplate>
-                                                            </DataGridTemplateColumn>
-                                                            <DataGridTemplateColumn x:Name="colZ" Header="Z"  Width="110" MinWidth="100" MaxWidth="200">
-                                                                <DataGridTemplateColumn.CellTemplate>
-                                                                    <DataTemplate>
-                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                                                                Text="{Binding Path=Z, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
-                                                                        </TextBox>
-                                                                    </DataTemplate>
-                                                                </DataGridTemplateColumn.CellTemplate>
-                                                            </DataGridTemplateColumn>-->
-
-                                                            
                                                         </DataGrid.Columns>
 
                                                     </DataGrid>
@@ -2415,12 +2283,6 @@
 
                             </StackPanel>
                             
-                            <!--<ListBox x:Name="lbEcsReactions" MinHeight="50" 
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.reactions_guid_ref}"
-                                     ItemTemplate="{Binding Source={StaticResource ecsReacListItemTemplate}}"
-                                    SelectedIndex="-1">
-                            </ListBox>-->
-
                             <ListView x:Name="lvEcsReactions" 
                                       ItemsSource="{Binding Path=scenario.environment.ecs.reactions_guid_ref}"
                                       SelectedIndex="-1"
@@ -3021,8 +2883,6 @@
                                 </Style>
                             </DataGrid.ColumnHeaderStyle>
 
-                            <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv},-->
-                                
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="cell population" >
                                     <DataGridTemplateColumn.CellTemplate>
@@ -3627,17 +3487,7 @@
                             <!-- List of Reactions in selected Reaction Complex -->
                             <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" >
                                 <TextBlock Text="Reactions" />
-                                <!--<ListBox x:Name="lbReactions2" MinHeight="50" AlternationCount="2"
-                                    ItemsSource="{Binding Path=Reactions, Mode=OneWay}"                                                      
-                                    DisplayMemberPath="TotalReactionString" >
-                                </ListBox>-->
-                                <!--<ListBox x:Name="lbReacComplexReactions" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                        ItemsSource="{Binding Path=reactions_guid_ref}"
-                                        ItemTemplate="{Binding Source={StaticResource rcReacListItemTemplate}}"
-                                        >
-                                </ListBox>-->
-
-                                <!-- ItemsSource="{Binding Path=reactions_guid_ref, Mode=TwoWay}" -->
+                                
                                 <ListView x:Name="lvReacComplexReactions" 
                                       ItemsSource="{Binding Path=ReactionRates, Mode=TwoWay}"
                                       SelectedIndex="-1"
@@ -3681,8 +3531,7 @@
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                        <!--<TextBlock Text="{Binding Path=reac.TotalReactionString,   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">-->
+                                                        
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
@@ -3702,7 +3551,6 @@
                                 <ToggleButton x:Name="btnGraphReactionComplex" IsChecked="False" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" 
                                               Checked="btnGraphReactionComplex_Checked" >Run Reaction Complex</ToggleButton>
                                 
-                                <!--<Button x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphReactionComplex_Click">Run Reaction Complex</Button>-->
                             </StackPanel>
                         </StackPanel>
                     </Expander>
@@ -3823,7 +3671,6 @@
                                             </StackPanel>
 
                                         </StackPanel>
-                                        <!--</StackPanel>-->
 
                                     </Expander>
                                     <!-- Reactions in this cell and their location -->

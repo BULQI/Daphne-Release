@@ -35,7 +35,15 @@ namespace DaphneUserControlLib
             }
             set
             {
-                max = Number + Number / RangeFactor;
+                if (AutoRange)
+                {
+                    max = Number + Number / RangeFactor;
+                }
+                else
+                {
+                    max = AbsMaximum;
+                }
+
                 OnPropertyChanged("Maximum");
             }
         }
@@ -48,7 +56,15 @@ namespace DaphneUserControlLib
             }
             set
             {
-                min = Number - Number / RangeFactor;
+                if (AutoRange)
+                {
+                    min = Number - Number / RangeFactor;
+                }
+                else
+                {
+                    min = AbsMinimum;
+                }
+                
                 OnPropertyChanged("Minimum");
             }
         }
@@ -373,6 +389,36 @@ namespace DaphneUserControlLib
             uc.TextFieldWidth = (int)(e.NewValue);
         }
 
+        //SLIDERWIDTH          
+        public static DependencyProperty SliderWidthProperty = DependencyProperty.Register("SliderWidth", typeof(int), typeof(DoublesBox), new FrameworkPropertyMetadata(100, SliderWidthPropertyChanged));
+        public int SliderWidth
+        {
+            get { return (int)GetValue(SliderWidthProperty); }
+            set
+            {
+                SetValue(SliderWidthProperty, value);
+
+                if (SliderEnabled)
+                {
+                    stpControl.Width = value;
+                    stpControl.Width += tbFNumber.Width;
+                    stpMainPanel.Width = stpControl.Width + 10;
+                }
+                else
+                {
+                    stpControl.Width = tbFNumber.Width;
+                    stpMainPanel.Width = stpControl.Width + 10;
+                }
+                OnPropertyChanged("SliderWidth");
+            }
+        }
+        private static void SliderWidthPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.SliderWidth = (int)(e.NewValue);
+        }
+
         //ISREADONLY          
         public static DependencyProperty IsReadOnlyProperty = DependencyProperty.Register("IsReadOnly", typeof(bool), typeof(DoublesBox), new FrameworkPropertyMetadata(false, IsReadOnlyPropertyChanged));
         public bool IsReadOnly
@@ -396,6 +442,66 @@ namespace DaphneUserControlLib
             // insert your code here
             DoublesBox uc = d as DoublesBox;
             uc.IsReadOnly = (bool)(e.NewValue);
+        }
+
+        //AUTORANGE - IF TRUE, MIN AND MAX ARE DETERMINED BY NUMBER      
+        public static DependencyProperty AutoRangeProperty = DependencyProperty.Register("AutoRange", typeof(bool), typeof(DoublesBox), new FrameworkPropertyMetadata(true, AutoRangePropertyChanged));
+        public bool AutoRange
+        {
+            get { return (bool)GetValue(AutoRangeProperty); }
+            set
+            {
+                SetValue(AutoRangeProperty, value);                
+                OnPropertyChanged("AutoRange");
+            }
+        }
+        private static void AutoRangePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.AutoRange = (bool)(e.NewValue);
+        }
+
+        //ABSMINIMUM - Used for slider if not auto range
+        /// <summary>
+        /// If automatic range calculation is not desired, use this to indicate slider min value.
+        /// </summary>
+        public static DependencyProperty AbsMinimumProperty = DependencyProperty.Register("AbsMinimum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(AbsMinimumPropertyChanged));
+        public double AbsMinimum
+        {
+            get { return (double)GetValue(AbsMinimumProperty); }
+            set
+            {
+                SetValue(AbsMinimumProperty, value);
+                SetMinMax();
+                OnPropertyChanged("AbsMinimum");
+            }
+        }
+        public static void AbsMinimumPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            DoublesBox uc = d as DoublesBox;
+            uc.AbsMinimum = (double)(e.NewValue);
+        }
+
+        //ABSMAXIMUM - Used for slider if not auto range
+        /// <summary>
+        /// If automatic range calculation is not desired, use this to indicate slider max value.
+        /// </summary>
+        public static DependencyProperty AbsMaximumProperty = DependencyProperty.Register("AbsMaximum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(AbsMaximumPropertyChanged));
+        public double AbsMaximum
+        {
+            get { return (double)GetValue(AbsMaximumProperty); }
+            set
+            {
+                SetValue(AbsMaximumProperty, value);
+                SetMinMax();
+                OnPropertyChanged("AbsMaximum");
+            }
+        }
+        public static void AbsMaximumPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            DoublesBox uc = d as DoublesBox;
+            uc.AbsMaximum = (double)(e.NewValue);
         }
     }
 }
