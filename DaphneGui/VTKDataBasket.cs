@@ -956,8 +956,8 @@ namespace DaphneGui
         /// </summary>
         public void UpdateAllocatedCells()
         {
-            // allow zero arrays; that's needed in order to totally clear the cells all of them die
-            if (Simulation.dataBasket.Cells != null) // && Simulation.dataBasket.Cells.Count > 0)
+            // allow zero arrays; that's needed in order to totally clear the cells after all of them die
+            if (Simulation.dataBasket.Cells != null)// && Simulation.dataBasket.Cells.Count > 0)
             {
                 // NOTE: Make sure that all arrays get updated or there will be memory problems.
                 allocateArrays(Simulation.dataBasket.Cells.Count, 2);
