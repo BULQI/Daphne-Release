@@ -667,7 +667,7 @@ namespace Daphne
             //      Naive, Activated, Short-lived plasmacyte, Long-lived plasmacyte, Centroblast, Centrocyte, Memory
 
             gc = new ConfigCell();
-            gc.CellName = "B cell";
+            gc.CellName = "B";
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
@@ -766,7 +766,7 @@ namespace Daphne
 
 
             gc = new ConfigCell();
-            gc.CellName = "GC B cell";
+            gc.CellName = "GC B";
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
