@@ -261,6 +261,11 @@ namespace Daphne
                                                 sc.scenario.environment.extent_y / 2,
                                                 sc.scenario.environment.extent_z / 2));
 
+            //set up the cell distribution parameters
+            cellPop.cellPopDist = new CellPopSpecific();
+            CellPopSpecific cps = cellPop.cellPopDist as CellPopSpecific;
+            cps.CopyLocations(cellPop);
+
             foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
             {
                 // Mean only
@@ -270,7 +275,8 @@ namespace Daphne
             {
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
-            } foreach (ConfigMolecularPopulation mpECM in sc.scenario.environment.ecs.molpops)
+            } 
+            foreach (ConfigMolecularPopulation mpECM in sc.scenario.environment.ecs.molpops)
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;

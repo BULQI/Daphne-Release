@@ -611,6 +611,7 @@
                                     Style="{StaticResource EyeballCheckboxStyle}"
                                     IsChecked="{Binding Path=blob_visibility}"
                                       Click="blob_actor_checkbox_clicked"
+                                      CommandParameter="{Binding Path=box_guid}"
                                     />
                         </Grid>
                     </StackPanel>                    
@@ -833,6 +834,117 @@
                 </StackPanel>
             </DataTemplate>
 
+            <DataTemplate DataType="{x:Type daph:CellPopSpecific}">                            
+                <StackPanel x:Name="panelCoordinates" Grid.Row="1" Grid.Column="0">
+                    <StackPanel  Margin="0,6,0,0">
+                        <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=spec_cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                    Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                                                                    CanUserReorderColumns="False" CanUserResizeRows="False"
+                                                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                                                    VerticalContentAlignment="Center"
+                                                                    CanUserAddRows="False"
+                                                                    BorderThickness="1"
+                                                                    BorderBrush="Black"
+                                                                    local:DataGridBehavior.DisplayRowNumber="True"
+                                                                    KeyDown="dgLocations_KeyDown"
+                                                                    ScrollBar.Scroll="dgLocations_Scroll"
+                                                                    ScrollViewer.ScrollChanged="dgLocations_Scroll"
+                                                                    SourceUpdated="dgLocations_Unloaded"
+                                                                    >
+                            <DataGrid.ContextMenu>
+                                <ContextMenu >
+                                    <MenuItem Header="Paste" Name="menuCoordinatesPaste" Click="menuCoordinatesPaste_Click"></MenuItem>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn  Header="Cell" Width="40" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
+                            </DataGrid.Columns>
+
+                        </DataGrid>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type daph:CellPopUniform}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock>Number of cells:    </TextBlock>                        
+                        <!--<TextBox IsReadOnly="True" IsEnabled="False" Width="50" Margin="8,-2" Text="{Binding ElementName=CellPopsListBox, Path=SelectedItem.number}"/>-->
+                        <TextBox IsReadOnly="True" IsEnabled="False" Width="50" Margin="8,-2" Text="{Binding ElementName=numberBox, Path=Value}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock>These cells will be evenly distributed.</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type daph:CellPopGaussian}">
+                <StackPanel Orientation="Vertical">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="peak conc" Margin="6,0"
+                                   Grid.Column="0" Grid.Row="0"  
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   />
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="1" Grid.Row="0"
+                                    Margin="0,2">
+                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
+                                                    SpinnerVisibility="Collapsed"
+                                                    HorizontalAlignment="Right"
+                                                    Format="F2"
+                                                    StepValue="10"
+                                                    Width="50" 
+                                                    CenterSlotHorizontalAlignment="Right"
+                                                    Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
+                                                    />
+                            <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                    <!-- ListView as level of indirection for getting to the correct BoxSpec -->
+                    <ListView x:Name="cellPopGaussianBoxSpecsListView"
+                                              ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
+                                              DisplayMemberPath="box_guid"
+                                              SelectedValue="{Binding Path=gauss_spec_guid_ref, Mode=OneWay}"
+                                              SelectedValuePath="box_guid"
+                                              Visibility="Collapsed"
+                                              />
+                    <ContentControl Name="GaussianBoxSpecDetails"
+                                                    Content="{Binding ElementName=cellPopGaussianBoxSpecsListView, Path=SelectedItem}" 
+                                                    HorizontalAlignment="Center"
+                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
+                                                    Margin="0,2"/>
+                </StackPanel>
+            </DataTemplate>
+
+
             <DataTemplate x:Key="molpopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -847,11 +959,10 @@
                                     Grid.ColumnSpan="2" Grid.Row="0"
                                     Margin="0,6"
                                     BorderBrush="DarkGray" BorderThickness="1"
-                                    Content="{Binding Path=mpInfo.mp_distribution}"
-                                    />
+                                    Content="{Binding Path=mpInfo.mp_distribution}"  />
                 </Grid>
-            </DataTemplate>
-            <DataTemplate x:Key="molpopDistributionDetailsTemplate2">
+            </DataTemplate>            
+            <DataTemplate x:Key="cellPopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -861,12 +972,11 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <ContentControl Name="solfac_dist_cc"
+                    <ContentControl Name="cp_dist"
                                     Grid.ColumnSpan="2" Grid.Row="0"
                                     Margin="0,6"
                                     BorderBrush="DarkGray" BorderThickness="1"
-                                    Content="{Binding Path=mpInfo.mp_distribution}"
-                                    />
+                                    Content="{Binding Path=cellPopDist}"   />
                 </Grid>
             </DataTemplate>
 
@@ -921,18 +1031,18 @@
                 </StackPanel>
             </DataTemplate>-->
 
-            <DataTemplate DataType="{x:Type daph:CellPopDistribution}">
+            <!--<DataTemplate DataType="{x:Type daph:CellPopDistribution}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="dist type" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
-                    <TextBox Text="{Binding Path=cpDistributionType, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox Text="{Binding Path=DistType, UpdateSourceTrigger=PropertyChanged}"
                                  Margin="0,2"
                                  />
                 </StackPanel>
 
-            </DataTemplate>
+            </DataTemplate>-->
 
             <!-- CellPopUniformDistribution -->
-            <DataTemplate DataType="{x:Type daph:CellPopUniformDistribution}">
+            <!--<DataTemplate DataType="{x:Type daph:CellPopUniformDistribution}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="conc" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
                     <TextBox Text="{Binding Path=Conc, UpdateSourceTrigger=PropertyChanged}"
@@ -940,10 +1050,10 @@
                                  />
                 </StackPanel>
                 
-            </DataTemplate>
+            </DataTemplate>-->
 
 
-            <DataTemplate DataType="{x:Type daph:CellPopGaussianDistribution}">
+            <!--<DataTemplate DataType="{x:Type daph:CellPopGaussianDistribution}">
                 <StackPanel Orientation="Vertical">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -976,7 +1086,6 @@
                         </StackPanel>
                         
                     </Grid>
-                    <!-- ListView as level of indirection for getting to the correct BoxSpec -->
                     <ListView x:Name="molPopGaussianBoxSpecsListView"
                                               ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
                                               DisplayMemberPath="box_guid"
@@ -990,7 +1099,7 @@
                                                     ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
                                                     Margin="0,2"/>
                 </StackPanel>
-            </DataTemplate>
+            </DataTemplate>-->
 
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
@@ -1080,38 +1189,9 @@
                                                                 ConverterParameter={StaticResource cellsetRegionsListView}}" />
                     </StackPanel>
                 </StackPanel>
-            </DataTemplate>
-
-            <DataTemplate x:Key="cellPopDistributionDetailsTemplate">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />                   
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />                        
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Column="0" Grid.Row="0" Margin="20,0">Location Parameters</TextBlock>
-                    <TextBox Grid.Column="0" Grid.Row="1" Margin="20,0"
-                             Text="{Binding Path=Peak}">
-                        
-                    </TextBox>
-                    <ContentControl Name="cell_dist"
-                            Grid.ColumnSpan="2" Grid.Row="2"
-                            Margin="0,6"
-                            BorderBrush="DarkGray" BorderThickness="1"
-                            Content="{Binding Path=cellPopDist}"
-                            />
-                </Grid>
-            </DataTemplate>            
-
-            <DataTemplate x:Key="cellPopDetailsTemplate">
-                <DataTemplate.Resources>
-                    <CollectionViewSource x:Key="cellCoordinates"  Source="{Binding Path=cell_list}"/>                    
-                </DataTemplate.Resources>
+            </DataTemplate>    
+            
+            <DataTemplate x:Key="cellPopDetailsTemplate">                
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1210,7 +1290,7 @@
                                     StepValue="10"
                                     Width="50" 
                                     CenterSlotHorizontalAlignment="Right"
-                                    Value="{Binding ElementName=number_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding ElementName=number_slider, Path=Value}"
                                     x:Name="numberBox"
                                     ValueChanged="numberBox_ValueChanged"
                                     />
@@ -1295,22 +1375,17 @@
                                 Header="Location"
                                 x:Name="LocationExpander"
                                 Margin="0,0,0,0" 
-                                Canvas.ZIndex="1"
-                                >
-
+                                Canvas.ZIndex="1"         >
                             
-
+                                <StackPanel Orientation="Vertical">                                
                                 <StackPanel Orientation="Vertical">
-                                
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel>
-                                        
+                                    <StackPanel>                                        
                                         <StackPanel Margin="8,0">
                                             <TextBlock>Cell placement method</TextBlock>
                                             <ComboBox x:Name="cbCellLocationType" Margin="0,4" Width="200" HorizontalAlignment="Left"
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
-                                                SelectedValue="{Binding Path=cellPopDist.cpDistributionType, Mode=OneWay}"
+                                                SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">
                                             </ComboBox>
                                         </StackPanel>
@@ -1333,6 +1408,7 @@
                                                         </Style>
                                                     </ContentControl.Style>
                                             </ContentControl>-->
+                                            
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -1341,8 +1417,26 @@
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
 
+                                                <!--<StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+                                                    
+                                                    <ContentControl Name="cellPopDistrib"
+                                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
+                                                        Margin="6,2"/>
+                                                    
+                                                    
+                                                </StackPanel>-->
 
-                                                <StackPanel x:Name="panelCoordinates" Grid.Row="0" Grid.Column="0">
+
+                                                <StackPanel Grid.Column="0" Grid.Row="0">
+                                                    <ContentControl Name="cellPopDistrib"
+                                                        Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
+                                                        Margin="6,2"/>
+                                                </StackPanel>
+
+
+
+                                                <!--<StackPanel x:Name="panelCoordinates" Grid.Row="1" Grid.Column="0">
                                                     <StackPanel.Style>
                                                         <Style>
                                                             <Setter Property="StackPanel.IsEnabled" Value="True"/>
@@ -1401,9 +1495,9 @@
 
                                                         </DataGrid>
                                                     </StackPanel>
-                                                </StackPanel>
+                                                </StackPanel>-->
 
-                                                <StackPanel x:Name="panelUniform" Margin="0,6,0,0" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0">
+                                                <!--<StackPanel x:Name="panelUniform" Margin="0,6,0,0" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0">
                                                     <StackPanel.Style>
                                                         <Style>
                                                             <Setter Property="StackPanel.Visibility" Value="Visible"/>
@@ -1416,38 +1510,10 @@
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </StackPanel.Style>
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="70" />
-                                                            <ColumnDefinition Width="Auto" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition />
-                                                        </Grid.RowDefinitions>
-                                                        <TextBlock Text="conc" Margin="6,0" 
-                                                           Grid.Column="0" Grid.Row="0"  
-                                                           HorizontalAlignment="Right" VerticalAlignment="Center"
-                               
-                                                           />
-                                                        <StackPanel Orientation="Horizontal"
-                                                            Grid.Column="1" Grid.Row="0"
-                                                            Margin="0,2">
-                                                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                            SpinnerVisibility="Collapsed"
-                                                            HorizontalAlignment="Right"
-                                                            Format="F2"
-                                                            StepValue="10"
-                                                            Width="50" 
-                                                            CenterSlotHorizontalAlignment="Right"
-                                                            Value="{Binding Path=concentration, UpdateSourceTrigger=PropertyChanged}"
-                                                            />
-                                                            <TextBlock Text="cells/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </StackPanel>
+                                                    </StackPanel.Style>                                                    
+                                                </StackPanel>-->
 
-                                                <StackPanel x:Name="panelGaussian" Margin="0,8,0,0" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0">
+                                                <!--<StackPanel x:Name="panelGaussian" Margin="0,8,0,0" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0">
                                                     <StackPanel.Style>
                                                         <Style>
                                                             <Setter Property="StackPanel.Visibility" Value="Visible"/>
@@ -1461,8 +1527,13 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </StackPanel.Style>
-                                                    <TextBlock>Gaussian</TextBlock>
-                                                </StackPanel>
+                                                    <ContentControl Name="cell_dist"
+                                                        Grid.ColumnSpan="2" Grid.Row="0"
+                                                        Margin="0,6"
+                                                        BorderBrush="DarkGray" BorderThickness="1"
+                                                        Content="{Binding Path=cellPopDist}"
+                                                        />
+                                                </StackPanel>-->
                                             </Grid>
 
                                         </StackPanel>                                        
@@ -2035,27 +2106,25 @@
                                         Name="MolPopDistributionTypeComboBox"
                                         ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
+                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
                                         GotFocus="MolPopDistributionTypeComboBox_GotFocus"
                                         MinWidth="120">
 
-
-                                    <!--<ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
-                                                    <Setter Property="SelectedIndex" Value="1"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
-                                                    <Setter Property="SelectedIndex" Value="1"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
-                                                    <Setter Property="SelectedIndex" Value="1"/>
-                                                </DataTrigger>
+                                    <ComboBox.Style>
+                                        <Style TargetType="ComboBox">                                            
+                                            <Style.Triggers>                                                
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="0" />
+                                                        <Condition Binding="{Binding ElementName=MolPopDistributionTypeComboBox, Path=SelectedIndex}" Value="1"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="ComboBox.SelectedIndex" Value="0"/>
+                                                </MultiDataTrigger>
+                                                
                                             </Style.Triggers>
                                         </Style>
-                                    </ComboBox.Style>-->
+                                    </ComboBox.Style>
                                     
                                     <ComboBox.ItemContainerStyle>
                                         <Style TargetType="{x:Type ComboBoxItem}">

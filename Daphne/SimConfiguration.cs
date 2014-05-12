@@ -1298,7 +1298,7 @@ namespace Daphne
             boundary = _boundary;
         }
     }
-    public class ConfigMolecularPopulation //: EntityModelBase
+    public class ConfigMolecularPopulation : EntityModelBase
     {
         public string molpop_guid { get; set; }
         private string _molecule_guid_ref;
@@ -1314,7 +1314,19 @@ namespace Daphne
             }
 
         }  // the molecule_guid of the molecule this mp contains
-        public string Name { get; set; }
+        private string _Name;
+        public string Name
+        {
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                _Name = value;
+                OnPropertyChanged("Name");
+            }
+        }
         private MolPopInfo _mp_Info;
         public MolPopInfo mpInfo
         {
@@ -1444,6 +1456,8 @@ namespace Daphne
                         MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
                         mpl.dim = (int)_boundary_face - 1;
                     }
+
+                    OnPropertyChanged("boundary_face");
                 }
             }
         }
@@ -1875,101 +1889,184 @@ namespace Daphne
         }
     }
 
-    public enum CellPopProbDistributionType { Uniform, Gaussian }
 
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(CellPopProbDistributionType), typeof(string))]
-    public class CellPopProbDistributionTypeToStringConverter : IValueConverter
+
+    ////public enum CellPopProbDistributionType { Uniform, Gaussian }
+
+    /////// <summary>
+    /////// Converter to go between enum values and "human readable" strings for GUI
+    /////// </summary>
+    ////[ValueConversion(typeof(CellPopProbDistributionType), typeof(string))]
+    ////public class CellPopProbDistributionTypeToStringConverter : IValueConverter
+    ////{
+    ////    // NOTE: This method is a bit fragile since the list of strings needs to 
+    ////    // correspond in length and index with the GlobalParameterType enum...
+    ////    private List<string> _cell_pop_prob_dist_type_strings = new List<string>()
+    ////        {
+    ////            "Uniform",
+    ////            "Gaussian"
+    ////        };
+
+    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        try
+    ////        {
+    ////            return _cell_pop_prob_dist_type_strings[(int)value];
+    ////        }
+    ////        catch
+    ////        {
+    ////            return "";
+    ////        }
+    ////    }
+
+    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+    ////    {
+    ////        string str = (string)value;
+    ////        int idx = _cell_pop_prob_dist_type_strings.FindIndex(item => item == str);
+    ////        return (CellPopProbDistributionType)Enum.ToObject(typeof(CellPopProbDistributionType), (int)idx);
+    ////    }
+    ////}
+
+    ////public enum CellPopSpecificLocationType { Coord, File }
+
+
+    public abstract class CellPopDistribution : EntityModelBase
     {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _cell_pop_prob_dist_type_strings = new List<string>()
-            {
-                "Uniform",
-                "Gaussian"
-            };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        private CellPopDistributionType _DistType;
+        public CellPopDistributionType DistType
         {
-            try
+            get { return _DistType; }
+            set
             {
-                return _cell_pop_prob_dist_type_strings[(int)value];
+                if (_DistType == value)
+                    return;
+                else
+                {
+                    _DistType = value;
+                    OnPropertyChanged("DistType");
+                }
             }
-            catch
+        }
+
+        public CellPopDistribution()
+        {
+        }
+    }
+
+    public class CellPopSpecific : CellPopDistribution
+    {
+        private ObservableCollection<CellState> _spec_cell_list;
+        public ObservableCollection<CellState> spec_cell_list
+        {
+            get { return _spec_cell_list; }
+            set
             {
-                return "";
+                _spec_cell_list = value;
+                OnPropertyChanged("spec_cell_list");
+            }
+        } 
+        public CellPopSpecific()
+        {
+            DistType = CellPopDistributionType.Specific;
+            spec_cell_list = new ObservableCollection<CellState>();
+        }
+        public void CopyLocations(CellPopulation cp)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(cp.cell_list, Newtonsoft.Json.Formatting.Indented, Settings);
+            _spec_cell_list = JsonConvert.DeserializeObject<ObservableCollection<CellState>>(jsonSpec, Settings);
+            OnPropertyChanged("spec_cell_list");
+        }
+    }
+
+    public class CellPopUniform : CellPopDistribution
+    {
+        public CellPopUniform()
+        {
+            DistType = CellPopDistributionType.Uniform;
+        }
+    }
+
+    public class CellPopGaussian : CellPopDistribution
+    {
+        public double peak_concentration { get; set; }
+        private string _gauss_spec_guid_ref;
+        public string gauss_spec_guid_ref
+        {
+            get { return _gauss_spec_guid_ref; }
+            set
+            {
+                if (_gauss_spec_guid_ref == value)
+                    return;
+                else
+                {
+                    _gauss_spec_guid_ref = value;
+                }
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public CellPopGaussian()            
         {
-            string str = (string)value;
-            int idx = _cell_pop_prob_dist_type_strings.FindIndex(item => item == str);
-            return (CellPopProbDistributionType)Enum.ToObject(typeof(CellPopProbDistributionType), (int)idx);
+            DistType = CellPopDistributionType.Gaussian;
+            peak_concentration = 100.0;
+            gauss_spec_guid_ref = "";
         }
     }
 
-    public enum CellPopSpecificLocationType { Coord, File }
+    ////public class CellPopSpecifyLocation : CellPopDistribution
+    ////{
+    ////    public CellPopSpecificLocationType LocationType { get; set; }
+    ////    public CellPopSpecifyLocation()
+    ////    {
+    ////        cpDistributionType = CellPopDistributionType.Specific;
+    ////        LocationType = CellPopSpecificLocationType.Coord;
+    ////    }
+    ////}
 
-    public abstract class CellPopDistribution
-    {
-        public CellPopDistributionType cpDistributionType { get; protected set; }
-    }
+    ////public class CellPopLocationFile : CellPopDistribution
+    ////{
+    ////    public string fileName { get; set; }
+    ////    public CellPopSpecificLocationType LocationType { get; set; }
+    ////    public CellPopLocationFile(string file)
+    ////    {
+    ////        cpDistributionType = CellPopDistributionType.Specific;
+    ////        LocationType = CellPopSpecificLocationType.File;
+    ////        fileName = file;
+    ////    }
+    ////}
 
-    public class CellPopSpecifyLocation : CellPopDistribution
-    {
-        public CellPopSpecificLocationType LocationType { get; set; }
-        public CellPopSpecifyLocation()
-        {
-            cpDistributionType = CellPopDistributionType.Specific;
-            LocationType = CellPopSpecificLocationType.Coord;
-        }
-    }
+    ////public class CellPopUniformDistribution : CellPopDistribution
+    ////{
+    ////    public double Conc { get; set; }
+    ////    //public CellPopProbDistributionType DistType { get; set; }
+    ////    public CellPopUniformDistribution(double conc)
+    ////    {
+    ////        Conc = conc;
+    ////        cpDistributionType = CellPopDistributionType.Uniform;
+    ////        //DistType = CellPopProbDistributionType.Uniform;
+    ////    }
+    ////}
 
-    public class CellPopLocationFile : CellPopDistribution
-    {
-        public string fileName { get; set; }
-        public CellPopSpecificLocationType LocationType { get; set; }
-        public CellPopLocationFile(string file)
-        {
-            cpDistributionType = CellPopDistributionType.Specific;
-            LocationType = CellPopSpecificLocationType.File;
-            fileName = file;
-        }
-    }
+    ////public class CellPopGaussianDistribution : CellPopDistribution
+    ////{
+    ////    //We should use these variables instead of the box spec, but for now, hold off.
+    ////    //private double[] center;
+    ////    //private double[] sigma;
+    ////    //private double peak;
+    ////    //public double[] Center { get; set; }
+    ////    //public double[] Sigma { get; set; }
+    ////    //public double   Peak { get; set; }
 
-    public class CellPopUniformDistribution : CellPopDistribution
-    {
-        public double Conc { get; set; }
-        //public CellPopProbDistributionType DistType { get; set; }
-        public CellPopUniformDistribution(double conc)
-        {
-            Conc = conc;
-            cpDistributionType = CellPopDistributionType.Uniform;
-            //DistType = CellPopProbDistributionType.Uniform;
-        }
-    }
+    ////    //public CellPopProbDistributionType DistType { get; set; }
 
-    public class CellPopGaussianDistribution : CellPopDistribution
-    {
-        //We should use these variables instead of the box spec, but for now, hold off.
-        //private double[] center;
-        //private double[] sigma;
-        //private double peak;
-        //public double[] Center { get; set; }
-        //public double[] Sigma { get; set; }
-        //public double   Peak { get; set; }
-
-        //public CellPopProbDistributionType DistType { get; set; }
-
-        public CellPopGaussianDistribution()
-        {
-            cpDistributionType = CellPopDistributionType.Gaussian;
-            //DistType = CellPopProbDistributionType.Gaussian;
-        }
-    }
+    ////    public CellPopGaussianDistribution()
+    ////    {
+    ////        cpDistributionType = CellPopDistributionType.Gaussian;
+    ////        //DistType = CellPopProbDistributionType.Gaussian;
+    ////    }
+    ////}
 
     public class CellState
     {
@@ -2041,10 +2138,22 @@ namespace Daphne
         }
     }
 
-    public class CellPopulation // : EntityModelBase
+    public class CellPopulation : EntityModelBase
     {
         public string cell_guid_ref { get; set; }
-        public string cellpopulation_name { get; set; }
+        private string _Name;
+        public string cellpopulation_name
+        {
+            get
+            {
+                return _Name;
+            }
+            set
+            {
+                _Name = value;
+                OnPropertyChanged("cellpopulation_name");
+            }
+        }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
         public string cell_subset_guid_ref { get; set; }
@@ -2106,7 +2215,22 @@ namespace Daphne
         public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
-        public CellPopDistribution cellPopDist { get; set; }
+        
+        private CellPopDistribution _cellPopDist;
+        public CellPopDistribution cellPopDist
+        {
+            get { return _cellPopDist; }
+            set
+            {
+                if (_cellPopDist == value)
+                    return;
+                else
+                {
+                    _cellPopDist = value;
+                    OnPropertyChanged("cellPopDist");
+                }
+            }
+        }
 
         private ObservableCollection<CellState> _cell_list;
         public ObservableCollection<CellState> cell_list
@@ -2116,41 +2240,41 @@ namespace Daphne
             {
                 _cell_list = value;
                 number = value == null ? 0 : _cell_list.Count;
-                //OnPropertyChanged("cell_list");
+                OnPropertyChanged("cell_list");
             }
         } 
 
-        public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
-        private void InitDistTypes()
-        {
-            CellPopDistType d = new CellPopDistType();
-            d.Name = "Specify cell coordinates";
-            d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
+        ////public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
+        ////private void InitDistTypes()
+        ////{
+        ////    CellPopDistType d = new CellPopDistType();
+        ////    d.Name = "Specify cell coordinates";
+        ////    d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
 
-            CellPopDistSubtype d2 = new CellPopDistSubtype();
-            d2.Label = "Input coordinates";
-            d.DistSubtypes.Add(d2);
+        ////    CellPopDistSubtype d2 = new CellPopDistSubtype();
+        ////    d2.Label = "Input coordinates";
+        ////    d.DistSubtypes.Add(d2);
 
-            d2 = new CellPopDistSubtype();
-            d2.Label = "Specify coordinates file";
-            d.DistSubtypes.Add(d2);
+        ////    d2 = new CellPopDistSubtype();
+        ////    d2.Label = "Specify coordinates file";
+        ////    d.DistSubtypes.Add(d2);
 
-            CellPopDistTypes.Add(d);
+        ////    CellPopDistTypes.Add(d);
 
-            d = new CellPopDistType();
-            d.Name = "Probability distribution";
-            d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
+        ////    d = new CellPopDistType();
+        ////    d.Name = "Probability distribution";
+        ////    d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
 
-            d2 = new CellPopDistSubtype();
-            d2.Label = "Uniform";
-            d.DistSubtypes.Add(d2);
+        ////    d2 = new CellPopDistSubtype();
+        ////    d2.Label = "Uniform";
+        ////    d.DistSubtypes.Add(d2);
 
-            d2 = new CellPopDistSubtype();
-            d2.Label = "Gaussian";
-            d.DistSubtypes.Add(d2);
+        ////    d2 = new CellPopDistSubtype();
+        ////    d2.Label = "Gaussian";
+        ////    d.DistSubtypes.Add(d2);
 
-            CellPopDistTypes.Add(d);
-        }
+        ////    CellPopDistTypes.Add(d);
+        ////}
 
         public CellPopulation()
         {
@@ -2167,9 +2291,9 @@ namespace Daphne
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
-            cellPopDist = new CellPopSpecifyLocation();
-            CellPopDistTypes = new ObservableCollection<CellPopDistType>();
-            InitDistTypes();
+            //cellPopDist = new CellPopSpecific();
+            ////CellPopDistTypes = new ObservableCollection<CellPopDistType>();
+            ////InitDistTypes();
 
             cell_list = new ObservableCollection<CellState>();
 
@@ -2185,6 +2309,10 @@ namespace Daphne
         //    return cc.membrane.molpops;
         //}
     }
+
+    
+
+    
 
     // MolPopInfo ==================================
     public class MolPopInfo : EntityModelBase

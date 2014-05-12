@@ -43,9 +43,15 @@ namespace DaphneGui
             CellPopulation cs = new CellPopulation();
             cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
             cs.cellpopulation_name = "New cell";
-            cs.number = 50;
+            cs.number = 1;
 
-            cs.cell_list.Add(new CellState(10, 100, 1000));
+            cs.cell_list.Add(new CellState(0, 0, 0));
+            cs.cellPopDist = new CellPopSpecific();
+            if (cs.cellPopDist.DistType == CellPopDistributionType.Specific)
+            {
+                CellPopSpecific cps = cs.cellPopDist as CellPopSpecific;
+                cps.CopyLocations(cs);
+            }
 
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
@@ -107,6 +113,57 @@ namespace DaphneGui
             }
 
         }
+
+        // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
+        private void AddGaussianSpecification(CellPopGaussian cpg)
+        {
+            BoxSpecification box = new BoxSpecification();
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 100;
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            // Add box GUI property changed to VTK callback
+            box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
+            MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+
+            GaussianSpecification gg = new GaussianSpecification();
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "New on-center gradient";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
+            gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
+            MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+            cpg.gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+
+            // Add RegionControl & RegionWidget for the new gauss_spec
+            MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
+            MainWindow.GC.AddGaussSpecRegionWidget(gg);
+            // Connect the VTK callback
+            // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
+            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+
+            MainWindow.GC.Rwc.Invalidate();
+        }
+
+        private void DeleteGaussianSpecification(CellPopDistribution dist)
+        {
+            CellPopGaussian cpg = dist as CellPopGaussian;
+            string guid = cpg.gauss_spec_guid_ref;
+
+            if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+            {
+                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+                MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(gs);
+                MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.Remove(guid);
+                MainWindow.GC.RemoveRegionWidget(guid);
+            }
+
+        }
+
+        
 
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -804,7 +861,7 @@ namespace DaphneGui
 
             if (distType == CellPopDistributionType.Uniform)
             {
-                cp.cellPopDist = new CellPopUniformDistribution(5.0);
+                cp.cellPopDist = new CellPopUniform();
             }
         }
 
@@ -1402,10 +1459,66 @@ namespace DaphneGui
             if (cb.SelectedIndex == -1)
                 return;
 
-            CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
-            if (cpdt == CellPopDistributionType.Uniform)
-            {
+            
+            
 
+            // Only want to respond to purposeful user interaction, not just population and depopulation
+            // of solfacs list
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+                return;
+
+            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellPop == null)
+                return;
+
+            CellPopDistributionType new_dist_type = CellPopDistributionType.Uniform;
+            CellPopDistribution current_dist = cellPop.cellPopDist;
+
+            if (e.AddedItems.Count > 0)
+            {
+                new_dist_type = (CellPopDistributionType)e.AddedItems[0];
+            }
+
+                // Only want to change distribution type if the combo box isn't just selecting 
+                // the type of current item in the solfacs list box (e.g. when list selection is changed)
+
+            if (current_dist == null)
+            {
+            }
+            else if (current_dist.DistType == new_dist_type)
+            {
+                return;
+            }
+
+            if (current_dist != null)
+            {
+                if (new_dist_type != CellPopDistributionType.Gaussian && current_dist.DistType == CellPopDistributionType.Gaussian)
+                {
+                    DeleteGaussianSpecification(current_dist);
+                    CellPopGaussian cpg = current_dist as CellPopGaussian;
+                    cpg.gauss_spec_guid_ref = "";
+                    MainWindow.GC.Rwc.Invalidate();
+                }
+            }
+
+            CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
+
+            if (cpdt == CellPopDistributionType.Specific)
+            {
+                CellPopSpecific cps = new CellPopSpecific();
+                cellPop.cellPopDist = cps;
+                cps.CopyLocations(cellPop);                
+            }
+            else if (cpdt == CellPopDistributionType.Uniform)
+            {
+                CellPopUniform cpu = new CellPopUniform();
+                cellPop.cellPopDist = cpu;
+            }
+            else if (cpdt == CellPopDistributionType.Gaussian)
+            {
+                CellPopGaussian cpg = new CellPopGaussian();
+                AddGaussianSpecification(cpg);
+                cellPop.cellPopDist = cpg;
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
@@ -1423,12 +1536,29 @@ namespace DaphneGui
 #endif
         public void SelectGaussSpecInGUI(int index, string guid)
         {
-            // Gaussian specs are in the third tab panel
-            ConfigTabControl.SelectedIndex = 2;
-            // Use list index here since not all solfacs.solfac_distribution have this guid field
-            //GaussianSpecsListBox.SelectedIndex = index;
-            //GaussianSpecsListBox.SelectedValuePath = "gaussian_spec_box_guid_ref";
-            //GaussianSpecsListBox.SelectedValue = guid;
+            bool isBoxInCell = false;
+
+            foreach (CellPopulation cp in MainWindow.SC.SimConfig.scenario.cellpopulations) 
+            {
+                CellPopDistribution cpd = cp.cellPopDist;
+                if (cpd.DistType == CellPopDistributionType.Gaussian) {
+                    CellPopGaussian cpg = cpd as CellPopGaussian;
+                    if (cpg.gauss_spec_guid_ref == guid)
+                    {
+                        isBoxInCell = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isBoxInCell == true)
+            {
+                ConfigTabControl.SelectedIndex = 3;
+            }
+            else
+            {
+                ConfigTabControl.SelectedIndex = 2;
+            }
         }
 
         public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
@@ -1474,7 +1604,7 @@ namespace DaphneGui
                                 ((MolPopGaussian)MainWindow.SC.SimConfig.scenario.environment.ecs.molpops[r].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
                             {
                                 SelectSolfacInGUI(r);
-                                gui_spot_found = true;
+                                //gui_spot_found = true;
                                 break;
                             }
                         }
@@ -1488,7 +1618,7 @@ namespace DaphneGui
                             if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
                             {
                                 SelectGaussSpecInGUI(r, key);
-                                gui_spot_found = true;
+                                //gui_spot_found = true;
                                 break;
                             }
                         }
@@ -1588,7 +1718,7 @@ namespace DaphneGui
                 int rows_to_add = numNew - numOld;
                 for (int i = 0; i < rows_to_add; i++)
                 {
-                    cp.cell_list.Add(new CellState());                    
+                    cp.cell_list.Add(new CellState());                          
                 }
             }
             else if (numNew < numOld)
@@ -1604,6 +1734,12 @@ namespace DaphneGui
                 }
             }
             cp.number = cp.cell_list.Count;
+            if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+            {
+                CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                cps.CopyLocations(cp);
+            }
+            
 
         }
 
@@ -1709,13 +1845,18 @@ namespace DaphneGui
             if (cp == null)
                 return;
             cp.number = cp.cell_list.Count;
+
+            if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+            {
+                CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+                cps.CopyLocations(cp);
+            }
         }        
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
-            MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
-            string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+            CheckBox cb = e.OriginalSource as CheckBox;
+            string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
                 if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
@@ -1724,6 +1865,25 @@ namespace DaphneGui
                     gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
                 }
             }
+
+            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            //MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
+            //if (mpg != null)
+            //{
+            //    string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+            //    if (guid.Length > 0)
+            //    {
+            //        if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+            //        {
+            //            GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+            //            gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+                
+            //}
         }
 
         private void btnTesterClicked(object sender, RoutedEventArgs e)
@@ -1775,6 +1935,13 @@ namespace DaphneGui
             if (cb.SelectedIndex == 0)
             {
                 MainWindow.GC.OrientationMarker_IsChecked = false;
+                //if (MolPopDistComboBox != null)
+                //{
+                //    if (MolPopDistComboBox.SelectedIndex == 1)
+                //    {
+                //        MolPopDistComboBox.SelectedIndex = 0;
+                //    }
+                //}
             }
             else
             {
@@ -1890,8 +2057,13 @@ namespace DaphneGui
                 }
             }
             return false;
-        }    
-                
+        }
+
+        //private ComboBox MolPopDistComboBox;
+        //private void MolPopDistributionTypeComboBox_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    MolPopDistComboBox = sender as ComboBox;
+        //}
     }      
     
      
