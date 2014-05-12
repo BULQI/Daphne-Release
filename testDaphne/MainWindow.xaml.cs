@@ -210,8 +210,7 @@ namespace testDaphne
             MolecularPopulation mp;
             Molecule mol;
 
-            string path = "";
-            string readText = File.ReadAllText(path + "json_output.txt");
+            string readText = File.ReadAllText("json_output.txt");
 
             // The whole enchilada
             // Error - Unable to find a constructor to use for type Daphne.MolecularPopulation. ...
@@ -239,13 +238,12 @@ namespace testDaphne
 
         private void JsonSaveScenario(Simulation sim)
         {
-            string path = "";
-            MolecularPopulation mp;
+             MolecularPopulation mp;
             Molecule mol;
 
             JsonSerializer jserializer = new JsonSerializer();
 
-            using (StreamWriter sw = new StreamWriter(path + "json_output.txt"))
+            using (StreamWriter sw = new StreamWriter("json_output.txt"))
             using (JsonWriter writer = new JsonTextWriter(sw))
             {
                 jserializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -265,7 +263,7 @@ namespace testDaphne
                 // jserializer.Serialize(writer, mol);
             }
 
-            MessageBox.Show("Json output to " + path + "json_output.txt succeeded.");
+            MessageBox.Show("Json output to " + "json_output.txt succeeded.");
 
         }
 
@@ -324,8 +322,7 @@ namespace testDaphne
                 string output;
 
                 initQ = sim.ECS.Populations["CXCL13"].Integrate();
-                string datDir = "";
-                sim.ECS.Populations["CXCL13"].Conc.WriteToFile(datDir + "CXCL13 initial.txt");
+                sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
 
                 for (int i = 0; i < nSteps; i++)
                 {
@@ -345,7 +342,7 @@ namespace testDaphne
                 output = output + "\t" + initQ.ToString("F2") + "\t" + finalQ.ToString("F2") + "\t" + relDiff.ToString("E2");
                 Console.WriteLine(output);
 
-                sim.ECS.Populations["CXCL13"].Conc.WriteToFile(datDir + "CXCL13 final.txt");
+                sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
             }
         }
 
@@ -356,10 +353,9 @@ namespace testDaphne
             double[] complexConc = new double[nSteps];
 
             string output;
-            string datDir = "";
             string filename = "LigandReceptorComplex.txt";
 
-            using (StreamWriter writer = File.CreateText(datDir + filename))
+            using (StreamWriter writer = File.CreateText(filename))
             {
                 for (int i = 0; i < nSteps; i++)
                 {
@@ -395,10 +391,9 @@ namespace testDaphne
                 double[][] driverLoc = new double[nSteps][];
 
                 string output;
-                string datDir = "";
                 string filename = "DriverDynamics.txt";
 
-                using (StreamWriter writer = File.CreateText(datDir + filename))
+                using (StreamWriter writer = File.CreateText(filename))
                 {
                     for (int i = 0; i < nSteps; i++)
                     {
