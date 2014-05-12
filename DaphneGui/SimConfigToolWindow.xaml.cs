@@ -1243,7 +1243,7 @@ namespace DaphneGui
             string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
             cp.cell_locations.Clear();
-            for (int i = 0; i < paste.Length; i += 3)
+            for (int i = 0; i < paste.Length-2; i += 3)
             {
                 CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
                 cp.cell_locations.Add(cl);
