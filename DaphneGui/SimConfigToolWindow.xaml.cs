@@ -2620,6 +2620,10 @@ namespace DaphneGui
             {
                 cc.cytosol.molpops.Add(cmp);
             }
+            foreach (ConfigGene configGene in crc.genes)
+            {
+                cc.genes_guid_ref.Add(configGene.gene_guid);
+            }
             foreach (string rguid in crc.reactions_guid_ref)
             {
                 cc.cytosol.reactions_guid_ref.Add(rguid);
