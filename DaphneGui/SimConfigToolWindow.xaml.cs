@@ -174,7 +174,7 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification()
+        private void AddGaussianSpecification(MolPopGaussian mpg)
         {
             BoxSpecification box = new BoxSpecification();
             box.x_trans = 200;
@@ -194,6 +194,7 @@ namespace DaphneGui
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+            mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -251,13 +252,43 @@ namespace DaphneGui
                             break;
                         case MolPopDistributionType.Gaussian:
                             // Make sure there is at least one gauss_spec in repository
-                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                            {
-                                this.AddGaussianSpecification();
-                            }
-                            MolPopGaussian sgg = new MolPopGaussian();
-                            sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                            current_item.mp_distribution = sgg;
+                            ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                            ////{
+                            ////    this.AddGaussianSpecification();
+                            ////}
+                            MolPopGaussian mpg = new MolPopGaussian();                            
+                            ////BoxSpecification box = new BoxSpecification();
+                            ////box.x_scale = 200;
+                            ////box.y_scale = 200;
+                            ////box.z_scale = 200;
+                            ////box.x_trans = 500;
+                            ////box.y_trans = 500;
+                            ////box.z_trans = 500;
+                            ////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+
+                            ////GaussianSpecification gg = new GaussianSpecification();
+                            ////gg.gaussian_spec_box_guid_ref = box.box_guid;
+                            ////gg.gaussian_spec_name = "On-center gaussian";
+                            ////gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+                            ////gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
+                            ////MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+                            ////mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+
+                            //////sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                            ////current_item.mp_distribution = mpg;
+
+                            ////// Add RegionControl & RegionWidget for the new gauss_spec
+                            ////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
+                            ////MainWindow.GC.AddGaussSpecRegionWidget(gg);
+                            ////// Connect the VTK callback
+                            ////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
+                            ////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+                            ////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+
+                            ////MainWindow.GC.Rwc.Invalidate();
+                            AddGaussianSpecification(mpg);
+                            current_item.mp_distribution = mpg;
+
                             break;
                         case MolPopDistributionType.Custom:
 
@@ -336,12 +367,29 @@ namespace DaphneGui
                         break;
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
-                        if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                        {
-                            this.AddGaussianSpecification();
-                        }
+                        ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                        ////{
+                        ////    this.AddGaussianSpecification();
+                        ////}
                         MolPopGaussian sgg = new MolPopGaussian();
-                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                        //sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                        //string gauss_guid = sgg.gaussgrad_gauss_spec_guid_ref;
+                        //MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(sgg);
+
+                        GaussianSpecification gg = new GaussianSpecification();
+                        BoxSpecification box = new BoxSpecification();
+                        box.x_scale = 200;
+                        box.y_scale = 200;
+                        box.z_scale = 200;
+                        box.x_trans = 500;
+                        box.y_trans = 500;
+                        box.z_trans = 500;
+                        MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+                        gg.gaussian_spec_box_guid_ref = box.box_guid;
+                        gg.gaussian_spec_name = "Off-center gaussian";
+                        gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+                        MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+                        sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;
                     case MolPopDistributionType.Custom:
@@ -421,10 +469,10 @@ namespace DaphneGui
                         break;
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
-                        if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                        {
-                            this.AddGaussianSpecification();
-                        }
+                        ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                        ////{
+                        ////    this.AddGaussianSpecification();
+                        ////}
                         MolPopGaussian sgg = new MolPopGaussian();
                         sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
@@ -513,7 +561,7 @@ namespace DaphneGui
         public void SelectSolfacInGUI(int index)
         {
             // Solfacs are in the second tab panel
-            ConfigTabControl.SelectedIndex = 1;
+            //ConfigTabControl.SelectedIndex = 1;
             // Use list index here since not all solfacs.mp_distribution have this guid field
             lbEcsMolPops.SelectedIndex = index;
         }
@@ -523,9 +571,13 @@ namespace DaphneGui
             ConfigMolecule gm = new ConfigMolecule();
             gm.ReadOnly = false;
             gm.ForegroundColor = System.Windows.Media.Colors.Black;
-            //MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Add(gm);
+            //bool bFound = false;
+            //if (bFound == true) {
+            //    MessageBox.Show("Cannot add a duplicate molecule name");
+            //    return;
+            //}
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
-            lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
+            //lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
 
             lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }

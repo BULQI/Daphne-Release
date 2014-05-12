@@ -242,6 +242,11 @@ namespace DaphneGui
             }
             //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+
+            txtReac.Text = "";
+            reacmolguids.Clear();
+            txtProd.Text = "";
+            prodmolguids.Clear();
         }
 
         private bool ParseUserInput()

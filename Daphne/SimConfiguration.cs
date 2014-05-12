@@ -137,6 +137,8 @@ namespace Daphne
             rc_scenario = new Scenario();
             entity_repository = new EntityRepository();
 
+            
+
             ////LoadDefaultGlobalParameters();
             //LoadUserDefinedItems();           
 
@@ -221,6 +223,20 @@ namespace Daphne
             InitReactionComplexIDConfigReactionComplexDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
+
+            //int index = 0;
+            //foreach (ConfigEcmMolConc cemc in entity_repository.ecm_mol_pop_concs)
+            //{
+            //    cemc.molpop.molecule_guid_ref = entity_repository.molecules[index].molecule_guid;
+            //    index++;
+            //}
+
+            //ConfigCellMolDetail ccmd = new ConfigCellMolDetail(entity_repository.cells[0], true, true, true);
+            //entity_repository.cell_details.Add(ccmd);
+            //ccmd = new ConfigCellMolDetail(entity_repository.cells[1], false, false, false);
+            //entity_repository.cell_details.Add(ccmd);
+            //ccmd = new ConfigCellMolDetail(entity_repository.cells[2], true, false, true);
+            //entity_repository.cell_details.Add(ccmd);
         }
 
         /// <summary>
@@ -544,6 +560,7 @@ namespace Daphne
 #endif
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
+
         }
     }
 
@@ -566,8 +583,37 @@ namespace Daphne
         public Dictionary<string, ConfigCell> cells_dict;
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
 
+        //public ObservableCollection<ConfigEcmMolConc> ecm_mol_pop_concs { get; set; }
+        //public ObservableCollection<ConfigCellMolConc> cell_mol_pop_concs { get; set; }
+        //public ObservableCollection<ConfigCellMolDetail> cell_details { get; set; }
+
         public EntityRepository()
         {
+            //ecm_mol_pop_concs = new ObservableCollection<ConfigEcmMolConc>();
+            //ecm_mol_pop_concs.Clear();
+            //ConfigEcmMolConc cemc = new ConfigEcmMolConc("mp1");
+            ////cemc.molpop.molecule_guid_ref = molecules[0].molecule_guid;
+            //ecm_mol_pop_concs.Add(cemc);
+            //cemc = new ConfigEcmMolConc("mp2");
+            //cemc.full = true;
+            //cemc.fullgrad = false;
+            ////cemc.molpop.molecule_guid_ref = molecules[1].molecule_guid;
+            //ecm_mol_pop_concs.Add(cemc);
+
+            //cell_mol_pop_concs = new ObservableCollection<ConfigCellMolConc>();
+            //ConfigCellMolConc ccmc = new ConfigCellMolConc();
+            //cell_mol_pop_concs.Add(ccmc);
+            //ccmc = new ConfigCellMolConc();
+            //ccmc.cell.CellName = "TestCell2";
+            //ccmc.meangrad = true;
+            //ccmc.mean = false;
+            //cell_mol_pop_concs.Add(ccmc);
+
+
+            //cell_details = new ObservableCollection<ConfigCellMolDetail>();
+
+            
+
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
             box_specifications = new ObservableCollection<BoxSpecification>();
             cells = new ObservableCollection<ConfigCell>();
@@ -953,10 +999,26 @@ namespace Daphne
     }
 
     //skg daphne
-    public class ConfigMolecule : EntityModelBase
+    public class ConfigMolecule 
     {
         public string molecule_guid { get; set; }
-        public string Name { get; set; }
+        private string mol_name;
+        public string Name {
+            get
+            {
+                return mol_name;
+            }
+            set
+            {
+                bool bFound = false;  // FindMolecule(value);
+                if (bFound == true)
+                {
+                } 
+                else 
+                    mol_name = value;
+            }
+        }
+
         public double MolecularWeight { get; set; }
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
@@ -1006,7 +1068,7 @@ namespace Daphne
     }
 
     //skg daphne new classes
-    public class ConfigMolecularPopulation : EntityModelBase
+    public class ConfigMolecularPopulation //: EntityModelBase
     {
         private string _molecule_guid_ref;
         public string molecule_guid_ref 
@@ -1287,65 +1349,7 @@ namespace Daphne
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             molpops = src.molpops;
         }
-
-        //public void ParseForMolecules()
-        //{
-        //    MolDict = new Dictionary<string, Molecule>();
-        //    foreach (ConfigReaction grt in Reactions)
-        //    {
-        //        foreach (SpeciesReference sr in grt.listOfReactants)
-        //        {
-        //            ConfigMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-        //            if (gm != null) {
-        //                if (!MolDict.ContainsKey(sr.species))
-        //                {
-        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-        //                    MolDict.Add(mol.Name, mol);
-        //                }
-        //            }
-        //        }
-        //        foreach (SpeciesReference sr in grt.listOfProducts)
-        //        {
-        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-        //            if (gm != null)
-        //            {
-        //                if (!MolDict.ContainsKey(sr.species))
-        //                {
-        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-        //                    MolDict.Add(mol.Name, mol);
-        //                }
-        //            }
-        //        }
-        //        foreach (SpeciesReference sr in grt.listOfModifiers)
-        //        {
-        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-        //            if (gm != null)
-        //            {
-        //                if (!MolDict.ContainsKey(sr.species))
-        //                {
-        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-        //                    MolDict.Add(mol.Name, mol);
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //}
-
     }
-
-    //////public class GuiBoundaryReactionTemplate : ConfigReaction
-    //////{
-    //////    public GuiSpeciesReference ligand;
-    //////    public GuiSpeciesReference receptor;
-    //////    public GuiSpeciesReference complex;
-    //////    double fluxIntensityConstant;
-    //////}
-
-    //////public class GuiCatalyzedReactionTemplate : ConfigReaction
-    //////{
-    //////    public GuiSpeciesReference catalyst;
-    //////}
 
     public class ConfigCell
     {
@@ -1576,6 +1580,56 @@ namespace Daphne
         }
     }
 
+    public class ConfigEcmMolConc
+    {
+        public ConfigMolecularPopulation molpop { get; set; }
+        public bool mean { get; set; }
+        public bool full { get; set; }
+        public bool fullgrad { get; set; }
+
+        public ConfigEcmMolConc(string name)
+        {
+            molpop = new ConfigMolecularPopulation();
+            molpop.Name = name;
+            mean = true;
+            full = false;
+            fullgrad = true;
+        }
+    }
+
+    public class ConfigCellMolConc
+    {
+        public ConfigCell cell { get; set; }
+        public bool mean { get; set; }
+        public bool meangrad { get; set; }
+
+        public ConfigCellMolConc()
+        {
+            cell = new ConfigCell();
+            cell.CellName = "TestCell1";
+            mean = true;
+            meangrad = false;
+        }
+
+    }
+
+    public class ConfigCellMolDetail
+    {
+        public ConfigCell cell_type { get; set; }
+        public bool position { get; set; }
+        public bool velocity { get; set; }
+        public bool force { get; set; }
+
+        public ConfigCellMolDetail(ConfigCell cc, bool pos, bool vel, bool forc)
+        {
+            
+            cell_type = cc;
+            position = pos;
+            velocity = vel;
+            force = forc;    
+        }
+    }
+    
     public class CellPopulation : EntityModelBase
 
     {
@@ -2223,6 +2277,7 @@ namespace Daphne
                 }
             }
         }
+        public string gauss_spec_guid { get; set; }
 
         public GaussianSpecification()
         {
@@ -2231,6 +2286,9 @@ namespace Daphne
             gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
             gaussian_spec_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+
+            Guid id = Guid.NewGuid();
+            gauss_spec_guid = id.ToString(); 
         }
     }
 

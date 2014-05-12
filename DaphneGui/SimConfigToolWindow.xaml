@@ -91,7 +91,7 @@
             <CollectionViewSource x:Key="ggBoxSpecsListView"  
                                   Source="{Binding Path=entity_repository.box_specifications}"/>
 
-            <CollectionViewSource x:Key="solfacGaussianSpecsListView"  
+            <CollectionViewSource x:Key="molpopGaussianSpecsListView"  
                                   Source="{Binding Path=entity_repository.gaussian_specifications}"/>
 
             <CollectionViewSource x:Key="solfacSolfacTypesListView"  
@@ -588,7 +588,7 @@
                             RenderTransform="1.0,0,0,0.5,0,4"
                             Minimum="{Binding Path=x_trans_min}" 
                             Maximum="{Binding Path=x_trans_max}"
-                            Value="{Binding Path=x_trans}" 
+                            Value="{Binding Path=x_trans, Mode=TwoWay}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="2" Grid.Row="2"
@@ -880,7 +880,7 @@
                                    />
                         <ComboBox Name="gaussian_gradients_cbox"
                                                   Grid.Column="1" Grid.Row="1" 
-                                                  ItemsSource="{Binding Source={StaticResource solfacGaussianSpecsListView}}" 
+                                                  ItemsSource="{Binding Source={StaticResource molpopGaussianSpecsListView}}" 
                                                   DisplayMemberPath="gaussian_spec_name"
                                                   SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref}"
                                                   SelectedValuePath="gaussian_spec_box_guid_ref"
@@ -2273,10 +2273,12 @@
 
                         <StackPanel>
                             <ListBox x:Name="lbMol" Visibility="Visible" AlternationCount="2"                                                     
-                                    ItemsSource="{Binding Path=entity_repository.molecules}"                                     
-                                    ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"
+                                    ItemsSource="{Binding Path=entity_repository.molecules}"   
+                                    DisplayMemberPath="Name"                                    
                                     SelectedIndex="-1"
                                     SelectionChanged="lbMol_SelectionChanged"/>
+
+                            <!--ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"-->
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolec_Click"></Button>
@@ -3856,7 +3858,7 @@
                     
                     <!-- CELL POPULATIONS -->
                     <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="False"
+                            IsExpanded="True"
                             Header="Cell Populations"
                             x:Name="CellPopsExpander"
                             Margin="0,4,0,0" 
@@ -3878,7 +3880,7 @@
                                 <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
                             </StackPanel>
                             <Expander ExpandDirection="Down" Padding="6"
-                                    IsExpanded="False"
+                                    IsExpanded="True"
                                     Header="Cell Population Details"
                                     x:Name="CellPopsDetailsExpander"
                                     Margin="0,-15,0,0" 
@@ -3897,6 +3899,219 @@
                         </StackPanel>
                     </Expander>
                 </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- REPORTS -->
+        <TabItem Header="Reports">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical" Margin="8" >
+                    <StackPanel.Resources>
+                        <DataTemplate x:Key="cellTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsEnabled="{Binding}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="molGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=molecule_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="cellGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=CellName}" Margin="5,0,0,0"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=cell_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="reactionGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=TotalReactionString}" Margin="5,0,0,0"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=reaction_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        
+                    </StackPanel.Resources>
+
+                    <!-- Molecules in Extracellular Medium -->
+                    <TextBlock Text="Molecules in Extracellular Medium" FontWeight="Bold" Margin="0,5,0,0" />
+                    <DataGrid x:Name="dgEcmMols" 
+                            ItemsSource="{Binding Path=entity_repository.ecm_mol_pop_concs}" AutoGenerateColumns="False" 
+                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                            CanUserReorderColumns="False" CanUserResizeRows="False"
+                            CanUserSortColumns="False" RowHeaderWidth="0"
+                            VerticalContentAlignment="Center"
+                            CanUserAddRows="False"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            >
+
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Header="MolPop">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molpop.Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Mean">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mean, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Full">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="{Binding molpop.molecule_guid_ref}" HorizontalAlignment="Center" IsChecked="{Binding Path=full, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Full+Grad">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="{Binding molpop.molecule_guid_ref}"  HorizontalAlignment="Center" IsChecked="{Binding Path=fullgrad, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Molecules in Cells -->
+                    <TextBlock Text="Molecules in Cells" FontWeight="Bold" Margin="0,5,0,0" />
+                    <DataGrid x:Name="dgMolInCells" AutoGenerateColumns="False" ItemsSource="{Binding Path=entity_repository.cell_mol_pop_concs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                            CanUserReorderColumns="False" CanUserResizeRows="False"
+                            CanUserSortColumns="False" RowHeaderWidth="0"
+                            VerticalContentAlignment="Center"
+                            CanUserAddRows="False"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            >
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" >
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Header="MolPop">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell.CellName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Mean">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="{Binding }" HorizontalAlignment="Center" IsChecked="{Binding Path=mean, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Mean+Grad">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="{Binding molpop.molecule_guid_ref}"  HorizontalAlignment="Center" IsChecked="{Binding Path=meangrad, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Cell Details -->
+                    <TextBlock Text="Cell Details" FontWeight="Bold" Margin="0,10,0,0" />
+                    <DataGrid x:Name="dgCellDetails" AutoGenerateColumns="False" ItemsSource="{Binding Path=entity_repository.cell_details, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                            CanUserReorderColumns="False" CanUserResizeRows="False"
+                            CanUserSortColumns="False" RowHeaderWidth="0"
+                            VerticalContentAlignment="Center"
+                            CanUserAddRows="False"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            >
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" >
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Offset="0.0" Color="White" />
+                                            <GradientStop Offset="1.0" Color="Beige" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Header="Cell type">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell_type.CellName, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Position">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=position, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Velocity">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=velocity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Force">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=force, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                </StackPanel>
+                    
             </ScrollViewer>
         </TabItem>
 
@@ -3935,7 +4150,7 @@
                                 ItemTemplate="{Binding Source={StaticResource molGuidsListItemTemplate}}"
                                 SelectedIndex="0"
                                 />
-                    
+
                     <!-- Cells -->
                     <TextBlock Text="Cells" FontWeight="Bold" Margin="0,5,0,0" />
                     <ListBox x:Name="CellGuids" MinHeight="50" 
@@ -3943,7 +4158,7 @@
                                 ItemTemplate="{Binding Source={StaticResource cellGuidsListItemTemplate}}"
                                 SelectedIndex="0"
                                 />
-                    
+
                     <!-- Reactions -->
                     <TextBlock Text="Reactions" FontWeight="Bold" Margin="0,10,0,0" />
                     <ListBox x:Name="ReactionGuids" MinHeight="50" 
@@ -3951,11 +4166,12 @@
                                 ItemTemplate="{Binding Source={StaticResource reactionGuidsListItemTemplate}}"
                                 SelectedIndex="0"
                                 />
-                    
+
                 </StackPanel>
-                    
+
             </ScrollViewer>
         </TabItem>
+
 
     </TabControl>
 </docking:ToolWindow>
