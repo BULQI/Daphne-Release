@@ -48,8 +48,7 @@ namespace testDaphne
         {
             for (int i = 0; i < nSteps; i++)
             {
-                Simulation.dataBasket.ECS.Space.Step(dt);
-                sim.CMGR.Step(dt);
+                sim.Step(dt);
             }
         }
 
@@ -134,8 +133,7 @@ namespace testDaphne
 
             for (int i = 0; i < nSteps; i++)
             {
-                Simulation.dataBasket.ECS.Space.Step(dt);
-                sim.CMGR.Step(dt);
+                sim.Step(dt);
                 // Console.WriteLine(i);
             }
 
@@ -163,8 +161,7 @@ namespace testDaphne
             {
                 for (int i = 0; i < nSteps; i++)
                 {
-                    Simulation.dataBasket.ECS.Space.Step(dt);
-                    sim.CMGR.Step(dt);
+                    sim.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
                     driverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(Simulation.dataBasket.Cells.First().Value.State.X);
@@ -218,8 +215,7 @@ namespace testDaphne
             {
                 for (int i = 0; i < nSteps; i++)
                 {
-                    Simulation.dataBasket.ECS.Space.Step(dt);
-                    sim.CMGR.Step(dt);
+                    sim.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
                     driverLoc = Simulation.dataBasket.Cells.First().Value.State.X;
@@ -844,8 +840,7 @@ namespace testDaphne
             nSteps = 50000;
             for (int i = 0; i < nSteps; i++)
             {
-                Simulation.dataBasket.ECS.Space.Step(dt);
-                sim.CMGR.Step(dt);
+                sim.Step(dt);
                 // Console.WriteLine(i);
             }
 
@@ -1026,8 +1021,7 @@ namespace testDaphne
             nSteps = 5000;
             for (int i = 0; i < nSteps; i++)
             {
-                Simulation.dataBasket.ECS.Space.Step(dt);
-                sim.CMGR.Step(dt);
+                sim.Step(dt);
                 // Console.WriteLine(i);
             }
 

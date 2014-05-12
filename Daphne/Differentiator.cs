@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Daphne
 {
-    public class Differentiator
+    public class Differentiator : IDynamic
     {
         private Random ran;
         private Cell cell;

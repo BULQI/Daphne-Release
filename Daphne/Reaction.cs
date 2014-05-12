@@ -8,7 +8,7 @@ using ManifoldRing;
 
 namespace Daphne
 {
-    public abstract class Reaction
+    public abstract class Reaction : IDynamic
     {
         public double RateConstant;
         protected ScalarField intensity;

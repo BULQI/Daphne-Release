@@ -41,17 +41,17 @@ namespace DaphneGui
         public static string appPath;
 
         private DocWindow dw;
-        //private Thread simThread;
+        private Thread simThread;
         private VCRControl vcrControl;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
 
         private static Simulation sim;
-        public static Simulation Sim
-        {
-            get { return MainWindow.sim; }
-            set { MainWindow.sim = value; }
-        }
+        //public static Simulation Sim
+        //{
+        //    get { return MainWindow.sim; }
+        //    set { MainWindow.sim = value; }
+        //}
 
         private bool blueHandToolButton_IsChecked = false;
 
@@ -71,7 +71,7 @@ namespace DaphneGui
         }
         private Process devHelpProc;
         private static SimConfigurator configurator = null;
-        //private static int repetition;
+        private static int repetition;
 
         /// <summary>
         /// uri for the scenario file
@@ -114,32 +114,23 @@ namespace DaphneGui
         /// </summary>
         public static bool loadSuccess;
 
-        //private static VTKGraphicsController gc;
-        //private static VTKDataBasket vtkdataBasket;
-        private static DataBasket dataBasket;
+        private static VTKGraphicsController gc;
+        private static VTKDataBasket vtkDataBasket;
 
         /// <summary>
         /// retrieve a pointer to the (for now, singular) VTK graphics actors
-        /////////// </summary>
-        ////////public static VTKGraphicsController GC
-        ////////{
-        ////////    get { return gc; }
-        ////////}
+        /// </summary>
+        public static VTKGraphicsController GC
+        {
+            get { return gc; }
+        }
 
         /// <summary>
         /// retrieve a pointer to the VTK data basket object
         /// </summary>
-        ////////public static VTKDataBasket VTKBasket
-        ////////{
-        ////////    get { return vtkdataBasket; }
-        ////////}
-
-        /// <summary>
-        /// retrieve a pointer to the data basket object
-        /// </summary>
-        public static DataBasket Basket
+        public static VTKDataBasket VTKBasket
         {
-            get { return dataBasket; }
+            get { return vtkDataBasket; }
         }
 
         /// <summary>
@@ -163,10 +154,10 @@ namespace DaphneGui
         /// <summary>
         /// retrieve the repetition number
         /// </summary>
-        //////////public static int Repetition
-        //////////{
-        //////////    get { return repetition; }
-        //////////}
+        public static int Repetition
+        {
+            get { return repetition; }
+        }
 
         /// <summary>
         /// utility to query whether we are running a profiling session; need to enable the RUNNING_PROFILER flag and recompile
@@ -357,14 +348,12 @@ namespace DaphneGui
             sim = new Simulation();
 
             //SKIP VTK GRAPHICS WINDOW FOR NOW            
-            // data basket to hold simulation entities
-            dataBasket = new DataBasket();
             // vtk data basket to hold vtk data for entities with graphical representation
-            //////////vtkdataBasket = new VTKDataBasket();
+            vtkDataBasket = new VTKDataBasket();
             // graphics controller to manage vtk objects
-            //////////gc = new VTKGraphicsController(this);
+            gc = new VTKGraphicsController(this);
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
-            //////////this.vtkDisplay_DockPanel.DataContext = gc;
+            vtkDisplay_DockPanel.DataContext = gc;
             // this.SimConfigSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
 
             if (file_exists)
@@ -375,8 +364,7 @@ namespace DaphneGui
                 {
                     // after doing a full reset, don't require one immediately
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, false);
-                    //////////vtkdataBasket.UpdateData();
-                    //////////gc.DrawFrame(sim.GetProgressPercent());
+                    UpdateGraphics();
                     displayTitle();
                 }
                 else
@@ -418,9 +406,9 @@ namespace DaphneGui
             ////////}
 
             // create the simulation thread
-            //////////simThread = new Thread(new ThreadStart(run)) { IsBackground = true };
+            simThread = new Thread(new ThreadStart(run)) { IsBackground = true };
             //simThread.Priority = ThreadPriority.Normal;
-            //////////simThread.Start();
+            simThread.Start();
             dw = new DocWindow();
 
             // immediately run the simulation
@@ -428,9 +416,12 @@ namespace DaphneGui
             {
                 runSim();
             }
+        }
 
-
-
+        public void UpdateGraphics()
+        {
+            vtkDataBasket.UpdateData();
+            gc.DrawFrame(sim.GetProgressPercent());
         }
 
         /// <summary>
@@ -1123,7 +1114,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void runButton_Click(object sender, RoutedEventArgs e)
         {
-            configurator.SimConfig.scenario.environment.CalculateNumGridPts();
             runSim();
         }
 
@@ -1239,13 +1229,6 @@ namespace DaphneGui
             //}
         }
 
-
-
-        private void run()
-        {
-            
-        }
-
         private void initialState(bool newFile, bool completeReset, string jsonScenarioString)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
@@ -1329,26 +1312,27 @@ namespace DaphneGui
             this.SimConfigToolWindow.DataContext = configurator.SimConfig;
 
             // set up the simulation
-            //////////if (sim.setupSimulation(completeReset) == false)
-            //////////{
-            //////////    handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
-            //////////    return;
-            //////////}
+            if (sim.Load(configurator.SimConfig) == false)
+            {
+                handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
+                return;
+            }
 
-            //////////// Create all VTK visualization pipelines and elements
-            //////////gc.CreatePipelines();
+            vtkDataBasket.SetupVTKData(configurator.SimConfig);
+            // Create all VTK visualization pipelines and elements
+            gc.CreatePipelines();
 
-            //////////// clear the vcr cache
-            //////////if (vcrControl != null)
-            //////////{
-            //////////    vcrControl.ReleaseVCR();
-            //////////}
+            // clear the vcr cache
+            if (vcrControl != null)
+            {
+                vcrControl.ReleaseVCR();
+            }
 
-            //////////if (newFile)
-            //////////{
-            //////////    gc.recenterCamera();
-            //////////}
-            //////////gc.Rwc.Invalidate();
+            if (newFile)
+            {
+                gc.recenterCamera();
+            }
+            gc.Rwc.Invalidate();
 
             //////////// TODO: Need to do this for all GCs eventually...
             //////////// Add the RegionControl interaction event handlers here for easier reference to callback method
@@ -1415,6 +1399,18 @@ namespace DaphneGui
             saveScenarioAs.IsEnabled = enable;
         }
 
+        private void run()
+        {
+            while (true)
+            {
+                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                {
+                    sim.Step(configurator.SimConfig.scenario.time_config.rendering_interval);
+                    UpdateGraphics();
+                }
+            }
+        }
+
         /// <summary>
         /// Initiate a simulation run
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
@@ -1423,19 +1419,12 @@ namespace DaphneGui
         private void runSim()
         {
             //MessageBox.Show("In runSim()");
-
-            Sim.Load(configurator.SimConfig);
-            double T = configurator.SimConfig.scenario.time_config.duration;  //100;   // minutes
+            double T = configurator.SimConfig.scenario.time_config.duration;
             double dt = configurator.SimConfig.scenario.time_config.rendering_interval;
             int nSteps = (int)(T / dt);
 
-            MessageBox.Show("Started processing...num steps = " + nSteps);
-            for (int i = 0; i < nSteps; i++)
-            {
-                Simulation.dataBasket.ECS.Space.Step(dt);
-                sim.CMGR.Step(dt);
-            }
-            MessageBox.Show("Finished processing...");
+            repetition = 1;
+            sim.Start(nSteps);
 
             //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
             //YOU CAN ONLY CALL THIS AFTER LOADING A DRIVER-LOCOMOTOR SCENARIO
@@ -1575,8 +1564,7 @@ namespace DaphneGui
                 
                 for (int i = 0; i < nSteps; i++)
                 {
-                    Simulation.dataBasket.ECS.Space.Step(dt);
-                    sim.CMGR.Step(dt);
+                    sim.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
                     driverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(Simulation.dataBasket.Cells.First().Value.State.X);
@@ -1610,8 +1598,7 @@ namespace DaphneGui
 
                 for (int i = 0; i < nSteps; i++)
                 {
-                    Simulation.dataBasket.ECS.Space.Step(dt);
-                    sim.CMGR.Step(dt);
+                    sim.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
                     driverLoc = Simulation.dataBasket.Cells.First().Value.State.X;

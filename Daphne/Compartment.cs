@@ -15,7 +15,7 @@ namespace Daphne
     /// All molecular populations must be defined on either the interior manifold or one of the boundary manifolds.
     /// rtList keeps track of the ReactionTemplates that have been assigned to this compartment. Avoids duplication
     /// </summary>
-    public class Compartment
+    public class Compartment : IDynamic
     {
         public Compartment(Manifold interior)
         {

@@ -1,4 +1,4 @@
-﻿//#define ADVANCED_STUFF
+﻿//#define ALL_DATA
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,7 +17,7 @@ namespace Daphne
     /// </summary>
     public class DataBasket
     {
-#if ADVANCED_STUFF
+#if ALL_DATA
         /// <summary>
         /// safe cell id, guaranteed to be unused
         /// </summary>
@@ -35,7 +35,7 @@ namespace Daphne
         /// dictionary of molecules
         /// </summary>
         private Dictionary<string, Molecule> molecules;
-#if ADVANCED_STUFF
+#if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
         /// </summary>
@@ -63,13 +63,13 @@ namespace Daphne
         {
             cells = new Dictionary<int,Cell>();
             molecules = new Dictionary<string, Molecule>();
-#if ADVANCED_STUFF
+#if ALL_DATA
             safeCellID = 0;
             ResetTrackData();
 #endif
         }
 
-#if ADVANCED_STUFF
+#if ALL_DATA
         /// <summary>
         /// accessor for the safe cell id
         /// </summary>
@@ -107,7 +107,7 @@ namespace Daphne
             set { molecules = value; }
         }
 
-#if ADVANCED_STUFF
+#if ALL_DATA
         /// <summary>
         /// accessor for the dictionary of cell tracks
         /// </summary>
@@ -404,7 +404,7 @@ namespace Daphne
         {
             if (cell != null)
             {
-#if ADVANCED_STUFF
+#if ALL_DATA
                 // cause the cell to be updated into the grid in the next simulation round
                 cell.GridIndex[0] = cell.GridIndex[1] = cell.GridIndex[2] = -1;
 #endif
@@ -426,7 +426,7 @@ namespace Daphne
             {
                 Cell cell = cells[key];
 
-#if ADVANCED_STUFF
+#if ALL_DATA
                 // remove all pairs that contain this cell
                 MainWindow.Sim.CellManager.RemoveAllPairsContainingCell(cell, cells);
                 // remove the cell from the grid
@@ -439,7 +439,7 @@ namespace Daphne
             return false;
         }
 
-#if ADVANCED_STUFF
+#if ALL_DATA
         /// <summary>
         /// rekey the cell and its pairs and grid locations containing it
         /// </summary>

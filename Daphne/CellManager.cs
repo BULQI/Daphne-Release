@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Daphne
 {
-    public class CellManager
+    public class CellManager : IDynamic
     {
         public CellManager()
         {

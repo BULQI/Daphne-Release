@@ -84,6 +84,7 @@
     <Compile Include="DataBasket.cs" />
     <Compile Include="Differentiator.cs" />
     <Compile Include="GuiReactionComplex.cs" />
+    <Compile Include="Interfaces.cs" />
     <Compile Include="Locomotor.cs" />
     <Compile Include="MolecularPopulation.cs" />
     <Compile Include="MoleculeBuilder.cs" />

@@ -35,7 +35,7 @@ namespace Daphne
 
 
 
-    public class MolecularPopulation
+    public class MolecularPopulation : IDynamic
     {
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule { get; private set; }

@@ -550,6 +550,7 @@ namespace Daphne
                 else
                 {
                     _extent_x = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_x");
                 }
             }
@@ -564,6 +565,7 @@ namespace Daphne
                 else
                 {
                     _extent_y = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_y");
                 }
             }
@@ -578,6 +580,7 @@ namespace Daphne
                 else
                 {
                     _extent_z = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_z");
                 }
             }
@@ -592,6 +595,7 @@ namespace Daphne
                 else
                 {
                     _gridstep = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("gridstep");
                 }
             }
@@ -619,15 +623,24 @@ namespace Daphne
             gridstep_min = 1;
             gridstep_max = 100;
             gridstep = 50;
+            initialized = true;
 
             CalculateNumGridPts();
 
             ecs = new ConfigCompartment();
         }
 
-        public void CalculateNumGridPts()
+        private bool initialized = false;
+
+        private void CalculateNumGridPts()
         {
+            if (initialized == false)
+            {
+                return;
+            }
+
             int[] pt = new int[3];
+
             pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
             pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
             pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;
@@ -1665,7 +1678,7 @@ namespace Daphne
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _solfac_dist_type_strings = new List<string>()
+        private List<string> _molpop_dist_type_strings = new List<string>()
                                 {
                                     "Homogeneous",
                                     "Linear Gradient",
@@ -1677,7 +1690,7 @@ namespace Daphne
         {
             try
             {
-                return _solfac_dist_type_strings[(int)value];
+                return _molpop_dist_type_strings[(int)value];
             }
             catch
             {
@@ -1688,7 +1701,7 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string str = (string)value;
-            int idx = _solfac_dist_type_strings.FindIndex(item => item == str);
+            int idx = _molpop_dist_type_strings.FindIndex(item => item == str);
             return (MolPopDistributionType)Enum.ToObject(typeof(MolPopDistributionType), (int)idx);
         }
     }

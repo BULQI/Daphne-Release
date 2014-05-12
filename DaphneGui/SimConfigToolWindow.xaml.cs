@@ -403,13 +403,6 @@ namespace DaphneGui
             ////}
         }
 
-        private void sliderGridStep_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            double v = e.NewValue;
-
-            MainWindow.SC.SimConfig.scenario.environment.CalculateNumGridPts();
-        }
-
         private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;

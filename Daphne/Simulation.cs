@@ -10,14 +10,41 @@ using Ninject.Parameters;
 
 namespace Daphne
 {
-    public class Simulation
+    public class Simulation : IDynamic
     {
+        /// <summary>
+        /// constants used to set the run status
+        /// </summary>
+        public static byte RUNSTAT_OFF = 0,
+                           RUNSTAT_RUN = 1,
+                           RUNSTAT_PAUSE = 2,
+                           RUNSTAT_ABORT = 3,
+                           RUNSTAT_FINISHED = 4;
+
         public static DataBasket dataBasket;
+
+        public byte RunStatus { get; set; }
+        private int numSteps { get; set; }
+        private int curStep;
 
         public Simulation()
         {
             cellManager = new CellManager();
             dataBasket = new DataBasket();
+            reset();
+        }
+
+        private void reset()
+        {
+            RunStatus = RUNSTAT_OFF;
+            curStep = 0;
+        }
+
+        public void Start(int steps)
+        {
+            numSteps = steps;
+            reset();
+            RunStatus = RUNSTAT_RUN;
         }
 
         public void AddCell(Cell c)
@@ -304,7 +331,7 @@ namespace Daphne
             }
         }
 
-        public void Load(SimConfiguration sc)
+        public bool Load(SimConfiguration sc)
         {
             Scenario scenario = sc.scenario;
 
@@ -401,11 +428,52 @@ namespace Daphne
             {
                 addCompartmentReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, scenario.environment.ecs, sc.entity_repository);
             }
+
+            return true;
         }
 
-        public CellManager CMGR
+        public void Step(double dt)
         {
-            get { return cellManager; }
+            if (RunStatus == RUNSTAT_RUN)
+            {
+                dataBasket.ECS.Space.Step(dt);
+                cellManager.Step(dt);
+                curStep++;
+                if (curStep >= numSteps)
+                {
+                    RunStatus = RUNSTAT_FINISHED;
+                }
+            }
+        }
+
+        /// <summary>
+        /// calculate and return the progress of the simulation
+        /// </summary>
+        /// <returns>integer indicating the percent of progress</returns>
+        public int GetProgressPercent()
+        {
+            int percent = (numSteps == 0) ? 0 : (int)(100 * curStep / numSteps);
+
+            if (RunStatus == RUNSTAT_RUN)
+            {
+                if (percent >= 100)
+                {
+                    percent = 99;
+                }
+            }
+            else if (RunStatus == RUNSTAT_FINISHED)
+            {
+                if (percent > 0)
+                {
+                    percent = 100;
+                }
+            }
+            else if (percent > 100)
+            {
+                percent = 100;
+            }
+
+            return percent;
         }
 
         private CellManager cellManager;

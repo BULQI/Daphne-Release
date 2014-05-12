@@ -22,7 +22,7 @@ namespace Daphne
     /// <summary>
     /// The basic representation of a biological cell. 
     /// </summary>
-    public class Cell
+    public class Cell : IDynamic
     {
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is alive or dead.
@@ -140,6 +140,7 @@ namespace Daphne
 
         public int Index { get; private set; }
         private static int safeIndex = 0;
+        public int CellSetId { get; set; }
 
         public SpatialState State
         {
@@ -151,6 +152,11 @@ namespace Daphne
         {
             get { return isMotile; }
             set { isMotile = value; }
+        }
+
+        public double Radius
+        {
+            get { return radius; }
         }
 
         // There may be other components specific to a given cell type.
