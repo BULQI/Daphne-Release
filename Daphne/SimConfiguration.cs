@@ -2499,6 +2499,7 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             driver_guid = id.ToString();
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
+            states = new ObservableCollection<string>();
         }
 
         public ConfigTransitionDriver Clone()
