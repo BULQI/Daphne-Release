@@ -274,7 +274,7 @@ namespace Daphne
             double minDisSquared = 2*sc.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.cellPopDist.CellStates[0] = new CellState(  sc.scenario.environment.extent_x,
+            cellPop.cellPopDist.CellStates[0] = new CellState(  sc.scenario.environment.extent_x - 2*configCell.CellRadius,
                                                                 sc.scenario.environment.extent_y / 2,
                                                                 sc.scenario.environment.extent_z / 2);
             cellPop.cellpopulation_constrained_to_region = false;
@@ -1494,36 +1494,6 @@ namespace Daphne
                 }
             }
 
-            //var query =
-            //    from mol in sc.entity_repository.molecules
-            //    where mol.Name == "CXCR5" || mol.Name == "CXCL13:CXCR5" || mol.Name == "CXCL13"
-            //    select mol;
-
-            //ConfigMolecularPopulation cmp = null;
-            //foreach (ConfigMolecule cm in query)
-            //{
-            //    cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //    cmp.molecule_guid_ref = cm.molecule_guid;
-            //    cmp.mpInfo = new MolPopInfo("My " + cm.Name);
-            //    cmp.Name = "My " + cm.Name;
-            //    cmp.mpInfo.mp_dist_name = "Constant level";
-            //    cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //    cmp.mpInfo.mp_render_blending_weight = 2.0;
-
-            //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-            //    if (cm.Name == "CXCR5")
-            //    {
-            //        hl.concentration = 1.0;
-            //    }
-            //    else
-            //    {
-            //        hl.concentration = 2.0;
-            //    }
-            //    cmp.mpInfo.mp_distribution = hl;
-
-            //    crc.molpops.Add(cmp);
-            //}
-
             //REACTIONS
 
             //string guid = findReactionGuid(ReactionType.Association, sc);
@@ -1531,8 +1501,6 @@ namespace Daphne
             // Reaction strings
             type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5",
                                             "CXCL13 + CXCR5 -> CXCL13:CXCR5"}; 
-                                            //"CXCR5 ->",
-                                            //"CXCL13 ->"};
             
             for (int i = 0; i < type.Length; i++)
             {
@@ -1553,46 +1521,6 @@ namespace Daphne
                     crc.ReactionRates.Add(grp);
                 }
             }
-
-            //if (guid != null)
-            //{
-            //    ConfigReaction reac = findReactionByGuid(guid, sc);
-            //    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-            //    grp.Guid = guid;
-            //    grp.OriginalRate = reac.rate_const;
-            //    grp.ReactionComplexRate = reac.rate_const;
-            //    crc.reactions_guid_ref.Add(guid);
-            //    crc.ReactionRates.Add(grp);
-            //}
-
-            //guid = findReactionGuid(ReactionType.Dissociation, sc);
-            
-            //if (guid != null)
-            //{
-            //    ConfigReaction reac = findReactionByGuid(guid, sc);
-            //    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-            //    grp.Guid = guid;
-            //    grp.OriginalRate = reac.rate_const;
-            //    grp.ReactionComplexRate = reac.rate_const;
-            //    crc.reactions_guid_ref.Add(guid);
-            //    crc.ReactionRates.Add(grp);
-            //}
-
-            //foreach (ConfigReaction cr in sc.entity_repository.reactions)
-            //{
-            //    foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
-            //    {
-            //        if (cr.reaction_template_guid_ref == crt.reaction_template_guid && crt.reac_type == ReactionType.Annihilation)
-            //        {
-            //            crc.reactions_guid_ref.Add(cr.reaction_guid);
-            //            ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-            //            grp.Guid = cr.reaction_guid;
-            //            grp.OriginalRate = cr.rate_const;
-            //            grp.ReactionComplexRate = cr.rate_const;
-            //            crc.ReactionRates.Add(grp);
-            //        }
-            //    }                
-            //}
 
             sc.entity_repository.reaction_complexes.Add(crc);
 
