@@ -836,7 +836,7 @@
                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                    />
 
-                            <uc:DoublesBox SliderEnabled="False" Width="80" Number="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox SliderEnabled="False" Width="80" Number="{Binding Path=peak_concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             </uc:DoublesBox>
 
                             <!--<editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
