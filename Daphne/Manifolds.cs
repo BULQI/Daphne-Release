@@ -39,9 +39,21 @@ namespace Daphne
         // TinySphere.Integrate(s) returns s*4*pi*r^2
         // TinyBall.Integrate(s) returns s*4*pi*r^3/3
         public abstract double Integrate(ScalarField s);
-        public abstract int[] localToArr(double[] loc);
-        public abstract int arrToIndex(int[] arr);
+        public abstract double[] pointToLocalDouble(double[] loc);
+        public abstract int localIntToIndex(int[] arr);
 
+
+        public int[] pointToLocalInt(double[] loc)
+        {
+            double[] arr = pointToLocalDouble(loc);
+            int[] ret = new int[arr.Length];
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                ret[i] = (int)arr[i];
+            }
+            return ret;
+        }
 
         public bool isIn(double[] loc)
         {
@@ -73,7 +85,7 @@ namespace Daphne
         {
             if (isIn(p1) == true && isIn(p2) == true)
             {
-                int[] pi1 = localToArr(p1), pi2 = localToArr(p2);
+                double[] pi1 = pointToLocalDouble(p1), pi2 = pointToLocalDouble(p2);
                 double dist = 0;
 
                 for (int i = 0; i < pi1.Length; i++)
@@ -120,20 +132,20 @@ namespace Daphne
             return s[0] * Math.PI * Extents[0] * Extents[0];
         }
 
-        public override int[] localToArr(double[] loc)
+        public override double[] pointToLocalDouble(double[] loc)
         {
             if (loc == null || loc.Length != Dim)
             {
-                throw new Exception("Bad argument in localToArr");
+                throw new Exception("Bad argument in pointToLocalDouble");
             }
-            return new int[1];
+            return new double[1];
         }
 
-        public override int arrToIndex(int[] arr)
+        public override int localIntToIndex(int[] arr)
         {
             if (arr == null || arr.Length != Dim)
             {
-                throw new Exception("Bad argument in arrToIndex");
+                throw new Exception("Bad argument in localIntToIndex");
             }
             return 0;
         }
@@ -173,20 +185,20 @@ namespace Daphne
             return s[0] * 4.0 * Math.PI * Extents[0] * Extents[0] * Extents[0] / 3.0;
         }
 
-        public override int[] localToArr(double[] loc)
+        public override double[] pointToLocalDouble(double[] loc)
         {
             if (loc == null || loc.Length != Dim)
             {
-                return null;
+                throw new Exception("Bad argument in pointToLocalDouble");
             }
-            return new int[1];
+            return new double[1];
         }
 
-        public override int arrToIndex(int[] arr)
+        public override int localIntToIndex(int[] arr)
         {
             if (arr == null || arr.Length != Dim)
             {
-                return -1;
+                throw new Exception("Bad argument in localIntToIndex");
             }
             return 0;
         }
@@ -366,20 +378,20 @@ namespace Daphne
             }
         }
 
-        public override int[] localToArr(double[] loc)
+        public override double[] pointToLocalDouble(double[] loc)
         {
             if (loc == null || loc.Length != Dim)
             {
-                return null;
+                throw new Exception("Bad argument in pointToLocalDouble");
             }
-            return new int[] { (int)(loc[0] / StepSize[0]), (int)(loc[1] / StepSize[1]) };
+            return new double[] { loc[0] / StepSize[0], loc[1] / StepSize[1] };
         }
 
-        public override int arrToIndex(int[] arr)
+        public override int localIntToIndex(int[] arr)
         {
             if (arr == null || arr.Length != Dim)
             {
-                return -1;
+                throw new Exception("Bad argument in localIntToIndex");
             }
             return arr[0] + arr[1] * NumPoints[0];
         }
@@ -391,7 +403,7 @@ namespace Daphne
             // Linear interpolation
             // The values in point are in terms of manifold coordinates
 
-            int[] idx = localToArr(point);
+            int[] idx = pointToLocalInt(point);
 
             if (idx == null)
             {
@@ -760,20 +772,20 @@ namespace Daphne
             //Boundaries.Add(yzUpper.Id, yzUpperEmbed);
         }
 
-        public override int[] localToArr(double[] loc)
+        public override double[] pointToLocalDouble(double[] loc)
         {
             if (loc == null || loc.Length != Dim)
             {
-                return null;
+                throw new Exception("Bad argument in pointToLocalDouble");
             }
-            return new int[] { (int)(loc[0] / StepSize[0]), (int)(loc[1] / StepSize[1]), (int)(loc[2] / StepSize[2]) };
+            return new double[] { loc[0] / StepSize[0], loc[1] / StepSize[1], loc[2] / StepSize[2] };
         }
 
-        public override int arrToIndex(int[] arr)
+        public override int localIntToIndex(int[] arr)
         {
             if (arr == null || arr.Length != Dim)
             {
-                return -1;
+                throw new Exception("Bad argument in localIntToIndex");
             }
             return arr[0] + arr[1] * NumPoints[0] + arr[2] * NumPoints[0] * NumPoints[1];
         }
@@ -785,7 +797,7 @@ namespace Daphne
             // Linear interpolation
             // The values in point are in terms of manifold coordinates
 
-            int[] idx = localToArr(point);
+            int[] idx = pointToLocalInt(point);
 
             if (idx == null)
             {

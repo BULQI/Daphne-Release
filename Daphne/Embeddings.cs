@@ -139,7 +139,7 @@ namespace Daphne
                     point[dimensionsMap[i]] += Domain.Coordinates[index, i];
                 }
 
-                indexMap[index] = Range.arrToIndex(Range.localToArr(point));
+                indexMap[index] = Range.localIntToIndex(Range.pointToLocalInt(point));
             }
         }
 
