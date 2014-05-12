@@ -197,9 +197,9 @@
             <CollectionViewSource x:Key="transitionDriversListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"/>
 
-            <CollectionViewSource x:Key="cellTransitionDriverListView"  
+            <CollectionViewSource x:Key="cellTransitionDeathDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"
-                                  Filter="selectedCellTransitionDriverListView_Filter"/>
+                                  Filter="selectedCellTransitionDeathDriverListView_Filter"/>
 
             <CollectionViewSource x:Key="cellTransitionDivisionDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"
@@ -4225,7 +4225,7 @@
 
                                             <StackPanel x:Name="spDeath" Orientation="Vertical" >
                                                 <ListBox x:Name="lbDrivers" MaxHeight="0" 
-                                                         ItemsSource="{Binding Source={StaticResource cellTransitionDriverListView}}"
+                                                         ItemsSource="{Binding Source={StaticResource cellTransitionDeathDriverListView}}"
                                                          SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver_guid}"
                                                          SelectedValuePath="driver_guid"
                                                          DisplayMemberPath="Name" 
@@ -4253,6 +4253,8 @@
                                                 <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
                                                         Text="{Binding ElementName=lbDrivers, Path=SelectedItem.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
+                                                
+                                                <StackPanel Height="10"></StackPanel>
 
                                             </StackPanel>
 

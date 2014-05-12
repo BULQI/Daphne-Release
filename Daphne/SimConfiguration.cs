@@ -3242,6 +3242,7 @@ namespace Daphne
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
+            ReadOnly = false;
 
             // behaviors
             diff_scheme_guid_ref = "";
@@ -4596,6 +4597,9 @@ namespace Daphne
             ConfigMolecularPopulation MyMolPop = null;
             string mol_guid = "";
 
+            if (death_guid == "" || death_guid == null)
+                return mol_guid;
+
             if (drivers != null)
             {
                 foreach (ConfigTransitionDriver driver in drivers)
@@ -4609,7 +4613,7 @@ namespace Daphne
                 }
             }
 
-            if (cc != null)
+            if (cc != null && mol_guid != "")
             {
                 foreach (ConfigMolecularPopulation molpop in cc.molpops)
                 {

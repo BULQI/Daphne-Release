@@ -581,7 +581,7 @@ namespace DaphneGui
             }
         }
 
-        private void selectedCellTransitionDriverListView_Filter(object sender, FilterEventArgs e)
+        private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
@@ -3230,6 +3230,155 @@ namespace DaphneGui
       
         }
 
+        private DataGridTemplateColumn CreateDiffRegColumn(EntityRepository er, ConfigCell cell, string state)
+        {
+            DataGridTemplateColumn col = new DataGridTemplateColumn();
+
+            col.Header = state;
+            col.CanUserSort = false;
+            col.MinWidth = 50;
+
+            //SET UP CELL LAYOUT
+
+            //NON-EDITING TEMPLATE
+            DataTemplate cellTemplate = new DataTemplate();
+
+            //SET UP A TEXTBLOCK ONLY
+            Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            bn.Mode = BindingMode.TwoWay;
+            bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
+            bn.Converter = c;
+            CollectionViewSource cvs = new CollectionViewSource();
+            cvs.Source = er.molecules;
+            bn.ConverterParameter = cvs;
+            FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
+            txtDriverMol.Name = "DriverTextBlock";
+            txtDriverMol.SetBinding(TextBlock.TextProperty, bn);
+            cellTemplate.VisualTree = txtDriverMol;
+
+            //EDITING TEMPLATE
+
+            //SET UP A STACK PANEL THAT WILL CONTAIN A COMBOBOX AND AN EXPANDER
+            FrameworkElementFactory spFactory = new FrameworkElementFactory(typeof(StackPanel));
+            spFactory.Name = "mySpFactory";
+            spFactory.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
+
+            DataTemplate cellEditingTemplate = new DataTemplate();
+
+            //SET UP THE COMBO BOX
+            FrameworkElementFactory comboMolPops = new FrameworkElementFactory(typeof(ComboBox));
+            comboMolPops.Name = "MolPopComboBox";
+
+            //------ Use a composite collection to insert "None" item
+            CompositeCollection coll = new CompositeCollection();
+            ComboBoxItem nullItem = new ComboBoxItem();
+            nullItem.IsEnabled = true;
+            nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            nullItem.Content = "None";
+            coll.Add(nullItem);
+            CollectionContainer cc = new CollectionContainer();
+            cc.Collection = cell.cytosol.molpops;
+            coll.Add(cc);
+            comboMolPops.SetValue(ComboBox.ItemsSourceProperty, coll);
+
+            //--------------
+
+            comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
+            comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
+
+            //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
+            MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
+            Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            b3.Mode = BindingMode.TwoWay;
+            b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            b3.Converter = conv2;
+            b3.ConverterParameter = cell.cytosol;
+            comboMolPops.SetBinding(ComboBox.SelectedValueProperty, b3);
+            comboMolPops.SetValue(ComboBox.ToolTipProperty, "Mol Pop Name");
+
+            spFactory.AppendChild(comboMolPops);
+
+            //--------------------------------------------------
+
+            //SET UP AN EXPANDER THAT WILL CONTAIN ALPHA AND BETA
+
+            //This disables the expander if no driver molecule is selected
+            DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
+            Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            bEnabled.Mode = BindingMode.OneWay;
+            bEnabled.Converter = enabledConv;
+
+            //Expander
+            FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
+            expAlphaBeta.SetValue(Expander.HeaderProperty, "Production rate values");
+            expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
+            expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
+            expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
+            expAlphaBeta.SetValue(Expander.BackgroundProperty, Brushes.White);
+            expAlphaBeta.SetBinding(Expander.IsEnabledProperty, bEnabled);
+
+            FrameworkElementFactory spProduction = new FrameworkElementFactory(typeof(StackPanel));
+            spProduction.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
+
+            FrameworkElementFactory spAlpha = new FrameworkElementFactory(typeof(StackPanel));
+            spAlpha.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+            FrameworkElementFactory tbAlpha = new FrameworkElementFactory(typeof(TextBlock));
+            tbAlpha.SetValue(TextBlock.TextProperty, "Background:  ");
+            tbAlpha.SetValue(TextBlock.ToolTipProperty, "Background production rate");
+            tbAlpha.SetValue(TextBox.WidthProperty, 110D);
+            //tbAlpha.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
+            spAlpha.AppendChild(tbAlpha);
+
+            //SET UP THE ALPHA TEXTBOX
+            Binding b = new Binding(string.Format("elements[{0}].Alpha", DiffRegGrid.Columns.Count));
+            b.Mode = BindingMode.TwoWay;
+            b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            FrameworkElementFactory txtDriverAlpha = new FrameworkElementFactory(typeof(TextBox));
+            txtDriverAlpha.SetBinding(TextBox.TextProperty, b);
+
+            txtDriverAlpha.SetValue(TextBox.ToolTipProperty, "Background production rate");
+            txtDriverAlpha.SetValue(TextBox.WidthProperty, 50D);
+            spAlpha.AppendChild(txtDriverAlpha);
+            spProduction.AppendChild(spAlpha);
+
+            FrameworkElementFactory spBeta = new FrameworkElementFactory(typeof(StackPanel));
+            spBeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+            FrameworkElementFactory tbBeta = new FrameworkElementFactory(typeof(TextBlock));
+            tbBeta.SetValue(TextBlock.TextProperty, "Linear coefficient:  ");
+            tbBeta.SetValue(TextBox.WidthProperty, 110D);
+            tbBeta.SetValue(TextBlock.ToolTipProperty, "Production rate linear coefficient");
+            spBeta.AppendChild(tbBeta);
+
+            //SET UP THE BETA TEXTBOX
+            Binding beta = new Binding(string.Format("elements[{0}].Beta", DiffRegGrid.Columns.Count));
+            beta.Mode = BindingMode.TwoWay;
+            beta.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            FrameworkElementFactory txtDriverBeta = new FrameworkElementFactory(typeof(TextBox));
+            txtDriverBeta.SetBinding(TextBox.TextProperty, beta);
+            txtDriverBeta.SetValue(TextBox.WidthProperty, 50D);
+            txtDriverBeta.SetValue(TextBox.ToolTipProperty, "Production rate linear coefficient");
+            spBeta.AppendChild(txtDriverBeta);
+            spProduction.AppendChild(spBeta);
+
+            expAlphaBeta.AppendChild(spProduction);
+            spFactory.AppendChild(expAlphaBeta);
+
+            //---------------------------
+
+            //set the visual tree of the data template
+            cellEditingTemplate.VisualTree = spFactory;
+
+            //set cell layout
+            col.CellTemplate = cellTemplate;
+            col.CellEditingTemplate = cellEditingTemplate;
+
+            return col;
+        }
+
+
         /// <summary>
         /// This method creates a data grid column with a combo box in the header.
         /// The combo box contains genes that are not in the epigenetic map of of 
@@ -3393,7 +3542,7 @@ namespace DaphneGui
             DataGridTextColumn col = new DataGridTextColumn();
             col.Header = gene.Name;
             col.CanUserSort = false;
-            Binding b = new Binding(string.Format("activations[{0}]", EpigeneticMapGrid.Columns.Count-1));
+            Binding b = new Binding(string.Format("activations[{0}]", scheme.activationRows[0].activations.Count - 1));   //EpigeneticMapGrid.Columns.Count-1));  
             b.Mode = BindingMode.TwoWay;
             b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             col.Binding = b;
@@ -3470,11 +3619,33 @@ namespace DaphneGui
 
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
+            int i = 0;
             foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
             {
                 if (EpigeneticMapGrid.SelectedItems.Contains(diffrow))
                 {
+                    int index = diff_scheme.activationRows.IndexOf(diffrow);
+                    string stateToDelete = diff_scheme.Driver.states[index];
+
+                    //this deletes the column from the differentiation regulators grid
+                    DeleteDiffRegGridColumn(stateToDelete);
+
+                    //this removes the activation row from the differentiation scheme
                     diff_scheme.RemoveActivationRow(diffrow);
+                }
+                i++;
+            }
+
+        }
+
+        private void DeleteDiffRegGridColumn(string state)
+        {
+            foreach (DataGridTemplateColumn col in DiffRegGrid.Columns.ToList())
+            {
+                if ((string)(col.Header) == state)
+                {
+                    DiffRegGrid.Columns.Remove(col);
+                    break;
                 }
             }
         }
@@ -3490,12 +3661,15 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            //Show a dialog that gets the new state's name
+            AddDiffState ads = new AddDiffState();
 
-            diff_scheme.AddState("NewState");
-
-
-            //EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
+            if (ads.ShowDialog() == true)
+            {
+                ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+                diff_scheme.AddState(ads.StateName);
+                DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, ads.StateName));
+            }
 
         }
 
