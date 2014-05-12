@@ -853,7 +853,7 @@
                                         </Style>
                                     </TextBlock.Style>
                     </TextBlock>
-                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1, StringFormat={}{0:0.00}}" >                        
+                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[0].concVal, StringFormat={}{0:0.00}}" >                        
                     </TextBox>
                 </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
@@ -875,7 +875,7 @@
                         </TextBlock.Style>
                     </TextBlock>
 
-                        <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2, StringFormat={}{0:0.00}}">                        
+                        <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[1].concVal, StringFormat={}{0:0.00}}">                        
                     </TextBox>
                 </StackPanel>
                 </StackPanel>

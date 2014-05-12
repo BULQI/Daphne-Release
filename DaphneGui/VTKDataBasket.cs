@@ -316,8 +316,8 @@ namespace DaphneGui
                         break;
                 }
 
-                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).c1,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).c2,
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[0].concVal,
+                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[1].concVal,
                                                                ((MolPopLinear)molpop.mpInfo.mp_distribution).x1,
                                                                x2,
                                                                ((MolPopLinear)molpop.mpInfo.mp_distribution).dim);

@@ -1635,14 +1635,25 @@ namespace Daphne
     public enum Boundary { None = 0, left = 1, right, bottom, top, back, front };
     public class BoundaryCondition
     {
-        public MolBoundaryType boundaryType;
-        public Boundary boundary;
-        public double val;
+        public MolBoundaryType boundaryType { get; set; }
+        public Boundary boundary { get; set; }
+        public double concVal { get; set; }
+
+        public BoundaryCondition()
+        {            
+        }
 
         public BoundaryCondition(MolBoundaryType _boundaryType, Boundary _boundary)
         {
             boundaryType = _boundaryType;
             boundary = _boundary;
+        }
+
+        public BoundaryCondition(MolBoundaryType _boundaryType, Boundary _boundary, double val)
+        {
+            boundaryType = _boundaryType;
+            boundary = _boundary;
+            concVal = val;
         }
     }
 
@@ -1688,135 +1699,11 @@ namespace Daphne
             get { return reportMP; }
             set { reportMP = value; }
         }
-
-        ////public List<BoundaryCondition> boundaryCondition { get; set; }
-        ////private double _boundaryVal1;
-        ////public double boundaryVal1
-        ////{
-        ////    get
-        ////    {
-        ////        return _boundaryVal1;
-        ////    }
-        ////    set
-        ////    {
-        ////        _boundaryVal1 = value;
-        ////        if (_boundary_face != BoundaryFace.None)
-        ////        {
-        ////            boundaryCondition[0].val = value;
-        ////            // If linear is already set, then c1 needs to be updated here.
-        ////            if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
-        ////            {
-        ////                MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
-        ////                mpl.c1 = value;
-        ////            }
-        ////        }
-        ////    }
-        ////}
-        ////private double _boundaryVal2;
-        ////public double boundaryVal2
-        ////{
-        ////    get
-        ////    {
-        ////        return _boundaryVal2;
-        ////    }
-        ////    set
-        ////    {
-        ////        _boundaryVal2 = value;
-        ////        if (_boundary_face != BoundaryFace.None)
-        ////        {
-        ////            boundaryCondition[1].val = value;
-        ////            // If linear is already set, then c2 needs to be updated here.
-        ////            if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
-        ////            {
-        ////                MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
-        ////                mpl.c2 = value;
-        ////            }
-        ////        }
-        ////    }
-        ////}
-        ////private BoundaryFace _boundary_face;
-        ////public BoundaryFace boundary_face
-        ////{
-        ////    get
-        ////    {
-        ////        return _boundary_face;
-        ////    }
-        ////    set
-        ////    {
-        ////        _boundary_face = value;
-
-        ////        // NOTE: Future implementations may allow both Neumann and Dirichlet at the same face
-        ////        // or additional faces to be added. Until then...
-
-        ////        if (_boundary_face == BoundaryFace.None)
-        ////        {
-        ////            // Clear boundaryCondition list.
-        ////            boundaryCondition = new List<BoundaryCondition>();
-        ////        }
-        ////        else
-        ////        {
-        ////            if (boundaryCondition.Count == 0)
-        ////            {
-        ////                // Neumann not implemented yet. 
-        ////                MolBoundaryType molBoundType = MolBoundaryType.Dirichlet;
-        ////                switch (value)
-        ////                {
-        ////                    case BoundaryFace.X:
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.left));
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.right));
-        ////                        break;
-        ////                    case BoundaryFace.Y:
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.bottom));
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.top));
-        ////                        break;
-        ////                    case BoundaryFace.Z:
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.back));
-        ////                        boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.front));
-        ////                        break;
-        ////                    default:
-        ////                        throw new Exception("Improper boundary face selection");
-        ////                }
-        ////            }
-        ////            else
-        ////            {
-        ////                switch (value)
-        ////                {
-        ////                    case BoundaryFace.X:
-        ////                        boundaryCondition[0].boundary = Boundary.left;
-        ////                        boundaryCondition[1].boundary = Boundary.right;
-        ////                        break;
-        ////                    case BoundaryFace.Y:
-        ////                        boundaryCondition[0].boundary = Boundary.bottom;
-        ////                        boundaryCondition[1].boundary = Boundary.top;
-        ////                        break;
-        ////                    case BoundaryFace.Z:
-        ////                        boundaryCondition[0].boundary = Boundary.back;
-        ////                        boundaryCondition[1].boundary = Boundary.front;
-        ////                        break;
-        ////                    default:
-        ////                        throw new Exception("Improper boundary face selection");
-        ////                }
-        ////            }
-
-        ////            // If linear is already set, then dim needs to be updated here.
-        ////            if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
-        ////            {
-        ////                MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
-        ////                mpl.dim = (int)_boundary_face - 1;
-        ////            }
-
-        ////            OnPropertyChanged("boundary_face");
-        ////        }
-        ////    }
-        ////}
                     
         public ConfigMolecularPopulation(ReportType rt)
         {
             Guid id = Guid.NewGuid();
-
             molpop_guid = id.ToString();
-            //boundary_face = BoundaryFace.None;
-            //boundaryCondition = new List<BoundaryCondition>();
 
             if (rt == ReportType.CELL_MP)
             {
@@ -3309,46 +3196,8 @@ namespace Daphne
 
     public class MolPopLinear : MolPopDistribution
     {
-        public double c1 { get; set; }
-        public double c2 { get; set; }
         public double x1 { get; set; }
         public int dim { get; set; }
-
-        private double _boundaryVal1;
-        public double boundaryVal1
-        {
-            get
-            {
-                return _boundaryVal1;
-            }
-            set
-            {
-                _boundaryVal1 = value;
-                if (_boundary_face != BoundaryFace.None)
-                {
-                    boundaryCondition[0].val = value;
-                    c1 = value;
-                }
-            }
-        }
-        private double _boundaryVal2;
-        public double boundaryVal2
-        {
-            get
-            {
-                return _boundaryVal2;
-            }
-            set
-            {
-                _boundaryVal2 = value;
-                if (_boundary_face != BoundaryFace.None)
-                {
-                    boundaryCondition[1].val = value;
-                    c2 = value;
-                }
-            }
-        }
-
         private BoundaryFace _boundary_face;
         public BoundaryFace boundary_face
         {
@@ -3359,64 +3208,7 @@ namespace Daphne
             set
             {
                 _boundary_face = value;
-
-                // NOTE: Future implementations may allow both Neumann and Dirichlet at the same face
-                // or additional faces to be added. Until then...
-
-                if (_boundary_face == BoundaryFace.None)
-                {
-                    // Clear boundaryCondition list.
-                    boundaryCondition = new List<BoundaryCondition>();
-                }
-                else
-                {
-                    if (boundaryCondition.Count == 0)
-                    {
-                        // Neumann not implemented yet. 
-                        MolBoundaryType molBoundType = MolBoundaryType.Dirichlet;
-                        switch (value)
-                        {
-                            case BoundaryFace.X:
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.left));
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.right));
-                                break;
-                            case BoundaryFace.Y:
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.bottom));
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.top));
-                                break;
-                            case BoundaryFace.Z:
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.back));
-                                boundaryCondition.Add(new BoundaryCondition(molBoundType, Boundary.front));
-                                break;
-                            default:
-                                throw new Exception("Improper boundary face selection");
-                        }
-                    }
-                    else
-                    {
-                        switch (value)
-                        {
-                            case BoundaryFace.X:
-                                boundaryCondition[0].boundary = Boundary.left;
-                                boundaryCondition[1].boundary = Boundary.right;
-                                break;
-                            case BoundaryFace.Y:
-                                boundaryCondition[0].boundary = Boundary.bottom;
-                                boundaryCondition[1].boundary = Boundary.top;
-                                break;
-                            case BoundaryFace.Z:
-                                boundaryCondition[0].boundary = Boundary.back;
-                                boundaryCondition[1].boundary = Boundary.front;
-                                break;
-                            default:
-                                throw new Exception("Improper boundary face selection");
-                        }
-                    }
-
-                    dim = (int)_boundary_face - 1;
-
-                    OnPropertyChanged("boundary_face");
-                }
+                dim = (int)_boundary_face - 1;
             }
         }
         
@@ -3424,7 +3216,6 @@ namespace Daphne
         {
             mp_distribution_type = MolPopDistributionType.Linear;
             x1 = 0;
-            boundary_face = BoundaryFace.None;
             boundaryCondition = new List<BoundaryCondition>();
         }
     }

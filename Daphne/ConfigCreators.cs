@@ -164,7 +164,6 @@ namespace Daphne
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
-            //ChartWindow = ReacComplexChartWindow;
 
             //// Gaussian Distrtibution
             //// Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
@@ -209,21 +208,15 @@ namespace Daphne
                     configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                     configMolPop.Name = configMolecule.Name;
 
-                    // MolPop distribution information
-                    ////
-                    //MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    //hl.concentration = conc[i];
-                    //configMolPop.mpInfo.mp_distribution = hl;
-                    //configMolPop.mpInfo.mp_dist_name = "Uniform";
-                    
                     MolPopLinear molpoplin = new MolPopLinear();
                     molpoplin.boundary_face = BoundaryFace.X;
-                    molpoplin.boundaryVal1 = 5 * CXCL13conc;
-                    molpoplin.boundaryVal2 = 0;
-                    molpoplin.c1 = molpoplin.boundaryVal1;
-                    molpoplin.c2 = molpoplin.boundaryVal2;
                     molpoplin.dim = 0;
                     molpoplin.x1 = 0;
+                    molpoplin.boundaryCondition = new List<BoundaryCondition>(); 
+                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * CXCL13conc);                    
+                    molpoplin.boundaryCondition.Add(bc);
+                    bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+                    molpoplin.boundaryCondition.Add(bc);
                     configMolPop.mpInfo.mp_distribution = molpoplin;
                     configMolPop.mpInfo.mp_dist_name = "Linear";
 

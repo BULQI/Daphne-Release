@@ -162,8 +162,8 @@ namespace Daphne
                 {
                     MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
 
-                    mpl.c1 = mpl.boundaryCondition[0].val;
-                    mpl.c2 = mpl.boundaryCondition[1].val;
+                    double c1 = mpl.boundaryCondition[0].concVal;
+                    double c2 = mpl.boundaryCondition[1].concVal;
                     double x2;
                     switch (mpl.dim)
                     {
@@ -182,8 +182,8 @@ namespace Daphne
                     }
                          
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "linear", new double[] {       
-                                mpl.c1, 
-                                mpl.c2,
+                                c1, 
+                                c2,
                                 mpl.x1, 
                                 x2, 
                                 mpl.dim});
@@ -538,11 +538,11 @@ namespace Daphne
 
                             if (bc.boundaryType == MolBoundaryType.Dirichlet)
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
+                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
                             }
                             else
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.val });
+                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
                             }
                         }
                 }
