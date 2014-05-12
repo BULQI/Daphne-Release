@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using Newtonsoft.Json;
 
 using Daphne;
+using System.Windows.Data;
 
 namespace DaphneGui
 {
@@ -27,6 +28,60 @@ namespace DaphneGui
         public string Location { get; set; }
     }
 
+    public enum ReactionType {  Association=0, Dissociation=1, Annihilation=2, Dimerization=3, DimerDissociation=4, 
+                                Transformation=5, AutocatalyticTransformation=6, CatalyzedAnnihilation=7, 
+                                CatalyzedAssociation=8, CatalyzedCreation=9, CatalyzedDimerization=10, CatalyzedDimerDissociation=11, 
+                                CatalyzedDissociation=12, CatalyzedTransformation=13, BoundaryAssociation=14, BoundaryDissociation=15, Generalized=16}
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(ReactionType), typeof(string))]
+    public class ReactionTypeToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> _reaction_type_strings = new List<string>()
+                                {
+                                    "Association",
+                                    "Dissociation",
+                                    "Annihilation",
+                                    "Dimerization",
+                                    "DimerDissociation",
+                                    "Transformation",
+                                    "AutocatalyticTransformation",
+                                    "CatalyzedAnnihilation",
+                                    "CatalyzedAssociation",
+                                    "CatalyzedCreation",
+                                    "CatalyzedDimerization",
+                                    "CatalyzedDimerDissociation",
+                                    "CatalyzedTransformation",
+                                    "CatalyzedDissociation",
+                                    "BoundaryAssociation",
+                                    "BoundaryDissociation",
+                                    "Generalized"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _reaction_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _reaction_type_strings.FindIndex(item => item == str);
+            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
+        }
+    }
+
     public class GuiReactionTemplate
     {
         public GuiReactionTemplate()
@@ -38,24 +93,36 @@ namespace DaphneGui
             listOfModifiers = new List<GuiSpeciesReference>();
             rateConst = 0;
             
-            typeOfReaction = "";
+            //typeOfReaction = "";
         }
 
         public void CopyTo(ReactionTemplate rt )
         {
             rt.rateConst = rateConst;
-            rt.typeOfReaction = typeOfReaction;
+            //rt.typeOfReaction = typeOfReaction;
             rt.listOfModifiers.AddRange(listOfModifiers);
             rt.listOfProducts.AddRange(listOfProducts);
             rt.listOfReactants.AddRange(listOfReactants);
         }
 
-        private Dictionary<string, GuiSpeciesReference> molsByType = new Dictionary<string, GuiSpeciesReference>();
-        public Dictionary<string, GuiSpeciesReference> MolsByType
+        public ReactionType ReacType
         {
             get
             {
-                return molsByType;
+                return reacType;
+            }
+            set
+            {
+                reacType = value;
+            }
+        }
+
+        public string ReacTypeString
+        {
+            get
+            {
+                string result = (string)new ReactionTypeToShortStringConverter().Convert(reacType, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+                return result;
             }
         }
 
@@ -65,20 +132,15 @@ namespace DaphneGui
             {
                 return rateConst;
             }
-        }
-        public string TypeOfReaction
-        {
-            get
-            {
-                return typeOfReaction;
-            }
             set
             {
-                typeOfReaction = value;
+                rateConst = value;
             }
         }
 
+        public string gui_reaction_template_guid { get; set; }
 
+        [JsonIgnore]
         public string ReactantsString
         {
             get
@@ -108,6 +170,7 @@ namespace DaphneGui
             }
 
         }
+        [JsonIgnore]
         public string ProductsString
         {
             get
@@ -136,6 +199,7 @@ namespace DaphneGui
                 productsString = value;
             }
         }
+        [JsonIgnore]
         public string TotalReactionString
         {
             get
@@ -146,20 +210,31 @@ namespace DaphneGui
             {
                 totalReactionString = value;
             }
-        } 
-
-        public List<GuiSpeciesReference> listOfReactants;
-        public List<GuiSpeciesReference> listOfProducts;
-        public List<GuiSpeciesReference> listOfModifiers;
-        public double rateConst;
-        private string typeOfReaction;
+        }
+        
+        private double rateConst;
         private string reactantsString;
         private string productsString;
         private string totalReactionString;
-        public string gui_reaction_template_guid { get; set; }
-
+        private ReactionType reacType;
+        public List<GuiSpeciesReference> listOfReactants;
+        public List<GuiSpeciesReference> listOfProducts;
+        public List<GuiSpeciesReference> listOfModifiers;
+        
     }
 
+    public class GuiBoundaryReactionTemplate : GuiReactionTemplate
+    {
+        public GuiSpeciesReference ligand;
+        public GuiSpeciesReference receptor;
+        public GuiSpeciesReference complex;
+        double fluxIntensityConstant;
+    }
+
+    public class GuiCatalyzedReactionTemplate : GuiReactionTemplate
+    {
+        public GuiSpeciesReference catalyst;
+    }
     public class XMLReactionsSpec
     {
         public XMLReactionsSpec()
@@ -228,13 +303,13 @@ namespace DaphneGui
                 if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 0) && (rStoichSum == 1))
                 {
                     // annihilation a	→	0
-                    rt.TypeOfReaction = "annihilation";
+                    rt.ReacType = ReactionType.Annihilation;
 
                 }
                 else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
                 {
                     // association  a + b	→	c
-                    rt.TypeOfReaction = "association";
+                    rt.ReacType = ReactionType.Association;
                 }
                 //else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
                 //{
@@ -245,48 +320,36 @@ namespace DaphneGui
                 {
                     // creation (not allowed)  0 →	a
                     // TODO: handle this error properly
-                    rt.TypeOfReaction = "creation";
+                    rt.ReacType = ReactionType.CatalyzedCreation;
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
                 {
                     // dimerizaton 2a → b
-                    rt.TypeOfReaction = "dimerization";
+                    rt.ReacType = ReactionType.Dimerization;
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
                 {
                     // dimer dissociation b → 2a
-                    rt.TypeOfReaction = "dimerDissociation";
+                    rt.ReacType = ReactionType.DimerDissociation;
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 2) && (rStoichSum == 1) && (pStoichSum == 2))
                 {
                     // dissociation c →	a + b
-                    rt.TypeOfReaction = "dissociation";
+                    rt.ReacType = ReactionType.Dissociation;
                 }
                 else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 1))
                 {
                     // transformation   a →	b
-                    rt.TypeOfReaction = "transformation";
+                    rt.ReacType = ReactionType.Transformation;
                 }
                 else
                 {
                     // generalized reaction 
                     // to do: check for nonsense coefficient combos?
                     // not implemented yet.
-                    rt.TypeOfReaction = "generalized";
+                    rt.ReacType = ReactionType.Generalized;
                 }
-                // Every reaction has a catalyzed counterpart
-                // Keep the same basic reaction types and account for catalyzers later when the reactions are created
-                // See ReactionSwithch() in ReactionBuilder.cs
-                if (rt.listOfModifiers.Count > 0)
-                {
-                    rt.TypeOfReaction = rt.TypeOfReaction + "_cat";
-                }
-
             }
-
         }
-
-
     }
-
 }
