@@ -664,6 +664,10 @@ namespace Daphne
                 addCompartmentReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, scenario.environment.ecs, sc.entity_repository);
             }
 
+            // general parameters
+            Pair.Phi1 = sc.sim_params.phi1;
+            Pair.Phi2 = sc.sim_params.phi2;
+
             return true;
         }
         
