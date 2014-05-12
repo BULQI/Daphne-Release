@@ -98,6 +98,14 @@ namespace Daphne
         }
 
         /// <summary>
+        /// accessor for the populations
+        /// </summary>
+        public Dictionary<int, Dictionary<int, Cell>> Populations
+        {
+            get { return populations; }
+        }
+
+        /// <summary>
         /// accessor for the dictionary of molecules
         /// </summary>
         public Dictionary<string, Molecule> Molecules

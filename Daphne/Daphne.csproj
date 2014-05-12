@@ -94,6 +94,7 @@
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
+    <Compile Include="Reporter.cs" />
     <Compile Include="SimConfiguration.cs" />
     <Compile Include="Simulation.cs" />
   </ItemGroup>

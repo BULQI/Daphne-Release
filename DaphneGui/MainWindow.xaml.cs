@@ -66,6 +66,8 @@ namespace DaphneGui
             set { sim = value; }
         }
 
+        private Reporter reporter;
+
         private bool blueHandToolButton_IsChecked = false;
 
         public bool BlueHandToolButton_IsChecked
@@ -353,6 +355,8 @@ namespace DaphneGui
 
             // create the simulation
             sim = new Simulation();
+            // reporter
+            reporter = new Reporter();
 
             // vtk data basket to hold vtk data for entities with graphical representation
             vtkDataBasket = new VTKDataBasket();
@@ -1561,53 +1565,65 @@ namespace DaphneGui
         {
             while (true)
             {
-                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                lock (sim)
                 {
-                    // run the simulation forward to the next task
-                    sim.RunForward();
+                    if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                    {
+                        // run the simulation forward to the next task
+                        sim.RunForward();
 
-                    // check for flags and execute applicable task(s)
-                    if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
-                    {
-                        UpdateGraphics();
-                    }
-                    if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true)
-                    {
-                    }
+                        // check for flags and execute applicable task(s)
+                        if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
+                        {
+                            UpdateGraphics();
+                        }
+                        if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                        {
+                            reporter.AppendReporter(configurator.SimConfig, sim);
+                        }
 
-                    if (sim.RunStatus != Simulation.RUNSTAT_RUN)
-                    {
-                        // never rerun the simulation if the simulation was aborted
-                        if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                        if (sim.RunStatus != Simulation.RUNSTAT_RUN)
                         {
-                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
-                        }
-                        // for profiling: close the application after a completed experiment
-                        else if (ControlledProfiling() == true && sim.RunStatus == Simulation.RUNSTAT_FINISHED && repetition >= configurator.SimConfig.experiment_reps)
-                        {
-                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
-                            return;
-                        }
-                        else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
-                        {
-                            runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                            // never rerun the simulation if the simulation was aborted
+                            if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                            {
+                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                            }
+                            // for profiling: close the application after a completed experiment
+                            else if (ControlledProfiling() == true && sim.RunStatus == Simulation.RUNSTAT_FINISHED && repetition >= configurator.SimConfig.experiment_reps)
+                            {
+                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
+                                return;
+                            }
+                            else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                            {
+                                if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                {
+                                    reporter.CloseReporter();
+                                }
+                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                            }
                         }
                     }
+                    else if (sim.RunStatus == Simulation.RUNSTAT_ABORT)
+                    {
+                        if (Properties.Settings.Default.skipDataBaseWrites == false)
+                        {
+                            reporter.CloseReporter();
+                        }
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(reset));
+                        sim.RunStatus = Simulation.RUNSTAT_OFF;
+                    }
+                    //else if (vcrControl != null && vcrControl.IsActive() == true)
+                    //{
+                    //    vcrControl.Play();
+                    //    if (vcrControl.IsActive() == false)
+                    //    {
+                    //        // switch from pause to the play button
+                    //        VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
+                    //    }
+                    //}
                 }
-                else if (sim.RunStatus == Simulation.RUNSTAT_ABORT)
-                {
-                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(reset));
-                    sim.RunStatus = Simulation.RUNSTAT_OFF;
-                }
-                //else if (vcrControl != null && vcrControl.IsActive() == true)
-                //{
-                //    vcrControl.Play();
-                //    if (vcrControl.IsActive() == false)
-                //    {
-                //        // switch from pause to the play button
-                //        VCRbutton_Play.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(VCRUpdate));
-                //    }
-                //}
             }
         }
 
@@ -1659,6 +1675,7 @@ namespace DaphneGui
                 gc.EnablePickingButtons();
             }
 
+            sim.RunStatus = Simulation.RUNSTAT_OFF;
             resetButton.IsEnabled = true;
             resetButton.Content = "Reset";
             runButton.Content = "Run";
@@ -1730,6 +1747,10 @@ namespace DaphneGui
                 if (vcrControl != null)
                 {
                     vcrControl.SetInactive();
+                }
+                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
+                {
+                    reporter.StartReporter(configurator.SimConfig);
                 }
 
                 // only check for unique names if database writing is on and the unique names option is on

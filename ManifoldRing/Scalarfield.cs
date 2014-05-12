@@ -269,6 +269,15 @@ namespace ManifoldRing
         }
 
         /// <summary>
+        /// calculate and return the mean concentration in this scalar field
+        /// </summary>
+        /// <returns>the mean value</returns>
+        public double MeanValue()
+        {
+            return m.MeanValue(this);
+        }
+
+        /// <summary>
         /// field gradient at a location
         /// </summary>
         /// <param name="point">point parameter</param>
@@ -534,7 +543,7 @@ namespace ManifoldRing
                     {
                         writer.Write(n + "\t");
 
-                        v = m.indexArrayToLocal(m.linearIndexToIndexArray(i));
+                        v = m.linearIndexToLocal(i);
 
                         for (int j = 0; j < M.Dim; j++)
                         {

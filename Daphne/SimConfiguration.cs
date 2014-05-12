@@ -1024,6 +1024,22 @@ namespace Daphne
         }
     }
 
+    public enum ExtendedReport { NONE, LEAN, COMPLETE };
+
+    public class ReportMP
+    {
+        public bool mean { get; set; }
+        public ExtendedReport mp_extended { get; set; }
+        public ExtendedReport probe_extended { get; set; }
+
+        public ReportMP()
+        {
+            mean = true;
+            mp_extended = ExtendedReport.COMPLETE;
+            probe_extended = ExtendedReport.COMPLETE;
+        }
+    }
+
     //skg daphne new classes
     public class ConfigMolecularPopulation //: EntityModelBase
     {
@@ -1047,6 +1063,18 @@ namespace Daphne
         {
             get { return _mp_Info; }
             set { _mp_Info = value; }
+        }
+
+        private ReportMP reportMP;
+        public ReportMP report_mp
+        {
+            get { return reportMP; }
+            set { reportMP = value; }
+        }
+
+        public ConfigMolecularPopulation()
+        {
+            reportMP = new ReportMP();
         }
     }
 
@@ -1536,15 +1564,38 @@ namespace Daphne
             Z = z;
         }
     }
-    
-    public class CellPopulation : EntityModelBase
 
+    public class ReportXVF
+    {
+        public bool position { get; set; }
+        public bool velocity { get; set; }
+        public bool force { get; set; }
+
+        public ReportXVF()
+        {
+            position = true;
+            velocity = true;
+            force = true;
+        }
+    }
+
+    public class CellPopulation : EntityModelBase
     {
         public string cell_guid_ref { get; set; }
         public string cellpopulation_name { get; set; }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
         public string cell_subset_guid_ref { get; set; }
+
+        private ReportXVF reportXVF;
+        public ReportXVF report_xvf
+        {
+            get { return reportXVF; }
+            set
+            {
+                reportXVF = value;
+            }
+        }
 
         private int _number;
         public int number
@@ -1652,6 +1703,9 @@ namespace Daphne
             InitDistTypes();
 
             cell_locations = new ObservableCollection<CellLocation>();
+
+            // reporting
+            reportXVF = new ReportXVF();
         }
     }
 

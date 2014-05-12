@@ -70,8 +70,11 @@ namespace Daphne
 
         public void restart()
         {
-            reset();
-            RunStatus = RUNSTAT_RUN;
+            lock (this)
+            {
+                reset();
+                RunStatus = RUNSTAT_RUN;
+            }
         }
 
         public void AddCell(Cell c)
@@ -672,6 +675,11 @@ namespace Daphne
             {
                 RunStatus = RUNSTAT_FINISHED;
             }
+        }
+
+        public double AccumulatedTime
+        {
+            get { return accumulatedTime; }
         }
 
         /// <summary>

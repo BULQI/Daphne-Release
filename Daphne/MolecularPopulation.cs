@@ -164,7 +164,6 @@ namespace Daphne
                     concentration = concentration.DirichletBC(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]);
                 }
             }
-       
         }
     }
 
