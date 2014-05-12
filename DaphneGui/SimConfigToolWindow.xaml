@@ -1939,15 +1939,6 @@
                                                         DisplayMemberPath="Name"
                                                         SelectedIndex="0" />
 
-                                                <!--Binding ElementName=GlobalParameterTypesListBox, Path=SelectedItem-->
-
-                                                <!--ItemTemplate="{Binding Source={StaticResource membraneMolPopsListItemTemplate}}"-->
-
-                                                <!--ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}"
-                                                            DisplayMemberPath="molecule_guid_ref"                                                    
-                                                            SelectedIndex="-1"
-                                                    />-->
-                                                    
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                         <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
                                                         <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" />
@@ -1957,8 +1948,8 @@
                                                     <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
                                                     <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="150"
-                                                            ItemsSource="{Binding Source={StaticResource cytosolReactionsListView}}"
-                                                            DisplayMemberPath="TotalReactionString"                                                    
+                                                            ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
+                                                            DisplayMemberPath="Name"                                                    
                                                             SelectedIndex="-1"
                                                     />
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
