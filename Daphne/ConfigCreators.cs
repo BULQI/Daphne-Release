@@ -921,12 +921,17 @@ namespace Daphne
             // Attach transition driver to differentiation scheme
             diffScheme.Driver = driver;
 
-            // Add epigenetic map of genes and activations
+            // Add genes
             diffScheme.genes = new ObservableCollection<string>();
+            for (int j = 0; j < activations.GetLength(1); j++)
+            {
+                diffScheme.genes.Add(findGeneGuid(geneNames[j], sc));
+            }
+
+            // Add epigenetic map of genes and activations
             diffScheme.activationRows = new ObservableCollection<ConfigActivationRow>();
             for (int i = 0; i < activations.GetLength(0); i++)
             {
-                diffScheme.genes.Add(findGeneGuid(geneNames[i], sc));
                 actRow = new ConfigActivationRow();
                 for (int j = 0; j < activations.GetLength(1); j++)
                 {
