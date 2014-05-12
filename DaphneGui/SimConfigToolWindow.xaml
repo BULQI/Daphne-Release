@@ -29,12 +29,14 @@
             </Style>
 
             <daph:RelativePositionToShortStringConverter x:Key="RelativePosEnumConv" />            
-            <daph:MolPopDistributionTypeToStringConverter x:Key="SolfacDistTypeEnumConv" />
-            <daph:GlobalParamTypeToStringConverter x:Key="GlobalParameterTypeEnumConv" />
+            <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
+            <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
             <daph:RegionGUIDtoNameConverter x:Key="RegionGUIDtoNameConv" />
             <daph:ManyToBooleanConverter x:Key="ManyConv" />
-                
+            <daph:TextToColorConverter x:Key="textToColorConv" />
+
+            <!--<daph:GlobalParamTypeToStringConverter x:Key="GlobalParameterTypeEnumConv" />-->
             <!--<daph:CellTypeGUIDtoNameConverter x:Key="CellTypeGUIDtoNameConv" />-->
             <!--<daph:SolfacGUIDtoSolfacNameConverter x:Key="SolfacGUIDtoSolfacNameConv" />-->
             <!--<daph:SolfacGUIDtoReceptorNameConverter x:Key="SolfacGUIDtoReceptorNameConv" />-->
@@ -70,7 +72,23 @@
                     <x:Type TypeName="daph:MolPopDistributionType" />
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
-            
+
+            <ObjectDataProvider x:Key="cellPopDistributionTypes"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:CellPopDistributionType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <ObjectDataProvider x:Key="cellPopProbDistributionTypes"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="daph:CellPopProbDistributionType" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
             <CollectionViewSource x:Key="cellsetRegionsListView"  
                                   Source="{Binding Path=scenario.regions}"/>
 
@@ -87,7 +105,7 @@
                                   Source="{Binding Path=entity_repository.solfac_types}"/>
 
             <CollectionViewSource x:Key="cellTypesListView"  
-                                  Source="{Binding Path=PredefCells}"/>
+                                  Source="{Binding Path=entity_repository.PredefCells}"/>
 
             <!-- skg 5/29/12 -->
             <CollectionViewSource x:Key="baseCellTypesListView"  
@@ -889,23 +907,39 @@
                 </StackPanel>
             </DataTemplate>
 
-
             <!-- =========================== -->
-            <!-- Regions -->            
+            <!-- Cell Population -->
 
-            <DataTemplate x:Key="regionListItemTemplate">
+            <!-- Cell Pop Distributions -->
+            <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding Path=region_visibility}" Style="{StaticResource EyeballCheckboxStyle}"/>
-                    <Rectangle Width="10" Height="10"
-                               Margin="5,0,0,0"
-                               VerticalAlignment="Center"
-                               Fill="{Binding Path=region_color, Converter={StaticResource colorToSolidBrushConv}}"
-                               Stroke="Black" StrokeThickness="0.5"/>
-                    <TextBlock Text="{Binding Path=region_name}" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding Converter={StaticResource CellPopDistTypeEnumConv}}"/>
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate x:Key="regionDetailsTemplate">
+            <DataTemplate DataType="{x:Type daph:CellPopDistribution}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="dist type" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
+                    <TextBox Text="{Binding Path=cpDistributionType, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2"
+                                 />
+                </StackPanel>
+
+            </DataTemplate>
+
+            <!-- CellPopUniformDistribution -->
+            <DataTemplate DataType="{x:Type daph:CellPopUniformDistribution}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="conc" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
+                    <TextBox Text="{Binding Path=Conc, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2"
+                                 />
+                </StackPanel>
+                
+            </DataTemplate>
+
+
+            <DataTemplate DataType="{x:Type daph:CellPopGaussianDistribution}">
                 <StackPanel Orientation="Vertical">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -916,59 +950,43 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="name" Margin="6,0"
+                        <TextBlock Text="peak conc" Margin="6,0"
                                    Grid.Column="0" Grid.Row="0"  
                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                    />
-                        <TextBox Text="{Binding Path=region_name, UpdateSourceTrigger=PropertyChanged}"
-                                 Grid.Column="1" Grid.Row="0"
-                                 Margin="0,2"
-                                 />
-                        <TextBlock Text="type" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                        <ComboBox ItemsSource="{Binding Source={StaticResource regionShapesEnum}}"
-                                  Grid.Column="1" Grid.Row="1"
-                                  SelectedValue="{Binding Path=region_type}"
-                                  IsSynchronizedWithCurrentItem="true" 
-                                  Margin="0,2"
-                                  />
-                        <TextBlock Text="color" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="3"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                        <editors:ColorEditBox x:Name="regionColorEditBox"
-                                          Grid.Column="1" Grid.Row="3"
-                                          CheckBoxVisibility="Collapsed"
-                                          SpinnerVisibility="Collapsed"
-                                          Width="140"
-                                          HorizontalAlignment="Left" 
-                                          Format="a r g b"
-                                          Value="{Binding Path=region_color}"
-                                          Margin="0,2"
-                                          />
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="1" Grid.Row="0"
+                                    Margin="0,2">
+                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
+                                                    SpinnerVisibility="Collapsed"
+                                                    HorizontalAlignment="Right"
+                                                    Format="G"
+                                                    StepValue="10"
+                                                    Width="50" 
+                                                    CenterSlotHorizontalAlignment="Right"
+                                                    Value="{Binding Path=Peak, UpdateSourceTrigger=PropertyChanged}"
+                                                    />
+                            <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        </StackPanel>
+                        
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-                    <ListView Name="regionSpecsListView"
-                                              Grid.Column="1" Grid.Row="1"
-                                              ItemsSource="{Binding Source={StaticResource boxSpecsListView}}"
+                    <ListView x:Name="solfacGaussianBoxSpecsListView"
+                                              ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
                                               DisplayMemberPath="box_guid"
-                                              SelectedValue="{Binding Path=region_box_spec_guid_ref, Mode=OneWay}"
+                                              SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
                                               SelectedValuePath="box_guid"
                                               Visibility="Collapsed"
                                               />
-                    <ContentControl Name="RegionBoxSpecDetails"
+                    <ContentControl Name="GaussianBoxSpecDetails"
+                                                    Content="{Binding ElementName=solfacGaussianBoxSpecsListView, Path=SelectedItem}" 
                                                     HorizontalAlignment="Center"
-                                                    Content="{Binding ElementName=regionSpecsListView, Path=SelectedItem}" 
-                                                    ContentTemplate="{StaticResource boxSpecDetailsTemplate}" 
+                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
                                                     Margin="0,2"/>
                 </StackPanel>
             </DataTemplate>
-
-            <!-- =========================== -->
-            <!-- Cell Population -->
 
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
@@ -1002,28 +1020,6 @@
                         <TextBlock Text="s" />
                     </StackPanel>
 
-                    <!-- Only want a region name to show up if cells are constrained to region -->
-                    <!--<StackPanel Orientation="Horizontal">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=cellpopulation_constrained_to_region}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=cellpopulation_constrained_to_region}" Value="False">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text=" " />
-                        <TextBlock Text="{Binding Path=wrt_region, 
-                                                                Converter={StaticResource RelativePosEnumConv}}" />
-                        <TextBlock Text=" " />
-                        <TextBlock Text="{Binding Path=cellpopulation_region_guid_ref, 
-                                                                Converter={StaticResource RegionGUIDtoNameConv}, 
-                                                                ConverterParameter={StaticResource cellsetRegionsListView}}" />
-                    </StackPanel>-->
                 </StackPanel>
             </DataTemplate>
 
@@ -1081,116 +1077,165 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate x:Key="cellPopDetailsTemplate">
+            <DataTemplate x:Key="cellPopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />                   
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />                        
                     </Grid.RowDefinitions>
-                    <TextBlock Text="name" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="0"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
-                                 Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
-                    <TextBlock Text="cell type" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"  />
-                    <ComboBox x:Name="cell_type_combo_box"
+                    <TextBlock Grid.Column="0" Grid.Row="0" Margin="20,0">Location Parameters</TextBlock>
+                    <TextBox Grid.Column="0" Grid.Row="1" Margin="20,0"
+                             Text="{Binding Path=Peak}">
+                        
+                    </TextBox>
+                    <ContentControl Name="cell_dist"
+                            Grid.ColumnSpan="2" Grid.Row="2"
+                            Margin="0,6"
+                            BorderBrush="DarkGray" BorderThickness="1"
+                            Content="{Binding Path=cellPopDist}"
+                            />
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate x:Key="cellPopDetailsTemplate">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="name" Margin="6,0"
+                                        Grid.Column="0" Grid.Row="0"  
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
+                                        Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
+                        <TextBlock Text="cell type" Margin="6,0"
+                                        Grid.Column="0" Grid.Row="1"  
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"  />
+                        <ComboBox x:Name="cell_type_combo_box"
                                         Grid.Column="1" Grid.Row="1" Margin="0,2"
                                         MinWidth="80"
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectedValue="{Binding Path=CellType}"
-                                        
-                                        
+                                    />
+                        <TextBlock Text="number" Margin="6,0"
+                                        Grid.Column="0" Grid.Row="2"  
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"  />
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="1" Grid.Row="2"
+                                    Margin="0,4">
+                            <Slider x:Name="number_slider"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Width="100"
+                                    RenderTransform="1.0,0,0,0.5,0,6"
+                                    Minimum="1" 
+                                    Maximum="10000" 
+                                    Value="{Binding Path=number}" 
+                                    IsSnapToTickEnabled="True" 
+                                    TickFrequency="1" 
+                                    KeyboardNavigation.IsTabStop="False"
+                                    />
+                            <editors:Int32EditBox CheckBoxVisibility="Collapsed" 
+                                    SpinnerVisibility="Collapsed"
+                                    HorizontalAlignment="Right"
+                                    Format="N0"
+                                    StepValue="10"
+                                    Width="50" 
+                                    CenterSlotHorizontalAlignment="Right"
+                                    Value="{Binding ElementName=number_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                    />
+                        </StackPanel>
+
+                        <TextBlock Text="color" Margin="6,0"
+                                        Grid.Column="0" Grid.Row="3"  
+                                        HorizontalAlignment="Right" VerticalAlignment="Center"
                                         />
-                    <TextBlock Text="number" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="2"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"  />
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1" Grid.Row="2"
-                                Margin="0,4">
-                        <Slider x:Name="number_slider"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Width="100"
-                                RenderTransform="1.0,0,0,0.5,0,6"
-                                Minimum="1" 
-                                Maximum="10000" 
-                                Value="{Binding Path=number}" 
-                                IsSnapToTickEnabled="True" 
-                                TickFrequency="1" 
-                                KeyboardNavigation.IsTabStop="False"
+                        <editors:ColorEditBox x:Name="cellColorEditBox"
+                                        Grid.Column="1" Grid.Row="3"
+                                        CheckBoxVisibility="Collapsed"
+                                        SpinnerVisibility="Collapsed"
+                                        Width="140"
+                                        HorizontalAlignment="Left" 
+                                        Format="a r g b"
+                                        Value="{Binding Path=cellpopulation_color}"
+                                        Margin="0,2"
                                 />
-                        <editors:Int32EditBox CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Right"
-                                            Format="N0"
-                                            StepValue="10"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding ElementName=number_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    </StackPanel>
+                    </Grid>
+                    <Grid>
+                        <Expander ExpandDirection="Down" Padding="6"
+                                    
+                                IsExpanded="False"
+                                Header="Location"
+                                x:Name="LocationExpander"
+                                Margin="0,0,0,0" 
+                                Canvas.ZIndex="1"
+                                >
 
-                    <TextBlock Text="color" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="3"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                    <editors:ColorEditBox x:Name="cellColorEditBox"
-                                          Grid.Column="1" Grid.Row="3"
-                                          CheckBoxVisibility="Collapsed"
-                                          SpinnerVisibility="Collapsed"
-                                          Width="140"
-                                          HorizontalAlignment="Left" 
-                                          Format="a r g b"
-                                          Value="{Binding Path=cellpopulation_color}"
-                                          Margin="0,2"
-                                          />
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Location Method" Margin="20,0"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                    
+                                    <!--<ComboBox   Name="cbCellPopDistributionType"
+                                                ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
+                                                ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
+                                                SelectedValue="{Binding Path=cpDistributionType, Mode=OneWay}"
+                                                SelectionChanged="cbCellPopDistributionType_SelectionChanged"
+                                                MinWidth="120"
+                                                />-->
 
-                    <CheckBox Name="constrain_to_region_checkbox"
-                              Content="Constrain to region"
-                              Grid.ColumnSpan="2" Grid.Row="4"
-                              Margin="0,6"
-                              IsChecked="{Binding Path=cellpopulation_constrained_to_region}"
-                              />
-                    <TextBlock Text="region" Margin="6,0"
-                               Grid.Column="0" Grid.Row="5"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               IsEnabled="{Binding ElementName=constrain_to_region_checkbox, Path=IsChecked}"
-                               />
-                    <ComboBox Name="cell_region_cbox"
-                              Grid.Column="1" Grid.Row="5" 
-                              IsEnabled="{Binding ElementName=constrain_to_region_checkbox, Path=IsChecked}"
-                              MinWidth="80"
-                              ItemsSource="{Binding Source={StaticResource cellsetRegionsListView}}" 
-                              DisplayMemberPath="region_name"
-                              SelectedValue="{Binding Path=cellpopulation_region_guid_ref}"
-                              SelectedValuePath="region_box_spec_guid_ref"
-                              />
-                    <TextBlock Text="placement" Margin="6,0"
-                               Grid.Column="0" Grid.Row="6"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               IsEnabled="{Binding ElementName=constrain_to_region_checkbox, Path=IsChecked}"
-                               />
-                    <ComboBox Grid.Column="1" Grid.Row="6"
-                                  ItemsSource="{Binding Source={StaticResource relativePosition}}"
-                                  SelectedValue="{Binding Path=wrt_region}"
-                                  IsSynchronizedWithCurrentItem="true" 
-                                  MinWidth="120"
-                                  IsEnabled="{Binding ElementName=constrain_to_region_checkbox, Path=IsChecked}"
-                                  />
-                </Grid>
+                                    <!--<ListBox   Name="lbCellPopDistributionType" Margin="20,0"
+                                                ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
+                                                ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
+                                                SelectedValue="{Binding Path=cpDistributionType, Mode=TwoWay}"
+                                                SelectionChanged="lbCellPopDistributionType_SelectionChanged"
+                                                MinWidth="180"
+                                               
+                                                />
+
+                                    <ListBox   Name="lbCellPopDistributionSubType" Margin="20,0"
+                                                
+                                                SelectionChanged="lbCellPopDistributionType_SelectionChanged"
+                                                MinWidth="180"
+                                                />-->
+
+                                    <ListBox x:Name="lbCellPopDistributionType" Margin="20,0" MinWidth="180" 
+                                             ItemsSource="{Binding CellPopDistTypes}" 
+                                             SelectedIndex="{Binding Path=cellPopDist.cpDistributionType}"/>
+                                    <ListBox MinWidth="180" Margin="20,10" 
+                                             ItemsSource="{Binding SelectedItem.DistSubtypes, ElementName=lbCellPopDistributionType}" 
+                                             SelectionChanged="lbCellPopDistSubType_SelectionChanged" />
+
+                                    <ContentControl Name="CellPopDistributionDetails"
+                                        Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
+                                        Margin="6,2"/>
+
+                                </StackPanel>
+                                
+                                
+                            </StackPanel>
+                        </Expander>
+                    </Grid>
+                </StackPanel>
             </DataTemplate>
 
             <DataTemplate x:Key="cellDetailsTemplate">
@@ -1291,7 +1336,7 @@
             <!-- Mol Pop Distributions -->            
             <DataTemplate x:Key="molpopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Converter={StaticResource SolfacDistTypeEnumConv}}"/>
+                    <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
                 </StackPanel>
             </DataTemplate>
 
@@ -1501,225 +1546,6 @@
                 </StackPanel>
             </DataTemplate>
 
-            <!-- =========================== -->
-            <!-- Global Paramter Types -->
-
-            <DataTemplate x:Key="globalParamterTypeListItemTemplate">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Path=global_parameter_type, Converter={StaticResource GlobalParameterTypeEnumConv}}"/>
-                </StackPanel>
-            </DataTemplate>
-
-            <DataTemplate x:Key="globalParameterTypeDetailsTemplate">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="70" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <ContentControl x:Name="global_params_detail_cc"
-                                        Grid.ColumnSpan="2" Grid.Row="1"
-                                        Content="{Binding}"
-                                        />
-                </Grid>
-            </DataTemplate>
-
-            <DataTemplate DataType="{x:Type daph:ForceParams}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="130" />
-                        <ColumnDefinition Width="50" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="rupture distance" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0"/>
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="0"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=force_delta, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="penetration resistance" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="1"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=force_phi1, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm^2/min^2" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="adhesion constant" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="2"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=force_phi2, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="/min^2" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                </Grid>
-            </DataTemplate>
-
-            <DataTemplate DataType="{x:Type daph:LocomotorParams}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="110" />
-                        <ColumnDefinition Width="45" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="drag" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0"/>
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="0"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=loco_gamma, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="/min" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="locomotive force" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="1"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=loco_sigma, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm/min^2" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="reorientation rate" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="2"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=loco_zeta, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="/min" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="chemotaxis coeff" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="3"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=loco_chi, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm^4/molec/min^3" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                </Grid>
-            </DataTemplate>
-
-            <DataTemplate DataType="{x:Type daph:SynapseParams}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="110" />
-                        <ColumnDefinition Width="45" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="alpha" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0"/>
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="0"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=Alpha, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="/min" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="beta" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="1"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=Beta, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm/min^2" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    
-                    <!---->
-                    <TextBlock Text="delta" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="2"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=Delta, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm^4/molec/min^3" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    
-                    <!---->
-                    <TextBlock Text="epsilon" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="3"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=Epsilon, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="µm^4/molec/min^3" Grid.Column="2" Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                    <!---->
-                    <TextBlock Text="kappa" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0" />
-                    <editors:DoubleEditBox Grid.Column="1" Grid.Row="4"
-                                            CheckBoxVisibility="Collapsed" 
-                                            SpinnerVisibility="Collapsed"
-                                            HorizontalAlignment="Left"
-                                            Format="G"
-                                            Width="50" 
-                                            CenterSlotHorizontalAlignment="Right"
-                                            Value="{Binding Path=Kappa, UpdateSourceTrigger=PropertyChanged}"
-                                            />
-                    <TextBlock Text="/min" Grid.Column="2" Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0"/>
-                </Grid>
-            </DataTemplate>
-
-
         </TabControl.Resources>
 
         <!-- SIM SETUP -->        
@@ -1896,6 +1722,13 @@
                                         <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0"/>
                                     </StackPanel>
                                 </DataTemplate>
+                                <DataTemplate x:Key="libMolListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Path=Name}" 
+                                                   Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}" 
+                                                   Margin="5,0,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
 
                             </Grid.Resources>
                             <Grid.ColumnDefinitions>
@@ -1915,12 +1748,12 @@
                             <!-- MOLECULES -->
                             <TextBlock Text="Molecules" Grid.Column="0" Grid.Row="0" Margin="0,-6" FontWeight="Bold"  />
                             <ListBox x:Name="lbMol" Visibility="Visible" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" AlternationCount="2"                                                     
-                                    ItemsSource="{Binding Path=PredefMolecules}" 
-                                    DisplayMemberPath="Name"
+                                    ItemsSource="{Binding Path=entity_repository.AllMolecules}"                                     
+                                    ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"
                                     SelectedIndex="0" />
 
                             <Button x:Name="btnAddMolec" Grid.Column="1" Grid.Row="2" Width="80" Height="32" HorizontalAlignment="Right" Click="btnAddMolec_Click">Add</Button>
-                            <Button x:Name="btnRemoveMolec" Grid.Column="2" Grid.Row="2" Width="80" Height="32" HorizontalAlignment="Left" >Remove</Button>
+                            <Button x:Name="btnRemoveMolec" Grid.Column="2" Grid.Row="2" Width="80" Height="32" HorizontalAlignment="Left" Click="btnRemoveMolec_Click" >Remove</Button>
 
                             <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Margin="0,8" Orientation="Vertical" DataContext="{Binding ElementName=lbMol, Path=SelectedItem}" >
                                 <Grid>
@@ -1937,7 +1770,7 @@
                                     </Grid.RowDefinitions>
                                     <!-- Name -->
                                     <TextBlock Text="Molecule Name" Margin="6,0" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    <TextBox x:Name="txtMolName" Text="{Binding Path=Name}" Grid.Column="1" Grid.Row="0"  Height="24" Margin="0,4" IsReadOnly="True"  ></TextBox>
+                                    <TextBox x:Name="txtMolName" Text="{Binding Path=Name}" Grid.Column="1" Grid.Row="0"  Height="24" Margin="0,4" ></TextBox>
                                     <!-- Weight -->
                                     <TextBlock Text="Molecular Weight" Margin="6,0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                     <TextBox x:Name="txtMolWt" Grid.Column="1" Grid.Row="1" Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Width="80" Height="24" Margin="0,4"></TextBox>
@@ -1995,7 +1828,7 @@
                             <!-- REACTIONS -->
                             <TextBlock Text="Reactions" Grid.Column="0" Grid.Row="0"  FontWeight="Bold"  Margin="0,0,0,0" />
                             <ListBox x:Name="lbReactions" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,0,0,0" AlternationCount="2"                                                        
-                                                            ItemsSource="{Binding Path=PredefReactions, Mode=TwoWay}"                                                      
+                                                            ItemsSource="{Binding Path=entity_repository.PredefReactions, Mode=TwoWay}"                                                      
                                                             ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
                                                             SelectedIndex="0"
                                                             >
@@ -2033,9 +1866,9 @@
                                                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                                        
                                                     Width="580"
                                                     Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="5">
-                                <!--<Grid>
+                                <Grid>
                                     <local:AddReactionControl />
-                                </Grid>-->
+                                </Grid>
                             </Expander>
                         </Grid>
                     </Expander>
@@ -2080,7 +1913,7 @@
 
                                 <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
                                 <ListBox x:Name="lbComplexes" MinHeight="50"
-                                            ItemsSource="{Binding Path=PredefReactionComplexes}"                                                      
+                                            ItemsSource="{Binding Path=entity_repository.PredefReactionComplexes}"                                                      
                                             ItemTemplate="{Binding Source={StaticResource reacComplexListItemTemplate}}"
                                             SelectedIndex="0">
                                 </ListBox>
@@ -2328,7 +2161,7 @@
                             >
                         <StackPanel>
                             <ListBox x:Name="CellsListBox" MinHeight="50" 
-                                    ItemsSource="{Binding Path=PredefCells}" 
+                                    ItemsSource="{Binding Path=entity_repository.PredefCells}" 
                                     DisplayMemberPath="CellName"
                                     SelectedIndex="0"
                                     />
@@ -2515,7 +2348,7 @@
                                                     </StackPanel.Resources>
                                                     <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
                                                     <ListBox x:Name="lbCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                            ItemsSource="{Binding Path=PredefReactions, Mode=TwoWay}"                                                      
+                                                            ItemsSource="{Binding Path=entity_repository.PredefReactions, Mode=TwoWay}"                                                      
                                                             ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
                                                             SelectedIndex="0"
                                                             >
@@ -2606,12 +2439,12 @@
                                                     </StackPanel.Resources>
                                                     <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                                                     <ListBox x:Name="lbCellAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                            ItemsSource="{Binding Path=PredefReactionComplexes, Mode=TwoWay}"                                                      
+                                                            ItemsSource="{Binding Path=entity_repository.PredefReactionComplexes, Mode=TwoWay}"                                                      
                                                             ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                                             SelectedIndex="0"     >
                                                     </ListBox>
                                                     <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                                        <Button Name="CellAddReacCxButton"  Width="50" Content="Add" />
+                                                        <Button Name="CellAddReacCxButton"  Width="50" Content="Add" Click="CellAddReacCxButton_Click" />
                                                     </StackPanel>
                                                     <ContentControl Name="CellAddReactionComplexDetails"
                                                         Content="{Binding ElementName=lbCellAvailableReacCx, Path=SelectedItem}" 
@@ -2685,14 +2518,14 @@
                         <StackPanel>
 
                         <TextBlock Text="Extracellular Medium Extents" FontWeight="Bold" Margin="0,-10,0,0" />
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="X" Margin="6,0"
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="X" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
                                                     Width="60"
                                                     />
-                        <Slider Name="extent_x_slider"
+                            <Slider Name="extent_x_slider"
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center"
                                                 Width="100"
@@ -2704,7 +2537,7 @@
                                                 TickFrequency="1" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
-                        <editors:DoubleEditBox x:Name="ExtentXReadout" 
+                            <editors:DoubleEditBox x:Name="ExtentXReadout" 
                                                               CheckBoxVisibility="Collapsed" 
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
@@ -2714,40 +2547,40 @@
                                                               CenterSlotHorizontalAlignment="Right"
                                                               Value="{Binding ElementName=extent_x_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                               />
-                        <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Y" Margin="6,0"
+                            <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Y" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
                                                     Width="60"
                                                     />
-                        <Slider Name="extent_y_slider"
-                                                Orientation="Horizontal"
-                                                VerticalAlignment="Center"
-                                                Width="100"
-                                                RenderTransform="1.0,0,0,0.5,0,7"
-                                                Minimum="{Binding Path=scenario.environment.extent_min}" 
-                                                Maximum="{Binding Path=scenario.environment.extent_max}" 
-                                                Value="{Binding Path=scenario.environment.extent_y}" 
-                                                IsSnapToTickEnabled="True" 
-                                                TickFrequency="1" 
-                                                KeyboardNavigation.IsTabStop="False"
-                                                />
-                        <editors:DoubleEditBox x:Name="ExtentYReadout" 
-                                                              CheckBoxVisibility="Collapsed" 
-                                                              SpinnerVisibility="Collapsed"
-                                                              HorizontalAlignment="Right"
-                                                              Format="N0"
-                                                              StepValue="1"
-                                                              Width="40" 
-                                                              CenterSlotHorizontalAlignment="Right"
-                                                              Value="{Binding ElementName=extent_y_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                                              />
-                        <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                            <Slider Name="extent_y_slider"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Width="100"
+                                                    RenderTransform="1.0,0,0,0.5,0,7"
+                                                    Minimum="{Binding Path=scenario.environment.extent_min}" 
+                                                    Maximum="{Binding Path=scenario.environment.extent_max}" 
+                                                    Value="{Binding Path=scenario.environment.extent_y}" 
+                                                    IsSnapToTickEnabled="True" 
+                                                    TickFrequency="1" 
+                                                    KeyboardNavigation.IsTabStop="False"
+                                                    />
+                            <editors:DoubleEditBox x:Name="ExtentYReadout" 
+                                                                  CheckBoxVisibility="Collapsed" 
+                                                                  SpinnerVisibility="Collapsed"
+                                                                  HorizontalAlignment="Right"
+                                                                  Format="N0"
+                                                                  StepValue="1"
+                                                                  Width="40" 
+                                                                  CenterSlotHorizontalAlignment="Right"
+                                                                  Value="{Binding ElementName=extent_y_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                                                  />
+                            <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Z" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -2778,20 +2611,54 @@
                                                               />
                         <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
                     </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="grid step" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="60"
+                                                    />
+                                <Slider Name="sliderGridStep"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Width="100"
+                                                    RenderTransform="1.0,0,0,0.5,0,7"
+                                                    Minimum="{Binding Path=scenario.environment.gridstep_min}" 
+                                                    Maximum="{Binding Path=scenario.environment.gridstep_max}" 
+                                                    Value="{Binding Path=scenario.environment.gridstep}" 
+                                                    IsSnapToTickEnabled="True" 
+                                                    TickFrequency="1" 
+                                                    KeyboardNavigation.IsTabStop="False"
+                                                    ValueChanged="sliderGridStep_ValueChanged"
+                                        
+                                                    />
+                                <editors:DoubleEditBox x:Name="GridStepReadout" 
+                                                                  CheckBoxVisibility="Collapsed" 
+                                                                  SpinnerVisibility="Collapsed"
+                                                                  HorizontalAlignment="Right"
+                                                                  Format="N0"
+                                                                  StepValue="1"
+                                                                  Width="40" 
+                                                                  CenterSlotHorizontalAlignment="Right"
+                                                                  Value="{Binding ElementName=sliderGridStep, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                                                  />
+
+                            </StackPanel>
 
                         </StackPanel>
+                        
                     </Expander>
                     <Expander
-                                                Padding="5" 
-                                                ExpandDirection="Down"
-                                                    IsExpanded="False"
-                                                    Header="Molecular Populations"                                              
-                                                    x:Name="MolPopsExpander"
-                                                    Margin="0,5,0,0" 
-                                                    Canvas.ZIndex="1"
-                                                BorderThickness="1"
-                                                BorderBrush="Black"
-                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                            Padding="5" 
+                            ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Molecular Populations"                                              
+                                x:Name="MolPopsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                         <StackPanel>
 
@@ -2849,9 +2716,8 @@
                                 <ComboBox x:Name="molecule_combo_box"
                                         Grid.Column="1" Grid.Row="0" Margin="0,2"
                                         MinWidth="80"
-                                        ItemsSource="{Binding PredefMolecules}" 
-                                                                                
-                                        SelectedItem="{Binding ElementName=MolPopsListBox, Path=SelectedItem.Molecule,  Mode=TwoWay}"
+                                        ItemsSource="{Binding entity_repository.PredefMolecules}" 
+                                        SelectedValue="{Binding ElementName=MolPopsListBox, Path=SelectedItem.Molecule.Name,  Mode=TwoWay}"
                                         DisplayMemberPath="Name"  
                                           
                                         />
@@ -2953,7 +2819,7 @@
                                     </StackPanel.Resources>
                                     <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
                                     <ListBox x:Name="lbAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                            ItemsSource="{Binding Path=PredefReactions, Mode=TwoWay}"                                                      
+                                                            ItemsSource="{Binding Path=entity_repository.PredefReactions, Mode=TwoWay}"                                                      
                                                             ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
                                                             SelectedIndex="0"
                                                             >
@@ -3050,7 +2916,7 @@
                                     
                                     <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                                     <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                        ItemsSource="{Binding Path=PredefReactionComplexes, Mode=TwoWay}"                                                      
+                                        ItemsSource="{Binding Path=entity_repository.PredefReactionComplexes, Mode=TwoWay}"                                                      
                                         ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                         SelectedIndex="0"
                                         >
@@ -3107,55 +2973,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <!-- Regions -->
-                    <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="False"
-                            Header="Regions"
-                            x:Name="RegionsExpander"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
-                        <StackPanel>
-                            <StackPanel>
-                                <StackPanel.ToolTip>
-                                    <StackPanel Width="200" Orientation="Horizontal">
-                                        <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
-                                                            VerticalAlignment="Top" Padding="5" Width="200">
-                                                Click Add button to define a 3D region inside the big cube.  This region will be populated with cells defined below.
-                                        </TextBlock>
-                                    </StackPanel>
-                                </StackPanel.ToolTip>
-                                <!--<TextBlock Text="Regions" FontWeight="Bold" Margin="0,5,0,0"  />-->
-                            </StackPanel>
-                            <ListBox x:Name="RegionsListBox" MinHeight="50" 
-                                                 ItemsSource="{Binding Path=scenario.regions}"
-                                                 ItemTemplate="{Binding Source={StaticResource regionListItemTemplate}}"
-                                                 SelectedIndex="0"
-                                                />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddRegionButton" Width="50" Content="Add" Click="AddRegionButton_Click" />
-                                <Button Name="RemoveRegionButton" Width="50" Content="Remove" Click="RemoveRegionButton_Click" />
-                            </StackPanel>
-                            <Expander ExpandDirection="Down"
-                                    IsExpanded="False"
-                                    Header="Details"
-                                    x:Name="RegionsDetailsExpander"
-                                    Margin="0,-15,0,0" 
-                                    Canvas.ZIndex="1"
-                                    >
-                                <StackPanel Orientation="Vertical">
-                                    <ContentControl Name="RegionDetails"
-                                                                Content="{Binding ElementName=RegionsListBox, Path=SelectedItem}" 
-                                                                ContentTemplate="{StaticResource regionDetailsTemplate}" 
-                                                                Margin="8"/>
-                                </StackPanel>
-                            </Expander>
-                        </StackPanel>
-                    </Expander>
-
+                    
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -3211,64 +3029,6 @@
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
-
-        <!-- REPOSITORY -->
-        <TabItem Header="Gaussian Specs">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Orientation="Vertical" Margin="8">
-
-                    <!-- Gaussian Specifications -->
-                    <Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              >
-                        <Expander.Header>
-                            <TextBlock FontWeight="Bold" Text="Distribution Parameters" />
-                        </Expander.Header>
-                        <StackPanel Orientation="Vertical">
-                            <ListBox x:Name="GaussianSpecsListBox" MinHeight="50" 
-                                             ItemsSource="{Binding Path=entity_repository.gaussian_specifications}" 
-                                             ItemTemplate="{Binding Source={StaticResource gaussianSpecListItemTemplate}}"
-                                                 SelectedIndex="0"
-                                             />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Name="AddGaussSpecButton"  Width="50" Content="Add" Click="AddGaussSpecButton_Click" />
-                                <Button Name="RemoveGaussSpecButton" Width="50" Content="Remove" Click="RemoveGaussSpecButton_Click" />
-                            </StackPanel>
-                            <ContentControl Name="GaussSpecDetails"
-                                                Content="{Binding ElementName=GaussianSpecsListBox, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource gaussianSpecDetailsTemplate}" 
-                                                Margin="8"/>
-                        </StackPanel>
-                    </Expander>
-                </StackPanel>
-            </ScrollViewer>
-        </TabItem>
-
-        <!-- GLOBAL PARAMETERS -->
-        <TabItem Header="Behaviors">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Orientation="Vertical" Margin="8">
-
-                    <!-- Parameter Types -->
-                    <TextBlock Text="Global Parameters?? Should this tab stay?" FontWeight="Bold" Margin="0,5,0,0" />
-                    <ListBox x:Name="GlobalParameterTypesListBox" MinHeight="50" 
-                                             ItemsSource="{Binding Path=global_parameters}" 
-                                             ItemTemplate="{Binding Source={StaticResource globalParamterTypeListItemTemplate}}"
-                                             SelectedIndex="0"
-                                             />
-                    <ContentControl Name="GlobalParameterTypeDetails"
-                                            Content="{Binding ElementName=GlobalParameterTypesListBox, Path=SelectedItem}" 
-                                            ContentTemplate="{StaticResource globalParameterTypeDetailsTemplate}" 
-                                            Margin="8"/>
-
-                </StackPanel>
-            </ScrollViewer>
-        </TabItem>
-
-        
-
-        
-
 
     </TabControl>
 </docking:ToolWindow>

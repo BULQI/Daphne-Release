@@ -23,77 +23,39 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-        private void AddRegionButton_Click(object sender, RoutedEventArgs e)
-        {
-            RegionsDetailsExpander.IsExpanded = true;
+        //private void AddRegionButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    //RegionsDetailsExpander.IsExpanded = true;
 
+        //    BoxSpecification box = new BoxSpecification();
+        //    box.x_trans = 200;
+        //    box.y_trans = 200;
+        //    box.z_trans = 200;
+        //    box.x_scale = 100;
+        //    box.y_scale = 100;
+        //    box.z_scale = 100;
+        //    // Add box GUI property changed to VTK callback
+        //    //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
+        //    //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+        //    //////////Region reg = new Region("New region", RegionShape.Ellipsoid);
+        //    //////////reg.region_box_spec_guid_ref = box.box_guid;
+        //    //////////reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.6f, 0.31f, 0.7f);
+        //    //////////// Add region GUI property changed to VTK callback
+        //    //////////reg.PropertyChanged += MainWindow.SC.GUIRegionSurfacePropertyChange;
+        //    //////////MainWindow.SC.SimConfig.scenario.regions.Add(reg);
+        //    //////////RegionsListBox.SelectedIndex = RegionsListBox.Items.Count - 1;
+
+        //    //////////// Add RegionControl & RegionWidget for the new region
+        //    //////////MainWindow.VTKBasket.AddRegionRegionControl(reg);
+        //    //////////MainWindow.GC.AddRegionRegionWidget(reg);
+        //    //////////// Connect the VTK callback
+        //    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+        //    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
             
+        //    //////////MainWindow.GC.Rwc.Invalidate();
+        //}
 
-            BoxSpecification box = new BoxSpecification();
-            box.x_trans = 200;
-            box.y_trans = 200;
-            box.z_trans = 200;
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            // Add box GUI property changed to VTK callback
-            //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
-            //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
-            //////////Region reg = new Region("New region", RegionShape.Ellipsoid);
-            //////////reg.region_box_spec_guid_ref = box.box_guid;
-            //////////reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.6f, 0.31f, 0.7f);
-            //////////// Add region GUI property changed to VTK callback
-            //////////reg.PropertyChanged += MainWindow.SC.GUIRegionSurfacePropertyChange;
-            //////////MainWindow.SC.SimConfig.scenario.regions.Add(reg);
-            //////////RegionsListBox.SelectedIndex = RegionsListBox.Items.Count - 1;
-
-            //////////// Add RegionControl & RegionWidget for the new region
-            //////////MainWindow.VTKBasket.AddRegionRegionControl(reg);
-            //////////MainWindow.GC.AddRegionRegionWidget(reg);
-            //////////// Connect the VTK callback
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
-            
-            //////////MainWindow.GC.Rwc.Invalidate();
-        }
-
-        private void RemoveRegionButton_Click(object sender, RoutedEventArgs e)
-        {
-            Region current_item = (Region)RegionsListBox.SelectedItem;
-            string current_guid = current_item.region_box_spec_guid_ref;
-            bool being_used = false;
-
-            // Check to make sure no cellpopulations are using this region
-            for (int ii = 0; ii < MainWindow.SC.SimConfig.scenario.cellpopulations.Count; ii++)
-            {
-                if (MainWindow.SC.SimConfig.scenario.cellpopulations[ii].cellpopulation_region_guid_ref == current_guid)
-                    being_used = true;
-            }
-            if (being_used)
-            {
-                // Pop up notice
-                MessageBoxResult tmp = MessageBox.Show("The region you are trying to delete is being used to constrain a cell set.");
-                return;
-            }
-            else
-            {
-                BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[current_guid];
-
-                //////////// Remove box property changed callback
-                //////////bs.PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
-                //////////// Remove box from entity_repository list
-                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(bs);
-                //////////// Remove region property changed callback
-                //////////current_item.PropertyChanged -= MainWindow.SC.GUIRegionSurfacePropertyChange;
-                //////////// Remove region from scenario regions list
-                //////////MainWindow.SC.SimConfig.scenario.regions.Remove(current_item);
-
-                //////////// Remove the RegionControl & RegionWidget(s)
-                //////////MainWindow.VTKBasket.RemoveRegionControl(current_guid);
-                //////////MainWindow.GC.RemoveRegionWidget(current_guid);
-                //////////MainWindow.GC.Rwc.Invalidate();
-            }
-        }
+        
 
         private void AddCellButton_Click(object sender, RoutedEventArgs e)
         {
@@ -113,12 +75,7 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
         }
 
-        private void AddGaussSpecButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.AddGaussianSpecification();
-            GaussianSpecsListBox.SelectedIndex = GaussianSpecsListBox.Items.Count - 1;
-        }
-
+        
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
         private void AddGaussianSpecification()
         {
@@ -152,52 +109,6 @@ namespace DaphneGui
             //////////MainWindow.GC.Rwc.Invalidate();
         }
 
-        private void RemoveGaussSpecButton_Click(object sender, RoutedEventArgs e)
-        {
-            GaussianSpecification current_item = (GaussianSpecification)GaussianSpecsListBox.SelectedItem;
-            string current_guid = current_item.gaussian_spec_box_guid_ref;
-            bool being_used = false;
-            
-            if (being_used)
-            {
-                // Pop up notice
-                MessageBoxResult tmp = MessageBox.Show("The gaussian specification you are trying to delete is being used by a soluble factor.");
-                return;
-            }
-            else
-            {
-                // Find the box_spec associated with this region
-                int box_id = -1;
-                for (int jj = 0; jj < MainWindow.SC.SimConfig.entity_repository.box_specifications.Count; jj++)
-                {
-                    if (MainWindow.SC.SimConfig.entity_repository.box_specifications[jj].box_guid == current_guid)
-                    {
-                        box_id = jj;
-                        break;
-                    }
-                }
-                if (box_id == -1)
-                {
-                    // Should never reach here... pop up notice
-                    MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
-                    return;
-                }
-                //////////// Remove box property changed callback
-                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id].PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
-                //////////// Remove box from entity_repository list
-                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id]);
-                //////////// Remove region property changed callback
-                //////////current_item.PropertyChanged -= MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
-                //////////// Remove region from scenario regions list
-                //////////MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(current_item);
-
-                //////////// Remove the RegionControl & RegionWidget(s)
-                //////////MainWindow.VTKBasket.RemoveRegionControl(current_guid);
-                //////////MainWindow.GC.RemoveRegionWidget(current_guid);
-                //////////MainWindow.GC.Rwc.Invalidate();
-            }
-        }
-
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
@@ -206,13 +117,13 @@ namespace DaphneGui
                 return;
 
 
-            GuiMolecularPopulation current_mol = (GuiMolecularPopulation)MolPopsListBox.SelectedItem;
+            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)MolPopsListBox.SelectedItem;
             MolPopInfo current_item = current_mol.mpInfo;
             MolPopDistributionType new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
             // Only want to change distribution type if the combo box isn't just selecting 
             // the type of current item in the solfacs list box (e.g. when list selection is changed)
-            if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
+            if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
             {
                 return;
             }
@@ -318,16 +229,6 @@ namespace DaphneGui
             experiment_name_box.Focus();
         }
 
-        public void SelectRegionInGUI(int index, string guid)
-        {
-            // Regions are in the second (entities) tab panel
-            ConfigTabControl.SelectedIndex = 1;
-            // Because each region will have a unique box guid, can use data-binding-y way of setting selection
-            RegionsListBox.SelectedIndex = index;
-            RegionsListBox.SelectedValuePath = "region_box_spec_guid_ref";
-            RegionsListBox.SelectedValue = guid;
-        }
-
         public void SelectSolfacInGUI(int index)
         {
             // Solfacs are in the second tab panel
@@ -336,90 +237,16 @@ namespace DaphneGui
             MolPopsListBox.SelectedIndex = index;
         }
 
-        public void SelectGaussSpecInGUI(int index, string guid)
-        {
-            // Gaussian specs are in the third tab panel
-            ConfigTabControl.SelectedIndex = 2;
-            // Use list index here since not all solfacs.mp_distribution have this guid field
-            GaussianSpecsListBox.SelectedIndex = index;
-            GaussianSpecsListBox.SelectedValuePath = "gaussian_spec_box_guid_ref";
-            GaussianSpecsListBox.SelectedValue = guid;
-        }
-
-        //////////public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
-        //////////{
-        //////////    // identify the widget's key
-        //////////    string key = "";
-
-        //////////    if (rw != null && MainWindow.GC.Regions.ContainsValue(rw) == true)
-        //////////    {
-        //////////        foreach (KeyValuePair<string, RegionWidget> kvp in MainWindow.GC.Regions)
-        //////////        {
-        //////////            if (kvp.Value == rw)
-        //////////            {
-        //////////                key = kvp.Key;
-        //////////                break;
-        //////////            }
-        //////////        }
-
-        //////////        // found?
-        //////////        if (key != "")
-        //////////        {
-        //////////            // Select the correct region/solfac/gauss_spec in the GUI's lists
-        //////////            bool gui_spot_found = false;
-
-        //////////            for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
-        //////////            {
-        //////////                // See whether the current widget is for a Region
-        //////////                if (MainWindow.SC.SimConfig.scenario.regions[r].region_box_spec_guid_ref == key)
-        //////////                {
-        //////////                    SelectRegionInGUI(r, key);
-        //////////                    gui_spot_found = true;
-        //////////                    break;
-        //////////                }
-        //////////            }
-        //////////            if (!gui_spot_found)
-        //////////            {
-        //////////                // Next check whether any Solfacs use this right gaussian_spec for this box
-        //////////                //////////for (int r = 0; r < MainWindow.SC.SimConfig.scenario.solfacs.Count; r++)
-        //////////                //////////{
-        //////////                //////////    // We'll just be picking the first one that uses 
-        //////////                //////////    if (MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
-        //////////                //////////        ((MolPopGaussianGradient)MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
-        //////////                //////////    {
-        //////////                //////////        SelectSolfacInGUI(r);
-        //////////                //////////        gui_spot_found = true;
-        //////////                //////////        break;
-        //////////                //////////    }
-        //////////                //////////}
-        //////////            }
-        //////////            if (!gui_spot_found)
-        //////////            {
-        //////////                // Last check the gaussian_specs for this box guid
-        //////////                for (int r = 0; r < MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count; r++)
-        //////////                {
-        //////////                    // We'll just be picking the first one that uses 
-        //////////                    if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
-        //////////                    {
-        //////////                        SelectGaussSpecInGUI(r, key);
-        //////////                        gui_spot_found = true;
-        //////////                        break;
-        //////////                    }
-        //////////                }
-        //////////            }
-        //////////        }
-        //////////    }
-        //////////}
-
         private void btnAddMolec_Click(object sender, RoutedEventArgs e)
         {
-            int i = 0;
-            i++;
+            ConfigMolecule gm = new ConfigMolecule();
+            gm.ReadOnly = false;
+            gm.ForegroundColor = System.Windows.Media.Colors.Black;
+            MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Add(gm);
+            MainWindow.SC.SimConfig.entity_repository.AllMolecules.Add(gm);
+            MolPopsListBox.SelectedIndex = MolPopsListBox.Items.Count - 1;
 
-            lbMol.ItemsSource = "{Binding Path=PredefMolecules}";
-
-            int count = lbMol.Items.Count;
-
+            lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }
 
         private void AddMolButton_Click(object sender, RoutedEventArgs e)
@@ -427,7 +254,7 @@ namespace DaphneGui
             //SolfacsDetailsExpander.IsExpanded = true;
             // Default to HomogeneousLevel for now...
 
-            GuiMolecularPopulation gmp = new GuiMolecularPopulation();
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo();
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -438,6 +265,11 @@ namespace DaphneGui
         }
         private void RemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
+            int nIndex = MolPopsListBox.SelectedIndex;
+            if ( nIndex >= 0) {
+                ConfigMolecularPopulation gmp = (ConfigMolecularPopulation)MolPopsListBox.SelectedValue;
+                MainWindow.SC.SimConfig.scenario.MolPops.Remove(gmp);
+            }
         }
         private void AddReacButton_Click(object sender, RoutedEventArgs e)
         {
@@ -450,6 +282,12 @@ namespace DaphneGui
         }
         private void RemoveReacButton_Click(object sender, RoutedEventArgs e)
         {
+            int nIndex = ReacListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                GuiReactionTemplate grt = (GuiReactionTemplate)ReacListBox.SelectedValue;
+                MainWindow.SC.SimConfig.scenario.Reactions.Remove(grt);
+            }
         }
         private void AddReacCompButton_Click(object sender, RoutedEventArgs e)
         {
@@ -461,6 +299,12 @@ namespace DaphneGui
         }
         private void RemoveReacCompButton_Click(object sender, RoutedEventArgs e)
         {
+            int nIndex = ReactionComplexListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                GuiReactionComplex grc = (GuiReactionComplex)ReactionComplexListBox.SelectedValue;
+                MainWindow.SC.SimConfig.scenario.ReactionComplexes.Remove(grc);
+            }
         }
         private void AddReacCompExpandButton_Click(object sender, RoutedEventArgs e)
         {            
@@ -539,6 +383,66 @@ namespace DaphneGui
             //////////ReacComplexChartWindow.slMaxTime.Maximum = rc.dMaxTime;
             //////////ReacComplexChartWindow.slMaxTime.Value = rc.dInitialTime;
 
+        }
+
+        private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            CellPopDistributionType distType = (CellPopDistributionType)e.AddedItems[0];
+
+            if (distType == CellPopDistributionType.Probability)
+            {
+                //lbCellPopDistributionSubType
+                cp.cellPopDist = new CellPopUniformDistribution(5.0);
+            }
+            //current_item.mp_distribution = slg;
+
+        }
+
+        private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int index = 0;  //CellPopsDetailsExpander
+        }
+
+        private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (lbCellAvailableReacCx.SelectedIndex != -1)
+            {
+                GuiReactionComplex grc = (GuiReactionComplex)lbCellAvailableReacCx.SelectedValue;
+                if (!MainWindow.SC.SimConfig.scenario.ReactionComplexes.Contains(grc))
+                    MainWindow.SC.SimConfig.scenario.ReactionComplexes.Add(grc);
+            }
+        }
+
+        private void sliderGridStep_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            double v = e.NewValue;
+
+            MainWindow.SC.SimConfig.scenario.environment.CalculateNumGridPts();
+        }
+
+        private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;
+            if (gm.ReadOnly == false)
+            {
+                int index = lbMol.SelectedIndex;
+                MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Remove(gm);
+                MainWindow.SC.SimConfig.entity_repository.AllMolecules.Remove(gm);
+
+                lbMol.SelectedIndex = index;
+
+                if (index >= lbMol.Items.Count)
+                    lbMol.SelectedIndex = lbMol.Items.Count - 1;
+
+                if (lbMol.Items.Count == 0)
+                    lbMol.SelectedIndex = -1;
+
+            }
+            else
+            {
+                MessageBox.Show("Cannot remove a predefined molecule");
+            }
         }
 
         

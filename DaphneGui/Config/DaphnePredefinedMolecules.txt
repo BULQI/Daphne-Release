@@ -1,68 +1,101 @@
 [
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "A",
     "MolecularWeight": 2.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 2.0
+    "DiffusionCoefficient": 2.0,
+    "gui_molecule_guid": "df10ae26-1711-435f-bfa3-498cb9d5fbc7",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "B",
     "MolecularWeight": 3.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 2.0
+    "DiffusionCoefficient": 2.0,
+    "gui_molecule_guid": "e783df61-f884-4a31-8f9b-77f99898853c",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "E",
     "MolecularWeight": 5.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 1.0
+    "DiffusionCoefficient": 1.0,
+    "gui_molecule_guid": "56dd3bd9-7149-4340-a8ac-7a40c0dac875",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "X",
     "MolecularWeight": 3.5,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 2.0
+    "DiffusionCoefficient": 2.0,
+    "gui_molecule_guid": "745aa775-b09e-49ac-9db8-f10e2aa53882",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "Y",
     "MolecularWeight": 4.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 2.0
+    "DiffusionCoefficient": 2.0,
+    "gui_molecule_guid": "addf86ae-83c8-4fc1-814a-c98b7bfa652b",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "CXCR5",
     "MolecularWeight": 1.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 1.0
+    "DiffusionCoefficient": 1.0,
+    "gui_molecule_guid": "02f68cf5-e44d-43a7-931c-5f56c52119d4",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "CXCL13",
     "MolecularWeight": 0.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 6000.0
+    "DiffusionCoefficient": 6000.0,
+    "gui_molecule_guid": "d50081d6-d54f-4593-9b30-1954b3190053",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "CXCR5:CXCL13",
     "MolecularWeight": 0.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 0.0
+    "DiffusionCoefficient": 0.0,
+    "gui_molecule_guid": "361139a3-eb98-4b48-9ad9-2d5c4782489e",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "gCXCR5",
     "MolecularWeight": 0.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 0.0
+    "DiffusionCoefficient": 0.0,
+    "gui_molecule_guid": "8771f860-fb0d-4d08-a24c-b7e5c760e3d9",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "driver",
     "MolecularWeight": 0.0,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 0.0
+    "DiffusionCoefficient": 0.0,
+    "gui_molecule_guid": "61b29b28-1211-479e-81de-628191aa0746",
+    "ReadOnly": true
   },
   {
+    "ForegroundColor": "#FFFF0000",
     "Name": "CXCL12",
     "MolecularWeight": 7.96,
     "EffectiveRadius": 0.0,
-    "DiffusionCoefficient": 6000.0
+    "DiffusionCoefficient": 6000.0,
+    "gui_molecule_guid": "298febb8-43b1-4281-a649-656227ae0ce9",
+    "ReadOnly": true
   }
 ]

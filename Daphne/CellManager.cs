@@ -9,7 +9,6 @@ using ManifoldRing;
 using Ninject;
 using Ninject.Parameters;
 
-
 namespace Daphne
 {
     public class CellManager
@@ -108,9 +107,10 @@ namespace Daphne
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
                 double transductionConstant = 1e4;
+
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>();
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.CellType.CellRadius));
 
                     cellPos[0] = extent[0] / 4.0;
                     cellPos[1] = extent[1] / 2.0;
@@ -118,11 +118,12 @@ namespace Daphne
                     cell.setState(cellPos, new double[] { 0, 0, 0 });
                     cell.IsMotile = false;
 
-                    foreach (GuiMolecularPopulation gmp in cp.CellMolPops)
+                    //foreach (GuiMolecularPopulation gmp in cp.CellMolPops)
+                    foreach (ConfigMolecularPopulation cmp in cp.CellType.CellMolPops)
                     {
-                        if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                        if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                         {
-                            MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
+                            MolPopGaussianGradient mpgg = (MolPopGaussianGradient)cmp.mpInfo.mp_distribution;
                             double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
                             double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[ECS.Space.Interior.Dim];
 
@@ -131,10 +132,10 @@ namespace Daphne
                             center[2] = extent[2] / 2.0;
 
                             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-                            Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
+                            Molecule mol = new Molecule(cmp.Molecule.Name, cmp.Molecule.MolecularWeight, cmp.Molecule.EffectiveRadius, cmp.Molecule.DiffusionCoefficient);
 
                             //if (gmp.InMembrane)
-                            if (gmp.Location == MolPopPosition.Membrane)
+                            if (cmp.Location == MolPopPosition.Membrane)
                             {
                                 //cell.PlasmaMembrane.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
                                 if (mol.Name == "CXCR5")
@@ -152,16 +153,18 @@ namespace Daphne
                             }
                             else
                             {
-                                cell.PlasmaMembrane.AddMolecularPopulation(mol, "const", new double[] { 250.0 });
+                                cell.Cytosol.AddMolecularPopulation(mol, "const", new double[] { 250.0 });
                             }
                         }
 
                     }
 
                     //CELL REACTIONS
-                    if (cp.CellReactions != null)
+                    //if (cp.CellReactions != null)
+                    if (cp.CellType.CellReactions != null)
                     {
-                        foreach (GuiReactionTemplate grt in cp.CellReactions)
+                        //foreach (GuiReactionTemplate grt in cp.CellReactions)
+                        foreach (GuiReactionTemplate grt in cp.CellType.CellReactions)
                         {
                             if (grt.ReacType == ReactionType.Association)
                             {
@@ -243,7 +246,7 @@ namespace Daphne
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
 
-            foreach (GuiMolecularPopulation gmp in scenario.MolPops)
+            foreach (ConfigMolecularPopulation gmp in scenario.MolPops)
             {
                 if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {

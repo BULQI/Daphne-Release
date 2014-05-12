@@ -8,9 +8,7 @@ using System.IO;
 using System.Text;
 
 using System.Xml.Serialization;
-//using Daphne;
 using Newtonsoft.Json;
-//using Workbench;
 using System.Linq;
 
 using System.Windows.Media;
@@ -103,7 +101,6 @@ namespace Daphne
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(simConfigJson, settings);
             SimConfig.InitializeStorageClasses();
         }
-
     }
 
     public class SimConfiguration
@@ -115,14 +112,7 @@ namespace Daphne
         public string experiment_guid { get; set; }
         public string experiment_description { get; set; }
         public Scenario scenario { get; set; }
-        public ObservableCollection<GlobalParameter> global_parameters { get; set; }
         public EntityRepository entity_repository { get; set; }
-
-        //skg daphne Tuesday, April 16, 2013        
-        public ObservableCollection<GuiReactionTemplate>    PredefReactions { get; set; }
-        public ObservableCollection<GuiMolecule>            PredefMolecules { get; set; }
-        public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
-        public ObservableCollection<GuiCell> PredefCells { get; set; }
 
         //[XmlIgnore]
         //[JsonIgnore]
@@ -131,10 +121,8 @@ namespace Daphne
         // Convenience utility storage (not serialized)
         // NOTE: These could be moved to entity_repository...
         [XmlIgnore]
-        [JsonIgnore]
         public Dictionary<string, BoxSpecification> box_guid_box_dict;
         [XmlIgnore]
-        [JsonIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
 
         public SimConfiguration()
@@ -146,16 +134,25 @@ namespace Daphne
             experiment_reps = 1;
             experiment_description = "Whole sim config description";
             scenario = new Scenario();
-            global_parameters = new ObservableCollection<GlobalParameter>();
             entity_repository = new EntityRepository();
 
-            //skg daphne
+            entity_repository.PredefReactions = new ObservableCollection<GuiReactionTemplate>();
+            entity_repository.PredefMolecules = new ObservableCollection<ConfigMolecule>();
+            entity_repository.PredefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
+            entity_repository.PredefCells = new ObservableCollection<ConfigCell>();
+
+            entity_repository.AllMolecules = new ObservableCollection<ConfigMolecule>();
+            entity_repository.AllReactions = new ObservableCollection<GuiReactionTemplate>();
+
+            LoadDefaultGlobalParameters();
+
+            entity_repository.UserdefMolecules = new ObservableCollection<ConfigMolecule>();
+            entity_repository.UserdefReactions = new ObservableCollection<GuiReactionTemplate>();
+            entity_repository.UserdefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
+            entity_repository.UserdefCells = new ObservableCollection<ConfigCell>();
+
+            //LoadUserDefinedItems();
             
-            PredefReactions = new ObservableCollection<GuiReactionTemplate>();
-            PredefMolecules = new ObservableCollection<GuiMolecule>();
-            PredefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
-            PredefCells = new ObservableCollection<GuiCell>();
-            //LoadDefaultGlobalParameters();
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
@@ -173,25 +170,25 @@ namespace Daphne
         void environment_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // Update all BoxSpecifications
-            foreach (BoxSpecification bs in entity_repository.box_specifications)
-            {
-                // NOTE: Uncomment and add in code if really need to adjust directions independently for efficiency
-                //if (e.PropertyName == "extent_x")
-                //{
-                //    // set x direction
-                //}
-                //if (e.PropertyName == "extent_y")
-                //{
-                //    // set x direction
-                //}
-                //if (e.PropertyName == "extent_z")
-                //{
-                //    // set x direction
-                //}
+            ////foreach (BoxSpecification bs in entity_repository.box_specifications)
+            ////{
+            ////    // NOTE: Uncomment and add in code if really need to adjust directions independently for efficiency
+            ////    //if (e.PropertyName == "extent_x")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
+            ////    //if (e.PropertyName == "extent_y")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
+            ////    //if (e.PropertyName == "extent_z")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
 
-                // For now just setting all every time...
-                SetBoxSpecExtents(bs);
-            }
+            ////    // For now just setting all every time...
+            ////    SetBoxSpecExtents(bs);
+            ////}
 
             // Update VTK environment box 
             var env = scenario.environment;
@@ -227,21 +224,21 @@ namespace Daphne
             //---------------------------------------------------------------------------------------
             //BCell 
 
-            GuiCell gc = new GuiCell();
+            ConfigCell gc = new ConfigCell();
             gc.CellName = "BCell";
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
             var query1 =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
                 select mol;
 
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query1)
+            ConfigMolecularPopulation gmp = null;
+            foreach (ConfigMolecule gm in query1)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
@@ -265,15 +262,15 @@ namespace Daphne
 
             //MOLECULES IN CYTOSOL
             var query2 =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "driver"
                 select mol;
 
             gmp = null;
-            foreach (GuiMolecule gm in query2)
+            foreach (ConfigMolecule gm in query2)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 if (gm.Name == "driver")
@@ -292,28 +289,28 @@ namespace Daphne
                 gc.CellMolPops.Add(gmp);
             }
 
-            PredefCells.Add(gc);
+            entity_repository.PredefCells.Add(gc);
 
             //---------------------------------------------------------------------------------------
             //TCell 
 
-            gc = new GuiCell();
+            gc = new ConfigCell();
             gc.CellName = "TCell";
             gc.CellRadius = 5.0;
 
-            PredefCells.Add(gc);
+            entity_repository.PredefCells.Add(gc);
 
-            gc = new GuiCell();
+            gc = new ConfigCell();
             gc.CellName = "FDC";
             gc.CellRadius = 5.0;
 
-            PredefCells.Add(gc);
+            entity_repository.PredefCells.Add(gc);
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(PredefCells, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(entity_repository.PredefCells, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = "Config\\DaphnePredefinedCells.txt";
             File.WriteAllText(jsonFile, jsonSpec);
         }
@@ -354,7 +351,7 @@ namespace Daphne
             gbrt.RateConst = 2.0;
             gbrt.ReacType = ReactionType.BoundaryAssociation;
 
-            PredefReactions.Add(gbrt);
+            entity_repository.PredefReactions.Add(gbrt);
 
             //----------------------------------------------
             //BoundaryDissociation
@@ -384,7 +381,7 @@ namespace Daphne
             gbrt.RateConst = 2.0;
             gbrt.ReacType = ReactionType.BoundaryDissociation;
 
-            PredefReactions.Add(gbrt);
+            entity_repository.PredefReactions.Add(gbrt);
 
             //Association
             GuiReactionTemplate grt = new GuiReactionTemplate();
@@ -409,7 +406,7 @@ namespace Daphne
 
             grt.RateConst = 2.0;
             grt.ReacType = ReactionType.Association;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //Dissociation
             grt = new GuiReactionTemplate();
@@ -434,7 +431,7 @@ namespace Daphne
 
             grt.RateConst = 2.0;
             grt.ReacType = ReactionType.Dissociation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //Dissociation
             grt = new GuiReactionTemplate();
@@ -459,7 +456,7 @@ namespace Daphne
 
             grt.RateConst = 1.0;
             grt.ReacType = ReactionType.Dissociation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //CatalyzedCreation
             GuiCatalyzedReactionTemplate gcrt = new GuiCatalyzedReactionTemplate();
@@ -479,7 +476,7 @@ namespace Daphne
             gcrt.RateConst = 2.0;
             gcrt.catalyst = gsr;
             gcrt.ReacType = ReactionType.CatalyzedCreation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //CatalyzedCreation
             gcrt = new GuiCatalyzedReactionTemplate();
@@ -499,8 +496,8 @@ namespace Daphne
             gcrt.RateConst = 0.6;
             gcrt.catalyst = gsr;
             gcrt.ReacType = ReactionType.CatalyzedCreation;
-            
-            PredefReactions.Add(gcrt);
+
+            entity_repository.PredefReactions.Add(gcrt);
 
             //Annihilation
             grt = new GuiReactionTemplate();
@@ -513,8 +510,8 @@ namespace Daphne
 
             grt.RateConst = 2.0;
             grt.ReacType = ReactionType.Annihilation;
-            
-            PredefReactions.Add(grt);
+
+            entity_repository.PredefReactions.Add(grt);
 
             //Annihilation
             grt = new GuiReactionTemplate();
@@ -527,7 +524,7 @@ namespace Daphne
 
             grt.RateConst = 2.0;
             grt.ReacType = ReactionType.Annihilation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //Annihilation
             grt = new GuiReactionTemplate();
@@ -540,7 +537,7 @@ namespace Daphne
 
             grt.RateConst = 1.0;
             grt.ReacType = ReactionType.Annihilation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //CatalyzedAnnihilation
             grt = new GuiReactionTemplate();
@@ -559,7 +556,7 @@ namespace Daphne
 
             grt.RateConst = 2.0;
             grt.ReacType = ReactionType.CatalyzedAnnihilation;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //CatalyzedAnnihilation
             gcrt = new GuiCatalyzedReactionTemplate();
@@ -579,7 +576,7 @@ namespace Daphne
             gcrt.RateConst = 2.0;
             gcrt.ReacType = ReactionType.CatalyzedAnnihilation;
 
-            PredefReactions.Add(gcrt);
+            entity_repository.PredefReactions.Add(gcrt);
 
             //CatalyzedDimerDissociation
             gcrt = new GuiCatalyzedReactionTemplate();
@@ -605,7 +602,7 @@ namespace Daphne
             gcrt.RateConst = 2.0;
             gcrt.ReacType = ReactionType.CatalyzedDimerDissociation;
             gcrt.catalyst = gsr;
-            PredefReactions.Add(gcrt);
+            entity_repository.PredefReactions.Add(gcrt);
 
             //Generalized
             grt = new GuiReactionTemplate();
@@ -630,7 +627,7 @@ namespace Daphne
 
             grt.RateConst = 1.0;
             grt.ReacType = ReactionType.Generalized;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //Generalized
             grt = new GuiReactionTemplate();
@@ -655,7 +652,7 @@ namespace Daphne
 
             grt.RateConst = 1.0;
             grt.ReacType = ReactionType.Generalized;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
             //Generalized
             grt = new GuiReactionTemplate();
@@ -680,14 +677,14 @@ namespace Daphne
 
             grt.RateConst = 1.0;
             grt.ReacType = ReactionType.Generalized;
-            PredefReactions.Add(grt);
+            entity_repository.PredefReactions.Add(grt);
 
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(PredefReactions, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(entity_repository.PredefReactions, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = "Config\\DaphnePredefinedReactions.txt";
             File.WriteAllText(jsonFile, jsonSpec);
 
@@ -695,18 +692,9 @@ namespace Daphne
 
         public void LoadDefaultGlobalParameters()
         {
-            var force_params = new ForceParams();
-            global_parameters.Add(force_params);
-            var locomotor_params = new LocomotorParams();
-            global_parameters.Add(locomotor_params);
-            var synapse_params = new SynapseParams();
-            global_parameters.Add(synapse_params);
-
             //skg daphne
-
             PREDEFINEDREACTIONSCREATOR();
             
-
             string path = "Config\\DaphnePredefinedReactions.txt";
             //string readText = File.ReadAllText(path);
             var settings = new JsonSerializerSettings();
@@ -714,37 +702,57 @@ namespace Daphne
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             string readText = File.ReadAllText(path);
             //SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
-            PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText, settings);
+            entity_repository.PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText, settings);
 
             //GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)PredefReactions[0]; 
 
             path = "Config\\DaphnePredefinedMolecules.txt";
             readText = File.ReadAllText(path);
-            PredefMolecules = JsonConvert.DeserializeObject<ObservableCollection<GuiMolecule>>(readText);
+            entity_repository.PredefMolecules = JsonConvert.DeserializeObject<ObservableCollection<ConfigMolecule>>(readText);
+            foreach (ConfigMolecule gm in entity_repository.PredefMolecules)
+            {
+                entity_repository.AllMolecules.Add(gm);
+            }
+
+            
+
+
+
 
             PREDEFINEDCELLSCREATOR();
 
-            PredefCells.Clear();
+            entity_repository.PredefCells.Clear();
             path = "Config\\DaphnePredefinedCells.txt";
             readText = File.ReadAllText(path);
-            PredefCells = JsonConvert.DeserializeObject<ObservableCollection<GuiCell>>(readText, settings);
+            entity_repository.PredefCells = JsonConvert.DeserializeObject<ObservableCollection<ConfigCell>>(readText, settings);
 
             GuiReactionComplex rc = new GuiReactionComplex();
             rc.Name = "Bistable";
-            rc.Reactions.Add(PredefReactions[5]);
-            rc.Reactions.Add(PredefReactions[6]);
-            rc.Reactions.Add(PredefReactions[7]);
-            rc.Reactions.Add(PredefReactions[8]);
-            PredefReactionComplexes.Add(rc);
+            rc.Reactions.Add(entity_repository.PredefReactions[5]);
+            rc.Reactions.Add(entity_repository.PredefReactions[6]);
+            rc.Reactions.Add(entity_repository.PredefReactions[7]);
+            rc.Reactions.Add(entity_repository.PredefReactions[8]);
+            entity_repository.PredefReactionComplexes.Add(rc);
 
             rc = new GuiReactionComplex();
             rc.Name = "Receptor/Ligand";
-            rc.Reactions.Add(PredefReactions[0]);
-            rc.Reactions.Add(PredefReactions[1]);
-            rc.Reactions.Add(PredefReactions[2]);
-            rc.Reactions.Add(PredefReactions[3]);
-            PredefReactionComplexes.Add(rc);
+            rc.Reactions.Add(entity_repository.PredefReactions[0]);
+            rc.Reactions.Add(entity_repository.PredefReactions[1]);
+            rc.Reactions.Add(entity_repository.PredefReactions[2]);
+            rc.Reactions.Add(entity_repository.PredefReactions[3]);
+            entity_repository.PredefReactionComplexes.Add(rc);
+        }
 
+        public void CopyUserDefinedItems()
+        {
+            foreach (ConfigMolecule gm in entity_repository.UserdefMolecules)
+            {
+                entity_repository.AllMolecules.Add(gm);
+            }
+            foreach (GuiReactionTemplate grt in entity_repository.UserdefReactions)
+            {
+                entity_repository.AllReactions.Add(grt);
+            }
         }
 
         public void CreateAndSerializeLigandReceptorScenario()
@@ -761,9 +769,9 @@ namespace Daphne
             //ChartWindow = ReacComplexChartWindow;
 
             // Entity Repository
-            EntityRepository repository = new EntityRepository();
+            //EntityRepository repository = new EntityRepository();
 
-            entity_repository = repository;
+            //entity_repository = repository;
 
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
@@ -774,52 +782,25 @@ namespace Daphne
             box.x_trans = 100;
             box.y_trans = 300;
             box.z_trans = 100;
-            repository.box_specifications.Add(box);
+            entity_repository.box_specifications.Add(box);
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "Off-center gaussian";
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             entity_repository.gaussian_specifications.Add(gg);
 
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            scenario.regions.Add(reg);
-
             //ADD ECS MOL POPS
             //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
             //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
             var query =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCL13"
                 select mol;
 
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
+            ConfigMolecularPopulation gmp = null;
+            foreach (ConfigMolecule gm in query)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.Location = MolPopPosition.ECS;
@@ -828,13 +809,13 @@ namespace Daphne
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
                 sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
                 scenario.MolPops.Add(gmp);
             }
 
             //ADD CELLS AND MOLECULES IN THE CELLS
-            GuiCell gc = new GuiCell();
+            ConfigCell gc = new ConfigCell();
             gc.CellName = "BCell";
             gc.CellRadius = 4.0;
            
@@ -844,17 +825,18 @@ namespace Daphne
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
+            cp.CellType = gc;
 
             var query1 =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
                 select mol;
 
             gmp = null;
-            foreach (GuiMolecule gm in query1)
+            foreach (ConfigMolecule gm in query1)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
@@ -867,10 +849,10 @@ namespace Daphne
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
                 sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
 
-                cp.CellMolPops.Add(gmp);
+                //cp.CellMolPops.Add(gmp);
                 gc.CellMolPops.Add(gmp);
             }
 
@@ -878,21 +860,14 @@ namespace Daphne
 
             scenario.cellpopulations.Add(cp);
 
-            //-------------------------------------------------------------
-            int[] nGridPts = { 21, 21, 21 };
-            scenario.NumGridPts = nGridPts;
-            scenario.GridStep = 50;
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
 
             //---------------------------------------------------------------
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(PredefReactions[0]);    //The 0'th reaction is Boundary Association
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.PredefReactions[0]);    //The 0'th reaction is Boundary Association
             scenario.Reactions.Add(grt);
 
-            grt = (GuiBoundaryReactionTemplate)PredefReactions[1];    //The 1st reaction is Boundary Dissociation
+            grt = (GuiBoundaryReactionTemplate)entity_repository.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
             scenario.Reactions.Add(grt);
 
         }
@@ -914,10 +889,6 @@ namespace Daphne
             LoadDefaultGlobalParameters();
             //ChartWindow = ReacComplexChartWindow;
 
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-            entity_repository = repository;
-
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
@@ -927,49 +898,22 @@ namespace Daphne
             box.x_trans = 100;
             box.y_trans = 300;
             box.z_trans = 100;
-            repository.box_specifications.Add(box);
+            entity_repository.box_specifications.Add(box);
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "Off-center gaussian";
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             entity_repository.gaussian_specifications.Add(gg);
 
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            scenario.regions.Add(reg);
-
             var query =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCL13"
                 select mol;
 
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
+            ConfigMolecularPopulation gmp = null;
+            foreach (ConfigMolecule gm in query)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.Location = MolPopPosition.ECS;
@@ -978,13 +922,13 @@ namespace Daphne
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
                 sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
                 scenario.MolPops.Add(gmp);
             }
 
             //ADD CELLS AND MOLECULES IN THE CELLS
-            GuiCell gc = new GuiCell();
+            ConfigCell gc = new ConfigCell();
             gc.CellName = "BCell";
             gc.CellRadius = 4.0;
 
@@ -994,18 +938,19 @@ namespace Daphne
             cp.cellpopulation_constrained_to_region = true;
             cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
+            cp.CellType = gc;
 
             //MOLECULES IN MEMBRANE
             var query1 =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
                 select mol;
 
             gmp = null;
-            foreach (GuiMolecule gm in query1)
+            foreach (ConfigMolecule gm in query1)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
@@ -1021,24 +966,23 @@ namespace Daphne
                     sgg.peak_concentration = 125;
                 else
                     sgg.peak_concentration = 130;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
 
-                cp.CellMolPops.Add(gmp);
                 gc.CellMolPops.Add(gmp);
             }
 
             //MOLECULES IN CYTOSOL
             var query2 =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "driver"
                 select mol;
 
             gmp = null;
-            foreach (GuiMolecule gm in query2)
+            foreach (ConfigMolecule gm in query2)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 if (gm.Name == "driver")
@@ -1051,10 +995,9 @@ namespace Daphne
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
                 sgg.peak_concentration = 250;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
 
-                cp.CellMolPops.Add(gmp);
                 gc.CellMolPops.Add(gmp);
             }
 
@@ -1063,24 +1006,15 @@ namespace Daphne
             scenario.cellpopulations.Add(cp);
 
             //-------------------------------------------------------------
-            int[] nGridPts = { 21, 21, 21 };
-            scenario.NumGridPts = nGridPts;
-            scenario.GridStep = 50;
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //---------------------------------------------------------------
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(PredefReactions[0]);    //The 0'th reaction is Boundary Association
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.PredefReactions[0]);    //The 0'th reaction is Boundary Association
 
             scenario.Reactions.Add(grt);
             grt = new GuiBoundaryReactionTemplate();
-            grt = (GuiBoundaryReactionTemplate)PredefReactions[1];    //The 1st reaction is Boundary Dissociation
+            grt = (GuiBoundaryReactionTemplate)entity_repository.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
 
             scenario.Reactions.Add(grt);
-
         }
 
         /// <summary>
@@ -1099,11 +1033,6 @@ namespace Daphne
             LoadDefaultGlobalParameters();
             //ChartWindow = ReacComplexChartWindow;
 
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-
-            entity_repository = repository;
-
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
@@ -1113,65 +1042,31 @@ namespace Daphne
             box.x_trans = 100;
             box.y_trans = 300;
             box.z_trans = 100;
-            repository.box_specifications.Add(box);
+            entity_repository.box_specifications.Add(box);
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "Off-center gaussian";
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             entity_repository.gaussian_specifications.Add(gg);
 
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            scenario.regions.Add(reg);
-            //end skg
-
             //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-
-            //Dictionary<string, Molecule> MolDict;
-            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            //MolDict = MoleculeBuilder.Go(molSpec);
-
             var query =
-                from mol in PredefMolecules
+                from mol in entity_repository.PredefMolecules
                 where mol.Name == "CXCL13"
                 select mol;
 
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
+            ConfigMolecularPopulation gmp = null;
+            foreach (ConfigMolecule gm in query)
             {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
+                gmp = new ConfigMolecularPopulation();
+                gmp.Molecule = new ConfigMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                //gmp.mpInfo.mp_type_guid_ref = entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
                 sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
                 scenario.MolPops.Add(gmp);
             }
@@ -1190,6 +1085,7 @@ namespace Daphne
             //InitCellSubsetGuidCellSubsetDict();
             InitBoxExtentsAndGuidBoxDict();
             InitCellPopulationIDCellPopulationDict();
+            CopyUserDefinedItems();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -1217,16 +1113,6 @@ namespace Daphne
             }
             SafeCellPopulationID = max_id + 1;
         }
-
-        //private void InitCellSubsetGuidCellSubsetDict()
-        //{
-        //    cellsubset_guid_cellsubset_dict.Clear();
-        //    foreach (CellSubset ct in entity_repository.cell_subsets)
-        //    {
-        //        cellsubset_guid_cellsubset_dict.Add(ct.cell_subset_guid, ct);
-        //    }
-        //    entity_repository.cell_subsets.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsubsets_CollectionChanged); 
-        //}
 
         private void InitBoxExtentsAndGuidBoxDict()
         {
@@ -1295,11 +1181,11 @@ namespace Daphne
             }
         }
 
-        public GuiMolecule FindMolecule(string name)
+        public ConfigMolecule FindMolecule(string name)
         {
-            GuiMolecule gm = null;
+            ConfigMolecule gm = null;
 
-            foreach (GuiMolecule g in PredefMolecules)
+            foreach (ConfigMolecule g in entity_repository.PredefMolecules)
             {
                 if (g.Name == name)
                 {
@@ -1312,7 +1198,7 @@ namespace Daphne
     }
 
     // start at > 0 as zero seems to be the default for metadata when a property is not present
-    public enum SimStates { Linear = 1, Cubic, Tiny, Large, OneD, TwoD, ThreeD };
+    public enum SimStates { Linear = 1, Cubic, Tiny, Large };
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1327,10 +1213,7 @@ namespace Daphne
                                     "linear",
                                     "cubic",
                                     "tiny",
-                                    "large",
-                                    "1d",
-                                    "2d",
-                                    "3d"
+                                    "large"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -1360,16 +1243,12 @@ namespace Daphne
         public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
         public Environment environment { get; set; }
-        public ObservableCollection<Region> regions { get; set; }        
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
         //skg daphne       
         public ObservableCollection<GuiReactionTemplate> Reactions { get; set; }
-        public ObservableCollection<GuiMolecularPopulation> MolPops { get; set; }
+        public ObservableCollection<ConfigMolecularPopulation> MolPops { get; set; }
         public ObservableCollection<GuiReactionComplex> ReactionComplexes { get; set; }
-        public int[] NumGridPts { get; set; } // = { 21, 21, 21 };
-        public double GridStep { get; set; }    //= 50;
-        public double CellRadius { get; set; }
 
         public Scenario()
         {
@@ -1378,33 +1257,46 @@ namespace Daphne
             simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
             environment = new Environment();
-            regions = new ObservableCollection<Region>();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
-            //skg daphne
             Reactions = new ObservableCollection<GuiReactionTemplate>();
-            MolPops = new ObservableCollection<GuiMolecularPopulation>();
+            MolPops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionComplexes = new ObservableCollection<GuiReactionComplex>();
         }
     }
-
     
     public class EntityRepository
     {
-        //public ObservableCollection<SolfacType> solfac_types { get; set; }
-        //public ObservableCollection<CellSubset> cell_subsets { get; set; }
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
         public ObservableCollection<BoxSpecification> box_specifications { get; set; }
 
+        [JsonIgnore]
+        public ObservableCollection<GuiReactionTemplate> PredefReactions { get; set; }
+        [JsonIgnore]
+        public ObservableCollection<ConfigMolecule> PredefMolecules { get; set; }
+        [JsonIgnore]
+        public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
+        [JsonIgnore]
+        public ObservableCollection<ConfigCell> PredefCells { get; set; }
+
+        //User defined molecules, reactions, reaction complexes, cells
+        public ObservableCollection<ConfigMolecule> UserdefMolecules { get; set; }
+        public ObservableCollection<GuiReactionTemplate> UserdefReactions { get; set; }
+        public ObservableCollection<GuiReactionComplex> UserdefReactionComplexes { get; set; }
+        public ObservableCollection<ConfigCell> UserdefCells { get; set; }
+
+        //All molecules - Combined from PredefMolecules and UserdefMolecules
+        [JsonIgnore]
+        public ObservableCollection<ConfigMolecule> AllMolecules { get; set; }
+
+        [JsonIgnore]
+        public ObservableCollection<GuiReactionTemplate> AllReactions { get; set; }
+
         public EntityRepository()
         {
-            //solfac_types = new ObservableCollection<SolfacType>();
-            //cell_subsets = new ObservableCollection<CellSubset>();
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
             box_specifications = new ObservableCollection<BoxSpecification>();
         }
-
-        
     }
 
     public class TimeConfig
@@ -1421,12 +1313,12 @@ namespace Daphne
         }
     }
 
-
     public class Environment : EntityModelBase
     {
         private int _extent_x;
         private int _extent_y;
         private int _extent_z;
+        private double _gridstep;
         public int extent_x
         {
             get { return _extent_x; }
@@ -1469,10 +1361,30 @@ namespace Daphne
                 }
             }
         }
+        public double gridstep
+        {
+            get { return _gridstep; }
+            set
+            {
+                if (_gridstep == value)
+                    return;
+                else
+                {
+                    _gridstep = value;
+                    OnPropertyChanged("gridstep");
+                }
+            }
+        }
+        public int[] NumGridPts { get; set; }
+
         [XmlIgnore]
         public int extent_min { get; set; }
         [XmlIgnore]
         public int extent_max { get; set; }
+        [XmlIgnore]
+        public int gridstep_min { get; set; }
+        [XmlIgnore]
+        public int gridstep_max { get; set; }
 
         public Environment()
         {
@@ -1481,11 +1393,26 @@ namespace Daphne
             extent_z = 400;
             extent_min = 5;
             extent_max = 1000;
+            gridstep_min = 1;
+            gridstep_max = 100;
+            gridstep = 50;
+
+            CalculateNumGridPts();
+        }
+
+        public void CalculateNumGridPts()
+        {
+            int[] pt = new int[3];
+            pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
+            pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
+            pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;
+
+            NumGridPts = pt;
         }
     }
 
     public enum RegionShape { Rectangular, Ellipsoid }
-
+    
     public class Region : EntityModelBase
     {
         private string _region_name = "";
@@ -1603,20 +1530,43 @@ namespace Daphne
         {
             string str = (string)value;
             int idx = _relative_position_strings.FindIndex(item => item == str);
-            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
+            return (RelativePosition)Enum.ToObject(typeof(RelativePosition), (int)idx);
+        }
+    }
+
+    [ValueConversion(typeof(Color), typeof(string))]
+    public class TextToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string ret = "Red";
+            Color col = (Color)value;
+            if (col == Colors.Red)
+                ret = "Red";
+            else
+                ret = "Black";
+
+            return ret;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
         }
     }
 
     //skg daphne
-    public class GuiMolecule : EntityModelBase
+    public class ConfigMolecule : EntityModelBase
     {
         public string Name { get; set; }
         public double MolecularWeight { get; set; }
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
         public string gui_molecule_guid { get; set; }
+        public bool ReadOnly { get; set; }
+        public Color ForegroundColor { get; set; }
 
-        public GuiMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
+        public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
         {
             Guid id = Guid.NewGuid();
             gui_molecule_guid = id.ToString();
@@ -1624,9 +1574,11 @@ namespace Daphne
             MolecularWeight = thisMW;
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
+            ReadOnly = true;
+            ForegroundColor = Colors.Red;
         }
 
-        public GuiMolecule()
+        public ConfigMolecule()
             : base()
         {
             Guid id = Guid.NewGuid();
@@ -1635,9 +1587,11 @@ namespace Daphne
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
+            ReadOnly = true;
+            ForegroundColor = Colors.Red;
         }
 
-        public GuiMolecule(GuiMolecule gm)
+        public ConfigMolecule(ConfigMolecule gm)
         {
             Guid id = Guid.NewGuid();
             gui_molecule_guid = id.ToString();
@@ -1645,20 +1599,20 @@ namespace Daphne
             MolecularWeight = gm.MolecularWeight;
             EffectiveRadius = gm.EffectiveRadius;
             DiffusionCoefficient = gm.DiffusionCoefficient;
+            ForegroundColor = gm.ForegroundColor;
         }
-
     }
 
     //skg daphne
-    public class GuiMolecularPopulation : EntityModelBase
+    public class ConfigMolecularPopulation : EntityModelBase
     {
-        public GuiMolecularPopulation()
+        public ConfigMolecularPopulation()
             : base()
         {
             Guid id = Guid.NewGuid();
             gui_mol_pop_guid = id.ToString();
         }
-        public GuiMolecule Molecule { get; set; }
+        public ConfigMolecule Molecule { get; set; }
         public string Name { get; set; }
         private MolPopInfo _mp_Info;
         public MolPopInfo mpInfo
@@ -1707,26 +1661,178 @@ namespace Daphne
         {
             string str = (string)value;
             int idx = _molpop_position_strings.FindIndex(item => item == str);
-            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
+            return (MolPopPosition)Enum.ToObject(typeof(MolPopPosition), (int)idx);
         }
     }
 
-    public class GuiCell
+    public class ConfigCell
     {
-        public GuiCell()
+        public ConfigCell()
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
 
-            CellMolPops = new ObservableCollection<GuiMolecularPopulation>();
+            CellMolPops = new ObservableCollection<ConfigMolecularPopulation>();
         }
 
         public string CellName { get; set; }
         public double CellRadius { get; set; }
 
-        public ObservableCollection<GuiMolecularPopulation> CellMolPops { get; set; }
+        public ObservableCollection<ConfigMolecularPopulation> CellMolPops { get; set; }
         public ObservableCollection<GuiReactionTemplate> CellReactions { get; set; }
         public ObservableCollection<GuiReactionComplex> CellReactionComplexes { get; set; }
+    }
+
+    public class CellPopDistType
+    {
+        public string Name { get; set; }
+        public ObservableCollection<CellPopDistSubtype> DistSubtypes { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    public class CellPopDistSubtype
+    {
+        public string Label { get; set; }
+        public override string ToString()
+        {
+            return Label;
+        }
+    }
+
+    public enum CellPopDistributionType { Specific, Probability }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(CellPopDistributionType), typeof(string))]
+    public class CellPopDistributionTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> _cell_pop_dist_type_strings = new List<string>()
+            {
+                "Specify cell coordinates",
+                "Probability Distribution"
+            };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _cell_pop_dist_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
+            return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
+        }
+    }
+
+    public enum CellPopProbDistributionType { Uniform, Gaussian }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(CellPopProbDistributionType), typeof(string))]
+    public class CellPopProbDistributionTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the GlobalParameterType enum...
+        private List<string> _cell_pop_prob_dist_type_strings = new List<string>()
+            {
+                "Uniform",
+                "Gaussian"
+            };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _cell_pop_prob_dist_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _cell_pop_prob_dist_type_strings.FindIndex(item => item == str);
+            return (CellPopProbDistributionType)Enum.ToObject(typeof(CellPopProbDistributionType), (int)idx);
+        }
+    }
+
+    public enum CellPopSpecificLocationType { Coord, File }
+
+    public abstract class CellPopDistribution
+    {
+        public CellPopDistributionType cpDistributionType { get; protected set; }
+    }
+
+    public class CellPopSpecifyLocation : CellPopDistribution
+    {
+        public CellPopSpecificLocationType LocationType { get; set; }
+        public CellPopSpecifyLocation()
+        {
+            cpDistributionType = CellPopDistributionType.Specific;
+            LocationType = CellPopSpecificLocationType.Coord;
+        }
+    }
+
+    public class CellPopLocationFile : CellPopDistribution
+    {
+        public string fileName { get; set; }
+        public CellPopSpecificLocationType LocationType { get; set; }
+        public CellPopLocationFile(string file)
+        {
+            cpDistributionType = CellPopDistributionType.Specific;
+            LocationType = CellPopSpecificLocationType.File;
+            fileName = file;
+        }
+    }
+
+    public class CellPopUniformDistribution : CellPopDistribution
+    {
+        public double Conc { get; set; }
+        public CellPopProbDistributionType DistType { get; set; }
+        public CellPopUniformDistribution(double conc)
+        {
+            Conc = conc;
+            cpDistributionType = CellPopDistributionType.Probability;
+            DistType = CellPopProbDistributionType.Uniform;
+        }
+    }
+
+    public class CellPopGaussianDistribution : CellPopDistribution
+    {
+        private double[] center;
+        private double[] sigma;
+        private double peak;
+
+        public double[] Center { get; set; }
+        public double[] Sigma { get; set; }
+        public double   Peak { get; set; }
+
+        public CellPopProbDistributionType DistType { get; set; }
+
+        public CellPopGaussianDistribution()
+        {
+            cpDistributionType = CellPopDistributionType.Probability;
+            DistType = CellPopProbDistributionType.Gaussian;
+        }
     }
 
     public class CellPopulation
@@ -1762,13 +1868,43 @@ namespace Daphne
         public System.Windows.Media.Color cellpopulation_color { get; set; }
 
         //skg Daphne
-        public GuiCell CellType { get; set; }
+        public ConfigCell CellType { get; set; }
         public double MaxConc { get; set; }
         public double[] Sigma { get; set; }
         public double[] Center { get; set; }
-        public ObservableCollection<GuiMolecularPopulation> CellMolPops { get; set; }
-        public ObservableCollection<GuiReactionTemplate> CellReactions { get; set; }
-        public ObservableCollection<GuiReactionComplex> CellReactionComplexes { get; set; }
+        public CellPopDistribution cellPopDist;
+
+        public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
+        private void InitDistTypes()
+        {
+            CellPopDistType d = new CellPopDistType();
+            d.Name = "Specify cell coordinates";
+            d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
+
+            CellPopDistSubtype d2 = new CellPopDistSubtype();
+            d2.Label = "Input coordinates";
+            d.DistSubtypes.Add(d2);
+
+            d2 = new CellPopDistSubtype();
+            d2.Label = "Specify coordinates file";
+            d.DistSubtypes.Add(d2);
+
+            CellPopDistTypes.Add(d);
+
+            d = new CellPopDistType();
+            d.Name = "Probability distribution";
+            d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
+
+            d2 = new CellPopDistSubtype();
+            d2.Label = "Uniform";
+            d.DistSubtypes.Add(d2);
+
+            d2 = new CellPopDistSubtype();
+            d2.Label = "Gaussian";
+            d.DistSubtypes.Add(d2);
+
+            CellPopDistTypes.Add(d);
+        }
 
         public CellPopulation()
         {
@@ -1785,11 +1921,12 @@ namespace Daphne
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
-            CellMolPops = new ObservableCollection<GuiMolecularPopulation>();
+            cellPopDist = new CellPopUniformDistribution(10.0);            
+            CellPopDistTypes = new ObservableCollection<CellPopDistType>();
+            InitDistTypes();
         }
     }
 
-    // skg daphne
     // MolPopInfo ==================================
     public class MolPopInfo : EntityModelBase
     {
@@ -1914,76 +2051,6 @@ namespace Daphne
             return "y";
         }
     }
-
-    /// <summary>
-    /// Converter to go between solfac GUID references in CellSubset list of ReceptorExpressionLevelPairs
-    /// and receptor names kept in the repository list of SolfacType(s).
-    /// </summary>
-    ////[ValueConversion(typeof(string), typeof(string))]
-    ////public class SolfacGUIDtoReceptorNameConverter : IValueConverter
-    ////{
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        string guid = value as string;
-    ////        string receptor_name = "";
-    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-    ////        ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
-    ////        if (solfac_list != null)
-    ////        {
-    ////            foreach (SolfacType st in solfac_list)
-    ////            {
-    ////                if (st.solfac_type_guid == guid)
-    ////                {
-    ////                    receptor_name = st.solfac_type_receptor_name + " (" + st.solfac_type_name + ")";
-    ////                    break;
-    ////                }
-    ////            }
-    ////        }
-    ////        return receptor_name;
-    ////    }
-
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        // TODO: Should probably put something real here, but right now it never gets called,
-    ////        // so I'm not sure what the value and parameter objects would be...
-    ////        return "y";
-    ////    }
-    ////}
-
-    /// <summary>
-    /// Converter to go between solfac GUID references in CellSubset list of ReceptorExpressionLevelPairs
-    /// and receptor names kept in the repository list of SolfacType(s).
-    /// </summary>
-    ////[ValueConversion(typeof(string), typeof(string))]
-    ////public class SolfacGUIDtoSolfacNameConverter : IValueConverter
-    ////{
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        string guid = value as string;
-    ////        string receptor_name = "";
-    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-    ////        ObservableCollection<SolfacType> solfac_list = cvs.Source as ObservableCollection<SolfacType>;
-    ////        if (solfac_list != null)
-    ////        {
-    ////            foreach (SolfacType st in solfac_list)
-    ////            {
-    ////                if (st.solfac_type_guid == guid)
-    ////                {
-    ////                    receptor_name = st.solfac_type_name;
-    ////                    break;
-    ////                }
-    ////            }
-    ////        }
-    ////        return receptor_name;
-    ////    }
-
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        // TODO: Should probably put something real here, but right now it never gets called,
-    ////        // so I'm not sure what the value and parameter objects would be...
-    ////        return "y";
-    ////    }
-    ////}
 
     /// <summary>
     /// Convert System.Windows.Media.Color to SolidBrush for rectangle fills
@@ -2774,114 +2841,6 @@ namespace Daphne
             amplitude = a;
         }
     }
-
-
-    // SIM PARAMETERS CLASSES ================================
-
-    public enum GlobalParameterType { ForceParams, LocomotorParams, SynapseParams }
-
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(GlobalParameterType), typeof(string))]
-    public class GlobalParamTypeToStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _global_param_type_strings = new List<string>()
-                                {
-                                    "Adhesion",
-                                    "Locomotion",
-                                    "Synapse"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _global_param_type_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _global_param_type_strings.FindIndex(item => item == str);
-            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
-        }
-    }
-
-    // Base class for any global parameter types
-    [XmlInclude(typeof(ForceParams)),
-     XmlInclude(typeof(LocomotorParams)),
-     XmlInclude(typeof(SynapseParams))]
-    public class GlobalParameter
-    {
-        [XmlIgnore]
-        public GlobalParameterType global_parameter_type { get; protected set; }
-
-        public GlobalParameter()
-        {
-        }
-    }
-
-    public class ForceParams : GlobalParameter
-    {
-        public double force_delta { get; set; }
-        public double force_phi1 { get; set; }
-        public double force_phi2 { get; set; }
-
-        public ForceParams()
-        {
-            global_parameter_type = GlobalParameterType.ForceParams;
-
-            force_delta = 15.0;
-            force_phi1 = 300.0;
-            force_phi2 = 0.44;
-        }
-    }
-
-    public class LocomotorParams : GlobalParameter
-    {
-        public double loco_gamma { get; set; }
-        public double loco_sigma { get; set; }
-        public double loco_zeta { get; set; }
-        public double loco_chi { get; set; }
-
-        public LocomotorParams()
-        {
-            global_parameter_type = GlobalParameterType.LocomotorParams;
-
-            loco_gamma = 1.0;
-            loco_sigma = 10.0;
-            loco_zeta = 1.0;
-            loco_chi = 30;
-        }
-    }
-
-    public class SynapseParams : GlobalParameter
-    {
-        public double Alpha { get; set; }
-        public double Beta { get; set; }
-        public double Kappa { get; set; }
-        public double Delta { get; set; }
-        public double Epsilon { get; set; }        
-
-        public SynapseParams()
-        {
-            global_parameter_type = GlobalParameterType.SynapseParams;
-
-            Alpha = 15.0;
-            Beta = 300.0;
-            Kappa = 0.44;
-            Delta = 0.44;
-            Epsilon = 0.44;
-        }
-    }    
 
     /// <summary>
     /// Converter to test > 1 -> true, not -> false for "s" plural addition

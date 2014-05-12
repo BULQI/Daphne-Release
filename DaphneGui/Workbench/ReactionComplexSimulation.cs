@@ -80,7 +80,10 @@ namespace Workbench
 
         public ReactionComplexSimulation(GuiReactionComplex grc)
         {
-            rc = new ReactionComplex(grc.Name, new TinyBall(5.0));
+            TinyBall ball = new TinyBall();
+
+            ball.Initialize(new double[] { 5.0 });
+            rc = new ReactionComplex(grc.Name, ball);
             
             //grc.CopyReactionsTo(rc);
             foreach (GuiReactionTemplate grt in grc.Reactions)

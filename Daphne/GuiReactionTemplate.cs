@@ -78,7 +78,7 @@ namespace Daphne
         {
             string str = (string)value;
             int idx = _reaction_type_strings.FindIndex(item => item == str);
-            return (GlobalParameterType)Enum.ToObject(typeof(GlobalParameterType), (int)idx);
+            return (ReactionType)Enum.ToObject(typeof(ReactionType), (int)idx);
         }
     }
 
@@ -235,121 +235,5 @@ namespace Daphne
     {
         public GuiSpeciesReference catalyst;
     }
-    ////public class XMLReactionsSpec
-    ////{
-    ////    public XMLReactionsSpec()
-    ////    {
-    ////        listOfReactions = new List<GuiReactionTemplate>();
-    ////    }
-
-    ////    public List<GuiReactionTemplate> listOfReactions;
-    ////}
-
-    ////public class ReactionsConfigurator
-    ////{
-    ////    public ReactionsConfigurator()
-    ////    {
-    ////    }
-
-    ////    public void deserialize(string filename)
-    ////    {
-    ////        XmlSerializer xs;
-
-    ////        xs = new XmlSerializer(typeof(XMLReactionsSpec));
-
-    ////        using (Stream s = File.OpenRead(filename))
-    ////        {
-    ////            // content
-    ////            content = (XMLReactionsSpec)xs.Deserialize(s);
-    ////        }
-    ////    }
-
-    ////    public void serialize(string filename)
-    ////    {
-    ////        XmlSerializer xs = new XmlSerializer(typeof(XMLReactionsSpec));
-
-    ////        using (Stream s = File.Create(filename))
-    ////        {
-    ////            xs.Serialize(s, content);
-    ////        }
-    ////    }
-
-    ////    //public XMLReactionsSpec content;
-
-
-    ////    public void TemplReacType(List<GuiReactionTemplate> rtList)
-    ////    {
-    ////        //List<ReactionTemplate> rtList = rtList;
-
-    ////        int rCnt, pCnt, rStoichSum, pStoichSum;
-
-    ////        foreach (GuiReactionTemplate rt in rtList)
-    ////        {
-    ////            rCnt = rt.listOfReactants.Count;
-    ////            pCnt = rt.listOfProducts.Count;
-
-    ////            rStoichSum = 0;
-    ////            foreach (SpeciesReference reactSpecies in rt.listOfReactants)
-    ////            {
-    ////                rStoichSum = rStoichSum + reactSpecies.stoichiometry;
-    ////            }
-
-    ////            pStoichSum = 0;
-    ////            foreach (SpeciesReference prodSpecies in rt.listOfProducts)
-    ////            {
-    ////                pStoichSum = pStoichSum + prodSpecies.stoichiometry;
-    ////            }
-
-    ////            if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 0) && (rStoichSum == 1))
-    ////            {
-    ////                // annihilation a	→	0
-    ////                rt.ReacType = ReactionType.Annihilation;
-
-    ////            }
-    ////            else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
-    ////            {
-    ////                // association  a + b	→	c
-    ////                rt.ReacType = ReactionType.Association;
-    ////            }
-    ////            //else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
-    ////            //{
-    ////            //    // association  e + a	→	2e
-    ////            //    rt.typeOfReaction = "autocatalyticTransformation";
-    ////            //}
-    ////            else if ((rt.listOfReactants.Count == 0) && (rt.listOfProducts.Count == 1))
-    ////            {
-    ////                // creation (not allowed)  0 →	a
-    ////                // TODO: handle this error properly
-    ////                rt.ReacType = ReactionType.CatalyzedCreation;
-    ////            }
-    ////            else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 2) && (pStoichSum == 1))
-    ////            {
-    ////                // dimerizaton 2a → b
-    ////                rt.ReacType = ReactionType.Dimerization;
-    ////            }
-    ////            else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
-    ////            {
-    ////                // dimer dissociation b → 2a
-    ////                rt.ReacType = ReactionType.DimerDissociation;
-    ////            }
-    ////            else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 2) && (rStoichSum == 1) && (pStoichSum == 2))
-    ////            {
-    ////                // dissociation c →	a + b
-    ////                rt.ReacType = ReactionType.Dissociation;
-    ////            }
-    ////            else if ((rt.listOfReactants.Count == 1) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 1))
-    ////            {
-    ////                // transformation   a →	b
-    ////                rt.ReacType = ReactionType.Transformation;
-    ////            }
-    ////            else
-    ////            {
-    ////                // generalized reaction 
-    ////                // to do: check for nonsense coefficient combos?
-    ////                // not implemented yet.
-    ////                rt.ReacType = ReactionType.Generalized;
-    ////            }
-    ////        }
-    ////    }
-    ////}
+    
 }

@@ -61,6 +61,7 @@ namespace Daphne
         public void InjectCytosol(Compartment c)
         {
             Cytosol = c;
+            Cytosol.Interior.Initialize(new double[] { radius });
             if (PlasmaMembrane != null)
             {
                 initBoundary();
@@ -72,6 +73,7 @@ namespace Daphne
         public void InjectMembrane(Compartment c)
         {
             PlasmaMembrane = c;
+            PlasmaMembrane.Interior.Initialize(new double[] { radius });
             if (Cytosol != null)
             {
                 initBoundary();

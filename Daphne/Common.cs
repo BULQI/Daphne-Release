@@ -21,7 +21,6 @@ namespace Daphne
         {
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
-            radius = 5.0;
             gridStep = 50;
             numGridPts = new int[] { 21, 21, 21 };
         }
@@ -29,7 +28,6 @@ namespace Daphne
         // these are static for simplicity only; they more than likely should be instance members in SimConfig
         public static SimStates simInterpolate { get; set; }
         public static SimStates simCellSize { get; set; }
-        public static double radius { get; set; }
         public static double gridStep { get; set; }
         public static int[] numGridPts { get; set; }
     }
@@ -52,6 +50,8 @@ namespace Daphne
         public static IKernel kernel;
         private Scenario scenario;
 
+        private enum MetadataValues { OneD = 1, TwoD, ThreeD, Membrane, Cytosol, ECS };
+
         public SimulationModule(Scenario scenario)
             : base()
         {
@@ -61,9 +61,8 @@ namespace Daphne
                 scenario = new Scenario();
                 scenario.simInterpolate = FakeConfig.simInterpolate;
                 scenario.simCellSize = FakeConfig.simCellSize;
-                scenario.NumGridPts = FakeConfig.numGridPts;
-                scenario.GridStep = FakeConfig.gridStep;
-                scenario.CellRadius = FakeConfig.radius;
+                scenario.environment.NumGridPts = FakeConfig.numGridPts;
+                scenario.environment.gridstep = FakeConfig.gridStep;
             }
             // end hack
             this.scenario = scenario;
@@ -72,20 +71,21 @@ namespace Daphne
         public override void Load()
         {
             // bindings for interpolators
-            Bind<Interpolator>().To<Trilinear2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.TwoD);
-            Bind<Interpolator>().To<Tricubic2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.TwoD);
-            Bind<Interpolator>().To<Trilinear3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.ThreeD);
-            Bind<Interpolator>().To<Tricubic3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<SimStates>("Dimension") == SimStates.ThreeD);
+            Bind<Interpolator>().To<Trilinear2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<MetadataValues>("Dimension") == MetadataValues.TwoD);
+            Bind<Interpolator>().To<Tricubic2D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<MetadataValues>("Dimension") == MetadataValues.TwoD);
+            Bind<Interpolator>().To<Trilinear3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Linear && ctx.Binding.Metadata.Get<MetadataValues>("Dimension") == MetadataValues.ThreeD);
+            Bind<Interpolator>().To<Tricubic3D>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Interpolation") == SimStates.Cubic && ctx.Binding.Metadata.Get<MetadataValues>("Dimension") == MetadataValues.ThreeD);
 
             // bindings for manifolds
-            Bind<Manifold>().To<TinyBall>().WhenParentNamed("Cytosol").WithConstructorArgument("radius", scenario.CellRadius);
-            Bind<Manifold>().To<TinySphere>().WhenParentNamed("Membrane").WithConstructorArgument("radius", scenario.CellRadius);
-            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", SimStates.ThreeD).WithMetadata("Interpolation", scenario.simInterpolate);
-            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", SimStates.TwoD).WithMetadata("Interpolation", scenario.simInterpolate);
+            Bind<Manifold>().To<TinyBall>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Size") == SimStates.Tiny && ctx.Binding.Metadata.Get<MetadataValues>("Component") == MetadataValues.Cytosol);
+            Bind<Manifold>().To<TinySphere>().WhenAnyAncestorMatches(ctx => ctx.Binding.Metadata.Get<SimStates>("Size") == SimStates.Tiny && ctx.Binding.Metadata.Get<MetadataValues>("Component") == MetadataValues.Membrane);
+            // NOTE: have Ball/Sphere definitions here in addition when size == Large
+            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", MetadataValues.ThreeD).WithMetadata("Interpolation", scenario.simInterpolate);
+            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", MetadataValues.TwoD).WithMetadata("Interpolation", scenario.simInterpolate);
 
             // bindings for compartment
-            Bind<Compartment>().ToSelf().WhenMemberHas<Cytosol>().Named("Cytosol");
-            Bind<Compartment>().ToSelf().WhenMemberHas<Membrane>().Named("Membrane");
+            Bind<Compartment>().ToSelf().WhenMemberHas<Cytosol>().WithMetadata("Component", MetadataValues.Cytosol).WithMetadata("Size", scenario.simCellSize);
+            Bind<Compartment>().ToSelf().WhenMemberHas<Membrane>().WithMetadata("Component", MetadataValues.Membrane).WithMetadata("Size", scenario.simCellSize);
             Bind<Compartment>().ToSelf();
 
             // bindings for molecular populations
@@ -95,10 +95,9 @@ namespace Daphne
             Bind<MolecularPopulation>().ToSelf();
             Bind<IFieldInitializerFactory>().ToFactory(() => new CustomInstanceProvider());
 
-
             // bindings for simulation entities
-            Bind<Cell>().ToSelf().WithConstructorArgument("radius", scenario.CellRadius).WithMetadata("Size", scenario.simCellSize);
-            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.NumGridPts).WithConstructorArgument("gridStep", scenario.GridStep);
+            Bind<Cell>().ToSelf();
+            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep);
         }
     }
 }

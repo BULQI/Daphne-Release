@@ -14,7 +14,7 @@ namespace Daphne
     {
         public string Name { get; set; }
         public ObservableCollection<GuiReactionTemplate> Reactions { get; set; }
-        public ObservableCollection<GuiMolecule> Molecules { get; set; }
+        public ObservableCollection<ConfigMolecule> Molecules { get; set; }
         public string gui_reaction_complex_guid { get; set; }
 
         [XmlIgnore]
@@ -34,7 +34,7 @@ namespace Daphne
             {
                 foreach (SpeciesReference sr in grt.listOfReactants)
                 {
-                    GuiMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    ConfigMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null) {
                         if (!MolDict.ContainsKey(sr.species))
                         {
@@ -45,7 +45,7 @@ namespace Daphne
                 }
                 foreach (SpeciesReference sr in grt.listOfProducts)
                 {
-                    GuiMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null)
                     {
                         if (!MolDict.ContainsKey(sr.species))
@@ -57,7 +57,7 @@ namespace Daphne
                 }
                 foreach (SpeciesReference sr in grt.listOfModifiers)
                 {
-                    GuiMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null)
                     {
                         if (!MolDict.ContainsKey(sr.species))

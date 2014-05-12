@@ -57,6 +57,11 @@ namespace ManifoldRing
         /// <returns>number of nodes as int</returns>
         public abstract int NodesPerSide(int i);
         /// <summary>
+        /// initialize manifold members
+        /// </summary>
+        /// <param name="data">data array</param>
+        public abstract void Initialize(double[] data);
+        /// <summary>
         /// value at position, delegates to scalar field and interpolates if needed
         /// </summary>
         /// <param name="x">position</param>
@@ -245,11 +250,23 @@ namespace ManifoldRing
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="radius">sphere radius</param>
-        public TinySphere(double radius)
+        public TinySphere()
             : base(2)
         {
-            this.radius = radius;
+        }
+
+        /// <summary>
+        /// initialize the radius
+        /// </summary>
+        /// <param name="data">one element array with the radius</param>
+        public override void Initialize(double[] data)
+        {
+            if (data.Length != 1)
+            {
+                throw new Exception("TinySphere Initialize data must have length 1");
+            }
+
+            radius = data[0];
         }
 
         /// <summary>
@@ -420,11 +437,23 @@ namespace ManifoldRing
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="radius">ball radius</param>
-        public TinyBall(double radius)
+        public TinyBall()
             : base(3)
         {
-            this.radius = radius;
+        }
+
+        /// <summary>
+        /// initialize the radius
+        /// </summary>
+        /// <param name="data">one element array with the radius</param>
+        public override void Initialize(double[] data)
+        {
+            if (data.Length != 1)
+            {
+                throw new Exception("TinyBall Initialize data must have length 1");
+            }
+
+            radius = data[0];
         }
 
         /// <summary>
@@ -605,20 +634,32 @@ namespace ManifoldRing
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="nNodesPerSide">nodes per side array</param>
-        /// <param name="stepSize">uniform stepsize</param>
         /// <param name="dim">dimension</param>
         /// <param name="interpolator">handle to the interpolator instance used</param>
-        public InterpolatedNodes(int[] nNodesPerSide, double stepSize, int dim, Interpolator interpolator)
+        public InterpolatedNodes(int dim, Interpolator interpolator)
             : base(dim)
         {
-            if (nNodesPerSide.Length != Dim)
+            this.interpolator = interpolator;
+        }
+
+        /// <summary>
+        /// initialize the nodes per side and stepsize members
+        /// </summary>
+        /// <param name="data">data array with dim + 1 entries</param>
+        public override void Initialize(double[] data)
+        {
+            if (data.Length != Dim + 1)
             {
                 throw new Exception("Dimension mismatch in interpolated manifold.");
             }
 
-            this.stepSize = stepSize;
-            this.nNodesPerSide = (int[])nNodesPerSide.Clone();
+            nNodesPerSide = new int[data.Length - 1];
+            for (int i = 0; i < Dim; i++)
+            {
+                nNodesPerSide[i] = (int)data[i];
+            }
+            stepSize = data[data.Length - 1];
+
             extent = new double[Dim];
             // accumulate array size and compute extents
             ArraySize = 1;
@@ -633,8 +674,9 @@ namespace ManifoldRing
             {
                 PrincipalPoints[i] = linearIndexToLocal(i);
             }
-            this.interpolator = interpolator;
-            this.interpolator.Init(this);
+
+            // initialize interpolator
+            interpolator.Init(this);
         }
 
         /// <summary>
@@ -934,11 +976,9 @@ namespace ManifoldRing
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="nNodesPerSide">nodes per side array</param>
-        /// <param name="stepSize">uniform stepsize</param>
         /// <param name="interpolator">handle to the interpolator instance used</param>
-        public InterpolatedRectangle(int[] nNodesPerSide, double stepSize, Interpolator interpolator)
-            : base(nNodesPerSide, stepSize, 2, interpolator)
+        public InterpolatedRectangle(Interpolator interpolator)
+            : base(2, interpolator)
         {
         }
 
@@ -1004,11 +1044,9 @@ namespace ManifoldRing
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="nNodesPerSide">nodes per side array</param>
-        /// <param name="stepSize">uniform stepsize</param>
         /// <param name="interpolator">handle to the interpolator instance used</param>
-        public InterpolatedRectangularPrism(int[] nNodesPerSide, double stepSize, Interpolator interpolator)
-            : base(nNodesPerSide, stepSize, 3, interpolator)
+        public InterpolatedRectangularPrism(Interpolator interpolator)
+            : base(3, interpolator)
         {
         }
 

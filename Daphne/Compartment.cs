@@ -154,8 +154,10 @@ namespace Daphne
 
         public ExtraCellularSpace(int[] numGridPts, double gridStep, IKernel kernel)
         {
-            InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>(new ConstructorArgument("nNodesPerSide", numGridPts), new ConstructorArgument("stepSize", gridStep));
+            InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>();
+            double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep };
 
+            p.Initialize(data);
             space = new Compartment(p);
             sides = new Dictionary<string, int>();
 
@@ -163,13 +165,15 @@ namespace Daphne
 
             InterpolatedRectangle r;
             Transform t;
-            int[] nodes = new int[space.Interior.Dim - 1]; // can't access r.Dim before creating an instance
             double[] axis = new double[Transform.Dim];
 
+            data = new double[space.Interior.Dim];
             // front: no rotation, translate +z
-            nodes[0] = space.Interior.NodesPerSide(0);
-            nodes[1] = space.Interior.NodesPerSide(1);
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            data[0] = space.Interior.NodesPerSide(0);
+            data[1] = space.Interior.NodesPerSide(1);
+            data[2] = space.Interior.StepSize();
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             t.translate(new double[] { 0, 0, space.Interior.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
@@ -177,7 +181,8 @@ namespace Daphne
             sides.Add("front", r.Id);
 
             // back: rotate by pi about y, translate +x
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             axis[1] = 1;
             t.rotate(axis, Math.PI);
@@ -187,9 +192,10 @@ namespace Daphne
             sides.Add("back", r.Id);
 
             // right: rotate by pi/2 about y, translate +x, +z
-            nodes[0] = space.Interior.NodesPerSide(2);
-            nodes[1] = space.Interior.NodesPerSide(1);
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            data[0] = space.Interior.NodesPerSide(2);
+            data[1] = space.Interior.NodesPerSide(1);
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
             t.translate(new double[] { space.Interior.Extent(0), 0, space.Interior.Extent(2) });
@@ -198,7 +204,8 @@ namespace Daphne
             sides.Add("right", r.Id);
 
             // left: rotate by -pi/2 about y, no translation
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             t.rotate(axis, -Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);
@@ -206,9 +213,10 @@ namespace Daphne
             sides.Add("left", r.Id);
 
             // top: rotate by -pi/2 about x, translate +y, +z
-            nodes[0] = space.Interior.NodesPerSide(0);
-            nodes[1] = space.Interior.NodesPerSide(2);
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            data[0] = space.Interior.NodesPerSide(0);
+            data[1] = space.Interior.NodesPerSide(2);
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             axis[0] = 1;
             axis[1] = 0;
@@ -219,7 +227,8 @@ namespace Daphne
             sides.Add("top", r.Id);
 
             // bottom: rotate by pi/2 about x, no translation
-            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
+            r = kernel.Get<InterpolatedRectangle>();
+            r.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);

@@ -66,7 +66,7 @@ namespace DaphneGui
 
             Initialize();
 
-            lbReactions.DataContext = MainWindow.SC.SimConfig.PredefReactionComplexes;
+            lbReactions.DataContext = MainWindow.SC.SimConfig.entity_repository.PredefReactionComplexes;
             lbReactions.ItemsSource = LeftList;
             lbCxReactions.ItemsSource = RightList;
 
