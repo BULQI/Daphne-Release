@@ -1341,11 +1341,38 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
-            ////////Trying to add some code to preserve focus to the element that was in focus before the click on "Apply" button.
-            ////////Not yet working.
+            //Code to preserve focus to the element that was in focus before "Apply" button clicked.
+            TabItem selectedTab = SimConfigToolWindow.ConfigTabControl.SelectedItem as TabItem;
 
-            ////////IInputElement controlInFocus = Keyboard.FocusedElement;
-            ////////int selectedTab = SimConfigToolWindow.ConfigTabControl.SelectedIndex;
+            int nCellPopSelIndex = -1;
+            if (selectedTab == SimConfigToolWindow.tabCellPop)
+            {
+                nCellPopSelIndex = SimConfigToolWindow.CellPopsListBox.SelectedIndex;
+            }
+
+            int nMolPopSelIndex = -1;
+            if (selectedTab == SimConfigToolWindow.tabECM)
+            {
+                nMolPopSelIndex = SimConfigToolWindow.lbEcsMolPops.SelectedIndex;
+            }
+
+            int nLibCellSelIndex = -1;
+            int nLibRCSelIndex = -1;
+            if (selectedTab == SimConfigToolWindow.tabLibraries)
+            {
+                nLibCellSelIndex = SimConfigToolWindow.CellsListBox.SelectedIndex;
+                nLibRCSelIndex = SimConfigToolWindow.lbComplexes.SelectedIndex;
+            }
+
+            int nRepEcmMolSelIndex = -1;
+            int nRepCellSelIndex = -1;
+            int nRepCellPopSelIndex = -1;
+            if (selectedTab == SimConfigToolWindow.tabReports)
+            {
+                nRepEcmMolSelIndex = SimConfigToolWindow.dgEcmMols.SelectedIndex;
+                nRepCellSelIndex = SimConfigToolWindow.dgCellDetails.SelectedIndex;
+                nRepCellPopSelIndex = SimConfigToolWindow.lbRptCellPops.SelectedIndex;
+            }
 
             runButton.IsEnabled = false;
             mutex = true;
@@ -1353,8 +1380,26 @@ namespace DaphneGui
             saveTempFiles();
             updateGraphicsAndGUI();
 
-            ////////SimConfigToolWindow.ConfigTabControl.SelectedIndex = selectedTab;
-            ////////controlInFocus.Focus();
+            SimConfigToolWindow.ConfigTabControl.SelectedItem = selectedTab;
+            if (selectedTab == SimConfigToolWindow.tabCellPop)
+            {
+                SimConfigToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
+            }
+            else if (selectedTab == SimConfigToolWindow.tabECM)
+            {
+                SimConfigToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
+            }
+            else if (selectedTab == SimConfigToolWindow.tabLibraries)
+            {
+                SimConfigToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
+                SimConfigToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
+            }
+            else if (selectedTab == SimConfigToolWindow.tabReports)
+            {
+                SimConfigToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
+                SimConfigToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
+                SimConfigToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
+            }
         }
 
         /// <summary>
@@ -2367,10 +2412,11 @@ namespace DaphneGui
             }
             // save the preferences
             Properties.Settings.Default.Save();
+
         }
 
         private void exitApp_Click(object sender, RoutedEventArgs e)
-        {
+        {            
             CloseApp();
         }
 

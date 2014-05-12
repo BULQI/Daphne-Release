@@ -2229,6 +2229,9 @@ namespace DaphneGui
         {
             ComboBox cb = (ComboBox)sender;
 
+            if (cb.SelectedIndex == -1)
+                return;
+
             if (cb.SelectedIndex == 0)
             {
                 MainWindow.GC.OrientationMarker_IsChecked = false;
