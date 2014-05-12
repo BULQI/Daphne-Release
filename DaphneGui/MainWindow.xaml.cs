@@ -81,7 +81,7 @@ namespace DaphneGui
         /// </summary>
         public static Uri scenario_path;
         private string orig_content, orig_path;
-        private bool tempFileContent = false;
+        private bool tempFileContent = false, postConstruction = false;
 
         private bool exportAllFlag = false;
         private string igGeneFolderName = "";
@@ -503,6 +503,7 @@ namespace DaphneGui
             {
                 runSim();
             }
+            postConstruction = true;
         }
 
         public void UpdateGraphics()
@@ -1662,14 +1663,21 @@ namespace DaphneGui
             this.SimConfigToolWindow.DataContext = configurator.SimConfig;
 
             // set up the simulation
-            try
+            if (postConstruction == true && AssumeIDE() == true)
             {
                 sim.Load(configurator.SimConfig, completeReset);
             }
-            catch (Exception e)
+            else
             {
-                handleLoadFailure(exceptionMessage(e));
-                return;
+                try
+                {
+                    sim.Load(configurator.SimConfig, completeReset);
+                }
+                catch (Exception e)
+                {
+                    handleLoadFailure(exceptionMessage(e));
+                    return;
+                }
             }
 
             // reporter file name
@@ -1787,7 +1795,7 @@ namespace DaphneGui
                     if (sim.RunStatus == Simulation.RUNSTAT_RUN)
                     {
                         // run the simulation forward to the next task
-                        if (AssumeIDE() == true)
+                        if (postConstruction == true && AssumeIDE() == true)
                         {
                             sim.RunForward();
                         }
