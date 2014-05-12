@@ -2793,15 +2793,14 @@ namespace Daphne
         }
 
         /// <summary>
-        /// Update extents and check whether all cells are still within the specified bounds.
+        /// Update extents and other distribution-specific tasks.
         /// </summary>
         /// <param name="newExtents"></param>
-        public void Resize(double[] newExtents)
-        {
-            extents = (double[])newExtents.Clone();
-            CheckPositions();
-        }
+        public abstract void Resize(double[] newExtents);
 
+        /// <summary>
+        /// Check that all cells are in-bounds. 
+        /// </summary>
         public void CheckPositions()
         {
             double[] pos;
@@ -2823,8 +2822,6 @@ namespace Daphne
             {
                 AddByDistr(cellsToAdd);
             }
-
-
         }
     }
 
@@ -2844,13 +2841,12 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-
             MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
             uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
             uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
             uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
+            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
             uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
             if (_cellPop != null)
             {
@@ -2868,6 +2864,15 @@ namespace Daphne
         {
             return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
         }
+
+        public override void Resize(double[] newExtents)
+        {
+            Extents = (double[])newExtents.Clone();
+            uniProbDistX.SetDistributionParameters(0.0, Extents[0]);
+            uniProbDistY.SetDistributionParameters(0.0, Extents[1]);
+            uniProbDistZ.SetDistributionParameters(0.0, Extents[2]);           
+            CheckPositions();
+        }
     }
 
     /// <summary>
@@ -2883,13 +2888,12 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
-
             MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();   
             uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
             uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
             uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
+            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
+            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
             uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
             if (_cellPop != null)
             {
@@ -2906,6 +2910,15 @@ namespace Daphne
         public override double[] nextPosition()
         {
             return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
+        }
+
+        public override void Resize(double[] newExtents)
+        {
+            Extents = (double[])newExtents.Clone();
+            uniProbDistX.SetDistributionParameters(0.0, Extents[0]);
+            uniProbDistY.SetDistributionParameters(0.0, Extents[1]);
+            uniProbDistZ.SetDistributionParameters(0.0, Extents[2]);
+            Reset();
         }
     }
 
@@ -2995,6 +3008,11 @@ namespace Daphne
             OnPropertyChanged("CellStates");
         }
 
+        public override void Resize(double[] newExtents)
+        {
+            Extents = (double[])newExtents.Clone();
+            Reset();
+        }
 
         public void ParamReset(BoxSpecification box)
         {
