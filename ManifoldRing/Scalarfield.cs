@@ -98,7 +98,7 @@ namespace ManifoldRing
         {
             if (parameters.Length != 5)
             {
-                throw new Exception("ConstFieldInitializer length must be 5.");
+                throw new Exception("LinearFieldInitializer length must be 5.");
             }
 
             c1 = parameters[0];
