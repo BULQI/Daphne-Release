@@ -149,11 +149,6 @@ namespace Daphne
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();   
         }
 
-        public ObservableCollection<ConfigReaction> GetEcmAvailableReactions()
-        {
-            return entity_repository.reactions;
-        }
-
         /// <summary>
         /// Routine called when the environment extent changes
         /// Updates all box specifications in repository with correct max & min for sliders in GUI

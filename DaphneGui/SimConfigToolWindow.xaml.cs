@@ -574,9 +574,11 @@ namespace DaphneGui
                 }
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(cmp);
 
-                ConfigReaction dummy = new ConfigReaction();
-                MainWindow.SC.SimConfig.entity_repository.reactions.Add(dummy);
-                MainWindow.SC.SimConfig.entity_repository.reactions.Remove(dummy);
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+
+                //ConfigReaction dummy = new ConfigReaction();
+                //MainWindow.SC.SimConfig.entity_repository.reactions.Add(dummy);
+                //MainWindow.SC.SimConfig.entity_repository.reactions.Remove(dummy);
                 //AddReacExpander.InvalidateVisual();
                 //lvAvailableReacs.Items.Clear();
                 //lvAvailableReacs.InvalidateVisual();
@@ -2214,10 +2216,15 @@ namespace DaphneGui
         private void AddReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
             //lvAvailableReacs.InvalidateVisual();
-            lvAvailableReacs.ClearValue(ListView.ItemsSourceProperty);
+            //lvAvailableReacs.ClearValue(ListView.ItemsSourceProperty);
             //lvAvailableReacs.DataContext = null;
             //lvAvailableReacs.DataContext = MainWindow.SC.SimConfig.entity_repository.molecules;
             //EcmAvailableReactions.Refresh();
+        }
+
+        private void molecule_combo_box2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
         //private ComboBox MolPopDistComboBox;

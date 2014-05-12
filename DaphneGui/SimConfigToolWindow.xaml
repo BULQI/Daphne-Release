@@ -114,13 +114,10 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <ObjectDataProvider x:Name="odpEcmAvailReacs" x:Key="EcmAvailableReactions"
+            <!--<ObjectDataProvider x:Key="EcmAvailableReactions"
                             MethodName="GetEcmAvailableReactions" 
                             ObjectType="{x:Type daph:SimConfiguration}">                
-            </ObjectDataProvider>
-
-
-
+            </ObjectDataProvider>-->
 
             <CollectionViewSource x:Key="cellsetRegionsListView"  
                                   Source="{Binding Path=scenario.regions}"/>
@@ -1939,7 +1936,8 @@
                                                     ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"
-                                                    SelectedValuePath="molecule_guid">
+                                                    SelectedValuePath="molecule_guid"
+                                                    SelectionChanged="molecule_combo_box2_SelectionChanged" >
 
                                     <!--<ComboBox.Style>
                                         <Style TargetType="ComboBox">
@@ -3847,29 +3845,18 @@
                                               >
                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                     <TextBlock Text="Reactions Available in Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
-                                    <!--<ListBox x:Name="lbAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"                                                      
-                                                ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
-                                                SelectedIndex="0"
-                                                MinHeight="50" MaxHeight="150"
-                                                >
-                                    </ListBox>-->
                                     <!--<ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
-                                                ItemsSource="{Binding Source={StaticResource EcmAvailableReactions}}"
+                                            ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
+                                            SelectedIndex="0"
+                                            MinHeight="50" MaxHeight="150"
+                                            >
+                                    -->
+
+                                    <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
+                                                ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="0"
                                                 MinHeight="50" MaxHeight="150"
-                                                >-->
-                                        <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
-                                                ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
-                                                SelectedIndex="0"
-                                                MinHeight="50" MaxHeight="150"
-                                                >
-
-                                        <!-- ItemsSource="{Binding Path=entity_repository.reactions}" 
-                                        ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
-                                        DataContext = MainWindow.SC.SimConfig.entity_repository.reactions
-                                        -->
-
+                                    >
                                         <ListView.View>
                                             <GridView>
                                                 <GridView.ColumnHeaderContainerStyle>
@@ -4592,8 +4579,62 @@
         </TabItem>
 
         <!-- GUID VIEWER -->
-        <TabItem Header="GUID Viewer" Visibility="Hidden">
+        <TabItem Header="GUID Viewer" Visibility="Visible">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical">
+                        <!--<ListView x:Name="lvTestAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
+                            ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
+                            SelectedIndex="0"
+                            MinHeight="50" MaxHeight="150"
+                            >
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style TargetType="GridViewColumnHeader">
+                                            <Setter Property="Height" Value="Auto"></Setter>
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                        <GradientStop Offset="0.0" Color="White" />
+                                                        <GradientStop Offset="1.0" Color="Beige" />
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+
+                                    <GridViewColumn Width="80" Header="Rate constant">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground"  Value="Black">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Width="300" Header="Reaction" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalReactionString}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground"  Value="Black">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>                                      
+                                      </GridView>                                                                                                                                      
+                            </ListView.View>
+                        </ListView>
+        -->
+                    </StackPanel>
                 <StackPanel Orientation="Vertical" Margin="8">
                     <StackPanel.Resources>
                         <DataTemplate x:Key="molGuidsListItemTemplate">
@@ -4658,6 +4699,7 @@
                                 SelectedIndex="0"
                                 />
 
+                </StackPanel>
                 </StackPanel>
 
             </ScrollViewer>
