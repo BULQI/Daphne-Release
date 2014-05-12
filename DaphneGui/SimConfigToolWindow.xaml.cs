@@ -1412,6 +1412,9 @@ namespace DaphneGui
             gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+                return; 
+
             cell.membrane.molpops.Add(gmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
         }
@@ -1458,6 +1461,9 @@ namespace DaphneGui
             cmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+                return; 
+
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
