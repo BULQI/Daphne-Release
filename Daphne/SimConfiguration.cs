@@ -2926,8 +2926,16 @@ namespace Daphne
         /// </summary>
         /// <returns>double[3] {x,y,z}</returns>
         double[] nextPosition();
+        /// <summary>
+        /// Update extents of ECS and other distribution-specific tasks.
+        /// </summary>
+        /// <param name="newExtents"></param>
+        void Resize(double[] newExtents);
     }
 
+    /// <summary>
+    /// Contains information for positioning cells in the ECS according to specfied distributions.
+    /// </summary>
     public abstract class CellPopDistribution : EntityModelBase, ProbDistribution3D
     {
         private CellPopDistributionType _DistType;
@@ -2967,12 +2975,18 @@ namespace Daphne
             get { return extents; }
             set { extents=value; }
         }
+        // Separation distance from boundaries
+        private double wallDis;
         // Minimum separation (squared) for cells
         private double minDisSquared;
         public double MinDisSquared 
         { 
             get { return minDisSquared; }
-            set { minDisSquared = value; }
+            set 
+            { 
+                minDisSquared = value;
+                wallDis = Math.Sqrt(minDisSquared);
+            }
         }
 
         public CellPopDistribution(double[] _extents, double _minDisSquared, CellPopulation _cellPop)
@@ -2996,7 +3010,9 @@ namespace Daphne
         /// <returns></returns>
         protected bool inBounds(double[] pos)
         {
-            if ( (pos[0] < 0 || pos[0] > Extents[0]) || (pos[1] < 0 || pos[1] > Extents[1]) || (pos[2] < 0 || pos[2] > Extents[2]) )
+            if ((pos[0] < wallDis || pos[0] > Extents[0] - wallDis) ||
+                (pos[1] < wallDis || pos[1] > Extents[1] - wallDis) ||
+                (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
             {
                 return false;
             } 
@@ -3102,11 +3118,12 @@ namespace Daphne
             CellStates.Clear();
             AddByDistr(number);
         }
-
-        /// <summary>
-        /// Update extents and other distribution-specific tasks.
-        /// </summary>
-        /// <param name="newExtents"></param>
+ 
+        // <summary>
+        // Triggered by OnUpdate of ConfigEnvironment
+        // Update distributions accordingly.
+        // </summary>
+        // <param name="newextents"></param>
         public abstract void Resize(double[] newExtents);
 
         /// <summary>
@@ -3142,30 +3159,19 @@ namespace Daphne
     /// </summary>
     public class CellPopSpecific : CellPopDistribution
     {
-        // Used for populating initial values, then user can modify.
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistX;
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistY;
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistZ;
-
-
         public CellPopSpecific(double[] extents, double minDisSquared, CellPopulation _cellPop)
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
             MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
-            uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
-            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
-            uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
+
             if (_cellPop != null)
             {
                 AddByDistr(cellPop.number);
             }
             else
             {
-                // json deserialization gets us here
+                // json deserialization puts us here
                 AddByDistr(1);
             }
             OnPropertyChanged("CellStates");
@@ -3173,16 +3179,19 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
+                                    Extents[1] * Rand.UniformDist.NextDouble(), 
+                                    Extents[2] * Rand.UniformDist.NextDouble() };
         }
 
         public override void Resize(double[] newExtents)
         {
-            Extents = (double[])newExtents.Clone();
-            uniProbDistX.SetDistributionParameters(0.0, Extents[0]);
-            uniProbDistY.SetDistributionParameters(0.0, Extents[1]);
-            uniProbDistZ.SetDistributionParameters(0.0, Extents[2]);           
-            CheckPositions();
+            // Check whether extents changed
+            if ((Extents[0] != newExtents[0]) || (Extents[1] != newExtents[1]) || (Extents[2] != newExtents[2]))
+            {
+                Extents = (double[])newExtents.Clone();
+                CheckPositions();
+            }
         }
     }
 
@@ -3191,28 +3200,17 @@ namespace Daphne
     /// </summary>
     public class CellPopUniform : CellPopDistribution
     {
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistX;
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistY;
-        private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistZ;
-
         public CellPopUniform(double[] extents, double minDisSquared, CellPopulation _cellPop)
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();   
-            uniProbDistX = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistY = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistZ = new MathNet.Numerics.Distributions.ContinuousUniformDistribution(ran);
-            uniProbDistX.SetDistributionParameters(0.0, extents[0]);
-            uniProbDistY.SetDistributionParameters(0.0, extents[1]);
-            uniProbDistZ.SetDistributionParameters(0.0, extents[2]);
             if (_cellPop != null)
             {
                 AddByDistr(_cellPop.number);
             }
             else
             {
-                // json deserialization gets us here
+                // json deserialization puts us here
                 AddByDistr(1);
             }
             OnPropertyChanged("CellStates");
@@ -3220,16 +3218,19 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] { uniProbDistX.NextDouble(), uniProbDistY.NextDouble(), uniProbDistZ.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
+                                    Extents[1] * Rand.UniformDist.NextDouble(), 
+                                    Extents[2] * Rand.UniformDist.NextDouble() };
         }
 
         public override void Resize(double[] newExtents)
         {
-            Extents = (double[])newExtents.Clone();
-            uniProbDistX.SetDistributionParameters(0.0, Extents[0]);
-            uniProbDistY.SetDistributionParameters(0.0, Extents[1]);
-            uniProbDistZ.SetDistributionParameters(0.0, Extents[2]);
-            Reset();
+            // Check whether extents changed
+            if ((Extents[0] != newExtents[0]) || (Extents[1] != newExtents[1]) || (Extents[2] != newExtents[2]))
+            {
+                Extents = (double[])newExtents.Clone();
+                Reset();
+            }
         }
     }
 
@@ -3267,6 +3268,8 @@ namespace Daphne
                 }
             }
         }
+        // The standard deviations of the distribution
+        private double[] sigma;
 
         // transformation matrix for converting from absolute (simulation) 
         // to local (box) coordinates
@@ -3275,36 +3278,23 @@ namespace Daphne
                                                     new double[]{0.0, 0.0, 1.0, 0.0},
                                                     new double[]{0.0, 0.0, 0.0, 1.0} };
 
-        private MathNet.Numerics.Distributions.NormalDistribution normProbDistX;
-        private MathNet.Numerics.Distributions.NormalDistribution normProbDistY;
-        private MathNet.Numerics.Distributions.NormalDistribution normProbDistZ;
-
         public CellPopGaussian(double[] extents, double minDisSquared, BoxSpecification _box, CellPopulation _cellPop)
             : base(extents, minDisSquared, _cellPop)  
         {
             DistType = CellPopDistributionType.Gaussian;
             gauss_spec_guid_ref = "";
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
-            normProbDistX = new MathNet.Numerics.Distributions.NormalDistribution(ran);
-            normProbDistY = new MathNet.Numerics.Distributions.NormalDistribution(ran);
-            normProbDistZ = new MathNet.Numerics.Distributions.NormalDistribution(ran);
 
             if (_box != null)
             {
                 _box_guid = _box.box_guid;
                 _box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
-                normProbDistX.SetDistributionParameters(0, _box.x_scale / 2);
-                normProbDistY.SetDistributionParameters(0, _box.y_scale / 2);
-                normProbDistZ.SetDistributionParameters(0, _box.z_scale / 2);
+                sigma = new double[3] { _box.x_scale / 2, _box.y_scale / 2, _box.z_scale / 2 };
                 setRotationMatrix(_box);
             }
             else
             {
                 // We get here when deserializing from json
-                // The box settings and PropertyChanged update will be re-applied in SimConfig.InitGaussCellPopulationUpdates()
-                normProbDistX.SetDistributionParameters(0, extents[0] / 4);
-                normProbDistY.SetDistributionParameters(0, extents[1] / 4);
-                normProbDistZ.SetDistributionParameters(0, extents[2] / 4);
+                sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4};
             }
             if (_cellPop != null)
             {
@@ -3312,7 +3302,7 @@ namespace Daphne
             }
             else
             {
-                // json deserialization gets us here
+                // json deserialization puts us here
                 AddByDistr(1);
             }
  
@@ -3321,15 +3311,17 @@ namespace Daphne
 
         public override void Resize(double[] newExtents)
         {
-            Extents = (double[])newExtents.Clone();
-            Reset();
+            // Check whether extents changed
+            if ((Extents[0] != newExtents[0]) || (Extents[1] != newExtents[1]) || (Extents[2] != newExtents[2]))
+            {
+                Extents = (double[])newExtents.Clone();
+                Reset();
+            }
         }
 
         public void ParamReset(BoxSpecification box)
         {
-            normProbDistX.SetDistributionParameters(0, box.x_scale / 2);
-            normProbDistY.SetDistributionParameters(0, box.y_scale / 2);
-            normProbDistZ.SetDistributionParameters(0, box.z_scale / 2);
+            sigma = new double[3] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
             setRotationMatrix(box);
         }
 
@@ -3357,12 +3349,14 @@ namespace Daphne
         public override double[] nextPosition()
         {
             // Draw three random coordinates from normal distributions centered at the origin of the simulation coordinate system.
-            // Sigma values are half the box widths.
-            double[] pos = new double[3] { normProbDistX.NextDouble(), normProbDistY.NextDouble(), normProbDistZ.NextDouble() };
+            // normal distribution centered at zero with specified sigmas
+            double[] pos = new double[3] {  sigma[0] * Rand.NormalDist.NextDouble(), 
+                                            sigma[1] * Rand.NormalDist.NextDouble(), 
+                                            sigma[2] * Rand.NormalDist.NextDouble() };
 
             // The new position rotated and translated  with the box coordinate system
             double[] posRotated = new double[3];
-
+            // rotates and translates center of distribution
             for (int i = 0; i < 3; i++)
             {
                 posRotated[i] = pos[0] * ATL[i][0] +
