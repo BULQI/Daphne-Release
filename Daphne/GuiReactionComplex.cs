@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
-//using Daphne;
-//using Workbench;
 using System.Xml.Serialization;
-//using DaphneGui;
 
 namespace Daphne
 {
@@ -27,77 +24,49 @@ namespace Daphne
             Reactions = new ObservableCollection<ConfigReaction>();
         }
 
-        public void ParseForMolecules()
-        {
-            MolDict = new Dictionary<string, Molecule>();
-            foreach (ConfigReaction grt in Reactions)
-            {
-                foreach (SpeciesReference sr in grt.listOfReactants)
-                {
-                    ConfigMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-                    if (gm != null) {
-                        if (!MolDict.ContainsKey(sr.species))
-                        {
-                            Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-                            MolDict.Add(mol.Name, mol);
-                        }
-                    }
-                }
-                foreach (SpeciesReference sr in grt.listOfProducts)
-                {
-                    ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-                    if (gm != null)
-                    {
-                        if (!MolDict.ContainsKey(sr.species))
-                        {
-                            Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-                            MolDict.Add(mol.Name, mol);
-                        }
-                    }
-                }
-                foreach (SpeciesReference sr in grt.listOfModifiers)
-                {
-                    ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
-                    if (gm != null)
-                    {
-                        if (!MolDict.ContainsKey(sr.species))
-                        {
-                            Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
-                            MolDict.Add(mol.Name, mol);
-                        }
-                    }
-                }
-            }
-
-            // Write out XML file
-            //MainWindow.SC.SerializeSimConfigToFile();
-        }
-
-        ////public void CopyReactionsTo(ReactionComplex rc)
-        ////{
-        ////    //Copy reactions
-        ////    foreach (ConfigReaction grt in Reactions)
-        ////    {
-        ////        rc.ReactionsInComplex.Add(grt);
-        ////    }
-
-            
-        ////}
-
-        ////public void CopyMoleculesTo(ReactionComplex rc)
-        ////{
-        ////    //Copy molecules
-        ////    foreach (KeyValuePair<string, Molecule> kvp in MolDict)
-        ////    {
-        ////        Molecule mol = new Molecule(kvp.Value.Name, kvp.Value.MolecularWeight, kvp.Value.EffectiveRadius, kvp.Value.DiffusionCoefficient);
-        ////        rc.AddMolecularPopulation(mol, 2.0);
-        ////    }
-        ////}
-
-        //public void Run()
+        //public void ParseForMolecules()
         //{
-        //    ReactionComplexSimulation rcs = new ReactionComplexSimulation(this);
-        //    rcs.Go();
+        //    MolDict = new Dictionary<string, Molecule>();
+        //    foreach (ConfigReaction grt in Reactions)
+        //    {
+        //        foreach (SpeciesReference sr in grt.listOfReactants)
+        //        {
+        //            ConfigMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null) {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //        foreach (SpeciesReference sr in grt.listOfProducts)
+        //        {
+        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null)
+        //            {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //        foreach (SpeciesReference sr in grt.listOfModifiers)
+        //        {
+        //            ConfigMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
+        //            if (gm != null)
+        //            {
+        //                if (!MolDict.ContainsKey(sr.species))
+        //                {
+        //                    Molecule mol = new Molecule(gm.Name, gm.MolecularWeight, gm.EffectiveRadius, gm.DiffusionCoefficient);
+        //                    MolDict.Add(mol.Name, mol);
+        //                }
+        //            }
+        //        }
+        //    }
+
         //}
+
     }
 }

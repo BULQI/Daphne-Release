@@ -89,7 +89,7 @@ namespace DaphneGui
             //Reactions.Clear();
             foreach (ConfigReaction rt in ReactionsInComplex)
             {
-                minVal = Math.Min(minVal, rt.RateConst);                
+                minVal = Math.Min(minVal, rt.rate_const);                
             }
 
             dInitialTime = 5 / minVal;            
@@ -100,44 +100,44 @@ namespace DaphneGui
 
         public void LoadMolecules(Dictionary<string, Molecule> MolDict)
         {
-            List<string> molNames2 = new List<string>();
-            foreach (ConfigReaction rt in GRTList)
-            {
-                foreach (SpeciesReference sr in rt.listOfReactants)
-                {
-                    if (!molNames2.Contains(sr.species))
-                        molNames2.Add(sr.species);
-                }
+            ////List<string> molNames2 = new List<string>();
+            ////foreach (ConfigReaction rt in GRTList)
+            ////{
+            ////    foreach (SpeciesReference sr in rt.listOfReactants)
+            ////    {
+            ////        if (!molNames2.Contains(sr.species))
+            ////            molNames2.Add(sr.species);
+            ////    }
 
-                foreach (SpeciesReference sr in rt.listOfProducts)
-                {
-                    if (!molNames2.Contains(sr.species))
-                        molNames2.Add(sr.species);
-                }
+            ////    foreach (SpeciesReference sr in rt.listOfProducts)
+            ////    {
+            ////        if (!molNames2.Contains(sr.species))
+            ////            molNames2.Add(sr.species);
+            ////    }
 
-                foreach (SpeciesReference sr in rt.listOfModifiers)
-                {
-                    if (!molNames2.Contains(sr.species))
-                        molNames2.Add(sr.species);
-                }
-            }
+            ////    foreach (SpeciesReference sr in rt.listOfModifiers)
+            ////    {
+            ////        if (!molNames2.Contains(sr.species))
+            ////            molNames2.Add(sr.species);
+            ////    }
+            ////}
 
-            //Here add molecular population to this compartment
-            foreach (string s in molNames2)
-            {
-                if (MolDict.ContainsKey(s))
-                {
-                    AddMolecularPopulation(MolDict[s], "const", new double[] { 2.0 });
-                }
-            }
+            //////Here add molecular population to this compartment
+            ////foreach (string s in molNames2)
+            ////{
+            ////    if (MolDict.ContainsKey(s))
+            ////    {
+            ////        AddMolecularPopulation(MolDict[s], "const", new double[] { 2.0 });
+            ////    }
+            ////}
 
-            //Now add the actual reactions using ReactionBuilder class
-            foreach (ConfigReaction grt in GRTList)
-            {
-                ReactionTemplate rt = new ReactionTemplate();
-                grt.CopyTo(rt);
-                ReactionBuilder.ReactionSwitch(this, rt);
-            }
+            //////Now add the actual reactions using ReactionBuilder class
+            ////foreach (ConfigReaction grt in GRTList)
+            ////{
+            ////    ReactionTemplate rt = new ReactionTemplate();
+            ////    grt.CopyTo(rt);
+            ////    ReactionBuilder.ReactionSwitch(this, rt);
+            ////}
 
         }
 
@@ -333,7 +333,7 @@ namespace DaphneGui
             {
                 foreach (Reaction r in Reactions)
                 {
-                    r.RateConstant = rt.RateConst;
+                    r.RateConstant = rt.rate_const;
                 }
             }
         }

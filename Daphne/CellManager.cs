@@ -22,7 +22,7 @@ namespace Daphne
                 {
                     //double[] force = kvp.Value.Force(dt, kvp.Value.State.X);
                     // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                    double[] force = kvp.Value.Force(dt, new double[3]{0.0, 0.0, 0.0});
+                    double[] force = kvp.Value.Force(dt, new double[3] { 0.0, 0.0, 0.0 });
 
                     // A simple implementation of movement. For testing.
                     for (int i = 0; i < kvp.Value.State.X.Length; i++)

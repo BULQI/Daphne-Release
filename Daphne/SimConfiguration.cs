@@ -13,6 +13,7 @@ using System.Linq;
 
 using System.Windows.Media;
 using System.Windows.Data;
+using System.Windows;
 
 namespace Daphne
 {
@@ -114,8 +115,6 @@ namespace Daphne
         public Scenario scenario { get; set; }
         public EntityRepository entity_repository { get; set; }
 
-        //[XmlIgnore]
-        //[JsonIgnore]
         //public ChartViewToolWindow ChartWindow;
 
         // Convenience utility storage (not serialized)
@@ -136,23 +135,8 @@ namespace Daphne
             scenario = new Scenario();
             entity_repository = new EntityRepository();
 
-            //entity_repository.PredefReactions = new ObservableCollection<ConfigReaction>();
-            //entity_repository.PredefMolecules = new ObservableCollection<ConfigMolecule>();
-            entity_repository.PredefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
-            entity_repository.PredefCells = new ObservableCollection<ConfigCell>();
-
-            entity_repository.AllMolecules = new ObservableCollection<ConfigMolecule>();
-            entity_repository.AllReactions = new ObservableCollection<ConfigReaction>();
-
             ////LoadDefaultGlobalParameters();
-
-            ////entity_repository.UserdefMolecules = new ObservableCollection<ConfigMolecule>();
-            ////entity_repository.UserdefReactions = new ObservableCollection<ConfigReaction>();
-            ////entity_repository.UserdefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
-            ////entity_repository.UserdefCells = new ObservableCollection<ConfigCell>();
-
-            //LoadUserDefinedItems();
-            
+            //LoadUserDefinedItems();           
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
@@ -218,884 +202,6 @@ namespace Daphne
             bs.z_trans_min = -scenario.environment.extent_z / 2.0;
         }
 
-        private void PREDEFINEDCELLSCREATOR()
-        {
-            
-            //---------------------------------------------------------------------------------------
-            //BCell 
-
-            ConfigCell gc = new ConfigCell();
-            gc.CellName = "BCell";
-            gc.CellRadius = 5.0;
-
-            //MOLECULES IN MEMBRANE
-            var query1 =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            ConfigMolecularPopulation gmp = null;
-            foreach (ConfigMolecule gm in query1)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
-                {
-                    gmp.Location = MolPopPosition.Membrane;
-                }
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                //if (gm.Name == "CXCR5")
-                //    sgg.peak_concentration = 125;
-                //else
-                //    sgg.peak_concentration = 130;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                //gmp.mpInfo.mp_distribution = sgg;
-                
-                gc.CellMolPops.Add(gmp);
-            }
-
-            //MOLECULES IN CYTOSOL
-            var query2 =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "driver"
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query2)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "driver")
-                {
-                    gmp.Location = MolPopPosition.Cytosol;
-                }
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                //sgg.peak_concentration = 250;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                //gmp.mpInfo.mp_distribution = sgg;
-
-                gc.CellMolPops.Add(gmp);
-            }
-
-            entity_repository.PredefCells.Add(gc);
-
-            //---------------------------------------------------------------------------------------
-            //TCell 
-
-            gc = new ConfigCell();
-            gc.CellName = "TCell";
-            gc.CellRadius = 5.0;
-
-            entity_repository.PredefCells.Add(gc);
-
-            gc = new ConfigCell();
-            gc.CellName = "FDC";
-            gc.CellRadius = 5.0;
-
-            entity_repository.PredefCells.Add(gc);
-
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(entity_repository.PredefCells, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedCells.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
-        }
-
-        //Following function needs to be called only once
-        private void PREDEFINEDREACTIONSCREATOR()
-        {
-
-            //Test code to read in json containing object "PredefinedReactions"
-            //string readText = File.ReadAllText("TESTER.TXT");
-            //PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<ConfigReaction>>(readText);
-
-            //---------------------------
-            ObservableCollection<ConfigReaction> predefReacs = new ObservableCollection<ConfigReaction>();
-
-            //BoundaryAssociation
-            GuiBoundaryReactionTemplate gbrt = new GuiBoundaryReactionTemplate();
-
-            GuiSpeciesReference gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "membrane";
-            gbrt.listOfReactants.Add(gsr);
-            gbrt.receptor = gsr;
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "ecs";
-            gbrt.listOfReactants.Add(gsr);
-            gbrt.ligand = gsr;
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5:CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "membrane";
-            gbrt.listOfProducts.Add(gsr);
-            gbrt.complex = gsr;
-
-            gbrt.RateConst = 2.0;
-            gbrt.ReacType = ReactionType.BoundaryAssociation;
-
-            predefReacs.Add(gbrt);
-            //entity_repository.PredefReactions.Add(gbrt);
-
-            //----------------------------------------------
-            //BoundaryDissociation
-            gbrt = new GuiBoundaryReactionTemplate();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "membrane";
-            gbrt.listOfProducts.Add(gsr);
-            gbrt.receptor = gsr;
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "ecs";
-            gbrt.listOfProducts.Add(gsr);
-            gbrt.ligand = gsr;
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5:CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "membrane";
-            gbrt.listOfReactants.Add(gsr);
-            gbrt.complex = gsr;
-
-            gbrt.RateConst = 2.0;
-            gbrt.ReacType = ReactionType.BoundaryDissociation;
-
-            predefReacs.Add(gbrt);
-            //entity_repository.PredefReactions.Add(gbrt);
-
-            //Association
-            ConfigReaction grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5:CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 2.0;
-            grt.ReacType = ReactionType.Association;
-
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Dissociation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5:CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "none";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 2.0;
-            grt.ReacType = ReactionType.Dissociation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Dissociation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "E";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "A";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "E";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 1.0;
-            grt.ReacType = ReactionType.Dissociation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //CatalyzedCreation
-            GuiCatalyzedReactionTemplate gcrt = new GuiCatalyzedReactionTemplate();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfProducts.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "gCXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfModifiers.Add(gsr);
-
-            gcrt.RateConst = 2.0;
-            gcrt.catalyst = gsr;
-            gcrt.ReacType = ReactionType.CatalyzedCreation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //CatalyzedCreation
-            gcrt = new GuiCatalyzedReactionTemplate();
-            
-            gsr = new GuiSpeciesReference();
-            gsr.species = "E";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfModifiers.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfProducts.Add(gsr);
-
-            gcrt.RateConst = 0.6;
-            gcrt.catalyst = gsr;
-            gcrt.ReacType = ReactionType.CatalyzedCreation;
-
-            predefReacs.Add(gcrt);
-            //entity_repository.PredefReactions.Add(gcrt);
-
-            //Annihilation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            grt.RateConst = 2.0;
-            grt.ReacType = ReactionType.Annihilation;
-
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Annihilation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            grt.RateConst = 2.0;
-            grt.ReacType = ReactionType.Annihilation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Annihilation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "Y";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            grt.RateConst = 1.0;
-            grt.ReacType = ReactionType.Annihilation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //CatalyzedAnnihilation
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfModifiers.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            grt.RateConst = 2.0;
-            grt.ReacType = ReactionType.CatalyzedAnnihilation;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //CatalyzedAnnihilation
-            gcrt = new GuiCatalyzedReactionTemplate();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "Y";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfModifiers.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfReactants.Add(gsr);
-
-            gcrt.RateConst = 2.0;
-            gcrt.ReacType = ReactionType.CatalyzedAnnihilation;
-
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(gcrt);
-
-            //CatalyzedDimerDissociation
-            gcrt = new GuiCatalyzedReactionTemplate();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCR5:CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfProducts.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "CXCL13";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            gcrt.listOfModifiers.Add(gsr);
-
-            gcrt.RateConst = 2.0;
-            gcrt.ReacType = ReactionType.CatalyzedDimerDissociation;
-            gcrt.catalyst = gsr;
-            predefReacs.Add(gcrt);
-            //entity_repository.PredefReactions.Add(gcrt);
-
-            //Generalized
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "A";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 2;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 1.0;
-            grt.ReacType = ReactionType.Generalized;
-            
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Generalized
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "Y";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "Y";
-            gsr.stoichiometry = 2;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 1.0;
-            grt.ReacType = ReactionType.Generalized;
-
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-            //Generalized
-            grt = new ConfigReaction();
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 2;
-            gsr.Location = "na";
-            grt.listOfReactants.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "X";
-            gsr.stoichiometry = 1;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            gsr = new GuiSpeciesReference();
-            gsr.species = "Y";
-            gsr.stoichiometry = 2;
-            gsr.Location = "na";
-            grt.listOfProducts.Add(gsr);
-
-            grt.RateConst = 1.0;
-            grt.ReacType = ReactionType.Generalized;
-            predefReacs.Add(grt);
-            //entity_repository.PredefReactions.Add(grt);
-
-
-            //Write out into json file!
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(predefReacs, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = "Config\\DaphnePredefinedReactions.txt";
-            File.WriteAllText(jsonFile, jsonSpec);
-
-        }
-
-        public void LoadDefaultGlobalParameters()
-        {
-            //skg daphne
-            PREDEFINEDREACTIONSCREATOR();
-            
-            string path = "Config\\DaphnePredefinedReactions.txt";
-            //string readText = File.ReadAllText(path);
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            string readText = File.ReadAllText(path);
-
-            ObservableCollection<ConfigReaction> predefReacs = new ObservableCollection<ConfigReaction>();
-            predefReacs = JsonConvert.DeserializeObject<ObservableCollection<ConfigReaction>>(readText, settings);
-            foreach (ConfigReaction cr in predefReacs)
-            {
-                entity_repository.AllReactions.Add(cr);
-            }
-
-            //Old way
-            ////entity_repository.PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<ConfigReaction>>(readText, settings);
-
-            //GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)PredefReactions[0]; 
-
-            //Code to read predef mols from a file
-            path = "Config\\DaphnePredefinedMolecules.txt";
-            readText = File.ReadAllText(path);
-
-            //First method
-            ObservableCollection<ConfigMolecule> predefMols = new ObservableCollection<ConfigMolecule>();
-            predefMols = JsonConvert.DeserializeObject<ObservableCollection<ConfigMolecule>>(readText);
-            foreach (ConfigMolecule gm in predefMols)
-            {
-                entity_repository.AllMolecules.Add(gm);
-            }
-
-            //var Settings = new JsonSerializerSettings();
-            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //Settings.TypeNameHandling = TypeNameHandling.Auto;
-            //string jsonSpec = JsonConvert.SerializeObject(entity_repository.AllMolecules, Newtonsoft.Json.Formatting.Indented, Settings);
-            //string jsonFile = path;
-            //File.WriteAllText(jsonFile, jsonSpec);
-
-            //Alternate method - if we want everything including predef mols to be stored in one scenario file
-            //entity_repository.AllMolecules = JsonConvert.DeserializeObject<ObservableCollection<ConfigMolecule>>(readText);
-
-
-            PREDEFINEDCELLSCREATOR();
-
-            entity_repository.PredefCells.Clear();
-            path = "Config\\DaphnePredefinedCells.txt";
-            readText = File.ReadAllText(path);
-            entity_repository.PredefCells = JsonConvert.DeserializeObject<ObservableCollection<ConfigCell>>(readText, settings);
-
-            GuiReactionComplex rc = new GuiReactionComplex();
-            rc.Name = "Bistable";
-            rc.Reactions.Add(entity_repository.AllReactions[5]);
-            rc.Reactions.Add(entity_repository.AllReactions[6]);
-            rc.Reactions.Add(entity_repository.AllReactions[7]);
-            rc.Reactions.Add(entity_repository.AllReactions[8]);
-            entity_repository.PredefReactionComplexes.Add(rc);
-
-            rc = new GuiReactionComplex();
-            rc.Name = "Receptor/Ligand";
-            rc.Reactions.Add(entity_repository.AllReactions[0]);
-            rc.Reactions.Add(entity_repository.AllReactions[1]);
-            rc.Reactions.Add(entity_repository.AllReactions[2]);
-            rc.Reactions.Add(entity_repository.AllReactions[3]);
-            entity_repository.PredefReactionComplexes.Add(rc);
-        }
-
-        public void CreateAndSerializeLigandReceptorScenario()
-        {
-            // Experiment
-            experiment_name = "Ligand Receptor Scenario";
-            experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold";
-            scenario.time_config.duration = 100;
-            scenario.time_config.rendering_interval = 0.3;
-            scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            LoadDefaultGlobalParameters();
-            //ChartWindow = ReacComplexChartWindow;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            entity_repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            entity_repository.gaussian_specifications.Add(gg);
-
-            //ADD ECS MOL POPS
-            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-            //THIS VAR IS NOT OK
-            var query =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            ConfigMolecularPopulation gmp = null;
-            foreach (ConfigMolecule gm in query)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                scenario.MolPops.Add(gmp);
-            }
-
-            //ADD CELLS AND MOLECULES IN THE CELLS
-            ConfigCell gc = new ConfigCell();
-            gc.CellName = "BCell";
-            gc.CellRadius = 4.0;
-           
-            CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "My BCell";
-            cp.number = 1;
-            cp.cellpopulation_constrained_to_region = true;
-            cp.wrt_region = RelativePosition.Inside;
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-            cp.CellType = gc;
-
-            var query1 =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query1)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
-                {
-                    gmp.Location = MolPopPosition.Membrane;
-                }
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                gc.CellMolPops.Add(gmp);
-            }
-
-            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
-
-            scenario.cellpopulations.Add(cp);
-
-
-            //---------------------------------------------------------------
-
-            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.AllReactions[0]);    //The 0'th reaction is Boundary Association
-            scenario.Reactions.Add(grt);
-
-            grt = (GuiBoundaryReactionTemplate)entity_repository.AllReactions[1];    //The 1st reaction is Boundary Dissociation
-            scenario.Reactions.Add(grt);
-
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void CreateAndSerializeDriverLocomotionScenario()
-        {
-            // Experiment
-            experiment_name = "Driver Locomotion Scenario";
-            experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor";
-            scenario.time_config.duration = 100;
-            scenario.time_config.rendering_interval = 0.3;
-            scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            LoadDefaultGlobalParameters();
-            //ChartWindow = ReacComplexChartWindow;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            entity_repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            entity_repository.gaussian_specifications.Add(gg);
-
-            var query =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            ConfigMolecularPopulation gmp = null;
-            foreach (ConfigMolecule gm in query)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                scenario.MolPops.Add(gmp);
-            }
-
-            //ADD CELLS AND MOLECULES IN THE CELLS
-            ConfigCell gc = new ConfigCell();
-            gc.CellName = "BCell";
-            gc.CellRadius = 4.0;
-
-            CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "My-B-Cell";
-            cp.number = 1;
-            cp.cellpopulation_constrained_to_region = true;
-            cp.wrt_region = RelativePosition.Inside;
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-            cp.CellType = gc;
-
-            //MOLECULES IN MEMBRANE
-            var query1 =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query1)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
-                {
-                    gmp.Location = MolPopPosition.Membrane;
-                }
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                if (gm.Name == "CXCR5")
-                    sgg.peak_concentration = 125;
-                else
-                    sgg.peak_concentration = 130;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                gc.CellMolPops.Add(gmp);
-            }
-
-            //MOLECULES IN CYTOSOL
-            var query2 =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "driver"
-                select mol;
-
-            gmp = null;
-            foreach (ConfigMolecule gm in query2)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "driver")
-                {
-                    gmp.Location = MolPopPosition.Cytosol;
-                }
-
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 250;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                gc.CellMolPops.Add(gmp);
-            }
-
-            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
-
-            scenario.cellpopulations.Add(cp);
-
-            //-------------------------------------------------------------
-
-            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.AllReactions[0]);    //The 0'th reaction is Boundary Association
-
-            scenario.Reactions.Add(grt);
-            grt = new GuiBoundaryReactionTemplate();
-            grt = (GuiBoundaryReactionTemplate)entity_repository.AllReactions[1];    //The 1st reaction is Boundary Dissociation
-
-            scenario.Reactions.Add(grt);
-        }
-
-        /// <summary>
-        /// New default scenario for first pass of Daphne
-        /// </summary>
-        public void CreateAndSerializeDiffusionScenario()
-        {
-            // Experiment
-            experiment_name = "Diffusion Scenario";
-            experiment_description = "Initial scenario with 1 Compartment ECM with 1 molecular population, no cells or reactions";
-            scenario.time_config.duration = 100;
-            scenario.time_config.rendering_interval = 0.3;
-            scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            LoadDefaultGlobalParameters();
-            //ChartWindow = ReacComplexChartWindow;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            entity_repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            entity_repository.gaussian_specifications.Add(gg);
-
-            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-            var query =
-                from mol in entity_repository.AllMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            ConfigMolecularPopulation gmp = null;
-            foreach (ConfigMolecule gm in query)
-            {
-                gmp = new ConfigMolecularPopulation();
-                gmp.Molecule = new ConfigMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                scenario.MolPops.Add(gmp);
-            }
-
-        }
-
-
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
@@ -1106,6 +212,9 @@ namespace Daphne
             FindNextSafeCellPopulationID();
             InitBoxExtentsAndGuidBoxDict();
             InitCellPopulationIDCellPopulationDict();
+            InitMoleculeIDConfigMoleculeDict();
+            InitReactionTemplateIDConfigReactionTempalteDict();
+            InitReactionIDConfigReactionDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -1158,6 +267,38 @@ namespace Daphne
 
         }
 
+        private void InitMoleculeIDConfigMoleculeDict()
+        {
+            entity_repository.molecules_dict.Clear();
+            foreach (ConfigMolecule cm in entity_repository.molecules)
+            {
+                entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            }
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+
+        }
+
+        private void InitReactionIDConfigReactionDict()
+        {
+            entity_repository.reactions_dict.Clear();
+            foreach (ConfigReaction cr in entity_repository.reactions)
+            {
+                entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+            }
+            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+
+        }
+
+        private void InitReactionTemplateIDConfigReactionTempalteDict()
+        {
+            entity_repository.reaction_templates_dict.Clear();
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            }
+            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
+        }
+
         private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -1201,11 +342,70 @@ namespace Daphne
             }
         }
 
+        private void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecule cm = nn as ConfigMolecule;
+                    entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigMolecule cm = dd as ConfigMolecule;
+                    entity_repository.molecules_dict.Remove(cm.molecule_guid);
+                }
+            }
+        }
+        private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReaction cr = nn as ConfigReaction;
+                    entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReaction cr = dd as ConfigReaction;
+                    entity_repository.reactions_dict.Remove(cr.reaction_guid);
+                }
+            }
+        }
+
+        private void template_reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReactionTemplate crt = nn as ConfigReactionTemplate;
+                    entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReactionTemplate crt = dd as ConfigReactionTemplate;
+                    entity_repository.reaction_templates_dict.Remove(crt.reaction_template_guid);
+                }
+            }
+        }
+
         public ConfigMolecule FindMolecule(string name)
         {
             ConfigMolecule gm = null;
 
-            foreach (ConfigMolecule g in entity_repository.AllMolecules)
+            foreach (ConfigMolecule g in entity_repository.molecules)
             {
                 if (g.Name == name)
                 {
@@ -1265,10 +465,10 @@ namespace Daphne
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
-        //skg daphne       
-        public ObservableCollection<ConfigReaction> Reactions { get; set; }
-        public ObservableCollection<ConfigMolecularPopulation> MolPops { get; set; }
-        public ObservableCollection<GuiReactionComplex> ReactionComplexes { get; set; }
+        ////////skg daphne       
+        //////public ObservableCollection<ConfigReaction> Reactions { get; set; }
+        //////public ObservableCollection<ConfigMolecularPopulation> MolPops { get; set; }
+        //////public ObservableCollection<GuiReactionComplex> ReactionComplexes { get; set; }
 
         public Scenario()
         {
@@ -1279,9 +479,9 @@ namespace Daphne
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
-            Reactions = new ObservableCollection<ConfigReaction>();
-            MolPops = new ObservableCollection<ConfigMolecularPopulation>();
-            ReactionComplexes = new ObservableCollection<GuiReactionComplex>();
+            //////Reactions = new ObservableCollection<ConfigReaction>();
+            //////MolPops = new ObservableCollection<ConfigMolecularPopulation>();
+            //////ReactionComplexes = new ObservableCollection<GuiReactionComplex>();
         }
     }
     
@@ -1290,19 +490,30 @@ namespace Daphne
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
         public ObservableCollection<BoxSpecification> box_specifications { get; set; }
        
-        [JsonIgnore]
-        public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
-        public ObservableCollection<ConfigCell> PredefCells { get; set; }
+        //STILL HAVE TO DEAL WITH THESE PREDEF OBJECTS
+        //[JsonIgnore]
+        //public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
+        public ObservableCollection<ConfigCell> cells { get; set; }
+        //All molecules and reactions - Combined Predefined and User defined         
+        public ObservableCollection<ConfigMolecule> molecules { get; set; }
+        public ObservableCollection<ConfigReaction> reactions { get; set; }
+        public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
 
-        //All molecules - Combined Predefined Molecules and User defined Molecules        
-        public ObservableCollection<ConfigMolecule> AllMolecules { get; set; }
-        //All molecules - Combined Predef reactions and User defined reactions
-        public ObservableCollection<ConfigReaction> AllReactions { get; set; }
+        public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
+        public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
+        public Dictionary<string, ConfigReaction> reactions_dict;
 
         public EntityRepository()
         {
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
             box_specifications = new ObservableCollection<BoxSpecification>();
+            cells = new ObservableCollection<ConfigCell>();
+            molecules = new ObservableCollection<ConfigMolecule>();
+            reactions = new ObservableCollection<ConfigReaction>();
+            reaction_templates = new ObservableCollection<ConfigReactionTemplate>();
+            molecules_dict = new Dictionary<string, ConfigMolecule>();
+            reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
+            reactions_dict = new Dictionary<string, ConfigReaction>();
         }
     }
 
@@ -1393,6 +604,8 @@ namespace Daphne
         [XmlIgnore]
         public int gridstep_max { get; set; }
 
+        public ConfigCompartment ecs { get; set; }
+
         public ConfigEnvironment()
         {
             extent_x = 400;
@@ -1405,6 +618,8 @@ namespace Daphne
             gridstep = 50;
 
             CalculateNumGridPts();
+
+            ecs = new ConfigCompartment();
         }
 
         public void CalculateNumGridPts()
@@ -1562,64 +777,128 @@ namespace Daphne
         }
     }
 
+    public enum MoleculeLocation { Bulk = 0, Boundary }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(MoleculeLocation), typeof(string))]
+    public class MoleculeLocationToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the MoleculeLocation enum...
+        private List<string> _molecule_location_strings = new List<string>()
+                                {
+                                    "bulk",
+                                    "bondary"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _molecule_location_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _molecule_location_strings.FindIndex(item => item == str);
+            return (MoleculeLocation)Enum.ToObject(typeof(MoleculeLocation), (int)idx);
+        }
+    }
+
+    [ValueConversion(typeof(MoleculeLocation), typeof(bool))]
+    public class EnumBooleanConverter : IValueConverter
+    {
+        #region IValueConverter Members
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+                return DependencyProperty.UnsetValue;
+
+            object parameterValue = Enum.Parse(value.GetType(), parameterString);
+
+            return parameterValue.Equals(value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            return Enum.Parse(targetType, parameterString);
+        }
+        #endregion
+    }
+
     //skg daphne
     public class ConfigMolecule : EntityModelBase
     {
+        public string molecule_guid { get; set; }
         public string Name { get; set; }
         public double MolecularWeight { get; set; }
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
-        public string config_molecule_guid { get; set; }
-        public bool ReadOnly { get; set; }
-        public Color ForegroundColor { get; set; }
+        public bool   ReadOnly { get; set; }
+        public Color  ForegroundColor { get; set; }
+        public MoleculeLocation molecule_location { get; set; }
 
         public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
         {
             Guid id = Guid.NewGuid();
-            config_molecule_guid = id.ToString();
+            molecule_guid = id.ToString();
             Name = thisName;
             MolecularWeight = thisMW;
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
             ReadOnly = true;
             ForegroundColor = Colors.Red;
+            molecule_location = MoleculeLocation.Bulk;
         }
 
         public ConfigMolecule()
             : base()
         {
             Guid id = Guid.NewGuid();
-            config_molecule_guid = id.ToString();
+            molecule_guid = id.ToString();
             Name = "MolName";
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
             ReadOnly = true;
             ForegroundColor = Colors.Red;
+            molecule_location = MoleculeLocation.Bulk;
         }
 
         public ConfigMolecule(ConfigMolecule gm)
         {
             Guid id = Guid.NewGuid();
-            config_molecule_guid = id.ToString();
+            molecule_guid = id.ToString();
             Name = gm.Name;
             MolecularWeight = gm.MolecularWeight;
             EffectiveRadius = gm.EffectiveRadius;
             DiffusionCoefficient = gm.DiffusionCoefficient;
+            ReadOnly = gm.ReadOnly;
             ForegroundColor = gm.ForegroundColor;
+            molecule_location = gm.molecule_location;
         }
     }
 
     //skg daphne new classes
     public class ConfigMolecularPopulation : EntityModelBase
-    {
-        public ConfigMolecularPopulation()
-            : base()
-        {
-            Guid id = Guid.NewGuid();
-            config_mol_pop_guid = id.ToString();
-        }
-        public ConfigMolecule Molecule { get; set; }
+    {        
+        public string molecule_guid_ref { get; set; }  // the molecule_guid of the molecule this mp contains
         public string Name { get; set; }
         private MolPopInfo _mp_Info;
         public MolPopInfo mpInfo
@@ -1627,28 +906,27 @@ namespace Daphne
             get { return _mp_Info; }
             set { _mp_Info = value; }
         }
-
-        public string config_mol_pop_guid { get; set; }
-
-        //For molecules in cells
-        public MolPopPosition Location { get; set; }
-
     }
 
-    /// <summary>
-    /// Classes needed for Reactions
-    /// </summary>
-    public class GuiSpeciesReference : SpeciesReference
+    public class ConfigCompartment
     {
-        public string Location { get; set; }
+        // private to simConfig; see comment in EntityRepository
+        public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+        public ObservableCollection<string> reactions_guid_ref { get; set; }
+
+        public ConfigCompartment()
+        {
+            molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            reactions_guid_ref = new ObservableCollection<string>();
+        }
     }
 
     public enum ReactionType
     {
-        Association = 0, Dissociation = 1, Annihilation = 2, Dimerization = 3, DimerDissociation = 4,
-        Transformation = 5, AutocatalyticTransformation = 6, CatalyzedAnnihilation = 7,
-        CatalyzedAssociation = 8, CatalyzedCreation = 9, CatalyzedDimerization = 10, CatalyzedDimerDissociation = 11,
-        CatalyzedDissociation = 12, CatalyzedTransformation = 13, BoundaryAssociation = 14, BoundaryDissociation = 15, Generalized = 16
+        Association = 0, Dissociation, Annihilation, Dimerization, DimerDissociation,
+        Transformation, AutocatalyticTransformation, CatalyzedAnnihilation,
+        CatalyzedAssociation, CatalyzedCreation, CatalyzedDimerization, CatalyzedDimerDissociation,
+        CatalyzedDissociation, CatalyzedTransformation, CatalyzedBoundaryActivation, BoundaryAssociation, BoundaryDissociation, Generalized
     }
 
     /// <summary>
@@ -1675,6 +953,7 @@ namespace Daphne
                                     "CatalyzedDimerDissociation",
                                     "CatalyzedTransformation",
                                     "CatalyzedDissociation",
+                                    "CatalyzedBoundaryActivation",
                                     "BoundaryAssociation",
                                     "BoundaryDissociation",
                                     "Generalized"
@@ -1705,201 +984,131 @@ namespace Daphne
         public ConfigReaction()
         {
             Guid id = Guid.NewGuid();
-            config_reaction_guid = id.ToString();
-            listOfReactants = new List<GuiSpeciesReference>();
-            listOfProducts = new List<GuiSpeciesReference>();
-            listOfModifiers = new List<GuiSpeciesReference>();
-            rateConst = 0;
+            reaction_guid = id.ToString();
+
+            rate_const = 0;
+
+            reactants_molecule_guid_ref = new ObservableCollection<string>();
+            products_molecule_guid_ref = new ObservableCollection<string>();
+            modifiers_molecule_guid_ref = new ObservableCollection<string>();
         }
 
-        public void CopyTo(ReactionTemplate rt)
+        public void GetTotalReactionString(EntityRepository repos)
         {
-            rt.rateConst = rateConst;
-            rt.listOfModifiers.AddRange(listOfModifiers);
-            rt.listOfProducts.AddRange(listOfProducts);
-            rt.listOfReactants.AddRange(listOfReactants);
-        }
+            string s = "";
+            int i = 0;
 
-        public ReactionType ReacType
-        {
-            get
+            foreach (string mol_guid_ref in reactants_molecule_guid_ref)
             {
-                return reacType;
-            }
-            set
-            {
-                reacType = value;
-            }
-        }
+                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
 
-        public string ReacTypeString
-        {
-            get
-            {
-                string result = (string)new ReactionTypeToShortStringConverter().Convert(reacType, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-                return result;
+                //stoichiometry
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
+                s += cm.Name;
+                s += " + ";
             }
-        }
+            i = 0;
+            foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
+            {
+                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
 
-        public double RateConst
-        {
-            get
-            {
-                return rateConst;
-            }
-            set
-            {
-                rateConst = value;
-            }
-        }
+                //stoichiometry??
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
 
-        public string config_reaction_guid { get; set; }
-
-        [JsonIgnore]
-        public string ReactantsString
-        {
-            get
-            {
-                string s = "";
-                foreach (SpeciesReference sr in listOfReactants)
-                {
-                    if (sr.stoichiometry > 1)
-                        s += sr.stoichiometry;
-                    s += sr.species;
-                    s += " + ";
-                }
-                foreach (SpeciesReference sr in listOfModifiers)
-                {
-                    if (sr.stoichiometry > 1)
-                        s += sr.stoichiometry;
-                    s += sr.species;
-                    s += " + ";
-                }
-                char[] trimChars = { ' ', '+' };
-                s = s.Trim(trimChars);
-                return s;
-            }
-            set
-            {
-                reactantsString = value;
+                s += cm.Name;
+                s += " + ";
             }
 
-        }
-        [JsonIgnore]
-        public string ProductsString
-        {
-            get
+            char[] trimChars = { ' ', '+' };
+            s = s.Trim(trimChars);
+
+            s = s + " -> ";
+
+            foreach (string mol_guid_ref in products_molecule_guid_ref)
             {
-                string s = "";
-                foreach (SpeciesReference sr in listOfProducts)
-                {
-                    if (sr.stoichiometry > 1)
-                        s += sr.stoichiometry;
-                    s += sr.species;
-                    s += " + ";
-                }
-                foreach (SpeciesReference sr in listOfModifiers)
-                {
-                    if (sr.stoichiometry > 1)
-                        s += sr.stoichiometry;
-                    s += sr.species;
-                    s += " + ";
-                }
-                char[] trimChars = { ' ', '+' };
-                s = s.Trim(trimChars);
-                return s;
+                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
+
+                //stoichiometry??
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].products_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
+
+                s += cm.Name;
+                s += " + ";
             }
-            set
+            foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
-                productsString = value;
+                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
+
+                //stoichiometry??
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
+
+                s += cm.Name;
+                s += " + ";
             }
-        }
-        [JsonIgnore]
-        public string TotalReactionString
-        {
-            get
-            {
-                return ReactantsString + " -> " + ProductsString;
-            }
-            set
-            {
-                totalReactionString = value;
-            }
+
+            s = s.Trim(trimChars);
+
+            TotalReactionString = s;
+
         }
 
-        private double rateConst;
-        private string reactantsString;
-        private string productsString;
-        private string totalReactionString;
-        private ReactionType reacType;
-        public List<GuiSpeciesReference> listOfReactants;
-        public List<GuiSpeciesReference> listOfProducts;
-        public List<GuiSpeciesReference> listOfModifiers;
+        public string reaction_guid { get; set; }
+        public string reaction_template_guid_ref { get; set; }
+        public double rate_const { get; set; }
+        // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
+        public ObservableCollection<string> reactants_molecule_guid_ref;
+        public ObservableCollection<string> products_molecule_guid_ref;
+        public ObservableCollection<string> modifiers_molecule_guid_ref;
+
+        public string TotalReactionString { get; set; }
 
     }
 
-    public class GuiBoundaryReactionTemplate : ConfigReaction
+    public class ConfigReactionTemplate
     {
-        public GuiSpeciesReference ligand;
-        public GuiSpeciesReference receptor;
-        public GuiSpeciesReference complex;
-        double fluxIntensityConstant;
-    }
+        public string reaction_template_guid;
+        public string name;
+        // stoichiometric constants
+        public ObservableCollection<int> reactants_stoichiometric_const;
+        public ObservableCollection<int> products_stoichiometric_const;
+        public ObservableCollection<int> modifiers_stoichiometric_const;      
+        //reaction type
+        public ReactionType reac_type { get; set; }
 
-    public class GuiCatalyzedReactionTemplate : ConfigReaction
-    {
-        public GuiSpeciesReference catalyst;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public enum MolPopPosition { Cytosol, Membrane, ECS }
-
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(MolPopPosition), typeof(string))]
-    public class MolPopPositionToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _molpop_position_strings = new List<string>()
-                                {
-                                    "cytosol",
-                                    "membrane",
-                                    "ecs"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public ConfigReactionTemplate()
         {
-            try
-            {
-                return _molpop_position_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _molpop_position_strings.FindIndex(item => item == str);
-            return (MolPopPosition)Enum.ToObject(typeof(MolPopPosition), (int)idx);
+            Guid id = Guid.NewGuid();
+            reaction_template_guid = id.ToString();
+            reactants_stoichiometric_const = new ObservableCollection<int>();
+            products_stoichiometric_const = new ObservableCollection<int>();
+            modifiers_stoichiometric_const = new ObservableCollection<int>();
         }
     }
+
+
+    //////public class GuiBoundaryReactionTemplate : ConfigReaction
+    //////{
+    //////    public GuiSpeciesReference ligand;
+    //////    public GuiSpeciesReference receptor;
+    //////    public GuiSpeciesReference complex;
+    //////    double fluxIntensityConstant;
+    //////}
+
+    //////public class GuiCatalyzedReactionTemplate : ConfigReaction
+    //////{
+    //////    public GuiSpeciesReference catalyst;
+    //////}
 
     public class ConfigCell
     {
@@ -1908,15 +1117,18 @@ namespace Daphne
             CellName = "Default Cell";
             CellRadius = 5.0;
 
-            CellMolPops = new ObservableCollection<ConfigMolecularPopulation>();
+            membrane = new ConfigCompartment();
+            cytosol = new ConfigCompartment();
+            locomotor_mol_guid_ref = "";
         }
 
         public string CellName { get; set; }
         public double CellRadius { get; set; }
+        public string locomotor_mol_guid_ref { get; set; }
+        public double TransductionConstant { get; set; }
 
-        public ObservableCollection<ConfigMolecularPopulation> CellMolPops { get; set; }
-        public ObservableCollection<ConfigReaction> CellReactions { get; set; }
-        public ObservableCollection<GuiReactionComplex> CellReactionComplexes { get; set; }
+        public ConfigCompartment membrane;
+        public ConfigCompartment cytosol;
     }
 
     public class CellPopDistType
@@ -2071,8 +1283,16 @@ namespace Daphne
         }
     }
 
+    public class CellLocation
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+    }
+
     public class CellPopulation
     {
+        public ConfigCell CellType { get; set; }
         public string cellpopulation_name { get; set; }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
@@ -2102,13 +1322,9 @@ namespace Daphne
         public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
-
-        //skg Daphne
-        public ConfigCell CellType { get; set; }
-        public double MaxConc { get; set; }
-        public double[] Sigma { get; set; }
-        public double[] Center { get; set; }
         public CellPopDistribution cellPopDist;
+        public ObservableCollection<CellLocation> cell_locations { get; set; }  //number of items = 'number' from above
+
 
         public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
         private void InitDistTypes()
@@ -2160,6 +1376,8 @@ namespace Daphne
             cellPopDist = new CellPopUniformDistribution(10.0);            
             CellPopDistTypes = new ObservableCollection<CellPopDistType>();
             InitDistTypes();
+
+            cell_locations = new ObservableCollection<CellLocation>();
         }
     }
 
@@ -2250,6 +1468,77 @@ namespace Daphne
             mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             mp_render_blending_weight = 1.0;
             mp_render_on = true;
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class MolGUIDtoMolNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string mol_name = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            if (mol_list != null)
+            {
+                foreach (ConfigMolecule mol in mol_list)
+                {
+                    if (mol.molecule_guid == guid)
+                    {
+                        mol_name = mol.Name;
+                        break;
+                    }
+                }
+            }
+            return mol_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between reaction GUID references in ECS
+    /// and reaction info kept in the repository of reactions.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class ReacGUIDtoReacStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string reac_string = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
+            if (reac_list != null)
+            {
+                foreach (ConfigReaction cr in reac_list)
+                {
+                    if (cr.reaction_guid == guid)
+                    {
+                        //cr.GetTotalReactionString(
+                        reac_string = cr.TotalReactionString;
+                        break;
+                    }
+                }
+            }
+            return reac_string;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
         }
     }
 
@@ -2351,9 +1640,6 @@ namespace Daphne
             return (MolPopDistributionType)Enum.ToObject(typeof(MolPopDistributionType), (int)idx);
         }
     }
-
-
-    
 
     // Base class for homog, linear, gauss distributions
     [XmlInclude(typeof(MolPopHomogeneousLevel)),

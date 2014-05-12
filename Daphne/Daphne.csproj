@@ -80,6 +80,7 @@
     <Compile Include="CellManager.cs" />
     <Compile Include="Chemistry.cs" />
     <Compile Include="Compartment.cs" />
+    <Compile Include="ConfigCreators.cs" />
     <Compile Include="DataBasket.cs" />
     <Compile Include="Differentiator.cs" />
     <Compile Include="GuiReactionComplex.cs" />

@@ -95,6 +95,9 @@ namespace Daphne
             Bind<MolecularPopulation>().ToSelf();
             Bind<IFieldInitializerFactory>().ToFactory(() => new CustomInstanceProvider());
 
+            // chemistry
+            Bind<Molecule>().ToSelf();
+
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
             Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep);

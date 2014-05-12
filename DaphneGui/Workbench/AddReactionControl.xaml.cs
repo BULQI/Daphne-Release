@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using Daphne;
 
 namespace DaphneGui
 {
@@ -20,9 +21,19 @@ namespace DaphneGui
     /// </summary>
     public partial class AddReactionControl : UserControl
     {
+        private List<string> reacmolguids;
+        private List<string> prodmolguids;
         public AddReactionControl()
         {
             InitializeComponent();
+
+            reacmolguids = new List<string>();
+            prodmolguids = new List<string>();
+
+            //InitializeWordList();
+
+
+
             string[] wordList =
                 this.FindResource("WordList") as string[];
 
@@ -32,6 +43,26 @@ namespace DaphneGui
             new TextSearchFilter(view, this.txtSearch);
         }
 
+        ////private void InitializeWordList()
+        ////{
+        ////    //string[] wordList;
+        ////    List<string> molnames = new List<string>();
+
+        ////    foreach (ConfigMolecule cm in lbMol.Items)
+        ////    {
+        ////        molnames.Add(cm.Name);
+        ////    }            
+
+        ////    string[] wordList = molnames.ToArray();
+
+
+        ////    //    this.FindResource("WordList") as string[];
+
+        ////    ICollectionView view = CollectionViewSource.GetDefaultView(wordList);
+
+        ////    new TextSearchFilter(view, this.txtSearch);
+        ////}
+
         private void btnReac_Click(object sender, RoutedEventArgs e)
         {
             if (lbMol.SelectedItems.Count == 0)
@@ -40,9 +71,10 @@ namespace DaphneGui
             string reac = "";
             if (txtReac.Text.Length > 0)
                 reac = " + ";
-            foreach (string s in lbMol.SelectedItems)
+            foreach (ConfigMolecule cm in lbMol.SelectedItems)
             {
-                reac += s;
+                reacmolguids.Add(cm.molecule_guid);
+                reac += cm.Name;
                 reac += " + ";
             }
             reac = reac.Substring(0, reac.Length - 3);
@@ -58,9 +90,10 @@ namespace DaphneGui
             string prod = "";
             if (txtProd.Text.Length > 0)
                 prod = " + ";
-            foreach (string s in lbMol.SelectedItems)
+            foreach (ConfigMolecule cm in lbMol.SelectedItems)
             {
-                prod += s;
+                prodmolguids.Add(cm.molecule_guid);
+                prod += cm.Name;
                 prod += " + ";
             }
             prod = prod.Substring(0, prod.Length - 3);
@@ -76,11 +109,61 @@ namespace DaphneGui
         private void btnRClear_Click(object sender, RoutedEventArgs e)
         {
             txtReac.Text = "";
+            reacmolguids.Clear();
         }
 
         private void btnPClear_Click(object sender, RoutedEventArgs e)
         {
             txtProd.Text = "";
+            prodmolguids.Clear();
+        }
+
+        // given a reaction type, find its guid
+        private static string findReactionTemplateGuid(ReactionType rt, SimConfiguration sc)
+        {
+            foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
+            {
+                if (crt.reac_type == rt)
+                {
+                    return crt.reaction_template_guid;
+                }
+            }
+            return null;
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction cr = new ConfigReaction();
+            cr.rate_const = Convert.ToDouble(txtRate.Text);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, MainWindow.SC.SimConfig);  //MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[2].reaction_template_guid;  //findReactionTemplateGuid(ReactionType.BoundaryAssociation, MainWindow.SC.SimConfig);
+            foreach (string s in reacmolguids) {
+                if (!cr.reactants_molecule_guid_ref.Contains(s))
+                    cr.reactants_molecule_guid_ref.Add(s);
+            }
+
+            //increment stoichiometry
+            string guid = cr.reaction_template_guid_ref;
+            ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[guid];
+
+            // the indices of cr and crt match
+            for(int i = 0; i < cr.reactants_molecule_guid_ref.Count; i++)
+            {
+                crt.reactants_stoichiometric_const[i] += 1;
+            }
+
+            //----------------------------------
+
+            foreach (string s in prodmolguids)
+            {
+                if (!cr.products_molecule_guid_ref.Contains(s))
+                    cr.products_molecule_guid_ref.Add(s);
+            }
+
+            //increment stoichiometry            
+            for (int i = 0; i < cr.products_molecule_guid_ref.Count; i++)
+            {
+                crt.products_stoichiometric_const[i] += 1;
+            }
         }
     }
 }

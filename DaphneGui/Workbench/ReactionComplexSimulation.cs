@@ -90,7 +90,7 @@ namespace Workbench
             {
                 rc.ReactionsInComplex.Add(grt);
             }
-            grc.ParseForMolecules();
+            ////grc.ParseForMolecules();
             //grc.CopyMoleculesTo(rc);
             rc.Initialize();
 
@@ -101,9 +101,9 @@ namespace Workbench
 
             foreach (ConfigReaction grt in rc.ReactionsInComplex)
             {
-                ReactionTemplate rt = new ReactionTemplate();
-                grt.CopyTo(rt);
-                ReactionBuilder.ReactionSwitch(rc, rt);
+                ////ReactionTemplate rt = new ReactionTemplate();
+                ////grt.CopyTo(rt);
+                ////ReactionBuilder.ReactionSwitch(rc, rt);
             }
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in rc.Populations)

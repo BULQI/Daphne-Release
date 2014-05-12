@@ -441,22 +441,19 @@ namespace DaphneGui
             
             //DRIVER-LOCOMOTOR SCENARIO
             var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-            var sim_config = config.SimConfig;
-            sim_config.CreateAndSerializeDriverLocomotionScenario();
+            ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config.SimConfig);
             //serialize to json
             config.SerializeSimConfigToFile();
 
             //DIFFUSIION SCENARIO
             config = new SimConfigurator("Config\\daphne_diffusion_scenario.json");
-            sim_config = config.SimConfig;
-            sim_config.CreateAndSerializeDiffusionScenario();
+            ConfigCreators.CreateAndSerializeDiffusionScenario(config.SimConfig);
             //Serialize to json
             config.SerializeSimConfigToFile();
 
             //LIGAND-RECEPTOR SCENARIO
             config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
-            sim_config = config.SimConfig;
-            sim_config.CreateAndSerializeLigandReceptorScenario();
+            ConfigCreators.CreateAndSerializeLigandReceptorScenario(config.SimConfig);
             //serialize to json
             config.SerializeSimConfigToFile();
 
@@ -1660,7 +1657,7 @@ namespace DaphneGui
 
                     // cytosol; convert from the membrane's to the cytosol's system
                     convDriverLoc = Simulation.dataBasket.Cells.First().Value.Cytosol.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
-                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["driver"].Conc.Value(convDriverLoc);
+                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["A"].Conc.Value(convDriverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
                              driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];

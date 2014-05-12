@@ -31,6 +31,10 @@ namespace Daphne
         /// dictionary of cells
         /// </summary>
         private Dictionary<int, Cell> cells;
+        /// <summary>
+        /// dictionary of molecules
+        /// </summary>
+        private Dictionary<string, Molecule> molecules;
 #if ADVANCED_STUFF
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -58,6 +62,7 @@ namespace Daphne
         public DataBasket()
         {
             cells = new Dictionary<int,Cell>();
+            molecules = new Dictionary<string, Molecule>();
 #if ADVANCED_STUFF
             safeCellID = 0;
             ResetTrackData();
@@ -91,6 +96,15 @@ namespace Daphne
         {
             get { return cells; }
             set { cells = value; }
+        }
+
+        /// <summary>
+        /// accessor for the dictionary of molecules
+        /// </summary>
+        public Dictionary<string, Molecule> Molecules
+        {
+            get { return molecules; }
+            set { molecules = value; }
         }
 
 #if ADVANCED_STUFF
