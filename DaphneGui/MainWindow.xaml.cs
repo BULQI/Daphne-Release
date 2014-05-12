@@ -241,14 +241,14 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            try
-            {
-                CreateAndSerializeDaphneScenarios();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+            //try
+            //{
+            //    CreateAndSerializeDaphneScenarios();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
