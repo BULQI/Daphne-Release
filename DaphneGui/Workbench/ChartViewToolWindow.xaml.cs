@@ -36,7 +36,7 @@ namespace Workbench
         public ChartViewToolWindow()
         {
             InitializeComponent();
-            chartSize = new System.Drawing.Size(500, 300);
+            chartSize = new System.Drawing.Size(700, 300);
             DataContext = RC;
 
             
