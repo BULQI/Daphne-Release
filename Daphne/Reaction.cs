@@ -28,7 +28,7 @@ namespace Daphne
         public override void Step(double dt)
         {
             intensity = (dt * RateConstant) * reactant.Conc;
-            reactant.Conc += intensity;
+            reactant.Conc -= intensity;
         }
     }
 
