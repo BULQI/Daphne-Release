@@ -27,6 +27,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Runtime.InteropServices;
 
 using ActiproSoftware.Windows.Controls.Docking;
 using Kitware.VTK;
@@ -71,6 +72,8 @@ namespace DaphneGui
         private Process devHelpProc;
         private static SimConfigurator configurator = null;
         private static int repetition;
+        private static bool argDev = false, argBatch = false;
+        private string argScenarioFile = "";
 
         /// <summary>
         /// uri for the scenario file
@@ -162,7 +165,14 @@ namespace DaphneGui
 #if CONTROL_PROFILER
             return true;
 #else
-            return false;
+            if (argBatch == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
 #endif
         }
 
@@ -210,6 +220,9 @@ namespace DaphneGui
         }
 
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
+        [DllImport("kernel32.dll")]
+        static extern bool AttachConsole(int dwProcessId);
+        private const int ATTACH_PARENT_PROCESS = -1;
 
         public MainWindow()
         {
@@ -231,6 +244,67 @@ namespace DaphneGui
             //RecentFileList.UseXmlPersister();
             // the event handler to run when clicking on an entry in the recent files list
             //RecentFileList.MenuClick += (s, e) => loadScenarioFromFile(e.Filepath);
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            // current options:
+            // -batch willrun the app automatically and will close it as soon as it is finished
+            // -dev sets appPath to visual studio; omit this option when running an installed version
+            // -help prints user help on command usage
+
+            // when not running in Visual Studio, check if there are options
+            if (AssumeIDE() == false && args.Length > 1)
+            {
+                AttachConsole( ATTACH_PARENT_PROCESS );
+                for (int i = 1; i < args.Length; i++ )
+                {
+                    string s = args[i].ToLowerInvariant();
+
+                    if (s == "-help" || s == "-h")
+                    {
+                        Console.WriteLine("\n\nCommand line options are not case sensitive.");
+                        Console.WriteLine("They can be abbreviated with the option's first letter.");
+                        Console.WriteLine("\n -help or -h displays this online help.");
+                        Console.WriteLine("\n -batch or -b causes the simulation to start running after it loads\n  and will close the application upon simulation finish.");
+                        Console.WriteLine("\n -dev or -d sets the application path to the Visual Studio project;\n  omit when running a non-developer (installer) version.");
+                        Console.WriteLine("\n -file:name or -f:name specifies the simulation file by name.");
+                        Console.WriteLine("\nPress Enter to return to the DOS prompt.");
+                        Environment.Exit(-1);
+                        return;
+                    }
+                    else if (s == "-batch" || s == "-b")
+                    {
+                        argBatch = true;
+                    }
+                    else if (s == "-dev" || s == "-d")
+                    {
+                        argDev = true;
+                    }
+                    else if (s.StartsWith("-file") == true || s.StartsWith("-f") == true)
+                    {
+                        string[] arr = s.Split(':');
+
+                        if (arr.Length == 2)
+                        {
+                            argScenarioFile = arr[1];
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nImproper command line format. Closing.");
+                            Console.WriteLine("\nPress Enter to return to the DOS prompt.");
+                            Environment.Exit(-1);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nYou specified an unknown command line option. Closing.");
+                        Console.WriteLine("\nPress Enter to return to the DOS prompt.");
+                        Environment.Exit(-1);
+                        return;
+                    }
+                }
+            }
 
             // get the screen size and set the application window size accordingly
             System.Drawing.Rectangle r = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
@@ -294,7 +368,11 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
 
-            if (openLastScenarioMenu.IsChecked == true)
+            if(argScenarioFile != "")
+            {
+                file = argScenarioFile;
+            }
+            else if (openLastScenarioMenu.IsChecked == true)
             {
                 file = Properties.Settings.Default.lastOpenScenario;
             }
@@ -828,7 +906,14 @@ namespace DaphneGui
 #if ASSUME_DEBUGGER || RUNNING_PROFILER || CONTROL_PROFILER
             return true;
 #else
-            return Debugger.IsAttached;
+            if (argDev == true)
+            {
+                return true;
+            }
+            else
+            {
+                return Debugger.IsAttached;
+            }
 #endif
         }
 
