@@ -553,23 +553,25 @@ namespace DaphneGui
             // prevent when a fit is in progress
             lock (cellFitLock)
             {
-                // re-initialize; if there are no cells, always do a full reset
-                initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, "");
-                enableCritical(loadSuccess);
-                if (loadSuccess == false)
+                lock (sim)
                 {
-                    return;
-                }
+                    // re-initialize; if there are no cells, always do a full reset
+                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, "");
+                    enableCritical(loadSuccess);
+                    if (loadSuccess == false)
+                    {
+                        return;
+                    }
 
-                // it doesn't make sense to run a simulation if there are no cells after the reinitialization
-                //if (Simulation.dataBasket.Cells.Count < 1)
-                //{
-                //    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
-                //    return;
-                //}
+                    // it doesn't make sense to run a simulation if there are no cells after the reinitialization
+                    //if (Simulation.dataBasket.Cells.Count < 1)
+                    //{
+                    //    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
+                    //    return;
+                    //}
 
-                // next time around, force a reset
-                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
+                    // next time around, force a reset
+                    MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 #if CELL_REGIONS
                 // hide the cell regions
                 foreach (Region rr in configurator.SimConfig.scenario.regions)
@@ -582,48 +584,49 @@ namespace DaphneGui
                     rr.region_visibility = false;
                 }
 #endif
-                // hide the regions used to control Gaussians
-                foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
-                {
-                    // Use the utility dict to find the box associated with this region
-                    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+                    // hide the regions used to control Gaussians
+                    foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
+                    {
+                        // Use the utility dict to find the box associated with this region
+                        BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
 
-                    // Property changed notifications will take care of turning off the Widgets and Actors
-                    bb.box_visibility = false;
-                    gg.gaussian_region_visibility = false;
+                        // Property changed notifications will take care of turning off the Widgets and Actors
+                        bb.box_visibility = false;
+                        gg.gaussian_region_visibility = false;
+                    }
+
+                    //// always reset the simulation for now to start at the beginning
+                    //if (Properties.Settings.Default.skipDataBaseWrites == false)
+                    //{
+                    //    DataBaseTools.CreateExpInDataBase();
+                    //    DataBaseTools.SaveCellSetIDs();
+                    //    DataBaseTools.CreateSaveAttributes();
+                    //}
+
+                    // since the above call resets the experiment name each time, reset comparison string
+                    // so we don't bother people about saving just because of this change
+                    // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
+                    orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                    sim.restart();
+                    UpdateGraphics();
+
+                    // prevent the user from running certain tasks immediately, crashing the simulation
+                    //resetButton.IsEnabled = false;
+                    resetButton.Content = "Abort";
+                    //runButton.IsEnabled = false;
+                    fileMenu.IsEnabled = false;
+                    analysisMenu.IsEnabled = false;
+                    optionsMenu.IsEnabled = false;
+                    gc.ToolsToolbar_IsEnabled = false;
+                    gc.DisablePickingButtons();
+                    VCR_Toolbar.IsEnabled = false;
+                    this.menu_ActivateSimSetup.IsEnabled = false;
+                    SimConfigToolWindow.Close();
+
+                    // prevent all fit/analysis-related things
+                    hideFit();
+                    ExportMenu.IsEnabled = false;
                 }
-
-                //// always reset the simulation for now to start at the beginning
-                //if (Properties.Settings.Default.skipDataBaseWrites == false)
-                //{
-                //    DataBaseTools.CreateExpInDataBase();
-                //    DataBaseTools.SaveCellSetIDs();
-                //    DataBaseTools.CreateSaveAttributes();
-                //}
-
-                // since the above call resets the experiment name each time, reset comparison string
-                // so we don't bother people about saving just because of this change
-                // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
-                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                sim.restart();
-                UpdateGraphics();
-
-                // prevent the user from running certain tasks immediately, crashing the simulation
-                //resetButton.IsEnabled = false;
-                resetButton.Content = "Abort";
-                //runButton.IsEnabled = false;
-                fileMenu.IsEnabled = false;
-                analysisMenu.IsEnabled = false;
-                optionsMenu.IsEnabled = false;
-                gc.ToolsToolbar_IsEnabled = false;
-                gc.DisablePickingButtons();
-                VCR_Toolbar.IsEnabled = false;
-                this.menu_ActivateSimSetup.IsEnabled = false;
-                SimConfigToolWindow.Close();
-
-                // prevent all fit/analysis-related things
-                hideFit();
-                ExportMenu.IsEnabled = false;
             }
         }
 

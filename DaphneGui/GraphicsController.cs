@@ -1754,8 +1754,6 @@ namespace DaphneGui
 
             // Regions
             CreateRegionWidgets();
-
-
             // Cells
             if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null)
             {
