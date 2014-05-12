@@ -32,31 +32,15 @@
             <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
-            <daph:RegionGUIDtoNameConverter x:Key="RegionGUIDtoNameConv" />
             <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
             <daph:MolGUIDtoMolIndexConverter x:Key="MolGUIDtoMolIndexConv" />
             <daph:ReacGUIDtoReacStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
-
+            <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
             <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
             
-
-
-            <!--<daph:GlobalParamTypeToStringConverter x:Key="GlobalParameterTypeEnumConv" />-->
-            <!--<daph:CellTypeGUIDtoNameConverter x:Key="CellTypeGUIDtoNameConv" />-->
-            <!--<daph:SolfacGUIDtoSolfacNameConverter x:Key="SolfacGUIDtoSolfacNameConv" />-->
-            <!--<daph:SolfacGUIDtoReceptorNameConverter x:Key="SolfacGUIDtoReceptorNameConv" />-->
-
-                <!--<ObjectDataProvider x:Key="molPopPosition"
-                    MethodName="GetValues" 
-                    ObjectType="{x:Type sys:Enum}">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="daph:MolPopPosition" />
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>-->
-
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
@@ -868,7 +852,7 @@
                                                     />
                             <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
                         </StackPanel>
-                        <TextBlock Text="gauss" Margin="6,0"
+                        <!--<TextBlock Text="gauss" Margin="6,0"
                                    Grid.Column="0" Grid.Row="1"  
                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                    />
@@ -879,7 +863,7 @@
                                                   SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref}"
                                                   SelectedValuePath="gaussian_spec_box_guid_ref"
                                                   MaxWidth="150"
-                                                  />
+                                                  />-->
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
                     <ListView x:Name="solfacGaussianBoxSpecsListView"
@@ -1830,7 +1814,7 @@
                                                               CheckBoxVisibility="Collapsed" 
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
-                                                              Format="F0"
+                                                              Format="F2"
                                                               StepValue="100"
                                                               Width="50" 
                                                               CenterSlotHorizontalAlignment="Right"
@@ -1989,19 +1973,18 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                 <!-- Weight -->
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" IsEnabled="False">
                                         <TextBlock Text="Molecular Weight" Margin="6,0"  HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100"/>
                                         <TextBox x:Name="txtMolWt"  Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Height="24" Margin="0,0" MinWidth="100"></TextBox>
                                     </StackPanel>
                                     <!-- Radius -->
-                                    <StackPanel Orientation="Horizontal" Margin="6,0">
+                                    <StackPanel Orientation="Horizontal" Margin="6,0" IsEnabled="False">
                                         <TextBlock Text="Molecular Radius"  Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="120"/>
                                         <TextBox x:Name="txtRadius" Text="{Binding Path=EffectiveRadius}"  Height="24" Margin="0,0" MinWidth="100"/>
                                     </StackPanel>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,6">
-                                    <RadioButton IsChecked="{Binding Path=molecule_location}" x:Name="rbBulk"  Margin="6,0" Click="rbBulk_Click">Bulk</RadioButton>
-                                    <RadioButton IsChecked="{Binding Path=molecule_location}" x:Name="rbBoundary"  Margin="10,0" Click="rbBoundary_Click">Boundary</RadioButton>
+                                <StackPanel Orientation="Horizontal" Margin="0,8">
+                                    <CheckBox IsChecked="{Binding Path=molecule_location, Converter={StaticResource MolPopLocationBoolConv}}" x:Name="chkBoundary"  Margin="6,0" >Membrane bound</CheckBox>
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>

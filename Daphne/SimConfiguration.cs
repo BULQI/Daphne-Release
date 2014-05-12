@@ -15,8 +15,6 @@ using System.Windows.Media;
 using System.Windows.Data;
 using System.Windows;
 
-using ManifoldRing;
-
 namespace Daphne
 {
     public class SimConfigurator
@@ -684,92 +682,6 @@ namespace Daphne
         }
     }
 
-    public enum RegionShape { Rectangular, Ellipsoid }
-    
-    public class Region : EntityModelBase
-    {
-        private string _region_name = "";
-        public string region_name
-        {
-            get { return _region_name; }
-            set
-            {
-                if (_region_name == value)
-                    return;
-                else
-                {
-                    _region_name = value;
-                    OnPropertyChanged("region_name");
-                }
-            }
-        }
-        private RegionShape _region_type = RegionShape.Ellipsoid;
-        public RegionShape region_type 
-        {
-            get { return _region_type; }
-            set
-            {
-                if (_region_type == value)
-                    return;
-                else
-                {
-                    _region_type = value;
-                    OnPropertyChanged("region_type");
-                }
-            }
-        }
-        public string region_box_spec_guid_ref { get; set; }
-        private bool _region_visibility = true;
-        public bool region_visibility
-        {
-            get { return _region_visibility; }
-            set
-            {
-                if (_region_visibility == value)
-                    return;
-                else
-                {
-                    _region_visibility = value;
-                    OnPropertyChanged("region_visibility");
-                }
-            }
-        }
-        private System.Windows.Media.Color _region_color;
-        public System.Windows.Media.Color region_color
-        {
-            get { return _region_color; }
-            set
-            {
-                if (_region_color == value)
-                    return;
-                else
-                {
-                    _region_color = value;
-                    OnPropertyChanged("region_color");
-                }
-            }
-        }
-
-        public Region()
-        {
-            region_name = "Default Region";
-            region_box_spec_guid_ref = "";
-            region_visibility = true;
-            region_color = new System.Windows.Media.Color();
-            region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-        }
-
-        public Region(string name, RegionShape type)
-        {
-            region_name = name;
-            region_type = type;
-            region_box_spec_guid_ref = "";
-            region_visibility = true;
-            region_color = new System.Windows.Media.Color();
-            region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-        }
-    }
-    
     public enum RelativePosition { Inside, Surface, Outside }
 
     /// <summary>
@@ -860,6 +772,33 @@ namespace Daphne
         {
             string str = (string)value;
             int idx = _molecule_location_strings.FindIndex(item => item == str);
+            return (MoleculeLocation)Enum.ToObject(typeof(MoleculeLocation), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between enum values and boolean values for GUI checkbox
+    /// </summary>
+    [ValueConversion(typeof(MoleculeLocation), typeof(bool))]
+    public class MoleculeLocationToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            
+            int n = (int)value;
+            if (n == 1)
+                return true;
+            else
+                return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bVal = (bool)value;
+            int idx = 0;
+            if (bVal == true)
+                idx = 1;
+           
             return (MoleculeLocation)Enum.ToObject(typeof(MoleculeLocation), (int)idx);
         }
     }
@@ -1691,42 +1630,7 @@ namespace Daphne
             return "y";
         }
     }
-
-    /// <summary>
-    /// Converter to go between cell type GUID references in CellSets
-    /// and cell type names kept in the repository list of CellSubset(s).
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class RegionGUIDtoNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string region_name = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<Region> region_list = cvs.Source as ObservableCollection<Region>;
-            if (region_list != null)
-            {
-                foreach (Region rg in region_list)
-                {
-                    if (rg.region_box_spec_guid_ref == guid)
-                    {
-                        region_name = rg.region_name;
-                        break;
-                    }
-                }
-            }
-            return region_name;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
+    
     /// <summary>
     /// Convert System.Windows.Media.Color to SolidBrush for rectangle fills
     /// </summary>

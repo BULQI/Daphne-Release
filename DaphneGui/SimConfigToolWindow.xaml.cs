@@ -495,21 +495,21 @@ namespace DaphneGui
                 cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
-        private void rbBulk_Click(object sender, RoutedEventArgs e)
-        {
-            if (rbBulk.IsChecked == true)
-            {
-                rbBoundary.IsChecked = false;
-            }
-        }
+        //private void rbBulk_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (rbBulk.IsChecked == true)
+        //    {
+        //        rbBoundary.IsChecked = false;
+        //    }
+        //}
 
-        private void rbBoundary_Click(object sender, RoutedEventArgs e)
-        {
-            if (rbBoundary.IsChecked == true)
-            {
-                rbBulk.IsChecked = false;
-            }
-        }
+        //private void rbBoundary_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (rbBoundary.IsChecked == true)
+        //    {
+        //        rbBulk.IsChecked = false;
+        //    }
+        //}
 
         private void lbMol_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -519,13 +519,15 @@ namespace DaphneGui
 
             if (cm.molecule_location == MoleculeLocation.Boundary)
             {
-                rbBulk.IsChecked = false;
-                rbBoundary.IsChecked = true;
+                //rbBulk.IsChecked = false;
+                //rbBoundary.IsChecked = true;
+                chkBoundary.IsChecked = true;
             }
             else
             {
-                rbBulk.IsChecked = true;
-                rbBoundary.IsChecked = false;
+                //rbBulk.IsChecked = true;
+                //rbBoundary.IsChecked = false;
+                chkBoundary.IsChecked = false;
             }
         }
 
