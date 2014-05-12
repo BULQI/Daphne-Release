@@ -452,7 +452,7 @@ namespace Daphne
                     //Remove molecule from molecules_dict
                     entity_repository.molecules_dict.Remove(cm.molecule_guid);
 
-                    //This removes all the ECM molpops that have this molecule type
+                    //Remove all the ECM molpops that have this molecule type
                     foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
                     {
                         if (kvp.Value.molecule_guid_ref == cm.molecule_guid)
@@ -462,7 +462,7 @@ namespace Daphne
                         }
                     }
 
-                    //This removes all the cell membrane molpops that have this molecule type
+                    //Remove all the cell membrane molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
                         if (cell.ReadOnly == false)
@@ -478,7 +478,7 @@ namespace Daphne
                         }
                     }
 
-                    //This removes all the cell cytosol molpops that have this molecule type
+                    //Remove all the cell cytosol molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
                         if (cell.ReadOnly == false)
@@ -494,7 +494,7 @@ namespace Daphne
                         }
                     }
 
-                    //This removes all the reactions that use this molecule
+                    //Remove all the reactions that use this molecule
                     foreach (KeyValuePair<string, ConfigReaction> kvp in entity_repository.reactions_dict.ToList())
                     {
                         ConfigReaction reac = kvp.Value;
@@ -566,8 +566,11 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigCell cc = dd as ConfigCell;
+
+                    //Remove this guid from ER cells_dict
                     entity_repository.cells_dict.Remove(cc.cell_guid);
 
+                    //Remove all ECM cell populations with this cell guid
                     foreach (var cell_pop in scenario.cellpopulations.ToList())
                     {
                         if (cc.cell_guid == cell_pop.cell_guid_ref)
@@ -594,9 +597,44 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigReaction cr = dd as ConfigReaction;
+
+                    //Remove entry from ER reactions_dict
                     entity_repository.reactions_dict.Remove(cr.reaction_guid);
-                }
+
+                    //Remove all the ER reaction complex reactions that have this guid
+                    foreach (ConfigReactionComplex comp in entity_repository.reaction_complexes)
+                    {
+                        if (comp.reactions_guid_ref.Contains(cr.reaction_guid) )
+                            comp.reactions_guid_ref.Remove(cr.reaction_guid);
+                    }                    
+
+                    //Remove all the ECM reaction complex reactions that have this guid
+                    if (scenario.environment.ecs.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
+                    {
+                        scenario.environment.ecs.reaction_complexes_guid_ref.Remove(cr.reaction_guid);
+                    }
+
+                    //Remove all the ECM reactions that have this guid
+                    if (scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+                        scenario.environment.ecs.reactions_guid_ref.Remove(cr.reaction_guid);
+
+                    //Remove all the cell membrane/cytosol reactions that have this guid
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        if (cell.ReadOnly == false)
+                        {
+                            if (cell.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+                                cell.membrane.reactions_guid_ref.Remove(cr.reaction_guid);
+
+                            if (cell.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+                                cell.cytosol.reactions_guid_ref.Remove(cr.reaction_guid);
+                        }
+                    }
+                }                
+                
             }
+
+            
         }
 
         private void template_reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -2480,38 +2518,6 @@ namespace Daphne
             }
         } 
 
-        ////public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
-        ////private void InitDistTypes()
-        ////{
-        ////    CellPopDistType d = new CellPopDistType();
-        ////    d.Name = "Specify cell coordinates";
-        ////    d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
-
-        ////    CellPopDistSubtype d2 = new CellPopDistSubtype();
-        ////    d2.Label = "Input coordinates";
-        ////    d.DistSubtypes.Add(d2);
-
-        ////    d2 = new CellPopDistSubtype();
-        ////    d2.Label = "Specify coordinates file";
-        ////    d.DistSubtypes.Add(d2);
-
-        ////    CellPopDistTypes.Add(d);
-
-        ////    d = new CellPopDistType();
-        ////    d.Name = "Probability distribution";
-        ////    d.DistSubtypes = new ObservableCollection<CellPopDistSubtype>();
-
-        ////    d2 = new CellPopDistSubtype();
-        ////    d2.Label = "Uniform";
-        ////    d.DistSubtypes.Add(d2);
-
-        ////    d2 = new CellPopDistSubtype();
-        ////    d2.Label = "Gaussian";
-        ////    d.DistSubtypes.Add(d2);
-
-        ////    CellPopDistTypes.Add(d);
-        ////}
-
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -2528,10 +2534,6 @@ namespace Daphne
             cellpopulation_predef_color = ColorList.Orange;
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
-            //cellPopDist = new CellPopSpecific();
-            ////CellPopDistTypes = new ObservableCollection<CellPopDistType>();
-            ////InitDistTypes();
-
             cell_list = new ObservableCollection<CellState>();
 
             // reporting
@@ -2539,17 +2541,8 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
         }
-
-        //public ObservableCollection<ConfigMolecularPopulation> GetCellMembraneMols()
-        //{
-        //    ConfigCell cc = entity_repository.cells[cell_guid_ref];
-        //    return cc.membrane.molpops;
-        //}
+        
     }
-
-    
-
-    
 
     // MolPopInfo ==================================
     public class MolPopInfo : EntityModelBase
@@ -2706,15 +2699,7 @@ namespace Daphne
             // so I'm not sure what the value and parameter objects would be...
             int index = (int)value;
             string ret = "not found";
-            ////if (index >= 0)
-            ////{
-            ////    System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ////    ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            ////    if (mol_list != null)
-            ////    {
-            ////        ret = mol_list[index].molecule_guid;
-            ////    }
-            ////}
+            
             return ret;
         }
     }
