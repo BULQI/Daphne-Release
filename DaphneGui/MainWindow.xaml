@@ -382,7 +382,7 @@
                                                           ToolBar.OverflowMode="Never" ToolTip="Cells color by attribute">
                                                 </ComboBox>
 
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell selection tool mode</Label>
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell selection mode</Label>
                                                 <ComboBox Name="CellSelectionToolCB" Width="160"
                                                           ItemsSource="{Binding Path=CellSelectionToolModes}"
                                                           SelectedValue="{Binding Path=CellSelectionToolMode}"

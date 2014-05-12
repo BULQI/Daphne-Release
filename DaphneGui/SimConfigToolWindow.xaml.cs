@@ -2112,6 +2112,11 @@ namespace DaphneGui
             CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
+        private void TabItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            lbRptCellPops.SelectedIndex = 0;
+        }
+
         //private ComboBox MolPopDistComboBox;
         //private void MolPopDistributionTypeComboBox_Loaded(object sender, RoutedEventArgs e)
         //{
