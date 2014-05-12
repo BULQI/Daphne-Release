@@ -28,7 +28,7 @@ namespace Workbench
         public List<double> lTimes = new List<double>();
         private ChartManager cm;
         private System.Drawing.Size chartSize;
-        public ReactionComplexProcessor RC;
+        public ReactionComplexProcessor RC { get; set; }
 
         public ToggleButton toggleButton { get; set; }
         private bool dragging = false;
@@ -91,7 +91,8 @@ namespace Workbench
                 cm.DrawChart();
 
                 dgInitConcs.ItemsSource = RC.initConcs;
-                dgReactionRates.ItemsSource = RC.ReactionsInComplex;
+                //dgReactionRates.ItemsSource = RC.ReactionsInComplex;
+                dgReactionRates.ItemsSource = RC.CRC.ReactionRates;
 
             }
         }
@@ -193,10 +194,11 @@ namespace Workbench
 
         private void slMaxTime_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (RC != null && cm != null && RC.dInitialTime != slMaxTime.Value)
+            //if (RC != null && cm != null && RC.dInitialTime != slMaxTime.Value)
+            if (RC != null && cm != null)
             {
                 //RC.MaxTime = (int)slMaxTime.Value;
-                RC.dInitialTime = slMaxTime.Value;
+                //RC.dInitialTime = slMaxTime.Value;
                 cm.RedrawSeries();                      
             }
         }
@@ -209,14 +211,23 @@ namespace Workbench
                 return;
 
             RC.RestoreOriginalConcs();
-            RC.Go();
+            RC.RestoreOriginalRateConstants();
 
-            if (cm == null)
-                return;
+            if (toggleButton != null)
+            {
+                //This causes a redraw
+                toggleButton.IsChecked = true;
+            }
 
-            cm.ListTimes = RC.ListTimes;
-            cm.DictConcs = RC.DictGraphConcs;
-            cm.DrawChart();
+
+            //RC.Go();
+
+            //if (cm == null)
+            //    return;
+
+            //cm.ListTimes = RC.ListTimes;
+            //cm.DictConcs = RC.DictGraphConcs;
+            //cm.DrawChart();
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -262,6 +273,7 @@ namespace Workbench
 
         private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+
             Slider sl = sender as Slider;
 
             if (dragging == false)
@@ -273,11 +285,25 @@ namespace Workbench
 
         private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Slider sl = sender as Slider;
+            ////Slider sl = sender as Slider;
+
+            ////if (dragging == true)
+            ////{
+            ////    dragging = false;
+            ////    RC.UpdateRateConstants();
+            ////    RC.Go();
+            ////    cm.RedrawSeries();
+            ////    cm.RecalculateYMax();
+            ////}
+
+            ////return;
+
+            //Slider sl = sender as Slider;
 
             if (toggleButton != null && dragging == true)
             {
                 dragging = false;
+                RC.UpdateRateConstants();
 
                 //This causes a redraw
                 toggleButton.IsChecked = true;

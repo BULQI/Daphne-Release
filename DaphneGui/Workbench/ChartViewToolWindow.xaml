@@ -4,8 +4,10 @@
         xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking" 
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
         xmlns:local="clr-namespace:DaphneGui"
-        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"                                              
+                        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"           
         >
+    
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" >
         <Grid x:Name="ChartMainGrid" >
@@ -142,11 +144,20 @@
             </StackPanel>
 
             <StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
+
+                <StackPanel.Resources>
+                    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDToStringConv" />
+
+                    <CollectionViewSource x:Key="ecmReacsListView"  
+                                      Source="{Binding Path=SC.entity_repository.reactions}"
+                                      />
+                </StackPanel.Resources>
+
                 <!-- new code -->
                 <TextBlock>Reaction Rates</TextBlock>
                 
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=ReactionsInComplex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                                ItemsSource="{Binding Path=CRC.ReactionRates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
                                 MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
@@ -181,7 +192,12 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                             Text="{Binding Path=TotalReactionString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
+                                              
+                                              Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDToStringConv},
+                                                            ConverterParameter={StaticResource ecmReacsListView}}">
+
+                                        <!--Text="{Binding Path=guid}">-->
+                                        <!--Text="{Binding Path=reac.TotalReactionString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >-->
                                     </TextBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -197,7 +213,7 @@
                                                 RenderTransform="1.0,0,0,0.5,0,4"
                                                 Minimum="0.00" 
                                                 Maximum="1000.00"
-                                                Value="{Binding Path=daph_rate_const.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Value="{Binding Path=ReactionComplexRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                                 Margin="0,0,0,0" IsSnapToTickEnabled="True" 
                                                 TickFrequency="0.1"
                                                 ValueChanged="slRate_ValueChanged"
@@ -206,8 +222,10 @@
                                                 >
                                         </Slider>
 
+                                        <!-- Text="{Binding Path=daph_rate_const.FValue}" -->
+                                        
                                         <TextBox Height="24" Margin="20,0" Name="txtFormattedValue" Width="150" 
-                                            Text="{Binding Path=daph_rate_const.FValue}" 
+                                            Text="{Binding ElementName=slRate, Path=Value}" 
                                             GotFocus="txtFormattedValue_GotFocus" LostFocus="txtFormattedValue_LostFocus"/>
                                         
                                     </StackPanel>

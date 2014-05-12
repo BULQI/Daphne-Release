@@ -222,6 +222,8 @@ namespace Workbench
             s.MarkerSize = 4; 
             s.MarkerStyle = MarkerStyle.None;
             s.MarkerStep = n / 10;
+            if (s.MarkerStep <= 0)
+                s.MarkerStep = 1;
             //s.MarkerBorderColor = Color.Black;
             //s.MarkerColor = Color.Gold;
             s.Color = colorTable[_color % colorTable.Count];          

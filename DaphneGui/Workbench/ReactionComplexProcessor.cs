@@ -17,9 +17,9 @@ namespace Workbench
 {
     public class ReactionComplexProcessor : EntityModelBase
     {
-        Simulation Sim { get; set; }
-        SimConfiguration SC { get; set; }
-        ConfigReactionComplex CRC { get; set; }
+        public Simulation Sim { get; set; }
+        public SimConfiguration SC { get; set; }
+        public ConfigReactionComplex CRC { get; set; }
 
         public int nSteps { get; set; }
         public double dt { get; set; }
@@ -44,6 +44,7 @@ namespace Workbench
             }
         }
 
+        //This dict is used by chart view to plot the points and draw the graph
         protected Dictionary<string, List<double>> dictGraphConcs = new Dictionary<string, List<double>>();
         public Dictionary<string, List<double>> DictGraphConcs
         {
@@ -130,17 +131,22 @@ namespace Workbench
 
             double minVal = 1e7;
 
-            foreach (string guid in crc.reactions_guid_ref)
+            //foreach (string guid in crc.reactions_guid_ref)
+            //{
+            //    ConfigReaction cr = mainSC.entity_repository.reactions_dict[guid];
+            //    minVal = Math.Min(minVal, cr.rate_const);
+            //}
+
+            foreach (ConfigReactionGuidRatePair grp in crc.ReactionRates)
             {
-                ConfigReaction cr = mainSC.entity_repository.reactions_dict[guid];
-                minVal = Math.Min(minVal, cr.rate_const);
+                minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
 
-            dInitialTime = 3.33;
+            //dInitialTime = 3.33;
 
             SaveOriginalConcs();
             SaveInitialConcs();
@@ -372,8 +378,15 @@ namespace Workbench
             //ConfigReactionComplex newcrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
         }        
 
-        private void UpdateRateConstants()
+        public void UpdateRateConstants()
         {
+            foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            {
+                string guid = grp.Guid;
+                ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
+                cr.rate_const = grp.ReactionComplexRate;
+            }
+
             //Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
 
             //comp.Reactions.Clear();
@@ -387,6 +400,17 @@ namespace Workbench
 
             //    //comp.Reactions.Add(
             //}
+        }
+
+        public void RestoreOriginalRateConstants()
+        {
+            foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            {
+                string guid = grp.Guid;
+                ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
+                cr.rate_const = grp.OriginalRate;
+                grp.ReactionComplexRate = grp.OriginalRate;
+            }            
         }
 
         

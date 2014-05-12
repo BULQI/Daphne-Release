@@ -2473,12 +2473,13 @@ namespace DaphneGui
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
             MainWindow.ST_ReacComplexChartWindow.RC = rcp;
+            MainWindow.ST_ReacComplexChartWindow.DataContext = rcp;
             MainWindow.ST_ReacComplexChartWindow.Render();
 
             MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
             MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
 
-            MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
+            //MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
 
             MW.VTKDisplayDocWindow.Activate();
             

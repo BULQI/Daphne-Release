@@ -3784,8 +3784,10 @@
                                         ItemTemplate="{Binding Source={StaticResource rcReacListItemTemplate}}"
                                         >
                                 </ListBox>-->
+
+                                <!-- ItemsSource="{Binding Path=reactions_guid_ref, Mode=TwoWay}" -->
                                 <ListView x:Name="lvReacComplexReactions" 
-                                      ItemsSource="{Binding Path=reactions_guid_ref, Mode=TwoWay}"
+                                      ItemsSource="{Binding Path=ReactionRates, Mode=TwoWay}"
                                       SelectedIndex="-1"
                                         >
                                     <ListView.View>
@@ -3807,9 +3809,11 @@
                                             <GridViewColumn Width="80" Header="Rate constant">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                        
+                                                        <!--<TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView},
-                                                            ConverterCulture='de-DE'}">
+                                                            ConverterCulture='de-DE'}">-->
+                                                        <TextBlock Text="{Binding Path=ReactionComplexRate}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
@@ -3825,8 +3829,10 @@
 
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                        <TextBlock Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                        <!--<TextBlock Text="{Binding Path=reac.TotalReactionString,   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">-->
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 

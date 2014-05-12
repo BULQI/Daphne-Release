@@ -2410,6 +2410,13 @@ namespace Daphne
         }
     }
 
+    public class ConfigReactionGuidRatePair
+    {
+        public string Guid { get; set; }
+        public double OriginalRate { get; set; }
+        public double ReactionComplexRate { get; set; }
+    }
+
     public class ConfigReactionComplex : EntityModelBase
     {
         public string Name { get; set; }
@@ -2430,6 +2437,7 @@ namespace Daphne
         }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
         public bool ReadOnly { get; set; }
+        public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; }
 
         public ConfigReactionComplex()
         {
@@ -2448,6 +2456,7 @@ namespace Daphne
             ReadOnly = true;
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
         }
         public ConfigReactionComplex(ConfigReactionComplex src)
         {
@@ -2459,6 +2468,7 @@ namespace Daphne
             reactions_guid_ref = src.reactions_guid_ref;
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             molpops = src.molpops;
+            ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
         }
     }
 

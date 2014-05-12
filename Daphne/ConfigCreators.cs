@@ -1449,12 +1449,30 @@ namespace Daphne
 
             //REACTIONS
             string guid = findReactionGuid(ReactionType.Association, sc);
+
             if (guid != null)
+            {
+                ConfigReaction reac = findReactionByGuid(guid, sc);
+                ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                grp.Guid = guid;
+                grp.OriginalRate = reac.rate_const;
+                grp.ReactionComplexRate = reac.rate_const;
                 crc.reactions_guid_ref.Add(guid);
+                crc.ReactionRates.Add(grp);
+            }
 
             guid = findReactionGuid(ReactionType.Dissociation, sc);
+            
             if (guid != null)
+            {
+                ConfigReaction reac = findReactionByGuid(guid, sc);
+                ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                grp.Guid = guid;
+                grp.OriginalRate = reac.rate_const;
+                grp.ReactionComplexRate = reac.rate_const;
                 crc.reactions_guid_ref.Add(guid);
+                crc.ReactionRates.Add(grp);
+            }
 
             foreach (ConfigReaction cr in sc.entity_repository.reactions)
             {
@@ -1463,6 +1481,11 @@ namespace Daphne
                     if (cr.reaction_template_guid_ref == crt.reaction_template_guid && crt.reac_type == ReactionType.Annihilation)
                     {
                         crc.reactions_guid_ref.Add(cr.reaction_guid);
+                        ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                        grp.Guid = cr.reaction_guid;
+                        grp.OriginalRate = cr.rate_const;
+                        grp.ReactionComplexRate = cr.rate_const;
+                        crc.ReactionRates.Add(grp);
                     }
                 }                
             }
@@ -1523,6 +1546,19 @@ namespace Daphne
             foreach (ConfigReaction cr in sc.entity_repository.reactions)
             {
                 if (cr.TotalReactionString == rt) //cr.reaction_template_guid_ref == template_guid)
+                {
+                    return cr;
+                }
+            }
+            return null;
+        }
+
+        // given a reaction guid, return the ConfigReaction 
+        public static ConfigReaction findReactionByGuid(string guid, SimConfiguration sc)
+        {
+            foreach (ConfigReaction cr in sc.entity_repository.reactions)
+            {
+                if (cr.reaction_guid == guid) 
                 {
                     return cr;
                 }
