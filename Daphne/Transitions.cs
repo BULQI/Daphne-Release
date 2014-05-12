@@ -108,11 +108,11 @@ namespace Daphne
         /// <summary>
         /// Constructor
         /// </summary>
-        public TransitionDriver(int currentState)
+        public TransitionDriver()
         {
             drivers = new Dictionary<int, Dictionary<int, TransitionDriverElement>>();
             TransitionOccurred = false;
-            CurrentState = currentState;
+            CurrentState = 0;
             destinationPMF = new PMF<int>();
         }
 

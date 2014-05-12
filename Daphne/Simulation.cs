@@ -575,6 +575,17 @@ namespace Daphne
 
                         cell.DeathBehavior.AddDriverElement(0, 1, tde);
                     }
+                    // division behavior
+                    //if()
+                    //{
+                    //    TransitionDriverElement tde = new TransitionDriverElement();
+
+                    //    tde.DriverPop = ...;
+                    //    tde.Alpha = ...;
+                    //    tde.Beta = ...;
+
+                    //    cell.DivisionBehavior.AddDriverElement(0, 1, tde);
+                    //}
 
                     AddCell(cell);
                 }

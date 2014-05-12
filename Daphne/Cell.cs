@@ -46,9 +46,9 @@ namespace Daphne
         private double radius;
 
         /// <summary>
-        /// the cell's death behavior object
+        /// the cell's behaviors (death, division, differentiation)
         /// </summary>
-        private ITransitionDriver deathBehavior;
+        private ITransitionDriver deathBehavior, divisionBehavior;
 
 
         public Cell(double radius)
@@ -89,14 +89,25 @@ namespace Daphne
         }
 
         [Inject]
-        public void InjectDeathBehavior(ITransitionDriver dbehavior)
+        public void InjectDeathBehavior(ITransitionDriver behavior)
         {
-            deathBehavior = dbehavior;
+            deathBehavior = behavior;
         }
 
         public ITransitionDriver DeathBehavior
         {
             get { return deathBehavior; }
+        }
+
+        [Inject]
+        public void InjectDivisionBehavior(ITransitionDriver behavior)
+        {
+            divisionBehavior = behavior;
+        }
+
+        public ITransitionDriver DivisionBehavior
+        {
+            get { return divisionBehavior; }
         }
 
         private void initBoundary()
@@ -142,6 +153,15 @@ namespace Daphne
             if (deathBehavior.TransitionOccurred == true && deathBehavior.CurrentState == 1)
             {
                 alive = false;
+            }
+            // division
+            divisionBehavior.Step(dt);
+            if (divisionBehavior.TransitionOccurred == true && divisionBehavior.CurrentState == 1)
+            {
+                cytokinetic = false;
+                // reset transition
+                divisionBehavior.TransitionOccurred = false;
+                divisionBehavior.CurrentState = 0;
             }
 
             // Note: other behaviors to be updated here
@@ -260,6 +280,21 @@ namespace Daphne
                         tde.Beta = kvp_inner.Value.Beta;
                         // add it to the daughter
                         daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
+                }
+
+                // division
+                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DivisionBehavior.Drivers)
+                {
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+
+                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                        tde.Alpha = kvp_inner.Value.Alpha;
+                        tde.Beta = kvp_inner.Value.Beta;
+                        // add it to the daughter
+                        daughter.DivisionBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                     }
                 }
             }
