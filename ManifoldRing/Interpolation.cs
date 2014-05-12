@@ -13,7 +13,7 @@ namespace ManifoldRing
 
         // Used to create the value, gradient, and laplacian operators
         // We may be able to change access to 'protected' if Convert() is moved out of ScalarField
-        public abstract LocalMatrix[] interpolationMatrix(double[] x);
+        protected abstract LocalMatrix[] interpolationMatrix(double[] x);
         protected abstract LocalMatrix[][] laplacianMatrix();
         protected abstract LocalMatrix[][] gradientMatrix(double[] x);
 
@@ -103,7 +103,6 @@ namespace ManifoldRing
     /// </summary>
     public class Trilinear3D : NodeInterpolation
     {
-
         public Trilinear3D(InterpolatedNodes _m) : base(_m)
         {
             interpolationOperator = new LocalMatrix[8];
@@ -113,7 +112,7 @@ namespace ManifoldRing
             }
         }
 
-        public override LocalMatrix[] interpolationMatrix(double[] x)
+        protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
 
@@ -376,7 +375,7 @@ namespace ManifoldRing
             }
         }
 
-        public override LocalMatrix[] interpolationMatrix(double[] x)
+        protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
 
@@ -590,16 +589,18 @@ namespace ManifoldRing
             throw new NotImplementedException();
         }
 
-        public override LocalMatrix[] interpolationMatrix(double[] x)
+        protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
             throw new NotImplementedException();
             //return interpolator;
         }
+
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
             throw new NotImplementedException();
             //return gradient;
         }
+
         protected override LocalMatrix[][] laplacianMatrix()
         {
             throw new NotImplementedException();

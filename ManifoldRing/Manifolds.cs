@@ -583,7 +583,7 @@ namespace ManifoldRing
         protected int[] nNodesPerSide;
         protected double stepSize;
         protected double[] extent;
-        public NodeInterpolation Interpolation;
+        protected NodeInterpolation interpolation;
 
         /// <summary>
         /// constructor
@@ -836,7 +836,7 @@ namespace ManifoldRing
                 // Note: is returning zero the right thing to do when x is out of bounds?
                 return 0;
             }
-            return Interpolation.Interpolate(x, sf);
+            return interpolation.Interpolate(x, sf);
         }
 
         /// <summary>
@@ -846,7 +846,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            return Interpolation.Laplacian(sf);
+            return interpolation.Laplacian(sf);
         }
 
         /// <summary>
@@ -861,7 +861,7 @@ namespace ManifoldRing
             {
                 return new double[Dim];
             }
-            return Interpolation.Gradient(x, sf);
+            return interpolation.Gradient(x, sf);
         }
 
         /// <summary>
@@ -887,7 +887,7 @@ namespace ManifoldRing
 
         public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            return Interpolation.DiffusionFlux(flux, t);
+            return interpolation.DiffusionFlux(flux, t);
         }
     }
 
@@ -905,7 +905,7 @@ namespace ManifoldRing
         public InterpolatedRectangle(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 2)
         {
             // The right side should be specified by a parameter
-            Interpolation = new Trilinear2D(this);
+            interpolation = new Trilinear2D(this);
         }
 
         /// <summary>
@@ -976,7 +976,7 @@ namespace ManifoldRing
         public InterpolatedRectangularPrism(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 3)
         {
             // The right side should be specified by a parameter
-            Interpolation = new Trilinear3D(this);
+            interpolation = new Trilinear3D(this);
         }
 
         /// <summary>
