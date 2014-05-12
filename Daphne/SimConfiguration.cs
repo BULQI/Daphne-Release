@@ -1975,28 +1975,7 @@ namespace Daphne
 
         public void addMolPopulation(string key, MolecularPopulation mp)
         {
-
-            int arr_len = mp.Conc.M.ArraySize;
-            if (mp.BoundaryConcs.Count > 0)
-            {
-                arr_len += mp.BoundaryConcs.First().Value.M.ArraySize;
-            }
-            if (mp.BoundaryFluxes.Count > 0)
-            {
-                arr_len += mp.BoundaryFluxes.First().Value.M.ArraySize;
-            }
-
-            double[] valarr = new double[arr_len];
-            int dst_index = mp.Conc.CopyArray(valarr);
-            if (mp.BoundaryConcs.Count > 0)
-            {
-                dst_index += mp.BoundaryConcs.First().Value.CopyArray(valarr, dst_index);
-            }
-            if (mp.BoundaryFluxes.Count > 0)
-            {
-                mp.BoundaryFluxes.First().Value.CopyArray(valarr, dst_index);
-            }
-            configMolPop.Add(key, valarr);
+            configMolPop.Add(key, mp.CopyArray());
         }
     }
 

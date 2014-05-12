@@ -121,7 +121,6 @@ namespace Daphne
         /// <param name="parameters"></param>
         public void Initialize(string type, double[] parameters)
         {
-
             this.Conc.Initialize(type, parameters);
             //for boundaryConc - only one bounary exist for cell and only cell boundary are saved
             if (type == "explicit" && parameters.Length > concentration.M.ArraySize)
@@ -147,6 +146,38 @@ namespace Daphne
                     src_index += arr_len;
                 }
             }
+        }
+
+        /// <summary>
+        /// retrieve the field data as one array
+        /// </summary>
+        /// <returns></returns>
+        public double[] CopyArray()
+        {
+            int arr_len = Conc.M.ArraySize;
+
+            foreach (ScalarField s in BoundaryConcs.Values)
+            {
+                arr_len += s.M.ArraySize;
+            }
+            foreach (ScalarField s in BoundaryFluxes.Values)
+            {
+                arr_len += s.M.ArraySize;
+            }
+
+            double[] valarr = new double[arr_len];
+            int dst_index = Conc.CopyArray(valarr);
+
+            foreach (ScalarField s in BoundaryConcs.Values)
+            {
+                dst_index += s.CopyArray(valarr, dst_index);
+            }
+            foreach (ScalarField s in BoundaryFluxes.Values)
+            {
+                s.CopyArray(valarr, dst_index);
+            }
+
+            return valarr;
         }
 
         /// <summary>
