@@ -13,6 +13,7 @@ namespace Daphne
         {
             Id = safeId++;
             Dim = dim;
+            E_BOUNDARY_THICKNESS = 0.001;
         }
 
         public int Dim { get; private set; }
@@ -24,6 +25,8 @@ namespace Daphne
         public int[] NumPoints { get; set; }
         protected LocalMatrix[] interpolator { get; set; }
         protected LocalMatrix[][] gradientOperator { get; set; }
+
+        protected double E_BOUNDARY_THICKNESS;
 
         public double[,] Coordinates { get; set; }
         // extent in each dimension
@@ -55,7 +58,7 @@ namespace Daphne
             return ret;
         }
 
-        public bool isIn(double[] loc)
+        public virtual bool isIn(double[] loc)
         {
             for (int i = 0; i < Extents.Length; i++)
             {
@@ -67,10 +70,8 @@ namespace Daphne
             return true;
         }
 
-        public bool isOnBoundary(double[] loc)
+        public virtual bool isOnBoundary(double[] loc)
         {
-            double E_BOUNDARY_THICKNESS = 0.001;
-
             for (int i = 0; i < Extents.Length; i++)
             {
                 if (loc[i] < 0 || loc[i] > E_BOUNDARY_THICKNESS && loc[i] < Extents[i] - E_BOUNDARY_THICKNESS || loc[i] > Extents[i])
@@ -79,6 +80,17 @@ namespace Daphne
                 }
             }
             return true;
+        }
+
+        public virtual double halfDiameter()
+        {
+            double diam = 0;
+
+            for (int i = 0; i < Extents.Length; i++)
+            {
+                diam += Extents[i] * Extents[i];
+            }
+            return Math.Sqrt(diam) / 2;
         }
 
         public double distance(double[] p1, double[] p2)
@@ -115,6 +127,40 @@ namespace Daphne
             gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
             // The radius of the sphere
             Extents = (double[])extent.Clone();
+        }
+
+        public override double halfDiameter()
+        {
+            // Extents[0] holds the radius
+            return Extents[0];
+        }
+
+        public override bool isIn(double[] loc)
+        {
+            return isOnBoundary(loc);
+        }
+
+        public override bool isOnBoundary(double[] loc)
+        {
+            if (loc.Length != 3)
+            {
+                throw new Exception("TinySphere requires three coordinates for interpolation.");
+            }
+
+            double r = 0;
+
+            for (int i = 0; i < loc.Length; i++)
+            {
+                r += loc[i] * loc[i];
+            }
+            r = Math.Sqrt(r);
+
+            // The last condition is not necessary if TinySphere is required to have non-zero radius
+            if (r < Extents[0] - E_BOUNDARY_THICKNESS || r > Extents[0] + E_BOUNDARY_THICKNESS || r == 0)
+            {
+                return false;
+            }
+            return true;
         }
 
         public override LocalMatrix[] Interpolation(double[] point)
@@ -169,6 +215,52 @@ namespace Daphne
             Extents = (double[])extent.Clone();
         }
 
+        public override double halfDiameter()
+        {
+            // Extents[0] holds the radius
+            return Extents[0];
+        }
+
+        public override bool isIn(double[] loc)
+        {
+            if (loc.Length != 3)
+            {
+                throw new Exception("TinyBall requires three coordinates for interpolation.");
+            }
+
+            double r = 0;
+
+            for (int i = 0; i < loc.Length; i++)
+            {
+                r += loc[i] * loc[i];
+            }
+            r = Math.Sqrt(r);
+
+            return r <= Extents[0];
+        }
+
+        public override bool isOnBoundary(double[] loc)
+        {
+            if (loc.Length != 3)
+            {
+                throw new Exception("TinyBall requires three coordinates for interpolation.");
+            }
+
+            double r = 0;
+
+            for (int i = 0; i < loc.Length; i++)
+            {
+                r += loc[i] * loc[i];
+            }
+            r = Math.Sqrt(r);
+
+            // Extents[0] holds the radius
+            if (r < Extents[0] - E_BOUNDARY_THICKNESS || r > Extents[0] + E_BOUNDARY_THICKNESS || r == 0)
+            {
+                return false;
+            }
+            return true;
+        }
 
         public override LocalMatrix[] Interpolation(double[] point)
         {

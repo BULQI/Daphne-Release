@@ -446,15 +446,36 @@ namespace Daphne
 
         public override double Get(double[] point)
         {
-            LocalMatrix[] lm = m.Interpolation(point);
+            LocalMatrix[] lm = new LocalMatrix[parameterSize];
+
+            // NOTE: we may have to require the manifold in the MESF to be of type Tiny{Ball | Sphere} as for other types
+            // the calculation below will give a result that may not make sense
+            // in that case, revisit halfDiameter() to see if it is needed
+            if (m.isOnBoundary(point))
+            {
+                lm[0].Index = 0;
+                lm[0].Coefficient = 1;
+
+                for (int i = 1; i < parameterSize; i++)
+                {
+                    lm[i].Index = i;
+                    lm[i].Coefficient = point[i - 1] / m.halfDiameter();
+                }
+            }
+            else
+            {
+                for (int i = 0; i < parameterSize; i++)
+                {
+                    lm[i].Index = i;
+                    lm[i].Coefficient = 0;
+                }
+            }
+
             double value = 0;
 
-            if (lm != null)
+            for (int i = 0; i < lm.Length; i++)
             {
-                for (int i = 0; i < lm.Length; i++)
-                {
-                    value += lm[i].Coefficient * array[lm[i].Index];
-                }
+                value += lm[i].Coefficient * array[lm[i].Index];
             }
 
             return value;             
