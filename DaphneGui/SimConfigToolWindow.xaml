@@ -46,6 +46,7 @@
             <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
+            <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -4418,12 +4419,6 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                                 <StackPanel>
-                                    <!--<TextBlock HorizontalAlignment="Center" Text="{Binding ElementName=lbRptCellPops, Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv}, 
-                                            ConverterParameter={StaticResource cellTypesListView}, 
-                                           UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
-
-                                    <!--ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem, Converter=CellPopToCellMembMolPopsConv, ConverterParameter={StaticResource cellTypesListView}}"-->
-
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
                                     ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
@@ -4454,7 +4449,7 @@
 
                                         <DataGrid.Columns>
 
-                                            <DataGridTemplateColumn Header="Membrane Mol Popu">
+                                            <DataGridTemplateColumn Header="Membrane Mol Pop">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
@@ -4495,7 +4490,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                              ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cytosolMP}"
+                              ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
                                                         
                             Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
@@ -4528,7 +4523,8 @@
                                             <DataGridTemplateColumn Header="Cytosol Mol Pop">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                            ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>

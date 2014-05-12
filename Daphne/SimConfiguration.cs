@@ -2263,6 +2263,39 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Converter to go between cell pop and cell cytosol MolPops
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(ObservableCollection<ConfigMolecularPopulation>))]
+    public class CellGuidToCellCytoMolPopsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            string guid = value as string;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigCell> cell_list = cvs.Source as ObservableCollection<ConfigCell>;
+            if (cell_list != null)
+            {
+                foreach (ConfigCell cel in cell_list)
+                {
+                    if (cel.cell_guid == guid)
+                    {
+                        return cel.cytosol.molpops;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
 
 
     /// <summary>
