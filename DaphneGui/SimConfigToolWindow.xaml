@@ -136,6 +136,14 @@
                                   />
             <CollectionViewSource x:Key="ecmMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
+            <CollectionViewSource x:Key="bulkMoleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="bulkMoleculesListView_Filter"
+                                  />
+            <CollectionViewSource x:Key="boundaryMoleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="boundaryMoleculesListView_Filter"
+                                  />
             <!--<CollectionViewSource x:Key="ecsReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="ecmReactionCollectionViewSource_Filter"/>-->
@@ -1635,7 +1643,7 @@
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                 <ComboBox  x:Name="molecule_combo_box3" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                    ItemsSource="{Binding Source={StaticResource moleculesListView}}"
+                                                    ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref}"
                                                     SelectedValuePath="molecule_guid"
@@ -1734,7 +1742,7 @@
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                 
                                 <ComboBox  x:Name="molecule_combo_box22" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                    ItemsSource="{Binding Source={StaticResource moleculesListView2}}"
+                                                    ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref}"
                                                     SelectedValuePath="molecule_guid"
@@ -1838,7 +1846,7 @@
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                 <ComboBox  x:Name="molecule_combo_box2" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    ItemsSource="{Binding Source={StaticResource ecmMoleculesListView}}"
+                                                    ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"
                                                     SelectedValuePath="molecule_guid"

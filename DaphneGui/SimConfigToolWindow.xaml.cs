@@ -483,6 +483,24 @@ namespace DaphneGui
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(gmp);
             }
         }
+
+        private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol != null )
+            {
+                // Filter out mol if membrane bound 
+                if (mol.molecule_location == MoleculeLocation.Bulk)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction selected_grt = (ConfigReaction)lvAvailableReacs.SelectedItem;
@@ -736,6 +754,23 @@ namespace DaphneGui
             else
             {
                 System.Windows.Forms.MessageBox.Show("Cannot remove a predefined molecule");
+            }
+        }
+
+        private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol != null)
+            {
+                // Filter out mol if membrane bound 
+                if (mol.molecule_location == MoleculeLocation.Boundary)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
             }
         }
 
