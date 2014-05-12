@@ -156,12 +156,12 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
         }
 
-        // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
+        // Used to specify Gaussian distibution for cell positions
         private void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
         {
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "";
-            // gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
