@@ -72,7 +72,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.Name;
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopGaussian sgg = new MolPopGaussian();
 
@@ -172,7 +172,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.Name;
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopGaussian sgg = new MolPopGaussian();
 
@@ -260,7 +260,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.Name;
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopGaussian sgg = new MolPopGaussian();
 
@@ -343,7 +343,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Constant level";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.Name;
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
@@ -377,7 +377,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Constant level";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.Name;
+                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 

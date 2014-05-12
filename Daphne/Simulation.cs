@@ -127,13 +127,13 @@ namespace Daphne
                                                         mpgg.peak_concentration };
 
 
-                    simComp.AddMolecularPopulation(dataBasket.Molecules[cmp.molecule_guid_ref], "gauss", initArray);
+                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "gauss", initArray);
                 }
                 else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
                     MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution;
 
-                    simComp.AddMolecularPopulation(dataBasket.Molecules[cmp.molecule_guid_ref], "const", new double[] { mphl.concentration });
+                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
                 }
                 else
                 {
@@ -160,29 +160,29 @@ namespace Daphne
                     // reactant 1
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        r1 = comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        r1 = comp.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        r1 = boundary.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        r1 = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     // reactant 2
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        r2 = comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name];
+                        r2 = comp.Populations[cr.reactants_molecule_guid_ref[1]];
                     }
                     else
                     {
-                        r2 = boundary.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name];
+                        r2 = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
                     }
                     // product
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        p = comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        p = comp.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        p = boundary.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        p = boundary.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     comp.Reactions.Add(new BoundaryAssociation(r1, r2, p, cr.rate_const));
                 }
@@ -198,29 +198,29 @@ namespace Daphne
                     // product 1
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        p1 = comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        p1 = comp.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        p1 = boundary.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        p1 = boundary.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     // product 2
                     if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        p2 = comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name];
+                        p2 = comp.Populations[cr.products_molecule_guid_ref[1]];
                     }
                     else
                     {
-                        p2 = boundary.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name];
+                        p2 = boundary.Populations[cr.products_molecule_guid_ref[1]];
                     }
                     // reactant
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        r = comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        r = comp.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        r = boundary.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        r = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     comp.Reactions.Add(new BoundaryDissociation(p1, p2, r, cr.rate_const));
                 }
@@ -237,38 +237,38 @@ namespace Daphne
                     // test reactant 1
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulk = comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name];
+                        receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
                     }
                     // test reactant 2
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulk = comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name];
+                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[1]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name];
+                        receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
                     }
                     // test product 1
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulkActivated = comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        bulkActivated = comp.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name];
+                        receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
                     }
                     // test product 2
                     if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Bulk)
                     {
-                        bulkActivated = comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name];
+                        bulkActivated = comp.Populations[cr.products_molecule_guid_ref[1]];
                     }
                     else
                     {
-                        receptor = boundary.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name];
+                        receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
                     }
                     // if any is null, throw an exception
                     if (bulk == null || bulkActivated == null || receptor == null)
@@ -279,100 +279,100 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
-                    comp.Reactions.Add(new Association(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                       comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name],
-                                                       comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
                                                        cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
                 {
-                    comp.Reactions.Add(new Association(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                       comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
-                                                       comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name],
+                    comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                       comp.Populations[cr.products_molecule_guid_ref[1]],
                                                        cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Annihilation)
                 {
-                    comp.Reactions.Add(new Annihilation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                         cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dimerization)
                 {
-                    comp.Reactions.Add(new Dimerization(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                        comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new Dimerization(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
                                                         cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.DimerDissociation)
                 {
-                    comp.Reactions.Add(new DimerDissociation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                             comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new DimerDissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                              cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transformation)
                 {
-                    comp.Reactions.Add(new Transformation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                          comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new Transformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                          comp.Populations[cr.products_molecule_guid_ref[0]],
                                                           cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.AutocatalyticTransformation)
                 {
-                    comp.Reactions.Add(new AutocatalyticTransformation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                       comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new AutocatalyticTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                       comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                        cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAnnihilation)
                 {
-                    comp.Reactions.Add(new CatalyzedAnnihilation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAssociation)
                 {
-                    comp.Reactions.Add(new CatalyzedAssociation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                                comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name],
-                                                                comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedAssociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                                comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                 cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAnnihilation)
                 {
-                    comp.Reactions.Add(new CatalyzedAnnihilation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedAnnihilation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedCreation)
                 {
-                    comp.Reactions.Add(new CatalyzedCreation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                             comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedCreation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                              cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerization)
                 {
-                    comp.Reactions.Add(new CatalyzedDimerization(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedDimerization(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDimerDissociation)
                 {
-                    comp.Reactions.Add(new CatalyzedDimerDissociation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                      comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                                      comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedDimerDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                      comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                      comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                       cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedDissociation)
                 {
-                    comp.Reactions.Add(new CatalyzedDissociation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
-                                                                 comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name],
+                    comp.Reactions.Add(new CatalyzedDissociation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
+                                                                 comp.Populations[cr.products_molecule_guid_ref[1]],
                                                                  cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedTransformation)
                 {
-                    comp.Reactions.Add(new CatalyzedTransformation(comp.Populations[er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name],
-                                                                   comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                                                                   comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
+                    comp.Reactions.Add(new CatalyzedTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
+                                                                   comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                   comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                    cr.rate_const));
                 }
             }
@@ -466,7 +466,7 @@ namespace Daphne
 
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "")
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.molecules_dict[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref].Name];
+                        MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
 
                         cell.Locomotor = new Locomotor(driver, sc.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
                         cell.IsMotile = true;
@@ -560,7 +560,10 @@ namespace Daphne
             {
                 localStep = Math.Min(integratorStep, dt - t);
                 dataBasket.ECS.Space.Step(localStep);
-                collisionManager.Step(localStep);
+                if (collisionManager != null)
+                {
+                    collisionManager.Step(localStep);
+                }
                 cellManager.Step(localStep);
                 t += localStep;
             }

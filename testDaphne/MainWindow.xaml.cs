@@ -24,7 +24,6 @@ namespace testDaphne
         //private int nSteps;
         private ReactionsConfigurator config;
 
-        private Dictionary<string, Molecule> MolDict;
         private static Simulation sim;
 
         public static Simulation Sim
@@ -404,7 +403,7 @@ namespace testDaphne
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
             string molSpec = "CXCR5\t1.0\t0.0\t0.0\nCXCL13\t\t\t6.0e2\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t1.0e3\ndriverA\t\t\t1.0\nCXCL12\t7.96\t\t6.0e3\n";
-            MolDict = MoleculeBuilder.Go(molSpec);
+            Simulation.dataBasket.Molecules = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
             config.deserialize("ReacSpecFile1.xml");
@@ -470,12 +469,12 @@ namespace testDaphne
                                                     extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
                                                     midConc };
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "gauss", initArray);
 
             //// Add a ligand MolecularPopulation whose concentration (molecules/um^3) is linear in x
 
-            ////Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { midConc });
-            //Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "linear", new double[] { leftConc, 0.0, 0.0, extent[0], 0.0 });
+            ////Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "const", new double[] { midConc });
+            //Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "linear", new double[] { leftConc, 0.0, 0.0, extent[0], 0.0 });
 
             Manifold m;
             ScalarField sf;
@@ -522,15 +521,15 @@ namespace testDaphne
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 255.0 });
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 0.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation("CXCR5", "const", new double[] { 255.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation("CXCR5:CXCL13", "const", new double[] { 0.0 });
             }
 
             // Add Cytosol molecular populations
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
-                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], "const", new double[] { 250.0 });
-                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driverA"], "const", new double[] { 0.0 });
+                kvp.Value.Cytosol.AddMolecularPopulation("driver", "const", new double[] { 250.0 });
+                kvp.Value.Cytosol.AddMolecularPopulation("driverA", "const", new double[] { 0.0 });
             }
 
             //
@@ -577,7 +576,7 @@ namespace testDaphne
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            MolDict = MoleculeBuilder.Go(molSpec);
+            Simulation.dataBasket.Molecules = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
             config.deserialize("ReacSpecFile1.xml");
@@ -632,7 +631,7 @@ namespace testDaphne
                                                 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "gauss", initArray);
             //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
             Simulation.dataBasket.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
 
@@ -640,8 +639,8 @@ namespace testDaphne
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 255.0 });
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 0.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation("CXCR5", "const", new double[] { 255.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation("CXCR5:CXCL13", "const", new double[] { 0.0 });
             }
 
             //
@@ -680,7 +679,7 @@ namespace testDaphne
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            MolDict = MoleculeBuilder.Go(molSpec);
+            Simulation.dataBasket.Molecules = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
             config.deserialize("ReacSpecFile1.xml");
@@ -719,7 +718,7 @@ namespace testDaphne
                                                 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "gauss", initArray);
             Simulation.dataBasket.ECS.Space.Populations["CXCL13"].IsDiffusing = true;
         }
 
@@ -773,7 +772,7 @@ namespace testDaphne
             // Increase diffusion coefficient for CXCL13 by factor of 10 to speedup testing.
             //
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e4\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            MolDict = MoleculeBuilder.Go(molSpec);
+            Simulation.dataBasket.Molecules = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
             config.deserialize("ReacSpecFile1.xml");
@@ -813,7 +812,7 @@ namespace testDaphne
             slope = (max - min) / inm.Extent(0);
 
             // Add CXCL13 uniform concentration
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { (max + min) / 2.0 });
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "const", new double[] { (max + min) / 2.0 });
 
             MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations["CXCL13"];
             flux = 1e6 * slope * mp.Molecule.DiffusionCoefficient;
@@ -935,7 +934,7 @@ namespace testDaphne
             // Increase diffusion coefficient for CXCL13 by factor of 100 to speedup testing.
             //
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e5\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            MolDict = MoleculeBuilder.Go(molSpec);
+            Simulation.dataBasket.Molecules = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
             config.deserialize("ReacSpecFile1.xml");
@@ -963,7 +962,7 @@ namespace testDaphne
             //
 
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { 5.0 });
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation("CXCL13", "const", new double[] { 5.0 });
 
             //
             // Add Dirichlet boundary conditions to the ECM

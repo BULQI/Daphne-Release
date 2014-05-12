@@ -46,11 +46,9 @@ namespace Daphne
                 mol[i] = new Molecule(Name, MolecularWeight, EffectiveRadius, DiffusionCoefficient);
 
                 molDict.Add(mol[i].Name, mol[i]);
-
             }
 
             return molDict;
-
         }
     }
 }

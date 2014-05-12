@@ -422,7 +422,7 @@ namespace Daphne
                 else
                 {
                     // Product molecular population does not exist. Add it to the compartment containing the embedded manifold.
-                    C2.AddMolecularPopulation(MolDict[spRef.species], "const", new double[] { 0.0 });
+                    C2.AddMolecularPopulation(spRef.species, "const", new double[] { 0.0 });
                     prodComp.Add(C2);
                 }
             }

@@ -110,7 +110,10 @@ namespace ManifoldRing
             {
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(flux.M.PrincipalPoints[i])));
-                temp.array[n] += 2 * flux.Value(flux.M.PrincipalPoints[i]) / m.StepSize();
+                if (n >= 0 && n < temp.array.Length)
+                {
+                    temp.array[n] += 2 * flux.Value(flux.M.PrincipalPoints[i]) / m.StepSize();
+                }
             }
             return temp;
         }
@@ -159,7 +162,10 @@ namespace ManifoldRing
 
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(from.M.PrincipalPoints[i])));
-                sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
+                if (n >= 0 && n < sf.array.Length)
+                {
+                    sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
+                }
 
                 //Console.WriteLine("\t" + n);
 

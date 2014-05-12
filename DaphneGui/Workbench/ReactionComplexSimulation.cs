@@ -96,7 +96,7 @@ namespace Workbench
 
             foreach (KeyValuePair<string, Molecule> kvp in grc.MolDict)
             {
-                rc.AddMolecularPopulation(kvp.Value, "const", new double[] { 2.0 });
+                rc.AddMolecularPopulation(kvp.Key, "const", new double[] { 2.0 });
             }
 
             foreach (ConfigReaction grt in rc.ReactionsInComplex)
