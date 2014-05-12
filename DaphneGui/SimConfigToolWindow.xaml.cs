@@ -989,7 +989,7 @@ namespace DaphneGui
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
         }
-
+#if CELL_REGIONS
         public void SelectRegionInGUI(int index, string guid)
         {
             // Regions are in the second (entities) tab panel
@@ -999,7 +999,7 @@ namespace DaphneGui
             //RegionsListBox.SelectedValuePath = "region_box_spec_guid_ref";
             //RegionsListBox.SelectedValue = guid;
         }
-
+#endif
         public void SelectGaussSpecInGUI(int index, string guid)
         {
             // Gaussian specs are in the third tab panel
@@ -1031,7 +1031,6 @@ namespace DaphneGui
                 {
                     // Select the correct region/solfac/gauss_spec in the GUI's lists
                     bool gui_spot_found = false;
-
 #if CELL_REGIONS
                     for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
                     {

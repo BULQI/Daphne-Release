@@ -563,7 +563,6 @@ namespace DaphneGui
 
                 // next time around, force a reset
                 MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
-
 #if CELL_REGIONS
                 // hide the cell regions
                 foreach (Region rr in configurator.SimConfig.scenario.regions)
@@ -576,7 +575,6 @@ namespace DaphneGui
                     rr.region_visibility = false;
                 }
 #endif
-
                 // hide the regions used to control Gaussians
                 foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
                 {
@@ -1344,7 +1342,6 @@ namespace DaphneGui
                 MainWindow.GC.Rwc.Invalidate();
             }
         }
-
 #if CELL_REGIONS
         public static void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
         {

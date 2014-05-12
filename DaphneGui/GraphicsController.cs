@@ -1847,7 +1847,7 @@ namespace DaphneGui
 
             Regions.Add(box_guid, rw);
         }
-
+#if CELL_REGIONS
         public void AddRegionRegionWidget(Region rr)
         {
             string box_guid = rr.region_box_spec_guid_ref;
@@ -1872,7 +1872,7 @@ namespace DaphneGui
 
             Regions.Add(box_guid, rw);
         }
-
+#endif
         public void RemoveRegionWidget(string current_guid)
         {
             Regions[current_guid].ShowWidget(false);
