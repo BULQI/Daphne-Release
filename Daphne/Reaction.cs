@@ -458,6 +458,72 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Transport of material from bulk to boundary
+    /// </summary>
+    public class BoundaryTransportFrom : Reaction
+    {
+        MolecularPopulation membrane;
+        MolecularPopulation bulk;
+        Manifold boundary;
+        double fluxIntensityConstant;
+
+        public BoundaryTransportFrom(MolecularPopulation _membrane, MolecularPopulation _bulk, double _RateConst)
+        {
+            bulk = _bulk;
+            membrane = _membrane;
+            boundary = membrane.Man;
+            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            RateConstant = _RateConst;
+
+            if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
+            {
+                throw new Exception("Membrane and boundary concentration manifolds are unequal.");
+            }
+        }
+
+        public override void Step(double dt)
+        {
+            intensity = (RateConstant * dt) * bulk.BoundaryConcs[boundary.Id];
+
+            bulk.BoundaryFluxes[boundary.Id] -= fluxIntensityConstant * intensity;
+            membrane.Conc -= intensity;
+        }
+    }
+
+    /// <summary>
+    /// Transport of material from bulk to boundary
+    /// </summary>
+    public class BoundaryTransportTo : Reaction
+    {
+        MolecularPopulation membrane;
+        MolecularPopulation bulk;
+        Manifold boundary;
+        double fluxIntensityConstant;
+
+        public BoundaryTransportTo(MolecularPopulation _bulk, MolecularPopulation _membrane, double _RateConst)
+        {
+            bulk = _bulk;
+            membrane = _membrane;
+            boundary = membrane.Man;
+            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            RateConstant = _RateConst;
+
+            if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
+            {
+                throw new Exception("Membrane and boundary concentration manifolds are unequal.");
+            }
+        }
+
+        public override void Step(double dt)
+        {
+            intensity = (RateConstant * dt) * bulk.BoundaryConcs[boundary.Id];
+
+            bulk.BoundaryFluxes[boundary.Id] += fluxIntensityConstant * intensity;
+            membrane.Conc += intensity;
+        }
+    }
+
     public class CatalyzedBoundaryActivation : Reaction
     {
         MolecularPopulation bulk;
