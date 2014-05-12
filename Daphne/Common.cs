@@ -12,28 +12,8 @@ using ManifoldRing;
 namespace Daphne
 {
     /// <summary>
-    /// to be removed!
-    /// this is a fake config only; all this should be part of the SimConfig in some way
+    /// Ninject needs this for handling factories (resolving names)
     /// </summary>
-    public class FakeConfig
-    {
-        static FakeConfig()
-        {
-            simInterpolate = SimStates.Linear;
-            simCellSize = SimStates.Tiny;
-            gridStep = 10;
-            numGridPts = new int[] { 21, 21, 21 };
-            toroidal = false;
-        }
-
-        // these are static for simplicity only; they more than likely should be instance members in SimConfig
-        public static SimStates simInterpolate { get; set; }
-        public static SimStates simCellSize { get; set; }
-        public static double gridStep { get; set; }
-        public static int[] numGridPts { get; set; }
-        public static bool toroidal { get; set; }
-    }
-
     public class CustomInstanceProvider : StandardInstanceProvider
     {
         protected override string GetName(System.Reflection.MethodInfo methodInfo, object[] arguments)
@@ -57,17 +37,6 @@ namespace Daphne
         public SimulationModule(Scenario scenario)
             : base()
         {
-            // hack to get this to work for now
-            if (scenario == null)
-            {
-                scenario = new Scenario();
-                scenario.simInterpolate = FakeConfig.simInterpolate;
-                scenario.simCellSize = FakeConfig.simCellSize;
-                scenario.environment.NumGridPts = FakeConfig.numGridPts;
-                scenario.environment.gridstep = FakeConfig.gridStep;
-                scenario.environment.toroidal = FakeConfig.toroidal;
-            }
-            // end hack
             this.scenario = scenario;
         }
 
