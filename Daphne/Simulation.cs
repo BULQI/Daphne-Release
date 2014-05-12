@@ -229,7 +229,6 @@ namespace Daphne
                                 x2, 
                                 mpl.dim});
                 }
-
                 else
                 {
                     throw new Exception("Molecular population distribution type not implemented.");
@@ -481,12 +480,14 @@ namespace Daphne
             }
         }
 
-        public bool Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex=false)
+        public void Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex=false)
         {
             Scenario scenario = sc.scenario;
 
             if (is_reaction_complex == true)
+            {
                 scenario = sc.rc_scenario;
+            }
 
             duration = scenario.time_config.duration;
             sampleStep = scenario.time_config.sampling_interval;
@@ -497,7 +498,7 @@ namespace Daphne
             // exit if no reset required
             if (completeReset == false)
             {
-                return true;
+                return;
             }
 
             // executes the ninject bindings; call this after the config is initialized with valid values
@@ -661,8 +662,6 @@ namespace Daphne
             // general parameters
             Pair.Phi1 = sc.sim_params.phi1;
             Pair.Phi2 = sc.sim_params.phi2;
-
-            return true;
         }
         
         public void RunForward()

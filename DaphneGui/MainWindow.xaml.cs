@@ -234,7 +234,14 @@ namespace DaphneGui
 
             this.ToolWinCellInfo.Close();
 
-            CreateAndSerializeDaphneScenarios();
+            try
+            {
+                CreateAndSerializeDaphneScenarios();
+            }
+            catch(Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -1611,25 +1618,21 @@ namespace DaphneGui
                     }
                     catch
                     {
-                        //MessageBoxResult tmp = MessageBox.Show("That configuration has problems. Please select another experiment.");
                         handleLoadFailure("That configuration has problems. Please select another experiment.");
                         return;
                     }
                 }
                 else
                 {
-                    configurator = new SimConfigurator(scenario_path.LocalPath);
                     // catch xaml parse exception if it's not a good sim config file
                     try
                     {
+                        configurator = new SimConfigurator(scenario_path.LocalPath);
                         configurator.DeserializeSimConfig(tempFileContent);
                         //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        string output = string.Format("Error deserializing: {0}", e.Message);
-                        MessageBox.Show(output);
-                        //MessageBox.Show("There is a problem loading the configuration file.\nPress OK, then try to load another.", "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
                         handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
                         return;
                     }
@@ -1659,9 +1662,13 @@ namespace DaphneGui
             this.SimConfigToolWindow.DataContext = configurator.SimConfig;
 
             // set up the simulation
-            if (sim.Load(configurator.SimConfig, completeReset) == false)
+            try
             {
-                handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
+                sim.Load(configurator.SimConfig, completeReset);
+            }
+            catch (Exception e)
+            {
+                handleLoadFailure(exceptionMessage(e));
                 return;
             }
 
@@ -1712,19 +1719,47 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// blank the vtk screen and bulk of the gui
+        /// display an exception message
         /// </summary>
+        /// <param name="e">the exception</param>
+        private string exceptionMessage(Exception e)
+        {
+            string msg = e.Message;
+
+            // output the stack for developers
+            if (AssumeIDE() == true)
+            {
+                msg += "\n\n" + e.StackTrace;
+            }
+            return msg;
+        }
+
+        /// <summary>
+        /// show a message box with a string to respond to an exception
+        /// </summary>
+        /// <param name="s">exception message to display</param>
+        private void showExceptionBox(string s)
+        {
+            MessageBox.Show(s, "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>
+        /// handle a problem during loading: blank the vtk screen and bulk of the gui
+        /// </summary>
+        /// <param name="s">message to display</param>
         private void handleLoadFailure(string s)
         {
             loadSuccess = false;
             configurator.SimConfig = new SimConfiguration();
             configurator.SimConfig.experiment_name = "";
             configurator.SimConfig.experiment_description = "";
+            orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
             SimConfigToolWindow.DataContext = configurator.SimConfig;
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
             displayTitle("");
-            MessageBox.Show(s, "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
+            showExceptionBox(s);
         }
 
         /// <summary>
@@ -1752,46 +1787,64 @@ namespace DaphneGui
                     if (sim.RunStatus == Simulation.RUNSTAT_RUN)
                     {
                         // run the simulation forward to the next task
-                        sim.RunForward();
-
-                        // check for flags and execute applicable task(s)
-                        if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
+                        if (AssumeIDE() == true)
                         {
-                            UpdateGraphics();
+                            sim.RunForward();
                         }
-                        if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                        else
                         {
-                            reporter.AppendReporter(configurator.SimConfig, sim);
-                        }
-
-                        if (sim.RunStatus != Simulation.RUNSTAT_RUN)
-                        {
-                            // never rerun the simulation if the simulation was aborted
-                            if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                            try
                             {
-                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                                sim.RunForward();
                             }
-                            else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                            catch (Exception e)
                             {
-                                // autosave the state
-                                if (argSave == true)
-                                {
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
-                                }
-                                // close the reporter
-                                if (Properties.Settings.Default.skipDataBaseWrites == false)
-                                {
-                                    reporter.CloseReporter();
-                                }
-                                // for profiling: close the application after a completed experiment
-                                if (ControlledProfiling() == true && repetition >= configurator.SimConfig.experiment_reps)
-                                {
-                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
-                                    return;
-                                }
+                                showExceptionBox(exceptionMessage(e));
+                                sim.RunStatus = Simulation.RUNSTAT_ABORT;
+                            }
+                        }
 
-                                // update the gui; this is a non-issue if an application close just got requested, so may get skipped
-                                runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                        if (sim.RunStatus != Simulation.RUNSTAT_ABORT)
+                        {
+                            // check for flags and execute applicable task(s)
+                            if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
+                            {
+                                UpdateGraphics();
+                            }
+                            if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                            {
+                                reporter.AppendReporter(configurator.SimConfig, sim);
+                            }
+
+                            if (sim.RunStatus != Simulation.RUNSTAT_RUN)
+                            {
+                                // never rerun the simulation if the simulation was aborted
+                                if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                                {
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
+                                }
+                                else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                                {
+                                    // autosave the state
+                                    if (argSave == true)
+                                    {
+                                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
+                                    }
+                                    // close the reporter
+                                    if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                    {
+                                        reporter.CloseReporter();
+                                    }
+                                    // for profiling: close the application after a completed experiment
+                                    if (ControlledProfiling() == true && repetition >= configurator.SimConfig.experiment_reps)
+                                    {
+                                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
+                                        return;
+                                    }
+
+                                    // update the gui; this is a non-issue if an application close just got requested, so may get skipped
+                                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
+                                }
                             }
                         }
                     }
