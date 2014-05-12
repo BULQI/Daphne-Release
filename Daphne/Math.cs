@@ -825,19 +825,11 @@ namespace Daphne
         }
         public override LocalMatrix[][] GradientOperator(int index)
         {
-            // Linear estimate of gradient
-
-            //int[] idx = localToArr(point);
-
-            //if (idx == null)
-            //{
-            //    return null;
-            //}
 
             int j = (int)(index / NumPoints[0]);
             int i = (int)(index - j * NumPoints[0]);
 
-            if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1))
+            if ((i < 0) || (i > NumPoints[0] - 1) || (j < 0) || (j > NumPoints[1] - 1))
             {
                 return null;
             }
