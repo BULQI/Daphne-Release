@@ -1217,6 +1217,20 @@ namespace Daphne
             return gm;
         }
 
+        // given a gene name, find its guid
+        public string findGeneGuid(string name, SimConfiguration sc)
+        {
+            foreach (ConfigGene gene in sc.entity_repository.genes)
+            {
+                if (gene.Name == name)
+                {
+                    return gene.gene_guid;
+                }
+            }
+            return null;
+        }
+
+
         /// <summary>
         /// Select transcription reactions in the compartment.
         /// </summary>
@@ -2383,7 +2397,7 @@ namespace Daphne
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
     
-    public class ConfigDiffScheme 
+    public class ConfigDiffScheme : EntityModelBase
     {
         public string diff_scheme_guid { get; set; }
         public string Name { get; set; }
@@ -2393,7 +2407,20 @@ namespace Daphne
    
         //Epigenetic map information
         //  Genes (guids) affected by differentiation states
-        public ObservableCollection<string> genes { get; set; }
+        private ObservableCollection<string> _genes;
+        public ObservableCollection<string> genes 
+        {
+            get
+            {
+                return _genes;
+            }
+            set
+            {
+                _genes = value;
+                OnPropertyChanged("genes");
+            }
+        }
+
         //  Gene activations for each state
         //  The order of states (rows) should match the order in Drive.states
         public ObservableCollection<ConfigActivationRow> activationRows { get; set; }
@@ -2402,20 +2429,45 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             diff_scheme_guid = id.ToString();
+            //genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
+
+        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("genes");
+        }
+        
     }
 
-    public class ConfigActivationRow
+    public class ConfigActivationRow : EntityModelBase
     {
-        public ObservableCollection<double> activations { get; set; }
+        private ObservableCollection<double> _activations;
+        public ObservableCollection<double> activations
+        {
+            get
+            {
+                return _activations;
+            }
+            set
+            {
+                _activations = value;
+                OnPropertyChanged("activations");
+            }
+        }
 
         public ConfigActivationRow()
         {
             activations = new ObservableCollection<double>();
+            activations.CollectionChanged += new NotifyCollectionChangedEventHandler(activations_CollectionChanged);
+        }
+
+        private void activations_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("activations");
         }
     }
 
-    public enum ExtendedReport { NONE, LEAN, COMPLETE };
+    public enum ExtendedReport { NONE, LEAN, COMPLETE }; 
 
     public class ReportMP
     {
@@ -4499,6 +4551,45 @@ namespace Daphne
             }
 
             return retval;
+        }
+    }
+
+    /// <summary>
+    /// Differentiation Scheme Guid to Differentiation Scheme Name converter
+    /// 
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class DiffGUIDtoDiffNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string diff_name = "";
+
+            if (parameter == null || guid == null)
+                return diff_name;
+
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigDiffScheme> diff_list = cvs.Source as ObservableCollection<ConfigDiffScheme>;
+            if (diff_list != null)
+            {
+                foreach (ConfigDiffScheme d in diff_list)
+                {
+                    if (d.diff_scheme_guid == guid)
+                    {
+                        diff_name = d.Name;
+                        break;
+                    }
+                }
+            }
+            return diff_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
         }
     }
 

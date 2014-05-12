@@ -62,6 +62,7 @@
             <daph:DeathDriverGuidToAlphaConverter x:Key="DeathDriverGuidToAlphaConv" />
             <daph:DeathDriverGuidToBetaConverter x:Key="DeathDriverGuidToBetaConv" />
             <daph:DeathDriverGuidToDriverElementConverter x:Key="DeathDriverGuidToDriverElementConv" />
+            <daph:DiffGUIDtoDiffNameConverter x:Key="DiffGUIDtoDiffNameConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -4330,10 +4331,12 @@
 
                                                 <!-- DIFFERENTIATION SCHEME -->
                                                 <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                                    <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
-                                                    <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,10,0,0" 
-                                                                Text="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme_guid_ref}"  >
-                                                    </TextBox>
+                                                    <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
+                                                        <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" 
+                                                                Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.diff_scheme_guid_ref, 
+                                                                                Converter={StaticResource DiffGUIDtoDiffNameConv}, 
+                                                                                ConverterParameter={StaticResource diffSchemesListView}}" >
+                                                        </TextBox>
                                                 </StackPanel>
 
                                                 <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
@@ -4387,14 +4390,23 @@
                                                 <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
                                                             AutoGenerateColumns="False"
                                                             IsReadOnly="False"
-                                                            CanUserAddRows="True"                                                             
+                                                            CanUserAddRows="True"       
+                                                            CanUserReorderColumns="False"
+                                                            CanUserSortColumns="False"
                                                             AlternatingRowBackground="Beige"
                                                             SelectionMode="Single"
                                                             SelectionUnit="Cell"
                                                             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
-                                                           PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+                                                            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
                                                             >
 
+                                                    <DataGrid.ContextMenu>
+                                                        <ContextMenu >
+                                                            <MenuItem Header="Delete Selected Genes" Name="menuDeleteGenes" Click="menuDeleteGenes_Click"></MenuItem>
+                                                            <MenuItem Header="Delete Selected States" Name="menuDeleteStates" Click="menuDeleteStates_Click"></MenuItem>
+                                                        </ContextMenu>
+                                                    </DataGrid.ContextMenu>
+                                                    
                                                     <DataGrid.Resources>
                                                         <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
                                                             <Setter Property="Background" Value="Transparent" />

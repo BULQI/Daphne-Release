@@ -2870,13 +2870,18 @@ namespace DaphneGui
                 return;
             }
 
-            if (cell.diff_scheme_guid_ref == null)
+            //Clear the grids
+            EpigeneticMapGrid.Columns.Clear();
+            DiffRegGrid.Columns.Clear();
+
+            //if cell does not have a diff scheme, return
+            if (cell.diff_scheme_guid_ref == null || cell.diff_scheme_guid_ref.Length == 0)
                 return;
 
+            //Get the diff_scheme using the guid
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
             //EPIGENETIC MAP SECTION
-            EpigeneticMapGrid.Columns.Clear();
             EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
             EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
 
@@ -2888,68 +2893,71 @@ namespace DaphneGui
                 DataGridTextColumn col = new DataGridTextColumn();
                 col.Header = gene.Name;                
                 col.CanUserSort = false;
-                col.Binding = new Binding(string.Format("activations[{0}]", nn));
+                Binding b = new Binding(string.Format("activations[{0}]", nn));
+                b.Mode = BindingMode.TwoWay;
+                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                col.Binding = b;
                 EpigeneticMapGrid.Columns.Add(col);
                 nn++;
             }
 
-            //Begin - This code below adds an extra column to the epigenetic grid
-            //        This allows the user to add genes to the grid
-            DataGridTextColumn editor_col = new DataGridTextColumn();
-            editor_col.CanUserSort = false;
-            DataGridRowHeader header = new DataGridRowHeader();
-            DataTemplate rowHeaderTemplate = new DataTemplate();
-
-            CollectionViewSource cvs1 = new CollectionViewSource();
-            cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
-            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
-            
-
-            CompositeCollection coll1 = new CompositeCollection();
-            ComboBoxItem nullItem1 = new ComboBoxItem();
-            nullItem1.IsEnabled = true;
-            nullItem1.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            //nullItem1.Content = "Add a gene";
-            nullItem1.SetValue(ComboBoxItem.ContentProperty, "Add a gene");
-            coll1.Add(nullItem1);
-            CollectionContainer cc1 = new CollectionContainer();
-            cc1.Collection = cvs1.View;
-            coll1.Add(cc1);
-
-            //Binding bb = new Binding("coll1");
-            //bb.Mode = BindingMode.TwoWay;
-            //bb.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-
-            FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
-            addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
-            addGenesCombo.SetValue(ComboBox.SelectedValueProperty, nullItem1.Content);
-            //addGenesCombo.SetBinding(ComboBox.ItemsSourceProperty, coll1);
-            addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
-            
-            //addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, cvs1.View);
-
-            addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
-            addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
-            addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
-
-            rowHeaderTemplate.VisualTree = addGenesCombo;
-            header.ContentTemplate = rowHeaderTemplate;
-            editor_col.Header = header;
+            //Create a column that allows the user to add genes to the grid
+            DataGridTextColumn editor_col = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(editor_col);
-            //End 
+
+
+            ////DataGridTextColumn editor_col = new DataGridTextColumn();
+            ////editor_col.CanUserSort = false;
+            ////DataGridRowHeader header = new DataGridRowHeader();
+            ////DataTemplate rowHeaderTemplate = new DataTemplate();
+
+            ////CollectionViewSource cvs1 = new CollectionViewSource();
+            ////cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
+            ////cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+            
+            ////CompositeCollection coll1 = new CompositeCollection();
+            //////ComboBoxItem nullItem1 = new ComboBoxItem();
+            ////ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
+            //////nullItem1.IsEnabled = true;
+            //////nullItem1.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            //////nullItem1.SetValue(ComboBoxItem.ContentProperty, "Add a gene");
+            ////coll1.Add(dummyItem);
+            ////CollectionContainer cc1 = new CollectionContainer();
+            ////cc1.Collection = cvs1.View;
+            ////coll1.Add(cc1);
+
+            //////Binding bb = new Binding("coll1");
+            //////bb.Mode = BindingMode.TwoWay;
+            //////bb.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+
+            ////FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
+            ////addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            
+            //////addGenesCombo.SetValue(ComboBox.SelectedValueProperty, nullItem1.Content);
+            //////addGenesCombo.SetBinding(ComboBox.ItemsSourceProperty, coll1);
+            ////addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
+            
+            //////addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, cvs1.View);
+
+            ////addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
+            ////addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
+            ////addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
+
+            ////addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
+
+            ////rowHeaderTemplate.VisualTree = addGenesCombo;
+            ////header.ContentTemplate = rowHeaderTemplate;
+            ////editor_col.Header = header;
+            ////EpigeneticMapGrid.Columns.Add(editor_col);
+            //////End 
 
             EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
 
-            
 
+            //----------------------------------
             //DIFFERENTIATION REGULATORS SECTION
-            ObservableCollection<ConfigTransitionDriverRow> TransitionData = diff_scheme.Driver.DriverElements;
 
-            DiffRegGrid.Columns.Clear();
-            DiffRegGrid.DataContext = diff_scheme.Driver;
-            DiffRegGrid.ItemsSource = TransitionData;
-
+            DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
             DiffRegGrid.CanUserAddRows = true;
             DiffRegGrid.CanUserDeleteRows = true;
 
@@ -3045,7 +3053,7 @@ namespace DaphneGui
                 FrameworkElementFactory comboMolPops = new FrameworkElementFactory(typeof(ComboBox));
                 comboMolPops.Name = "MolPopComboBox";
 
-                //------ Testing composite collection to insert "None" item
+                //------ Use a composite collection to insert "None" item
                 CompositeCollection coll = new CompositeCollection();
                 ComboBoxItem nullItem = new ComboBoxItem();
                 nullItem.IsEnabled = true;
@@ -3056,11 +3064,8 @@ namespace DaphneGui
                 cc.Collection = cell.cytosol.molpops;
                 coll.Add(cc);
                 comboMolPops.SetValue(ComboBox.ItemsSourceProperty, coll);
+
                 //--------------
-
-                ////comboMolPops.SetValue(ComboBox.ItemsSourceProperty, cell.cytosol.molpops);
-
-                //---------------------
 
                 comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
                 comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
@@ -3074,9 +3079,6 @@ namespace DaphneGui
                 b3.ConverterParameter = cell.cytosol;
                 comboMolPops.SetBinding(ComboBox.SelectedValueProperty, b3);
                 comboMolPops.SetValue(ComboBox.ToolTipProperty, "Mol Pop Name");
-
-                //comboMolPops.SetValue(ComboBox.DataContextProperty, elements[i]);
-                //comboMolPops.SetBinding(ComboBox.DataContextProperty, new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i)));
 
                 spFactory.AppendChild(comboMolPops);
 
@@ -3157,8 +3159,6 @@ namespace DaphneGui
 
                 //---------------------------
 
-                
-
                 //set the visual tree of the data template
                 cellEditingTemplate.VisualTree = spFactory;
 
@@ -3170,10 +3170,49 @@ namespace DaphneGui
                 i++;
             }
 
-            
-
             DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(DiffRegItemContainerGenerator_StatusChanged);
       
+        }
+
+        /// <summary>
+        /// This method creates a data grid column with a combo box in the header.
+        /// The combo box contains genes that are not in the epigenetic map of of 
+        /// the selected cell's differentiation scheme.  
+        /// This allows the user to add genes to the epigenetic map.
+        /// </summary>
+        /// <returns></returns>
+        private DataGridTextColumn CreateUnusedGenesColumn(EntityRepository er)
+        {
+            DataGridTextColumn editor_col = new DataGridTextColumn();
+            editor_col.CanUserSort = false;
+            DataGridRowHeader header = new DataGridRowHeader();
+            DataTemplate rowHeaderTemplate = new DataTemplate();
+
+            CollectionViewSource cvs1 = new CollectionViewSource();
+            cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
+            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
+
+            CompositeCollection coll1 = new CompositeCollection();
+            ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
+            coll1.Add(dummyItem);
+            CollectionContainer cc1 = new CollectionContainer();
+            cc1.Collection = cvs1.View;
+            coll1.Add(cc1);
+
+            FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
+            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
+            addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
+            addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
+            addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
+            addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
+
+            addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
+
+            rowHeaderTemplate.VisualTree = addGenesCombo;
+            header.ContentTemplate = rowHeaderTemplate;
+            editor_col.Header = header;
+
+            return editor_col;
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -3195,9 +3234,6 @@ namespace DaphneGui
                 DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
                 // do something
                 DataGridBehavior.SetHighlightColumn(columnHeader.Column, true);
-                //columnHeader.Column.SetValue(DataGridColumn.Highlight
-	            //MessageBox.Show(columnHeader.Column.Header.ToString());
-		        //MessageBox.Show(columnHeader.Column.DisplayIndex.ToString());
             }
  
             if (dep is DataGridCell)
@@ -3233,18 +3269,20 @@ namespace DaphneGui
             return value;
         }
 
-
-
-
         //-----------------------------------------
 
         /// <summary>
-        /// This handler gets called when user clicks on the "add genes" combo box in the upper right of the epigenetic map data grid
+        /// This handler gets called when user selects a gene in the "add genes" 
+        /// combo box in the upper right of the epigenetic map data grid.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         public void comboAddGeneToEpigeneticMap_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            ComboBox combo = sender as ComboBox;
+            if (combo.SelectedIndex <= 0)
+                return;
+
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
@@ -3253,13 +3291,18 @@ namespace DaphneGui
                 return;
 
             ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
-            ComboBox combo = sender as ComboBox;
+            
+            ConfigGene gene = null;
 
             if (combo != null && combo.Items.Count > 0)
             {
+                //Skip 0'th combo box item because it is the "None" string
                 if (combo.SelectedIndex > 0)
                 {
-                    ConfigGene gene = (ConfigGene)combo.SelectedItem;
+                    gene = (ConfigGene)combo.SelectedItem;       
+                    if (gene == null)
+                        return;
+
                     if (!scheme.genes.Contains(gene.gene_guid))
                     {
                         scheme.genes.Add(gene.gene_guid);
@@ -3270,6 +3313,23 @@ namespace DaphneGui
                     }
                 }
             }
+
+            if (gene == null)
+                return;
+
+            //Have to refresh the data grid!
+            DataGridTextColumn col = new DataGridTextColumn();
+            col.Header = gene.Name;
+            col.CanUserSort = false;
+            Binding b = new Binding(string.Format("activations[{0}]", EpigeneticMapGrid.Columns.Count-1));
+            b.Mode = BindingMode.TwoWay;
+            b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            col.Binding = b;
+            EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count-1, col);
+
+            combo.SelectedIndex = 0;
+
+            //DiffSchemeExpander_Expanded(null, null);
         }
 
         //For adding a state
@@ -3609,6 +3669,54 @@ namespace DaphneGui
         }
 
         private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// This method is called on right-click + "delete selected genes", 
+        /// on the epigenetic map data grid. Selected columns (genes) will 
+        /// get deleted.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void menuDeleteGenes_Click(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+            {
+                return;
+            }
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            foreach (DataGridTextColumn col in EpigeneticMapGrid.Columns.ToList())
+            {
+                bool isSelected = DataGridBehavior.GetHighlightColumn(col);
+                string gene_name = col.Header as string;
+                string guid = MainWindow.SC.SimConfig.findGeneGuid(gene_name, MainWindow.SC.SimConfig);
+                if (isSelected && guid != null && guid.Length > 0)
+                {
+                    diff_scheme.genes.Remove(guid);
+                    EpigeneticMapGrid.Columns.Remove(col);
+                }
+            }
+
+            //This deletes the last column
+            int colcount = EpigeneticMapGrid.Columns.Count;
+            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
+            EpigeneticMapGrid.Columns.Remove(comboCol);
+
+            //Regenerate the last column
+            comboCol = CreateUnusedGenesColumn(er);
+            EpigeneticMapGrid.Columns.Add(comboCol);
+        }
+
+        private void menuDeleteStates_Click(object sender, RoutedEventArgs e)
         {
 
         }
