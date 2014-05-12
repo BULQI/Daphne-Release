@@ -13,7 +13,6 @@ namespace Daphne
     /// <summary>
     /// Manages the chemical reactions that occur within the interior manifold of the compartment and between the interior and the boundaries. 
     /// All molecular populations must be defined on either the interior manifold or one of the boundary manifolds.
-    /// rtList keeps track of the ReactionTemplates that have been assigned to this compartment. Avoids duplication
     /// </summary>
     public class Compartment : IDynamic
     {
@@ -23,7 +22,6 @@ namespace Daphne
             Populations = new Dictionary<string, MolecularPopulation>();
             BulkReactions = new List<Reaction>();
             BoundaryReactions = new Dictionary<int, List<Reaction>>();
-            RTList = new List<ReactionTemplate>();
             Boundaries = new Dictionary<int, Compartment>();
             BoundaryTransforms = new Dictionary<int, Transform>();
             NaturalBoundaries = new Dictionary<int, Manifold>();
@@ -54,70 +52,6 @@ namespace Daphne
             }
         }
 
-        public bool HasThisReaction(ReactionTemplate rt)
-        {
-            if (RTList.Count == 0)
-            {
-                return false;
-            }
-
-            return RTList.Contains(rt);
-        }
-
-        public bool HasAllReactants(ReactionTemplate rt)
-        {
-            // find if all the species in the reaction template have matches in the molecular populations
-            if (rt.listOfReactants.Count == 0)
-            {
-                return true;
-            }
-
-            foreach (SpeciesReference spRef in rt.listOfReactants)
-            {
-                // as soon as there is one not found we can return false
-                if (Populations.ContainsKey(spRef.species) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public bool HasAllModifiers(ReactionTemplate rt)
-        {
-            // find if all the species in the reaction template have matches in the molecular populations
-            if (rt.listOfModifiers.Count == 0)
-            {
-                return true;
-            }
-
-            foreach (SpeciesReference spRef in rt.listOfModifiers)
-            {
-                // as soon as there is one not found we can return false
-                if (Populations.ContainsKey(spRef.species) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public void AddNeededProducts(ReactionTemplate rt, Dictionary<string, Molecule> MolDict)
-        {
-            // Check the product molecules exist as MolecularPopulations in the Compartment
-            // If not, add a molecular population to the compartment
-            foreach (SpeciesReference spRef in rt.listOfProducts)
-            {
-                // not contained? add it
-                if (Populations.ContainsKey(spRef.species) == false)
-                {
-                    AddMolecularPopulation(spRef.species, "const", new double[] { 0.0 });
-                }
-            }
-        }
-
         /// <summary>
         /// Carries out the dynamics in-place for its molecular populations over time interval dt.
         /// </summary>
@@ -143,21 +77,6 @@ namespace Daphne
             {
                 // Update boundary concentrations
                 molpop.Value.Step(dt);
- 
-                // Diffusion
-
-                //// molpop.Value.Conc += dt * molpop.Value.Molecule.DiffusionCoefficient * molpop.Value.Conc.Laplacian();
-                //foreach (KeyValuePair<int, Compartment> kvp in Boundaries)
-                //{
-                //    pos = BoundaryTransforms[kvp.Key].Translation;
-                //    molpop.Value.Conc += -dt * molpop.Value.Conc.DiffusionFluxTerm(molpop.Value.BoundaryFluxes[kvp.Key], pos);
-                //}
-
-                //foreach (KeyValuePair<int, Manifold> kvp in NaturalBoundaries)
-                //{
-                //    pos = NaturalBoundaryTransforms[kvp.Key].Translation;
-                //    molpop.Value.Conc += -dt * molpop.Value.Conc.DiffusionFluxTerm(molpop.Value.NaturalBoundaryFluxes[kvp.Key], pos);
-                //}
             }
         }
 
@@ -177,7 +96,6 @@ namespace Daphne
         public List<Reaction> BulkReactions { get; private set; }
         public Dictionary<int, List<Reaction>> BoundaryReactions { get; private set; }
         public Manifold Interior { get; private set; }
-        public List<ReactionTemplate> RTList { get; private set; }
         public Dictionary<int, Compartment> Boundaries { get; private set; }
         public Dictionary<int, Transform> BoundaryTransforms { get; set; }
         public Dictionary<int, Manifold> NaturalBoundaries { get; private set; }
