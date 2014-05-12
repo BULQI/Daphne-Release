@@ -645,7 +645,7 @@ namespace Daphne
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
                     {
                         ConfigDiffScheme config_diffScheme = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
-                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[config_diffScheme.Driver.driver_guid];
+                        ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
