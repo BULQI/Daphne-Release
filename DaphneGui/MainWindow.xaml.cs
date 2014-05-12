@@ -517,32 +517,32 @@ namespace DaphneGui
         /// <summary>
         /// Create and serialize all scenarios
         /// </summary>
-        ////////public void CreateAndSerializeDaphneScenarios()
-        ////////{
-        ////////    //BLANK SCENARIO
-        ////////    var config = new SimConfigurator("Config\\daphne_blank_scenario.json");
-        ////////    ConfigCreators.CreateAndSerializeBlankScenario(config);
-        ////////    //serialize to json
-        ////////    config.SerializeSimConfigToFile();
+        public void CreateAndSerializeDaphneScenarios()
+        {
+            //BLANK SCENARIO
+            var config = new SimConfigurator("Config\\daphne_blank_scenario.json");
+            ConfigCreators.CreateAndSerializeBlankScenario(config);
+            //serialize to json
+            config.SerializeSimConfigToFile();
 
-        ////////    //DRIVER-LOCOMOTOR SCENARIO
-        ////////    config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-        ////////    ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config);
-        ////////    // serialize to json
-        ////////    config.SerializeSimConfigToFile();
+            //DRIVER-LOCOMOTOR SCENARIO
+            config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
+            ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config);
+            // serialize to json
+            config.SerializeSimConfigToFile();
 
-        ////////    //DIFFUSIION SCENARIO
-        ////////    config = new SimConfigurator("Config\\daphne_diffusion_scenario.json");
-        ////////    ConfigCreators.CreateAndSerializeDiffusionScenario(config);
-        ////////    //Serialize to json
-        ////////    config.SerializeSimConfigToFile();
+            //DIFFUSIION SCENARIO
+            config = new SimConfigurator("Config\\daphne_diffusion_scenario.json");
+            ConfigCreators.CreateAndSerializeDiffusionScenario(config);
+            //Serialize to json
+            config.SerializeSimConfigToFile();
 
-        ////////    //LIGAND-RECEPTOR SCENARIO
-        ////////    config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
-        ////////    ConfigCreators.CreateAndSerializeLigandReceptorScenario(config);
-        ////////    //serialize to json
-        ////////    config.SerializeSimConfigToFile();
-        ////////}
+            //LIGAND-RECEPTOR SCENARIO
+            config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
+            ConfigCreators.CreateAndSerializeLigandReceptorScenario(config);
+            //serialize to json
+            config.SerializeSimConfigToFile();
+        }
 
         private void showScenarioInitial()
         {
