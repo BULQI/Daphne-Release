@@ -857,7 +857,8 @@
                                         </Style>
                                     </TextBlock.Style>
                     </TextBlock>
-                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[0].concVal, StringFormat={}{0:0.00}}" >                        
+                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[0].concVal, 
+                                        UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" >                        
                     </TextBox>
                 </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
@@ -878,8 +879,8 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-
-                        <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[1].concVal, StringFormat={}{0:0.00}}">                        
+                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[1].concVal, 
+                                UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}">                        
                     </TextBox>
                 </StackPanel>
                 </StackPanel>
@@ -2141,7 +2142,7 @@
                                                               CheckBoxVisibility="Collapsed" 
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
-                                                              Format="F2"
+                                                              Format="F3"
                                                               StepValue="100"
                                                               Width="60" 
                                                               CenterSlotHorizontalAlignment="Right"
@@ -2159,21 +2160,21 @@
                         <Slider Name="time_step_slider"
                                                 Orientation="Horizontal"
                                                 VerticalAlignment="Center"
-                                                Width="100"
+                                                Width="200"
                                                 RenderTransform="1.0,0,0,0.5,0,7"
-                                                Minimum="0.1" 
+                                                Minimum="0.001" 
                                                 Maximum="{Binding ElementName=time_duration_slider, Path=Value}" 
                                                 Value="{Binding Path=scenario.time_config.rendering_interval}" 
                                                 IsSnapToTickEnabled="True" 
-                                                TickFrequency="0.1" 
+                                                TickFrequency="0.01" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                         <editors:DoubleEditBox x:Name="TimeStepReadout" 
                                                               CheckBoxVisibility="Collapsed" 
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
-                                                              Format="N2"
-                                                              StepValue="0.1"
+                                                              Format="N3"
+                                                              StepValue="0.01"
                                                               Width="60" 
                                                               CenterSlotHorizontalAlignment="Right"
                                                               Value="{Binding ElementName=time_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
@@ -2193,19 +2194,19 @@
                                                 VerticalAlignment="Center"
                                                 Width="100"
                                                 RenderTransform="1.0,0,0,0.5,0,7"
-                                                Minimum="0" 
+                                                Minimum="0.001" 
                                                 Maximum="{Binding ElementName=time_duration_slider, Path=Value}"
                                                 Value="{Binding Path=scenario.time_config.sampling_interval}" 
                                                 IsSnapToTickEnabled="True" 
-                                                TickFrequency="0.1" 
+                                                TickFrequency="0.01" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                         <editors:DoubleEditBox x:Name="SamplingInterval" 
                                                               CheckBoxVisibility="Collapsed" 
                                                               SpinnerVisibility="Collapsed"
                                                               HorizontalAlignment="Right"
-                                                              Format="N2"
-                                                              StepValue="0.1"
+                                                              Format="N3"
+                                                              StepValue="0.01"
                                                               Width="60" 
                                                               CenterSlotHorizontalAlignment="Right"
                                                               Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
