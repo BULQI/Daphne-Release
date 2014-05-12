@@ -1108,6 +1108,9 @@ namespace Daphne
         //Following function needs to be called only once
         private static void PredefinedReactionsCreator(SimConfiguration sc)
         {
+            // NOTE: Whenever there are two or more reactants (or products or modifiers) in a boundary reaction,
+            // the bulk molecules must be added first, then the boundary molecules.
+
             double kr, kf;
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -1252,7 +1255,7 @@ namespace Daphne
             //
             kr = 1 / 0.1;
             kf = kr / 2.2e-3;
-            // BoundaryAssociation: CXCR4| + CXCL12 -> CXCL12:CXCR4|
+            // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
             // reactants

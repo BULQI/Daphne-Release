@@ -170,22 +170,6 @@ namespace DaphneGui
             cr.ReadOnly = false;
             cr.rate_const = inputRateConstant;
 
-            //NEED TO UPDATE THIS - SKG 8/6/13
-            //////----------------------------------
-            //////Reactants
-            ////foreach (string s in reacmolguids) {
-            ////    if (!cr.reactants_molecule_guid_ref.Contains(s))
-            ////        cr.reactants_molecule_guid_ref.Add(s);
-            ////}
-
-            //////----------------------------------
-            //////Products
-            ////foreach (string s in prodmolguids)
-            ////{
-            ////    if (!cr.products_molecule_guid_ref.Contains(s))
-            ////        cr.products_molecule_guid_ref.Add(s);
-            ////}
-
             cr.reaction_template_guid_ref = IdentifyReactionType();
             if (cr.reaction_template_guid_ref == null)
             {
@@ -195,6 +179,10 @@ namespace DaphneGui
             }
             ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
 
+            // Don't have to add stoichiometry information since the reaction template knows it based on reaction type
+            // For each list of reactants, products, and modifiers, add bulk then boundary molecules.
+
+            // Bulk Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
@@ -204,12 +192,22 @@ namespace DaphneGui
                     MessageBox.Show(msg);
                     return;
                 }
-
-                if (!cr.reactants_molecule_guid_ref.Contains(guid))
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                {
                     cr.reactants_molecule_guid_ref.Add(guid);
-
-                //Don't have to add stoichiometry since the reaction template knows it based on reaction type
+                }
             }
+            // Boundary Reactants
+            foreach (KeyValuePair<string, int> kvp in inputReactants)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                {
+                    cr.reactants_molecule_guid_ref.Add(guid);
+                }
+            }
+
+            // Bulk Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
@@ -219,9 +217,22 @@ namespace DaphneGui
                     MessageBox.Show(msg);
                     return;
                 }
-                if (!cr.products_molecule_guid_ref.Contains(guid))
+                if (!cr.products_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                {
                     cr.products_molecule_guid_ref.Add(guid);
+                }
             }
+            // Boundary Products
+            foreach (KeyValuePair<string, int> kvp in inputProducts)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                {
+                    cr.products_molecule_guid_ref.Add(guid);
+                }
+            }
+
+            // Bulk modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
@@ -231,9 +242,21 @@ namespace DaphneGui
                     MessageBox.Show(msg);
                     return;
                 }
-                if (!cr.products_molecule_guid_ref.Contains(guid))
+                if (!cr.modifiers_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                {
                     cr.modifiers_molecule_guid_ref.Add(guid);
+                }
             }
+            // Boundary modifiers
+            foreach (KeyValuePair<string, int> kvp in inputModifiers)
+            {
+                string guid = findMoleculeGuidByName(kvp.Key);
+                if (!cr.modifiers_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                {
+                    cr.modifiers_molecule_guid_ref.Add(guid);
+                }
+            }
+
             //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
 
