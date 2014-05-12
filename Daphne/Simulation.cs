@@ -10,7 +10,6 @@ using ManifoldRing;
 
 using Ninject;
 using Ninject.Parameters;
-using System.Diagnostics;
 
 namespace Daphne
 {
@@ -604,15 +603,15 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
                     {
-                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid;
+                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
                     // Differentiation
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != "")
                     {
                         string diff_scheme_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref;
                         ConfigDiffScheme config_diffScheme = sc.entity_repository.diff_schemes_dict[diff_scheme_guid];
@@ -633,20 +632,10 @@ namespace Daphne
                         }
                     }
 
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != null)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref];
-                        tde.Alpha = 0;
-                        tde.Beta = 0.002;
-
-                        cell.DeathBehavior.AddDriverElement(0, 1, tde);
-                    }
                     // division behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
                     {
-                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid;
+                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
@@ -724,11 +713,7 @@ namespace Daphne
             }
 
         }
-
-        Stopwatch sw = new Stopwatch();
-
-
-
+        
         public void RunForward()
         {
             if (RunStatus == RUNSTAT_RUN)
@@ -736,16 +721,10 @@ namespace Daphne
                 // render and sample the initial state
                 if (renderCount == 0 && sampleCount == 0)
                 {
-                    sw.Start();
                     setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
                     renderCount++;
                     sampleCount++;
                     return;
-                }
-                if (sampleCount == 20)
-                {
-                    sw.Stop();
-                    Console.WriteLine("Elapsed={0} ms", sw.Elapsed.TotalMilliseconds);
                 }
                 // clear all flags
                 clearFlag(SIMFLAG_ALL);
