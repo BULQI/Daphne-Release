@@ -2738,6 +2738,21 @@ namespace DaphneGui
                 MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
+
+        private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnCopyGene_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnAddGene_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }      
     
      

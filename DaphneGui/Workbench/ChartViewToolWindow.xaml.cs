@@ -31,7 +31,6 @@ namespace Workbench
         public ReactionComplexProcessor RC { get; set; }
 
         public ToggleButton toggleButton { get; set; }
-        private bool dragging = false;
 
         public ChartViewToolWindow()
         {
@@ -201,8 +200,6 @@ namespace Workbench
 
         private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            dragging = true;
-            
             Slider s = sender as Slider;
             double m = s.Minimum;
         }

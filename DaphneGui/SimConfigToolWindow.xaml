@@ -1386,6 +1386,38 @@
 
             </DataTemplate>
 
+            <DataTemplate x:Key="cellDeathDetailsTemplate">
+                <StackPanel Margin="0,-10" HorizontalAlignment="Left" Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical" >
+                        <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
+                        <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
+                                                                  ItemsSource="{Binding cytosol.molpops}" DisplayMemberPath="Name" >
+                        </ComboBox>
+                        <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
+                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" />
+                        <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
+                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196" />
+                        <Label Content="    " Width="100"></Label>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate x:Key="cellProductionDetailsTemplate">
+                <StackPanel Margin="0,-10" HorizontalAlignment="Left" Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical" >
+                        <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
+                        <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
+                                                                  ItemsSource="{Binding cytosol.molpops}" DisplayMemberPath="Name" >
+                        </ComboBox>
+                        <Label Content="Background Production Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
+                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" />
+                        <Label Content="Production Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
+                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196" />
+                        <Label Content="    " Width="100"></Label>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+
             <Style TargetType="editors:DoubleEditBox">
                 <Setter Property="CheckBoxVisibility" Value="Collapsed" />
                 <Setter Property="SpinnerVisibility" Value="Collapsed" />
@@ -3173,6 +3205,85 @@
                         </DataTemplate>
 
                     </StackPanel.Resources>
+                    <!-- GENES -->
+                    <Expander                                            
+                            Padding="5" ExpandDirection="Down"
+                            IsExpanded="False"
+                            Header="Genes"                                                  
+                            x:Name="GenesExpander"
+                            Margin="0,2,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                >
+
+                        <StackPanel>
+
+                            <DataGrid x:Name="dgLibGenes" 
+                                ItemsSource="{Binding Path=entity_repository.genes}" AutoGenerateColumns="False" 
+                                Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                                CanUserReorderColumns="False" CanUserResizeRows="False"
+                                CanUserSortColumns="False" RowHeaderWidth="0"
+                                VerticalContentAlignment="Center"
+                                CanUserAddRows="False"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                >
+
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader" >
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="Height" Value="24" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background">
+                                            <Setter.Value>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Offset="0.0" Color="White" />
+                                                    <GradientStop Offset="1.0" Color="Beige" />
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+
+                                <DataGrid.Columns>
+
+                                    <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                          LostFocus="TextBox_LostFocus">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="{x:Type TextBox}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
+                                                                    <Setter Property="IsEnabled" Value="False" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
+                                                                    <Setter Property="IsEnabled" Value="True" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+
+
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="btnCopyGene"  Width="50" Content="Copy" Click="btnCopyGene_Click"></Button>
+                                <Button Name="btnAddGene"  Width="50" Content="Add" Click="btnAddGene_Click"></Button>
+                                <Button Name="btnRemoveGene" Width="50" Content="Remove"  Click="btnRemoveGene_Click"></Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Expander>
                     <!-- MOLECULES -->
                     <Expander                                            
                             Padding="5" ExpandDirection="Down"
@@ -3884,6 +3995,249 @@
 
                                         </StackPanel>
                                     </Expander>
+
+                                    <!-- Cell Death -->
+                                    <Expander
+                                                Padding="5" 
+                                                ExpandDirection="Down"
+                                                IsExpanded="False"
+                                                Header="Cell Death"                                              
+                                                x:Name="CellDeathExpander"
+                                                Margin="0,5,0,0" 
+                                                Canvas.ZIndex="1"
+                                                BorderThickness="1"
+                                                BorderBrush="Black"
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                        <StackPanel>
+                                            <ContentControl Name="CellDeathDetails" Margin="6,0"
+                                                Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource cellDeathDetailsTemplate}" 
+                                            />
+                                        </StackPanel>
+                                    </Expander>
+
+                                    <!-- DIFFERENTIATION SCHEMES -->
+                                    <Expander   
+                                        Padding="5" ExpandDirection="Down"
+                                        IsExpanded="False"
+                                        Header="Differentiation Schemes"                                                  
+                                        x:Name="DiffSchemeExpander"
+                                        Margin="0,4,0,0" 
+                                        Canvas.ZIndex="1"
+                                        BorderThickness="1"
+                                        BorderBrush="Black"
+                                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                        <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                                            <Grid DataContext="{Binding ElementName=lbDiff, Path=SelectedItem}">
+                                                <Grid.Resources>
+                                                    <DataTemplate x:Key="diffSchemeListItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Path=Name}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate x:Key="geneListItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Width="50" Text="{Binding Path=Name}" />
+                                                            <CheckBox IsChecked="{Binding Path=Active}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate x:Key="stateListItemTemplate">
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
+                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate x:Key="cellState2ListItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Width="20" Text="{Binding Path=Name}" />
+                                                            <TextBlock Width="10" Text="" />
+                                                            <TextBox Width="50" Text="{Binding Path=MolName}" />
+                                                            <!--<ComboBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                                                        ItemsSource="{Binding Path=molecNames}" 
+                                                                        />-->
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                    <DataTemplate x:Key="cellStateListItemTemplate">
+                                                        <StackPanel Orientation="Vertical">
+                                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="Active" 
+                                                                    ItemTemplate="{Binding Source={StaticResource cellState2ListItemTemplate}}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate x:Key="diffStatesListItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Width="80" Text="{Binding Path=Name}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+
+                                                    <DataTemplate x:Key="cellStateGridItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Width="80" Text="{Binding Path=MolName}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </Grid.Resources>
+
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200" />
+                                                    <ColumnDefinition Width="130" />
+                                                    <ColumnDefinition Width="120" />
+                                                    <ColumnDefinition Width="120" />
+                                                    <ColumnDefinition Width="120" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <!-- DIFFERENTIATION SCHEMES -->
+                                                <!--<TextBlock Text="Differentiation Schemes" Grid.Column="0" Grid.Row="0"  FontWeight="Bold"  Margin="0,10,0,0" />-->
+                                                <ListBox x:Name="lbDiff" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Height="100" Margin="0,10,0,0" 
+                                                            ItemsSource="{Binding Path=ListDiffSchemes}"                                                      
+                                                            ItemTemplate="{Binding Source={StaticResource diffSchemeListItemTemplate}}"
+                                                            SelectedIndex="0" >
+                                                </ListBox>
+                                                <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                    <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+                                                    <TextBox x:Name="txtDiffName" Text="{Binding Path=Name}"  Width="200" Height="24"  Margin="0,10,0,0"  ></TextBox>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <Button x:Name="btnEditDiff" Grid.Column="1" Grid.Row="1" Width="40" HorizontalAlignment="Left" >Edit</Button>
+                                                    <Button x:Name="btnAddDiff" Width="40" HorizontalAlignment="Right" >Add</Button>
+                                                    <Button x:Name="btnCopyDiff" Width="50" HorizontalAlignment="Left" >Copy</Button>
+                                                    <Button x:Name="btnRemoveDiff" Width="60" HorizontalAlignment="Right" >Remove</Button>
+                                                </StackPanel>
+
+                                                <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+
+                                                <!-- Differentiation Matrix for selected Differentiation Scheme-->
+                                                <DataGrid Visibility="Hidden" x:Name="dgDiffScheme" Height="100" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10,0,0" AlternatingRowBackground="Beige"
+                                                                ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="MolName">
+
+                                                    <DataGrid.ColumnHeaderStyle>
+                                                        <Style  TargetType="DataGridColumnHeader" >
+                                                            <Setter Property="FontSize" Value="14" />
+                                                            <Setter Property="Background" Value="Beige" />
+                                                            <Setter Property="BorderBrush" Value="Black" />
+                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="MinWidth" Value="50" />
+                                                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                            <Setter Property="ContentTemplate" >
+                                                                <Setter.Value>
+                                                                    <DataTemplate >
+                                                                        <StackPanel>
+                                                                            <TextBlock Text="Header" />
+                                                                            <!--<TextBlock Text="{Binding}" />-->
+                                                                            <!--<TextBlock Text="{Binding Path=Name}"/>-->
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </DataGrid.ColumnHeaderStyle>
+                                                    <!--<DataGrid.RowHeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                        AncestorType={x:Type DataGridRow}}, 
+                                                                        Path=Item.Name}"/>
+                                        </DataTemplate>
+                                    </DataGrid.RowHeaderTemplate>-->
+
+                                                </DataGrid>
+
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
+                                                    <!-- This datagrid is the best one so far -->
+                                                    <DataGrid Margin="0,10,0,0" x:Name="TheGrid" Width="350"
+                                                            AutoGenerateColumns="False"
+                                                            IsReadOnly="False"
+                                                            CanUserAddRows="False" 
+                                                                AlternatingRowBackground="Beige"
+                                                            >
+
+                                                        <!--<DataGrid.RowHeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                    AncestorType={x:Type DataGridRow}}, 
+                                                                    Path=Item.Name}"/>
+                                            </DataTemplate>
+                                        </DataGrid.RowHeaderTemplate>-->
+
+                                                    </DataGrid>
+                                                    <ListBox Visibility="Hidden"  Height="144" HorizontalAlignment="Left" Margin="0,10,0,0" Name="lbScheme" VerticalAlignment="Top" Width="250" VerticalContentAlignment="Top" 
+                                                                ItemsSource="{Binding Path=States}"
+                                                                ItemTemplate="{Binding Source={StaticResource stateListItemTemplate}}">
+                                                        <ListBox.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel IsItemsHost="True" />
+                                                            </ItemsPanelTemplate>
+                                                        </ListBox.ItemsPanel>
+                                                    </ListBox>
+                                                </StackPanel>
+
+                                                <TextBlock Text="Differentiation Regulators" Grid.Column="0" Grid.Row="5" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="5">
+
+                                                    <!-- This CellState datagrid is good -->
+                                                    <DataGrid Height="144" Width="350" Margin="0,10,0,0" x:Name="CellStateGrid" 
+                                                                AutoGenerateColumns="False"
+                                                                IsReadOnly="False"
+                                                                CanUserAddRows="False" >
+                                                        <!--SelectedCellsChanged="CellStateGrid_SelectedCellsChanged"-->
+
+                                                        <DataGrid.Resources>
+                                                            <Style x:Name="MyStyle" TargetType="ComboBox">
+                                                                <Setter Property="IsEnabled" Value="True" />
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </Style>
+                                                        </DataGrid.Resources>
+                                                        <!--<DataGrid.RowHeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                        AncestorType={x:Type DataGridRow}}, 
+                                                                        Path=Item.Name}"/>
+                                            </DataTemplate>
+                                        </DataGrid.RowHeaderTemplate>-->
+
+                                                    </DataGrid>
+                                                    <ListBox Visibility="Hidden" Height="144" HorizontalAlignment="Left" Margin="0,10,0,0" Name="lbCellStates" VerticalAlignment="Top" Width="250" VerticalContentAlignment="Top" 
+                                                                ItemsSource="{Binding Path=CellStates}"
+                                                                ItemTemplate="{Binding Source={StaticResource cellStateListItemTemplate}}">
+                                                        <ListBox.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel IsItemsHost="True" />
+                                                            </ItemsPanelTemplate>
+                                                        </ListBox.ItemsPanel>
+                                                    </ListBox>
+                                                    <!--<Button x:Name="btnDebug1" Height="24" Width="40" HorizontalAlignment="Left" Click="btnDebug1_Click">Debug</Button>-->
+                                                </StackPanel>
+                                                <TextBlock Text="Differentiation Regulator" Grid.Column="0" Grid.Row="7" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
+                                                <StackPanel Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3">
+                                                    <ContentControl x:Name="DiffCellDeathDetails" Margin="6,0"
+                                                Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource cellProductionDetailsTemplate}" 
+                                            />
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </StackPanel>
+                                    </Expander>
+
                                     <!-- Reaction Complexes in this cell and their location -->
                                     <!-- Hidden for now 10/15/13 -->
                                     <Expander
@@ -4019,218 +4373,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <!-- DIFFERENTIATION SCHEMES -->
-                    <!-- HIDE FOR NOW -->
-                    <Expander   
-                        Visibility="Hidden"
-                        Padding="5" ExpandDirection="Down"
-                        IsExpanded="False"
-                        Header="Differentiation Schemes"                                                  
-                        x:Name="DiffSchemeExpander"
-                        Margin="0,4,0,0" 
-                        Canvas.ZIndex="1"
-                        BorderThickness="1"
-                        BorderBrush="Black"
-                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                        <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
-                            <Grid DataContext="{Binding ElementName=lbDiff, Path=SelectedItem}">
-                                <Grid.Resources>
-                                    <DataTemplate x:Key="diffSchemeListItemTemplate">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Path=Name}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate x:Key="geneListItemTemplate">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Width="50" Text="{Binding Path=Name}" />
-                                            <CheckBox IsChecked="{Binding Path=Active}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate x:Key="stateListItemTemplate">
-                                        <StackPanel Orientation="Vertical">
-                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
-                                                ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
-                                                ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate x:Key="cellState2ListItemTemplate">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Width="20" Text="{Binding Path=Name}" />
-                                            <TextBlock Width="10" Text="" />
-                                            <TextBox Width="50" Text="{Binding Path=MolName}" />
-                                            <!--<ComboBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
-                                                                        ItemsSource="{Binding Path=molecNames}" 
-                                                                        />-->
-                                        </StackPanel>
-                                    </DataTemplate>
-                                    <DataTemplate x:Key="cellStateListItemTemplate">
-                                        <StackPanel Orientation="Vertical">
-                                            <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
-                                            <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="Active" 
-                                                                    ItemTemplate="{Binding Source={StaticResource cellState2ListItemTemplate}}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate x:Key="diffStatesListItemTemplate">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Width="80" Text="{Binding Path=Name}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-
-                                    <DataTemplate x:Key="cellStateGridItemTemplate">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Width="80" Text="{Binding Path=MolName}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Grid.Resources>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="200" />
-                                    <ColumnDefinition Width="130" />
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="120" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
-                                </Grid.RowDefinitions>
-
-                                <!-- DIFFERENTIATION SCHEMES -->
-                                <!--<TextBlock Text="Differentiation Schemes" Grid.Column="0" Grid.Row="0"  FontWeight="Bold"  Margin="0,10,0,0" />-->
-                                <ListBox x:Name="lbDiff" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Height="100" Margin="0,10,0,0" 
-                                                            ItemsSource="{Binding Path=ListDiffSchemes}"                                                      
-                                                            ItemTemplate="{Binding Source={StaticResource diffSchemeListItemTemplate}}"
-                                                            SelectedIndex="0" >
-                                </ListBox>
-                                <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
-                                    <TextBox x:Name="txtDiffName" Text="{Binding Path=Name}"  Width="200" Height="24"  Margin="0,10,0,0"  ></TextBox>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button x:Name="btnEditDiff" Grid.Column="1" Grid.Row="1" Width="40" HorizontalAlignment="Left" >Edit</Button>
-                                    <Button x:Name="btnAddDiff" Width="40" HorizontalAlignment="Right" >Add</Button>
-                                    <Button x:Name="btnCopyDiff" Width="50" HorizontalAlignment="Left" >Copy</Button>
-                                    <Button x:Name="btnRemoveDiff" Width="60" HorizontalAlignment="Right" >Remove</Button>
-                                </StackPanel>
-
-                                <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
-
-                                <!-- Differentiation Matrix for selected Differentiation Scheme-->
-                                <DataGrid Visibility="Hidden" x:Name="dgDiffScheme" Height="100" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,10,0,0" AlternatingRowBackground="Beige"
-                                                                ItemsSource="{Binding Path=CellStates}" DisplayMemberPath="MolName">
-
-                                    <DataGrid.ColumnHeaderStyle>
-                                        <Style  TargetType="DataGridColumnHeader" >
-                                            <Setter Property="FontSize" Value="14" />
-                                            <Setter Property="Background" Value="Beige" />
-                                            <Setter Property="BorderBrush" Value="Black" />
-                                            <Setter Property="BorderThickness" Value="1" />
-                                            <Setter Property="MinWidth" Value="50" />
-                                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                            <Setter Property="ContentTemplate" >
-                                                <Setter.Value>
-                                                    <DataTemplate >
-                                                        <StackPanel>
-                                                            <TextBlock Text="Header" />
-                                                            <!--<TextBlock Text="{Binding}" />-->
-                                                            <!--<TextBlock Text="{Binding Path=Name}"/>-->
-                                                        </StackPanel>
-                                                    </DataTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </DataGrid.ColumnHeaderStyle>
-                                    <!--<DataGrid.RowHeaderTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
-                                                                        AncestorType={x:Type DataGridRow}}, 
-                                                                        Path=Item.Name}"/>
-                                        </DataTemplate>
-                                    </DataGrid.RowHeaderTemplate>-->
-
-                                </DataGrid>
-
-                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
-                                    <!-- This datagrid is the best one so far -->
-                                    <DataGrid Margin="0,10,0,0" x:Name="TheGrid" Width="350"
-                                                            AutoGenerateColumns="False"
-                                                            IsReadOnly="False"
-                                                            CanUserAddRows="False" 
-                                                                AlternatingRowBackground="Beige"
-                                                            >
-
-                                        <!--<DataGrid.RowHeaderTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
-                                                                    AncestorType={x:Type DataGridRow}}, 
-                                                                    Path=Item.Name}"/>
-                                            </DataTemplate>
-                                        </DataGrid.RowHeaderTemplate>-->
-
-                                    </DataGrid>
-                                    <ListBox Visibility="Hidden"  Height="144" HorizontalAlignment="Left" Margin="0,10,0,0" Name="lbScheme" VerticalAlignment="Top" Width="250" VerticalContentAlignment="Top" 
-                                                                ItemsSource="{Binding Path=States}"
-                                                                ItemTemplate="{Binding Source={StaticResource stateListItemTemplate}}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel IsItemsHost="True" />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                    </ListBox>
-                                </StackPanel>
-
-                                <TextBlock Text="Differentiation Regulators" Grid.Column="0" Grid.Row="5" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
-                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="5">
-
-                                    <!-- This CellState datagrid is good -->
-                                    <DataGrid Height="144" Width="350" Margin="0,10,0,0" x:Name="CellStateGrid" 
-                                                                AutoGenerateColumns="False"
-                                                                IsReadOnly="False"
-                                                                CanUserAddRows="False" >
-                                        <!--SelectedCellsChanged="CellStateGrid_SelectedCellsChanged"-->
-
-                                        <DataGrid.Resources>
-                                            <Style x:Name="MyStyle" TargetType="ComboBox">
-                                                <Setter Property="IsEnabled" Value="True" />
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </Style>
-                                        </DataGrid.Resources>
-                                        <!--<DataGrid.RowHeaderTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
-                                                                        AncestorType={x:Type DataGridRow}}, 
-                                                                        Path=Item.Name}"/>
-                                            </DataTemplate>
-                                        </DataGrid.RowHeaderTemplate>-->
-
-                                    </DataGrid>
-                                    <ListBox Visibility="Hidden" Height="144" HorizontalAlignment="Left" Margin="0,10,0,0" Name="lbCellStates" VerticalAlignment="Top" Width="250" VerticalContentAlignment="Top" 
-                                                                ItemsSource="{Binding Path=CellStates}"
-                                                                ItemTemplate="{Binding Source={StaticResource cellStateListItemTemplate}}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel IsItemsHost="True" />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                    </ListBox>
-                                    <!--<Button x:Name="btnDebug1" Height="24" Width="40" HorizontalAlignment="Left" Click="btnDebug1_Click">Debug</Button>-->
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </Expander>
+                    
 
                 </StackPanel>
             </ScrollViewer>
