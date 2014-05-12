@@ -3243,7 +3243,8 @@ namespace DaphneGui
 
             //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
             MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
-            Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            string sText = string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count);
+            Binding b3 = new Binding(sText);
             b3.Mode = BindingMode.TwoWay;
             b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             b3.Converter = conv2;
@@ -3397,53 +3398,15 @@ namespace DaphneGui
 
             else if (dep is DataGridRowHeader)
             {
-                //while ((dep != null) && !(dep is DataGridRow))
-                //{
-                //    dep = VisualTreeHelper.GetParent(dep);
-                //}
-                //if (dep == null)
-                //    return;
-
-                //// do something
-                //EpigeneticMapGrid.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
-                //DataGridRow row = dep as DataGridRow;
-                //row.IsSelected = true;
             }
  
             else if (dep is DataGridCell)
             {
                 DataGridCell cell = dep as DataGridCell;
-                // do something
-                //EpigeneticMapGrid.SelectionUnit = DataGridSelectionUnit.Cell;
+                // do something                
             }
 	    }
-
-        private object ExtractBoundValue(DataGridRow row, DataGridCell cell)
-        {
-            // find the column that this cell belongs to
-            DataGridBoundColumn col = cell.Column as DataGridBoundColumn;
-            //DataGridTemplateColumn col = cell.Column as DataGridTemplateColumn;
-
-            if (col == null)
-                return null;
-
-            // find the property that this column is bound to
-            Binding binding = col.Binding as Binding;
-            //Binding binding = col.CellTemplate.
-            string boundPropertyName = binding.Path.Path;
-
-            // find the object that is related to this row
-            object data = row.Item;
-
-            // extract the property value
-            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(data);
-
-            PropertyDescriptor property = properties[boundPropertyName];
-            object value = property.GetValue(data);
-
-            return value;
-        }
-
+       
         //-----------------------------------------
 
         /// <summary>
@@ -3634,56 +3597,25 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void comboMolPops_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+#if false
             //This code is no good and is "iffed out". Was trying to get the grid cell where the user clicked.
             //Apparently, this is very hard to do in wpf.  How nice!
-#if false
-            
 
-            ////ComboBox box = sender as ComboBox;
-            ////ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)box.SelectedItem;
-            ////string molguid = molpop.molecule_guid_ref;
-            ////DataGridTemplateColumn col = (DataGridTemplateColumn)(DiffRegGrid.Columns[0]);
-            ////DataTemplate dt = col.CellTemplate;
-            //ContentPresenter myContentPresenter = VisualTreeHelper.GetChild(   //FindVisualChild<ContentPresenter>(this);
-            //TextBlock tblock = dt.FindName("DriverTextBlock", (FrameworkElement)col.) as TextBlock;  //, (FrameworkElement)spFactory.) as TextBox;
-            //tbox.Text = molguid;
+            //PROBABLY WILL NOT NEED THIS AT ALL BECAUSE THE DATA BINDINGS ARE WORKING. SO REMOVE IT WHEN WE'RE SURE WE DON'T NEED IT.
 
-            //DataGridColumn col2 = DiffRegGrid.CurrentColumn;
-            //DataGridRow row = DiffRegGrid.Items[0] as DataGridRow;
-            //DataGridCell cell = row.
-
-            //if (col2 == null)
+            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            //if (cell == null)
             //    return;
 
-            //ComboBoxItem  myComboBoxItem = (ComboBoxItem)(box.ItemContainerGenerator.ContainerFromItem(box.Items.CurrentItem));
-            //if (myComboBoxItem == null)
-            //    return;
-
-            //// Getting the ContentPresenter of myListBoxItem
-            //ContentPresenter myContentPresenter = GetVisualChild<ContentPresenter>(col2);
-
-            //// Finding textBlock from the DataTemplate that is set on that ContentPresenter
-            //DataTemplate myDataTemplate = myContentPresenter.ContentTemplate;
-            //TextBlock myTextBlock = (TextBlock)myDataTemplate.FindName("textBlock", myContentPresenter);
-#endif
-            //If there is no driver molecule defined for this transition element, then create one
-            ComboBox combo = sender as ComboBox;
-            //if (sender != null) 
+            //ComboBox combo = sender as ComboBox;
+            //if (sender != null)
             //{
-
             //    DataGridCellInfo cellInfo = DiffRegGrid.CurrentCell;
             //    if (cellInfo == null)
             //        return;
 
-            //    ConfigTransitionDriverRow driverRow = (ConfigTransitionDriverRow)cellInfo.Item;
-            //    //DataGridCell dgc = DiffRegGrid.CurrentCell.Ite
-
-            //    int nrow = -1;
-
-
-            //    if (nrow < 0)
-            //        return;
-
+            //    ConfigTransitionDriverRow driverRow = cell.diff_scheme.Driver.DriverElements[6];  //(ConfigTransitionDriverRow)cellInfo.Item;
+                
             //    if (DiffRegGrid.CurrentColumn == null)
             //        return;
 
@@ -3691,13 +3623,15 @@ namespace DaphneGui
             //    if (ncol < 0)
             //        return;
 
-            //    ConfigTransitionDriver d = (ConfigTransitionDriver)(DiffRegGrid.DataContext);
-            //    if (d.DriverElements[nrow].elements[ncol] == null) {
-            //        ConfigTransitionDriverElement elem = new ConfigTransitionDriverElement();
-            //        ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)combo.SelectedItem;
-            //        elem.driver_mol_guid_ref = molpop.molecule_guid_ref;
-            //    }
+            //    if (combo.SelectedIndex < 0)
+            //        return;
+
+            //    ConfigMolecularPopulation selMolPop = ((ConfigMolecularPopulation)(combo.SelectedItem));
+
+            //    driverRow.elements[ncol].driver_mol_guid_ref = selMolPop.molecule_guid_ref;
             //}
+#endif
+
         }
 
         /// <summary>
@@ -3844,55 +3778,6 @@ namespace DaphneGui
             }
             return null;
         }
-
-        private void DiffRegGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //DependencyObject dep = (DependencyObject)e.OriginalSource;
-
-            //// iteratively traverse the visual tree
-            //while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
-            //{
-            //    dep = VisualTreeHelper.GetParent(dep);
-            //}
-
-            //if (dep == null)
-            //    return;
-
-            //if (dep is DataGridColumnHeader)
-            //{
-            //    DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
-            //    // do something
-            //}
-
-            //if (dep is DataGridCell)
-            //{
-            //    DataGridCell cell = dep as DataGridCell;
-            //    DataGridColumn col = cell.Column;
-            //    while ((dep != null) && !(dep is DataGridRow))
-            //    {
-            //        dep = VisualTreeHelper.GetParent(dep);
-            //    }
-
-            //    DataGridRow row = dep as DataGridRow;
-            //    int rownum = DiffRegGrid.FindRowIndex(row);
-            //    int colnum = cell.Column.DisplayIndex;
-
-            //    ConfigTransitionDriverRow driverRow = (ConfigTransitionDriverRow)(DiffRegGrid.Items[rownum]); //(ConfigTransitionDriverElement)ExtractBoundValue(row, cell);
-            //    ConfigTransitionDriverElement elem = driverRow.elements[colnum];
-            //    if (elem != null)
-            //    {
-            //        //txtAlpha.Text = elem.Alpha.ToString();
-            //        //txtBeta.Text = elem.Beta.ToString();
-
-            //        Binding b = new Binding("elem.Alpha");  //row.Item.elements[colnum]
-            //        b.Mode = BindingMode.TwoWay;
-            //        b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            //        txtAlpha.SetBinding(TextBox.TextProperty, b);
-                    
-            //    }
-            //}
-        }
-
 
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {

@@ -2565,6 +2565,7 @@ namespace Daphne
 
         public void AddState(string sname)
         {
+            //Add a row in Epigenetic Table
             ConfigActivationRow row = new ConfigActivationRow();
             for (int i = 0; i < genes.Count; i++)
             {
@@ -2574,7 +2575,26 @@ namespace Daphne
             Driver.states.Add(sname);
             activationRows.Add(row);
 
-            ConfigTransitionDriverRow trow = new ConfigTransitionDriverRow();
+            //Add a row AND a column in Differentiation Table
+            ConfigTransitionDriverRow trow; 
+
+            //Add a column to existing rows
+            for (int k = 0; k < Driver.states.Count - 1; k++)
+            {
+                trow = Driver.DriverElements[k];
+                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                e.Alpha = 0;
+                e.Beta = 0;
+                e.driver_mol_guid_ref = null;
+                e.CurrentStateName = Driver.states[k];
+                e.CurrentState = k;
+                e.DestState = Driver.states.Count - 1;
+                e.DestStateName = Driver.states[Driver.states.Count - 1];
+                trow.elements.Add(e);
+            }
+            
+            //Add a row
+            trow = new ConfigTransitionDriverRow();
             for (int j = 0; j < Driver.states.Count; j++ )
             {
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
@@ -2583,6 +2603,8 @@ namespace Daphne
                 e.driver_mol_guid_ref = null;
                 e.CurrentStateName = sname;
                 e.CurrentState = Driver.states.Count - 1;
+                e.DestState = j;
+                e.DestStateName = Driver.states[j];
                 trow.elements.Add(e);
             }
 

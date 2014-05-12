@@ -4456,8 +4456,6 @@
                                                             
                                                             >
 
-                                                    <!--MouseRightButtonUp="DiffRegGrid_MouseRightButtonUp"-->
-
                                                     <DataGrid.Resources>
                                                         <Style x:Name="DiffRegComboStyle" TargetType="ComboBox">
                                                             <Setter Property="IsEnabled" Value="True" />
