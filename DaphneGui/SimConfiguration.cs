@@ -250,11 +250,11 @@ namespace DaphneGui
             global_parameters.Add(synapse_params);
 
             //skg daphne
-            string path = "Config\\DaphnePredefinedReactions.json";
+            string path = "Config\\DaphnePredefinedReactions.txt";
             string readText = File.ReadAllText(path);
             PredefReactions = JsonConvert.DeserializeObject<ObservableCollection<GuiReactionTemplate>>(readText);
 
-            path = "Config\\DaphnePredefinedMolecules.json";
+            path = "Config\\DaphnePredefinedMolecules.txt";
             readText = File.ReadAllText(path);
             PredefMolecules = JsonConvert.DeserializeObject<ObservableCollection<GuiMolecule>>(readText);
 

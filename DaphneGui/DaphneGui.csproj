@@ -243,10 +243,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Content Include="Config\DaphnePredefinedMolecules.json">
+    <Content Include="Config\DaphnePredefinedMolecules.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Config\DaphnePredefinedReactions.json">
+    <Content Include="Config\DaphnePredefinedReactions.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Config\daphne_ecm_scenario.json">
