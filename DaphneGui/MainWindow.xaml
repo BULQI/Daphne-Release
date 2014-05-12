@@ -180,7 +180,7 @@
                     </Style>
                 </ToolBarTray.Resources>
                 <ToolBar Name="SimControlToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                    <Button Content="Refresh" HorizontalAlignment="Left" Name="resetButton" 
+                    <Button Content="Apply" HorizontalAlignment="Left" Name="resetButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
                                 Margin="0" Click="resetButton_Click">
                         <Button.ToolTip>

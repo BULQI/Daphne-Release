@@ -1234,7 +1234,7 @@ namespace DaphneGui
             }
             else
             {
-                reset();
+                applyChanges();
             }
         }
 
@@ -1705,7 +1705,7 @@ namespace DaphneGui
                         {
                             reporter.CloseReporter();
                         }
-                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(reset));
+                        runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(applyChanges));
                         sim.RunStatus = Simulation.RUNSTAT_OFF;
                     }
                     //else if (vcrControl != null && vcrControl.IsActive() == true)
@@ -1771,7 +1771,7 @@ namespace DaphneGui
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
             resetButton.IsEnabled = true;
-            resetButton.Content = "Reset";
+            resetButton.Content = "Apply";
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready";
             //runButton.IsEnabled = true;
@@ -1788,8 +1788,34 @@ namespace DaphneGui
             gc.Rwc.Focus();
         }
 
-        private void reset()
+        private void applyChanges()
         {
+            // check if there were changes
+            if (configurator.SerializeSimConfigToStringSkipDeco() != orig_content)
+            {
+                MessageBoxResult result = saveDialog();
+
+                // apply changes, save if needed
+                if (result == MessageBoxResult.Yes)
+                {
+                    // save into the same file
+                    configurator.SerializeSimConfigToFile();
+                    orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                    orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    // allow saving with a different name
+                    saveScenarioUsingDialog();
+                }
+                else
+                {
+                    // reload the file; also resets the gui, discards changes
+                    loadScenarioFromFile(scenario_path.LocalPath);
+                    return;
+                }
+            }
+
             lockAndResetSim(false, "");
             //also need to delete every for this experiment in database.
             //DataBaseTools.DeleteExperiment(configurator.SimConfig.experiment_db_id);
@@ -1896,14 +1922,8 @@ namespace DaphneGui
                 }
                 else
                 {
-                    // Configure the message box to be displayed
-                    string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
-                    string caption = "Scenario Changed";
-                    MessageBoxButton button = MessageBoxButton.YesNoCancel;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
-
                     // Display message box
-                    MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                    MessageBoxResult result = saveDialog();
 
                     // Process message box results
                     switch (result)
@@ -1936,7 +1956,19 @@ namespace DaphneGui
                     statusBarMessagePanel.Content = "Running...";
                 }
             }
-        }        
+        }
+
+        private MessageBoxResult saveDialog()
+        {
+            // Configure the message box to be displayed
+            string messageBoxText = "Scenario parameters have changed. Do you want to overwrite the information in " + extractFileName() + "?";
+            string caption = "Scenario Changed";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
+
+            // Display message box
+            return MessageBox.Show(messageBoxText, caption, button, icon);
+        }
 
         public void DisplayCellInfo(int cellID)
         {
