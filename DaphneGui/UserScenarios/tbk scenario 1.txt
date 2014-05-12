@@ -1,0 +1,9 @@
+﻿This scenario creates two cell types, designated A and B. 
+
+Type A secretes CXCL12 at a constant rate, has receptors (CXCR5) for CXCL13. These cells climb up gradients of CXCL13 as long as their membrane CXCR5 are not saturated.
+
+Type B is Type A with CXCL12 replaced by CXCL13 and CXCR5 replaced by CXCR4.
+
+The grid is 200 um on a side, with a lattice spacing of 10um.
+
+There are 10 cells of each type initially placed at random within the volume.
