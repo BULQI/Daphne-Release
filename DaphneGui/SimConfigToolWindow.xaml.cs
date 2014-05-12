@@ -34,7 +34,7 @@ namespace DaphneGui
         //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
-            InitializeComponent();
+            InitializeComponent();            
         }
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
@@ -547,7 +547,7 @@ namespace DaphneGui
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
             
             gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].molecule_guid;
-            gmp.Name = "NewMP";
+            gmp.Name = MainWindow.SC.SimConfig.entity_repository.molecules[0].Name;
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
@@ -2208,6 +2208,14 @@ namespace DaphneGui
         {
             ComboBox ColorComboBox = sender as ComboBox;
             int n = ColorComboBox.SelectedIndex;
+        }
+
+        private void AddReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            //lvAvailableReacs.InvalidateVisual();
+            //lvAvailableReacs.DataContext = null;
+            //lvAvailableReacs.DataContext = MainWindow.SC.SimConfig.entity_repository.reactions;
+            //EcmAvailableReactions.Refresh();
         }
 
         //private ComboBox MolPopDistComboBox;

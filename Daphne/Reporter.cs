@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 
 using ManifoldRing;
+using System.Globalization;
 
 namespace Daphne
 {
@@ -142,14 +143,14 @@ namespace Daphne
                     {
                         double[] pos = prism.linearIndexToLocal(i);
 
-                        writer.Write("{0}\t{1}\t{2}\t{3}", pos[0], pos[1], pos[2], mp.Conc.Value(pos));
+                        writer.Write("{0}\t{1}\t{2}\t{3}", pos[0], pos[1], pos[2], mp.Conc.Value(pos).ToString("G3", CultureInfo.InvariantCulture));
 
                         // gradient
                         if (c.report_mp.mp_extended == ExtendedReport.COMPLETE)
                         {
                             double[] grad = mp.Conc.LatticeGradient(i);
 
-                            writer.Write("\t{0}\t{1}\t{2}", grad[0], grad[1], grad[2]);
+                            writer.Write("\t{0}\t{1}\t{2}", grad[0].ToString("G3", CultureInfo.InvariantCulture), grad[1].ToString("G3", CultureInfo.InvariantCulture), grad[2].ToString("G3", CultureInfo.InvariantCulture));
                         }
                         writer.WriteLine();
                     }
