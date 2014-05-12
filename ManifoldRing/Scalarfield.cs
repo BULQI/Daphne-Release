@@ -360,7 +360,7 @@ namespace ManifoldRing
                 if (init.GetType() == typeof(ConstFieldInitializer))
                 {
                     // initialize the zero-th moment for ME fields; leave gradient equal to zero
-                    array[0] = init.initialize(new double[]{0, 0, 0});
+                    array[0] = init.initialize(new double[] { 0, 0, 0 });
                 }
                 else
                 {
@@ -376,7 +376,7 @@ namespace ManifoldRing
         }
 
         public ScalarField reset(double d)
-        {  
+        {
             for (int i = 0; i < array.Length; i++) array[i] = d;
             return this;
         }
@@ -452,7 +452,7 @@ namespace ManifoldRing
         /// <returns>diffusion flux term as field in the interior manifold</returns>
         public ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            return m.DiffusionFluxTerm(flux,t);
+            return m.DiffusionFluxTerm(flux, t);
         }
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace ManifoldRing
         {
             return m.Integrate(this);
         }
-        
+
         /// <summary>
         /// Impose Dirichlet boundary conditions
         /// </summary>
@@ -750,41 +750,6 @@ namespace ManifoldRing
         {
             // this.M.Restrict(from, pos, this);
             this.M.Restrict(from, t, this);
-        }
-
-        /// <summary>
-        /// For debugging purposes
-        /// </summary>
-        /// <param name="filename"></param>
-        public void WriteToFile(string filename)
-        {
-
-            if (M.GetType() == typeof(InterpolatedRectangle) || M.GetType() == typeof(InterpolatedRectangularPrism)) 
-            {
-                using (StreamWriter writer = File.CreateText(filename))
-                {
-                    int n = 0;
-                    MathNet.Numerics.LinearAlgebra.Vector v;
-
-                    InterpolatedNodes m;
-                    m = (InterpolatedNodes)M;
-
-                    for (int i = 0; i < array.Length; i++)
-                    {
-                        writer.Write(n + "\t");
-
-                        v = m.linearIndexToLocal(i);
-
-                        for (int j = 0; j < M.Dim; j++)
-                        {
-                            writer.Write(v[j] + "\t");
-                        }
-                        writer.Write(array[n] + "\n");
-
-                        n++;
-                    }
-                }
-            }
         }
     }
 }
