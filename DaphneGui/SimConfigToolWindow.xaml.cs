@@ -802,13 +802,10 @@ namespace DaphneGui
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             CellPopDistributionType distType = (CellPopDistributionType)e.AddedItems[0];
 
-            if (distType == CellPopDistributionType.Probability)
+            if (distType == CellPopDistributionType.Uniform)
             {
-                //lbCellPopDistributionSubType
                 cp.cellPopDist = new CellPopUniformDistribution(5.0);
             }
-            //current_item.mp_distribution = slg;
-
         }
 
         private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1406,7 +1403,7 @@ namespace DaphneGui
                 return;
 
             CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
-            if (cpdt == CellPopDistributionType.Probability)
+            if (cpdt == CellPopDistributionType.Uniform)
             {
 
             }

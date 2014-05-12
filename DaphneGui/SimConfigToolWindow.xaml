@@ -42,7 +42,7 @@
             <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
             <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
-            <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
+            <!--<daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />-->
             <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
@@ -82,13 +82,13 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <ObjectDataProvider x:Key="cellPopProbDistributionTypes"
+            <!--<ObjectDataProvider x:Key="cellPopProbDistributionTypes"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
                 <ObjectDataProvider.MethodParameters>
                     <x:Type TypeName="daph:CellPopProbDistributionType" />
                 </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
+            </ObjectDataProvider>-->
 
             <ObjectDataProvider x:Key="boundaryTypes"
                     MethodName="GetValues" 
@@ -907,8 +907,7 @@
             </DataTemplate>
 
             <!-- =========================== -->
-            <!-- Cell Population -->
-
+            <!-- Cell Population -->            
             <!-- Cell Pop Distributions -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
@@ -916,11 +915,11 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate x:Key="cellPopProbDistributionTypeTemplate">
+            <!--<DataTemplate x:Key="cellPopProbDistributionTypeTemplate">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Converter={StaticResource CellPopProbDistTypeEnumConv}}"/>
                 </StackPanel>
-            </DataTemplate>
+            </DataTemplate>-->
 
             <DataTemplate DataType="{x:Type daph:CellPopDistribution}">
                 <StackPanel Orientation="Horizontal">
@@ -1118,6 +1117,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="70" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>                          
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -1202,6 +1202,7 @@
                                     TickFrequency="1" 
                                     KeyboardNavigation.IsTabStop="False"
                                     />
+                            
                             <editors:Int32EditBox CheckBoxVisibility="Collapsed" 
                                     SpinnerVisibility="Collapsed"
                                     HorizontalAlignment="Right"
@@ -1219,7 +1220,15 @@
                                         Grid.Column="0" Grid.Row="4"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"
                                         />
-                        <editors:ColorEditBox x:Name="cellColorEditBox"
+                        <!--<ComboBox x:Name="cbCellColor" Grid.Column="1" Grid.Row="4" SelectedIndex="{Binding Path=cellpopulation_color,UpdateSourceTrigger=PropertyChanged}">
+                            <ComboBoxItem>Red</ComboBoxItem>
+                            <ComboBoxItem>Orange</ComboBoxItem>
+                            <ComboBoxItem>Yellow</ComboBoxItem>
+                            <ComboBoxItem>Green</ComboBoxItem>
+                            <ComboBoxItem>Blue</ComboBoxItem>
+                            <ComboBoxItem>Custom</ComboBoxItem>
+                        </ComboBox>-->
+                        <editors:ColorEditBox x:Name="cellColorEditBox" 
                                         Grid.Column="1" Grid.Row="4"
                                         CheckBoxVisibility="Collapsed"
                                         SpinnerVisibility="Collapsed"
@@ -1227,8 +1236,49 @@
                                         HorizontalAlignment="Left" 
                                         Format="a r g b"
                                         Value="{Binding Path=cellpopulation_color}"
-                                        Margin="0,2"
-                                />
+                                        Margin="0,2">
+                            
+                            <!--<editors:ColorEditBox.Style>
+                                <Style TargetType="{x:Type editors:ColorEditBox}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=cbCellColor, Path=SelectedIndex}" Value="5">
+                                            <Setter Property="editors:ColorEditBox.Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="0" />
+                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="1" />
+                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="2" />
+                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="3" />
+                                                <Condition Binding="{Binding ElementName=cbCellColor,Path=SelectedIndex}" Value="4" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter  Property="editors:ColorEditBox.Visibility" Value="Hidden"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                    
+                                </Style>
+                            </editors:ColorEditBox.Style>-->
+                            
+                        </editors:ColorEditBox>
+                                
+
+                        <!--<TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                        
+                                    <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                        <Setter  Property="StackPanel.IsEnabled" Value="False"/>
+                                    </DataTrigger>
+                        
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>-->
 
                         <!-- Show GUID - for debugging only -->
                         <!-- <TextBlock Text="guid_ref" Margin="6,0"
@@ -1248,100 +1298,85 @@
                                 Canvas.ZIndex="1"
                                 >
 
-                            <StackPanel Orientation="Vertical">
+                            
+
+                                <StackPanel Orientation="Vertical">
                                 
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel>
                                         
                                         <StackPanel Margin="8,0">
                                             <TextBlock>Cell placement method</TextBlock>
-                                            <ComboBox x:Name="cbCellLocationType" Margin="0,4"
+                                            <ComboBox x:Name="cbCellLocationType" Margin="0,4" Width="200" HorizontalAlignment="Left"
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
                                                 ItemTemplate="{Binding Source={StaticResource cellPopDistributionTypeTemplate}}"
                                                 SelectedValue="{Binding Path=cellPopDist.cpDistributionType, Mode=OneWay}"
-                                                      SelectionChanged="cbCellLocationType_SelectionChanged">
+                                                SelectionChanged="cbCellLocationType_SelectionChanged">
                                             </ComboBox>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="16,0">
-                                            
-                                            <StackPanel>
-                                                <!--<StackPanel.Style>
-                                                    <Style>
-                                                        <Setter Property="StackPanel.IsEnabled" Value="True"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ElementName=rbByCoord , Path=IsChecked}" Value="True">
-                                                                <Setter  Property="StackPanel.IsEnabled" Value="True"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
-                                                                <Setter  Property="StackPanel.IsEnabled" Value="False"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </StackPanel.Style>-->
-                                                <StackPanel.Style>
-                                                    <Style>
-                                                        <Setter Property="StackPanel.IsEnabled" Value="True"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
-                                                                <Setter  Property="StackPanel.IsEnabled" Value="False"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </StackPanel.Style>
-                                                <Expander ExpandDirection="Down" Padding="6"                                    
-                                                    IsExpanded="False"
-                                                    Header="Coordinates"
-                                                    x:Name="CoordinatesExpander"
-                                                    Margin="0,0,0,0" 
-                                                    Canvas.ZIndex="1"
-                                                    >
-                                                    <StackPanel>                                                        
-                                                  
-                                                        <!--<datagrid:ThemedDataGrid x:Name="tdgLocations"
-                                                                   ItemsSource="{Binding Path=cell_locations, UpdateSourceTrigger=PropertyChanged}"
-                                                                                 Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
-                                                                    CanUserReorderColumns="False" CanUserResizeRows="False"
-                                                                    CanUserSortColumns="False" RowHeaderWidth="0"
-                                                                    VerticalContentAlignment="Center"
-                                                                    CanUserAddRows="False"
-                                                                    BorderThickness="1"
-                                                                    BorderBrush="Black">
+                                            <StackPanel Orientation="Vertical" Margin="16,0">
+                                            <!--<ContentControl Name="CellLocationDetails"
+                                                    ContentTemplate="{StaticResource cellCoordsTemplate}">
+                                                    <ContentControl.Style>
+                                                        <Style>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="0">
+                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellCoordsTemplate}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellUniformTemplate}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="2">
+                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellGaussianTemplate}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ContentControl.Style>
+                                            </ContentControl>-->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
 
-                                                            <DataGrid.Columns>
-                                                                <DataGridTextColumn Width="20" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
-                                                            </DataGrid.Columns>
 
-                                                        </datagrid:ThemedDataGrid>-->
+                                                <StackPanel x:Name="panelCoordinates" Grid.Row="0" Grid.Column="0">
+                                                    <StackPanel.Style>
+                                                        <Style>
+                                                            <Setter Property="StackPanel.IsEnabled" Value="True"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="2">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
 
+                                                    <StackPanel  Margin="0,6,0,0">
                                                         <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=cell_list, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                                                     CanUserSortColumns="False" RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center"
                                                                     CanUserAddRows="False"
-                                                                  
                                                                     BorderThickness="1"
                                                                     BorderBrush="Black"
                                                                     local:DataGridBehavior.DisplayRowNumber="True"
                                                                     KeyDown="dgLocations_KeyDown"
-                                                                  
-                                                                    
                                                                     ScrollBar.Scroll="dgLocations_Scroll"
                                                                     ScrollViewer.ScrollChanged="dgLocations_Scroll"
                                                                     SourceUpdated="dgLocations_Unloaded"
-                                                                  
-                                                                    
                                                                     >
-
-                                                            
                                                             <DataGrid.ContextMenu>
                                                                 <ContextMenu >
                                                                     <MenuItem Header="Paste" Name="menuCoordinatesPaste" Click="menuCoordinatesPaste_Click"></MenuItem>
-                                                                    <!--<MenuItem Header="Paste" Command="{Binding PasteCommand}" x:Name="menuCoordinatesPaste"></MenuItem>-->
                                                                 </ContextMenu>
                                                             </DataGrid.ContextMenu>
-
-                                                            
 
                                                             <DataGrid.ColumnHeaderStyle>
                                                                 <Style TargetType="DataGridColumnHeader" >
@@ -1360,63 +1395,77 @@
                                                                     </Setter>
                                                                 </Style>
                                                             </DataGrid.ColumnHeaderStyle>
-                                                            <!--<DataGrid.RowHeaderTemplate>
-                                                                <DataTemplate>
-                                                                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
-                                                                        AncestorType={x:Type DataGridRow}}   }"/>
-                                                                </DataTemplate>
-                                                            </DataGrid.RowHeaderTemplate>-->
-                                                            <!--<DataGrid.RowStyle>
-                                                                <Style TargetType="DataGridRow">
-                                                                    <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
-                                                                    <Setter Property="BorderThickness" Value="1" />
-                                                                    <Setter Property="BorderBrush" Value="Gray" />
-                                                                </Style>
-                                                            
-                                                            </DataGrid.RowStyle>-->
-
                                                             <DataGrid.Columns>
                                                                 <DataGridTextColumn  Header="Cell" Width="40" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
                                                             </DataGrid.Columns>
-                                                            
+
                                                         </DataGrid>
                                                     </StackPanel>
-                                                
-                                                </Expander>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <StackPanel Margin="10,0">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                </Grid.RowDefinitions>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,6">
-                                                    <TextBlock Text="distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                    <ComboBox Margin="10,0"
-                                                    Name="CellPopDistributionTypeComboBox"
-                                                    ItemsSource="{Binding Source={StaticResource cellPopProbDistributionTypes}}"
-                                                    ItemTemplate="{Binding Source={StaticResource cellPopProbDistributionTypeTemplate}}"
-                                                    SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"  
-                                                    SelectionChanged="CellPopDistributionTypeComboBox_SelectionChanged"
-                                                    MinWidth="120"
-                                                    />
                                                 </StackPanel>
 
-                                                <StackPanel Grid.Column="0" Grid.Row="1">
-                                                    <ContentControl Name="CellPopProbDistributionDetails"
-                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                    Margin="6,2"/>
+                                                <StackPanel x:Name="panelUniform" Margin="0,6,0,0" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0">
+                                                    <StackPanel.Style>
+                                                        <Style>
+                                                            <Setter Property="StackPanel.Visibility" Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="0">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="2">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="70" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition />
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Text="conc" Margin="6,0" 
+                                                           Grid.Column="0" Grid.Row="0"  
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                               
+                                                           />
+                                                        <StackPanel Orientation="Horizontal"
+                                                            Grid.Column="1" Grid.Row="0"
+                                                            Margin="0,2">
+                                                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
+                                                            SpinnerVisibility="Collapsed"
+                                                            HorizontalAlignment="Right"
+                                                            Format="F2"
+                                                            StepValue="10"
+                                                            Width="50" 
+                                                            CenterSlotHorizontalAlignment="Right"
+                                                            Value="{Binding Path=concentration, UpdateSourceTrigger=PropertyChanged}"
+                                                            />
+                                                            <TextBlock Text="cells/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
+
+                                                <StackPanel x:Name="panelGaussian" Margin="0,8,0,0" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="0">
+                                                    <StackPanel.Style>
+                                                        <Style>
+                                                            <Setter Property="StackPanel.Visibility" Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="0">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
+                                                                    <Setter  Property="StackPanel.Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <TextBlock>Gaussian</TextBlock>
                                                 </StackPanel>
                                             </Grid>
-                                        </StackPanel>
 
-
+                                        </StackPanel>                                        
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -1428,8 +1477,6 @@
             <DataTemplate x:Key="cellDetailsTemplate">
 
                 <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Horizontal" IsReadOnly="{Binding Path=ReadOnly}">
-                    <!--<StackPanel Orientation="Horizontal">-->
-
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />

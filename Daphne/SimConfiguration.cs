@@ -1805,7 +1805,7 @@ namespace Daphne
         }
     }
 
-    public enum CellPopDistributionType { Specific, Probability }
+    public enum CellPopDistributionType { Specific, Uniform, Gaussian }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1818,7 +1818,8 @@ namespace Daphne
         private List<string> _cell_pop_dist_type_strings = new List<string>()
             {
                 "Specify cell coordinates",
-                "Probability Distribution"
+                "Uniform",
+                "Gaussian"
             };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -1942,12 +1943,12 @@ namespace Daphne
     public class CellPopUniformDistribution : CellPopDistribution
     {
         public double Conc { get; set; }
-        public CellPopProbDistributionType DistType { get; set; }
+        //public CellPopProbDistributionType DistType { get; set; }
         public CellPopUniformDistribution(double conc)
         {
             Conc = conc;
-            cpDistributionType = CellPopDistributionType.Probability;
-            DistType = CellPopProbDistributionType.Uniform;
+            cpDistributionType = CellPopDistributionType.Uniform;
+            //DistType = CellPopProbDistributionType.Uniform;
         }
     }
 
@@ -1961,12 +1962,12 @@ namespace Daphne
         //public double[] Sigma { get; set; }
         //public double   Peak { get; set; }
 
-        public CellPopProbDistributionType DistType { get; set; }
+        //public CellPopProbDistributionType DistType { get; set; }
 
         public CellPopGaussianDistribution()
         {
-            cpDistributionType = CellPopDistributionType.Probability;
-            DistType = CellPopProbDistributionType.Gaussian;
+            cpDistributionType = CellPopDistributionType.Gaussian;
+            //DistType = CellPopProbDistributionType.Gaussian;
         }
     }
 
