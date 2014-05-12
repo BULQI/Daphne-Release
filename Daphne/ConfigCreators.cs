@@ -1214,7 +1214,7 @@ namespace Daphne
 
             // BoundaryTransportTo: CXCR5 -> CXCR5|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             // products
@@ -1225,7 +1225,7 @@ namespace Daphne
 
             // BoundaryTransportFrom: CXCR5| -> CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, sc));
             // products
@@ -1236,7 +1236,7 @@ namespace Daphne
 
             // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
             // products
@@ -1292,7 +1292,7 @@ namespace Daphne
 
             // BoundaryTransportTo: CXCR4 -> CXCR4|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             // products
@@ -1303,7 +1303,7 @@ namespace Daphne
 
             // BoundaryTransportFrom: CXCR4| -> CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
             // products
@@ -1314,7 +1314,7 @@ namespace Daphne
 
             // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
             // products
