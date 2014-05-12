@@ -81,6 +81,7 @@ namespace DaphneGui
         /// </summary>
         public static Uri scenario_path;
         private string orig_content, orig_path;
+        private bool tempFileContent = false;
 
         private bool exportAllFlag = false;
         private string igGeneFolderName = "";
@@ -531,8 +532,6 @@ namespace DaphneGui
             ConfigCreators.CreateAndSerializeLigandReceptorScenario(config.SimConfig);
             //serialize to json
             config.SerializeSimConfigToFile();
-
-
         }
 
         private void showScenarioInitial()
@@ -581,15 +580,13 @@ namespace DaphneGui
             }
 
             return result;
-
         }
 
         private void saveScenarioAs_Click(object sender, RoutedEventArgs e)
         {
             saveScenarioUsingDialog();
+            tempFileContent = false;
         }
-
-
 
         /// <summary>
         /// Exports a model specification into SBML
@@ -767,7 +764,7 @@ namespace DaphneGui
                 {
                     vcrControl.SetInactive();
                 }
-                initialState(newFile, true, xmlConfigString);
+                initialState(newFile || tempFileContent, true, xmlConfigString);
                 enableCritical(loadSuccess);
                 if (loadSuccess == false)
                 {
@@ -1337,7 +1334,8 @@ namespace DaphneGui
             }
             else
             {
-                applyChanges();
+                saveTempFiles();
+                updateGraphicsAndGUI();
             }
         }
 
@@ -1624,7 +1622,7 @@ namespace DaphneGui
                     // catch xaml parse exception if it's not a good sim config file
                     try
                     {
-                        configurator.DeserializeSimConfig();
+                        configurator.DeserializeSimConfig(tempFileContent);
                         //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }
                     catch (Exception e)
@@ -1670,7 +1668,7 @@ namespace DaphneGui
             // reporter file name
             reporter.FileName = configurator.SimConfig.reporter_file_name;
 
-            //temporary solution to avoid popup resaving states -axin
+            // temporary solution to avoid popup resaving states -axin
             if (true)
             {
                 orig_content = configurator.SerializeSimConfigToStringSkipDeco();
@@ -1891,11 +1889,6 @@ namespace DaphneGui
             //ResetCameraButton.IsEnabled = true;
             //save3DView.IsEnabled = true;
 
-
-
-
-
-
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.SimConfigToolWindow.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
@@ -1904,11 +1897,26 @@ namespace DaphneGui
             gc.Rwc.Focus();
         }
 
-        private void applyChanges()
+        private bool saveTempFiles()
         {
             // check if there were changes
             if (configurator.SerializeSimConfigToStringSkipDeco() != orig_content)
             {
+                configurator.SerializeSimConfigToFile(true);
+                tempFileContent = true;
+                return true;
+            }
+            return false;
+        }
+
+        private bool applyTempFilesAndSave(bool discard)
+        {
+            if (tempFileContent == true)
+            {
+                configurator.DeserializeSimConfig(true);
+                // handled this set of files
+                tempFileContent = false;
+
                 MessageBoxResult result = saveDialog();
 
                 // apply changes, save if needed
@@ -1924,15 +1932,21 @@ namespace DaphneGui
                     // allow saving with a different name
                     saveScenarioUsingDialog();
                 }
-                else
+                else // if we had a proper discard button, discard would have to be it's own option
                 {
-                    // reload the file; also resets the gui, discards changes
-                    loadScenarioFromFile(scenario_path.LocalPath);
-                    return;
+                    if (discard == true)
+                    {
+                        // reload the file; also resets the gui, discards changes
+                        tempFileContent = false;
+                        loadScenarioFromFile(scenario_path.LocalPath);
+                    }
+                    return false;
                 }
+
+                return true;
             }
 
-            updateGraphicsAndGUI();
+            return true;
         }
 
         private void updateGraphicsAndGUI()
@@ -2048,7 +2062,7 @@ namespace DaphneGui
                     }
                 }*/
 
-                if (configurator.SerializeSimConfigToStringSkipDeco() == orig_content)
+                if (tempFileContent == false && configurator.SerializeSimConfigToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2071,6 +2085,7 @@ namespace DaphneGui
                             // initiating a run starts always at repetition 1
                             repetition = 1;
                             lockSaveStartSim(true);
+                            tempFileContent = false;
                             break;
                         case MessageBoxResult.No:
                             if (saveScenarioUsingDialog() == true)
@@ -2078,6 +2093,7 @@ namespace DaphneGui
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
                                 lockSaveStartSim(true);
+                                tempFileContent = false;
                             }
                             break;
                         case MessageBoxResult.Cancel:
@@ -2190,6 +2206,11 @@ namespace DaphneGui
 
         private void CommandBindingOpen_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            if (tempFileContent == true || saveTempFiles() == true)
+            {
+                applyTempFilesAndSave(true);
+            }
+
             Nullable<bool> result = loadScenarioUsingDialog();
 
             // Process open file dialog box results
@@ -2234,10 +2255,19 @@ namespace DaphneGui
                 // display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
+            tempFileContent = false;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if ((tempFileContent == true || saveTempFiles() == true) && applyTempFilesAndSave(false) == false)
+            {
+                // Note: this is a cute idea, canceling the exit, but we'd need a 'discard' button in addition
+                // to cancel to make this usable in a convenient way; without it the user would be forced to save the changes
+                //e.Cancel = true;
+                //return;
+            }
+
             // terminate the simulation thread first
             if (simThread != null && simThread.IsAlive)
             {

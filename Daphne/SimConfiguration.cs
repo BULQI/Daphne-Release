@@ -21,6 +21,7 @@ namespace Daphne
     public class SimConfigurator
     {
         public string FileName { get; set; }
+        public const string TempScenarioFile = "Config\\temp_scenario.json", TempUserDefFile = "Config\\temp_userdef.json";
         public SimConfiguration SimConfig { get; set; }
 
         public UserDefinedGroup userDefGroup { get; set; }
@@ -34,7 +35,9 @@ namespace Daphne
         public SimConfigurator(string filename)
         {
             if (filename == null)
+            {
                 throw new ArgumentNullException("filename");
+            }
 
             this.FileName = filename;
             this.SimConfig = new SimConfiguration();
@@ -42,7 +45,7 @@ namespace Daphne
             userDefGroup = new UserDefinedGroup();
         }
 
-        public void SerializeSimConfigToFile()
+        public void SerializeSimConfigToFile(bool tempFiles = false)
         {
             //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
@@ -54,12 +57,13 @@ namespace Daphne
             
             //serialize SimConfig
             string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = FileName;
+            string jsonFile = tempFiles == true ? TempScenarioFile : FileName;
+
             File.WriteAllText(jsonFile, jsonSpec);
 
             //serialize user defined objects
             jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);
-            jsonFile = "Config\\UserDefinedGroup.json";
+            jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
             File.WriteAllText(jsonFile, jsonSpec);
         }
 
@@ -100,7 +104,7 @@ namespace Daphne
             return ret;
         }
 
-        public void DeserializeSimConfig()
+        public void DeserializeSimConfig(bool tempFiles = false)
         {
             //Deserialize JSON
             var settings = new JsonSerializerSettings();
@@ -108,14 +112,16 @@ namespace Daphne
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
             //deserialize SimConfig
-            string readText = File.ReadAllText(FileName);
+            string jsonFile = tempFiles == true ? TempScenarioFile : FileName;
+            string readText = File.ReadAllText(jsonFile);
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
             SimConfig.InitializeStorageClasses();
 
             //deserialize user defined objects
-            if (File.Exists("\\config\\UserDefinedGroup.json"))
+            jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
+            if (File.Exists(jsonFile))
             {
-                readText = File.ReadAllText("Config\\UserDefinedGroup.json");
+                readText = File.ReadAllText(jsonFile);
                 userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
                 userDefGroup.CopyToConfig(SimConfig);
             }
