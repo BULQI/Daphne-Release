@@ -587,7 +587,7 @@ namespace Daphne
                     AddCellTranscriptionReactions(cell, sc.entity_repository, transcription_reacs);
                     
                     // locomotion
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != null)
+                    if (cell.Cytosol.Populations.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref) == true)
                     {
                         MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
 
@@ -604,7 +604,8 @@ namespace Daphne
                     //TRANSITION DRIVERS
                     // death behavior
 #if GUID_REF_BASED
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
+                    //if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
+                    if (sc.entity_repository.transition_drivers_dict.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref) == true)
                     {
                         string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
@@ -621,7 +622,8 @@ namespace Daphne
 
                     // Differentiation
 #if GUID_REF_BASED
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != "")
+                    //if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != "")
+                    if (sc.entity_repository.diff_schemes_dict.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref) == true)
                     {
                         string diff_scheme_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref;
                         ConfigDiffScheme config_diffScheme = sc.entity_repository.diff_schemes_dict[diff_scheme_guid];
@@ -669,7 +671,8 @@ namespace Daphne
 
                     // division behavior
 #if GUID_REF_BASED
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
+                    //if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
+                    if (sc.entity_repository.transition_drivers_dict.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref) == true)
                     {
                         string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
@@ -745,7 +748,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (config_tde.driver_mol_guid_ref != "")
+                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;

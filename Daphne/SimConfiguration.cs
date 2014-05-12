@@ -4920,7 +4920,7 @@ namespace Daphne
             ConfigMolecularPopulation MyMolPop = null;
             string mol_guid = "";
 
-            if (death_guid == "" || death_guid == "")
+            if (death_guid == "")
                 return mol_guid;
 
             if (drivers != null)
