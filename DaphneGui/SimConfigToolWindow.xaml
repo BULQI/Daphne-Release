@@ -172,6 +172,10 @@
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="cytosolReactionsCollectionViewSource_Filter"/>
 
+            <CollectionViewSource x:Key="ecmAvailableReactionsListView"  
+                                  Source="{Binding Path=entity_repository.reactions}"
+                                  Filter="ecmAvailableReactionsListView_Filter"/>
+
             <!-- skg 5/29/12 -->
             <CollectionViewSource x:Key="baseCellTypesListView"  
                                   Source="{Binding Path=entity_repository.CellBaseTypeLabel}"/>
@@ -3644,7 +3648,7 @@
 
                             </StackPanel>
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" 
+                                    ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
                                     SelectedIndex="-1"
                             />
@@ -3794,11 +3798,13 @@
                                                 MinHeight="50" MaxHeight="150"
                                                 >
                                     </ListBox>-->
-                                    <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                ItemsSource="{Binding Path=entity_repository.reactions}"
+                                    <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
+                                                ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="-1"
                                                 MinHeight="50" MaxHeight="150"
                                                 >
+
+                                        <!-- ItemsSource="{Binding Path=entity_repository.reactions}" -->
 
                                         <ListView.View>
                                             <GridView>

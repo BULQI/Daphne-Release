@@ -559,8 +559,20 @@ namespace DaphneGui
             int index = lbEcsMolPops.SelectedIndex;
             if (index >= 0)
             {
-                ConfigMolecularPopulation gmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
-                MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(gmp);
+                ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
+
+                MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove ECM reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);                
+                if (res == MessageBoxResult.No)
+                    return;
+
+                foreach (string reacguid in MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.ToList())
+                {
+                    if (MainWindow.SC.SimConfig.entity_repository.reactions_dict[reacguid].HasMolecule(cmp.molecule_guid_ref))
+                    {
+                        MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
+                    }
+                }
+                MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(cmp);
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -587,6 +599,30 @@ namespace DaphneGui
                     e.Accepted = false;
                 }
             }
+        }
+
+        
+
+        private bool EcmHasMolecule(string molguid)
+        {
+            foreach (ConfigMolecularPopulation molpop in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
+            {
+                if (molpop.molecule_guid_ref == molguid)
+                    return true;
+            }
+            return false;
+        }
+        private bool CellPopsHaveMolecule(string molguid)
+        {
+            bool ret = false;
+            foreach (CellPopulation cell_pop in MainWindow.SC.SimConfig.scenario.cellpopulations)
+            {
+                ConfigCell cell = MainWindow.SC.SimConfig.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                if (MembraneHasMolecule(cell, molguid))
+                    return true;
+            }
+            
+            return ret;
         }
 
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -695,30 +731,6 @@ namespace DaphneGui
             }
 
         }
-
-        private bool EcmHasMolecule(string molguid)
-        {
-            foreach (ConfigMolecularPopulation molpop in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
-            {
-                if (molpop.molecule_guid_ref == molguid)
-                    return true;
-            }
-            return false;
-        }
-
-        private bool CellPopsHaveMolecule(string molguid)
-        {
-            bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SC.SimConfig.scenario.cellpopulations)
-            {
-                ConfigCell cell = MainWindow.SC.SimConfig.entity_repository.cells_dict[cell_pop.cell_guid_ref];
-                if (MembraneHasMolecule(cell, molguid))
-                    return true;
-            }
-            
-            return ret;
-        }
-
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = lvEcsReactions.SelectedIndex;
@@ -733,6 +745,57 @@ namespace DaphneGui
 
             }
         }
+
+        private void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+
+            bool bOK = false;
+            foreach (string molguid in cr.reactants_molecule_guid_ref) {
+                if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                {
+                    bOK = true;
+                }
+                else
+                {
+                    bOK = false;
+                    break;
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.products_molecule_guid_ref)
+                {
+                    if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+
+            e.Accepted = bOK;
+        }
+
 
         private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1397,7 +1460,7 @@ namespace DaphneGui
             if (cr != null && cc != null)
             {
                 e.Accepted = false;
-                // Filter out cr if not in ecm reaction list 
+                // Filter out cr if not in membrane reaction list 
                 if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
                     e.Accepted = true;
@@ -1434,7 +1497,7 @@ namespace DaphneGui
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
             if (cr != null && cc != null)
             {
-                // Filter out cr if not in ecm reaction list 
+                // Filter out cr if not in cytosol reaction list 
                 if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
                     e.Accepted = true;

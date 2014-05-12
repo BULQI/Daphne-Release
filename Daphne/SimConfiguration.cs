@@ -1793,14 +1793,15 @@ namespace Daphne
             //    {
             //    }
             //}
-            //else if (e.Action == NotifyCollectionChangedAction.Remove)
+            //else 
+            //if (e.Action == NotifyCollectionChangedAction.Remove)
             //{
             //    foreach (var oo in e.OldItems)
             //    {
             //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
-            //        if (cmp.report_mp.molpop_guid_ref == cmp.molpop_guid)
+            //        if (entity_repository.reactions_dict(reactions_guid_ref).)
             //        {
-
+            //            reactions_guid_ref.Remove(cmp.molecule_guid_ref);
             //        }
             //    }
             //}
