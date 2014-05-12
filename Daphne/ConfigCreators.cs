@@ -103,6 +103,13 @@ namespace Daphne
             cl.Z = 1000;
             cp.cell_locations.Add(cl);
 
+            foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
+            {
+                ReportMP rmp = new ReportMP();
+                rmp.molpop_guid_ref = cmp.molpop_guid;
+                cp.EcmProbeMP.Add(rmp);
+            }
+
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
             sc.scenario.cellpopulations.Add(cp);
@@ -188,6 +195,9 @@ namespace Daphne
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
                 sc.scenario.environment.ecs.molpops.Add(gmp);
+
+                
+
             }
 
             //ADD CELLS AND CELL MOLECULES
@@ -206,6 +216,13 @@ namespace Daphne
             cl.Y = 250;
             cl.Z = 250;
             cp.cell_locations.Add(cl);
+
+            foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
+            {
+                ReportMP rmp = new ReportMP();
+                rmp.molpop_guid_ref = cmp.molpop_guid;
+                cp.EcmProbeMP.Add(rmp);
+            }
 
             sc.scenario.cellpopulations.Add(cp);
 

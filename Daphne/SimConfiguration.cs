@@ -219,6 +219,7 @@ namespace Daphne
             InitGaussSpecsAndGuidGaussDict();
             InitCellPopulationIDCellPopulationDict();
             InitMoleculeIDConfigMoleculeDict();
+            InitMolPopIDConfigMolecularPopDict();
             InitCellIDConfigCellDict();
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
@@ -292,6 +293,19 @@ namespace Daphne
                 entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
             }
             entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+
+        }
+
+        private void InitMolPopIDConfigMolecularPopDict()
+        {
+            ConfigCompartment cc = scenario.environment.ecs;
+            cc.molpops_dict.Clear();
+            foreach (ConfigMolecularPopulation cmp in cc.molpops)
+            {
+                cc.molpops_dict.Add(cmp.molpop_guid, cmp);
+            }
+            cc.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
+            //entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
 
         }
 
@@ -428,6 +442,66 @@ namespace Daphne
                 {
                     ConfigMolecule cm = dd as ConfigMolecule;
                     entity_repository.molecules_dict.Remove(cm.molecule_guid);
+                }
+            }
+        }
+        private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecularPopulation cmp = nn as ConfigMolecularPopulation;
+
+                    //foreach (ConfigMolecularPopulation mp in scenario.environment.ecs.molpops)
+                    //{
+                    //    if (mp.Name == cmp.Name)
+                    //    {
+                    //        string output = string.Format("Molecular population '{0}' already exists, please use a different name.", cmp.Name);
+                    //        MessageBox.Show(output);
+                    //        return;
+                    //    }
+                    //}
+
+                    scenario.environment.ecs.molpops_dict.Add(cmp.molpop_guid, cmp);
+
+                    int count = scenario.cellpopulations.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        ReportMP rmp = new ReportMP();
+                        rmp.molpop_guid_ref = cmp.molpop_guid;
+
+                        CellPopulation cp = scenario.cellpopulations[i];
+                        //REPORTER-TO-DO   
+                        cp.EcmProbeMP.Add(rmp);
+                        
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigMolecularPopulation cmp = dd as ConfigMolecularPopulation;
+                    scenario.environment.ecs.molpops_dict.Remove(cmp.molpop_guid);
+
+                    int count = scenario.cellpopulations.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        CellPopulation cp = scenario.cellpopulations[i];
+
+                        //REPORTER-TO-DO   
+                        //HERE DELETE REPORTMP FROM cp.EcmProbeMP
+                        /*
+                         * foreach (ReportMP rmp in cp.EcmProbeMP) {
+                         *     if (rmp.molpop_guid_ref == cmp.molpop_guid) {
+                         *         //cannot delete item inside loop
+                         *     }
+                         * }
+                         */
+                        
+                    }
+                        
                 }
             }
         }
@@ -1183,18 +1257,21 @@ namespace Daphne
         public bool mean { get; set; }
         public ExtendedReport mp_extended { get; set; }
         public ExtendedReport probe_extended { get; set; }
+        public string molpop_guid_ref { get; set; }
 
         public ReportMP()
         {
-            mean = true;
-            mp_extended = ExtendedReport.LEAN;
-            probe_extended = ExtendedReport.COMPLETE;
+            mean = false;
+            mp_extended = ExtendedReport.NONE;
+            probe_extended = ExtendedReport.NONE;
         }
     }
 
     //skg daphne new classes
     public class ConfigMolecularPopulation //: EntityModelBase
     {
+        public string molpop_guid { get; set; }
+
         private string _molecule_guid_ref;
         public string molecule_guid_ref 
         {
@@ -1231,6 +1308,8 @@ namespace Daphne
         {
             reportMP = new ReportMP();
             boundary_face = BoundaryFace.None;
+            Guid id = Guid.NewGuid();
+            molpop_guid = id.ToString();
         }
     }
 
@@ -1238,6 +1317,7 @@ namespace Daphne
     {
         // private to simConfig; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
         //public ObservableCollection<string> reactions_guid_ref { get; set; }
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
@@ -1261,6 +1341,7 @@ namespace Daphne
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             reactions_guid_ref = new ObservableCollection<string>();
             reaction_complexes_guid_ref = new ObservableCollection<string>();
+            molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
         }
     }
 
@@ -1839,6 +1920,19 @@ namespace Daphne
             CellPopDistTypes.Add(d);
         }
 
+        private ObservableCollection<ReportMP> ecmProbeMP; // report options per ecm molpop
+        public ObservableCollection<ReportMP> EcmProbeMP
+        {
+            get
+            {
+                return ecmProbeMP;
+            }
+            set
+            {
+                ecmProbeMP = value;
+            }
+        }
+
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -1859,6 +1953,7 @@ namespace Daphne
             InitDistTypes();
 
             cell_locations = new ObservableCollection<CellLocation>();
+            ecmProbeMP = new ObservableCollection<ReportMP>();
 
             // reporting
             reportXVF = new ReportXVF();
@@ -2046,6 +2141,44 @@ namespace Daphne
             ////    }
             ////}
             return ret;
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class MolPopGUIDtoMolPopNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (parameter == null)
+                return "";
+
+            string guid = value as string;
+            string molpop_name = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigMolecularPopulation> molpop_list = cvs.Source as ObservableCollection<ConfigMolecularPopulation>;
+            if (molpop_list != null)
+            {
+                foreach (ConfigMolecularPopulation mp in molpop_list)
+                {
+                    if (mp.molpop_guid == guid)
+                    {
+                        molpop_name = mp.Name;
+                        break;
+                    }
+                }
+            }
+            return molpop_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
         }
     }
 

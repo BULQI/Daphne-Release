@@ -36,6 +36,8 @@
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
             <daph:MolGUIDtoMolIndexConverter x:Key="MolGUIDtoMolIndexConv" />
+            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+            
             <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />
             <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
@@ -122,6 +124,9 @@
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="moleculesListView2"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
+            <CollectionViewSource x:Key="molPopsListView"  
+                                  Source="{Binding Path=scenario.environment.ecs.molpops}"
+                                  />
             <CollectionViewSource x:Key="ecmMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <!--<CollectionViewSource x:Key="ecsReactionsListView"  
@@ -4203,8 +4208,81 @@
                             BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
-                        <!--<TextBlock Text="Molecular Populations by Cell" FontWeight="Bold" Margin="0,5,0,0" />-->
                         <StackPanel>
+                            <ListBox x:Name="lbRptCellPops" MinHeight="100" 
+                            ItemsSource="{Binding Path=scenario.cellpopulations}" 
+                            DisplayMemberPath="cellpopulation_name"
+                            SelectedIndex="0"
+                            />
+                            <!-- EcmProbeMP -->
+                            <Expander ExpandDirection="Down" Padding="5"
+                                IsExpanded="False"
+                                Header="ECM probe at cell location"
+                                Margin="0,4,0,0" 
+                                Canvas.ZIndex="1"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                                >
+                                <StackPanel>
+                                    <DataGrid x:Name="dgEcmProbeMols" AutoGenerateColumns="False" 
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.EcmProbeMP}"                                                         
+                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                        CanUserReorderColumns="False" CanUserResizeRows="False"
+                                        CanUserSortColumns="False" RowHeaderWidth="0"
+                                        VerticalContentAlignment="Center"
+                                        CanUserAddRows="False"
+                                        BorderThickness="1"
+                                        BorderBrush="Black"
+                                        >
+
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader" >
+                                                <Setter Property="FontSize" Value="12" />
+                                                <Setter Property="Height" Value="24" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="BorderBrush" Value="Black" />
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Offset="0.0" Color="White" />
+                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+
+                                        <DataGrid.Columns>
+                                            <DataGridTemplateColumn Header="mol pop" Width="60">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molpop_guid_ref, Converter={StaticResource MolPopGUIDtoMolPopNameConv},
+                                                            ConverterParameter={StaticResource molPopsListView}}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <DataGridTemplateColumn Header="conc" Width="60">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=probe_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <DataGridTemplateColumn Header="conc+gradient" Width="90">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=probe_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Expander>
                             <ListBox x:Name="lbRptCells" MinHeight="100" 
                             ItemsSource="{Binding Path=entity_repository.cells}" 
                              DisplayMemberPath="CellName"
@@ -4220,62 +4298,61 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                                 <StackPanel>
-                                <!--<TextBlock Text="Molecules in membrane" FontWeight="Bold" Margin="0,10,0,0" />-->
-                                <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False" 
-                                ItemsSource="{Binding ElementName=lbRptCells, Path=SelectedItem.membrane.molpops}"                            
-                                Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
-                                CanUserReorderColumns="False" CanUserResizeRows="False"
-                                CanUserSortColumns="False" RowHeaderWidth="0"
-                                VerticalContentAlignment="Center"
-                                CanUserAddRows="False"
-                                BorderThickness="1"
-                                BorderBrush="Black"
-                                >
-                                    <DataGrid.ColumnHeaderStyle>
-                                        <Style TargetType="DataGridColumnHeader" >
-                                            <Setter Property="FontSize" Value="12" />
-                                            <Setter Property="Height" Value="24" />
-                                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                            <Setter Property="BorderThickness" Value="1" />
-                                            <Setter Property="BorderBrush" Value="Black" />
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                        <GradientStop Offset="0.0" Color="White" />
-                                                        <GradientStop Offset="1.0" Color="Beige" />
-                                                    </LinearGradientBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False" 
+                                    ItemsSource="{Binding ElementName=lbRptCells, Path=SelectedItem.membrane.molpops}"                            
+                                    Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                    CanUserReorderColumns="False" CanUserResizeRows="False"
+                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                    VerticalContentAlignment="Center"
+                                    CanUserAddRows="False"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    >
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader" >
+                                                <Setter Property="FontSize" Value="12" />
+                                                <Setter Property="Height" Value="24" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="BorderBrush" Value="Black" />
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Offset="0.0" Color="White" />
+                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
 
-                                    <DataGrid.Columns>
+                                        <DataGrid.Columns>
 
-                                        <DataGridTemplateColumn Header="Membrane Mol Pop">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Header="Membrane Mol Pop">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="mean" Width="60">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
+                                            <DataGridTemplateColumn Header="mean" Width="60">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
 
-                                        <DataGridTemplateColumn Header="mean+gradient" Width="90">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
+                                            <DataGridTemplateColumn Header="mean+gradient" Width="90">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
                                 </StackPanel>
                             </Expander>
 
@@ -4290,79 +4367,9 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                                 <StackPanel>
-                            <!--<TextBlock Text="Molecules in cytosol" FontWeight="Bold" Margin="0,10,0,0" />-->
-                            <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
+                                    <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
                               ItemsSource="{Binding ElementName=lbRptCells, Path=SelectedItem.cytosol.molpops}"
                                                         
-                            Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
-                            CanUserReorderColumns="False" CanUserResizeRows="False"
-                            CanUserSortColumns="False" RowHeaderWidth="0"
-                            VerticalContentAlignment="Center"
-                            CanUserAddRows="False"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            >
-
-                                <DataGrid.ColumnHeaderStyle>
-                                    <Style TargetType="DataGridColumnHeader" >
-                                        <Setter Property="FontSize" Value="12" />
-                                        <Setter Property="Height" Value="24" />
-                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                        <Setter Property="BorderThickness" Value="1" />
-                                        <Setter Property="BorderBrush" Value="Black" />
-                                        <Setter Property="Background">
-                                            <Setter.Value>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                    <GradientStop Offset="0.0" Color="White" />
-                                                    <GradientStop Offset="1.0" Color="Beige" />
-                                                </LinearGradientBrush>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </DataGrid.ColumnHeaderStyle>
-
-                                <DataGrid.Columns>
-                                    <DataGridTemplateColumn Header="Cytosol Mol Pop">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTemplateColumn Header="mean" Width="60">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <DataGridTemplateColumn Header="mean+gradient" Width="90">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </Expander>
-
-                            <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="False"
-                            Header="ECM probe at cell location"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
-                                <StackPanel>
-                                    <!--<TextBlock Text="ECM probe at cell location" FontWeight="Bold" Margin="0,10,0,0" />-->
-                                    <DataGrid x:Name="dgEcmProbeMols" AutoGenerateColumns="False" 
-                            ItemsSource="{Binding Path=scenario.environment.ecs.molpops}"                                                         
                             Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
                             CanUserSortColumns="False" RowHeaderWidth="0"
@@ -4391,7 +4398,7 @@
                                         </DataGrid.ColumnHeaderStyle>
 
                                         <DataGrid.Columns>
-                                            <DataGridTemplateColumn Header="MolPop">
+                                            <DataGridTemplateColumn Header="Cytosol Mol Pop">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
@@ -4399,7 +4406,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="conc" Width="60">
+                                            <DataGridTemplateColumn Header="mean" Width="60">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
@@ -4407,7 +4414,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="conc+gradient" Width="90">
+                                            <DataGridTemplateColumn Header="mean+gradient" Width="90">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
@@ -4418,11 +4425,10 @@
                                     </DataGrid>
                                 </StackPanel>
                             </Expander>
+
+
                         </StackPanel>
                     </Expander>
-
-
-
                 </StackPanel>
                     
             </ScrollViewer>
@@ -4438,6 +4444,13 @@
                                 <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
                                 <TextBlock Text="    " Margin="5,0,0,0"/>
                                 <TextBlock Text="{Binding Path=molecule_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="molpopGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=molpop_guid}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate x:Key="cellGuidsListItemTemplate">
@@ -4456,6 +4469,14 @@
                         </DataTemplate>
                     </StackPanel.Resources>
 
+                    <!-- Molecular Populations -->
+                    <TextBlock Text="Molecular Populations" FontWeight="Bold" Margin="0,5,0,0" />
+                    <ListBox x:Name="MolPopGuids" MinHeight="50" 
+                                ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" 
+                                ItemTemplate="{Binding Source={StaticResource molpopGuidsListItemTemplate}}"
+                                SelectedIndex="0"
+                                />
+                    
                     <!-- Molecules -->
                     <TextBlock Text="Molecules" FontWeight="Bold" Margin="0,5,0,0" />
                     <ListBox x:Name="MolGuids" MinHeight="50" 
