@@ -226,9 +226,13 @@ namespace DaphneGui
             e.CanExecute = true;
         }
 
+        public static ChartViewToolWindow ST_ReacComplexChartWindow;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            ST_ReacComplexChartWindow = ReacComplexChartWindow;
 
             this.ToolWinCellInfo.Close();
 

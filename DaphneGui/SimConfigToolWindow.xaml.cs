@@ -683,12 +683,13 @@ namespace DaphneGui
 
         private void btnGraphComplex_Click(object sender, RoutedEventArgs e)
         {
+
             if (lbComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to process.");
                 return;
             }
-            
+
             ConfigReactionComplex grc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
             ////// executes the ninject bindings; call this after the config is initialized with valid values
@@ -719,7 +720,7 @@ namespace DaphneGui
                 {
                     ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref];
                     //Molecule mol = new Molecule(cm.Name, cm.MolecularWeight, cm.EffectiveRadius, cm.DiffusionCoefficient);
-                    kvp.Value.Cytosol.AddMolecularPopulation(cm.molecule_guid, "const", new double[] { 2.0 }); 
+                    kvp.Value.Cytosol.AddMolecularPopulation(cm.molecule_guid, "const", new double[] { 2.0 });
                 }
                 foreach (string rguid in grc.reactions_guid_ref)
                 {
@@ -755,7 +756,7 @@ namespace DaphneGui
                         comp.Reactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
                     }
                 }
-                kvp.Value.IsMotile = false;  
+                kvp.Value.IsMotile = false;
             }
 
 
@@ -775,7 +776,7 @@ namespace DaphneGui
             ////////MainWindow.SC.SimConfig.ChartWindow.Render();
             ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Maximum = rcs.RC.dMaxTime;
             ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Value = rcs.RC.dInitialTime;
-              
+
             //////////rc = Sim.FindReactionComplex(rcname);
 
             ////////////The Go function calculates the initial list (dictionary) of concs for each molecule   
@@ -822,6 +823,8 @@ namespace DaphneGui
             }
 
             MessageBox.Show("Finished processing reaction complex.");
+
+            MainWindow.ST_ReacComplexChartWindow.Activate();
 
         }
 
