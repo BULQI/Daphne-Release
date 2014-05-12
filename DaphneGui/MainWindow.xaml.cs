@@ -1753,6 +1753,11 @@ namespace DaphneGui
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
                                 }
+                                // close the reporter
+                                if (Properties.Settings.Default.skipDataBaseWrites == false)
+                                {
+                                    reporter.CloseReporter();
+                                }
                                 // for profiling: close the application after a completed experiment
                                 if (ControlledProfiling() == true && repetition >= configurator.SimConfig.experiment_reps)
                                 {
@@ -1760,11 +1765,7 @@ namespace DaphneGui
                                     return;
                                 }
 
-                                // remaining: close reporter and update the gui
-                                if (Properties.Settings.Default.skipDataBaseWrites == false)
-                                {
-                                    reporter.CloseReporter();
-                                }
+                                // update the gui; this is a non-issue if an application close just got requested, so may get skipped
                                 runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
                             }
                         }
