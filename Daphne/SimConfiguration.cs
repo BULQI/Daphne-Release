@@ -1994,6 +1994,54 @@ namespace Daphne
         }
     }
 
+    public class GuidToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bResult = true;
+            string guid = value as string;
+
+            if (guid == "" || guid == null)
+            {
+                bResult = false;
+            }
+
+            return bResult;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = "";
+
+            //bool bval = value as bool;
+
+            //if (bval 
+
+            return guid;
+        }
+    }
+
+    public class TransitionDriverToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bResult = true;
+            ConfigTransitionDriver td = value as ConfigTransitionDriver;
+
+            if (td == null)
+            {
+                bResult = false;
+            }
+
+            return bResult;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigTransitionDriver ds = null;
+
+            return ds;
+        }
+    }
+
     /// <summary>
     /// Converter to go between enum values and boolean values for GUI checkbox
     /// </summary>
@@ -3258,7 +3306,8 @@ namespace Daphne
         }
     }
 
-    public class ConfigCell
+    public class ConfigCell : EntityModelBase
+
     {
         public ConfigCell()
         {
@@ -3330,17 +3379,59 @@ namespace Daphne
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
         public string diff_scheme_guid_ref { get; set; }
-        public ConfigDiffScheme diff_scheme { get; set; }
+
+        private ConfigDiffScheme _diff_scheme;
+        public ConfigDiffScheme diff_scheme
+        {
+            get
+            {
+                return _diff_scheme;
+            }
+
+            set
+            {
+                _diff_scheme = value;
+                OnPropertyChanged("diff_scheme");
+            }
+        }
 
         // Guid for ConfigTransitionDriver that drives cell death
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
         public string death_driver_guid_ref { get; set; }
-        public ConfigTransitionDriver death_driver { get; set; }
+        private ConfigTransitionDriver _death_driver;
+        public ConfigTransitionDriver death_driver
+        {
+            get
+            {
+                return _death_driver;
+            }
+
+            set
+            {
+                _death_driver = value;
+                OnPropertyChanged("death_driver");
+            }
+        }
+
         // Guid for ConfigTransitionDriver that drives cell division
         public string div_driver_guid_ref { get; set; }
-        public ConfigTransitionDriver div_driver { get; set; }
+
+        private ConfigTransitionDriver _div_driver;
+        public ConfigTransitionDriver div_driver 
+        {
+            get
+            {
+                return _div_driver;
+            }
+
+            set
+            {
+                _div_driver = value;
+                OnPropertyChanged("div_driver");
+            }
+        }
 
         public int CurrentDeathState;
         public int CurrentDivState;

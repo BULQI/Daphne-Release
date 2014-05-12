@@ -64,6 +64,9 @@
             <daph:DeathDriverGuidToDriverElementConverter x:Key="DeathDriverGuidToDriverElementConv" />
             <daph:DiffGUIDtoDiffNameConverter x:Key="DiffGUIDtoDiffNameConv" />
 
+            <daph:GuidToBoolConverter x:Key="GuidToBoolConv" />
+            <daph:TransitionDriverToBoolConverter x:Key="TransitionDriverToBoolConv" />
+
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
@@ -1359,20 +1362,36 @@
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
                             <TextBox Text="{Binding Path=CellName, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120"  />
                         </StackPanel>
+                        
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <uc:DoublesBox SliderEnabled="False" Width="120" Number="{Binding Path=CellRadius}">
+                            <uc:DoublesBox SliderEnabled="False" Width="100" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius}">
                             </uc:DoublesBox>
                         </StackPanel>
+                        
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="differentiator" Margin="6,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120"
+                            <TextBox x:Name="txtCellDiff" Width="120" IsEnabled="False" IsReadOnly="True" Text="{Binding Path=diff_scheme.Name, Mode=OneWay}" />
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" Width="220" >
+                            <Expander 
+                                Header="select another differentiator"   
+                                ExpandDirection="Down" 
+                                Padding="6" 
+                                Margin="0,0,0,0" 
+                                Canvas.ZIndex="1"     
+                                HorizontalAlignment="Right"
+                                Width="Auto"
+                                Visibility="Visible"
+                                >
+                                
+                                <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
                                        ItemsSource="{Binding Source={StaticResource diffSchemesListView}}"
                                        DisplayMemberPath="Name"
-                                        
+                                       SelectionChanged="cbCellDiffSchemes_SelectionChanged"
                                        />
-
-                           
+                            </Expander>
                             
                         </StackPanel>
                     </StackPanel>
@@ -1437,115 +1456,6 @@
                 </local:DaphneStackPanel>
 
             </DataTemplate>
-
-            <DataTemplate x:Key="cellDeathDetailsTemplate">
-                <StackPanel Margin="0,-10" HorizontalAlignment="Left" Orientation="Horizontal">
-                    
-                    <!--<TextBox Height="24" HorizontalAlignment="Left" Margin="4,-4" VerticalAlignment="Top" Width="196" 
-                             Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, 
-                                                Path=DataContext.entity_repository.transition_drivers_dict[death_driver_guid].DriverElements[0].elements[1]}" 
-                    />-->
-                             
-                    <!--<StackPanel Orientation="Vertical" >
-                        <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label2" VerticalAlignment="Top" Width="200" />
-                        <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
-                                  ItemsSource="{Binding cytosol.molpops}" 
-                                  DisplayMemberPath="Name"
-                                  >
-
-                            <ComboBox.SelectedItem >
-                                
-                                <MultiBinding Converter="{StaticResource MolGuidToMolPopNameMultiConv2}" >
-                                    <Binding Path="entity_repository.transition_drivers_dict[death_driver_guid].DriverElements[0].elements[1]"  />
-                                    <Binding Path="cytosol" />
-                                </MultiBinding>
-                            </ComboBox.SelectedItem>
-                        </ComboBox>
-                    </StackPanel>-->
-                    
-                    
-                    <StackPanel Orientation="Vertical">
-                        <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />                        
-                        <!-- This retrieves the driver molecule guid using the death_driver_guid and puts it into txtMolGuid textbox -->
-                        <!--<Label Content="Molecule Guid" Height="28" HorizontalAlignment="Left"  Name="labelTempo" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtMolGuid" Margin="4,-4" VerticalAlignment="Top" Width="196"
-                                 Text="{Binding Path=death_driver_guid, 
-                                                          Converter={StaticResource DeathDriverGuidToMolGuidConv}, 
-                                                          ConverterParameter={StaticResource transitionDriversListView}}"
-                                 />-->
-
-                        <!--<ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
-                                  ItemsSource="{Binding cytosol.molpops}" DisplayMemberPath="Name"> 
-                            <ComboBox.Text>
-                                <MultiBinding Converter="{StaticResource MolGuidToMolPopNameMultiConv}" 
-                                              ConverterParameter="{StaticResource transitionDriversListView}">
-                                    <Binding Path="death_driver_guid"  />
-                                    <Binding Path="cytosol" />
-                                </MultiBinding>
-                            </ComboBox.Text>
-                        </ComboBox>-->
-
-                        <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
-                                  ItemsSource="{Binding cytosol.molpops, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Name" >
-                            <ComboBox.SelectedItem>
-                                <MultiBinding Converter="{StaticResource MolGuidToMolPopMultiConv}" 
-                                              ConverterParameter="{StaticResource transitionDriversListView}">
-                                    <Binding Path="death_driver_guid"  />
-                                    <Binding Path="cytosol" />
-                                </MultiBinding>
-                            </ComboBox.SelectedItem>
-                        </ComboBox>
-
-                        <!-- Trying to use multi converter. This works very well but it is just for testing -->
-                        <Label Content="Mol Pop Name" Height="28" HorizontalAlignment="Left"  Name="labelTemp" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtMolPopName" Margin="4,-4" VerticalAlignment="Top" Width="196" >
-                            <TextBox.Text>
-
-                                <MultiBinding   Converter="{StaticResource MolGuidToMolPopMultiConv}" 
-                                                ConverterParameter="{StaticResource transitionDriversListView}">
-                                    <Binding Path="death_driver_guid" />                                    
-                                    <Binding Path="cytosol" />
-                                    
-                                </MultiBinding>
-                                
-                            </TextBox.Text>
-                        </TextBox>
-
-                        <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
-                                 Text="{Binding Path=death_driver_guid, Mode=TwoWay, UpdateSourceTrigger=LostFocus,
-                                        Converter={StaticResource DeathDriverGuidToAlphaConv}, 
-                                        ConverterParameter={StaticResource transitionDriversListView}}"/>
-                        <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
-                                Text="{Binding Path=death_driver_guid, Mode=TwoWay, UpdateSourceTrigger=LostFocus,
-                                        Converter={StaticResource DeathDriverGuidToBetaConv}, 
-                                        ConverterParameter={StaticResource transitionDriversListView}}"/>
-                        
-                        <Label Content="    " Width="100"></Label>
-                        
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate x:Key="cellProductionDetailsTemplate">
-                <StackPanel Margin="0,-10" HorizontalAlignment="Left" Orientation="Horizontal">
-                    <StackPanel Orientation="Vertical" >
-                        <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
-                        <TextBox IsReadOnly="True" Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="txtProductionMolPop" VerticalAlignment="Top" Width="196"
-                                >
-                        </TextBox>
-                        <!--<ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
-                                                                  ItemsSource="{Binding cytosol.molpops}" DisplayMemberPath="Name" >
-                        </ComboBox>-->
-                        <Label Content="Background Production Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" />
-                        <Label Content="Production Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
-                        <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196" />
-                        <Label Content="    " Width="100"></Label>
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-
 
             <Style TargetType="editors:DoubleEditBox">
                 <Setter Property="CheckBoxVisibility" Value="Collapsed" />
@@ -3882,7 +3792,7 @@
                                 <local:DaphneStackPanel x:Name="panelCellMolPops" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
                                     <!--<StackPanel Orientation="Vertical">-->
                                     <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellDetails" Height="96"
+                                        <ContentControl Name="CellDetails" 
                                                 Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellDetailsTemplate}" 
                                                 Margin="6,4"/>
@@ -4209,75 +4119,47 @@
                                     </Expander>
 
                                     <!-- Cell Death -->
-                                    <Expander
-                                                Padding="5" 
-                                                ExpandDirection="Down"
-                                                IsExpanded="False"
-                                                Header="Cell Death"                                              
-                                                x:Name="CellDeathExpander"
-                                                Margin="0,5,0,0" 
-                                                Canvas.ZIndex="1"
-                                                BorderThickness="1"
-                                                BorderBrush="Black"
+                                    <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Cell Death" x:Name="CellDeathExpander" 
+                                                Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
                                         <StackPanel>
-
                                             <StackPanel x:Name="spDeath" Orientation="Vertical" >
-                                                <!--<ListBox x:Name="lbDrivers" MaxHeight="0" 
-                                                         ItemsSource="{Binding Source={StaticResource cellTransitionDeathDriverListView}}"
-                                                         SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver_guid}"
-                                                         SelectedValuePath="driver_guid"
-                                                         DisplayMemberPath="Name" 
-                                                />
-                                                <TextBox Text="{Binding ElementName=lbDrivers, Path=SelectedItem.Name}" />-->
-                                                         
+                                                <CheckBox x:Name="chkHasDeathDriver" Content="Has Death Driver" Margin="4,0"   
+                                                          IsChecked="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver, Mode=TwoWay, UpdateSourceTrigger=Explicit,
+                                                                        Converter={StaticResource TransitionDriverToBoolConv}}" 
+                                                          Click="chkHasDeathDriver_Click"
+                                                           />
                                                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
-                                                <!--<ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop" VerticalAlignment="Top" Width="196"
-                                                    ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops, Mode=TwoWay}" DisplayMemberPath="Name" 
-                                                          DropDownOpened="comboDeathMolPop_DropDownOpened"
-                                                          SelectionChanged="comboDeathMolPop_SelectionChanged">
-                                                    <ComboBox.SelectedItem>
-                                                        <MultiBinding Converter="{StaticResource MolGuidToMolPopMultiConv}" 
-                                                            ConverterParameter="{StaticResource transitionDriversListView}">
-                                                            <Binding ElementName="CellsListBox" Path="SelectedItem.death_driver_guid"  />
-                                                            <Binding ElementName="CellsListBox" Path="SelectedItem.cytosol" />
-                                                        </MultiBinding>
-                                                    </ComboBox.SelectedItem>
-                                                </ComboBox>-->
-
                                                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
                                                           ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
                                                           DisplayMemberPath="Name" 
                                                           DropDownOpened="comboDeathMolPop_DropDownOpened"
                                                           SelectionChanged="comboDeathMolPop_SelectionChanged"
-                                                          SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].driver_mol_guid_ref}"
+                                                          SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           SelectedValuePath="molecule_guid_ref"
+                                                          IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"
                                                           >
                                                 </ComboBox>
-
                                                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
-                                                        Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
+                                                        Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                                         IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"/>
 
                                                 <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
-                                                        Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
+                                                        Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                                         IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"/>
 
                                                 <StackPanel Height="10"></StackPanel>
-
                                             </StackPanel>
-
                                         </StackPanel>
-                                        
                                     </Expander>
 
                                     <!-- Cell Division -->
-                                    <Expander
+                                    <Expander   Header="Cell Division"
                                                 Padding="5" 
                                                 ExpandDirection="Down"
                                                 IsExpanded="False"
-                                                Header="Cell Division"                                              
                                                 x:Name="CellDivisionExpander"
                                                 Margin="0,5,0,0" 
                                                 Canvas.ZIndex="1"
@@ -4286,8 +4168,12 @@
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                         <StackPanel>
-
                                             <StackPanel x:Name="spDivision" Orientation="Vertical" >
+                                                <CheckBox x:Name="chkHasDivDriver" Content="Has Division Driver" Margin="4,0"   
+                                                          IsChecked="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver, Mode=TwoWay, UpdateSourceTrigger=Explicit,
+                                                                        Converter={StaticResource TransitionDriverToBoolConv}}" 
+                                                          Click="chkHasDivDriver_Click"
+                                                           />
                                                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label_1" VerticalAlignment="Top" Width="200" />
                                                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDivisionMolPops" VerticalAlignment="Top" Width="196"
                                                           ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
@@ -4298,7 +4184,6 @@
                                                           SelectedValuePath="molecule_guid_ref"
                                                           >
                                                 </ComboBox>
-
                                                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
                                                 <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDivRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
                                                         Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
@@ -4308,12 +4193,8 @@
                                                         Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
 
                                                 <StackPanel Height="10"></StackPanel>
-
-
                                             </StackPanel>
-
                                         </StackPanel>
-
                                     </Expander>
 
                                     <!-- DIFFERENTIATION SCHEME -->

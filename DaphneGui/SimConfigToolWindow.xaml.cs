@@ -2935,7 +2935,7 @@ namespace DaphneGui
                 return;
 
             //Get the diff_scheme using the guid
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
             //EPIGENETIC MAP SECTION
             EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
@@ -4027,7 +4027,126 @@ namespace DaphneGui
 
         }
 
+        private void cbCellDiffSchemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //Don't want to do anything when first display this combo box
+            //Only do something if user really clicked and selected a different scheme
 
+            //if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            //    return;
+
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            ComboBox combo = sender as ComboBox;
+            ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+
+            //if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
+            //    return;
+
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+
+            if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
+            {
+                cell.diff_scheme = er.diff_schemes_dict[diffNew.diff_scheme_guid].Clone();
+            }
+        }
+
+        private void chkHasDeathDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            CheckBox ch = sender as CheckBox;
+            if (ch.IsChecked == false)
+            {
+                cell.death_driver = null;
+            }
+            else
+            {
+                if (cell.death_driver == null)
+                {
+                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                    //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
+                    cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
+                    if (cell.death_driver_guid_ref == null)
+                    {
+                        MessageBox.Show("No death drivers are defined");
+                        return;
+                    }
+                    if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
+                    {
+                        cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
+                    }
+                }
+            }
+        }
+
+        private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            CheckBox ch = sender as CheckBox;
+            if (ch.IsChecked == false)
+            {
+                cell.div_driver = null;
+            }
+            else
+            {
+                if (cell.div_driver == null)
+                {
+                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                    //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
+                    cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                    if (cell.div_driver_guid_ref == null)
+                    {
+                        MessageBox.Show("No division drivers are defined");
+                        return;
+                    }
+
+                    if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                    {
+                        cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                    }
+                }
+            }
+        }
+
+        private ConfigTransitionDriver FindFirstDeathDriver()
+        {
+            ConfigTransitionDriver driver = null;
+            foreach (ConfigTransitionDriver d in MainWindow.SC.SimConfig.entity_repository.transition_drivers)
+            {
+                string name = d.Name;
+                if (name.Contains("apoptosis"))
+                {
+                    driver = d;
+                    break;
+                }
+            }
+
+            return driver;
+        }
+
+        private ConfigTransitionDriver FindFirstDivDriver()
+        {
+            ConfigTransitionDriver driver = null;
+            foreach (ConfigTransitionDriver d in MainWindow.SC.SimConfig.entity_repository.transition_drivers)
+            {
+                string name = d.Name;
+                if (name.Contains("division"))
+                {
+                    driver = d;
+                    break;
+                }
+            }
+
+            return driver;
+        }
     }    
 
     public class DataGridBehavior
