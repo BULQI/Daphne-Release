@@ -116,24 +116,24 @@ namespace DaphneGui
         /// </summary>
         public static bool loadSuccess;
 
-        private static VTKGraphicsController gc;
-        private static VTKDataBasket vtkdataBasket;
+        ////////private static VTKGraphicsController gc;
+        ////////private static VTKDataBasket vtkdataBasket;
 
         /// <summary>
         /// retrieve a pointer to the (for now, singular) VTK graphics actors
         /// </summary>
-        public static VTKGraphicsController GC
-        {
-            get { return gc; }
-        }
+        ////////public static VTKGraphicsController GC
+        ////////{
+        ////////    get { return gc; }
+        ////////}
 
         /// <summary>
         /// retrieve a pointer to the VTK data basket object
         /// </summary>
-        public static VTKDataBasket VTKBasket
-        {
-            get { return vtkdataBasket; }
-        }
+        ////////public static VTKDataBasket VTKBasket
+        ////////{
+        ////////    get { return vtkdataBasket; }
+        ////////}
 
         /// <summary>
         /// retrieve a pointer to the configurator
@@ -359,16 +359,17 @@ namespace DaphneGui
             //this.ChartViewDocWindow.Close();
             this.menu_ActivateAnalysisChart.IsEnabled = false;
 
+            //SKIP VTK GRAPHICS WINDOW FOR NOW
             // create the simulation
             //////////sim = new Simulation();
             // data basket to hold simulation entities
             //////////dataBasket = new DataBasket();
             // vtk data basket to hold vtk data for entities with graphical representation
-            vtkdataBasket = new VTKDataBasket();
+            //////////vtkdataBasket = new VTKDataBasket();
             // graphics controller to manage vtk objects
-            gc = new VTKGraphicsController(this);
+            //////////gc = new VTKGraphicsController(this);
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
-            this.vtkDisplay_DockPanel.DataContext = gc;
+            //////////this.vtkDisplay_DockPanel.DataContext = gc;
             // this.SimConfigSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
 
             if (file_exists)
@@ -379,7 +380,7 @@ namespace DaphneGui
                 {
                     // after doing a full reset, don't require one immediately
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, false);
-                    vtkdataBasket.UpdateData();
+                    //////////vtkdataBasket.UpdateData();
                     //////////gc.DrawFrame(sim.GetProgressPercent());
                     displayTitle();
                 }
@@ -523,28 +524,6 @@ namespace DaphneGui
                 where mol.Name == "CXCL13"
                 select mol;
 
-            //One Solfac for the one mol pop
-            //Solfac solfac = new Solfac();
-            //solfac.solfac_name = "Gaussian cxcl13 gradient";
-            //solfac.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-            //solfac.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //solfac.mp_render_blending_weight = 2.0;
-            //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-            //sgg.peak_concentration = 10;
-            //sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-            //solfac.mp_distribution = sgg;            
-
-            //GuiMolecularPopulation gmp = new GuiMolecularPopulation();
-            //foreach (GuiMolecule gm in query)
-            //{
-            //    gmp.Molecule = new GuiMolecule(gm);
-            //    gmp.mpInfo = new MolPopInfo("My CXCL13");
-            //    //gmp.Name = "My CXCL13";
-            //    //gmp.mpInfo = solfac;
-            //    sim_config.scenario.MolPops.Add(gmp);
-            //    break;
-            //}
-
             GuiMolecularPopulation gmp = null;
             foreach (GuiMolecule gm in query)
             {
@@ -563,44 +542,6 @@ namespace DaphneGui
                 sim_config.scenario.MolPops.Add(gmp);
             }
 
-            //gmp.mpInfo.mp_name = "Gaussian cxcl13 gradient";
-            //gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-            //gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //gmp.mpInfo.mp_render_blending_weight = 2.0;
-            //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-            //sgg.peak_concentration = 10;
-            //sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-            //gmp.mpInfo.mp_distribution = sgg;    
-
-            //GuiMolecularPopulation gmp = null; 
-            //foreach (GuiMolecule gm in query)
-            //{
-            //    gmp = new GuiMolecularPopulation();
-            //    gmp.Molecule = new GuiMolecule(gm);
-            //    gmp.mpInfo = new Solfac();
-            //    gmp.Name = "My " + gm.Name;
-            //    gmp.mpInfo.solfac_name = "Gaussian gradient";
-            //    gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-            //    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //    gmp.mpInfo.mp_render_blending_weight = 2.0;
-            //    MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-            //    sgg.peak_concentration = 10;
-            //    sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-            //    gmp.mpInfo.mp_distribution = sgg;    
-            //    sim_config.scenario.MolPops.Add(gmp);                
-            //}
-
-            
-
-            //foreach (KeyValuePair<string, Molecule> kvp in MolDict)
-            //{
-            //    GuiMolecule gm = new GuiMolecule(kvp.Value.Name, kvp.Value.MolecularWeight, kvp.Value.EffectiveRadius, kvp.Value.DiffusionCoefficient);
-            //    sim_config.scenario.Molecules.Add(gm);                
-            //}
-            
-            // create the simulation
-            //sim = new Simulation();
-
             //
             // Create Extracellular fluid
             // 
@@ -609,9 +550,6 @@ namespace DaphneGui
 
             // spatial extent in each dimension
             double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //sim.ECS = new Compartment(new BoundedRectangularPrism(numGridPts, XCellExtent));
-            //Compartment ECS = new Compartment(new BoundedRectangularPrism(numGridPts, XCellExtent));
 
             //
             // Add all molecular populations
@@ -835,305 +773,7 @@ namespace DaphneGui
 
         }
 
-        /// <summary>
-        /// Generate a test XML file for new GUI
-        /// </summary>
-        //////////public void CreateAndSerializeDefaultScenario()
-        //////////{
-        //////////    var config = new SimConfigurator("Config\\default_scenario.xml");
-        //////////    var sim_config = config.SimConfig;
-
-        //////////    // Experiment
-        //////////    sim_config.experiment_name = "Default test scenario";
-        //////////    sim_config.experiment_description = "Generic scenario with a few options set for testing simulation setup";
-        //////////    sim_config.scenario.time_config.duration = 100;
-        //////////    sim_config.scenario.time_config.rendering_interval = 0.3;
-        //////////    sim_config.scenario.time_config.sampling_interval = 1440;
-
-        //////////    // Global Paramters
-        //////////    sim_config.LoadDefaultGlobalParameters();
-
-        //////////    // Entity Repository
-        //////////    EntityRepository repository = new EntityRepository();
-
-        //////////    // Possible solfac types
-        //////////    SolfacType st = new SolfacType();
-        //////////    st.solfac_type_name = "cxcl13";
-        //////////    st.solfac_type_receptor_name = "cxcr5";
-        //////////    repository.solfac_types.Add(st);
-
-        //////////    st = new SolfacType();
-        //////////    st.solfac_type_name = "ccl19";
-        //////////    st.solfac_type_receptor_name = "ccr7";
-        //////////    repository.solfac_types.Add(st);
-
-        //////////    //skg 5/22/12
-        //////////    st = new SolfacType();
-        //////////    st.solfac_type_name = "cxcl12";
-        //////////    st.solfac_type_receptor_name = "cxcr4";
-        //////////    repository.solfac_types.Add(st);
-        //////////    //end skg
-
-        //////////    // NOTE: Need to finish adding solfac types before initializing cell types
-        //////////    //   because cell type parameters have a list of solfac/receptor levels
-
-        //////////    // Possible cell types
-        //////////    // skg changed 5/22/12
-        //////////    CellSubset ct = new CellSubset();
-        //////////    BCellSubsetType cb = new BCellSubsetType();
-        //////////    ct.cell_subset_type = cb;
-        //////////    //ct.cell_subset_name = "Centroblast";
-        //////////    repository.cell_subsets.Add(ct);
-
-        //////////    ct = new CellSubset();
-        //////////    TCellSubsetType tc = new TCellSubsetType();
-        //////////    ct.cell_subset_type = tc;
-        //////////    //ct.cell_subset_name = "T Follicular Helper";
-        //////////    repository.cell_subsets.Add(ct);
-
-        //////////    // Calling Reset on cell_subsets all at once, but could have called
-        //////////    // ct.InitializeReceptorLevels(repository.solfac_types) on each right after 
-        //////////    // each was created...
-        //////////    repository.ResetCellTypesReceptorsLists();
-
-        //////////    // Changing defaults for receptor params on each cell type
-
-        //////////    //skg 6/1/12 changed
-
-        //////////    // bcell cxcl13 receptor
-        //////////    BCellSubsetType bcst = (BCellSubsetType)(repository.cell_subsets[0].cell_subset_type);
-        //////////    bcst.cell_subset_type_receptor_params[0].receptor_params.ckr_u = 6;
-        //////////    bcst.cell_subset_type_receptor_params[1].receptor_params.ckr_pi = 0.0;
-
-        //////////    // tcell ccl19 receptor                       
-        //////////    TCellSubsetType tcst = (TCellSubsetType)(repository.cell_subsets[1].cell_subset_type);
-        //////////    tcst.cell_subset_type_receptor_params[0].receptor_params.ckr_pi = 0.0;
-        //////////    tcst.cell_subset_type_receptor_params[1].receptor_params.ckr_u = 6;
-
-        //////////    sim_config.entity_repository = repository;
-
-        //////////    // Gaussian Gradients
-        //////////    GaussianSpecification gg = new GaussianSpecification();
-        //////////    BoxSpecification box = new BoxSpecification();
-        //////////    box.x_scale = 125;
-        //////////    box.y_scale = 125;
-        //////////    box.z_scale = 125;
-        //////////    box.x_trans = 100;
-        //////////    box.y_trans = 300;
-        //////////    box.z_trans = 100;
-        //////////    repository.box_specifications.Add(box);
-        //////////    gg.gaussian_spec_box_guid_ref = box.box_guid;
-        //////////    gg.gaussian_spec_name = "Off-center gaussian";
-        //////////    gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-        //////////    sim_config.entity_repository.gaussian_specifications.Add(gg);
-
-        //////////    // Regions
-        //////////    box = new BoxSpecification();
-        //////////    box.x_scale = 100;
-        //////////    box.y_scale = 100;
-        //////////    box.z_scale = 100;
-        //////////    box.x_trans = 300;
-        //////////    box.y_trans = 300;
-        //////////    box.z_trans = 300;
-        //////////    repository.box_specifications.Add(box);
-        //////////    Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-        //////////    reg.region_box_spec_guid_ref = box.box_guid;
-        //////////    reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-        //////////    sim_config.scenario.regions.Add(reg);
-
-        //////////    box = new BoxSpecification();
-        //////////    box.x_scale = 50;
-        //////////    box.y_scale = 50;
-        //////////    box.z_scale = 300;
-        //////////    box.x_trans = 100;
-        //////////    box.y_trans = 100;
-        //////////    box.z_trans = 200;
-        //////////    repository.box_specifications.Add(box);
-        //////////    reg = new Region("Box region", RegionShape.Rectangular);
-        //////////    reg.region_box_spec_guid_ref = box.box_guid;
-        //////////    reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-        //////////    sim_config.scenario.regions.Add(reg);
-
-        //////////    // Cells
-        //////////    CellPopulation cs = new CellPopulation();
-        //////////    cs.cellpopulation_name = "Bcells starting in ellipsoid";
-        //////////    cs.cell_subset_guid_ref = sim_config.entity_repository.cell_subsets[0].cell_subset_guid;
-        //////////    cs.number = 30;
-        //////////    cs.cellpopulation_constrained_to_region = true;
-        //////////    cs.cellpopulation_region_guid_ref = sim_config.scenario.regions[0].region_box_spec_guid_ref;
-        //////////    cs.wrt_region = RelativePosition.Inside;
-        //////////    cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-
-        //////////    //skg 5/24/12
-        //////////    ////BCellSubsetType bc = new BCellSubsetType();
-        //////////    ////cs.cellType = bc;
-        //////////    ////bc.cell_subset_guid = sim_config.entity_repository.cell_types[0].cell_subset_guid;
-        //////////    //end skg
-
-        //////////    sim_config.scenario.cellpopulations.Add(cs);
-
-        //////////    cs = new CellPopulation();
-        //////////    cs.cellpopulation_name = "Tcells starting in box";
-        //////////    cs.cell_subset_guid_ref = sim_config.entity_repository.cell_subsets[1].cell_subset_guid;
-        //////////    cs.number = 30;
-        //////////    cs.cellpopulation_constrained_to_region = true;
-        //////////    cs.cellpopulation_region_guid_ref = sim_config.scenario.regions[1].region_box_spec_guid_ref;
-        //////////    cs.wrt_region = RelativePosition.Inside;
-        //////////    cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.22f, 0.49f, 0.72f);
-
-        //////////    //skg 5/24/12
-        //////////    ////ConfigTCell tc = new ConfigTCell();
-        //////////    ////cs.cellType = tc;
-        //////////    ////tc.cell_subset_guid = sim_config.entity_repository.cell_subsets[1].cell_subset_guid;
-        //////////    //end skg
-
-        //////////    sim_config.scenario.cellpopulations.Add(cs);
-
-        //////////    // Solfacs
-        //////////    Solfac solfac = new Solfac();
-        //////////    solfac.solfac_name = "Gaussian cxcl13 gradient";
-        //////////    solfac.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-        //////////    solfac.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-        //////////    solfac.mp_render_blending_weight = 2.0;
-        //////////    MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-        //////////    sgg.peak_concentration = 10;
-        //////////    sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-        //////////    solfac.mp_distribution = sgg;
-        //////////    sim_config.scenario.solfacs.Add(solfac);
-
-        //////////    solfac = new Solfac();
-        //////////    solfac.solfac_name = "Linear ccl19 gradient";
-        //////////    solfac.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f);
-        //////////    solfac.mp_render_blending_weight = 1.0;
-        //////////    MolPopLinearGradient sll = new MolPopLinearGradient();
-        //////////    sll.min_concentration = 0;
-        //////////    sll.max_concentration = 0.5;
-        //////////    MathNet.Numerics.LinearAlgebra.Vector grad = new MathNet.Numerics.LinearAlgebra.Vector(new double[] { 1.0, 0.0, 0.0 });
-        //////////    sll.gradient_direction = grad.Normalize();
-        //////////    solfac.mp_distribution = sll;
-        //////////    solfac.mp_type_guid_ref = sim_config.entity_repository.solfac_types[1].solfac_type_guid;
-        //////////    solfac.solfac_is_time_varying = false;
-        //////////    sim_config.scenario.solfacs.Add(solfac);
-
-        //////////    //skg 5/22/12
-        //////////    solfac = new Solfac();
-        //////////    solfac.solfac_name = "Linear cxcl12 gradient";
-        //////////    solfac.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 1.0f, 0.0f);
-        //////////    solfac.mp_render_blending_weight = 1.0;
-        //////////    MolPopLinearGradient sLin = new MolPopLinearGradient();
-        //////////    sLin.min_concentration = 0;
-        //////////    sLin.max_concentration = 0.5;
-        //////////    MathNet.Numerics.LinearAlgebra.Vector grad2 = new MathNet.Numerics.LinearAlgebra.Vector(new double[] { 1.0, 0.0, 0.0 });
-        //////////    sLin.gradient_direction = grad2.Normalize();
-        //////////    solfac.mp_distribution = sLin;
-        //////////    solfac.mp_type_guid_ref = sim_config.entity_repository.solfac_types[2].solfac_type_guid;
-        //////////    solfac.solfac_is_time_varying = false;
-        //////////    sim_config.scenario.solfacs.Add(solfac);
-        //////////    //end skg
-
-        //////////    /*
-        //////////    solfac = new Solfac();
-        //////////    solfac.solfac_name = "Homog";
-        //////////    solfac.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.0f, 0.0f, 1.0f);
-        //////////    solfac.solfac_type_ref = sim_config.entity_repository.solfac_types[1].solfac_type_name;
-        //////////    solfac.solfac_is_time_varying = true;
-        //////////    solfac.solfac_amplitude_keyframes.Add(new TimeAmpPair(0, 1));
-        //////////    sim_config.scenario.solfacs.Add(solfac);
-        //////////    */
-
-        //////////    // Write out XML file
-        //////////    config.SerializeSimConfigToFile();
-        //////////}
-
-        ///////////// <summary>
-        ///////////// Generate a test XML file for new GUI
-        ///////////// </summary>
-        //////////public void CreateAndSerializeBlankScenario()
-        //////////{
-        //////////    var config = new SimConfigurator("Config\\blank_scenario.xml");
-        //////////    var sim_config = config.SimConfig;
-
-        //////////    // Experiment
-        //////////    sim_config.experiment_name = "Blank experiment for XML serialization";
-        //////////    sim_config.experiment_description = "Blank scenario for clean simulation setup";
-        //////////    sim_config.scenario.time_config.duration = 100;
-        //////////    sim_config.scenario.time_config.rendering_interval = 0.3;
-        //////////    sim_config.scenario.time_config.sampling_interval = 1440;
-
-        //////////    // Global Paramters
-        //////////    sim_config.LoadDefaultGlobalParameters();
-
-        //////////    // Entity Repository
-        //////////    EntityRepository repository = new EntityRepository();
-
-        //////////    // Possible solfac types
-        //////////    SolfacType st = new SolfacType();
-        //////////    st.solfac_type_name = "cxcl13";
-        //////////    st.solfac_type_receptor_name = "cxcr5";
-        //////////    repository.solfac_types.Add(st);
-
-        //////////    st = new SolfacType();
-        //////////    st.solfac_type_name = "ccl19";
-        //////////    st.solfac_type_receptor_name = "ccr7";
-        //////////    repository.solfac_types.Add(st);
-
-        //////////    //skg 5/22/12
-        //////////    st = new SolfacType();
-        //////////    st.solfac_type_name = "cxcl12";
-        //////////    st.solfac_type_receptor_name = "cxcr4";
-        //////////    repository.solfac_types.Add(st);
-        //////////    //end skg
-
-        //////////    // NOTE: Need to finish adding solfac types before initializing cell types
-        //////////    //   because cell type parameters have a list of solfac/receptor levels
-
-        //////////    // Possible cell types
-
-        //////////    // skg changed 5/22/12
-        //////////    CellSubset ct = new CellSubset();
-        //////////    BCellSubsetType cb = new BCellSubsetType();
-        //////////    ct.cell_subset_type = cb;
-        //////////    //ct.cell_subset_name = "Centroblast";
-        //////////    repository.cell_subsets.Add(ct);
-
-        //////////    ct = new CellSubset();
-        //////////    TCellSubsetType tc = new TCellSubsetType();
-        //////////    ct.cell_subset_type = tc;
-        //////////    //ct.cell_subset_name = "T Follicular Helper";
-        //////////    repository.cell_subsets.Add(ct);
-
-        //////////    // Calling Reset on cell_subsets all at once, but could have called
-        //////////    // ct.InitializeReceptorLevels(repository.solfac_types) on each right after 
-        //////////    // each was created...
-        //////////    repository.ResetCellTypesReceptorsLists();
-
-        //////////    // Changing defaults for receptor params on each cell type                        
-
-        //////////    //skg 6/1/12 changed
-
-        //////////    // bcell cxcl13 receptor
-        //////////    BCellSubsetType bcst = (BCellSubsetType)(repository.cell_subsets[0].cell_subset_type);
-        //////////    bcst.cell_subset_type_receptor_params[0].receptor_params.ckr_u = 6;
-        //////////    bcst.cell_subset_type_receptor_params[1].receptor_params.ckr_pi = 0.0;
-
-        //////////    // tcell ccl19 receptor                       
-        //////////    TCellSubsetType tcst = (TCellSubsetType)(repository.cell_subsets[1].cell_subset_type);
-        //////////    tcst.cell_subset_type_receptor_params[0].receptor_params.ckr_pi = 0.0;
-        //////////    tcst.cell_subset_type_receptor_params[1].receptor_params.ckr_u = 6;
-
-        //////////    sim_config.entity_repository = repository;
-
-        //////////    // Gaussian Gradients
-
-        //////////    // Regions
-
-        //////////    // Cells
-
-        //////////    // Solfacs
-
-        //////////    // Write out XML file
-        //////////    config.SerializeSimConfigToFile();
-        //////////}
+        
 
         private void showScenarioInitial()
         {
@@ -1194,31 +834,6 @@ namespace DaphneGui
 
         }
 
-        //skg daphne Thursday, April 18, 2013
-        //private Nullable<bool> loadJsonScenarioUsingDialog()
-        //{
-        //    // Configure open file dialog box
-        //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-        //    dlg.InitialDirectory = orig_path;
-        //    dlg.DefaultExt = ".json"; // Default file extension
-        //    dlg.Filter = "Sim Config JSON docs (.json)|*.json"; // Filter files by extension
-
-        //    // Show open file dialog box
-        //    Nullable<bool> result = dlg.ShowDialog();
-
-        //    // Process open file dialog box results
-        //    if (result == true)
-        //    {
-        //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-        //        string jsonFile = dlg.FileName;
-        //        RecentFileList.InsertFile(jsonFile);
-        //        setScenarioPaths(jsonFile);
-        //    }
-
-        //    return result;
-        //}
-
-
         private void saveScenarioAs_Click(object sender, RoutedEventArgs e)
         {
             saveScenarioUsingDialog();
@@ -1243,7 +858,6 @@ namespace DaphneGui
             {
                 string filename = dlg.FileName;
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
-
                 
                 configurator.FileName = filename;
                 configurator.SerializeSimConfigToFile();
@@ -1279,15 +893,15 @@ namespace DaphneGui
 
                 // after doing a full reset, don't require one immediately unless we did a db load
                 MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
+
+                //REMOVE VTK AND GRAPHICS WINDOW CODE FOR NOW
                 //////////sim.reset();
                 // reset cell tracks and free memory
-                gc.CleanupTracks();
-                gc.CellController.SetCellOpacities(1.0);
-                fitCellOpacitySlider.Value = 1.0;
-                vtkdataBasket.UpdateData();
+                //////////gc.CleanupTracks();
+                //////////gc.CellController.SetCellOpacities(1.0);
+                //////////fitCellOpacitySlider.Value = 1.0;
+                //////////vtkdataBasket.UpdateData();
                 //////////gc.DrawFrame(sim.GetProgressPercent());
-
-
 
                 // prevent all fit/analysis-related things
                 hideFit();
@@ -1459,6 +1073,7 @@ namespace DaphneGui
             }
         }
 
+        //skg daphne
         //private string extractFileName()
         //{
         //    string[] segments = xmlPath.LocalPath.Split('\\');
@@ -1844,12 +1459,12 @@ namespace DaphneGui
             blueHandToolButton_IsChecked = !blueHandToolButton_IsChecked;
 
             MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, false);
-            gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
+            /////gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
 
             if (blueHandToolButton_IsChecked)
             {
                 MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, true);
-                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
+                /////gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
             }
         }
 
@@ -2093,18 +1708,20 @@ namespace DaphneGui
                 if (configurator != null)
                 {
                     // if we configured a simulation prior to this call, remove all property changed event handlers
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-                    {
-                        configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= configurator.GUIInteractionToWidgetCallback;
-                    }
-                    for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-                    {
-                        configurator.SimConfig.scenario.regions[i].PropertyChanged -= configurator.GUIRegionSurfacePropertyChange;
-                    }
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-                    {
-                        configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= configurator.GUIGaussianSurfaceVisibilityToggle;
-                    }
+
+                    //skg REMOVE VTK AND GRAPHICS STUFF FOR NOW
+                    //////////for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+                    //////////{
+                    //////////    configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= configurator.GUIInteractionToWidgetCallback;
+                    //////////}
+                    //////////for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+                    //////////{
+                    //////////    configurator.SimConfig.scenario.regions[i].PropertyChanged -= configurator.GUIRegionSurfacePropertyChange;
+                    //////////}
+                    //////////for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
+                    //////////{
+                    //////////    configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= configurator.GUIGaussianSurfaceVisibilityToggle;
+                    //////////}
                 }
                 // load past experiment
                 if (jsonScenarioString != "")
@@ -2146,18 +1763,19 @@ namespace DaphneGui
             }
 
             // (re)connect the handlers for the property changed event
-            for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-            {
-                configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += configurator.GUIInteractionToWidgetCallback;
-            }
-            for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-            {
-                configurator.SimConfig.scenario.regions[i].PropertyChanged += configurator.GUIRegionSurfacePropertyChange;
-            }
-            for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-            {
-                configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += configurator.GUIGaussianSurfaceVisibilityToggle;
-            }
+            //skg daphne REMOVE VTK AND GRAPHICS STUFF FOR NOW
+            //////////for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+            //////////{
+            //////////    configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += configurator.GUIInteractionToWidgetCallback;
+            //////////}
+            //////////for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+            //////////{
+            //////////    configurator.SimConfig.scenario.regions[i].PropertyChanged += configurator.GUIRegionSurfacePropertyChange;
+            //////////}
+            //////////for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
+            //////////{
+            //////////    configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += configurator.GUIGaussianSurfaceVisibilityToggle;
+            //////////}
 
             // GUI Resources
             // Set the data context for the main tab control config GUI
@@ -2170,34 +1788,34 @@ namespace DaphneGui
             //////////    return;
             //////////}
 
-            // Create all VTK visualization pipelines and elements
-            gc.CreatePipelines();
+            //////////// Create all VTK visualization pipelines and elements
+            //////////gc.CreatePipelines();
 
-            // clear the vcr cache
-            if (vcrControl != null)
-            {
-                vcrControl.ReleaseVCR();
-            }
+            //////////// clear the vcr cache
+            //////////if (vcrControl != null)
+            //////////{
+            //////////    vcrControl.ReleaseVCR();
+            //////////}
 
-            if (newFile)
-            {
-                gc.recenterCamera();
-            }
-            gc.Rwc.Invalidate();
+            //////////if (newFile)
+            //////////{
+            //////////    gc.recenterCamera();
+            //////////}
+            //////////gc.Rwc.Invalidate();
 
-            // TODO: Need to do this for all GCs eventually...
-            // Add the RegionControl interaction event handlers here for easier reference to callback method
-            foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
-            {
-                // NOTE: For now not doing any callbacks on property change for RegionControls...
-                kvp.Value.ClearCallbacks();
-                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
-                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
-            }
+            //////////// TODO: Need to do this for all GCs eventually...
+            //////////// Add the RegionControl interaction event handlers here for easier reference to callback method
+            //////////foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
+            //////////{
+            //////////    // NOTE: For now not doing any callbacks on property change for RegionControls...
+            //////////    kvp.Value.ClearCallbacks();
+            //////////    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
+            //////////    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
+            //////////}
 
-            VCR_Toolbar.IsEnabled = false;
-            gc.ToolsToolbar_IsEnabled = true;
-            gc.DisablePickingButtons();
+            //////////VCR_Toolbar.IsEnabled = false;
+            //////////gc.ToolsToolbar_IsEnabled = true;
+            //////////gc.DisablePickingButtons();
 
 #if LANGEVIN_TIMING
             gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
@@ -2215,8 +1833,8 @@ namespace DaphneGui
             configurator.SimConfig.experiment_name = "";
             configurator.SimConfig.experiment_description = "";
             SimConfigToolWindow.DataContext = configurator.SimConfig;
-            gc.Cleanup();
-            gc.Rwc.Invalidate();
+            //////////gc.Cleanup();
+            //////////gc.Rwc.Invalidate();
             displayTitle("");
             MessageBox.Show(s, "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
@@ -2385,8 +2003,8 @@ namespace DaphneGui
             if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == true)
             {
                 MainWindow.SetControlFlag(MainWindow.CONTROL_PICKING_ENABLED, false);
-                gc.CellController.SetCellOpacities(1.0);
-                gc.DisablePickingButtons();
+                //////////gc.CellController.SetCellOpacities(1.0);
+                //////////gc.DisablePickingButtons();
             }
         }
 
@@ -2414,26 +2032,6 @@ namespace DaphneGui
                 displayTitle();
             }
         }
-
-        //skg daphne Thursday, April 18, 2013        
-        //private void loadJsonScenario_Click(object sender, RoutedEventArgs e)
-        //{
-        //    Nullable<bool> result = loadJsonScenarioUsingDialog();
-
-        //    // Process open file dialog box results
-        //    if (result == true)
-        //    {
-        //        // show the inital state
-        //        lockAndResetSim(true, "");
-        //        if (loadSuccess == false)
-        //        {
-        //            return;
-        //        }
-        //        SimConfigToolWindow.IsEnabled = true;
-        //        saveScenario.IsEnabled = true;
-        //        displayTitle();
-        //    }
-        //}
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
         private void CommandBindingSave_CanExecute(object sender, CanExecuteRoutedEventArgs e)

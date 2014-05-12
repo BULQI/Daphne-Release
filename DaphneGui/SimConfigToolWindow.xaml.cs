@@ -34,24 +34,24 @@ namespace DaphneGui
             box.y_scale = 100;
             box.z_scale = 100;
             // Add box GUI property changed to VTK callback
-            box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
-            MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
-            Region reg = new Region("New region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.6f, 0.31f, 0.7f);
-            // Add region GUI property changed to VTK callback
-            reg.PropertyChanged += MainWindow.SC.GUIRegionSurfacePropertyChange;
-            MainWindow.SC.SimConfig.scenario.regions.Add(reg);
-            RegionsListBox.SelectedIndex = RegionsListBox.Items.Count - 1;
+            //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
+            //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+            //////////Region reg = new Region("New region", RegionShape.Ellipsoid);
+            //////////reg.region_box_spec_guid_ref = box.box_guid;
+            //////////reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.6f, 0.31f, 0.7f);
+            //////////// Add region GUI property changed to VTK callback
+            //////////reg.PropertyChanged += MainWindow.SC.GUIRegionSurfacePropertyChange;
+            //////////MainWindow.SC.SimConfig.scenario.regions.Add(reg);
+            //////////RegionsListBox.SelectedIndex = RegionsListBox.Items.Count - 1;
 
-            // Add RegionControl & RegionWidget for the new region
-            MainWindow.VTKBasket.AddRegionRegionControl(reg);
-            MainWindow.GC.AddRegionRegionWidget(reg);
-            // Connect the VTK callback
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+            //////////// Add RegionControl & RegionWidget for the new region
+            //////////MainWindow.VTKBasket.AddRegionRegionControl(reg);
+            //////////MainWindow.GC.AddRegionRegionWidget(reg);
+            //////////// Connect the VTK callback
+            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
             
-            MainWindow.GC.Rwc.Invalidate();
+            //////////MainWindow.GC.Rwc.Invalidate();
         }
 
         private void RemoveRegionButton_Click(object sender, RoutedEventArgs e)
@@ -76,19 +76,19 @@ namespace DaphneGui
             {
                 BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[current_guid];
 
-                // Remove box property changed callback
-                bs.PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
-                // Remove box from entity_repository list
-                MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(bs);
-                // Remove region property changed callback
-                current_item.PropertyChanged -= MainWindow.SC.GUIRegionSurfacePropertyChange;
-                // Remove region from scenario regions list
-                MainWindow.SC.SimConfig.scenario.regions.Remove(current_item);
+                //////////// Remove box property changed callback
+                //////////bs.PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
+                //////////// Remove box from entity_repository list
+                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(bs);
+                //////////// Remove region property changed callback
+                //////////current_item.PropertyChanged -= MainWindow.SC.GUIRegionSurfacePropertyChange;
+                //////////// Remove region from scenario regions list
+                //////////MainWindow.SC.SimConfig.scenario.regions.Remove(current_item);
 
-                // Remove the RegionControl & RegionWidget(s)
-                MainWindow.VTKBasket.RemoveRegionControl(current_guid);
-                MainWindow.GC.RemoveRegionWidget(current_guid);
-                MainWindow.GC.Rwc.Invalidate();
+                //////////// Remove the RegionControl & RegionWidget(s)
+                //////////MainWindow.VTKBasket.RemoveRegionControl(current_guid);
+                //////////MainWindow.GC.RemoveRegionWidget(current_guid);
+                //////////MainWindow.GC.Rwc.Invalidate();
             }
         }
 
@@ -302,7 +302,7 @@ namespace DaphneGui
             box.y_scale = 200;
             box.z_scale = 200;
             // Add box GUI property changed to VTK callback
-            box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
+            //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
             MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
 
             GaussianSpecification gg = new GaussianSpecification();
@@ -310,18 +310,18 @@ namespace DaphneGui
             gg.gaussian_spec_name = "New on-center gradient";
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
-            gg.PropertyChanged += MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
+            //////////gg.PropertyChanged += MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
 
-            // Add RegionControl & RegionWidget for the new gauss_spec
-            MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-            MainWindow.GC.AddGaussSpecRegionWidget(gg);
-            // Connect the VTK callback
-            // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+            //////////// Add RegionControl & RegionWidget for the new gauss_spec
+            //////////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
+            //////////MainWindow.GC.AddGaussSpecRegionWidget(gg);
+            //////////// Connect the VTK callback
+            //////////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
+            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
-            MainWindow.GC.Rwc.Invalidate();
+            //////////MainWindow.GC.Rwc.Invalidate();
         }
 
         private void RemoveGaussSpecButton_Click(object sender, RoutedEventArgs e)
@@ -364,19 +364,19 @@ namespace DaphneGui
                     MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
                     return;
                 }
-                // Remove box property changed callback
-                MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id].PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
-                // Remove box from entity_repository list
-                MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id]);
-                // Remove region property changed callback
-                current_item.PropertyChanged -= MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
-                // Remove region from scenario regions list
-                MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(current_item);
+                //////////// Remove box property changed callback
+                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id].PropertyChanged -= MainWindow.SC.GUIInteractionToWidgetCallback;
+                //////////// Remove box from entity_repository list
+                //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Remove(MainWindow.SC.SimConfig.entity_repository.box_specifications[box_id]);
+                //////////// Remove region property changed callback
+                //////////current_item.PropertyChanged -= MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
+                //////////// Remove region from scenario regions list
+                //////////MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(current_item);
 
-                // Remove the RegionControl & RegionWidget(s)
-                MainWindow.VTKBasket.RemoveRegionControl(current_guid);
-                MainWindow.GC.RemoveRegionWidget(current_guid);
-                MainWindow.GC.Rwc.Invalidate();
+                //////////// Remove the RegionControl & RegionWidget(s)
+                //////////MainWindow.VTKBasket.RemoveRegionControl(current_guid);
+                //////////MainWindow.GC.RemoveRegionWidget(current_guid);
+                //////////MainWindow.GC.Rwc.Invalidate();
             }
         }
 
@@ -528,70 +528,70 @@ namespace DaphneGui
             GaussianSpecsListBox.SelectedValue = guid;
         }
 
-        public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
-        {
-            // identify the widget's key
-            string key = "";
+        //////////public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
+        //////////{
+        //////////    // identify the widget's key
+        //////////    string key = "";
 
-            if (rw != null && MainWindow.GC.Regions.ContainsValue(rw) == true)
-            {
-                foreach (KeyValuePair<string, RegionWidget> kvp in MainWindow.GC.Regions)
-                {
-                    if (kvp.Value == rw)
-                    {
-                        key = kvp.Key;
-                        break;
-                    }
-                }
+        //////////    if (rw != null && MainWindow.GC.Regions.ContainsValue(rw) == true)
+        //////////    {
+        //////////        foreach (KeyValuePair<string, RegionWidget> kvp in MainWindow.GC.Regions)
+        //////////        {
+        //////////            if (kvp.Value == rw)
+        //////////            {
+        //////////                key = kvp.Key;
+        //////////                break;
+        //////////            }
+        //////////        }
 
-                // found?
-                if (key != "")
-                {
-                    // Select the correct region/solfac/gauss_spec in the GUI's lists
-                    bool gui_spot_found = false;
+        //////////        // found?
+        //////////        if (key != "")
+        //////////        {
+        //////////            // Select the correct region/solfac/gauss_spec in the GUI's lists
+        //////////            bool gui_spot_found = false;
 
-                    for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
-                    {
-                        // See whether the current widget is for a Region
-                        if (MainWindow.SC.SimConfig.scenario.regions[r].region_box_spec_guid_ref == key)
-                        {
-                            SelectRegionInGUI(r, key);
-                            gui_spot_found = true;
-                            break;
-                        }
-                    }
-                    if (!gui_spot_found)
-                    {
-                        // Next check whether any Solfacs use this right gaussian_spec for this box
-                        //////////for (int r = 0; r < MainWindow.SC.SimConfig.scenario.solfacs.Count; r++)
-                        //////////{
-                        //////////    // We'll just be picking the first one that uses 
-                        //////////    if (MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
-                        //////////        ((MolPopGaussianGradient)MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
-                        //////////    {
-                        //////////        SelectSolfacInGUI(r);
-                        //////////        gui_spot_found = true;
-                        //////////        break;
-                        //////////    }
-                        //////////}
-                    }
-                    if (!gui_spot_found)
-                    {
-                        // Last check the gaussian_specs for this box guid
-                        for (int r = 0; r < MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count; r++)
-                        {
-                            // We'll just be picking the first one that uses 
-                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
-                            {
-                                SelectGaussSpecInGUI(r, key);
-                                gui_spot_found = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //////////            for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
+        //////////            {
+        //////////                // See whether the current widget is for a Region
+        //////////                if (MainWindow.SC.SimConfig.scenario.regions[r].region_box_spec_guid_ref == key)
+        //////////                {
+        //////////                    SelectRegionInGUI(r, key);
+        //////////                    gui_spot_found = true;
+        //////////                    break;
+        //////////                }
+        //////////            }
+        //////////            if (!gui_spot_found)
+        //////////            {
+        //////////                // Next check whether any Solfacs use this right gaussian_spec for this box
+        //////////                //////////for (int r = 0; r < MainWindow.SC.SimConfig.scenario.solfacs.Count; r++)
+        //////////                //////////{
+        //////////                //////////    // We'll just be picking the first one that uses 
+        //////////                //////////    if (MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
+        //////////                //////////        ((MolPopGaussianGradient)MainWindow.SC.SimConfig.scenario.solfacs[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
+        //////////                //////////    {
+        //////////                //////////        SelectSolfacInGUI(r);
+        //////////                //////////        gui_spot_found = true;
+        //////////                //////////        break;
+        //////////                //////////    }
+        //////////                //////////}
+        //////////            }
+        //////////            if (!gui_spot_found)
+        //////////            {
+        //////////                // Last check the gaussian_specs for this box guid
+        //////////                for (int r = 0; r < MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count; r++)
+        //////////                {
+        //////////                    // We'll just be picking the first one that uses 
+        //////////                    if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
+        //////////                    {
+        //////////                        SelectGaussSpecInGUI(r, key);
+        //////////                        gui_spot_found = true;
+        //////////                        break;
+        //////////                    }
+        //////////                }
+        //////////            }
+        //////////        }
+        //////////    }
+        //////////}
 
         private void CellSubsetTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

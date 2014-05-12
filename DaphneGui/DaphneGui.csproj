@@ -98,7 +98,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Chemokine.cs" />
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
@@ -120,14 +119,11 @@
     <Compile Include="Workbench\EditRCReactions.xaml.cs">
       <DependentUpon>EditRCReactions.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GraphicsController.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="GuiExtension.cs" />
     <Compile Include="GuiReactionTemplate.cs" />
     <Compile Include="Workbench\ReactionComplex.cs" />
     <Compile Include="RecentFileList.cs" />
-    <Compile Include="RegionControl.cs" />
-    <Compile Include="RegionWidget.cs" />
     <Compile Include="SimConfigToolWindow.xaml.cs">
       <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
     </Compile>
@@ -135,7 +131,6 @@
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="VCRControl.cs" />
-    <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\ReactionComplexSimulation.cs" />
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

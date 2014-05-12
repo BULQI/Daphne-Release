@@ -45,10 +45,8 @@ namespace DaphneGui
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
-            //string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = FileName;
-            //jsonFile = jsonFile.Replace(".xml", ".json");
             File.WriteAllText(jsonFile, jsonSpec);
         }
 
@@ -127,87 +125,7 @@ namespace DaphneGui
             SimConfig.InitializeStorageClasses();
         }
 
-        // NOTE: Added these callbacks to SimConfiguration so they could be referred to w.r.t. a static object
-        // when a new Region is created by a button click in SimConfigToolWindow. Not sure this is the best
-        // place for these (would prefer they would still be in MainWindow, or maybe we need a separate static object
-        // that just holds callbacks...
-        // Also not sure what will happen when there are multiple or no GCs...
-        public void GUIInteractionToWidgetCallback(object sender, PropertyChangedEventArgs e)
-        {
-            BoxSpecification box = (BoxSpecification)sender;
-
-            if (box == null)
-            {
-                return;
-            }
-
-            if (e.PropertyName == "box_visibility")
-            {
-                MainWindow.GC.Regions[box.box_guid].ShowWidget(box.box_visibility);
-            }
-
-            // Catch-all for other scale / translation manipulations
-            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) && MainWindow.GC.Regions.ContainsKey(box.box_guid))
-            {
-                MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
-                MainWindow.GC.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-        }
-
-        public void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
-        {
-            Region region = (Region)sender;
-
-            if (region == null)
-            {
-                return;
-            }
-
-            if (e.PropertyName == "region_visibility")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, region.region_visibility);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_type")
-            {
-                MainWindow.VTKBasket.Regions[region.region_box_spec_guid_ref].SetShape(region.region_type);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetShape(MainWindow.GC.Rwc.RenderWindow, region.region_type);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_color")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetColor(region.region_color.ScR, region.region_color.ScG, region.region_color.ScB);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetOpacity(region.region_color.ScA);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            return;
-        }
-
-        public void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
-        {
-            GaussianSpecification gauss = (GaussianSpecification)sender;
-
-            if (gauss == null)
-            {
-                return;
-            }
-
-            if (e.PropertyName == "gaussian_region_visibility")
-            {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "gaussian_spec_color")
-            {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetOpacity(gauss.gaussian_spec_color.ScA);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            return;
-        }
-
-
+        
     }
 
     public class SimConfiguration
@@ -296,12 +214,12 @@ namespace DaphneGui
 
             // Update VTK environment box 
             var env = scenario.environment;
-            MainWindow.VTKBasket.EnvironmentController.setupBox(env.extent_x, env.extent_y, env.extent_z);
+            /////MainWindow.VTKBasket.EnvironmentController.setupBox(env.extent_x, env.extent_y, env.extent_z);
             // NOTE: Rwc.Invalidate happens to also be called because every box specification has a callback to
             //   GUIInteractionToWidgetCallback on its PropertyChanged, and that calls Invalidate, but wanted to
             //   call it here, too, for environment change explicitly just in case box specs are handled differently
             //   in the future, didn't want the environment box to stop updating "live" mysteriously.
-            MainWindow.GC.Rwc.Invalidate();
+            /////MainWindow.GC.Rwc.Invalidate();
         }
 
         private void SetBoxSpecExtents(BoxSpecification bs)
@@ -1182,7 +1100,7 @@ namespace DaphneGui
             InitialMeanAffinity = 1.0E6;
             SynapseArea = 25;            
         }
-    }    
+    }
 
     public class ReceptorParameters
     {
@@ -1194,7 +1112,7 @@ namespace DaphneGui
             receptor_solfac_type_guid_ref = "";
             receptor_params = new CkReceptorParams();
         }
-        
+
         public ReceptorParameters(string guid)
         {
             receptor_solfac_type_guid_ref = guid;
