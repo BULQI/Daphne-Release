@@ -4301,6 +4301,8 @@ namespace Daphne
         public double[][] transform_matrix { get; set; }
         private bool _box_visibility = true;
         private bool _blob_visibility = true;
+        private bool _current_blob_visibility = true;
+        private bool _current_box_visibility = true;
         
         // Range values calculated based on environment extents
         private double _x_trans_max;
@@ -4552,6 +4554,34 @@ namespace Daphne
                 }
             }
         }
+        public bool current_box_visibility
+        {
+            get { return _current_box_visibility; }
+            set
+            {
+                if (_current_box_visibility == value)
+                    return;
+                else
+                {
+                    _current_box_visibility = value;
+                    OnPropertyChanged("current_box_visibility");
+                }
+            }
+        }
+        public bool current_blob_visibility
+        {
+            get { return _current_blob_visibility; }
+            set
+            {
+                if (_current_blob_visibility == value)
+                    return;
+                else
+                {
+                    _current_blob_visibility = value;
+                    OnPropertyChanged("current_blob_visibility");
+                }
+            }
+        }
         public double x_scale
         {
             get {
@@ -4737,6 +4767,7 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             box_guid = id.ToString();
             box_visibility = true;
+            current_box_visibility = true;
             transform_matrix = new double[][] {
                 new double[]{1.0, 0.0, 0.0, 0.0},
                 new double[]{0.0, 1.0, 0.0, 0.0},

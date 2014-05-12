@@ -341,10 +341,6 @@ namespace DaphneGui
                         ////    this.AddGaussianSpecification();
                         ////}
                         MolPopGaussian sgg = new MolPopGaussian();
-                        //sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                        //string gauss_guid = sgg.gaussgrad_gauss_spec_guid_ref;
-                        //MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(sgg);
-
                         GaussianSpecification gg = new GaussianSpecification();
                         BoxSpecification box = new BoxSpecification();
                         box.x_scale = 200;
@@ -418,6 +414,8 @@ namespace DaphneGui
                         sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;
+
+#if allow_dist_from_file
                     //case MolPopDistributionType.Custom:
 
                     //    var prev_distribution = current_item.mp_distribution;
@@ -444,7 +442,9 @@ namespace DaphneGui
                     //    {
                     //        current_item.mp_distribution = prev_distribution;
                     //    }
-                    //    break;
+                    //    break;  
+#endif
+
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
                 }
@@ -550,16 +550,7 @@ namespace DaphneGui
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-
-                //ConfigReaction dummy = new ConfigReaction();
-                //MainWindow.SC.SimConfig.entity_repository.reactions.Add(dummy);
-                //MainWindow.SC.SimConfig.entity_repository.reactions.Remove(dummy);
-                //AddReacExpander.InvalidateVisual();
-                //lvAvailableReacs.Items.Clear();
-                //lvAvailableReacs.InvalidateVisual();
-                //CollectionViewSource cvs = ConfigTabControl.FindResource("ecmAvailableReacs") as CollectionViewSource;
-                //cvs.View.Refresh();
-                //lvAvailableReacs.
+                
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -985,20 +976,11 @@ namespace DaphneGui
             }
 
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            //ConfigReactionComplex crcNew = new ConfigReactionComplex(crcCurr);
             ConfigReactionComplex crcNew = crcCurr.Clone();
 
             MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Add(crcNew);
 
-            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-
-            ////AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
-            ////if (arc.ShowDialog() == true)
-            ////{
-            ////    ////////lbComplexes.ItemsSource = null;
-            ////    ////////lbComplexes.ItemsSource = Sim.RCList;
-            ////}    
-
+            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;            
         }
 
         private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
@@ -1059,13 +1041,6 @@ namespace DaphneGui
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
-            //CellPopDistributionType distType = (CellPopDistributionType)e.AddedItems[0];
-
-            //if (distType == CellPopDistributionType.Uniform)
-            //{
-            //    //cp.cellPopDist = new CellPopUniform();
-            //}
         }
 
         private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1074,12 +1049,15 @@ namespace DaphneGui
 
         private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)
         {
-            ////if (lbCellAvailableReacCx.SelectedIndex != -1)
-            ////{
-            ////    ConfigReactionComplex grc = (ConfigReactionComplex)lbCellAvailableReacCx.SelectedValue;
-            ////    if (!MainWindow.SC.SimConfig.scenario.ReactionComplexes.Contains(grc))
-            ////        MainWindow.SC.SimConfig.scenario.ReactionComplexes.Add(grc);
-            ////}
+
+#if allow_rc_in_cell
+            if (lbCellAvailableReacCx.SelectedIndex != -1)
+            {
+                ConfigReactionComplex grc = (ConfigReactionComplex)lbCellAvailableReacCx.SelectedValue;
+                if (!MainWindow.SC.SimConfig.scenario.ReactionComplexes.Contains(grc))
+                    MainWindow.SC.SimConfig.scenario.ReactionComplexes.Add(grc);
+            } 
+#endif
         }
 
         //LIBRARIES TAB EVENT HANDLERS
@@ -1538,23 +1516,10 @@ namespace DaphneGui
 
         private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //ListBox lb = (ListBox)e.Source;
-            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lb.SelectedItem;
-            //string molname = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
         }
 
         private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //Binding b = new Binding();
-            //b.ElementName = "CellCytosolMolPopsListBox";
-            //PropertyPath pp = new PropertyPath(CellCytosolMolPopsListBox.SelectedItem);
-            //DependencyProperty dp;
-            //dp.PropertyType = CellCytosolMolPopsListBox.SelectedItem.GetType();
-            //b.Path = pp;
-            //CytoMolPopDetails.SetBinding(dp, b);
-
-            //cc.SetBinding(
-            //MembMolPopDetails.Content = cont
         }
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
@@ -2200,28 +2165,9 @@ namespace DaphneGui
                 if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
                 {
                     GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
-                    gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
+                    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
                 }
             }
-
-            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
-            //MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
-            //if (mpg != null)
-            //{
-            //    string guid = mpg.gaussgrad_gauss_spec_guid_ref;
-            //    if (guid.Length > 0)
-            //    {
-            //        if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
-            //        {
-            //            GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
-            //            gs.gaussian_region_visibility = !gs.gaussian_region_visibility;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-                
-            //}
         }
 
         private void btnTesterClicked(object sender, RoutedEventArgs e)

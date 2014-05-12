@@ -691,10 +691,15 @@ namespace DaphneGui
                     {
                         // Use the utility dict to find the box associated with this region
                         BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+                        
+                        // Save current visibility statuses
+                        bb.current_box_visibility = bb.box_visibility;
+                        bb.current_blob_visibility = gg.gaussian_region_visibility;
 
                         // Property changed notifications will take care of turning off the Widgets and Actors
                         bb.box_visibility = false;
                         gg.gaussian_region_visibility = false;
+                        
                     }
 
                     //// always reset the simulation for now to start at the beginning
@@ -1948,19 +1953,27 @@ namespace DaphneGui
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
-            gc.ToolsToolbarEnableAllIcons();
-            //gc.ToolsToolbar_IsEnabled = true;
-            //SolfacRenderingCB.IsEnabled = true;
+            gc.ToolsToolbarEnableAllIcons();            
 
-            //gc.HandToolButton_IsEnabled = true;
-            //gc.WhArrowToolButton_IsEnabled = true;
-            //gc.PreviewButton_IsEnabled = true;
-            //CellRenderMethodCB.IsEnabled = true;
-            //CellsColorByCB.IsEnabled = true;
-            //ScalarBarMarkerButton.IsEnabled = true;
-            //OrientationMarkerButton.IsEnabled = true;
-            //ResetCameraButton.IsEnabled = true;
-            //save3DView.IsEnabled = true;
+            //Set the box and blob visibilities to how they were pre-run
+            foreach (ConfigMolecularPopulation molpop in SC.SimConfig.scenario.environment.ecs.molpops)
+            {
+                if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    MolPopGaussian mpg = molpop.mpInfo.mp_distribution as MolPopGaussian;
+                    SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
+                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
+                }
+            }
+            foreach (CellPopulation cellpop in SC.SimConfig.scenario.cellpopulations)
+            {
+                if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+                {
+                    CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
+                    SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
+                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
+                }
+            }
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.SimConfigToolWindow.Activate();
@@ -2070,19 +2083,7 @@ namespace DaphneGui
 
                 //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
                 gc.ToolsToolbarEnableOnlyHand();
-
-                //gc.ToolsToolbar_IsEnabled = true;
-                //gc.HandToolButton_IsEnabled = true;
-                //gc.WhArrowToolButton_IsEnabled = false;
-                //gc.PreviewButton_IsEnabled = false;
-                //CellRenderMethodCB.IsEnabled = false;
-                //CellsColorByCB.IsEnabled = false;
-                //SolfacRenderingCB.IsEnabled = false;
-                //ScalarBarMarkerButton.IsEnabled = false;
-                //OrientationMarkerButton.IsEnabled = false;
-                //ResetCameraButton.IsEnabled = false;
-                //save3DView.IsEnabled = false;
-
+                
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
