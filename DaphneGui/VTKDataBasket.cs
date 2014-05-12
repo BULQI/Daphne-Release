@@ -157,34 +157,34 @@ namespace DaphneGui
         }
     }
 
-    /// <summary>
-    /// custom distribution molpop
-    /// </summary>
-    public class MolpopTypeCustomController : MolPopTypeController
-    {
-        /// <summary>
-        /// name of the file containing the data
-        /// </summary>
-        public string datafile { get; set; }
-        /// <summary>
-        /// minimum concentration
-        /// </summary>
-        public double min { get; set; }
-        /// <summary>
-        /// maximum concentration
-        /// </summary>
-        public double max { get; set; }
+    ///// <summary>
+    ///// custom distribution molpop
+    ///// </summary>
+    //public class MolpopTypeCustomController : MolPopTypeController
+    //{
+    //    /// <summary>
+    //    /// name of the file containing the data
+    //    /// </summary>
+    //    public string datafile { get; set; }
+    //    /// <summary>
+    //    /// minimum concentration
+    //    /// </summary>
+    //    public double min { get; set; }
+    //    /// <summary>
+    //    /// maximum concentration
+    //    /// </summary>
+    //    public double max { get; set; }
 
-        /// <summary>
-        /// constructor
-        /// </summary>
-        /// <param name="file">data file name</param>
-        public MolpopTypeCustomController(string file)
-        {
-            datafile = file;
-            type = MolPopDistributionType.Custom;
-        }
-    }
+    //    /// <summary>
+    //    /// constructor
+    //    /// </summary>
+    //    /// <param name="file">data file name</param>
+    //    public MolpopTypeCustomController(string file)
+    //    {
+    //        datafile = file;
+    //        type = MolPopDistributionType.Custom;
+    //    }
+    //}
 
     /// <summary>
     /// encapsulates the environment data controller, in essence, the box for the outline
@@ -327,22 +327,22 @@ namespace DaphneGui
             {
                 molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mpInfo.mp_distribution).concentration);
             }
-            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
-            {
-                molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mpInfo.mp_distribution).custom_gradient_file_uri.LocalPath);
-                //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
-                //{
-                //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
-                //    string messageBoxText = "Aborting custom chemokine insertion, possible file format problem in\n\n" + ((MolPopCustomGradient)molpop.mp_distribution).custom_gradient_file_uri.LocalPath;
-                //    string caption = "Error creating custom chemokine";
-                //    MessageBoxButton button = MessageBoxButton.OK;
-                //    MessageBoxImage icon = MessageBoxImage.Error;
+            //else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
+            //{
+            //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mpInfo.mp_distribution).custom_gradient_file_uri.LocalPath);
+            //    //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
+            //    //{
+            //    //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
+            //    //    string messageBoxText = "Aborting custom chemokine insertion, possible file format problem in\n\n" + ((MolPopCustomGradient)molpop.mp_distribution).custom_gradient_file_uri.LocalPath;
+            //    //    string caption = "Error creating custom chemokine";
+            //    //    MessageBoxButton button = MessageBoxButton.OK;
+            //    //    MessageBoxImage icon = MessageBoxImage.Error;
 
-                //    // display the message box
-                //    MessageBox.Show(messageBoxText, caption, button, icon);
-                //    return;
-                //}
-            }
+            //    //    // display the message box
+            //    //    MessageBox.Show(messageBoxText, caption, button, icon);
+            //    //    return;
+            //    //}
+            //}
             else
             {
                 return;
@@ -398,10 +398,10 @@ namespace DaphneGui
                 {
                     div = ((MolpopTypeGaussianController)kvp.Value).amplitude;
                 }
-                else if (kvp.Value.Type == MolPopDistributionType.Custom)
-                {
-                    div = ((MolpopTypeCustomController)kvp.Value).max;
-                }
+                //else if (kvp.Value.Type == MolPopDistributionType.Custom)
+                //{
+                //    div = ((MolpopTypeCustomController)kvp.Value).max;
+                //}
 
                 if (div == 0.0)
                 {

@@ -657,6 +657,31 @@ namespace Daphne
 
 
         }
+
+        public bool HasCell(ConfigCell cell)
+        {
+            bool res = false;
+            foreach (CellPopulation cell_pop in cellpopulations)
+            {
+                if (cell_pop.cell_guid_ref == cell.cell_guid)
+                {
+                    return true;
+                }
+            }
+            return res;
+        }
+
+        public void RemoveCellPopulation(ConfigCell cell) 
+        {
+            foreach (CellPopulation cell_pop in cellpopulations)
+            {
+                if (cell_pop.cell_guid_ref == cell.cell_guid)
+                {
+                    cellpopulations.Remove(cell_pop);
+                    return;
+                }
+            }
+        }
     }
 
     public class SimulationParams
@@ -2906,7 +2931,8 @@ namespace Daphne
         }
     }
 
-    public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Custom, Explicit }
+    //public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Custom, Explicit }
+    public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Explicit }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -2921,7 +2947,7 @@ namespace Daphne
                                     "Homogeneous",
                                     "Linear",
                                     "Gaussian",
-                                    "Custom",
+                                    //"Custom",
                                     "Explicit",
                                 };
 
@@ -2945,11 +2971,25 @@ namespace Daphne
         }
     }
 
+    [ValueConversion(typeof(string), typeof(bool))]
+    public class IsNullConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return (value == null);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new InvalidOperationException("IsNullConverter can only be used OneWay.");
+        }
+    }
+
     // Base class for homog, linear, gauss distributions
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
      XmlInclude(typeof(MolPopLinear)),
-     XmlInclude(typeof(MolPopGaussian)),
-     XmlInclude(typeof(MolPopCustom))]
+     XmlInclude(typeof(MolPopGaussian))]
+     //XmlInclude(typeof(MolPopCustom))]
     public abstract class MolPopDistribution : EntityModelBase
     {
         [XmlIgnore]
@@ -3025,59 +3065,59 @@ namespace Daphne
         public double[] conc;
     }
 
-    public class MolPopCustom : MolPopDistribution
-    {
-        private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
-        private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
+    //public class MolPopCustom : MolPopDistribution
+    //{
+    //    private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
+    //    private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
 
-        public MolPopCustom()
-        {
-            mp_distribution_type = MolPopDistributionType.Custom;
-        }
+    //    public MolPopCustom()
+    //    {
+    //        mp_distribution_type = MolPopDistributionType.Custom;
+    //    }
 
-        [XmlIgnore]
-        public Uri custom_gradient_file_uri
-        {
-            get { return _custom_gradient_file_uri; }
-            set
-            {
-                if (_custom_gradient_file_uri == value)
-                    return;
-                else
-                {
-                    _custom_gradient_file_uri = value;
-                    _custom_gradient_file_string = value.AbsolutePath;
-                    //OnPropertyChanged("custom_gradient_file_uri");
-                    //OnPropertyChanged("custom_gradient_file_string");
-                    //OnPropertyChanged("custom_gradient_file_name");
-                }
-            }
-        }
+    //    [XmlIgnore]
+    //    public Uri custom_gradient_file_uri
+    //    {
+    //        get { return _custom_gradient_file_uri; }
+    //        set
+    //        {
+    //            if (_custom_gradient_file_uri == value)
+    //                return;
+    //            else
+    //            {
+    //                _custom_gradient_file_uri = value;
+    //                _custom_gradient_file_string = value.AbsolutePath;
+    //                //OnPropertyChanged("custom_gradient_file_uri");
+    //                //OnPropertyChanged("custom_gradient_file_string");
+    //                //OnPropertyChanged("custom_gradient_file_name");
+    //            }
+    //        }
+    //    }
 
-        public string custom_gradient_file_string
-        {
-            get { return _custom_gradient_file_string; }
-            set
-            {
-                if (_custom_gradient_file_string == value)
-                    return;
-                else
-                {
-                    _custom_gradient_file_string = value;
-                    _custom_gradient_file_uri = new Uri(value);
-                    //OnPropertyChanged("custom_gradient_file_uri");
-                    //OnPropertyChanged("custom_gradient_file_string");
-                    //OnPropertyChanged("custom_gradient_file_name");
-                }
-            }
-        }
+    //    public string custom_gradient_file_string
+    //    {
+    //        get { return _custom_gradient_file_string; }
+    //        set
+    //        {
+    //            if (_custom_gradient_file_string == value)
+    //                return;
+    //            else
+    //            {
+    //                _custom_gradient_file_string = value;
+    //                _custom_gradient_file_uri = new Uri(value);
+    //                //OnPropertyChanged("custom_gradient_file_uri");
+    //                //OnPropertyChanged("custom_gradient_file_string");
+    //                //OnPropertyChanged("custom_gradient_file_name");
+    //            }
+    //        }
+    //    }
 
-        [XmlIgnore]
-        public string custom_gradient_file_name
-        {
-            get { return _custom_gradient_file_uri.Segments[_custom_gradient_file_uri.Segments.Length - 1]; }
-        }
-    }
+    //    [XmlIgnore]
+    //    public string custom_gradient_file_name
+    //    {
+    //        get { return _custom_gradient_file_uri.Segments[_custom_gradient_file_uri.Segments.Length - 1]; }
+    //    }
+    //}
 
     public class GaussianSpecification : EntityModelBase
     {

@@ -53,6 +53,7 @@
             <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
             <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
             <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
+            <daph:IsNullConverter x:Key="IsNullConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1605,7 +1606,7 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopCustom}">
+            <!--<DataTemplate DataType="{x:Type daph:MolPopCustom}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -1634,7 +1635,7 @@
                                 />
                     </StackPanel>
                 </Grid>
-            </DataTemplate>
+            </DataTemplate>-->
 
             <DataTemplate x:Key="membraneMolPopDetailsTemplate">
                 <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
@@ -1903,8 +1904,23 @@
                                                     ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"
-                                                    SelectedValuePath="molecule_guid"
-                                                    />
+                                                    SelectedValuePath="molecule_guid">
+
+                                    <!--<ComboBox.Style>
+                                        <Style TargetType="ComboBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=molecule_guid_ref, Converter={StaticResource IsNullConv}}" Value="True">
+                                                    <Setter Property="SelectedIndex" Value="0"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Path=molecule_guid_ref, Converter={StaticResource IsNullConv}}" Value="False">
+                                                    <Setter Property="SelectedValue" Value="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.Style>-->
+
+                                </ComboBox>
+                                                    
                                 <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
                             </StackPanel>
                             <StackPanel  Grid.Column="0" Grid.Row="4">
@@ -4030,8 +4046,8 @@
                                      
                                              />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellButton_Click"/>
-                                <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
+                                <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
+                                <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
                             </StackPanel>
                             <Expander ExpandDirection="Down" Padding="6"
                                     IsExpanded="True"

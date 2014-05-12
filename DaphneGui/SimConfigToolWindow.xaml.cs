@@ -37,7 +37,7 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-        private void AddCellButton_Click(object sender, RoutedEventArgs e)
+        private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             CellsDetailsExpander.IsExpanded = true;
             CellPopulation cs = new CellPopulation();
@@ -59,7 +59,7 @@ namespace DaphneGui
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
-        private void RemoveCellButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
@@ -246,33 +246,33 @@ namespace DaphneGui
                         current_item.mp_distribution = mpg;
 
                         break;
-                    case MolPopDistributionType.Custom:
+                    //case MolPopDistributionType.Custom:
 
-                        var prev_distribution = current_item.mp_distribution;
-                        MolPopCustom scg = new MolPopCustom();
-                        current_item.mp_distribution = scg;
+                    //    var prev_distribution = current_item.mp_distribution;
+                    //    MolPopCustom scg = new MolPopCustom();
+                    //    current_item.mp_distribution = scg;
 
-                        // Configure open file dialog box
-                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                        dlg.InitialDirectory = MainWindow.appPath;
-                        dlg.DefaultExt = ".txt"; // Default file extension
-                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+                    //    // Configure open file dialog box
+                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                    //    dlg.InitialDirectory = MainWindow.appPath;
+                    //    dlg.DefaultExt = ".txt"; // Default file extension
+                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-                        // Show open file dialog box
-                        Nullable<bool> result = dlg.ShowDialog();
+                    //    // Show open file dialog box
+                    //    Nullable<bool> result = dlg.ShowDialog();
 
-                        // Process open file dialog box results
-                        if (result == true)
-                        {
-                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                            string filename = dlg.FileName;
-                            scg.custom_gradient_file_string = filename;
-                        }
-                        else
-                        {
-                            current_item.mp_distribution = prev_distribution;
-                        }
-                        break;
+                    //    // Process open file dialog box results
+                    //    if (result == true)
+                    //    {
+                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                    //        string filename = dlg.FileName;
+                    //        scg.custom_gradient_file_string = filename;
+                    //    }
+                    //    else
+                    //    {
+                    //        current_item.mp_distribution = prev_distribution;
+                    //    }
+                    //    break;
 
                     case MolPopDistributionType.Explicit:
                         break;
@@ -352,33 +352,33 @@ namespace DaphneGui
                         sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;
-                    case MolPopDistributionType.Custom:
+                    //case MolPopDistributionType.Custom:
 
-                        var prev_distribution = current_item.mp_distribution;
-                        MolPopCustom scg = new MolPopCustom();
-                        current_item.mp_distribution = scg;
+                    //    var prev_distribution = current_item.mp_distribution;
+                    //    MolPopCustom scg = new MolPopCustom();
+                    //    current_item.mp_distribution = scg;
 
-                        // Configure open file dialog box
-                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                        dlg.InitialDirectory = MainWindow.appPath;
-                        dlg.DefaultExt = ".txt"; // Default file extension
-                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+                    //    // Configure open file dialog box
+                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                    //    dlg.InitialDirectory = MainWindow.appPath;
+                    //    dlg.DefaultExt = ".txt"; // Default file extension
+                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-                        // Show open file dialog box
-                        Nullable<bool> result = dlg.ShowDialog();
+                    //    // Show open file dialog box
+                    //    Nullable<bool> result = dlg.ShowDialog();
 
-                        // Process open file dialog box results
-                        if (result == true)
-                        {
-                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                            string filename = dlg.FileName;
-                            scg.custom_gradient_file_string = filename;
-                        }
-                        else
-                        {
-                            current_item.mp_distribution = prev_distribution;
-                        }
-                        break;
+                    //    // Process open file dialog box results
+                    //    if (result == true)
+                    //    {
+                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                    //        string filename = dlg.FileName;
+                    //        scg.custom_gradient_file_string = filename;
+                    //    }
+                    //    else
+                    //    {
+                    //        current_item.mp_distribution = prev_distribution;
+                    //    }
+                    //    break;
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
                 }
@@ -437,33 +437,33 @@ namespace DaphneGui
                         sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;
-                    case MolPopDistributionType.Custom:
+                    //case MolPopDistributionType.Custom:
 
-                        var prev_distribution = current_item.mp_distribution;
-                        MolPopCustom scg = new MolPopCustom();
-                        current_item.mp_distribution = scg;
+                    //    var prev_distribution = current_item.mp_distribution;
+                    //    MolPopCustom scg = new MolPopCustom();
+                    //    current_item.mp_distribution = scg;
 
-                        // Configure open file dialog box
-                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                        dlg.InitialDirectory = MainWindow.appPath;
-                        dlg.DefaultExt = ".txt"; // Default file extension
-                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+                    //    // Configure open file dialog box
+                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                    //    dlg.InitialDirectory = MainWindow.appPath;
+                    //    dlg.DefaultExt = ".txt"; // Default file extension
+                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-                        // Show open file dialog box
-                        Nullable<bool> result = dlg.ShowDialog();
+                    //    // Show open file dialog box
+                    //    Nullable<bool> result = dlg.ShowDialog();
 
-                        // Process open file dialog box results
-                        if (result == true)
-                        {
-                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                            string filename = dlg.FileName;
-                            scg.custom_gradient_file_string = filename;
-                        }
-                        else
-                        {
-                            current_item.mp_distribution = prev_distribution;
-                        }
-                        break;
+                    //    // Process open file dialog box results
+                    //    if (result == true)
+                    //    {
+                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                    //        string filename = dlg.FileName;
+                    //        scg.custom_gradient_file_string = filename;
+                    //    }
+                    //    else
+                    //    {
+                    //        current_item.mp_distribution = prev_distribution;
+                    //    }
+                    //    break;
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
                 }
@@ -471,32 +471,32 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// Event handler for button press for changing custom chemokine distribution input file
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SolfacCustomGradientFile_Click(object sender, RoutedEventArgs e)
-        {
-            MolPopInfo current_item = (MolPopInfo)lbEcsMolPops.SelectedItem;
+        ///// <summary>
+        ///// Event handler for button press for changing custom chemokine distribution input file
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //private void SolfacCustomGradientFile_Click(object sender, RoutedEventArgs e)
+        //{
+        //    MolPopInfo current_item = (MolPopInfo)lbEcsMolPops.SelectedItem;
 
-            // Configure open file dialog box
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustom)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
-            dlg.DefaultExt = ".txt"; // Default file extension
-            dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+        //    // Configure open file dialog box
+        //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+        //    dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustom)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
+        //    dlg.DefaultExt = ".txt"; // Default file extension
+        //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-            // Show open file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
+        //    // Show open file dialog box
+        //    Nullable<bool> result = dlg.ShowDialog();
 
-            // Process open file dialog box results
-            if (result == true)
-            {
-                // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                string filename = dlg.FileName;
-                ((MolPopCustom)current_item.mp_distribution).custom_gradient_file_string = filename;
-            }
-        }
+        //    // Process open file dialog box results
+        //    if (result == true)
+        //    {
+        //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+        //        string filename = dlg.FileName;
+        //        ((MolPopCustom)current_item.mp_distribution).custom_gradient_file_string = filename;
+        //    }
+        //}
 
         /// <summary>
         /// switch to the sim setup panel
@@ -532,7 +532,15 @@ namespace DaphneGui
             //SolfacsDetailsExpander.IsExpanded = true;
             // Default to HomogeneousLevel for now...
 
+            if (MainWindow.SC.SimConfig.entity_repository.molecules.Count == 0)
+            {
+                MessageBox.Show("There are no molecules to choose from. Please start with a blank scenario or other scenario that contains molecules.");
+                return;
+            }
+            
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+            
+            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].molecule_guid;
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -926,19 +934,9 @@ namespace DaphneGui
         }
         private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
             if (gm.ReadOnly == false)
             {
-                //int index = lbMol.SelectedIndex;
-                //MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Remove(gm);
-                //lbMol.SelectedIndex = index;
-                //if (index >= lbMol.Items.Count)
-                //    lbMol.SelectedIndex = lbMol.Items.Count - 1;
-
-                //if (lbMol.Items.Count == 0)
-                //    lbMol.SelectedIndex = -1;
-
                 int index = dgLibMolecules.SelectedIndex;
                 MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
                 dgLibMolecules.SelectedIndex = index;
@@ -2028,15 +2026,29 @@ namespace DaphneGui
 
                 if (cell.ReadOnly == false)
                 {
-                    MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
+                    MessageBoxResult res;
+                    if (MainWindow.SC.SimConfig.scenario.HasCell(cell))
+                    {
+                        res = MessageBox.Show("If you delete this cell, corresponding cell populations will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
+                    }
+                    else
+                    {
+                        res = MessageBox.Show("Are you sure you would like to remove this cell?", "Warning", MessageBoxButton.YesNo);
+                    }
 
-                    CellsListBox.SelectedIndex = nIndex;
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        MainWindow.SC.SimConfig.scenario.RemoveCellPopulation(cell);
+                        MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
 
-                    if (nIndex >= CellsListBox.Items.Count)
-                        CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+                        CellsListBox.SelectedIndex = nIndex;
 
-                    if (CellsListBox.Items.Count == 0)
-                        CellsListBox.SelectedIndex = -1;
+                        if (nIndex >= CellsListBox.Items.Count)
+                            CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+
+                        if (CellsListBox.Items.Count == 0)
+                            CellsListBox.SelectedIndex = -1;
+                    }
                 }
                 else
                 {
