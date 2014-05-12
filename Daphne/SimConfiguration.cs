@@ -3494,6 +3494,27 @@ namespace Daphne
 
         public int CurrentDeathState;
         public int CurrentDivState;
+
+        //Return true if this compartment has a molecular population with given molecule
+        public bool HasGene(string gene_guid)
+        {
+            return genes_guid_ref.Contains(gene_guid);
+        }
+
+        //Return true if this cell has all the genes in the given list of gene guids
+        public bool HasGenes(ObservableCollection<string> gene_guids)
+        {
+            bool res = true;
+            foreach (string guid in gene_guids)
+            {
+                if (!HasGene(guid))
+                {
+                    res = false;
+                    break;
+                }
+            }
+            return res;
+        }
     }
 
     public class CellPopDistType

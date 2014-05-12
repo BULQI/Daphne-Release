@@ -967,46 +967,69 @@ namespace DaphneGui
             ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
 
             ObservableCollection<string> membBound = new ObservableCollection<string>();
+            ObservableCollection<string> gene_guids = new ObservableCollection<string>();
             ObservableCollection<string> bulk = new ObservableCollection<string>();
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
 
-            if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
-            {
-                e.Accepted = true;
+            //if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            //{
+            //    e.Accepted = true;
 
-                return;
-            }
+            //    return;
+            //}
 
             foreach (string molguid in cr.reactants_molecule_guid_ref)
-                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
                     membBound.Add(molguid);
+                else if (er.genes_dict.ContainsKey(molguid))
+                    gene_guids.Add(molguid);
                 else
                     bulk.Add(molguid);
 
             foreach (string molguid in cr.products_molecule_guid_ref)
-                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
                     membBound.Add(molguid);
+                else if (er.genes_dict.ContainsKey(molguid))
+                    gene_guids.Add(molguid);
                 else
                     bulk.Add(molguid);
 
             foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
                     membBound.Add(molguid);
+                else if (er.genes_dict.ContainsKey(molguid))
+                    gene_guids.Add(molguid);
                 else
                     bulk.Add(molguid);
 
             bool bOK = true;
+            bool bTranscription = false;
 
-            if (bulk.Count <= 0)
-                bOK = false;
+            if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            {
+                bTranscription = bulk.Count > 0 && gene_guids.Count > 0 && cc.HasGenes(gene_guids) && cc.cytosol.HasMolecules(bulk);
+                if (bTranscription == true)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+            else
+            {
+                if (bulk.Count <= 0)
+                    bOK = false;
 
-            if (bOK && membBound.Count > 0)
-                bOK = cc.membrane.HasMolecules(membBound);
+                if (bOK && membBound.Count > 0)
+                    bOK = cc.membrane.HasMolecules(membBound);
 
-            if (bOK)
-                bOK = cc.cytosol.HasMolecules(bulk);
+                if (bOK)
+                    bOK = cc.cytosol.HasMolecules(bulk);
 
-            e.Accepted = bOK;
+                e.Accepted = bOK;
+            }
 
         }
 
@@ -3538,6 +3561,9 @@ namespace DaphneGui
                 b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 col.Binding = b;
             }
+
+            //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
+            //    return;                        
 
             EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
 
