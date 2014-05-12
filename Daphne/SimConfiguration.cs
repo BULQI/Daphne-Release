@@ -2042,47 +2042,6 @@ namespace Daphne
         }
     }
 
-
-
-    ////public enum CellPopProbDistributionType { Uniform, Gaussian }
-
-    /////// <summary>
-    /////// Converter to go between enum values and "human readable" strings for GUI
-    /////// </summary>
-    ////[ValueConversion(typeof(CellPopProbDistributionType), typeof(string))]
-    ////public class CellPopProbDistributionTypeToStringConverter : IValueConverter
-    ////{
-    ////    // NOTE: This method is a bit fragile since the list of strings needs to 
-    ////    // correspond in length and index with the GlobalParameterType enum...
-    ////    private List<string> _cell_pop_prob_dist_type_strings = new List<string>()
-    ////        {
-    ////            "Uniform",
-    ////            "Gaussian"
-    ////        };
-
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        try
-    ////        {
-    ////            return _cell_pop_prob_dist_type_strings[(int)value];
-    ////        }
-    ////        catch
-    ////        {
-    ////            return "";
-    ////        }
-    ////    }
-
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        string str = (string)value;
-    ////        int idx = _cell_pop_prob_dist_type_strings.FindIndex(item => item == str);
-    ////        return (CellPopProbDistributionType)Enum.ToObject(typeof(CellPopProbDistributionType), (int)idx);
-    ////    }
-    ////}
-
-    ////public enum CellPopSpecificLocationType { Coord, File }
-
-
     public abstract class CellPopDistribution : EntityModelBase
     {
         private CellPopDistributionType _DistType;
@@ -2144,7 +2103,7 @@ namespace Daphne
 
     public class CellPopGaussian : CellPopDistribution
     {
-        public double peak_concentration { get; set; }
+        //public double peak_concentration { get; set; }
         private string _gauss_spec_guid_ref;
         public string gauss_spec_guid_ref
         {
@@ -2163,63 +2122,10 @@ namespace Daphne
         public CellPopGaussian()            
         {
             DistType = CellPopDistributionType.Gaussian;
-            peak_concentration = 100.0;
+            //peak_concentration = 100.0;
             gauss_spec_guid_ref = "";
         }
     }
-
-    ////public class CellPopSpecifyLocation : CellPopDistribution
-    ////{
-    ////    public CellPopSpecificLocationType LocationType { get; set; }
-    ////    public CellPopSpecifyLocation()
-    ////    {
-    ////        cpDistributionType = CellPopDistributionType.Specific;
-    ////        LocationType = CellPopSpecificLocationType.Coord;
-    ////    }
-    ////}
-
-    ////public class CellPopLocationFile : CellPopDistribution
-    ////{
-    ////    public string fileName { get; set; }
-    ////    public CellPopSpecificLocationType LocationType { get; set; }
-    ////    public CellPopLocationFile(string file)
-    ////    {
-    ////        cpDistributionType = CellPopDistributionType.Specific;
-    ////        LocationType = CellPopSpecificLocationType.File;
-    ////        fileName = file;
-    ////    }
-    ////}
-
-    ////public class CellPopUniformDistribution : CellPopDistribution
-    ////{
-    ////    public double Conc { get; set; }
-    ////    //public CellPopProbDistributionType DistType { get; set; }
-    ////    public CellPopUniformDistribution(double conc)
-    ////    {
-    ////        Conc = conc;
-    ////        cpDistributionType = CellPopDistributionType.Uniform;
-    ////        //DistType = CellPopProbDistributionType.Uniform;
-    ////    }
-    ////}
-
-    ////public class CellPopGaussianDistribution : CellPopDistribution
-    ////{
-    ////    //We should use these variables instead of the box spec, but for now, hold off.
-    ////    //private double[] center;
-    ////    //private double[] sigma;
-    ////    //private double peak;
-    ////    //public double[] Center { get; set; }
-    ////    //public double[] Sigma { get; set; }
-    ////    //public double   Peak { get; set; }
-
-    ////    //public CellPopProbDistributionType DistType { get; set; }
-
-    ////    public CellPopGaussianDistribution()
-    ////    {
-    ////        cpDistributionType = CellPopDistributionType.Gaussian;
-    ////        //DistType = CellPopProbDistributionType.Gaussian;
-    ////    }
-    ////}
 
     public class CellState
     {
@@ -2881,7 +2787,7 @@ namespace Daphne
                         if (culture.Name == "en-US")
                             reac_string = cr.TotalReactionString;
                         else
-                            reac_string = cr.rate_const.ToString();
+                            reac_string = cr.rate_const.ToString("G5", System.Globalization.CultureInfo.InvariantCulture); //ToString("E3");  //("#.##E0");        //("#.00");
                         break;
                     }
                 }
