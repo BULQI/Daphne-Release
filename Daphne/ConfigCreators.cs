@@ -39,6 +39,24 @@ namespace Daphne
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
 
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            sc.entity_repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gg);
+
+            //ADD ECS MOL POPS
+            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
             var query =
                 from mol in sc.entity_repository.molecules
                 where mol.Name == "CXCL13"
@@ -51,13 +69,13 @@ namespace Daphne
                 gmp.molecule_guid_ref = gm.molecule_guid;
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussian mpg = new MolPopGaussian();                
-                mpg.SetMinMax(sc.scenario.environment);
-                mpg.SetCenterSigma(400, 400, 400, 125, 125, 125);
-                mpg.Peak = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                gmp.mpInfo.mp_distribution = mpg;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
 
@@ -82,6 +100,15 @@ namespace Daphne
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
             sc.scenario.cellpopulations.Add(cp);
+
+            //---------------------------------------------------------------
+
+            ////////EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
+            //////GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(entity_repository.AllReactions[0]);    //The 0'th reaction is Boundary Association
+            //////scenario.Reactions.Add(grt);
+
+            //////grt = (GuiBoundaryReactionTemplate)entity_repository.AllReactions[1];    //The 1st reaction is Boundary Dissociation
+            //////scenario.Reactions.Add(grt);
 
         }
 
@@ -109,7 +136,23 @@ namespace Daphne
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
-            
+            //ChartWindow = ReacComplexChartWindow;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 200;
+            box.y_scale = 200;
+            box.z_scale = 200;
+            box.x_trans = 500;
+            box.y_trans = 500;
+            box.z_trans = 500;
+            sc.entity_repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gg);
+
             var query =
                 from mol in sc.entity_repository.molecules
                 where mol.Name == "CXCL13"
@@ -123,13 +166,13 @@ namespace Daphne
                 gmp.molecule_guid_ref = gm.molecule_guid;
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussian mpg = new MolPopGaussian();
-                mpg.SetMinMax(sc.scenario.environment);
-                mpg.SetCenterSigma(500, 500, 500, 200, 200, 200);
-                mpg.Peak = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23; //3.6132 // 10;              
-                gmp.mpInfo.mp_distribution = mpg;                                               
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23; //3.6132 // 10;              
+                sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;                                               
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
 
@@ -177,7 +220,23 @@ namespace Daphne
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
-            
+            //ChartWindow = ReacComplexChartWindow;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            sc.entity_repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gg);
+
             //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
             var query =
                 from mol in sc.entity_repository.molecules
@@ -192,13 +251,13 @@ namespace Daphne
                 gmp.molecule_guid_ref = gm.molecule_guid;
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussian mpg = new MolPopGaussian();
-                mpg.SetCenterSigma(300,300,300,100,100,100);
-                mpg.SetMinMax(sc.scenario.environment);
-                mpg.Peak = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                gmp.mpInfo.mp_distribution = mpg;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
         }
@@ -217,6 +276,22 @@ namespace Daphne
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 200;
+            box.y_scale = 200;
+            box.z_scale = 200;
+            box.x_trans = 500;
+            box.y_trans = 500;
+            box.z_trans = 500;
+            sc.entity_repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gg);
+
         }
 
         private static void PredefinedCellsCreator(SimConfiguration sc)
@@ -257,9 +332,10 @@ namespace Daphne
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
 
+                gmp.mpInfo.mp_dist_name = "Constant level";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopUniform hl = new MolPopUniform();
+                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 if (gm.Name == "CXCR5")
                 {
                     hl.concentration = 125;
@@ -288,9 +364,10 @@ namespace Daphne
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
 
+                gmp.mpInfo.mp_dist_name = "Constant level";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopUniform hl = new MolPopUniform();
+                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 hl.concentration = 250;
                 gmp.mpInfo.mp_distribution = hl;
 

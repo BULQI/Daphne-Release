@@ -119,7 +119,8 @@ namespace Daphne
 
         // Convenience utility storage (not serialized)
         // NOTE: These could be moved to entity_repository...
-        
+        [XmlIgnore]
+        public Dictionary<string, BoxSpecification> box_guid_box_dict;
         [XmlIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
 
@@ -134,9 +135,12 @@ namespace Daphne
             scenario = new Scenario();
             entity_repository = new EntityRepository();
 
+            ////LoadDefaultGlobalParameters();
+            //LoadUserDefinedItems();           
+
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            ////box_guid_box_dict = new Dictionary<string, BoxSpecification>();
+            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();   
         }
 
@@ -149,6 +153,27 @@ namespace Daphne
         /// <param name="e"></param>
         void environment_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            // Update all BoxSpecifications
+            ////foreach (BoxSpecification bs in entity_repository.box_specifications)
+            ////{
+            ////    // NOTE: Uncomment and add in code if really need to adjust directions independently for efficiency
+            ////    //if (e.PropertyName == "extent_x")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
+            ////    //if (e.PropertyName == "extent_y")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
+            ////    //if (e.PropertyName == "extent_z")
+            ////    //{
+            ////    //    // set x direction
+            ////    //}
+
+            ////    // For now just setting all every time...
+            ////    SetBoxSpecExtents(bs);
+            ////}
+
             // Update VTK environment box 
             var env = scenario.environment;
             /////MainWindow.VTKBasket.EnvironmentController.setupBox(env.extent_x, env.extent_y, env.extent_z);
@@ -159,6 +184,24 @@ namespace Daphne
             /////MainWindow.GC.Rwc.Invalidate();
         }
 
+        private void SetBoxSpecExtents(BoxSpecification bs)
+        {
+            bs.x_scale_max = scenario.environment.extent_x;
+            bs.x_scale_min = scenario.environment.extent_min;
+            bs.x_trans_max = 1.5 * scenario.environment.extent_x;
+            bs.x_trans_min = -scenario.environment.extent_x / 2.0;
+
+            bs.y_scale_max = scenario.environment.extent_y;
+            bs.y_scale_min = scenario.environment.extent_min;
+            bs.y_trans_max = 1.5 * scenario.environment.extent_y;
+            bs.y_trans_min = -scenario.environment.extent_y / 2.0;
+
+            bs.z_scale_max = scenario.environment.extent_z;
+            bs.z_scale_min = scenario.environment.extent_min;
+            bs.z_trans_max = 1.5 * scenario.environment.extent_z;
+            bs.z_trans_min = -scenario.environment.extent_z / 2.0;
+        }
+
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
@@ -167,6 +210,7 @@ namespace Daphne
         {
             // GenerateNewExperimentGUID();
             FindNextSafeCellPopulationID();
+            InitBoxExtentsAndGuidBoxDict();
             InitCellPopulationIDCellPopulationDict();
             InitMoleculeIDConfigMoleculeDict();
             InitCellIDConfigCellDict();
@@ -199,6 +243,20 @@ namespace Daphne
             }
             SafeCellPopulationID = max_id + 1;
         }
+
+        private void InitBoxExtentsAndGuidBoxDict()
+        {
+            box_guid_box_dict.Clear();
+            foreach (BoxSpecification bs in entity_repository.box_specifications)
+            {
+                box_guid_box_dict.Add(bs.box_guid, bs);
+
+                // Piggyback on this routine to set initial extents from environment values
+                SetBoxSpecExtents(bs);
+            }
+            entity_repository.box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
+        }
+
         private void InitCellPopulationIDCellPopulationDict()
         {
             cellpopulation_id_cellpopulation_dict.Clear();  
@@ -251,6 +309,29 @@ namespace Daphne
                 entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
             }
             entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
+        }
+
+        private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    BoxSpecification bs = nn as BoxSpecification;
+                    box_guid_box_dict.Add(bs.box_guid, bs);
+
+                    // Piggyback on this callback to set extents from environment for new box specifications
+                    SetBoxSpecExtents(bs);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    BoxSpecification bs = dd as BoxSpecification;
+                    box_guid_box_dict.Remove(bs.box_guid);
+                }
+            }
         }
 
         private void cellsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -440,7 +521,7 @@ namespace Daphne
     public class EntityRepository 
     {
         public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
-        ////public ObservableCollection<BoxSpecification> box_specifications { get; set; }
+        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
        
         //STILL HAVE TO DEAL WITH THESE PREDEF OBJECTS
         //[JsonIgnore]
@@ -459,7 +540,7 @@ namespace Daphne
         public EntityRepository()
         {
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
-            //box_specifications = new ObservableCollection<BoxSpecification>();
+            box_specifications = new ObservableCollection<BoxSpecification>();
             cells = new ObservableCollection<ConfigCell>();
             molecules = new ObservableCollection<ConfigMolecule>();
             reactions = new ObservableCollection<ConfigReaction>();
@@ -502,6 +583,7 @@ namespace Daphne
                 else
                 {
                     _extent_x = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_x");
                 }
             }
@@ -516,6 +598,7 @@ namespace Daphne
                 else
                 {
                     _extent_y = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_y");
                 }
             }
@@ -530,6 +613,7 @@ namespace Daphne
                 else
                 {
                     _extent_z = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("extent_z");
                 }
             }
@@ -544,6 +628,7 @@ namespace Daphne
                 else
                 {
                     _gridstep = value;
+                    CalculateNumGridPts();
                     OnPropertyChanged("gridstep");
                 }
             }
@@ -571,15 +656,24 @@ namespace Daphne
             gridstep_min = 1;
             gridstep_max = 100;
             gridstep = 50;
+            initialized = true;
 
             CalculateNumGridPts();
 
             ecs = new ConfigCompartment();
         }
 
-        public void CalculateNumGridPts()
+        private bool initialized = false;
+
+        private void CalculateNumGridPts()
         {
+            if (initialized == false)
+            {
+                return;
+            }
+
             int[] pt = new int[3];
+
             pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
             pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
             pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;
@@ -1331,21 +1425,21 @@ namespace Daphne
     public class MolPopInfo : EntityModelBase
     {
         public string mp_guid { get; set; }
-        //private string _mp_dist_name = "";
-        //public string mp_dist_name
-        //{
-        //    get { return _mp_dist_name; }
-        //    set
-        //    {
-        //        if (_mp_dist_name == value)
-        //            return;
-        //        else
-        //        {
-        //            _mp_dist_name = value;
-        //            OnPropertyChanged("mp_dist_name");
-        //        }
-        //    }
-        //}
+        private string _mp_dist_name = "";
+        public string mp_dist_name
+        {
+            get { return _mp_dist_name; }
+            set
+            {
+                if (_mp_dist_name == value)
+                    return;
+                else
+                {
+                    _mp_dist_name = value;
+                    OnPropertyChanged("mp_dist_name");
+                }
+            }
+        }
         private string _mp_type_guid_ref;
         public string mp_type_guid_ref
         {
@@ -1404,10 +1498,10 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             mp_guid = id.ToString();
-            //mp_dist_name = name;
+            mp_dist_name = name;
             mp_type_guid_ref = "";
             // Default is static homogeneous level
-            mp_distribution = new MolPopUniform();
+            mp_distribution = new MolPopHomogeneousLevel();
             mp_is_time_varying = false;
             mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
             mp_color = new System.Windows.Media.Color();
@@ -1563,7 +1657,7 @@ namespace Daphne
         }
     }
 
-    public enum MolPopDistributionType { Uniform, Linear, Gaussian, Custom }
+    public enum MolPopDistributionType { Homogeneous, LinearGradient, Gaussian, CustomGradient }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1573,19 +1667,19 @@ namespace Daphne
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _dist_type_strings = new List<string>()
+        private List<string> _molpop_dist_type_strings = new List<string>()
                                 {
-                                    "Uniform",
-                                    "Linear",
+                                    "Homogeneous",
+                                    "Linear Gradient",
                                     "Gaussian",
-                                    "Custom"
+                                    "Custom Gradient"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             try
             {
-                return _dist_type_strings[(int)value];
+                return _molpop_dist_type_strings[(int)value];
             }
             catch
             {
@@ -1596,16 +1690,16 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string str = (string)value;
-            int idx = _dist_type_strings.FindIndex(item => item == str);
+            int idx = _molpop_dist_type_strings.FindIndex(item => item == str);
             return (MolPopDistributionType)Enum.ToObject(typeof(MolPopDistributionType), (int)idx);
         }
     }
 
     // Base class for homog, linear, gauss distributions
-    [XmlInclude(typeof(MolPopUniform)),
-     XmlInclude(typeof(MolPopLinear)),
-     XmlInclude(typeof(MolPopGaussian)),
-     XmlInclude(typeof(MolPopCustom))]
+    [XmlInclude(typeof(MolPopHomogeneousLevel)),
+     XmlInclude(typeof(MolPopLinearGradient)),
+     XmlInclude(typeof(MolPopGaussianGradient)),
+     XmlInclude(typeof(MolPopCustomGradient))]
     public abstract class MolPopDistribution : EntityModelBase
     {
         [XmlIgnore]
@@ -1616,18 +1710,18 @@ namespace Daphne
         }
     }
 
-    public class MolPopUniform : MolPopDistribution
+    public class MolPopHomogeneousLevel : MolPopDistribution
     {
         public double concentration { get; set; }
 
-        public MolPopUniform()
+        public MolPopHomogeneousLevel()
         {
-            mp_distribution_type = MolPopDistributionType.Uniform;
+            mp_distribution_type = MolPopDistributionType.Homogeneous;
             concentration = 10.0;
         }
     }
 
-    public class MolPopLinear : MolPopDistribution
+    public class MolPopLinearGradient : MolPopDistribution
     {
         public double[] gradient_direction { get; set; }
         public double min_concentration { get; set; }
@@ -1666,76 +1760,50 @@ namespace Daphne
             }
         }
 
-        public MolPopLinear()
+        public MolPopLinearGradient()
         {
-            mp_distribution_type = MolPopDistributionType.Linear;
+            mp_distribution_type = MolPopDistributionType.LinearGradient;
             gradient_direction = new double[3] { 1.0, 0.0, 0.0 };
             min_concentration = 0.0;
             max_concentration = 100.0;
         }
     }
 
-    public class MolPopGaussian : MolPopDistribution
+    public class MolPopGaussianGradient : MolPopDistribution
     {
-        public CellLocation Center { get; set; }
-        public CellLocation Sigma { get; set; }
-        public double Peak { get; set; }     
-   
-        public double x_max { get; set; }
-        public double x_min { get; set; }
-        public double y_max { get; set; }
-        public double y_min { get; set; }
-        public double z_max { get; set; }
-        public double z_min { get; set; }
-        public double xwid_max { get; set; }
-        public double xwid_min { get; set; }
-        public double ywid_max { get; set; }
-        public double ywid_min { get; set; }
-        public double zwid_max { get; set; }
-        public double zwid_min { get; set; }
+        public double peak_concentration { get; set; }
+        private string _gaussgrad_gauss_spec_guid_ref;
+        public string gaussgrad_gauss_spec_guid_ref
+        {
+            get { return _gaussgrad_gauss_spec_guid_ref; }
+            set
+            {
+                if (_gaussgrad_gauss_spec_guid_ref == value)
+                    return;
+                else
+                {
+                    _gaussgrad_gauss_spec_guid_ref = value;
+                    OnPropertyChanged("gaussgrad_gauss_spec_guid_ref");
+                }
+            }
+        }
 
-        public MolPopGaussian()
+        public MolPopGaussianGradient()
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
-            Center = new CellLocation();
-            Center.X = 500; Center.Y = 500; Center.Z = 500;
-            Sigma = new CellLocation();
-            Sigma.X = 200; Sigma.Y = 200; Sigma.Z = 200;
-        }
-
-        public void SetCenterSigma(double locx, double locy, double locz, double widx, double widy, double widz)
-        {
-            Center.X = locx; Center.Y = locy; Center.Z = locz;
-            Sigma.X = widx; Sigma.Y = widy; Sigma.Z = widz;
-        }
-
-        public void SetMinMax(ConfigEnvironment environment)
-        {
-            x_max = environment.extent_x;
-            x_min = environment.extent_min;
-            xwid_max = 1.5 * environment.extent_x;
-            xwid_min = -environment.extent_x / 2.0;
-
-            y_max = environment.extent_y;
-            y_min = environment.extent_min;
-            ywid_max = 1.5 * environment.extent_y;
-            ywid_min = -environment.extent_y / 2.0;
-
-            z_max = environment.extent_z;
-            z_min = environment.extent_min;
-            zwid_max = 1.5 * environment.extent_z;
-            zwid_min = -environment.extent_z / 2.0;
+            peak_concentration = 100.0;
+            gaussgrad_gauss_spec_guid_ref = "";
         }
     }
 
-    public class MolPopCustom : MolPopDistribution
+    public class MolPopCustomGradient : MolPopDistribution
     {
         private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
         private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
 
-        public MolPopCustom()
+        public MolPopCustomGradient()
         {
-            mp_distribution_type = MolPopDistributionType.Custom;
+            mp_distribution_type = MolPopDistributionType.CustomGradient;
         }
 
         [XmlIgnore]
@@ -1843,6 +1911,471 @@ namespace Daphne
 
 
     // UTILITY CLASSES =======================
+    public class BoxSpecification : EntityModelBase
+    {
+        public string box_guid { get; set; }
+        public double[][] transform_matrix { get; set; }
+        private bool _box_visibility = true;
+        
+        // Range values calculated based on environment extents
+        private double _x_trans_max;
+        private double _x_trans_min;
+        private double _x_scale_max;
+        private double _x_scale_min;
+        private double _y_trans_max;
+        private double _y_trans_min;
+        private double _y_scale_max;
+        private double _y_scale_min;
+        private double _z_trans_max;
+        private double _z_trans_min;
+        private double _z_scale_max;
+        private double _z_scale_min;
+
+        [XmlIgnore]
+        public double x_trans_max
+        {
+            get { return _x_trans_max; }
+            set
+            {
+                if (_x_trans_max == value)
+                    return;
+                else
+                {
+                    _x_trans_max = value;
+                    OnPropertyChanged("x_trans_max");
+                    // This doesn't seem to be taken care of by GUI itself...
+                    if (x_trans > _x_trans_max) x_trans = _x_trans_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double x_trans_min
+        {
+            get { return _x_trans_min; }
+            set
+            {
+                if (_x_trans_min == value)
+                    return;
+                else
+                {
+                    _x_trans_min = value;
+                    OnPropertyChanged("x_trans_min");
+                    // This doesn't seem to be taken care of by GUI itself...
+                    if (x_trans < _x_trans_min) x_trans = _x_trans_min;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double x_scale_max
+        {
+            get { return _x_scale_max; }
+            set
+            {
+                if (_x_scale_max == value)
+                    return;
+                else
+                {
+                    _x_scale_max = value;
+                    OnPropertyChanged("x_scale_max");
+                    // This doesn't seem to be taken care of by GUI itself...
+                    if (x_scale > _x_scale_max) x_scale = _x_scale_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double x_scale_min
+        {
+            get { return _x_scale_min; }
+            set
+            {
+                if (_x_scale_min == value)
+                    return;
+                else
+                {
+                    _x_scale_min = value;
+                    OnPropertyChanged("x_scale_min");
+                    // This doesn't seem to be taken care of by GUI itself...
+                    if (x_scale < _x_scale_min) x_scale = _x_scale_min;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double y_trans_max
+        {
+            get { return _y_trans_max; }
+            set
+            {
+                if (_y_trans_max == value)
+                    return;
+                else
+                {
+                    _y_trans_max = value;
+                    OnPropertyChanged("y_trans_max");
+                    if (y_trans > _y_trans_max) y_trans = _y_trans_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double y_trans_min
+        {
+            get { return _y_trans_min; }
+            set
+            {
+                if (_y_trans_min == value)
+                    return;
+                else
+                {
+                    _y_trans_min = value;
+                    OnPropertyChanged("y_trans_min");
+                    if (y_trans < _y_trans_min) y_trans = _y_trans_min;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double y_scale_max
+        {
+            get { return _y_scale_max; }
+            set
+            {
+                if (_y_scale_max == value)
+                    return;
+                else
+                {
+                    _y_scale_max = value;
+                    OnPropertyChanged("y_scale_max");
+                    if (y_scale > _y_scale_max) y_scale = _y_scale_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double y_scale_min
+        {
+            get { return _y_scale_min; }
+            set
+            {
+                if (_y_scale_min == value)
+                    return;
+                else
+                {
+                    _y_scale_min = value;
+                    OnPropertyChanged("y_scale_min");
+                    if (y_scale < _y_scale_min) y_scale = _y_scale_min;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double z_trans_max
+        {
+            get { return _z_trans_max; }
+            set
+            {
+                if (_z_trans_max == value)
+                    return;
+                else
+                {
+                    _z_trans_max = value;
+                    OnPropertyChanged("z_trans_max");
+                    if (z_trans > _z_trans_max) z_trans = _z_trans_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double z_trans_min
+        {
+            get { return _z_trans_min; }
+            set
+            {
+                if (_z_trans_min == value)
+                    return;
+                else
+                {
+                    _z_trans_min = value;
+                    OnPropertyChanged("z_trans_min");
+                    if (z_trans < _z_trans_min) z_trans = _z_trans_min;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double z_scale_max
+        {
+            get { return _z_scale_max; }
+            set
+            {
+                if (_z_scale_max == value)
+                    return;
+                else
+                {
+                    _z_scale_max = value;
+                    OnPropertyChanged("z_scale_max");
+                    if (z_scale > _z_scale_max) z_scale = _z_scale_max;
+                }
+            }
+        }
+
+        [XmlIgnore]
+        public double z_scale_min
+        {
+            get { return _z_scale_min; }
+            set
+            {
+                if (_z_scale_min == value)
+                    return;
+                else
+                {
+                    _z_scale_min = value;
+                    OnPropertyChanged("z_scale_min");
+                    if (z_scale < _z_scale_min) z_scale = _z_scale_min;
+                }
+            }
+        }
+
+        public bool box_visibility 
+        {
+            get { return _box_visibility; }
+            set
+            {
+                if (_box_visibility == value)
+                    return;
+                else
+                {
+                    _box_visibility = value;
+                    OnPropertyChanged("box_visibility");
+                }
+            }
+        }
+        public double x_scale
+        {
+            get {
+                return getScale(0);
+            }
+            set
+            {
+                double current = getScale(0);
+
+                if (value != current)
+                {
+                    if (current != 0.0)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            transform_matrix[i][0] /= current;
+                            transform_matrix[i][0] *= value;
+                        }
+                    }
+                    else
+                    {
+                        transform_matrix[0][0] = value;
+                        transform_matrix[1][0] = 0.0;
+                        transform_matrix[2][0] = 0.0;
+                    }
+                    base.OnPropertyChanged("x_scale");
+                }
+            }
+        }
+        public double y_scale
+        {
+            get
+            {
+                return getScale(1);
+            }
+            set
+            {
+                double current = getScale(1);
+
+                if (value != current)
+                {
+                    if (current != 0.0)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            transform_matrix[i][1] /= current;
+                            transform_matrix[i][1] *= value;
+                        }
+                    }
+                    else
+                    {
+                        transform_matrix[0][1] = 0.0;
+                        transform_matrix[1][1] = value;
+                        transform_matrix[2][1] = 0.0;
+                    }
+                    base.OnPropertyChanged("y_scale");
+                }
+            }
+        }
+        public double z_scale
+        {
+            get
+            {
+                return getScale(2);
+            }
+            set
+            {
+                double current = getScale(2);
+
+                if (value != current)
+                {
+                    if (current != 0.0)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            transform_matrix[i][2] /= current;
+                            transform_matrix[i][2] *= value;
+                        }
+                    }
+                    else
+                    {
+                        transform_matrix[0][2] = 0.0;
+                        transform_matrix[1][2] = 0.0;
+                        transform_matrix[2][2] = value;
+                    }
+                    base.OnPropertyChanged("z_scale");
+                }
+            }
+        }
+
+        public double x_trans
+        {
+            get { return transform_matrix[0][3]; }
+            set
+            {
+                if (value != transform_matrix[0][3])
+                {
+                    transform_matrix[0][3] = value;
+                    base.OnPropertyChanged("x_trans");
+                }
+            }
+        }
+        public double y_trans
+        {
+            get { return transform_matrix[1][3]; }
+            set
+            {
+                if (value != transform_matrix[1][3])
+                {
+                    transform_matrix[1][3] = value;
+                    base.OnPropertyChanged("y_trans");
+                }
+            }
+        }
+        public double z_trans
+        {
+            get { return transform_matrix[2][3]; }
+            set
+            {
+                if (value != transform_matrix[2][3])
+                {
+                    transform_matrix[2][3] = value;
+                    base.OnPropertyChanged("z_trans");
+                }
+            }
+        }
+
+        private double getScale(byte i)
+        {
+            if (i >= 3)
+            {
+                return 0.0;
+            }
+
+            double scale = Math.Sqrt(transform_matrix[0][i] * transform_matrix[0][i] +
+                                     transform_matrix[1][i] * transform_matrix[1][i] +
+                                     transform_matrix[2][i] * transform_matrix[2][i]);
+
+            return scale;
+        }
+
+        public BoxSpecification()
+        {
+            Guid id = Guid.NewGuid();
+            box_guid = id.ToString();
+            box_visibility = true;
+            transform_matrix = new double[][] {
+                new double[]{1.0, 0.0, 0.0, 0.0},
+                new double[]{0.0, 1.0, 0.0, 0.0},
+                new double[]{0.0, 0.0, 1.0, 0.0},
+                new double[]{0.0, 0.0, 0.0, 1.0} };
+        }
+
+        public void SetMatrix(double[][] value)
+        {
+            bool x_scale_change = false,
+                 y_scale_change = false,
+                 z_scale_change = false,
+                 matrix_change  = false;
+
+            for (int row = 0; row < 4; row++)
+            {
+                for (int col = 0; col < 4; col++)
+                {
+                    if (value[row][col] != transform_matrix[row][col])
+                    {
+                        transform_matrix[row][col] = value[row][col];
+                        // call handler once only
+                        if (matrix_change == false)
+                        {
+                            matrix_change = true;
+                        }
+
+                        // handle scaling
+                        if (x_scale_change == false && row < 3 && col == 0)
+                        {
+                            x_scale_change = true;
+                        }
+                        else if (y_scale_change == false && row < 3 && col == 1)
+                        {
+                            y_scale_change = true;
+                        }
+                        else if (z_scale_change == false && row < 3 && col == 2)
+                        {
+                            z_scale_change = true;
+                        }
+
+                        // handle translations
+                        else if (row == 0 && col == 3)
+                        {
+                            base.OnPropertyChanged("x_trans");
+                        }
+                        else if (row == 1 && col == 3)
+                        {
+                            base.OnPropertyChanged("y_trans");
+                        }
+                        else if (row == 2 && col == 3)
+                        {
+                            base.OnPropertyChanged("z_trans");
+                        }
+                    }
+                }
+            }
+
+            // call property changed handlers
+            if (matrix_change == true)
+            {
+                base.OnPropertyChanged("transform_matrix");
+            }
+            if (x_scale_change == true)
+            {
+                base.OnPropertyChanged("x_scale");
+            }
+            if (y_scale_change == true)
+            {
+                base.OnPropertyChanged("y_scale");
+            }
+            if (z_scale_change == true)
+            {
+                base.OnPropertyChanged("z_scale");
+            }
+        }
+    }
 
     ////public enum CellPopDistributionType { Uniform, Gaussian }
 
