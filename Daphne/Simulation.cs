@@ -22,12 +22,19 @@ namespace Daphne
                            RUNSTAT_PAUSE = 2,
                            RUNSTAT_ABORT = 3,
                            RUNSTAT_FINISHED = 4;
+        /// <summary>
+        /// simulation actions
+        /// </summary>
+        public static byte SIMFLAG_RENDER = 1 << 0,
+                           SIMFLAG_SAMPLE = 1 << 1,
+                           SIMFLAG_ALL    = 0xFF;
 
         public static DataBasket dataBasket;
 
         public byte RunStatus { get; set; }
-        private int numSteps { get; set; }
-        private int curStep;
+        private byte simFlags;
+        private double accumulatedTime, duration, renderStep, sampleStep;
+        private int renderCount, sampleCount;
         private const double integratorStep = 0.001;
 
         public Simulation()
@@ -37,10 +44,26 @@ namespace Daphne
             reset();
         }
 
+        private void clearFlag(byte flag)
+        {
+            simFlags &= (byte)~flag;
+        }
+
+        public bool CheckFlag(byte flag)
+        {
+            return (simFlags & flag) != 0;
+        }
+
+        private void setFlag(byte flag)
+        {
+            simFlags |= flag;
+        }
+
         public void reset()
         {
             RunStatus = RUNSTAT_OFF;
-            curStep = 0;
+            accumulatedTime = 0.0;
+            renderCount = sampleCount = 0;
         }
 
         public void restart()
@@ -339,7 +362,9 @@ namespace Daphne
         {
             Scenario scenario = sc.scenario;
 
-            numSteps = (int)Math.Ceiling(scenario.time_config.duration / scenario.time_config.rendering_interval);
+            duration = scenario.time_config.duration;
+            sampleStep = scenario.time_config.sampling_interval;
+            renderStep = scenario.time_config.rendering_interval;
             // make sure the simulation does not start to run immediately
             RunStatus = RUNSTAT_OFF;
 
@@ -455,25 +480,73 @@ namespace Daphne
             return true;
         }
 
-        public void Step(double dt)
+        public void RunForward()
         {
             if (RunStatus == RUNSTAT_RUN)
             {
-                double t = 0, localStep;
+                // render and sample the initial state
+                if (renderCount == 0 && sampleCount == 0)
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    renderCount++;
+                    sampleCount++;
+                    return;
+                }
+                // clear all flags
+                clearFlag(SIMFLAG_ALL);
+                
+                // find the maximum allowable step (time until the next event occurs)
+                double dt;
 
-                while (t < dt)
+                // render to happen next
+                if (renderCount * renderStep < sampleCount * sampleStep)
                 {
-                    localStep = Math.Min(integratorStep, dt - t);
-                    dataBasket.ECS.Space.Step(localStep);
-                    collisionManager.Step(localStep);
-                    cellManager.Step(localStep);
-                    t += localStep;
+                    setFlag(SIMFLAG_RENDER);
+                    dt = renderCount * renderStep - accumulatedTime;
+                    renderCount++;
                 }
-                curStep++;
-                if (curStep >= numSteps)
+                // sample to happen next
+                else if (renderCount * renderStep > sampleCount * sampleStep)
                 {
-                    RunStatus = RUNSTAT_FINISHED;
+                    setFlag(SIMFLAG_SAMPLE);
+                    dt = sampleCount * sampleStep - accumulatedTime;
+                    sampleCount++;
                 }
+                // both to happen simultaneously
+                else
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    dt = renderCount * renderStep - accumulatedTime;
+                    renderCount++;
+                    sampleCount++;
+                }
+                // take the step
+                Step(dt);
+
+                // render and sample the final state upon completion
+                if (RunStatus == RUNSTAT_FINISHED)
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                }
+            }
+        }
+
+        public void Step(double dt)
+        {
+            double t = 0, localStep;
+
+            while (t < dt)
+            {
+                localStep = Math.Min(integratorStep, dt - t);
+                dataBasket.ECS.Space.Step(localStep);
+                collisionManager.Step(localStep);
+                cellManager.Step(localStep);
+                t += localStep;
+            }
+            accumulatedTime += dt;
+            if (accumulatedTime >= duration)
+            {
+                RunStatus = RUNSTAT_FINISHED;
             }
         }
 
@@ -483,7 +556,7 @@ namespace Daphne
         /// <returns>integer indicating the percent of progress</returns>
         public int GetProgressPercent()
         {
-            int percent = (numSteps == 0) ? 0 : (int)(100 * curStep / numSteps);
+            int percent = (accumulatedTime == 0) ? 0 : (int)(100 * accumulatedTime / duration);
 
             if (RunStatus == RUNSTAT_RUN)
             {

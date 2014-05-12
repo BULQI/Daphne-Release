@@ -1482,8 +1482,18 @@ namespace DaphneGui
             {
                 if (sim.RunStatus == Simulation.RUNSTAT_RUN)
                 {
-                    sim.Step(configurator.SimConfig.scenario.time_config.rendering_interval);
-                    UpdateGraphics();
+                    // run the simulation forward to the next task
+                    sim.RunForward();
+
+                    // check for flags and execute applicable task(s)
+                    if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
+                    {
+                        UpdateGraphics();
+                    }
+                    if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true)
+                    {
+                    }
+
                     if (sim.RunStatus != Simulation.RUNSTAT_RUN)
                     {
                         // never rerun the simulation if the simulation was aborted
