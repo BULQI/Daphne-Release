@@ -2488,6 +2488,8 @@ namespace Daphne
         public ObservableCollection<int> modifiers_stoichiometric_const;      
         //reaction type
         public ReactionType reac_type { get; set; }
+        // True if the reaction involves bulk and boundary molecules. Default is false.
+        public bool isBoundary;
 
         public ConfigReactionTemplate()
         {
@@ -2496,6 +2498,7 @@ namespace Daphne
             reactants_stoichiometric_const = new ObservableCollection<int>();
             products_stoichiometric_const = new ObservableCollection<int>();
             modifiers_stoichiometric_const = new ObservableCollection<int>();
+            isBoundary = false;
         }
     }
 

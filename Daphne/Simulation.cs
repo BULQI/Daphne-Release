@@ -237,13 +237,19 @@ namespace Daphne
             }
         }
 
-        private void addCompartmentReactions(Compartment comp, Compartment boundary, ConfigCompartment configComp, EntityRepository er)
+        private List<ConfigReaction> getBoundaryReactions(ConfigCompartment configComp, EntityRepository er)
         {
             List<string> reac_guids = new List<string>();
+            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
 
             foreach (string rguid in configComp.reactions_guid_ref)
             {
-                reac_guids.Add(rguid);
+                ConfigReaction cr = er.reactions_dict[rguid];
+                if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                {
+                    reac_guids.Add(rguid);
+                    config_reacs.Add(cr);
+                }
             }
 
             foreach (string rcguid in configComp.reaction_complexes_guid_ref)
@@ -253,10 +259,66 @@ namespace Daphne
                 {
                     if (reac_guids.Contains(rguid) == false)
                     {
-                        reac_guids.Add(rguid);
+                        ConfigReaction cr = er.reactions_dict[rguid];
+                        if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                        {
+                            //reac_guids.Add(rguid);
+                            config_reacs.Add(cr);
+                        }
                     }
                 }
             }
+            return config_reacs;
+        }
+
+        private List<ConfigReaction> getBulkReactions(ConfigCompartment configComp, EntityRepository er)
+        {
+            List<string> reac_guids = new List<string>();
+            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+
+            foreach (string rguid in configComp.reactions_guid_ref)
+            {
+                ConfigReaction cr = er.reactions_dict[rguid];
+                if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                {
+                    reac_guids.Add(rguid);
+                    config_reacs.Add(cr);
+                }
+            }
+
+            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            {
+                ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
+                foreach (string rguid in crc.reactions_guid_ref)
+                {
+                    if (reac_guids.Contains(rguid) == false)
+                    {
+                        ConfigReaction cr = er.reactions_dict[rguid];
+                        if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                        {
+                            //reac_guids.Add(rguid);
+                            config_reacs.Add(cr);
+                        }
+                    }
+                }
+            }
+            return config_reacs;
+        }
+
+
+        private void addCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
+        {
+            //foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            //{
+            //    ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
+            //    foreach (string rguid in crc.reactions_guid_ref)
+            //    {
+            //        if (reac_guids.Contains(rguid) == false)
+            //        {
+            //            reac_guids.Add(rguid);
+            //        }
+            //    }
+            //}
 
             // NOTES: 
             // ConfigCreator.PredefinedReactionsCreator() and SimConfigToolWindow.btnSave_Click() 
@@ -265,30 +327,20 @@ namespace Daphne
             // When comp is ECS then ECS boundary reactions may not apply to some cell types. 
             // The continue statements below catch these cases.
 
-            foreach( string guid in reac_guids)
+            foreach (ConfigReaction cr in config_reacs)
             {
-                ConfigReaction cr = er.reactions_dict[guid];           
-
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryAssociation)
                 {
-                    if (boundary == null)
-                    {
-                        throw new Exception("Can't have a null boundary in a boundary reaction.");
-                    }
-                    if ( !boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) || !boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) )
+                    if (!boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) || !boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
                     {
                         continue;
                     }
-                    comp.Reactions.Add(new BoundaryAssociation( boundary.Populations[cr.reactants_molecule_guid_ref[1]],
+                    comp.Reactions.Add(new BoundaryAssociation(boundary.Populations[cr.reactants_molecule_guid_ref[1]],
                                                                 comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                 boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryDissociation)
                 {
-                    if (boundary == null)
-                    {
-                        throw new Exception("Can't have a null boundary in a boundary reaction.");
-                    }
                     if (!boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) || !boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[1]))
                     {
                         continue;
@@ -297,47 +349,43 @@ namespace Daphne
                                                                 comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                 boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
                 }
-                else if(er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
+                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
                 {
-                    if (boundary == null)
-                    {
-                        throw new Exception("Can't have a null boundary in a boundary reaction.");
-                    }
-                    if ( !boundary.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]) )
+                    if (!boundary.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]))
                     {
                         continue;
                     }
-                    comp.Reactions.Add(new CatalyzedBoundaryActivation( comp.Populations[cr.reactants_molecule_guid_ref[0]], 
-                                                                        comp.Populations[cr.products_molecule_guid_ref[0]], 
+                    comp.Reactions.Add(new CatalyzedBoundaryActivation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                         boundary.Populations[cr.modifiers_molecule_guid_ref[0]], cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
                 {
-                    if (boundary == null)
-                    {
-                        throw new Exception("Can't have a null boundary in a boundary reaction.");
-                    }
-                    if (!boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]) )
+                    if (!boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
                     {
                         continue;
                     }
-                    comp.Reactions.Add(new BoundaryTransportTo( comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.Reactions.Add(new BoundaryTransportTo(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                 boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
                 {
-                    if (boundary == null)
-                    {
-                        throw new Exception("Can't have a null boundary in a boundary reaction.");
-                    }
-                    if ( !boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]) )
+                    if (!boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]))
                     {
                         continue;
                     }
-                    comp.Reactions.Add(new BoundaryTransportFrom( boundary.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                                  comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
+                    comp.Reactions.Add(new BoundaryTransportFrom(boundary.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                    comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
                 }
-                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
+            }
+            return;
+        }
+
+        private void addCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
+        {
+            foreach(ConfigReaction cr in config_reacs)
+            {
+                if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
                     comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                        comp.Populations[cr.reactants_molecule_guid_ref[1]],
@@ -494,6 +542,8 @@ namespace Daphne
             // convenience arrays to save code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             Compartment[] simComp = new Compartment[2];
+            List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
+            List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenario.cellpopulations)
@@ -503,6 +553,10 @@ namespace Daphne
 
                 configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
                 configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+
+                bulk_reacs[0] = getBulkReactions(configComp[0], sc.entity_repository);
+                bulk_reacs[1] = getBulkReactions(configComp[1], sc.entity_repository);
+                boundary_reacs = getBoundaryReactions(configComp[0], sc.entity_repository);
                 
                 for (int i = 0; i < cp.number; i++)
                 {
@@ -529,16 +583,16 @@ namespace Daphne
                             MolPopExplicit mp_explicit = new MolPopExplicit();
                             // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
                             mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
-                            cmp.mpInfo.mp_distribution = mp_explicit;                              
+                            cmp.mpInfo.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], sc);
                     }
 
                     //CELL REACTIONS
-                    // cytosol; has boundary
-                    addCompartmentReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol, sc.entity_repository);
+                    addCompartmentBulkReactions(cell.Cytosol, sc.entity_repository,bulk_reacs[0]);
+                    addCompartmentBulkReactions(cell.PlasmaMembrane, sc.entity_repository, bulk_reacs[1]);
                     // membrane; no boundary
-                    addCompartmentReactions(cell.PlasmaMembrane, null, sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane, sc.entity_repository);
+                    addCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository, boundary_reacs);
 
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != null)
                     {
@@ -593,18 +647,16 @@ namespace Daphne
                 }
             }
 
-            // ADD ECS REACTIONS
-            if (dataBasket.Cells.Count == 0)
+            //// ADD ECS REACTIONS
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+            reacs = getBulkReactions(scenario.environment.ecs, sc.entity_repository);
+            addCompartmentBulkReactions(dataBasket.ECS.Space, sc.entity_repository,reacs);
+            reacs = getBoundaryReactions(scenario.environment.ecs, sc.entity_repository);
+            foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                addCompartmentReactions(dataBasket.ECS.Space, null, scenario.environment.ecs, sc.entity_repository);
+                addCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, sc.entity_repository, reacs);
             }
-            else
-            {
-                foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
-                {
-                    addCompartmentReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, scenario.environment.ecs, sc.entity_repository);
-                }
-            }
+
 
             // general parameters
             Pair.Phi1 = sc.sim_params.phi1;
