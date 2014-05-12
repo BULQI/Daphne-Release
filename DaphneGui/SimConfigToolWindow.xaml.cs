@@ -2960,53 +2960,6 @@ namespace DaphneGui
             //Create a column that allows the user to add genes to the grid
             DataGridTextColumn editor_col = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(editor_col);
-
-
-            ////DataGridTextColumn editor_col = new DataGridTextColumn();
-            ////editor_col.CanUserSort = false;
-            ////DataGridRowHeader header = new DataGridRowHeader();
-            ////DataTemplate rowHeaderTemplate = new DataTemplate();
-
-            ////CollectionViewSource cvs1 = new CollectionViewSource();
-            ////cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
-            ////cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
-            
-            ////CompositeCollection coll1 = new CompositeCollection();
-            //////ComboBoxItem nullItem1 = new ComboBoxItem();
-            ////ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
-            //////nullItem1.IsEnabled = true;
-            //////nullItem1.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            //////nullItem1.SetValue(ComboBoxItem.ContentProperty, "Add a gene");
-            ////coll1.Add(dummyItem);
-            ////CollectionContainer cc1 = new CollectionContainer();
-            ////cc1.Collection = cvs1.View;
-            ////coll1.Add(cc1);
-
-            //////Binding bb = new Binding("coll1");
-            //////bb.Mode = BindingMode.TwoWay;
-            //////bb.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-
-            ////FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            ////addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
-            
-            //////addGenesCombo.SetValue(ComboBox.SelectedValueProperty, nullItem1.Content);
-            //////addGenesCombo.SetBinding(ComboBox.ItemsSourceProperty, coll1);
-            ////addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
-            
-            //////addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, cvs1.View);
-
-            ////addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
-            ////addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
-            ////addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
-
-            ////addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
-
-            ////rowHeaderTemplate.VisualTree = addGenesCombo;
-            ////header.ContentTemplate = rowHeaderTemplate;
-            ////editor_col.Header = header;
-            ////EpigeneticMapGrid.Columns.Add(editor_col);
-            //////End 
-
             EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
 
 
@@ -3511,7 +3464,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme scheme = cell.diff_scheme;
             
             ConfigGene gene = null;
 
@@ -3582,7 +3535,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
 
             foreach (DataGridTextColumn col in EpigeneticMapGrid.Columns.ToList())
             {
@@ -3617,7 +3570,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
 
             int i = 0;
             foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
@@ -3666,7 +3619,7 @@ namespace DaphneGui
 
             if (ads.ShowDialog() == true)
             {
-                ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+                ConfigDiffScheme diff_scheme = cell.diff_scheme;
                 diff_scheme.AddState(ads.StateName);
                 DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, ads.StateName));
             }
@@ -3789,7 +3742,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme scheme = cell.diff_scheme;
 
             int rowcount = DiffRegGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
@@ -3820,7 +3773,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme scheme = cell.diff_scheme;
 
             int rowcount = EpigeneticMapGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
