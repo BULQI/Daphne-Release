@@ -41,7 +41,7 @@ namespace testDaphne
 
 
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
-            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t\nCXCR5:CXCL13\t\t\t\ngCXCR5\t\t\t\n";
+            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t\nCXCR5:CXCL13\t\t\t1.0\ngCXCR5\t\t\t\n";
             MolDict = MoleculeBuilder.Go(molSpec);
 
             // TODO: 
@@ -56,47 +56,101 @@ namespace testDaphne
 
             config.TemplReacType(config.content.listOfReactions);
 
-            // Later, we should define a compartment class -   ExtracelluarSpaceTypeI,
+            // TODO: define a compartment class -   ExtracelluarSpaceTypeI,
             // which has as it's interior manifold BoundedRectangularPrism.
 
-            int[] numGridPts = {5, 5, 5};
+            // NOTE:The order in which compartments and molecular populations are implemented matters
+            // because of the BoundaryConcs and Fluxes in MolecularPopulations
+            // Assign all compartments first, then molecular populations
+
+            //
+            // Create all compartments
+            //
+
+            int[] numGridPts = {50, 50, 50};
             // min and max spatial extent in each dimension
             double[] XCellSpatialExtent = { 0.0, 10.0, 0.0, 10.0, 0.0, 10.0 };
-            Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellSpatialExtent));
 
-            // Creates Cytoplasm and PlasmaMembrane compartments
-            Cell cell_1 = new Cell();
+            // NOTE: Create a BoundedRectangularPrism locally in order to be able to use GaussianDensity
+            // to define a Gaussian density distribution for CXCL13 
+            // If not, we could use the commented statement below
+            //Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellSpatialExtent));
+            BoundedRectangularPrism b = new BoundedRectangularPrism(numGridPts, XCellSpatialExtent);
+            Compartment XCellSpace = new Compartment(b);
 
-            // Add the cell plasma membrane as a boundary in the extracellular compartment
-            Embedding cellMembraneEmbed = new Embedding(cell_1.PlasmaMembrane.Interior, XCellSpace.Interior);
-            XCellSpace.Interior.Boundaries.Add(cell_1.PlasmaMembrane.Interior, cellMembraneEmbed);
+            // Uniformly populate the extracellular fluid with cells 
+            int numCells = 1;
+            double[] cellPos = new double[XCellSpace.Interior.Dim];
+            Cell[] cells = new Cell[numCells];
+            for (int i = 0; i < numCells; i++)
+            {
+                cellPos[0] = XCellSpatialExtent[0] + (i+1)*(XCellSpatialExtent[1] - XCellSpatialExtent[0]) / (numCells+1);
+                cellPos[1] = XCellSpatialExtent[2] + (i+1)*(XCellSpatialExtent[3] - XCellSpatialExtent[2]) / (numCells + 1);
+                cellPos[2] = XCellSpatialExtent[4] + (i+1)*(XCellSpatialExtent[5] - XCellSpatialExtent[4]) / (numCells + 1);
+                // Creates Cytoplasm and PlasmaMembrane compartments
+                cells[i] = new Cell(cellPos);
 
-            // Adds new MolecularPopulation with intial concentration 1.0
-            //XCellSpace.Populations = new List<MolecularPopulation>();
-            XCellSpace.AddMolecularPopulation("Extracellular_CXCL13", MolDict["CXCL13"], 1.0);
+            }
 
-            //cell_1.Cytosol.Populations = new List<MolecularPopulation>();
-            cell_1.Cytosol.AddMolecularPopulation("Cytosolic_CXCR5", MolDict["CXCR5"], 1.0);
-            cell_1.Cytosol.AddMolecularPopulation("Cytosolic_gCXCR5", MolDict["gCXCR5"], 1.0);
-            //cell_1.PlasmaMembrane.Populations = new List<MolecularPopulation>();
-            cell_1.PlasmaMembrane.AddMolecularPopulation("Membrane_CXCR5", MolDict["CXCR5"], 1.0);
+            //
+            // Add all embedded manifolds that aren't already assigned
+            // 
+
+            for (int i = 0; i < numCells; i++)
+            {
+                // Add the cell plasma membrane as a boundary in the extracellular compartment
+                MotileTSEmbedding cellMembraneEmbed = new MotileTSEmbedding(cells[i].PlasmaMembrane.Interior, (BoundedRectangularPrism) XCellSpace.Interior, cells[i].Loc);
+                XCellSpace.Interior.Boundaries.Add(cells[i].PlasmaMembrane.Interior, cellMembraneEmbed);
+            }
+
+            //
+            // Add all molecular populations
+            //
+
+            //// Adds new MolecularPopulation with intial concentration 1.0
+            //XCellSpace.AddMolecularPopulation("Extracellular_CXCL13", MolDict["CXCL13"], 1.0);
+
+            // Add a new MolecularPopulation whose concentration is a Gaussian density function
+            double maxConc = 9.0;
+            ScalarField s = new ScalarField(XCellSpace.Interior);
+            double[] sigma = { 1.0, 1.0, 1.0 };
+            double[] center = new double[XCellSpace.Interior.Dim];
+            center[0] = (XCellSpatialExtent[1] + XCellSpatialExtent[0]) / 2.0;
+            center[1] = (XCellSpatialExtent[3] + XCellSpatialExtent[2]) / 2.0;
+            center[2] = (XCellSpatialExtent[5] + XCellSpatialExtent[4]) / 2.0;
+            s = maxConc * b.GaussianDensity(center, sigma);
+            XCellSpace.AddMolecularPopulation("Extracellular_CXCL13", MolDict["CXCL13"], s);
+
+            for (int i = 0; i < numCells; i++)
+            {
+                //cell[i].Cytosol.Populations = new List<MolecularPopulation>();
+                cells[i].Cytosol.AddMolecularPopulation("Cytosolic_CXCR5", MolDict["CXCR5"], 1.0);
+                cells[i].Cytosol.AddMolecularPopulation("Cytosolic_gCXCR5", MolDict["gCXCR5"], 1.0);
+                //cells[i]PlasmaMembrane.Populations = new List<MolecularPopulation>();
+                cells[i].PlasmaMembrane.AddMolecularPopulation("Membrane_CXCR5", MolDict["CXCR5"], 1.0);
+            }
 
 
             // Iterate through compartments and add reactions until there aren't any more changes
             // TO DO: change from simple 3 iterations, to sensing when there are no more changes
             // TO DO: add Boundary reactions 
 
+            // tf = true if a reaction or product molecule was added
             bool tf;
-            for (int i = 0; i < 2; i++)
+
+            do
             {
+                tf = false;
+                tf = tf | ReactionBuilder.CompartReactions(XCellSpace, config.content.listOfReactions, MolDict);
+                for (int i = 0; i < numCells; i++)
+                {
+                    tf = tf | ReactionBuilder.CompartReactions(cells[i].Cytosol, config.content.listOfReactions, MolDict);
+                    tf = tf | ReactionBuilder.CompartReactions(cells[i].PlasmaMembrane, config.content.listOfReactions, MolDict);
 
-                tf = ReactionBuilder.CompartReactions(XCellSpace, config.content.listOfReactions, MolDict);
-                tf = ReactionBuilder.CompartReactions(cell_1.Cytosol, config.content.listOfReactions, MolDict);
-                tf = ReactionBuilder.CompartReactions(cell_1.PlasmaMembrane, config.content.listOfReactions, MolDict);
+                    tf = tf | ReactionBuilder.CompartBoundaryReactions(XCellSpace, config.content.listOfReactions, MolDict);
+                }
 
-                tf = ReactionBuilder.CompartBoundaryReactions(XCellSpace, config.content.listOfReactions, MolDict);
-
-            }
+            } while (tf);
             
             // create the simulation
             sim = new Simulation();
@@ -104,14 +158,20 @@ namespace testDaphne
             sim.ExtracellularSpace = XCellSpace;
 
             sim.cells = new Dictionary<int, Cell>();
-            sim.cells.Add(1, cell_1);
+            for (int i = 0; i < numCells; i++)
+            {
+                sim.cells.Add(1, cells[i]);
+            }
 
             nSteps = 3;
             dt = 1.0e-3;
             for (int i = 0; i < nSteps; i++)
             {
                 XCellSpace.Step(dt);
-                cell_1.Step(dt);
+                for (int j = 0; j < numCells; j++)
+                {
+                    cells[j].Step(dt);
+                }
             }
 
         }

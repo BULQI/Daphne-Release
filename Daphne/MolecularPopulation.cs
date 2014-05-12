@@ -39,6 +39,8 @@ namespace Daphne
 
         // it seems necessary to make these fluxes and boundary concentrations dictionaries
         // so that the fluxes and boundary concentrations can be identified as sharing a manifold
+        // These keep track of the fluxes and concentrations at the boundaries of the manifold 
+        // that contains the molecular population
         public Dictionary<Manifold,ScalarField> Fluxes;
         public Dictionary<Manifold,ScalarField> BoundaryConcs;
 
@@ -48,12 +50,11 @@ namespace Daphne
             Man = man;
             Conc = new ScalarField(man);
 
-            // This isn't working yet - gmk 10/2/2012
-            //foreach (DiscretizedManifold m in Man.Boundaries.Keys)
-            //{
-            //    Fluxes.Add(m, new ScalarField(m));
-            //    BoundaryConcs.Add(m, new ScalarField(m));
-            //}
+            foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+            {
+                Fluxes.Add(m, new ScalarField(m));
+                BoundaryConcs.Add(m, new ScalarField(m));
+            }
         }
 
         public MolecularPopulation(string name, Molecule mol, DiscretizedManifold man, ScalarField initConc)
@@ -73,11 +74,12 @@ namespace Daphne
                     Fluxes.Add(m, new ScalarField(m));
                     BoundaryConcs.Add(m, new ScalarField(m));
 
-                    // Initializing BoundaryConc
-                    for (int i = 0; i < BoundaryConcs[m].array.Length; i++)
-                    {
-                        BoundaryConcs[m].array[i] = Conc.array[Man.Boundaries[m].WhereIs(i)];
-                    }
+                    //// Initializing BoundaryConc
+                    //for (int i = 0; i < BoundaryConcs[m].array.Length; i++)
+                    //{
+                    //    // WhereIs not fully implemented
+                    //    BoundaryConcs[m].array[i] = Conc.array[Man.Boundaries[m].WhereIs(i)];
+                    //}
                 }
             }
 
@@ -89,12 +91,34 @@ namespace Daphne
         {
             Conc = initialConcentration;
 
-            // Initializing BoundaryConcs doesn't seem to fit here
+            // Moved to UpdateBoundaryconcs
             //foreach (Manifold m in Man.Boundaries.Keys)
             //{
-            //    BoundaryConcs[m] = initialConcentration;
+            //    //BoundaryConcs[m] = initialConcentration;
+
+            //    for (int i = 0; i < BoundaryConcs[m].array.Length; i++)
+            //    {
+            //        //  TODO: WhereIs is not fully implemented
+            //        BoundaryConcs[m].array[i] = Conc.array[Man.Boundaries[m].WhereIs(i)];
+            //    }
             //}
-            // NB! also need to initialize bondary concentrations and fluxes
+            //// NB! also need to initialize bondary concentrations and fluxes
+        }
+
+        public void UpdateBoundaryConcs(DiscretizedManifold Man)
+        {
+            if (Man.Boundaries != null)
+            {
+                foreach (Manifold m in Man.Boundaries.Keys)
+                {
+                    for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
+                    {
+                        // NOTE: This corresponds to the case where there is a one-to-one
+                        // correspondance between the array points of the embedding and embedded manifolds
+                        BoundaryConcs[m].array[k] = Conc.array[Man.Boundaries[m].WhereIs(k)];
+                    }
+                }
+            }
         }
 
         public double Concentration(double[] point)
@@ -128,25 +152,28 @@ namespace Daphne
                 for (int j = 0; j < Man.Laplacian[i].Length; j++)
                 {
                     temparray[i] += Man.Laplacian[i][j].Coefficient * Conc.array[Man.Laplacian[i][j].Index] * dt;
+
+                    // NOTE - change the grid size, time step, or use implicit method to eliminate this next statement
+                    if (temparray[i] < 0)
+                    {
+                        temparray[i] = 0;
+                    }
                 }
             }
             Conc.array = temparray;
 
-            // TODO: This if statement is here because TinySphere and TinyBall have Boundaries = null
-            // This requires a similar if statement in the contructor
-            //     MolecularPopulation(string name, Molecule mol, DiscretizedManifold man, ScalarField initConc),
-            // so BoundaryConcs are null for those manifolds
-            // Is this correct?
-            if (Man.Boundaries != null)
-            {
-                foreach (Manifold m in Man.Boundaries.Keys)
-                {
-                    for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
-                    {
-                        BoundaryConcs[m].array[k] = Conc.array[Man.Boundaries[m].WhereIs(k)];
-                    }
-                }
-            }
+            //if (Man.Boundaries != null)
+            //{
+
+            //    foreach (Manifold m in Man.Boundaries.Keys)
+            //    {
+            //        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
+            //        {
+            //            BoundaryConcs[m].array[k] = Conc.array[Man.Boundaries[m].WhereIs(k)];
+            //        }
+            //    }
+            //}
+            UpdateBoundaryConcs(Man);
 
         }
     }

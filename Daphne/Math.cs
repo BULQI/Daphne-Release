@@ -89,6 +89,10 @@ namespace Daphne
         public abstract LocalMatrix[] Interpolation(double[] point);
         public double[,] Coordinates;
         public Dictionary<Manifold,Embedding> Boundaries;
+
+        // Required by MotileTSEmbedding to access StepSize
+        public abstract int GridToArray(int[] gridIndices);
+        public abstract int PointToArray(double[] point);
     }
 
     public class ScalarField
@@ -198,11 +202,20 @@ namespace Daphne
             }
 
             interpolator = new LocalMatrix[1] { new LocalMatrix() { Coefficient = 1.0, Index = 0 } };
-        }
+         }
 
         public override LocalMatrix[] Interpolation(double[] point)
         {
             return interpolator;
+        }
+
+        public override int GridToArray(int[] gridIndices)
+        {
+            return 0;
+        }
+        public override int PointToArray(double[] point)
+        {
+            return 0;
         }
     }
 
@@ -234,6 +247,15 @@ namespace Daphne
             return interpolator;
         }
 
+        public override int GridToArray(int[] gridIndices)
+        {
+            return 0;
+        }
+
+        public override int PointToArray(double[] point)
+        {
+            return 0;
+        }
     }
 
     public class Rectangle : DiscretizedManifold
@@ -268,6 +290,15 @@ namespace Daphne
             return interpolator;
         }
 
+        public override int GridToArray(int[] gridIndices)
+        {
+            return new int();
+        }
+
+        public override int PointToArray(double[] point)
+        {
+            return new int();
+        }
     }
 
     public class RectangularPrism : DiscretizedManifold
@@ -291,14 +322,26 @@ namespace Daphne
             return interpolator;
         }
 
+        public override int GridToArray(int[] gridIndices)
+        {
+            return new int();
+        }
+
+        public override int PointToArray(double[] point)
+        {
+            return new int();
+        }
+
     }
 
     public class BoundedRectangularPrism : DiscretizedManifold
     {
         LocalMatrix[] interpolator;
         // min and max in each dimension
-        double[] spatialExtent;
-        double[] StepSize;
+        public double[] spatialExtent;
+        public double[] StepSize;
+        public double[] Origin;
+        //Dictionary<Manifold,embed
 
         public BoundedRectangularPrism(int[] numGridPts, double[] _spatialExtent)
         {
@@ -310,18 +353,25 @@ namespace Daphne
             Boundaries = new Dictionary<Manifold, Embedding>();
             Laplacian = new LocalMatrix[ArraySize][];
             interpolator = new LocalMatrix[8];
+
             spatialExtent = (double[])_spatialExtent.Clone();
+
+            Origin = new double[Dim];
+            Origin[0] = spatialExtent[0];
+            Origin[1] = spatialExtent[1];
+            Origin[2] = spatialExtent[2];
+
             StepSize = new double[Dim];
             StepSize[0] = (spatialExtent[1] - spatialExtent[0]) / (Extents[0] - 1);
             StepSize[1] = (spatialExtent[3] - spatialExtent[2]) / (Extents[1] - 1);
             StepSize[2] = (spatialExtent[5] - spatialExtent[4]) / (Extents[2] - 1);
 
             int n = 0;
-            for (int i = 1; i < Extents[0]; i++)
+            for (int k = 0; k < Extents[2]; k++)
             {
-                for (int j = 1; j < Extents[1]; j++)
+                for (int j = 0; j < Extents[1]; j++)
                 {
-                    for (int k = 1; k < Extents[2]; k++)
+                    for (int i = 0; i < Extents[0]; i++)
                     {
                         Coordinates[n, 0] = i * StepSize[0];
                         Coordinates[n, 1] = j * StepSize[1];
@@ -331,11 +381,11 @@ namespace Daphne
                 }
             }
 
+            // TODO: this needs to be for correctness
             for (n = 0; n < ArraySize; n++)
             {
                 Laplacian[n] = new LocalMatrix[7];
             }
-            // Initialize Laplacian coefficients to zero.
             n = 0;
             int idxplus, idxminus;
             double coeff0, coeff;
@@ -478,6 +528,20 @@ namespace Daphne
 
         }
 
+        public override int GridToArray(int[] gridIndices)
+        {
+            return gridIndices[0] + gridIndices[1] * Extents[0] + gridIndices[2] * Extents[0] * Extents[1];
+        }
+
+        public override int PointToArray(double[] loc)
+        {
+            if (loc != null)
+            {
+                return (int)(loc[0] / StepSize[0]) + ((int)(loc[1] / StepSize[1])) * Extents[0] + ((int)(loc[2] / StepSize[2])) * Extents[0] * Extents[1];
+            }
+            return new int();
+        }
+
         private int[] localToArr(double[] loc)
         {
             if (loc != null)
@@ -487,6 +551,8 @@ namespace Daphne
             return null;
         }
 
+
+        // TODO: This needs to be checked for correctness
         public override LocalMatrix[] Interpolation(double[] point)
         {
             // Linear interpolation
@@ -536,36 +602,54 @@ namespace Daphne
             return interpolator;
 
         }
-    }
 
-    //     /// <summary>
-    //    /// Convert an index n from a 1D array int coordinate indices
-    //    /// </summary>
-    //    public int[] IndexToCoordIndices(int n, int[] Extents)
-    //    {
-    //        int[] idx = new int[Extents.Length];
-    //        int[] N = new int[Extents.Length];
-    //        int prod=1, sum=0;
+        /// <summary>
+        /// Calculate and return values of a Gaussian density funtion at each array point in the manifold
+        /// The value at the center is 1
+        /// </summary>
+        public ScalarField GaussianDensity(double[] x0, double[] sigma)
+        {
+            // QUESTION: Do we need this to avoid negative concentrations in the diffusion algorithm?
+            double SMALL = 1e-4;
 
-    //        for ( int m=0; m<Extents.Length-1; m++ )
-    //        {
-    //            prod = prod*Extents[m];
-    //            N[m+1] = prod;
-    //        }
+            // Any reason not to allow the center of the distribution to be outside the Extents?
+ 
+            //// Check that x0 is in the bounded manifold
+            //if ((x0[0] < this.spatialExtent[0]) || (x0[0] > this.spatialExtent[0]) ||
+            //    (x0[1] < this.spatialExtent[1]) || (x0[1] > this.spatialExtent[1]) ||
+            //    (x0[2] < this.spatialExtent[2]) || (x0[2] > this.spatialExtent[2]))
+            //{
+            //    // The center of the distribution is 
+            //    double d = 1.0/((Extents[1] - Extents[0]) * (Extents[3] - Extents[2]) * (Extents[5] - Extents[4]));
+            //    ScalarField s = new ScalarField(this, d);
+            //}
+            //else
+            //{
+                ScalarField s = new ScalarField(this);
+                double f;
 
-    //        for (int m = 0; m < Extents.Length; m++)
-    //        {
-    //            idx[Extents.Length - m - 1] = (int)(n / N[m]);
-    //            sum = sum + idx[Extents.Length - m - 1] * N[m];
-    //        }
+                double d = 1.0;
+                //double d = Math.Pow(2.0 * Math.PI, 1.5) * Math.Sqrt(sigma[0] * sigma[1] * sigma[2]);
 
-    //        return idx;
+                for (int i = 0; i < ArraySize; i++)
+                {
+                    f = 0;
+                    for (int j = 0; j < Dim; j++)
+                    {
+                        f = f + (x0[j] - Coordinates[i, j]) * (x0[j] - Coordinates[i, j]) / (2 * sigma[j]);
+                    }
+                    s.array[i] = Math.Exp(-f) / d;
 
-    //    }
-    //}
+                    if (s.array[i] < SMALL)
+                    {
+                        s.array[i] = 0;
+                    }
+                }
+            //}
 
-
-    
+            return s; 
+        }
+    }   
 
     /// <summary>
     /// LocalMatrix is a struct to facilitate local matrix algebra on a lattice by providing an efficient
@@ -582,31 +666,78 @@ namespace Daphne
 
     }
 
-    public class Embedding
+    abstract public class Embedding
     {
-        public Manifold Domain;
-        public Manifold Range;
+        public DiscretizedManifold Domain;
+        public DiscretizedManifold Range;
 
-        // gmk
-        public Embedding(Manifold domain, Manifold range)
+        //public Manifold Domain;
+        //public Manifold Range;
+
+        // For a point in the embedded (Domain) manifold,
+        // return the corresponding position in the embedding (Range) manifold
+        abstract public double[] WhereIs(double[] point);
+
+        // For an index in the embedded (Domain) manifold array,
+        // return the corresponding index in the embedding (Range) manifold array
+        abstract public int WhereIs(int index);
+    }
+
+    /// <summary>
+    /// Embedding for a motile tiny sphere (cell)
+    /// 
+    /// </summary>
+    public class MotileTSEmbedding : Embedding
+    {
+        // A structure that contains information about the location of the cell in the embedding environment
+        Locator Loc;
+
+        public MotileTSEmbedding(DiscretizedManifold domain, BoundedRectangularPrism range, Locator loc)
+        {
+            Domain = domain;
+            Range = range;
+            Loc= loc;
+        }
+
+        public override double[] WhereIs(double[] point)
+        {
+            return Loc.position;
+        }
+
+        public override int WhereIs(int index)
+        {
+            return Range.PointToArray(Loc.position);
+         }
+    }
+
+    /// <summary>
+    /// Embedding in which there is a one-to-one correspondance between the grid points 
+    /// of the embedded and embedding manifolds (e.g., cytoplasm and plasma membrane)
+    /// </summary>
+    public class OneToOneEmbedding : Embedding
+    {
+
+        // NOTE: This is a very subclass of Embedding which is used for TinySphere embedded
+        // in TinyBall
+
+        public OneToOneEmbedding(DiscretizedManifold domain, DiscretizedManifold range)
         {
             Domain = domain;
             Range = range;
         }
-        // gmk
-        public Embedding()
-        {
-        }
 
-        public double[] WhereIs(double[] point)
+        public override double[] WhereIs(double[] point)
         {
+            // Spatial location not applicable here
             return new double[Range.Dim];
         }
 
-        public int WhereIs(int index)
+        public override int WhereIs(int index)
         {
-            return new int();
+            return index;
         }
     }
+
+
 
 }
