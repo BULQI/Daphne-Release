@@ -65,7 +65,6 @@ namespace Daphne
             // Arbitrarily, choose CXCL13 concentration that give equilibrium receptor occupancy of 0.5
             // [CXCL13] = Kd = 0.0304 molecule/um^3
             //
-            MolPopHomogeneousLevel mpDist = new MolPopHomogeneousLevel();
             double CXCL13conc = 50.5e-9 * 1e-18 * 6.022e23;
             double[] conc = new double[1] { CXCL13conc };
             string[] type = new string[1] { "CXCL13" };
@@ -201,7 +200,6 @@ namespace Daphne
             // Arbitrarily, choose CXCL13 concentration that give equilibrium receptor occupancy of 0.5
             // [CXCL13] = Kd = 0.0304 molecule/um^3
             //
-            MolPopHomogeneousLevel mpDist = new MolPopHomogeneousLevel();
             double CXCL13conc = 50.5e-9 * 1e-18 * 6.022e23;
             double[] conc = new double[1] { CXCL13conc };
             string[] type = new string[1] { "CXCL13" };

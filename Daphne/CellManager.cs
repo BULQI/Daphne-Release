@@ -21,9 +21,6 @@ namespace Daphne
 
                 if (kvp.Value.IsMotile == true)
                 {
-                    // enforce boundary condition
-                    kvp.Value.EnforceBC();
-
                     // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
                     // add the chemotactic force (accumulate it into the force variable)
                     kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
@@ -34,6 +31,9 @@ namespace Daphne
                         kvp.Value.State.X[i] += kvp.Value.State.V[i] * dt;
                         kvp.Value.State.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
+
+                    // enforce boundary condition
+                    kvp.Value.EnforceBC();
                 }
             }
         }

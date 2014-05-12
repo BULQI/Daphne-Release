@@ -273,9 +273,9 @@ namespace ManifoldRing
             }
 
             double dx = x[0] / m.StepSize() - idx[0],
-                    dy = x[1] / m.StepSize() - idx[1],
-                    dz = x[2] / m.StepSize() - idx[2],
-                    dxmult, dymult, dzmult;
+                   dy = x[1] / m.StepSize() - idx[1],
+                   dz = x[2] / m.StepSize() - idx[2],
+                   dxmult, dymult, dzmult;
 
             int n = 0;
             for (int di = 0; di < 2; di++)

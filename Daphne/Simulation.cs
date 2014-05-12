@@ -587,7 +587,7 @@ namespace Daphne
                                 dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
                             }
                         }
-                }
+                    }
                 }
             }
 
