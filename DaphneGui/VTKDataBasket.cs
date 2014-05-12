@@ -115,7 +115,7 @@ namespace DaphneGui
         public double c1 { get; set; }  //1st face of boundary
         public double c2 { get; set; }  //2nd face of boundary
         public double x1 { get; set; }  //0
-        public double x2 { get; set; }  //max extent of cube
+        public double x2 { get; set; }  //max extent of cube - x or y or z depending on dim
         public int dim { get; set; }    //0=YZ plane, 1=XZ plane, 2=XY plane
 
         /// <summary>
@@ -300,11 +300,28 @@ namespace DaphneGui
             }
             else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
+                double x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
+                switch (((MolPopLinear)(molpop.mpInfo.mp_distribution)).dim)
+                {
+                    case 0:
+                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
+                        break;
+                    case 1:
+                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_y;
+                        break;
+                    case 2:
+                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_z;
+                        break;
+                    default:
+                        break;
+                }
+
                 molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).c1,
                                                                ((MolPopLinear)molpop.mpInfo.mp_distribution).c2,
                                                                ((MolPopLinear)molpop.mpInfo.mp_distribution).x1,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).x2,
+                                                               x2,
                                                                ((MolPopLinear)molpop.mpInfo.mp_distribution).dim);
+
             }
             else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {

@@ -45,6 +45,7 @@
             <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
             <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
+            <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -708,7 +709,7 @@
                             RenderTransform="1.0,0,0,0.5,0,4"
                             Minimum="{Binding Path=z_trans_min}" 
                             Maximum="{Binding Path=z_trans_max}"
-                            Value="{Binding Path=z_trans}" 
+                            Value="{Binding Path=z_trans, UpdateSourceTrigger=PropertyChanged}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="2" Grid.Row="4"
@@ -4417,8 +4418,14 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                                 <StackPanel>
-                                    <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False" 
-                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.membraneMP}"                            
+                                    <!--<TextBlock HorizontalAlignment="Center" Text="{Binding ElementName=lbRptCellPops, Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv}, 
+                                            ConverterParameter={StaticResource cellTypesListView}, 
+                                           UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
+
+                                    <!--ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem, Converter=CellPopToCellMembMolPopsConv, ConverterParameter={StaticResource cellTypesListView}}"-->
+
+                                    <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -4447,11 +4454,11 @@
 
                                         <DataGrid.Columns>
 
-                                            <DataGridTemplateColumn Header="Membrane Mol Pop">
+                                            <DataGridTemplateColumn Header="Membrane Mol Popu">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molpop_guid_ref, Converter={StaticResource MolPopGUIDtoMolPopNameConv},
-                                                            ConverterParameter={StaticResource molPopsListView}}"/>
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                            ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4459,7 +4466,7 @@
                                             <DataGridTemplateColumn Header="mean" Width="60">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4467,7 +4474,7 @@
                                             <DataGridTemplateColumn Header="mean+gradient" Width="90">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>

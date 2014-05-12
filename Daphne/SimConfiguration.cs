@@ -1316,7 +1316,7 @@ namespace Daphne
                 }
             }
         }
-
+                    
         public ConfigMolecularPopulation(ReportType rt)
         {
             Guid id = Guid.NewGuid();
@@ -1338,6 +1338,8 @@ namespace Daphne
             }
             reportMP.molpop_guid_ref = molpop_guid;
         }
+
+        
     }
 
     public class ConfigCompartment : EntityModelBase
@@ -1979,6 +1981,12 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
         }
+
+        //public ObservableCollection<ConfigMolecularPopulation> GetCellMembraneMols()
+        //{
+        //    ConfigCell cc = entity_repository.cells[cell_guid_ref];
+        //    return cc.membrane.molpops;
+        //}
     }
 
     // MolPopInfo ==================================
@@ -2223,6 +2231,41 @@ namespace Daphne
     }
 
     /// <summary>
+    /// Converter to go between cell pop and cell membrane MolPops
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(ObservableCollection<ConfigMolecularPopulation>))]
+    public class CellGuidToCellMembMolPopsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            string guid = value as string;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigCell> cell_list = cvs.Source as ObservableCollection<ConfigCell>;
+            if (cell_list != null)
+            {
+                foreach (ConfigCell cel in cell_list)
+                {
+                    if (cel.cell_guid == guid)
+                    {
+                        return cel.membrane.molpops;                        
+                    }
+                }
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+
+
+    /// <summary>
     /// Converter to go between molecule GUID references in MolPops
     /// and molecule names kept in the repository of molecules.
     /// </summary>
@@ -2395,14 +2438,13 @@ namespace Daphne
         public double c1 { get; set; }
         public double c2 { get; set; }
         public double x1 { get; set; }
-        public double x2 { get; set; }
+        //public double x2 { get; set; }
         public int dim { get; set; }
         
         public MolPopLinear()
         {
             mp_distribution_type = MolPopDistributionType.Linear;
-            x1 = 0.0;
-            x2 = 500;
+            x1 = 0.0;            
         }
     }
 

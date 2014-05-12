@@ -66,9 +66,9 @@ namespace DaphneGui
 
             Initialize();
 
-            ////lbReactions.DataContext = MainWindow.SC.SimConfig.entity_repository.PredefReactionComplexes;
-            ////lbReactions.ItemsSource = LeftList;
-            ////lbCxReactions.ItemsSource = RightList;
+            lbReactions.DataContext = MainWindow.SC.SimConfig.entity_repository;
+            lbReactions.ItemsSource = MainWindow.SC.SimConfig.entity_repository.reactions;
+            lbCxReactions.ItemsSource = MainWindow.SC.SimConfig.entity_repository.reaction_complexes;
 
         }
 

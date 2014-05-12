@@ -42,7 +42,7 @@ namespace DaphneGui
             CellsDetailsExpander.IsExpanded = true;
             CellPopulation cs = new CellPopulation();
             cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
-            cs.cellpopulation_name = "New cell";           
+            cs.cellpopulation_name = "New cell";
             cs.number = 50;
             CellLocation cl = new CellLocation();
             cl.X = 0; cl.Y = 0; cl.Z = 0;
@@ -128,7 +128,7 @@ namespace DaphneGui
                     new_dist_type = (MolPopDistributionType)e.AddedItems[0];
                 }
 
-                
+
                 // Only want to change distribution type if the combo box isn't just selecting 
                 // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
@@ -166,8 +166,8 @@ namespace DaphneGui
                         ////{
                         ////    this.AddGaussianSpecification();
                         ////}
-                        MolPopGaussian mpg = new MolPopGaussian();                            
-                            
+                        MolPopGaussian mpg = new MolPopGaussian();
+
                         AddGaussianSpecification(mpg);
                         current_item.mp_distribution = mpg;
 
@@ -495,7 +495,8 @@ namespace DaphneGui
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = lbEcsMolPops.SelectedIndex;
-            if ( nIndex >= 0) {
+            if (nIndex >= 0)
+            {
                 ConfigMolecularPopulation gmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(gmp);
             }
@@ -507,7 +508,7 @@ namespace DaphneGui
             {
                 MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(selected_grt.reaction_guid);
             }
-            
+
         }
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
@@ -520,7 +521,7 @@ namespace DaphneGui
                 {
                     MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
                 }
-                
+
             }
         }
 
@@ -560,14 +561,14 @@ namespace DaphneGui
             ConfigReactionComplex crcNew = new ConfigReactionComplex(crcCurr);
 
             MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Add(crcNew);
-            
+
             ////AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
             ////if (arc.ShowDialog() == true)
             ////{
             ////    ////////lbComplexes.ItemsSource = null;
             ////    ////////lbComplexes.ItemsSource = Sim.RCList;
             ////}    
-            
+
         }
 
         //Reaction Complexes/Differentiation Schemes tab
@@ -630,7 +631,7 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
             //
-            
+
             ConfigCell cc = new ConfigCell();
             cc.CellName = "RCCell";
             foreach (ConfigMolecularPopulation cmp in crc.molpops)
@@ -673,7 +674,7 @@ namespace DaphneGui
             MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
 
             MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
-        }        
+        }
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -909,7 +910,7 @@ namespace DaphneGui
 
         //****************************************************************************************************************
 
-        
+
 
         private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
@@ -940,7 +941,7 @@ namespace DaphneGui
                 {
                     e.Accepted = true;
                 }
-                
+
             }
         }
 
@@ -1006,13 +1007,13 @@ namespace DaphneGui
             //}
         }
 
-        
+
 
         private void AddCellButton_Click_1(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
             cc.CellName = "DefaultCell";
-            cc.CellRadius = 10;   
+            cc.CellRadius = 10;
             cc.TransductionConstant = 0;
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
@@ -1039,7 +1040,7 @@ namespace DaphneGui
             CellPopDistributionType cpdt = (CellPopDistributionType)cb.SelectedItem;
             if (cpdt == CellPopDistributionType.Probability)
             {
-                
+
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
@@ -1148,7 +1149,7 @@ namespace DaphneGui
 
             ////    // Only want to change distribution type if the combo box isn't just selecting 
             ////    // the type of current item in the solfacs list box (e.g. when list selection is changed)
-                
+
             ////    if (current_item.mp_distribution.mp_distribution_type == null) {
             ////    }
             ////    else { 
@@ -1176,7 +1177,7 @@ namespace DaphneGui
             ////        default:
             ////            throw new ArgumentException("CellPopProbInfo distribution type out of range");
             ////    }
-                
+
             ////}
         }
 
@@ -1212,7 +1213,7 @@ namespace DaphneGui
 
             if (numNew == numOld)
                 return;
-            
+
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
                 return;
@@ -1224,7 +1225,7 @@ namespace DaphneGui
                 {
                     CellLocation cl = new CellLocation();
                     cl.X = 1; cl.Y = 1; cl.Z = 1;
-                    cp.cell_locations.Add(cl);                    
+                    cp.cell_locations.Add(cl);
                 }
             }
             else if (numNew < numOld)
@@ -1233,7 +1234,7 @@ namespace DaphneGui
                     numOld = cp.cell_locations.Count;
 
                 int rows_to_delete = numOld - numNew;
-            
+
                 for (int i = rows_to_delete; i > 0; i--)
                 {
                     cp.cell_locations.RemoveAt(numNew + i - 1);
@@ -1278,7 +1279,7 @@ namespace DaphneGui
 
             }
 
-            
+
         }
 
         private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
@@ -1408,8 +1409,9 @@ namespace DaphneGui
         private void cbBoundFace_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)sender;
+
             if (cb.SelectedIndex == 0)
-            {                    
+            {
             }
             else
             {
@@ -1438,9 +1440,8 @@ namespace DaphneGui
             {
                 cbi.IsEnabled = false;
             }
-        }     
-
-    }
+        }
+    }                   
 
     public class DataGridBehavior
     {
@@ -1477,7 +1478,6 @@ namespace DaphneGui
                     ea.Row.Header = ea.Row.GetIndex() + 1;
                 };
                 dataGrid.LoadingRow += loadedRowHandler;
-
                 ItemsChangedEventHandler itemsChangedHandler = null;
                 itemsChangedHandler = (object sender, ItemsChangedEventArgs ea) =>
                 {
@@ -1496,7 +1496,7 @@ namespace DaphneGui
         #endregion // DisplayRowNumber
 
         #region Get Visuals
-
+        
         private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
         {
             List<T> visualCollection = new List<T>();
@@ -1556,7 +1556,6 @@ namespace DaphneGui
         {
         }
     }
-
-
-    
 }
+
+

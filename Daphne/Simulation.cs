@@ -143,12 +143,31 @@ namespace Daphne
                 else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
                     MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+
+                    //Need to get x2 from environment extents
+                    double x2;
+                    switch (mpl.dim)
+                    {
+                        case 0:
+                            x2 = sc.scenario.environment.extent_x;
+                            break;
+                        case 1:
+                            x2 = sc.scenario.environment.extent_y;
+                            break;
+                        case 2:
+                            x2 = sc.scenario.environment.extent_z;
+                            break;
+                        default:
+                            x2 = sc.scenario.environment.extent_x;  //??  WHAT SHOULD THE DEFAULT BE??
+                            break;
+                    }
+                         
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "linear", new double[] {       
                                 mpl.c1, 
                                 mpl.c2,
                                 mpl.x1, 
-                                mpl.x2, 
-                                mpl.dim,});
+                                x2, 
+                                mpl.dim});
 
                 }
 
