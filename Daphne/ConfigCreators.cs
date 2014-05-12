@@ -820,7 +820,6 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.CatalyzedBoundaryActivation;
-            crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
@@ -835,7 +834,6 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.BoundaryAssociation;
-            crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
@@ -850,7 +848,6 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.BoundaryDissociation;
-            crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
@@ -864,7 +861,6 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.BoundaryTransportFrom;
-            crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
@@ -878,7 +874,6 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.BoundaryTransportTo;
-            crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
