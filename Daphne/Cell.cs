@@ -354,25 +354,28 @@ namespace Daphne
             }
 
             // differentiation
-            daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
-            foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
+            if (Differentiator.nStates > 1)
             {
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
+                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
                 {
-                    TransitionDriverElement tde = new TransitionDriverElement();
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
 
-                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                    tde.Alpha = kvp_inner.Value.Alpha;
-                    tde.Beta = kvp_inner.Value.Beta;
-                    // add it to the daughter
-                    daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                        tde.Alpha = kvp_inner.Value.Alpha;
+                        tde.Beta = kvp_inner.Value.Beta;
+                        // add it to the daughter
+                        daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
                 }
+                Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
+                Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
+                Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
+                daughter.DifferentiationState = Differentiator.CurrentState;
+                daughter.SetGeneActivities();
             }
-            Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
-            Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
-            Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
-            daughter.DifferentiationState = Differentiator.CurrentState;
-            daughter.SetGeneActivities();
 
             return daughter;
         }
