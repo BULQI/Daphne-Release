@@ -78,37 +78,37 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification()
-        {
-            BoxSpecification box = new BoxSpecification();
-            box.x_trans = 200;
-            box.y_trans = 200;
-            box.z_trans = 200;
-            box.x_scale = 200;
-            box.y_scale = 200;
-            box.z_scale = 200;
-            // Add box GUI property changed to VTK callback
-            //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
-            MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+        ////private void AddGaussianSpecification()
+        ////{
+        ////    BoxSpecification box = new BoxSpecification();
+        ////    box.x_trans = 200;
+        ////    box.y_trans = 200;
+        ////    box.z_trans = 200;
+        ////    box.x_scale = 200;
+        ////    box.y_scale = 200;
+        ////    box.z_scale = 200;
+        ////    // Add box GUI property changed to VTK callback
+        ////    //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
+        ////    MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
 
-            GaussianSpecification gg = new GaussianSpecification();
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
-            //////////gg.PropertyChanged += MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
-            MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+        ////    GaussianSpecification gg = new GaussianSpecification();
+        ////    gg.gaussian_spec_box_guid_ref = box.box_guid;
+        ////    gg.gaussian_spec_name = "New on-center gradient";
+        ////    gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+        ////    // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
+        ////    //////////gg.PropertyChanged += MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
+        ////    MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
 
-            //////////// Add RegionControl & RegionWidget for the new gauss_spec
-            //////////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-            //////////MainWindow.GC.AddGaussSpecRegionWidget(gg);
-            //////////// Connect the VTK callback
-            //////////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+        ////    //////////// Add RegionControl & RegionWidget for the new gauss_spec
+        ////    //////////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
+        ////    //////////MainWindow.GC.AddGaussSpecRegionWidget(gg);
+        ////    //////////// Connect the VTK callback
+        ////    //////////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
+        ////    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+        ////    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
-            //////////MainWindow.GC.Rwc.Invalidate();
-        }
+        ////    //////////MainWindow.GC.Rwc.Invalidate();
+        ////}
 
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -143,28 +143,24 @@ namespace DaphneGui
                 //{
                     switch (new_dist_type)
                     {
-                        case MolPopDistributionType.Homogeneous:
-                            MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        case MolPopDistributionType.Uniform:
+                            MolPopUniform shl = new MolPopUniform();
                             current_item.mp_distribution = shl;
                             break;
-                        case MolPopDistributionType.LinearGradient:
-                            MolPopLinearGradient slg = new MolPopLinearGradient();
+                        case MolPopDistributionType.Linear:
+                            MolPopLinear slg = new MolPopLinear();
                             current_item.mp_distribution = slg;
                             break;
                         case MolPopDistributionType.Gaussian:
-                            // Make sure there is at least one gauss_spec in repository
-                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                            {
-                                this.AddGaussianSpecification();
-                            }
-                            MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                            sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                            current_item.mp_distribution = sgg;
+                            MolPopGaussian mpg = new MolPopGaussian();
+                            mpg.SetMinMax(MainWindow.SC.SimConfig.scenario.environment);
+                            mpg.Peak = 3.6132;
+                            current_item.mp_distribution = mpg;
                             break;
-                        case MolPopDistributionType.CustomGradient:
+                        case MolPopDistributionType.Custom:
 
                             var prev_distribution = current_item.mp_distribution;
-                            MolPopCustomGradient scg = new MolPopCustomGradient();
+                            MolPopCustom scg = new MolPopCustom();
                             current_item.mp_distribution = scg;
 
                             // Configure open file dialog box
@@ -206,7 +202,7 @@ namespace DaphneGui
 
             // Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustomGradient)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
+            dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustom)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
             dlg.DefaultExt = ".txt"; // Default file extension
             dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
@@ -218,7 +214,7 @@ namespace DaphneGui
             {
                 // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
                 string filename = dlg.FileName;
-                ((MolPopCustomGradient)current_item.mp_distribution).custom_gradient_file_string = filename;
+                ((MolPopCustom)current_item.mp_distribution).custom_gradient_file_string = filename;
             }
         }
 
@@ -284,7 +280,7 @@ namespace DaphneGui
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
+            //gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mpInfo.mp_is_time_varying = false;
             MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Add(gmp);
@@ -621,12 +617,12 @@ namespace DaphneGui
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
+            //gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mpInfo.mp_is_time_varying = false;
             gmp.mpInfo.mp_render_on = true;
 
-            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+            gmp.mpInfo.mp_distribution = new MolPopUniform();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             cell.membrane.molpops.Add(gmp);

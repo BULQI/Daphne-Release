@@ -550,23 +550,15 @@
                     </Grid>
                     <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
                     <TextBlock Text="width (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
-                    <!--<Line Margin="4,0,4,3" 
-                          Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" 
-                          SnapsToDevicePixels="True" Stroke="LightGray"
-                          Stretch="Fill" X1="0" X2="10" />
-                    <Line Margin="4,0,4,3" 
-                          Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="1" 
-                          SnapsToDevicePixels="True" Stroke="LightGray"
-                          Stretch="Fill" X1="0" X2="10" />-->
                     <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
                     <Slider x:Name="x_trans_slider"
                             Grid.Column="1" Grid.Row="2"
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=x_trans_min}" 
-                            Maximum="{Binding Path=x_trans_max}"
-                            Value="{Binding Path=x_trans}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.x_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.x_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Center.X, Mode=TwoWay}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="2" Grid.Row="2"
@@ -584,9 +576,9 @@
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=x_scale_min}" 
-                            Maximum="{Binding Path=x_scale_max}"
-                            Value="{Binding Path=x_scale}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.xwid_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.xwid_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Sigma.X, Mode=TwoWay}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="2"
@@ -605,9 +597,9 @@
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=y_trans_min}" 
-                            Maximum="{Binding Path=y_trans_max}"
-                            Value="{Binding Path=y_trans}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.y_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.y_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Center.Y}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="2" Grid.Row="3"
@@ -625,9 +617,9 @@
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=y_scale_min}" 
-                            Maximum="{Binding Path=y_scale_max}"
-                            Value="{Binding Path=y_scale}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.ywid_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.ywid_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Sigma.Y}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="3"
@@ -646,9 +638,9 @@
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=z_trans_min}" 
-                            Maximum="{Binding Path=z_trans_max}"
-                            Value="{Binding Path=z_trans}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.z_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.z_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Center.Z}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="2" Grid.Row="4"
@@ -666,9 +658,9 @@
                             Orientation="Horizontal"
                             Width="60"
                             RenderTransform="1.0,0,0,0.5,0,4"
-                            Minimum="{Binding Path=z_scale_min}" 
-                            Maximum="{Binding Path=z_scale_max}"
-                            Value="{Binding Path=z_scale}" 
+                            Minimum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.zwid_min}" 
+                            Maximum="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.zwid_max}"
+                            Value="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.mpInfo.mp_distribution.Sigma.Z}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="4"
@@ -684,7 +676,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+            <DataTemplate DataType="{x:Type daph:MolPopUniform}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -714,7 +706,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopLinearGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopLinear}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -821,7 +813,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopGaussianGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
                 <StackPanel Orientation="Vertical">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -841,43 +833,25 @@
                         <StackPanel Orientation="Horizontal"
                                     Grid.Column="1" Grid.Row="0"
                                     Margin="0,2">
-                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
+                                <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
                                                     SpinnerVisibility="Collapsed"
                                                     HorizontalAlignment="Right"
                                                     Format="G"
                                                     StepValue="10"
                                                     Width="50" 
                                                     CenterSlotHorizontalAlignment="Right"
-                                                    Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
+                                                    Value="{Binding Path=Peak, UpdateSourceTrigger=PropertyChanged}"
                                                     />
-                            <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                                <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
                         </StackPanel>
-                        <!--<TextBlock Text="gauss" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                        <ComboBox Name="gaussian_gradients_cbox"
-                                                  Grid.Column="1" Grid.Row="1" 
-                                                  ItemsSource="{Binding Source={StaticResource solfacGaussianSpecsListView}}" 
-                                                  DisplayMemberPath="gaussian_spec_name"
-                                                  SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref}"
-                                                  SelectedValuePath="gaussian_spec_box_guid_ref"
-                                                  MaxWidth="150"
-                                                  />-->
                     </Grid>
-                    <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-                    <ListView x:Name="solfacGaussianBoxSpecsListView"
-                                              ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
-                                              DisplayMemberPath="box_guid"
-                                              SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
-                                              SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
-                                              />
-                    <ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding ElementName=solfacGaussianBoxSpecsListView, Path=SelectedItem}" 
-                                                    HorizontalAlignment="Center"
-                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
-                                                    Margin="0,2"/>
+                    <StackPanel Orientation="Horizontal">
+                            <ContentControl Name="GaussianBoxSpecDetails"
+                                            Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                            HorizontalAlignment="Center"
+                                            ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
+                                            Margin="0,2"/>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
 
@@ -1460,7 +1434,7 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopCustomGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopCustom}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -2798,6 +2772,8 @@
                                                     IsSnapToTickEnabled="True" 
                                                     TickFrequency="1" 
                                                     KeyboardNavigation.IsTabStop="False"
+                                                    ValueChanged="sliderGridStep_ValueChanged"
+                                        
                                                     />
                                 <editors:DoubleEditBox x:Name="GridStepReadout" 
                                                                   CheckBoxVisibility="Collapsed" 
