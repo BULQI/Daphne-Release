@@ -4579,7 +4579,7 @@
         </TabItem>
 
         <!-- GUID VIEWER -->
-        <TabItem Header="GUID Viewer" Visibility="Visible">
+        <TabItem Header="GUID Viewer" Visibility="Hidden">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Vertical">
