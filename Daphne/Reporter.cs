@@ -25,6 +25,7 @@ namespace Daphne
         {
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
             startECM(sc);
+            cell_files.Clear();
             startCells(sc);
         }
 
