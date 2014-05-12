@@ -1,19 +1,76 @@
 [
-  {
+{
     "listOfReactants": [
       {
         "species": "CXCR5",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "membrane"
       },
       {
         "species": "CXCL13",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "ecs"
       }
     ],
     "listOfProducts": [
       {
         "species": "CXCR5:CXCL13",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "membrane"
+      }
+    ],
+    "rateConst": 2.0,
+    "listOfModifiers": [],
+    "typeOfReaction": "boundaryassociation",
+    "ReactantsString": "CXCR5 + CXCL13",
+    "ProductsString": "CXCR5:CXCL13",
+    "TotalReactionString": "CXCR5 + CXCL13 -> CXCR5:CXCL13"
+  },
+  {
+    "listOfReactants": [
+      {
+        "species": "CXCR5:CXCL13",
+        "stoichiometry": 1,
+		"Location": "membrane"
+      }
+    ],
+    "listOfProducts": [
+      {
+        "species": "CXCR5",
+        "stoichiometry": 1,
+		"Location": "membrane"
+      },
+      {
+        "species": "CXCL13",
+        "stoichiometry": 1,
+		"Location": "ecs"
+      }
+    ],
+    "rateConst": 2.0,
+    "listOfModifiers": [],
+    "typeOfReaction": "boundarydissociation",
+    "ReactantsString": "CXCR5:CXCL13",
+    "ProductsString": "CXCR5 + CXCL13",
+    "TotalReactionString": "CXCR5:CXCL13 -> CXCR5 + CXCL13"
+  },
+  {
+    "listOfReactants": [
+      {
+        "species": "CXCR5",
+        "stoichiometry": 1,
+		"Location": "interior"
+      },
+      {
+        "species": "CXCL13",
+        "stoichiometry": 1,
+		"Location": "interior"
+      }
+    ],
+    "listOfProducts": [
+      {
+        "species": "CXCR5:CXCL13",
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "rateConst": 2.0,
@@ -27,17 +84,20 @@
     "listOfReactants": [
       {
         "species": "CXCR5:CXCL13",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "CXCR5",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       },
       {
         "species": "CXCL13",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "rateConst": 2.0,
@@ -52,14 +112,15 @@
     "listOfProducts": [
       {
         "species": "CXCR5",
-        "stoichiometry": 1
+        "stoichiometry": 1,
       }
     ],
     "rateConst": 2.0,
     "listOfModifiers": [
       {
         "species": "gCXCR5",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "typeOfReaction": "creation_cat",
@@ -71,7 +132,8 @@
     "listOfReactants": [
       {
         "species": "CXCR5",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [],
@@ -86,7 +148,8 @@
     "listOfReactants": [
       {
         "species": "CXCL13",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [],
@@ -101,17 +164,20 @@
     "listOfReactants": [
       {
         "species": "E",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "A",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       },
       {
         "species": "E",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "rateConst": 1.0,
@@ -125,17 +191,20 @@
     "listOfReactants": [
       {
         "species": "A",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       },
       {
         "species": "X",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "X",
-        "stoichiometry": 2
+        "stoichiometry": 2,
+		"Location": "interior"
       }
     ],
     "rateConst": 1.0,
@@ -149,17 +218,20 @@
     "listOfReactants": [
       {
         "species": "X",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       },
       {
         "species": "Y",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "Y",
-        "stoichiometry": 2
+        "stoichiometry": 2,
+		"Location": "interior"
       }
     ],
     "rateConst": 1.0,
@@ -173,7 +245,7 @@
     "listOfReactants": [
       {
         "species": "Y",
-        "stoichiometry": 1
+        "stoichiometry": 1,
       }
     ],
     "listOfProducts": [],
@@ -189,14 +261,16 @@
     "listOfProducts": [
       {
         "species": "X",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "rateConst": 0.6,
     "listOfModifiers": [
       {
         "species": "E",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "typeOfReaction": "creation_cat",
@@ -208,20 +282,23 @@
     "listOfReactants": [
       {
         "species": "Y",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "X",
-        "stoichiometry": 2
+        "stoichiometry": 2,
+		"Location": "interior"
       }
     ],
     "rateConst": 8.0,
     "listOfModifiers": [
       {
         "species": "S",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "typeOfReaction": "dimerDissociation_cat",
@@ -233,17 +310,20 @@
     "listOfReactants": [
       {
         "species": "X",
-        "stoichiometry": 2
+        "stoichiometry": 2,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [
       {
         "species": "X",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       },
       {
         "species": "Y",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "rateConst": 1.0,
@@ -257,7 +337,8 @@
     "listOfReactants": [
       {
         "species": "X",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "listOfProducts": [],
@@ -265,7 +346,8 @@
     "listOfModifiers": [
       {
         "species": "Y",
-        "stoichiometry": 1
+        "stoichiometry": 1,
+		"Location": "interior"
       }
     ],
     "typeOfReaction": "annihilation_cat",

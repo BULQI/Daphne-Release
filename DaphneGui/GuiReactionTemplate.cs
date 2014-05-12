@@ -33,10 +33,11 @@ namespace DaphneGui
         {
             Guid id = Guid.NewGuid();
             gui_reaction_template_guid = id.ToString();
-            listOfReactants = new List<SpeciesReference>();
-            listOfProducts = new List<SpeciesReference>();
+            listOfReactants = new List<GuiSpeciesReference>();
+            listOfProducts = new List<GuiSpeciesReference>();
+            listOfModifiers = new List<GuiSpeciesReference>();
             rateConst = 0;
-            listOfModifiers = new List<SpeciesReference>();
+            
             typeOfReaction = "";
         }
 
@@ -48,9 +49,9 @@ namespace DaphneGui
             rt.listOfProducts.AddRange(listOfProducts);
             rt.listOfReactants.AddRange(listOfReactants);
         }
-        
-        private Dictionary<string, SpeciesReference> molsByType = new Dictionary<string, SpeciesReference>();        
-        public Dictionary<string, SpeciesReference> MolsByType
+
+        private Dictionary<string, GuiSpeciesReference> molsByType = new Dictionary<string, GuiSpeciesReference>();
+        public Dictionary<string, GuiSpeciesReference> MolsByType
         {
             get
             {
@@ -147,10 +148,10 @@ namespace DaphneGui
             }
         } 
 
-        public List<SpeciesReference> listOfReactants;
-        public List<SpeciesReference> listOfProducts;
+        public List<GuiSpeciesReference> listOfReactants;
+        public List<GuiSpeciesReference> listOfProducts;
+        public List<GuiSpeciesReference> listOfModifiers;
         public double rateConst;
-        public List<SpeciesReference> listOfModifiers;
         private string typeOfReaction;
         private string reactantsString;
         private string productsString;

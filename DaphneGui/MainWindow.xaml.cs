@@ -651,7 +651,7 @@ namespace DaphneGui
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             GuiReactionTemplate grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[0];    //The 0'th reaction is Association
+            grt = sim_config.PredefReactions[0];    //The 0'th reaction is Boundary Association
             var qsr = from species in grt.listOfReactants
                       where species.species == "CXCR5"
                       select species;
@@ -686,8 +686,38 @@ namespace DaphneGui
             sim_config.scenario.Reactions.Add(grt);
 
             grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[1];    //The 1st reaction is Dissociation
+            grt = sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
 
+            qsr = from species in grt.listOfReactants
+                  where species.species == "CXCR5:CXCL13"
+                  select species;
+            if (qsr.Count() > 0)
+            {
+                foreach (var sp in qsr)
+                {
+                    grt.MolsByType.Add("complex", sp);
+                }
+            }
+            qsr = from sp in grt.listOfProducts
+                  where sp.species == "CXCL13"
+                  select sp;
+            if (qsr.Count() > 0)
+            {
+                foreach (var sp in qsr)
+                {
+                    grt.MolsByType.Add("ligand", sp);
+                }
+            }
+            qsr = from sp in grt.listOfProducts
+                  where sp.species == "CXCR5"
+                  select sp;
+            if (qsr.Count() > 0)
+            {
+                foreach (var sp in qsr)
+                {
+                    grt.MolsByType.Add("receptor", sp);
+                }
+            }
             sim_config.scenario.Reactions.Add(grt);
 
             //End skg daphne
@@ -2141,45 +2171,14 @@ namespace DaphneGui
         {
             //MessageBox.Show("In runSim()");
 
-            
-
             Scenario scenario = configurator.SimConfig.scenario;
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             sim.CreateECS(new InterpolatedRectangularPrism(scenario.NumGridPts, configurator.SimConfig.scenario.GridStep));
 
-
             double[] extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
                                              sim.ECS.Space.Interior.Extent(1), 
                                              sim.ECS.Space.Interior.Extent(2) };
-
-
-            // ADD ECS MOLECULAR POPULATIONS
-
-            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-
-            foreach (GuiMolecularPopulation gmp in scenario.MolPops)
-            {
-                if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                {
-                    MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
-                    double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-                    double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
-
-                    center[0] = extent[0] / 2.0;
-                    center[1] = extent[1] / 2.0;
-                    center[2] = extent[2] / 2.0;
-
-                    // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-                    Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
-                    sim.ECS.Space.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
-                    sim.ECS.Space.Populations[mol.Name].IsDiffusing = false;
-                }
-            }
-
-            
 
             // ADD CELLS            
             double cellRadius = 5.0;
@@ -2194,7 +2193,8 @@ namespace DaphneGui
                     cellPos[0] = extent[0] / 3.0;
                     cellPos[1] = extent[1] / 3.0;
                     cellPos[2] = extent[2] / 3.0;
-                    cell.setState(cellPos, new double[] { 0, 0, 0 });                    
+                    cell.setState(cellPos, new double[] { 0, 0, 0 });
+                    cell.IsMotile = false;
 
                     foreach (GuiMolecularPopulation gmp in cp.CellMolPops)
                     {
@@ -2242,26 +2242,73 @@ namespace DaphneGui
                 }
             }
 
-            // ADD ECS REACTIONS
-            // THIS IS NOT GOOD ENOUGH BECAUSE THE MOLS IN THE REACTIONS ARE NOT NECESSARILY IN THE ECS - COULD BE IN MEMBRANE - FOR BOUNDARY REACTIONS
-            MolecularPopulation receptor, ligand, complex;
-            double k1plus = 2.0, k1minus = 1;
-            foreach (GuiReactionTemplate grt in scenario.Reactions)
+            // ADD ECS MOLECULAR POPULATIONS
+
+            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
+
+            foreach (GuiMolecularPopulation gmp in scenario.MolPops)
             {
-                if (grt.TypeOfReaction == "BoundaryAssociation")
+                if (gmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    string rec, lig, comp;
-                    rec = grt.MolsByType["receptor"].species;
-                    lig = grt.MolsByType["ligand"].species;
-                    comp = grt.MolsByType["complex"].species;
+                    MolPopGaussianGradient mpgg = (MolPopGaussianGradient)gmp.mpInfo.mp_distribution;
+                    double maxConc = mpgg.peak_concentration;  //2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
+                    double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 }, center = new double[sim.ECS.Space.Interior.Dim];
 
-                    receptor = sim.ECS.Space.Populations[rec];
-                    ligand = sim.ECS.Space.Populations[lig];
-                    complex = sim.ECS.Space.Populations[comp];
-                    sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-                    sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+                    center[0] = extent[0] / 2.0;
+                    center[1] = extent[1] / 2.0;
+                    center[2] = extent[2] / 2.0;
+
+                    // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+                    Molecule mol = new Molecule(gmp.Molecule.Name, gmp.Molecule.MolecularWeight, gmp.Molecule.EffectiveRadius, gmp.Molecule.DiffusionCoefficient);
+                    sim.ECS.Space.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
+                    sim.ECS.Space.Populations[mol.Name].IsDiffusing = false;
                 }
+            }
 
+            // ADD ECS REACTIONS
+            foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
+            {
+                MolecularPopulation receptor, ligand, complex;
+                double k1plus = 2.0, k1minus = 1;
+                foreach (GuiReactionTemplate grt in scenario.Reactions)
+                {
+                    if (grt.TypeOfReaction == "boundaryassociation" || grt.TypeOfReaction == "boundarydissociation")
+                    {
+                        string rec, lig, comp;
+                        string recLocation, ligLocation, compLocation;
+
+                        GuiSpeciesReference gsr = grt.MolsByType["receptor"];
+                        rec = gsr.species;
+                        recLocation = gsr.Location;
+
+                        gsr = grt.MolsByType["ligand"];
+                        lig = gsr.species;
+                        ligLocation = gsr.Location;
+
+                        gsr = grt.MolsByType["complex"];
+                        comp = gsr.species;
+                        compLocation = gsr.Location;
+
+                        // add receptor ligand boundary association and dissociation
+                        ////////    // R+L-> C
+                        ////////    // C -> R+L
+                        receptor = kvp.Value.PlasmaMembrane.Populations[rec];
+                        ligand = sim.ECS.Space.Populations[lig];
+                        complex = kvp.Value.PlasmaMembrane.Populations[comp];
+
+                        if (grt.TypeOfReaction == "boundaryassociation")
+                        {
+                            sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+                        }
+                        else
+                        {
+                            sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+                        }
+                    }
+
+                }
             }
 
             //ADD CELLS' REACTIONS
@@ -2295,7 +2342,7 @@ namespace DaphneGui
 
 
             double T = 100;   // minutes
-            double dt = 0.001;  //0.001;
+            double dt = 0.01;  //0.001;
             int nSteps = (int)(T / dt);
             TestStepperLigandReceptor(nSteps, dt);
 
@@ -2423,7 +2470,7 @@ namespace DaphneGui
             double[] driverLoc;
 
             string output;
-            string filename = "LigandReceptorComplex.txt";
+            string filename = "Config\\LigandReceptorComplex.txt";
 
             using (StreamWriter writer = File.CreateText(filename))
             {
