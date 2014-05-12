@@ -81,18 +81,6 @@ namespace Daphne
             cells = new Dictionary<int, Cell>();
         }
 
-        public void AddCell(double[] pos, double[] vel)
-        {
-            Cell c = new Cell();
-            SpatialState s = new SpatialState();
-
-            s.X = pos;
-            s.V = vel;
-            //cellManager.AddState(c, s);
-            c.State = s;
-            cells.Add(c.Index, c);
-        }
-
         public void AddCell(double[] pos, double[] vel, double radius)
         {
             Cell c = new Cell(radius);

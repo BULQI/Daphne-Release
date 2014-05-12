@@ -34,7 +34,7 @@ namespace Daphne
     {
         // the individuals that make up this MolecularPopulation
         public Molecule Molecule;
-        public DiscretizedManifold Man;
+        public Manifold Man;
 
         public ScalarField Conc;
 
@@ -62,11 +62,11 @@ namespace Daphne
         {
         }
 
-        public MolecularPopulation(Molecule mol, DiscretizedManifold man)
+        public MolecularPopulation(Molecule mol, Manifold man)
         {
             Molecule = mol;
             Man = man;
-            Conc = new ScalarField(man);
+            Conc = new DiscreteScalarField(man);
             GlobalGrad = new VectorField(man, globalGradDim);
 
             if (Man.Boundaries != null)
@@ -77,18 +77,18 @@ namespace Daphne
 
                 foreach (Embedding e in Man.Boundaries.Values)
                 {
-                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
-                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    Fluxes.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
                     BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
                 }
             }
         }
 
-        public MolecularPopulation(Molecule mol, DiscretizedManifold man, ScalarField initConc)
+        public MolecularPopulation(Molecule mol, Manifold man, ScalarField initConc)
         {
             Molecule = mol;
             Man = man;
-            Conc = new ScalarField(man);
+            Conc = new DiscreteScalarField(man);
             GlobalGrad = new VectorField(man, globalGradDim);
 
             if (Man.Boundaries != null)
@@ -99,8 +99,8 @@ namespace Daphne
 
                 foreach (Embedding e in Man.Boundaries.Values)
                 {
-                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
-                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    Fluxes.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
                     BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
                 }
             }
@@ -119,11 +119,11 @@ namespace Daphne
 
         }
 
-        public MolecularPopulation(Molecule mol, DiscretizedManifold man, ScalarField initConc, VectorField initGrad)
+        public MolecularPopulation(Molecule mol, Manifold man, ScalarField initConc, VectorField initGrad)
         {
             Molecule = mol;
             Man = man;
-            Conc = new ScalarField(man);
+            Conc = new DiscreteScalarField(man);
             GlobalGrad = new VectorField(man, globalGradDim);
 
             if (Man.Boundaries != null)
@@ -134,8 +134,8 @@ namespace Daphne
 
                 foreach (Embedding e in Man.Boundaries.Values)
                 {
-                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
-                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    Fluxes.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new DiscreteScalarField(e.Domain));
                     BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
                 }
             }
@@ -226,18 +226,18 @@ namespace Daphne
 
                     if (Man.Boundaries[id].NeedsInterpolation() == true)
                     {
-                        for (int k = 0; k < BoundaryConcs[id].array.Length; k++)
+                        for (int k = 0; k < BoundaryConcs[id].M.ArraySize; k++)
                         {
-                            BoundaryConcs[id].array[k] = Concentration(Man.Boundaries[id].WhereIs(k));
-                            BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIs(k));
+                            BoundaryConcs[id][k] = Concentration(Man.Boundaries[id].WhereIs(k));
+                            BoundaryGlobalGrad[id][k] = GlobalGradient(Man.Boundaries[id].WhereIs(k));
                         }
                     }
                     else
                     {
-                        for (int k = 0; k < BoundaryConcs[id].array.Length; k++)
+                        for (int k = 0; k < BoundaryConcs[id].M.ArraySize; k++)
                         {
-                            BoundaryConcs[id].array[k] = Concentration(Man.Boundaries[id].WhereIsIndex(k));
-                            BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIsIndex(k));
+                            BoundaryConcs[id][k] = Concentration(Man.Boundaries[id].WhereIsIndex(k));
+                            BoundaryGlobalGrad[id][k] = GlobalGradient(Man.Boundaries[id].WhereIsIndex(k));
                         }
                     }
                 }
@@ -262,16 +262,16 @@ namespace Daphne
             //        concentration += lm[i].Coefficient * Conc.array[lm[i].Index];
             //    }
             //}
-            return Conc.Value(point);
+            return Conc.Get(point);
         }
 
         public double Concentration(int idx)
         {
-            if (idx < 0 || idx >= Conc.array.Length)
+            if (idx < 0 || idx >= Conc.M.ArraySize)
             {
                 return 0;
             }
-            return Conc.array[idx];
+            return Conc[idx];
         }
 
 
@@ -280,9 +280,13 @@ namespace Daphne
             return GlobalGrad.Value(point);
         }
 
-        public Vector GlobalGradient(int i)
+        public Vector GlobalGradient(int idx)
         {
-            return GlobalGrad.Value(i);
+            if (idx < 0 || idx >= GlobalGrad.M.ArraySize)
+            {
+                return new double[] { 0, 0, 0 };
+            }
+            return GlobalGrad[idx];
         }
 
         /// <summary>
@@ -312,7 +316,7 @@ namespace Daphne
                     {
                         for (int j = 0; j < lm[i].Length; j++)
                         {
-                            gradient[i] += lm[i][j].Coefficient * Conc.array[lm[i][j].Index];
+                            gradient[i] += lm[i][j].Coefficient * Conc[lm[i][j].Index];
                         }
                     }
                 }
@@ -336,18 +340,18 @@ namespace Daphne
             // We may need a better way to indicate when diffusion should take place
             if ((Man.ArraySize > 1) && (IsDiffusing == true))
             {
-                ScalarField temparray = new ScalarField(Man);
+                ScalarField temparray = new DiscreteScalarField(Man, 0);
+
                 for (int i = 0; i < Man.ArraySize; i++)
                 {
                     for (int j = 0; j < Man.Laplacian[i].Length; j++)
                     {
-                        temparray.array[i] += Man.Laplacian[i][j].Coefficient * Conc.array[Man.Laplacian[i][j].Index] * dt;
+                        temparray[i] += Man.Laplacian[i][j].Coefficient * Conc[Man.Laplacian[i][j].Index] * dt;
                     }
                 }
                 Conc += Molecule.DiffusionCoefficient * temparray;
 
-                //string datDir = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
-                //this.Conc.WriteToFile(datDir + "CXCL13 final.txt");
+                //this.Conc.WriteToFile("CXCL13 final.txt");
 
                 // TODO: Implement diffusion of gradients
 
@@ -371,7 +375,7 @@ namespace Daphne
                         // Distribute the flux to or from the cell surface to the surrounding nodes
                         for (int k = 0; k < lm.Length; k++)
                         {
-                            Conc.array[lm[k].Index] += lm[k].Coefficient * kvp.Value.array[n] * cellSurfaceArea / voxelVolume;
+                            Conc[lm[k].Index] += lm[k].Coefficient * kvp.Value[n] * cellSurfaceArea / voxelVolume;
                         }
                     }
                     else if (Man.Boundaries[kvp.Key].NeedsInterpolation())

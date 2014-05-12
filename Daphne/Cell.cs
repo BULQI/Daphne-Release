@@ -20,38 +20,24 @@ namespace Daphne
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is alive or dead.
         /// </summary>
-        public bool Alive;
+        private bool Alive;
 
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is ready to divide. 
         /// </summary>
-        public bool Cytokinetic;
+        private bool Cytokinetic;
 
         /// <summary>
         /// The radius of the cell
         /// </summary>
         private double radius;
 
-        public Cell()
+
+        public Cell(double radius)
         {
             Alive = true;
             Cytokinetic = false;
-            PlasmaMembrane = new Compartment(new TinySphere());
-            Cytosol = new Compartment(new TinyBall());
-
-            OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
-
-            Cytosol.Interior.Boundaries = new Dictionary<int, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior.Id, cellEmbed);
-
-            Index = safeIndex++;
-        }
-
-        public Cell(double _radius)
-        {
-            Alive = true;
-            Cytokinetic = false;
-            radius = _radius;
+            this.radius = radius;
             PlasmaMembrane = new Compartment(new TinySphere(new double[1] {radius} ));
             Cytosol = new Compartment(new TinyBall(new double[1] { radius }));
 
@@ -74,7 +60,6 @@ namespace Daphne
             Cytosol.Step(dt);
             PlasmaMembrane.Step(dt);
             //Differentiator.Step(dt);
-            
         }
 
         /// <summary>

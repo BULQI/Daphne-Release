@@ -9,7 +9,7 @@ namespace Daphne
     {
         public static Cell Build(string description)
         {
-            return new Cell();
+            return new Cell(0);
         }
     }
 }

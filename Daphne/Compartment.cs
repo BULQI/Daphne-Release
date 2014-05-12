@@ -12,7 +12,7 @@ namespace Daphne
     /// </summary>
     public class Compartment
     {
-        public Compartment(DiscretizedManifold interior)
+        public Compartment(Manifold interior)
         {
             Interior = interior;
             Populations = new Dictionary<string, MolecularPopulation>();
@@ -28,7 +28,7 @@ namespace Daphne
         // gmk
         public void AddMolecularPopulation(Molecule mol, double initConc)
         {
-            ScalarField s = new ScalarField(Interior, initConc);
+            ScalarField s = new DiscreteScalarField(Interior, initConc);
             MolecularPopulation molpop = new MolecularPopulation(mol, Interior, s);
 
             Populations.Add(molpop.Molecule.Name, molpop);
@@ -45,7 +45,7 @@ namespace Daphne
         public void AddMolecularPopulation(Molecule mol, double initConc, double[] initGrad)
         {
             // Add the molecular population with concentration specified with initConc
-            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, new ScalarField(Interior, initConc), new VectorField(Interior, initGrad));
+            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, new DiscreteScalarField(Interior, initConc), new VectorField(Interior, initGrad));
 
             Populations.Add(molpop.Molecule.Name, molpop);
         }
@@ -132,7 +132,7 @@ namespace Daphne
 
         public Dictionary<string, MolecularPopulation> Populations;
         public List<Reaction> reactions;
-        public DiscretizedManifold Interior;
+        public Manifold Interior;
         public List<ReactionTemplate> rtList;
     }
 

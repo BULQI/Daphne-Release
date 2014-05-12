@@ -449,7 +449,7 @@ namespace Daphne
             // Update the gradients
 
             List<MolecularPopulation> mp = new List<MolecularPopulation>(genReac.Keys);
-            VectorField gradIntensity = new VectorField(mp[0].Man);
+            VectorField gradIntensity = new VectorField(mp[0].Man, mp[0].Man.Dim);
 
             foreach (KeyValuePair<MolecularPopulation, int[]> kvp in genReac)
             {
@@ -479,7 +479,7 @@ namespace Daphne
         MolecularPopulation receptor;
         MolecularPopulation ligand;
         MolecularPopulation complex;
-        DiscretizedManifold boundary;
+        Manifold boundary;
         double fluxIntensityConstant;
 
         public BoundaryAssociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
@@ -493,12 +493,11 @@ namespace Daphne
 
             if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
-                throw (new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
-
-                if (receptor.Man != complex.Man)
-                {
-                    throw (new Exception("Receptor and complex manifolds are unequal."));
-                }
+                throw new Exception("Receptor and ligand boundary concentration manifolds are unequal.");
+            }
+            if (receptor.Man != complex.Man)
+            {
+                throw new Exception("Receptor and complex manifolds are unequal.");
             }
         }
 
@@ -523,7 +522,7 @@ namespace Daphne
         MolecularPopulation receptor;
         MolecularPopulation ligand;
         MolecularPopulation complex;
-        DiscretizedManifold boundary;
+        Manifold boundary;
         double fluxIntensityConstant;
 
         public BoundaryDissociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
@@ -561,7 +560,7 @@ namespace Daphne
         MolecularPopulation receptor;
         MolecularPopulation ligand;
         MolecularPopulation complex;
-        DiscretizedManifold boundary;
+        Manifold boundary;
         double fluxIntensityConstant;
         private double cellRadius;
 
@@ -570,11 +569,11 @@ namespace Daphne
             // NOTE: Not sure why this doesn't work. At runtime, seems to think that _receptor.Man is empty.
             //if (_ligand.BoundaryConcs[boundary].M != _receptor.Man)
             //{
-            //    throw (new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
+            //    throw new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
 
             //    if (_receptor.Man != _complex.Man)
             //    {
-            //        throw (new Exception("Receptor and complex manifolds are unequal."));
+            //        throw new Exception("Receptor and complex manifolds are unequal."));
             //    }
             //}
 
@@ -588,12 +587,11 @@ namespace Daphne
 
             if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
-                throw (new Exception("Receptor and ligand boundary concentration manifolds are unequal."));
-
-                if (receptor.Man != complex.Man)
-                {
-                    throw (new Exception("Receptor and complex manifolds are unequal."));
-                }
+                throw new Exception("Receptor and ligand boundary concentration manifolds are unequal.");
+            }
+            if (receptor.Man != complex.Man)
+            {
+                throw new Exception("Receptor and complex manifolds are unequal.");
             }
 
         }
@@ -653,8 +651,8 @@ namespace Daphne
             //driver.GlobalGrad += dt * (3 * RateConstant / (cellRadius * cellRadius)) *
                                      //((driverTotal - driver.Conc) * complex.GlobalGrad - cellRadius * complex.Conc.array[0] * driver.GlobalGrad);
 
-            driverConc = driver.Conc.array[0];
-            complexConc = complex.Conc.array[0];
+            driverConc = driver.Conc[0];
+            complexConc = complex.Conc[0];
             driverGlobalGrad = driver.GlobalGrad[0];
             complexGlobalGrad = complex.GlobalGrad[0];
 
@@ -662,7 +660,7 @@ namespace Daphne
             driverGlobalGrad += dt * (3 * RateConstant / (cellRadius * cellRadius)) *
                                      ( (driverTotal - driverConc) * complexGlobalGrad - cellRadius* complexConc * driverGlobalGrad);
 
-            driver.Conc.array[0] = driverConc;
+            driver.Conc[0] = driverConc;
             driver.GlobalGrad[0] = driverGlobalGrad;
         }
 

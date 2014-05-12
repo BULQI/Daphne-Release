@@ -322,7 +322,7 @@ namespace testDaphne
                 string output;
 
                 initQ = sim.ECS.Populations["CXCL13"].Integrate();
-                sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
+                //sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
 
                 for (int i = 0; i < nSteps; i++)
                 {
@@ -342,7 +342,7 @@ namespace testDaphne
                 output = output + "\t" + initQ.ToString("F2") + "\t" + finalQ.ToString("F2") + "\t" + relDiff.ToString("E2");
                 Console.WriteLine(output);
 
-                sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
+                //sim.ECS.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
             }
         }
 
@@ -359,9 +359,9 @@ namespace testDaphne
             {
                 for (int i = 0; i < nSteps; i++)
                 {
-                    receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc.array[0];
-                    complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.array[0];
-                    ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id].array[0];
+                    receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc[0];
+                    complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc[0];
+                    ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id][0];
 
                     sim.ECS.Step(dt);
                     sim.CMGR.Step(dt);
@@ -397,10 +397,10 @@ namespace testDaphne
                 {
                     for (int i = 0; i < nSteps; i++)
                     {
-                        receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc.array[0];
-                        complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.array[0];
-                        driverConc[i] = sim.Cells[0].Cytosol.Populations["driver"].Conc.array[0];
-                        ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id].array[0];
+                        receptorConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5"].Conc[0];
+                        complexConc[i] = sim.Cells[0].PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc[0];
+                        driverConc[i] = sim.Cells[0].Cytosol.Populations["driver"].Conc[0];
+                        ligandBoundaryConc[i] = sim.ECS.Populations["CXCL13"].BoundaryConcs[sim.Cells[0].PlasmaMembrane.Interior.Id][0];
                         driverLoc[i] =  sim.Cells[0].State.X ;
 
                         sim.ECS.Step(dt);
