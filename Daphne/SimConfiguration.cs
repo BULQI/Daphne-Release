@@ -2697,8 +2697,8 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReadOnly = true;
-            Processor = new ReactionComplexProcessor();
-            RCSim = new Simulation();
+            //Processor = new ReactionComplexProcessor();
+            //RCSim = new Simulation();
             
         }
         public ConfigReactionComplex(string name)
@@ -2710,8 +2710,8 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
-            Processor = new ReactionComplexProcessor();
-            RCSim = new Simulation();
+            //Processor = new ReactionComplexProcessor();
+            //RCSim = new Simulation();
             
         }
         
@@ -2729,7 +2729,14 @@ namespace Daphne
             newrc.Name = "NewRC";
 
             return newrc;
-        }        
+        }
+
+        public void PrepareToRun()
+        {
+            Processor = new ReactionComplexProcessor();
+            RCSim = new Simulation();
+        }
+
     }
 
     public class ConfigCell

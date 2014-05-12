@@ -2447,6 +2447,7 @@ namespace DaphneGui
         private void DrawSelectedReactionComplex()
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+            crc.PrepareToRun();
 
             //
 
@@ -2491,6 +2492,7 @@ namespace DaphneGui
 
             ////ReactionComplexProcessor rcp = new ReactionComplexProcessor();
             ////rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
+
             crc.RCSim.Load(MainWindow.SC.SimConfig, true, true);
             crc.Processor.Initialize(MainWindow.SC.SimConfig, crc, crc.RCSim);
             crc.Processor.Go();
