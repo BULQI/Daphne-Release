@@ -536,7 +536,8 @@ namespace testDaphne
             //
 
             MolecularPopulation receptor, ligand, complex;
-            double k1plus = 2.0, k1minus = 1;
+            //double k1plus = 2.0, k1minus = 1;
+            double k1minus = 1;
             MolecularPopulation driver, driverA;
             double k2plus = 10.0,
                     k2minus = 1.0,
