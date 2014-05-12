@@ -903,9 +903,6 @@ namespace DaphneGui
             // add events to the iren instead of Observers
             rw.GetInteractor().LeftButtonPressEvt += new vtkObject.vtkObjectEventHandler(leftMouseDown);
 
-            //skg 7/10/12 - Experimenting how to display cell info - playing with right mouse down
-            rw.GetInteractor().RightButtonPressEvt += new vtkObject.vtkObjectEventHandler(rightMouseDown);
-
             // progress
             cornerAnnotation = new GraphicsProp();
             vtkCornerAnnotation prop = vtkCornerAnnotation.New();
@@ -1214,7 +1211,7 @@ namespace DaphneGui
                     whArrowToolButton_IsChecked = value;
                     HandToolButton_IsChecked = !value;
                     PreviewButton_IsEnabled = !value;
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_PICKING_ENABLED, !value);
+                    MainWindow.SetMouseLeftState(MainWindow.MOUSE_LEFT_TRACK, !value);
                     CellController.SetCellOpacities(value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1250,7 +1247,7 @@ namespace DaphneGui
                     handToolButton_IsChecked = value;
                     WhArrowToolButton_IsChecked = !value;
                     PreviewButton_IsEnabled = value;
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_PICKING_ENABLED, value);
+                    MainWindow.SetMouseLeftState(MainWindow.MOUSE_LEFT_TRACK, value);
                     CellController.SetCellOpacities(!value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1518,105 +1515,113 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
-            // picking
-            if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == false)
-            {
-                //Console.WriteLine("exit picking disabled");
-                return;
-            }
-
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
-#if ALL_GRAPHICS
+
             if (p > 0)
             {
                 p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
                 if (p >= 0)
                 {
                     int cellID = CellController.GetCellIndex(p);
-                    // only allow one activity that is related to fitting or changing/accessing the selected cell at a time
-                    lock (MainWindow.cellFitLock)
+
+                    if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_TRACK) == true)
                     {
-                        // NOTE: we may have other cells in the future that require path fitting besides motile cells
-                        if (MainWindow.Basket.Cells[cellID].isMotileBaseType() == true)
+#if ALL_GRAPHICS
+                        // only allow one activity that is related to fitting or changing/accessing the selected cell at a time
+                        lock (MainWindow.cellFitLock)
                         {
-                            MainWindow.selectedCell = (MotileCell)MainWindow.Basket.Cells[cellID];
-                        }
-                        else
-                        {
-                            MainWindow.selectedCell = null;
-                        }
-
-                        if (MainWindow.selectedCell != null)
-                        {
-                            // do the tube track fits only when not in fast preview mode
-                            if ((MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop == null ||
-                                 MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop == null) && PreviewButton_IsChecked == false ||
-                                PreviewButton_IsChecked == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop == null)
+                            // NOTE: we may have other cells in the future that require path fitting besides motile cells
+                            if (MainWindow.Basket.Cells[cellID].isMotileBaseType() == true)
                             {
-                                if (lpm == null)
-                                {
-                                    //Console.WriteLine("Created new LPM");
-                                    lpm = new LPManager();
-                                }
-
-                                // check if file exists and whether it is a new file
-                                if (MainWindow.CheckControlFlag(MainWindow.CONTROL_NEW_RUN) == true)
-                                {
-                                    MainWindow.SetControlFlag(MainWindow.CONTROL_NEW_RUN, false);
-                                    MainWindow.Basket.ConnectToExperiment(MainWindow.SC.SimConfig.experiment_db_id);
-                                }
-
-                                // allow for the quick preview
-                                if (PreviewButton_IsChecked == true)
-                                {
-                                    // need to initialize the data arrays, then do the fast preview
-                                    // TODO: Can remove LoadTrackData since GetCellTrack should do this...
-                                    if (MainWindow.Basket.LoadTrackData(MainWindow.selectedCell.CellIndex) == true)
-                                    {
-                                        GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
-                                        zoomToPath(GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop);
-                                        rwc.Invalidate();
-                                    }
-                                }
-                                else
-                                {
-                                    // Note: having this here is a good idea, but it causes a relative mouse coordinate change,
-                                    // which in turn initiates a camera rotation
-                                    //MW.LPFittingToolWindow.Activate();
-                                    
-                                    Thread fitThread = new Thread(new ThreadStart(fit)) { IsBackground = true };
-                                    fitThread.Start();
-                                }
+                                MainWindow.selectedCell = (MotileCell)MainWindow.Basket.Cells[cellID];
                             }
-                            // toggle visibility
                             else
                             {
-                                // switch the tubes on only if the mode is not fast preview
-                                if (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == true || PreviewButton_IsChecked == false))
-                                {
-                                    GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && !GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene);
-                                }
-                                if (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == true || PreviewButton_IsChecked == false))
-                                {
-                                    GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && !GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene);
-                                }
+                                MainWindow.selectedCell = null;
+                            }
 
-                                // switch off the actual path only if the mode is fast preview or the other two are also off
-                                if (GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene == false || (PreviewButton_IsChecked == true ||
-                                    GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == false && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == false))
+                            if (MainWindow.selectedCell != null)
+                            {
+                                // do the tube track fits only when not in fast preview mode
+                                if ((MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop == null ||
+                                     MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop == null) && PreviewButton_IsChecked == false ||
+                                    PreviewButton_IsChecked == true && GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop == null)
                                 {
-                                    GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, !GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene);
+                                    if (lpm == null)
+                                    {
+                                        //Console.WriteLine("Created new LPM");
+                                        lpm = new LPManager();
+                                    }
+
+                                    // check if file exists and whether it is a new file
+                                    if (MainWindow.CheckControlFlag(MainWindow.CONTROL_NEW_RUN) == true)
+                                    {
+                                        MainWindow.SetControlFlag(MainWindow.CONTROL_NEW_RUN, false);
+                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SC.SimConfig.experiment_db_id);
+                                    }
+
+                                    // allow for the quick preview
+                                    if (PreviewButton_IsChecked == true)
+                                    {
+                                        // need to initialize the data arrays, then do the fast preview
+                                        // TODO: Can remove LoadTrackData since GetCellTrack should do this...
+                                        if (MainWindow.Basket.LoadTrackData(MainWindow.selectedCell.CellIndex) == true)
+                                        {
+                                            GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, true);
+                                            zoomToPath(GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.Prop);
+                                            rwc.Invalidate();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Note: having this here is a good idea, but it causes a relative mouse coordinate change,
+                                        // which in turn initiates a camera rotation
+                                        //MW.LPFittingToolWindow.Activate();
+
+                                        Thread fitThread = new Thread(new ThreadStart(fit)) { IsBackground = true };
+                                        fitThread.Start();
+                                    }
                                 }
-                                MainWindow.SetControlFlag(MainWindow.CONTROL_UPDATE_GUI, true);
-                                rwc.Invalidate();
+                                // toggle visibility
+                                else
+                                {
+                                    // switch the tubes on only if the mode is not fast preview
+                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == true || PreviewButton_IsChecked == false))
+                                    {
+                                        GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == false && !GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene);
+                                    }
+                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.Prop != null && (GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == true || PreviewButton_IsChecked == false))
+                                    {
+                                        GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.addToScene(rw, MainWindow.CheckControlFlag(MainWindow.CONTROL_ZERO_FORCE) == true && !GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene);
+                                    }
+
+                                    // switch off the actual path only if the mode is fast preview or the other two are also off
+                                    if (GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene == false || (PreviewButton_IsChecked == true ||
+                                        GetCellTrack(MainWindow.selectedCell.CellIndex).StandardTrack.InScene == false && GetCellTrack(MainWindow.selectedCell.CellIndex).ZeroForceTrack.InScene == false))
+                                    {
+                                        GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.addToScene(rw, !GetCellTrack(MainWindow.selectedCell.CellIndex).ActualTrack.InScene);
+                                    }
+                                    MainWindow.SetControlFlag(MainWindow.CONTROL_UPDATE_GUI, true);
+                                    rwc.Invalidate();
+                                }
                             }
                         }
+#endif
+                    }
+                    else if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_MOLCONCS) == true)
+                    {
+                        Cell c = Simulation.dataBasket.Cells[cellID];
+
+                        MW.DisplayCellInfo(cellID);
+                    }
+                    else
+                    {
+                        return;
                     }
                 }
             }
-#endif
         }
 
         /// <summary>
@@ -2025,41 +2030,5 @@ namespace DaphneGui
 
             ren.SetBackground(0.0, 0.0, 0.0);
         }
-
-        //This code will display cell info in a new tab at the bottom.
-        //This will work if user clicks on hand icon and then right clicks on a cell.
-        //skg 7/10/12
-        public void rightMouseDown(vtkObject sender, vtkObjectEventArgs e)
-        {
-            // If cell picking is enabled, only then should we proceed, otherwise return
-            if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == false)
-            {
-                //Console.WriteLine("exit picking disabled");
-                //return;  //skg temporarily removed this - allows us to view concs when paused.
-
-                if (MainWindow.CheckControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED) == false)
-                {
-                    return;
-                }                
-            }                       
-
-            //This section is fields right click on a specific cell
-            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
-            int[] x = interactor.GetEventPosition();
-            int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
-
-            if (p > 0)
-            {
-                p = (int)((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).GetPointId();
-                if (p >= 0)
-                {
-                    int cellID = CellController.GetCellIndex(p);
-                    Cell c = Simulation.dataBasket.Cells[cellID];                    
-                    MW.DisplayCellInfo(cellID);
-                    return;                    
-                }
-            }
-        }
-
     }
 }

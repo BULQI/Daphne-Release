@@ -81,7 +81,7 @@ namespace DaphneGui
                 else
                 {
                     blueHandToolButton_IsChecked = value;
-                    MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, value);
+                    SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, value);
                 }
             }
         }
@@ -104,13 +104,20 @@ namespace DaphneGui
         public static byte CONTROL_NONE = 0,
                            CONTROL_FORCE_RESET = (1 << 0),
                            CONTROL_DB_LOAD = (1 << 1),
-                           CONTROL_PICKING_ENABLED = (1 << 2),
-                           CONTROL_ZERO_FORCE = (1 << 3),
-                           CONTROL_NEW_RUN = (1 << 4),
-                           CONTROL_UPDATE_GUI = (1 << 5),
-                           CONTROL_MOLCONCS_ENABLED = (1 << 6);
+                           CONTROL_ZERO_FORCE = (1 << 2),
+                           CONTROL_NEW_RUN = (1 << 3),
+                           CONTROL_UPDATE_GUI = (1 << 4);
 
         public static byte controlFlags = CONTROL_NONE;
+
+        /// <summary>
+        /// constants used to set the left mouse button state
+        /// </summary>
+        public static byte MOUSE_LEFT_NONE = 0,
+                           MOUSE_LEFT_TRACK = 1,
+                           MOUSE_LEFT_CELL_MOLCONCS = 2;
+
+        public static byte mouseLeftState = MOUSE_LEFT_NONE;
 
         /// <summary>
         /// constants used in progress bar updating
@@ -153,16 +160,6 @@ namespace DaphneGui
         public static SimConfigurator SC
         {
             get { return configurator; }
-        }
-
-        /// <summary>
-        /// check if a particular control flag is set
-        /// </summary>
-        /// <param name="flag">flag to check</param>
-        /// <returns>true if set</returns>
-        public static bool CheckControlFlag(byte flag)
-        {
-            return (controlFlags & flag) != 0;
         }
 
         /// <summary>
@@ -1263,13 +1260,15 @@ namespace DaphneGui
         {
             blueHandToolButton_IsChecked = !blueHandToolButton_IsChecked;
 
-            MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, false);
-            gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
-
             if (blueHandToolButton_IsChecked)
             {
-                MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, true);
+                SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, true);
                 gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
+            }
+            else
+            {
+                SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, false);
+                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
             }
         }
 
@@ -1290,7 +1289,44 @@ namespace DaphneGui
             {
                 controlFlags &= (byte)~flag;
             }
+        }
 
+        /// <summary>
+        /// check if a particular control flag is set
+        /// </summary>
+        /// <param name="flag">flag to check</param>
+        /// <returns>true if set</returns>
+        public static bool CheckControlFlag(byte flag)
+        {
+            return (controlFlags & flag) != 0;
+        }
+
+        /// <summary>
+        /// set the left mouse button state
+        /// </summary>
+        /// <param name="state">state to set</param>
+        /// <param name="set">true for set, false for clear</param>
+        public static void SetMouseLeftState(byte state, bool set)
+        {
+            // set
+            if (set == true)
+            {
+                mouseLeftState = state;
+            }
+            // clear
+            else
+            {
+                mouseLeftState = MOUSE_LEFT_NONE;
+            }
+        }
+
+        /// <summary>
+        /// check the mouse left state
+        /// </summary>
+        /// <param name="state">state to check</param>
+        public static bool CheckMouseLeftState(byte state)
+        {
+            return mouseLeftState == state;
         }
 
         private void save3DView_Click(object sender, RoutedEventArgs e)
@@ -1925,9 +1961,10 @@ namespace DaphneGui
             // And hide stats results chart for now
             //////////this.ChartViewDocWindow.Close();
             this.menu_ActivateAnalysisChart.IsEnabled = false;
-            if (MainWindow.CheckControlFlag(MainWindow.CONTROL_PICKING_ENABLED) == true)
+
+            if (CheckMouseLeftState(MOUSE_LEFT_TRACK) == true)
             {
-                MainWindow.SetControlFlag(MainWindow.CONTROL_PICKING_ENABLED, false);
+                SetMouseLeftState(MOUSE_LEFT_TRACK, false);
                 //////////gc.CellController.SetCellOpacities(1.0);
                 //////////gc.DisablePickingButtons();
             }
