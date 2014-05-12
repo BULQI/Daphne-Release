@@ -136,7 +136,28 @@ namespace Daphne
                 vector[i] = new Vector(M.Dim);
             }
         }
-        
+
+        /// <summary>
+        /// The dimension of each vector in the vector field is determined by the dimension of the initilizing array v.
+        /// Each vector in the vector field is initialized with the values of v.
+        /// </summary>
+        /// <param name="m">Manifold on which the vector field resides</param>
+        public VectorField(DiscretizedManifold m, double[] v)
+        {
+            M = m;
+            vector = new Vector[M.ArraySize];
+
+            for (int i = 0; i < M.ArraySize; i++)
+            {
+                vector[i] = new Vector(v.Length);
+
+                for (int j = 0; j < v.Length; j++)
+                {
+                    vector[i][j] = v[j];
+                }
+            }
+        }
+
         /// <summary>
         /// The dimension of each vector in the vector field is determined by the integer input parameter
         /// </summary>

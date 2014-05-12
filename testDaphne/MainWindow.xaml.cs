@@ -210,7 +210,7 @@ namespace testDaphne
             MolecularPopulation mp;
             Molecule mol;
 
-            string path = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+            string path = "";
             string readText = File.ReadAllText(path + "json_output.txt");
 
             // The whole enchilada
@@ -239,7 +239,7 @@ namespace testDaphne
 
         private void JsonSaveScenario(Simulation sim)
         {
-            string path = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+            string path = "";
             MolecularPopulation mp;
             Molecule mol;
 
@@ -294,7 +294,7 @@ namespace testDaphne
 
         private void go()
         {
-            double T = 10;   // minutes
+            double T = 100;   // minutes
             double dt = 0.001;
             int nSteps = (int)(T / dt);
 
@@ -324,7 +324,7 @@ namespace testDaphne
                 string output;
 
                 initQ = sim.ECS.Populations["CXCL13"].Integrate();
-                string datDir = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+                string datDir = "";
                 sim.ECS.Populations["CXCL13"].Conc.WriteToFile(datDir + "CXCL13 initial.txt");
 
                 for (int i = 0; i < nSteps; i++)
@@ -356,7 +356,7 @@ namespace testDaphne
             double[] complexConc = new double[nSteps];
 
             string output;
-            string datDir = @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+            string datDir = "";
             string filename = "LigandReceptorComplex.txt";
 
             using (StreamWriter writer = File.CreateText(datDir + filename))
@@ -395,7 +395,7 @@ namespace testDaphne
                 double[][] driverLoc = new double[nSteps][];
 
                 string output;
-                string datDir = "";// @"C:\Users\gmkepler\Documents\SoftwareDevelopment\Testing\";
+                string datDir = "";
                 string filename = "DriverDynamics.txt";
 
                 using (StreamWriter writer = File.CreateText(datDir + filename))
@@ -433,7 +433,6 @@ namespace testDaphne
         // 
         // Scenarios
         //
-
 
         private void DriverLocomotionScenario()
         {
@@ -481,13 +480,14 @@ namespace testDaphne
 
             int numCells = 1;
             double cellRadius = 5.0;
-            double[] cellPos = new double[sim.ECS.Interior.Dim];
+            double[] cellPos = new double[3];
+            double[] veloc = new double[3] { 0.0, 0.0, 0.0 };
 
             // One cell
             cellPos[0] = sim.ECS.Interior.Extents[0] / 4.0;
             cellPos[1] = sim.ECS.Interior.Extents[1] / 2.0;
             cellPos[2] = sim.ECS.Interior.Extents[2] / 2.0;
-            sim.AddCell(cellPos, new double[] { 0, 0, 0 }, cellRadius);
+            sim.AddCell(cellPos, veloc, cellRadius);
 
             // Add the cell plasma membrane as an embedded boundary manifold in the extracellular compartment
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
@@ -527,14 +527,17 @@ namespace testDaphne
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], 255.0);
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], 0.0);
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], 125.0);
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], 130.0);
             }
 
             // Add Cytosol molecular populations
+            // Start with a non-zero (activated) driver concentration and global gradient
+            double[] initGrad = new double[3] { 0, 2.0, 2.0 };
+            double initConc = 250;
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
-                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], 0);
+                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], initConc, initGrad);
             }
 
             //
@@ -545,7 +548,7 @@ namespace testDaphne
             double k1plus = 2.0, k1minus = 1;
             MolecularPopulation driver;
             double  k2plus = 1.0, 
-                    k2minus = 100.0,
+                    k2minus = 10.0,
                     transductionConstant = 1e4,
                     driverTotal = 500;
 
@@ -575,7 +578,6 @@ namespace testDaphne
                 kvp.Value.Cytosol.reactions.Add(new DriverDiffusion(driver));
 
                 kvp.Value.Locomotor = new Locomotor(driver, transductionConstant);
-
             }
 
         }
@@ -763,3 +765,4 @@ namespace testDaphne
     }
 
 }
+

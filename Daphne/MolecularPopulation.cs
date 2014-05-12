@@ -6,28 +6,6 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Daphne
 {
-    //public struct Molecule
-    //{
-    //    public string Name;
-    //    public double MolecularWeight;
-    //    public double EffectiveRadius;
-    //    public double DiffusionCoefficient;
-    //    private static double boltzmannConstant = 0;
-
-    //    public Molecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
-    //    {
-    //        Name = thisName;
-    //        MolecularWeight = thisMW;
-    //        EffectiveRadius = thisEffRad;
-    //        DiffusionCoefficient = thisDiffCoeff;
-    //    }
-
-    //    public void ComputeDiffusionCoefficient(double viscosity, double temperature)
-    //    {
-    //        DiffusionCoefficient = boltzmannConstant * temperature / (6 *  Math.PI * viscosity * EffectiveRadius);
-    //    }
-    //}
-
     public class Molecule
     {
         public string Name;
@@ -141,9 +119,40 @@ namespace Daphne
 
         }
 
+        public MolecularPopulation(Molecule mol, DiscretizedManifold man, ScalarField initConc, VectorField initGrad)
+        {
+            Molecule = mol;
+            Man = man;
+            Conc = new ScalarField(man);
+            GlobalGrad = new VectorField(man, globalGradDim);
+
+            if (Man.Boundaries != null)
+            {
+                Fluxes = new Dictionary<int, ScalarField>();
+                BoundaryConcs = new Dictionary<int, ScalarField>();
+                BoundaryGlobalGrad = new Dictionary<int, VectorField>();
+
+                foreach (Embedding e in Man.Boundaries.Values)
+                {
+                    Fluxes.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryConcs.Add(e.Domain.Id, new ScalarField(e.Domain));
+                    BoundaryGlobalGrad.Add(e.Domain.Id, new VectorField(e.Domain, globalGradDim));
+                }
+            }
+
+            Initialize(initConc);
+            GradInitialize(initGrad);
+
+        }
+
         public void Initialize(ScalarField initialConcentration)
         {
-                Conc = initialConcentration;
+            Conc = initialConcentration;
+        }
+
+        public void GradInitialize(VectorField initGrad)
+        {
+            GlobalGrad = initGrad;
         }
 
         ///// <summary>
@@ -228,7 +237,7 @@ namespace Daphne
                         for (int k = 0; k < BoundaryConcs[id].array.Length; k++)
                         {
                             BoundaryConcs[id].array[k] = Concentration(Man.Boundaries[id].WhereIsIndex(k));
-                           BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIsIndex(k));
+                            BoundaryGlobalGrad[id].vector[k] = GlobalGradient(Man.Boundaries[id].WhereIsIndex(k));
                         }
                     }
                 }
@@ -327,7 +336,7 @@ namespace Daphne
             // We may need a better way to indicate when diffusion should take place
             if ((Man.ArraySize > 1) && (IsDiffusing == true))
             {
-                ScalarField temparray = new ScalarField(Man);               
+                ScalarField temparray = new ScalarField(Man);
                 for (int i = 0; i < Man.ArraySize; i++)
                 {
                     for (int j = 0; j < Man.Laplacian[i].Length; j++)
@@ -352,24 +361,24 @@ namespace Daphne
 
                 foreach (KeyValuePair<int, ScalarField> kvp in Fluxes)
                 {
-                   
-                    if ( kvp.Key.GetType() == typeof(TinySphere ) && Man.GetType() == typeof(BoundedRectangularPrism) )
+
+                    if (kvp.Key.GetType() == typeof(TinySphere) && Man.GetType() == typeof(BoundedRectangularPrism))
                     {
                         cellSurfaceArea = 4 * Math.PI * kvp.Value.M.Extents[0] * kvp.Value.M.Extents[0];
-                        
+
                         // Returns an interpolation stencil for the 8 grid points surrounding the cell position
                         lm = Man.Interpolation(Man.Boundaries[kvp.Key].WhereIs(n));
                         // Distribute the flux to or from the cell surface to the surrounding nodes
-                        for (int k=0; k<lm.Length; k++)
+                        for (int k = 0; k < lm.Length; k++)
                         {
-                            Conc.array[lm[k].Index] += lm[k].Coefficient * kvp.Value.array[n] * cellSurfaceArea / voxelVolume; 
+                            Conc.array[lm[k].Index] += lm[k].Coefficient * kvp.Value.array[n] * cellSurfaceArea / voxelVolume;
                         }
                     }
-                    else if ( Man.Boundaries[kvp.Key].NeedsInterpolation() )
+                    else if (Man.Boundaries[kvp.Key].NeedsInterpolation())
                     {
                         // TODO: implement in general case
                     }
-                    else 
+                    else
                     {
                         // TODO: implement in general case
                     }

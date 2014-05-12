@@ -42,6 +42,14 @@ namespace Daphne
             Populations.Add(molpop.Molecule.Name, molpop);
         }
 
+        public void AddMolecularPopulation(Molecule mol, double initConc, double[] initGrad)
+        {
+            // Add the molecular population with concentration specified with initConc
+            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, new ScalarField(Interior, initConc), new VectorField(Interior, initGrad));
+
+            Populations.Add(molpop.Molecule.Name, molpop);
+        }
+
         public bool HasThisReaction(ReactionTemplate rt)
         {
             if (rtList.Count == 0) return false;
