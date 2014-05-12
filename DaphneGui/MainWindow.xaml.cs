@@ -317,7 +317,7 @@ namespace DaphneGui
                 //file = "daphne_test_scenario.xml";
                 //file = "default_scenario.xml";
                 //file = "daphne_test_scenario.json";
-                file = "daphne_ligand_receptor_scenario.json";
+                file = "daphne_blank_scenario.json";
             }
 
             // attempt to load a default simulation file; if it doesn't exist disable the gui
@@ -438,7 +438,6 @@ namespace DaphneGui
         /// </summary>
         public void CreateAndSerializeDaphneScenarios()
         {
-            
             //DRIVER-LOCOMOTOR SCENARIO
             var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
             ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config.SimConfig);
@@ -457,46 +456,14 @@ namespace DaphneGui
             //serialize to json
             config.SerializeSimConfigToFile();
 
+            //BLANK SCENARIO
+            config = new SimConfigurator("Config\\daphne_blank_scenario.json");
+            ConfigCreators.CreateAndSerializeBlankScenario(config.SimConfig);
+            //serialize to json
+            config.SerializeSimConfigToFile();
+
         }
 
-        ///// <summary>
-        ///// LIGAND-RECEPTOR scenario for first pass of Daphne
-        ///// </summary>
-        //public void CreateAndSerializeLigandReceptorScenario()
-        //{
-        //    var config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
-        //    var sim_config = config.SimConfig;
-        //    sim_config.CreateAndSerializeLigandReceptorScenario();
-
-        //    //serialize to json
-        //    config.SerializeSimConfigToFile();
-        //}
-
-        ///// <summary>
-        ///// DRIVER-LOCOMOTOR scenario for first pass of Daphne
-        ///// </summary>
-        //public void CreateAndSerializeDriverLocomotionScenario()
-        //{
-        //    var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-        //    var sim_config = config.SimConfig;
-        //    sim_config.CreateAndSerializeDriverLocomotionScenario();
-
-        //    //serialize to json
-        //    config.SerializeSimConfigToFile();
-        //}
-
-        ///// <summary>
-        ///// DIFFUSIION scenario for first pass of Daphne
-        ///// </summary>
-        //public void CreateAndSerializeDiffusionScenario()
-        //{
-        //    var config = new SimConfigurator("Config\\daphne_ecm_scenario.json");
-        //    var sim_config = config.SimConfig;
-        //    sim_config.CreateAndSerializeDiffusionScenario();
-        //    //Serialize to json
-        //    config.SerializeSimConfigToFile();
-        //}
-        
         private void showScenarioInitial()
         {
             lockAndResetSim(true, "");

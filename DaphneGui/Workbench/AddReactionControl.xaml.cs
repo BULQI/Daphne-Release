@@ -135,44 +135,30 @@ namespace DaphneGui
         {
             ConfigReaction cr = new ConfigReaction();
             cr.rate_const = Convert.ToDouble(txtRate.Text);
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, MainWindow.SC.SimConfig);  //MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[2].reaction_template_guid;  //findReactionTemplateGuid(ReactionType.BoundaryAssociation, MainWindow.SC.SimConfig);
+
+            //----------------------------------
+            //Reactants
             foreach (string s in reacmolguids) {
                 if (!cr.reactants_molecule_guid_ref.Contains(s))
                     cr.reactants_molecule_guid_ref.Add(s);
             }
 
-            //THIS IS NOT OK
-            //UNTIL WE HAVE AUTOMATIC REACTIONS, WE NEED USER TO INPUT REACTION_TYPE
-            cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.entity_repository.reaction_templates[(int)ReactionType.Association].reaction_template_guid;
-
-            //increment stoichiometry
-            string guid = cr.reaction_template_guid_ref;
-            ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[guid];
-
-            // the indices of cr and crt match
-            ////for(int i = 0; i < cr.reactants_molecule_guid_ref.Count; i++)
-            ////{
-            ////    crt.reactants_stoichiometric_const[i] += 1;
-            ////}
-
             //----------------------------------
-
+            //Products
             foreach (string s in prodmolguids)
             {
                 if (!cr.products_molecule_guid_ref.Contains(s))
                     cr.products_molecule_guid_ref.Add(s);
             }
 
-            //increment stoichiometry            
-            ////for (int i = 0; i < cr.products_molecule_guid_ref.Count; i++)
-            ////{
-            ////    crt.products_stoichiometric_const[i] += 1;
-            ////}
+            //NEED MODIFIERS TOO IN GUI
 
+            //THIS IS NOT OK
+            //UNTIL WE HAVE AUTOMATIC REACTIONS, WE NEED USER TO INPUT REACTION_TYPE
+            cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.entity_repository.reaction_templates[(int)ReactionType.Association].reaction_template_guid;
 
+            //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
-            //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-
         }
     }
 }

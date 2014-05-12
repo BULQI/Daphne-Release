@@ -38,7 +38,6 @@ namespace Daphne
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
-            //ChartWindow = ReacComplexChartWindow;
 
             // Gaussian Gradients
             GaussianSpecification gg = new GaussianSpecification();
@@ -58,7 +57,6 @@ namespace Daphne
             //ADD ECS MOL POPS
             //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
             //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-            //THIS VAR IS NOT OK
             var query =
                 from mol in sc.entity_repository.molecules
                 where mol.Name == "CXCL13"
@@ -262,6 +260,38 @@ namespace Daphne
                 gmp.mpInfo.mp_distribution = sgg;
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
+        }
+
+         /// <summary>
+        /// New default scenario for first pass of Daphne
+        /// </summary>
+        public static void CreateAndSerializeBlankScenario(SimConfiguration sc)
+        {
+            // Experiment
+            sc.experiment_name = "Blank Scenario";
+            sc.experiment_description = "Scenario with 1 Compartment ECM, no molecules, no cells or reactions";
+            sc.scenario.time_config.duration = 100;
+            sc.scenario.time_config.rendering_interval = 0.3;
+            sc.scenario.time_config.sampling_interval = 1440;
+
+            // Global Paramters
+            LoadDefaultGlobalParameters(sc);
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 200;
+            box.y_scale = 200;
+            box.z_scale = 200;
+            box.x_trans = 500;
+            box.y_trans = 500;
+            box.z_trans = 500;
+            sc.entity_repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            sc.entity_repository.gaussian_specifications.Add(gg);
+
         }
 
         private static void PredefinedCellsCreator(SimConfiguration sc)

@@ -23,40 +23,6 @@ namespace DaphneGui
             InitializeComponent();
         }
 
-        //private void AddRegionButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    //RegionsDetailsExpander.IsExpanded = true;
-
-        //    BoxSpecification box = new BoxSpecification();
-        //    box.x_trans = 200;
-        //    box.y_trans = 200;
-        //    box.z_trans = 200;
-        //    box.x_scale = 100;
-        //    box.y_scale = 100;
-        //    box.z_scale = 100;
-        //    // Add box GUI property changed to VTK callback
-        //    //////////box.PropertyChanged += MainWindow.SC.GUIInteractionToWidgetCallback;
-        //    //////////MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
-        //    //////////Region reg = new Region("New region", RegionShape.Ellipsoid);
-        //    //////////reg.region_box_spec_guid_ref = box.box_guid;
-        //    //////////reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.6f, 0.31f, 0.7f);
-        //    //////////// Add region GUI property changed to VTK callback
-        //    //////////reg.PropertyChanged += MainWindow.SC.GUIRegionSurfacePropertyChange;
-        //    //////////MainWindow.SC.SimConfig.scenario.regions.Add(reg);
-        //    //////////RegionsListBox.SelectedIndex = RegionsListBox.Items.Count - 1;
-
-        //    //////////// Add RegionControl & RegionWidget for the new region
-        //    //////////MainWindow.VTKBasket.AddRegionRegionControl(reg);
-        //    //////////MainWindow.GC.AddRegionRegionWidget(reg);
-        //    //////////// Connect the VTK callback
-        //    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-        //    //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
-            
-        //    //////////MainWindow.GC.Rwc.Invalidate();
-        //}
-
-        
-
         private void AddCellButton_Click(object sender, RoutedEventArgs e)
         {
             CellsDetailsExpander.IsExpanded = true;
@@ -75,7 +41,6 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
         }
 
-        
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
         private void AddGaussianSpecification()
         {
@@ -462,18 +427,8 @@ namespace DaphneGui
             }
         }
 
-        private void ReactionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            ////foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            ////{
-            ////    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            ////}
-
-        }
-
         private void btnAddReaction_Click(object sender, RoutedEventArgs e)
         {
-            
         }
 
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
@@ -482,28 +437,12 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
         }
 
-        private void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            //foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            //{
-            //    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            //}
-        }
-
-        private void ECMReacExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            //foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            //{
-            //    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            //}
-        }
-
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
             ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
             if (cc != null && cr != null)
-                cc.membrane.reactions_guid_ref.Add(cr.reaction_template_guid_ref);
+                cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -512,7 +451,7 @@ namespace DaphneGui
             ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
 
             if (cc != null && cr != null)
-                cc.cytosol.reactions_guid_ref.Add(cr.reaction_template_guid_ref);
+                cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void rbBulk_Click(object sender, RoutedEventArgs e)
@@ -549,14 +488,6 @@ namespace DaphneGui
             }
         }
 
-        private void EcsMolPopsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            ////foreach (ConfigMolecularPopulation cmp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
-            ////{
-            ////    lbEcsMolPops.Items.Add(cmp.Name);
-            ////}
-        }
-
         private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
             ConfigReaction cr = e.Item as ConfigReaction;
@@ -565,7 +496,6 @@ namespace DaphneGui
                 // Filter out cr if not in ecm reaction list 
                 if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
                 else
@@ -585,7 +515,6 @@ namespace DaphneGui
                 // Filter out cr if not in ecm reaction list 
                 if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
                 
@@ -601,7 +530,6 @@ namespace DaphneGui
                 // Filter out cr if not in ecm reaction list 
                 if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
                 {
-                    //cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                     e.Accepted = true;
                 }
                 else
@@ -638,26 +566,11 @@ namespace DaphneGui
 
         private void membraneMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
-            ////ConfigMolecularPopulation cmp = e.Item as ConfigMolecularPopulation;
-            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ////if (cm != null && cc != null)
-            ////{
-            ////    // Filter out molecule if not in membrane molecule list 
-            ////    if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
-            ////    {
-            ////        cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            ////        e.Accepted = true;
-            ////    }
-            ////    else
-            ////    {
-            ////        e.Accepted = false;
-            ////    }
-            ////}
+            
         }
 
         private void cytosolMoleculesCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
-
         }
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
@@ -665,23 +578,26 @@ namespace DaphneGui
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             string name = cell.membrane.molpops[0].Name;
         }
-
-        private void AddLibReactionsExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            ////foreach (ConfigReaction cr in MainWindow.SC.SimConfig.entity_repository.reactions)
-            ////{
-            ////    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
-            ////}
-        }
-
+        
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //MembReacListBox.Items.Clear();
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+                return;
+
+            MembReacListBox.Items.Clear();
+            foreach (string guid in cell.membrane.reactions_guid_ref) 
+            {
+                if (MainWindow.SC.SimConfig.entity_repository.reactions_dict.ContainsKey(guid))
+                    MembReacListBox.Items.Add(MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid]);
+            }
+
+            CytosolReacListBox.Items.Clear();
+            foreach (string guid in cell.cytosol.reactions_guid_ref)
+            {
+                if (MainWindow.SC.SimConfig.entity_repository.reactions_dict.ContainsKey(guid))
+                    CytosolReacListBox.Items.Add(MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid]);
+            }
         }
-
-        
     }
-
-   
-    
 }

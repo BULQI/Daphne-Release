@@ -1762,42 +1762,39 @@
                                     SelectionChanged="lbMol_SelectionChanged"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="btnCopyMolec"  Width="50" Content="Add" Click="btnCopyMolec_Click"></Button>
+                                <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolec_Click"></Button>
                                 <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddMolec_Click"></Button>
                                 <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolec_Click"></Button>
                             </StackPanel>
 
-                            <StackPanel  Margin="0,0" Orientation="Vertical" DataContext="{Binding ElementName=lbMol, Path=SelectedItem}" >
-                                <StackPanel.Resources>
-                                    <daph:EnumBooleanConverter x:Key="enumBooleanConverter" />
-                                </StackPanel.Resources>
+                            <StackPanel  Margin="0,6" Orientation="Vertical" DataContext="{Binding ElementName=lbMol, Path=SelectedItem}" >
+                                <StackPanel Orientation="Horizontal">
                                     <!-- Name -->
                                     <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Molecule Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                    <TextBox x:Name="txtMolName" Text="{Binding Path=Name}" Height="24" Margin="0,4" ></TextBox>
-                                    </StackPanel>
-                                    <!-- Weight -->
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Molecular Weight" Margin="6,0"  HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                        <TextBox x:Name="txtMolWt"  Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Width="80" Height="24" Margin="0,4"></TextBox>
-                                    </StackPanel>
-                                    <!-- Radius -->
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Molecular Radius"  Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                        <TextBox x:Name="txtRadius" Text="{Binding Path=EffectiveRadius}" Width="80" Height="24" Margin="0,4" />
+                                        <TextBlock Text="Molecule Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100"/>
+                                        <TextBox x:Name="txtMolName" Text="{Binding Path=Name}" Height="24" Margin="0,0" MinWidth="100"></TextBox>
                                     </StackPanel>
                                     <!-- Diffusion coefficient -->
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Diffusion coefficient"  Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                        <TextBox x:Name="txtDiffCoeff" Text="{Binding Path=DiffusionCoefficient}" Width="80" Height="24" Margin="0,4" />
+                                    <StackPanel Orientation="Horizontal" Margin="6,0">
+                                        <TextBlock Text="Diffusion coefficient"  Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="120"/>
+                                        <TextBox x:Name="txtDiffCoeff" Text="{Binding Path=DiffusionCoefficient}"  Height="24" Margin="0,0" MinWidth="100"/>
                                     </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                <!-- Weight -->
                                     <StackPanel Orientation="Horizontal">
-                                        <!--<RadioButton IsChecked="{Binding Path=molecule_location, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Bulk}">bulk</RadioButton>-->
-                                        <!--<RadioButton IsChecked="{Binding Path=molecule_location, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Boundary}">boundary</RadioButton>-->
-                                        <!--<CheckBox IsChecked="{Binding Path=molecule_location}">Boundary molecule</CheckBox>-->
+                                        <TextBlock Text="Molecular Weight" Margin="6,0"  HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100"/>
+                                        <TextBox x:Name="txtMolWt"  Text="{Binding Path=MolecularWeight, Mode=TwoWay}" Height="24" Margin="0,0" MinWidth="100"></TextBox>
+                                    </StackPanel>
+                                    <!-- Radius -->
+                                    <StackPanel Orientation="Horizontal" Margin="6,0">
+                                        <TextBlock Text="Molecular Radius"  Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="120"/>
+                                        <TextBox x:Name="txtRadius" Text="{Binding Path=EffectiveRadius}"  Height="24" Margin="0,0" MinWidth="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,6">
                                     <RadioButton IsChecked="{Binding Path=molecule_location}" x:Name="rbBulk"  Margin="6,0" Click="rbBulk_Click">Bulk</RadioButton>
                                     <RadioButton IsChecked="{Binding Path=molecule_location}" x:Name="rbBoundary"  Margin="10,0" Click="rbBoundary_Click">Boundary</RadioButton>
-                                        
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -1816,7 +1813,6 @@
                                 BorderThickness="1"
                                 BorderBrush="Black"                        
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                
-                                Expanded="ReactionsExpander_Expanded"
                                 >
 
                         
@@ -1896,7 +1892,6 @@
                                     x:Name="CellsDetailsExpander"
                                     Margin="0,-15,0,0" 
                                     Canvas.ZIndex="1"
-                                      
                                     >
 
                                 <StackPanel Orientation="Vertical">
@@ -1997,11 +1992,14 @@
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
-                                                    <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
+                                                    <!--<ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
                                                              ItemsSource="{Binding Source={StaticResource membraneReactionsListView}}"
                                                             DisplayMemberPath="TotalReactionString"                                                    
                                                             SelectedIndex="-1"
-                                                    />
+                                                    />-->
+                                                    <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
+                                                             DisplayMemberPath="TotalReactionString">
+                                                    </ListBox>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                         <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                                     </StackPanel>
@@ -2009,8 +2007,12 @@
                                                 <StackPanel Orientation="Vertical" >
                                                     <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
-                                                    <ListBox x:Name="CytosolReacPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
+                                                    <!--<ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
                                                              ItemsSource="{Binding Source={StaticResource cytosolReactionsListView}}"
+                                                            DisplayMemberPath="TotalReactionString"                                                    
+                                                            SelectedIndex="-1"
+                                                    />-->
+                                                    <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
                                                             DisplayMemberPath="TotalReactionString"                                                    
                                                             SelectedIndex="-1"
                                                     />
@@ -2027,7 +2029,6 @@
                                                   x:Name="CellAddReacExpander"
                                                   Margin="0,0,0,0" 
                                                   Canvas.ZIndex="1"
-                                                  Expanded="CellAddReacExpander_Expanded"
                                                   >
                                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                                     
@@ -2619,7 +2620,7 @@
                             BorderThickness="1"
                             BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            Expanded="EcsMolPopsExpander_Expanded">
+                            >
 
                         <StackPanel>
                             <StackPanel.Resources>
@@ -2735,7 +2736,6 @@
                             x:Name="ReacExpander"
                             Margin="0,5,0,0" 
                             Canvas.ZIndex="1"
-                            Expanded="ECMReacExpander_Expanded"
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
@@ -2810,7 +2810,6 @@
                                               x:Name="AddReacExpander"
                                               Margin="0,0,0,0" 
                                               Canvas.ZIndex="1"
-                                              Expanded="AddLibReactionsExpander_Expanded"
                                               >
                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                     <!--<StackPanel.Resources>
