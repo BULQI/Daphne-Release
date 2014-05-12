@@ -2750,8 +2750,6 @@ namespace Daphne
 
         [JsonIgnore]
         public ReactionComplexProcessor Processor { get; set; }
-        //[JsonIgnore]
-        //public Simulation RCSim { get; set; }
 
         public ConfigReactionComplex()
         {
@@ -2761,9 +2759,6 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReadOnly = true;
-            //Processor = new ReactionComplexProcessor();
-            //RCSim = new Simulation();
-            
         }
         public ConfigReactionComplex(string name)
         {
@@ -2774,9 +2769,6 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
-            //Processor = new ReactionComplexProcessor();
-            //RCSim = new Simulation();
-            
         }
         
         public ConfigReactionComplex Clone()
@@ -2808,85 +2800,47 @@ namespace Daphne
             return false;
         }
 
+        private void AddMolsToReaction(EntityRepository er, ConfigReaction reac, ObservableCollection<string> mols)
+        {
+            foreach (string molguid in mols)
+            {
+                ConfigMolecule configMolecule = er.molecules_dict[molguid];
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                    configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
+                    configMolPop.Name = configMolecule.Name;
+                    configMolPop.mpInfo.mp_dist_name = "Uniform";
+                    configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = 1;
+                    configMolPop.mpInfo.mp_distribution = hl;
+                    if (HasMolecule(molguid) == false)
+                    {
+                        molpops.Add(configMolPop);
+                    }
+                }
+            }
+        }
+
         public void RefreshMolPops(EntityRepository er)
         {
             //Clear mol pop list and regenerate it
             molpops.Clear();
-
             foreach (string reacguid in reactions_guid_ref)
             {
                 ConfigReaction reac = er.reactions_dict[reacguid];
-                foreach (string molguid in reac.reactants_molecule_guid_ref)
-                {
-                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    if (configMolecule != null)
-                    {
-                        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
-                        configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
-                        configMolPop.Name = configMolecule.Name;
-                        configMolPop.mpInfo.mp_dist_name = "Uniform";
-                        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
-                        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                        hl.concentration = 1;
-                        configMolPop.mpInfo.mp_distribution = hl;
-                        if (HasMolecule(molguid) == false)
-                        {
-                            molpops.Add(configMolPop);
-                        }
-                    }
-                }
-                foreach (string molguid in reac.products_molecule_guid_ref)
-                {
-                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    if (configMolecule != null)
-                    {
-                        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
-                        configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
-                        configMolPop.Name = configMolecule.Name;
-                        configMolPop.mpInfo.mp_dist_name = "Uniform";
-                        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
-                        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                        hl.concentration = 1;
-                        configMolPop.mpInfo.mp_distribution = hl;
-                        if (HasMolecule(molguid) == false)
-                        {
-                            molpops.Add(configMolPop);
-                        }
-                    }
-                }
-                foreach (string molguid in reac.modifiers_molecule_guid_ref)
-                {
-                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                    if (configMolecule != null)
-                    {
-                        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
-                        configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
-                        configMolPop.Name = configMolecule.Name;
-                        configMolPop.mpInfo.mp_dist_name = "Uniform";
-                        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
-                        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                        hl.concentration = 1;
-                        configMolPop.mpInfo.mp_distribution = hl;
-                        if (HasMolecule(molguid) == false)
-                        {
-                            molpops.Add(configMolPop);
-                        }
-                    }
-                }
-
+                AddMolsToReaction(er, reac, reac.reactants_molecule_guid_ref);
+                AddMolsToReaction(er, reac, reac.products_molecule_guid_ref);
+                AddMolsToReaction(er, reac, reac.modifiers_molecule_guid_ref);
             }
         }
 
         public void PrepareToRun()
         {
             Processor = new ReactionComplexProcessor();
-            //RCSim = new Simulation();
         }
 
     }

@@ -872,7 +872,7 @@
                                         Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         SliderEnabled="False">
                         </uc:DoublesBox>
-                </StackPanel>
+                    </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
                     <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
                         <TextBlock.Style>
@@ -1441,7 +1441,8 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox Text="{Binding Path=CellRadius, UpdateSourceTrigger=PropertyChanged}" Margin="0,2"  Width="120" />
+                            <uc:DoublesBox SliderEnabled="False" Width="120" Number="{Binding Path=CellRadius}">
+                            </uc:DoublesBox>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="differentiator" Margin="6,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
@@ -1493,12 +1494,15 @@
 
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
-                                <TextBox Text="{Binding Path=TransductionConstant, UpdateSourceTrigger=PropertyChanged}"  Margin="0,2" Width="100"  />
+                                <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=TransductionConstant, UpdateSourceTrigger=PropertyChanged}"    />
+                                
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
-                                <TextBox Text="{Binding Path=DragCoefficient, UpdateSourceTrigger=PropertyChanged}"  Margin="0,2" Width="100"  />
+                                <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=DragCoefficient, UpdateSourceTrigger=PropertyChanged}"    />
                             </StackPanel>
 
                         </StackPanel>
@@ -2491,13 +2495,6 @@
                                               >
                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                     <TextBlock Text="Available Reactions" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
-                                    <!--<ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
-                                            ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
-                                            SelectedIndex="0"
-                                            MinHeight="50" MaxHeight="150"
-                                            >
-                                    -->
-
                                     <ListView x:Name="lvAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"   
                                                 ItemsSource="{Binding Source={StaticResource ecmAvailableReactionsListView}}"
                                                 SelectedIndex="0"
@@ -2522,14 +2519,9 @@
                                                 <GridViewColumn Width="80" Header="Rate constant">
                                                     <GridViewColumn.CellTemplate>
                                                         <DataTemplate>
-                                                            <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground"  Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                            </TextBlock>
+                                                            <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
+                                                                Number="{Binding rate_const}">                                                                
+                                                            </uc:DoublesBox>
                                                         </DataTemplate>
                                                     </GridViewColumn.CellTemplate>
                                                 </GridViewColumn>
@@ -3750,7 +3742,7 @@
                                 <local:DaphneStackPanel x:Name="panelCellMolPops" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
                                     <!--<StackPanel Orientation="Vertical">-->
                                     <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellDetails" Height="84"
+                                        <ContentControl Name="CellDetails" Height="96"
                                                 Content="{Binding ElementName=CellsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellDetailsTemplate}" 
                                                 Margin="6,4"/>
@@ -3852,9 +3844,10 @@
                                             <StackPanel.Resources>
                                                 <DataTemplate x:Key="cellReacListItemTemplate">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Width="40" MinWidth="40" Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv}, StringFormat={}{0:#.00},
+                                                        <TextBlock Width="40" MinWidth="40" Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv}, StringFormat={}{0:#.00},
                                                                 ConverterParameter={StaticResource ecmReactionsListView}, ConverterCulture='de-DE'}">
                                                         </TextBlock>
+                                                        
                                                         <TextBlock Margin="10,0" Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},  
                                                                 ConverterParameter={StaticResource ecmReactionsListView}}">
                                                         </TextBlock>
@@ -3914,15 +3907,9 @@
                                                                                     <GridViewColumn Width="80" Header="Rate constant">
                                                                                         <GridViewColumn.CellTemplate>
                                                                                             <DataTemplate>
-                                                                                                <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
-                                                                                                <TextBlock.Style>
-                                                                                                    <Style>
-                                                                                                        <Setter Property="TextBlock.Foreground" 
-                                                                                                                Value="Black">
-                                                                                                        </Setter>
-                                                                                                    </Style>
-                                                                                                </TextBlock.Style>
-                                                                                                </TextBlock>
+                                                                                                <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
+                                                                                                    Number="{Binding rate_const}">                                                                                                    
+                                                                                                </uc:DoublesBox>
                                                                                             </DataTemplate>
                                                                                         </GridViewColumn.CellTemplate>
                                                                                     </GridViewColumn>
@@ -4004,15 +3991,9 @@
                                                                                     <GridViewColumn Width="80" Header="Rate constant">
                                                                                         <GridViewColumn.CellTemplate>
                                                                                             <DataTemplate>
-                                                                                                <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
-                                                                                                    <TextBlock.Style>
-                                                                                                        <Style>
-                                                                                                            <Setter Property="TextBlock.Foreground" 
-                                                                                                                    Value="Black">
-                                                                                                            </Setter>
-                                                                                                        </Style>
-                                                                                                    </TextBlock.Style>
-                                                                                                </TextBlock>
+                                                                                                <uc:DoublesBox SliderEnabled="False" IsReadOnly="True"
+                                                                                                    Number="{Binding rate_const}">                                                                                                    
+                                                                                                </uc:DoublesBox>
                                                                                             </DataTemplate>
                                                                                         </GridViewColumn.CellTemplate>
                                                                                     </GridViewColumn>

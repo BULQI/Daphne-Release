@@ -59,7 +59,7 @@
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
                 <TextBlock VerticalAlignment="Center" >Maximum time (seconds):</TextBlock>
-                <Slider x:Name="slMaxTime" 
+                <!--<Slider x:Name="slMaxTime" 
                         Orientation="Horizontal"
                         Width="100" Height="24"
                         RenderTransform="1.0,0,0,0.5,0,4"
@@ -72,8 +72,15 @@
                 </Slider>
                 <TextBox x:Name="txtMaxTime" Width="150" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
                       Text="{Binding ElementName=slMaxTime, Path=Value}">
-                </TextBox>                
-                
+                </TextBox>-->
+
+                <uc:DoublesBox x:Name="dblMaxTime" HorizontalAlignment="Left" Margin="4,0"
+                                                Number="{Binding Path=dInitialTime}"                                                   
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000">
+
+                </uc:DoublesBox>
+
             </StackPanel>
 
             <StackPanel Grid.Column="0" Grid.Row="2" >
@@ -135,7 +142,10 @@
                                                 Number="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
                                                 RangeFactor="1"
                                                 SNLowerThreshold="0.001"
-                                                SNUpperThreshold="1000">
+                                                SNUpperThreshold="1000"
+                                                PropertyChanged="dblConcs_PropertyChanged"       
+                                                >
+                                            
 
                                         </uc:DoublesBox>
 

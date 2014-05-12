@@ -179,6 +179,8 @@ namespace DaphneGui
 #endif
         }
 
+        public CellInfo SelectedCellInfo { get; set; } 
+
         /// <summary>
         /// custom routed command for delete db
         /// </summary>
@@ -234,6 +236,8 @@ namespace DaphneGui
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
 
             this.ToolWinCellInfo.Close();
+
+            SelectedCellInfo = new CellInfo();
 
             ////try
             ////{
@@ -2289,6 +2293,36 @@ namespace DaphneGui
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
             txtCellId.Content = cellID.ToString();
+
+            //enhancement - get cell location, velocity, force
+            //double cellConc = selectedCell.
+            tbCellConc.Text = "Cell Id: " + cellID; // +", Concentration = " + cellConc;
+
+            SelectedCellInfo.ciList.Clear();
+
+            CellXVF xvf = new CellXVF();
+            xvf.name = "Location (μm)";
+            xvf.x = selectedCell.State.X[0];
+            xvf.y = selectedCell.State.X[1];
+            xvf.z = selectedCell.State.X[2];
+            SelectedCellInfo.ciList.Add(xvf);
+
+            xvf = new CellXVF();
+            xvf.name = "Velocity (μm/min)";
+            xvf.x = selectedCell.State.V[0];
+            xvf.y = selectedCell.State.V[1];
+            xvf.z = selectedCell.State.V[2];
+            SelectedCellInfo.ciList.Add(xvf);
+
+            xvf = new CellXVF();
+            xvf.name = "Force (/\u03bc\u33a1)";
+            xvf.x = selectedCell.State.F[0];
+            xvf.y = selectedCell.State.F[1];
+            xvf.z = selectedCell.State.F[2];
+            SelectedCellInfo.ciList.Add(xvf);
+
+            //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
+            lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
 
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)

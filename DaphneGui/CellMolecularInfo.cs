@@ -4,9 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Drawing;
+using System.Collections.ObjectModel;
 
 namespace DaphneGui
 {
+    public class CellXVF
+    {
+        public string name { get; set; }
+        public double x { get; set; }
+        public double y { get; set; }
+        public double z { get; set; }
+    }
+
+
+    public class CellInfo
+    {
+        public ObservableCollection<CellXVF> ciList { get; set; }
+
+        public CellInfo()
+        {
+            ciList = new ObservableCollection<CellXVF>();
+        }
+    }
+
     public class CellMolecularInfo
     {
         public CellMolecularInfo()

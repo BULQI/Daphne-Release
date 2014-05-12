@@ -75,7 +75,7 @@ namespace DaphneUserControlLib
             set
             {
                 _format = "{0:N" + DecimalPlaces.ToString() + "}";
-                if (Number >= SNUpperThreshold)
+                if (Number >= SNUpperThreshold || Number < 0)
                 {
                     if (DecimalPlaces == 0)
                         DecimalPlaces++;
@@ -240,12 +240,20 @@ namespace DaphneUserControlLib
         {
             get { return (int)GetValue(RangeFactorProperty); }
             set
-            {                
-                SetValue(RangeFactorProperty, value);
+            {
+                if (value <= 0)
+                {
+                    SetValue(RangeFactorProperty, 1);
+                }
+                else
+                {
+                    SetValue(RangeFactorProperty, value);
+                }
                 SetMinMax();
                 OnPropertyChanged("RangeFactor");
             }
         }
+
         private static void RangeFactorPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             // insert your code here

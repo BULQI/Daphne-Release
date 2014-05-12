@@ -22,6 +22,7 @@ using Ninject.Parameters;
 
 using Workbench;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -2437,7 +2438,11 @@ namespace DaphneGui
         private void TabItem_Loaded(object sender, RoutedEventArgs e)
         {
             lbRptCellPops.SelectedIndex = 0;
-            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            ICollectionView icv = CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource);
+            if (icv != null)
+            {
+                icv.Refresh();
+            }
         }
 
         private void TextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -2550,8 +2555,9 @@ namespace DaphneGui
             MainWindow.ST_ReacComplexChartWindow.DataContext = crc.Processor;
             MainWindow.ST_ReacComplexChartWindow.Render();
 
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = crc.Processor.dMaxTime;
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = crc.Processor.dInitialTime;
+            //MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = crc.Processor.dMaxTime;
+            //MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = crc.Processor.dInitialTime;
+            MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = crc.Processor.dInitialTime;
 
             //MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
 

@@ -6,6 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DaphneGui"
              xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
              mc:Ignorable="d" 
              d:DesignHeight="407" d:DesignWidth="575">
     <UserControl.Resources>
@@ -82,23 +83,8 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" >
                 <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtRate" Width="60" Text="2.0">
-                    <!--<TextBox.BitmapEffect>
-                        <DropShadowBitmapEffect ShadowDepth=".4" Softness=".1"></DropShadowBitmapEffect>
-                    </TextBox.BitmapEffect>-->
-                    <!--<TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}">
-                            <Style.Triggers>
-                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                    <Setter Property="Effect">
-                                        <Setter.Value>
-                                            <DropShadowEffect Opacity="1" ShadowDepth="0" Color="Gray" BlurRadius="10" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>-->
+                <!--<uc:DoublesBox x:Name="txtRate" Width="60" SliderEnabled="False" Number="2.0" />-->
+                <TextBox x:Name="txtRate" Width="60" Text="2.0">                    
                 </TextBox>
             </StackPanel>
         </StackPanel>
