@@ -2607,7 +2607,7 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
-                e.driver_mol_guid_ref = null;
+                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = Driver.states[k];
                 e.CurrentState = k;
                 e.DestState = Driver.states.Count - 1;
@@ -2622,7 +2622,7 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
-                e.driver_mol_guid_ref = null;
+                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = sname;
                 e.CurrentState = Driver.states.Count - 1;
                 e.DestState = j;

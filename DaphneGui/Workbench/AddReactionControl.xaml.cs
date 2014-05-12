@@ -146,7 +146,7 @@ namespace DaphneGui
         // given a molecule name, check if it exists in repository - return
         private static string findMoleculeGuidByName(string inputMolName)
         {
-            string guid = null;
+            string guid = "";
             foreach (ConfigMolecule cm in MainWindow.SC.SimConfig.entity_repository.molecules)
             {
                 if (cm.Name == inputMolName)
@@ -465,7 +465,7 @@ namespace DaphneGui
         
         private string IdentifyReactionType()
         {
-            string reaction_template_guid_ref = null;
+            string reaction_template_guid_ref = "";
 
             bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
             bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
