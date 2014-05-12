@@ -483,7 +483,7 @@ namespace Daphne
                     // membrane; no boundary
                     addCompartmentReactions(cell.PlasmaMembrane, null, sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane, sc.entity_repository);
 
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "")
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != null)
                     {
                         MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
 

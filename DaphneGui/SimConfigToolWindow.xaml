@@ -2476,7 +2476,24 @@
                                     <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                                <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
+
+                                                <TextBox Width="150" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="{x:Type TextBox}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
+                                                                    <Setter Property="IsEnabled" Value="False" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
+                                                                    <Setter Property="IsEnabled" Value="True" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+
+
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -2547,9 +2564,9 @@
                             <!--ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"-->
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolec_Click"></Button>
-                                <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddMolec_Click"></Button>
-                                <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolec_Click"></Button>
+                                <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolecule_Click"></Button>
+                                <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddMolecule_Click"></Button>
+                                <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolecule_Click"></Button>
                             </StackPanel>
                         </StackPanel>
                         

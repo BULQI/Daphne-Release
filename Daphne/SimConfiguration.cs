@@ -448,7 +448,63 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecule cm = dd as ConfigMolecule;
+
+                    //Remove molecule from molecules_dict
                     entity_repository.molecules_dict.Remove(cm.molecule_guid);
+
+                    //This removes all the ECM molpops that have this molecule type
+                    foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
+                    {
+                        if (kvp.Value.molecule_guid_ref == cm.molecule_guid)
+                        {
+                            scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
+                            scenario.environment.ecs.molpops.Remove(kvp.Value);
+                        }
+                    }
+
+                    //This removes all the cell membrane molpops that have this molecule type
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        if (cell.ReadOnly == false)
+                        {
+                            foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
+                            {
+                                if (kvp.Value.molecule_guid_ref == cm.molecule_guid)
+                                {
+                                    cell.membrane.molpops_dict.Remove(kvp.Key);
+                                    cell.membrane.molpops.Remove(kvp.Value);
+                                }
+                            }
+                        }
+                    }
+
+                    //This removes all the cell cytosol molpops that have this molecule type
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        if (cell.ReadOnly == false)
+                        {
+                            foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
+                            {
+                                if (cmp.molecule_guid_ref == cm.molecule_guid)
+                                {
+                                    //cell.cytosol.molpops_dict.Remove(kvp.Key);
+                                    cell.cytosol.molpops.Remove(cmp);
+                                }
+                            }
+                        }
+                    }
+
+                    //This removes all the reactions that use this molecule
+                    foreach (KeyValuePair<string, ConfigReaction> kvp in entity_repository.reactions_dict.ToList())
+                    {
+                        ConfigReaction reac = kvp.Value;
+                        if (reac.HasMolecule(cm.molecule_guid))
+                        {
+                            entity_repository.reactions_dict.Remove(kvp.Key);
+                            entity_repository.reactions.Remove(kvp.Value);
+                        }
+                    }
+
                 }
             }
         }
@@ -511,6 +567,13 @@ namespace Daphne
                 {
                     ConfigCell cc = dd as ConfigCell;
                     entity_repository.cells_dict.Remove(cc.cell_guid);
+
+                    foreach (var cell_pop in scenario.cellpopulations.ToList())
+                    {
+                        if (cc.cell_guid == cell_pop.cell_guid_ref)
+                            scenario.cellpopulations.Remove(cell_pop);
+                    }
+
                 }
             }
         }
@@ -655,7 +718,6 @@ namespace Daphne
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
-
         }
 
         public bool HasCell(ConfigCell cell)
@@ -669,18 +731,6 @@ namespace Daphne
                 }
             }
             return res;
-        }
-
-        public void RemoveCellPopulation(ConfigCell cell) 
-        {
-            foreach (CellPopulation cell_pop in cellpopulations)
-            {
-                if (cell_pop.cell_guid_ref == cell.cell_guid)
-                {
-                    cellpopulations.Remove(cell_pop);
-                    return;
-                }
-            }
         }
     }
 
@@ -1669,7 +1719,7 @@ namespace Daphne
     {
         // private to simConfig; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
+        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;      //IS THIS NEEDED??
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -1693,6 +1743,70 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             reaction_complexes_guid_ref = new ObservableCollection<string>();
             molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
+
+            molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
+        }
+
+        private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //if (e.Action == NotifyCollectionChangedAction.Add)
+            //{
+            //    foreach (var nn in e.NewItems)
+            //    {
+            //    }
+            //}
+            //else if (e.Action == NotifyCollectionChangedAction.Remove)
+            //{
+            //    foreach (var oo in e.OldItems)
+            //    {
+            //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
+            //        if (cmp.report_mp.molpop_guid_ref == cmp.molpop_guid)
+            //        {
+
+            //        }
+            //    }
+            //}
+
+            OnPropertyChanged("molpops");            
+        }
+
+
+        //Return true if this compartment has a molecular population with given molecule
+        public bool HasMolecule(ConfigMolecule mol)
+        {
+            bool res = false;
+            foreach (ConfigMolecularPopulation molpop in molpops)
+            {
+                if (molpop.molecule_guid_ref == mol.molecule_guid)
+                {
+                    return true;
+                }
+            }
+            return res;
+        }
+
+        //Remove a molecular population given a molecule guid
+        public void RemoveMolecularPopulation(string molecule_guid)
+        {
+            string molpop_guid = "";
+
+            ConfigMolecularPopulation delMolPop = null;
+            foreach (ConfigMolecularPopulation cmp in molpops)
+            {
+                if (molecule_guid == cmp.molecule_guid_ref)
+                {
+                    molpop_guid = cmp.molpop_guid;
+                    delMolPop = cmp;
+                    break;
+                }
+            }
+
+            if (molpop_guid.Length > 0)
+            {
+                //molpops.Remove(molpops_dict[molpop_guid]);
+                molpops.Remove(delMolPop);
+                //molpops_dict.Remove(molpop_guid);
+            }
         }
     }
 
@@ -1861,6 +1975,16 @@ namespace Daphne
 
             TotalReactionString = s;
 
+        }
+
+        public bool HasMolecule(string molguid)
+        {
+            if (reactants_molecule_guid_ref.Contains(molguid) || products_molecule_guid_ref.Contains(molguid) || modifiers_molecule_guid_ref.Contains(molguid))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public string reaction_guid { get; set; }

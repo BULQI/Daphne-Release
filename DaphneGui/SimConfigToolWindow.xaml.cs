@@ -917,7 +917,7 @@ namespace DaphneGui
 
         //LIBRARIES TAB EVENT HANDLERS
         //MOLECULES        
-        private void btnAddMolec_Click(object sender, RoutedEventArgs e)
+        private void btnAddMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = new ConfigMolecule();
             gm.ReadOnly = false;
@@ -928,7 +928,7 @@ namespace DaphneGui
             dgLibMolecules.ScrollIntoView(cm);
         }
 
-        private void btnCopyMolec_Click(object sender, RoutedEventArgs e)
+        private void btnCopyMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
 
@@ -943,12 +943,26 @@ namespace DaphneGui
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
             dgLibMolecules.ScrollIntoView(cm);
         }
-        private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
+        private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
             if (gm.ReadOnly == false)
             {
+                MessageBoxResult res;
+                if (MainWindow.SC.SimConfig.scenario.environment.ecs.HasMolecule(gm))
+                {
+                    res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
+                }
+                else
+                {
+                    res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
+                }
+
+                if (res == MessageBoxResult.No)
+                    return;
+
                 int index = dgLibMolecules.SelectedIndex;
+                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
                 MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
                 dgLibMolecules.SelectedIndex = index;
 
@@ -2049,7 +2063,7 @@ namespace DaphneGui
 
                     if (res == MessageBoxResult.Yes)
                     {
-                        MainWindow.SC.SimConfig.scenario.RemoveCellPopulation(cell);
+                        //MainWindow.SC.SimConfig.scenario.RemoveCellPopulation(cell);
                         MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
 
                         CellsListBox.SelectedIndex = nIndex;
