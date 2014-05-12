@@ -121,12 +121,14 @@ namespace Daphne
                         return;
                     }
 
+                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
+                    // box x,y,z_scale parameters are 2*sigma
                     double[] initArray = new double[] { sc.entity_repository.box_specifications[box_id].x_trans, 
                                                         sc.entity_repository.box_specifications[box_id].y_trans,
                                                         sc.entity_repository.box_specifications[box_id].z_trans,
-                                                        sc.entity_repository.box_specifications[box_id].x_scale,
-                                                        sc.entity_repository.box_specifications[box_id].y_scale,
-                                                        sc.entity_repository.box_specifications[box_id].z_scale,
+                                                        sc.entity_repository.box_specifications[box_id].x_scale / 2,
+                                                        sc.entity_repository.box_specifications[box_id].y_scale / 2,
+                                                        sc.entity_repository.box_specifications[box_id].z_scale / 2,
                                                         mpgg.peak_concentration };
 
 
