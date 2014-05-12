@@ -1467,41 +1467,6 @@ namespace Daphne
 
             //----------------------------
 
-            crc = new ConfigReactionComplex("Bistable");
-            foreach (ConfigMolecule cm in query)
-            {
-                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                cmp.molecule_guid_ref = cm.molecule_guid;
-                cmp.mpInfo = new MolPopInfo("My " + cm.Name);
-                cmp.Name = "My " + cm.Name;
-                cmp.mpInfo.mp_dist_name = "Constant level";
-                cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                cmp.mpInfo.mp_render_blending_weight = 2.0;
-
-                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                if (cm.Name == "CXCR5")
-                {
-                    hl.concentration = 2.0;
-                }
-                else
-                {
-                    hl.concentration = 4.0;
-                }
-                cmp.mpInfo.mp_distribution = hl;
-
-                crc.molpops.Add(cmp);
-            }
-
-            guid = findReactionGuid(ReactionType.Association, sc);
-            if (guid != null)
-                crc.reactions_guid_ref.Add(guid);
-
-            guid = findReactionGuid(ReactionType.Dissociation, sc);
-            if (guid != null)
-                crc.reactions_guid_ref.Add(guid);
-
-            sc.entity_repository.reaction_complexes.Add(crc);
-
             //////////////////// Locomotor_1 Reaction complex
 
             //ConfigMolecule configMolec = new ConfigMolecule();
