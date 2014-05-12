@@ -305,31 +305,6 @@ namespace Daphne
             }
         }
 
-        ///// <summary>
-        ///// Returns the (global) gradient of a MolecularPopulation concentration relative to the 3D extracellular manifold.
-        ///// </summary>
-        ///// <param name="point">The location in the 3D extracellular environment</param>
-        ///// <returns></returns>
-        //public double[] Gradient_3D(double[] point)
-        //{
-        //    LocalMatrix[] lm = Man.Interpolation(point);
-        //    double[] gradient = new double[Man.Dim];
-
-        //    if (lm != null)
-        //    {
-        //        for (int i = 0; i < Man.Dim; i++)
-        //        {
-        //            for (int j = 0; j < lm.Length; j++)
-        //            {
-        //                gradient[i] += lm[j].Coefficient * GlobalGrad[i].array[lm[j].Index];
-        //            }
-        //        }
-        //    }
-        //    return gradient;
-           
-        //}
-
-
         /// <summary>
         /// The evolution native to a molecular population is diffusion.
         /// The step method evolves the diffusion through dt time units.
