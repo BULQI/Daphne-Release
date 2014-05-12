@@ -468,6 +468,7 @@ namespace Daphne
                     gc.membrane.molpops.Add(gmp);
                 }
             }
+            gc.DragCoefficient = 1.0;
             sc.entity_repository.cells.Add(gc);
 
             //
