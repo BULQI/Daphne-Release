@@ -186,7 +186,7 @@ namespace Daphne
             // create a file stream for each cell population
             foreach (CellPopulation cp in sc.scenario.cellpopulations)
             {
-                string header = "time\tcell_id";
+                string header = "cell_id\ttime";
                 bool create = false;
 
                 if (cp.report_xvf.position == true)
@@ -271,8 +271,8 @@ namespace Daphne
 
                 foreach (Cell c in Simulation.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
-                    // time cell_id
-                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", sim.AccumulatedTime, c.Cell_id);
+                    // cell_id time
+                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, sim.AccumulatedTime);
 
                     if (cp.report_xvf.position == true)
                     {
