@@ -23,6 +23,7 @@ namespace DaphneGui
         {
             runButton.IsEnabled = false;
             resetButton.IsEnabled = false;
+            abortButton.IsEnabled = false;
             if (SimConfigSaver == null)
             {
                 //copy initial settings, only done once
@@ -56,6 +57,7 @@ namespace DaphneGui
                 {
                     runButton.IsEnabled = true;
                     resetButton.IsEnabled = true;
+                    abortButton.IsEnabled = true;
                     return;
                 }
                 SimConfigSaver.FileName = dlg.FileName;
@@ -123,6 +125,7 @@ namespace DaphneGui
             SimConfigSaver.SerializeSimConfigToFile();
             runButton.IsEnabled = true;
             resetButton.IsEnabled = true;
+            abortButton.IsEnabled = true;
         }
 
     }

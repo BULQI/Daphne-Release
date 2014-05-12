@@ -1208,39 +1208,6 @@
                             
                         </ComboBox>
 
-                        <!--<Popup Name="myPopup" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" PlacementTarget="{Binding ElementName=cell_type_combo_box}" >
-                            
-                            <Popup.Resources>
-                                <DataTemplate x:Key="reacsPopupItemTemplate">
-                                    <StackPanel Orientation="Horizontal" >
-                                        <TextBlock Text="{Binding }" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </Popup.Resources>
-                            
-                            <Popup.Style>
-                                <Style TargetType="Popup">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsMouseOver}" Value="True">
-                                            <Setter Property="IsOpen" Value="True" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsDropDownOpen}" Value="True">
-                                            <Setter Property="IsOpen" Value="False" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Popup.Style>
-
-                            <StackPanel>
-                            <TextBlock Text="Reactions in this cell" Background="White" Foreground="Green"  ></TextBlock>
-                                <ListBox x:Name="lbTTt" MaxWidth="500" BorderThickness="2" BorderBrush="DarkBlue" Background="#F0F0F0F0" 
-                                 ItemsSource="{Binding ElementName=cell_type_combo_box, Path=SelectedItem, Converter={StaticResource CellGuidToCellReactionsConv}, ConverterParameter={StaticResource ecmReactionsListView}}"
-                                 ItemTemplate="{Binding Source={StaticResource reacsPopupItemTemplate}}"    >                                    
-                            </ListBox>
-                            </StackPanel>
-
-                        </Popup>-->
-
                         <TextBlock Text="number" Margin="6,0"
                                         Grid.Column="0" Grid.Row="3"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
@@ -1306,13 +1273,6 @@
                             </editors:ColorEditBox>
                         </StackPanel>
 
-                        <!-- Show GUID - for debugging only -->
-                        <!-- <TextBlock Text="guid_ref" Margin="6,0"
-                                        Grid.Column="0" Grid.Row="4"  
-                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
-
-                        <TextBox Text="{Binding Path=cell_guid_ref, UpdateSourceTrigger=PropertyChanged}"
-                                        Grid.Column="1" Grid.Row="4"  Margin="0,2"   />-->
                     </Grid>
                     <Grid>
                         <Expander ExpandDirection="Down" Padding="6"
@@ -1326,7 +1286,7 @@
                                 <StackPanel Orientation="Vertical">                                
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel>                                        
-                                        <StackPanel Margin="8,0">
+                                        <StackPanel Orientation="Horizontal" Margin="8,0">
                                             
                                             <ComboBox x:Name="cbCellLocationType" Margin="0,4" Width="200" HorizontalAlignment="Left"
                                                 ItemsSource="{Binding Source={StaticResource cellPopDistributionTypes}}"
@@ -1334,6 +1294,35 @@
                                                 SelectedValue="{Binding Path=cellPopDist.DistType, Mode=OneWay}"
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">
                                             </ComboBox>
+                                            
+                                            <Button x:Name="btnRegenerateCellPositions" Height="22" Margin="8,0" Click="btnRegenerateCellPositions_Click" Content="Reset">
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType, Path=SelectedIndex}" Value="1">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ElementName=cbCellLocationType, Path=SelectedIndex}" Value="2">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                                
+                                                <Button.ToolTip>
+                                                    <ToolTip>
+                                                        <StackPanel Width="200" Orientation="Horizontal">
+                                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                                                    Clicking this button will re-generate the cell positions for
+                                                                    Uniform and Gaussian placement methods.
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </ToolTip>
+                                                </Button.ToolTip>
+                                            </Button>
+                                            
                                         </StackPanel>
                                             <StackPanel Orientation="Vertical" Margin="16,0">                                            
                                             <Grid>
@@ -2015,7 +2004,7 @@
         </TabControl.Resources>
 
         <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" >        
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup">        
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
 
@@ -2863,7 +2852,7 @@
         </TabItem>
 
         <!-- REPORTS -->
-        <TabItem Header="Reports" Loaded="TabItem_Loaded">
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="TabItem_Loaded">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8" >
                     <StackPanel.Resources >
@@ -3313,7 +3302,7 @@
         </TabItem>
 
         <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTIONS COMPLEXES, AND DIFFERENTIATION SCHEMES -->
-        <TabItem Header="Component Libraries">
+        <TabItem x:Name="tabLibraries" Header="Component Libraries">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <StackPanel.Resources>
@@ -4440,7 +4429,7 @@
 
 
         <!-- GUID VIEWER -->
-        <TabItem Header="GUID Viewer" Visibility="Hidden">
+        <TabItem x:Name="tabGuids" Header="GUID Viewer" Visibility="Hidden">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
 

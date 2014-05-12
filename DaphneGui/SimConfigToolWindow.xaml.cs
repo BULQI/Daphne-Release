@@ -2733,6 +2733,24 @@ namespace DaphneGui
             CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
         }
 
+        private void btnRegenerateCellPositions_Click(object sender, RoutedEventArgs e)
+        {
+            // cellPop points to the current CellPopulation
+            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellPop == null)
+            {
+                return;
+            }
+            // current_dist points to the current distribution in cellPop
+            CellPopDistribution current_dist = cellPop.cellPopDist;
+
+            if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform) 
+            {
+                current_dist.Reset();
+                MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            }
+        }
+
 
     }      
     

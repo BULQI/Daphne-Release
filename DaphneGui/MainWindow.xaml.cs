@@ -718,8 +718,8 @@ namespace DaphneGui
                     UpdateGraphics();
 
                     // prevent the user from running certain tasks immediately, crashing the simulation
-                    //resetButton.IsEnabled = false;
-                    resetButton.Content = "Abort";
+                    resetButton.IsEnabled = false;
+                    //resetButton.Content = "Abort";
                     //runButton.IsEnabled = false;
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
@@ -749,6 +749,7 @@ namespace DaphneGui
             saveScenarioAs.IsEnabled = enable;
             loadExp.IsEnabled = enable;
             recentFileList.IsEnabled = enable;
+            newScenario.IsEnabled = enable;
             //exitApp.IsEnabled = enable;
         }
 
@@ -758,11 +759,12 @@ namespace DaphneGui
         /// <param name="enable">false to disable</param>
         private void enableCritical(bool enable)
         {
-            resetButton.IsEnabled = enable;
+            //resetButton.IsEnabled = enable;
             runButton.IsEnabled = enable;
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
+            abortButton.IsEnabled = enable;
         }
 
         /// <summary>
@@ -1346,15 +1348,15 @@ namespace DaphneGui
             runButton.IsEnabled = false;
             mutex = true;
 
-            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-            {
-                sim.RunStatus = Simulation.RUNSTAT_ABORT;
-            }
-            else
-            {
+            //if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            //{
+            //    sim.RunStatus = Simulation.RUNSTAT_ABORT;
+            //}
+            //else
+            //{
                 saveTempFiles();
                 updateGraphicsAndGUI();
-            }
+            //}
         }
 
         /// <summary>
@@ -1946,8 +1948,9 @@ namespace DaphneGui
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
-            resetButton.IsEnabled = true;            
-            resetButton.Content = "Apply";
+            resetButton.IsEnabled = true;
+            abortButton.IsEnabled = false;
+            //resetButton.Content = "Apply";
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready";
             //runButton.IsEnabled = true;
@@ -1988,7 +1991,8 @@ namespace DaphneGui
 
         private void simControlUpdate()
         {
-            resetButton.IsEnabled = true;
+            //resetButton.IsEnabled = true;
+            abortButton.IsEnabled = true;
             runButton.IsEnabled = true;
         }
 
@@ -2078,7 +2082,8 @@ namespace DaphneGui
             if (sim.RunStatus == Simulation.RUNSTAT_RUN)
             {
                 //resetButton.IsEnabled = true;
-                resetButton.Content = "Abort";
+                //resetButton.Content = "Abort";
+                abortButton.IsEnabled = true;
                 sim.RunStatus = Simulation.RUNSTAT_PAUSE;
 
                 //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
@@ -2096,7 +2101,8 @@ namespace DaphneGui
             else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
                 //resetButton.IsEnabled = false;
-                resetButton.Content = "Abort";
+                //resetButton.Content = "Abort";
+                abortButton.IsEnabled = false;
                 sim.RunStatus = Simulation.RUNSTAT_RUN;
                 runButton.Content = "Pause";
                 statusBarMessagePanel.Content = "Running...";
@@ -2436,6 +2442,21 @@ namespace DaphneGui
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();
             VTKDisplayDocWindow.Activate();
+        }
+
+        private void abortButton_Click(object sender, RoutedEventArgs e)
+        {
+            runButton.IsEnabled = false;
+            mutex = true;
+            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            {
+                sim.RunStatus = Simulation.RUNSTAT_ABORT;
+            }
+            else
+            {
+                saveTempFiles();
+                updateGraphicsAndGUI();
+            }
         }
     }
 }

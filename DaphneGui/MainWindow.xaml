@@ -232,6 +232,20 @@
                             </ToolTip>
                         </Button.ToolTip>
                     </Button>
+                    <Button Content="Abort" HorizontalAlignment="Left" Name="abortButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Click="abortButton_Click">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Abort the simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
                 </ToolBar>
                 <ToolBar Name="VCR_Toolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" IsEnabled="False">
                     <Button Name="VCRbutton_First" Click="VCRbutton_First_Click" ToolBar.OverflowMode="Never">
