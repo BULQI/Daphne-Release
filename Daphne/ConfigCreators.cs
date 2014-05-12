@@ -52,18 +52,14 @@ namespace Daphne
             // Experiment
             sc.experiment_name = "Ligand Receptor Scenario";
             sc.experiment_description = "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.";
-            sc.scenario.time_config.duration = 1;
-            sc.scenario.time_config.rendering_interval = 1;
-            sc.scenario.time_config.sampling_interval = sc.scenario.time_config.duration/20;
+            sc.scenario.time_config.duration = 15;
+            sc.scenario.time_config.rendering_interval = sc.scenario.time_config.duration / 10;
+            sc.scenario.time_config.sampling_interval = sc.scenario.time_config.duration/100;
 
-            sc.scenario.environment.extent_x = 300;
-            sc.scenario.environment.extent_y = 300;
-            sc.scenario.environment.extent_z = 300;
-            sc.scenario.environment.extent_min = 5;
-            sc.scenario.environment.extent_max = 1000;
-            sc.scenario.environment.gridstep_min = 1;
-            sc.scenario.environment.gridstep_max = 100;
-            sc.scenario.environment.gridstep = 50;
+            sc.scenario.environment.extent_x = 200;
+            sc.scenario.environment.extent_y = 200;
+            sc.scenario.environment.extent_z = 200;
+            sc.scenario.environment.gridstep = 10;
 
 
             // Global Paramters
@@ -175,38 +171,18 @@ namespace Daphne
 
             // Experiment
             sc.experiment_name = "Cell locomotion with driver molecule.";
-            sc.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) created by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
-            sc.scenario.environment.extent_x = 350;
-            sc.scenario.environment.extent_y = 350;
-            sc.scenario.environment.extent_z = 350;
-            sc.scenario.environment.extent_min = 5;
-            sc.scenario.environment.extent_max = 1000;
-            sc.scenario.environment.gridstep_min = 1;
-            sc.scenario.environment.gridstep_max = 100;
-            sc.scenario.environment.gridstep = 50;
+            sc.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
+            sc.scenario.environment.extent_x = 200;
+            sc.scenario.environment.extent_y = 200;
+            sc.scenario.environment.extent_z = 200;
+            sc.scenario.environment.gridstep = 10;
 
-            sc.scenario.time_config.duration = 100;
+            sc.scenario.time_config.duration = 30;
             sc.scenario.time_config.rendering_interval = sc.scenario.time_config.duration/100;
             sc.scenario.time_config.sampling_interval = sc.scenario.time_config.duration/100;
 
             // Global Paramters
             LoadDefaultGlobalParameters(configurator);
-
-            //// Gaussian Distrtibution
-            //// Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
-            //// box x,y,z_scale parameters are 2*sigma
-            //GaussianSpecification gaussSpec = new GaussianSpecification();
-            //BoxSpecification box = new BoxSpecification();
-            //box.x_trans = sc.scenario.environment.extent_x / 2;
-            //box.y_trans = sc.scenario.environment.extent_y / 2;
-            //box.z_trans = sc.scenario.environment.extent_z / 2;
-            //box.x_scale = sc.scenario.environment.extent_x / 5;
-            //box.y_scale = sc.scenario.environment.extent_y / 5;
-            //box.z_scale = sc.scenario.environment.extent_z / 5;
-            //sc.entity_repository.box_specifications.Add(box);
-            //gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
-            //gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            //sc.entity_repository.gaussian_specifications.Add(gaussSpec);
 
             // ECS
 
@@ -274,9 +250,10 @@ namespace Daphne
             double minDisSquared = 2*sc.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.cellPopDist.CellStates[0] = new CellState(  sc.scenario.environment.extent_x - 2*configCell.CellRadius,
-                                                                sc.scenario.environment.extent_y / 2,
-                                                                sc.scenario.environment.extent_z / 2);
+            // Don't start the cell on a lattice point, until gradient interpolation method improves.
+            cellPop.cellPopDist.CellStates[0] = new CellState(sc.scenario.environment.extent_x - 2 * configCell.CellRadius - sc.scenario.environment.gridstep/2,
+                                                                sc.scenario.environment.extent_y / 2 - sc.scenario.environment.gridstep / 2,
+                                                                sc.scenario.environment.extent_z / 2 - sc.scenario.environment.gridstep / 2);
             cellPop.cellpopulation_constrained_to_region = false;
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             sc.scenario.cellpopulations.Add(cellPop);
@@ -328,15 +305,15 @@ namespace Daphne
 
             // Experiment
             sc.experiment_name = "Diffusion Scenario";
-            sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Gaussian initial distribution. No flux BCs.";
-            sc.scenario.time_config.duration = 10.0;
-            sc.scenario.time_config.rendering_interval = 1;
-            sc.scenario.time_config.sampling_interval = 1.0;
+            sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.";
+            sc.scenario.time_config.duration = 2.0;
+            sc.scenario.time_config.rendering_interval = 0.2;
+            sc.scenario.time_config.sampling_interval = 0.2;
 
-            sc.scenario.environment.extent_x = 500;
-            sc.scenario.environment.extent_y = 500;
-            sc.scenario.environment.extent_z = 500;
-            sc.scenario.environment.gridstep = 50;
+            sc.scenario.environment.extent_x = 200;
+            sc.scenario.environment.extent_y = 200;
+            sc.scenario.environment.extent_z = 200;
+            sc.scenario.environment.gridstep = 10;
 
             // Global Paramters
             LoadDefaultGlobalParameters(configurator);
@@ -387,7 +364,7 @@ namespace Daphne
                 configMolPop.mpInfo.mp_render_blending_weight = 2.0;
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
-                molPopGaussian.peak_concentration = 100;
+                molPopGaussian.peak_concentration = 10;
                 molPopGaussian.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 configMolPop.mpInfo.mp_distribution = molPopGaussian;
 
@@ -413,7 +390,7 @@ namespace Daphne
             sc.experiment_name = "Blank Scenario";
             sc.experiment_description = "Libraries only.";
             sc.scenario.time_config.duration = 100;
-            sc.scenario.time_config.rendering_interval = 0.3;
+            sc.scenario.time_config.rendering_interval = 1.0;
             sc.scenario.time_config.sampling_interval = 1440;
 
             // Global Paramters
