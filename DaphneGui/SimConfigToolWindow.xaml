@@ -631,7 +631,7 @@
                         </Grid>
                     </StackPanel>                    
                     <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
-                    <TextBlock Text="width (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
+                    <TextBlock Text="std. dev. (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
                     <!--<Line Margin="4,0,4,3" 
                           Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" 
                           SnapsToDevicePixels="True" Stroke="LightGray"
@@ -775,24 +775,26 @@
                     <Grid.RowDefinitions>
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="conc" Margin="6,0" 
-                               Grid.Column="0" Grid.Row="0"  
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               
-                               />
+                    
                     <StackPanel Orientation="Horizontal"
                                 Grid.Column="1" Grid.Row="0"
-                                Margin="0,2">
+                                Margin="-50,2">
+                        
+                        <TextBlock Text="concentration" Margin="0,0" 
+                               Grid.Column="0" Grid.Row="0"  
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               />
                         <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
                                                 SpinnerVisibility="Collapsed"
                                                 HorizontalAlignment="Right"
                                                 Format="F2"
                                                 StepValue="10"
                                                 Width="50" 
+                                                Margin="4,0"
                                                 CenterSlotHorizontalAlignment="Right"
                                                 Value="{Binding Path=concentration, UpdateSourceTrigger=PropertyChanged}"
                                                 />
-                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="4,0,0,0"/>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
@@ -1079,17 +1081,13 @@
 
             <DataTemplate x:Key="cellListItemTemplate">
                 <StackPanel Orientation="Horizontal">
-                    <!--<CheckBox IsChecked="{Binding Path=cellpopulation_render_on}" Style="{StaticResource EyeballCheckboxStyle}"/>-->
                     <Rectangle Width="10" Height="10"
                                                Margin="5,0,0,0"
                                                VerticalAlignment="Center"
                                                Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
                                                Stroke="Black" StrokeThickness="0.5"/>
                     <TextBlock Text="{Binding Path=number}" Margin="5,0,0,0"/>
-                    <TextBlock Text=" " />
-                    <!--<TextBlock Text="{Binding Path=cell_subset_guid_ref, 
-                                                                Converter={StaticResource CellTypeGUIDtoNameConv}, 
-                                                                ConverterParameter={StaticResource cellsetCellTypesListView}}" />-->
+                    <TextBlock Text=" " />                    
                     <StackPanel Orientation="Horizontal">
                         <!-- Only want an "s" to show up if more than one cell -->
                         <StackPanel.Style>
@@ -1469,7 +1467,6 @@
 
                         </StackPanel>
                     </Expander>
-                <!--</StackPanel>-->
                 </local:DaphneStackPanel>
 
             </DataTemplate>
@@ -1524,7 +1521,6 @@
 
             <DataTemplate x:Key="membraneMolPopDetailsTemplate">
                 <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
-                    <!--<StackPanel Orientation="Horizontal">-->
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1585,8 +1581,6 @@
                                                     SelectedValue="{Binding Path=molecule_guid_ref}"
                                                     SelectedValuePath="molecule_guid"
                                                     />
-                                <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
-
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -1601,15 +1595,7 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Homogeneous Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                <!--<ComboBox Margin="10,0"
-                                        Name="MembraneMolPopDistributionTypeComboBox"
-                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
-                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
-                                        SelectionChanged="MembraneMolPopDistributionComboBox_SelectionChanged"
-                                        MinWidth="120"
-                                        />-->
+                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>                                
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="1">
@@ -1620,12 +1606,10 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                    <!--</StackPanel>-->
                 </local:DaphneStackPanel>
             </DataTemplate>
             <DataTemplate x:Key="cytosolMolPopDetailsTemplate">
                 <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
-                <!--<StackPanel Orientation="Horizontal">-->
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1686,8 +1670,6 @@
                                                     SelectedValue="{Binding Path=molecule_guid_ref}"
                                                     SelectedValuePath="molecule_guid"
                                                     />
-                                <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
-
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -1702,15 +1684,7 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Homogeneous Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                <!--<ComboBox Margin="10,0"
-                                        Name="CytosolMolPopDistributionTypeComboBox"
-                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
-                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
-                                        SelectionChanged="CytosolMolPopDistributionComboBox_SelectionChanged"
-                                        MinWidth="120"
-                                        />-->
+                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>                                
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="1">
@@ -1721,7 +1695,6 @@
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                <!--</StackPanel>-->
                 </local:DaphneStackPanel>
             </DataTemplate>
             
@@ -2396,7 +2369,7 @@
                         <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
                     </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="grid step" Margin="6,0"
+                                <TextBlock Text="grid size" Margin="6,0"
                                                     Grid.Column="0" Grid.Row="2"  
                                                     HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     TextAlignment="Right"
@@ -3024,7 +2997,7 @@
                         <!--<TextBlock Text="Molecules in Extracellular Medium" FontWeight="Bold" Margin="0,5,0,0" />-->
                         <DataGrid x:Name="dgEcmMols" 
                             ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" AutoGenerateColumns="False" 
-                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
+                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
                             CanUserSortColumns="False" RowHeaderWidth="0"
                             VerticalContentAlignment="Center"
@@ -3053,7 +3026,7 @@
 
                             <DataGrid.Columns>
 
-                                <DataGridTemplateColumn Header="MolPop">
+                                <DataGridTemplateColumn Header="molecular population" Width="150">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
@@ -3061,7 +3034,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Mean">
+                                <DataGridTemplateColumn Header="mean">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mean, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -3069,7 +3042,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Full">
+                                <DataGridTemplateColumn Header="full">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <!--<RadioButton GroupName="{Binding molpop.molecule_guid_ref}" HorizontalAlignment="Center" IsChecked="{Binding Path=full, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>-->
@@ -3082,7 +3055,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Full+Gradient" Width="90">
+                                <DataGridTemplateColumn Header="full+gradient" Width="90">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <!--<RadioButton GroupName="{Binding molecule_guid_ref}"  HorizontalAlignment="Center" IsChecked="{Binding Path=fullgrad, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>-->
@@ -3141,7 +3114,7 @@
                             <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=cell_guid_ref, Converter={StaticResource CellGUIDtoCellNameConv},-->
                                 
                             <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="Cell Population" >
+                                <DataGridTemplateColumn Header="cell population" >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock HorizontalAlignment="Center" Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
@@ -3149,7 +3122,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Position" Width="60">
+                                <DataGridTemplateColumn Header="position" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_xvf.position, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -3157,7 +3130,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Velocity" Width="60">
+                                <DataGridTemplateColumn Header="velocity" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_xvf.velocity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -3165,7 +3138,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Force" Width="60">
+                                <DataGridTemplateColumn Header="force" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_xvf.force, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -3206,7 +3179,7 @@
                                 <StackPanel>
                                     <DataGrid x:Name="dgEcmProbeMols" AutoGenerateColumns="False" 
                                         ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.ecm_probe}"                                                         
-                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"
                                         VerticalContentAlignment="Center"
@@ -3234,7 +3207,7 @@
                                         </DataGrid.ColumnHeaderStyle>
 
                                         <DataGrid.Columns>
-                                            <DataGridTemplateColumn Header="mol pop" Width="60">
+                                            <DataGridTemplateColumn Header="molecular population" Width="125" >
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molpop_guid_ref, Converter={StaticResource MolPopGUIDtoMolPopNameConv},
@@ -3243,7 +3216,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="conc" Width="60">
+                                            <DataGridTemplateColumn Header="concentration" Width="100">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
@@ -3251,7 +3224,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="conc+gradient" Width="90">
+                                            <DataGridTemplateColumn Header="concentration+gradient" Width="140">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
@@ -3303,7 +3276,7 @@
 
                                         <DataGrid.Columns>
 
-                                            <DataGridTemplateColumn Header="Membrane Mol Pop">
+                                            <DataGridTemplateColumn Header="molecular population" Width="125">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
@@ -3312,7 +3285,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="mean" Width="60">
+                                            <DataGridTemplateColumn Header="mean" Width="70">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
@@ -3320,7 +3293,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="mean+gradient" Width="90">
+                                            <DataGridTemplateColumn Header="mean+gradient" Width="100">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
@@ -3373,7 +3346,7 @@
                                         </DataGrid.ColumnHeaderStyle>
 
                                         <DataGrid.Columns>
-                                            <DataGridTemplateColumn Header="Cytosol Mol Pop">
+                                            <DataGridTemplateColumn Header="molecular population" Width="120">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
@@ -3382,7 +3355,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="mean" Width="60">
+                                            <DataGridTemplateColumn Header="mean" Width="70">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
@@ -3390,7 +3363,7 @@
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
 
-                                            <DataGridTemplateColumn Header="mean+gradient" Width="90">
+                                            <DataGridTemplateColumn Header="mean+gradient" Width="100">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
@@ -3899,7 +3872,7 @@
 
                                                 <Expander ExpandDirection="Down"
                                                           IsExpanded="False"
-                                                          Header="Membrane Mol Pop Details"
+                                                          Header="Membrane Molecular Population Details"
                                                           x:Name="MembraneMolPopDetailsExpander"
                                                           Margin="0,0,0,0" 
                                                           Canvas.ZIndex="1"
@@ -3913,7 +3886,7 @@
                                                 </Expander>
                                                 <Expander ExpandDirection="Down"
                                                           IsExpanded="False"
-                                                          Header="Cytosol Mol Pop Details"
+                                                          Header="Cytosol Molecular Population Details"
                                                           x:Name="CytosolMolPopDetailsExpander"
                                                           Margin="0,0,0,0" 
                                                           Canvas.ZIndex="1"
