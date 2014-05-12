@@ -2499,89 +2499,69 @@
                                 BorderBrush="Black"                        
                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"                                
                                 >
-                        <Grid >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200" />
-                                <ColumnDefinition Width="50" />
-                                <ColumnDefinition Width="230" />
-                                <ColumnDefinition Width="130" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="150" />
-                                <RowDefinition Height="24" />
-                                <RowDefinition Height="12" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <ListView x:Name="lvReactions" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" 
-                                      ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
-                                      >
-                                <!--<ItemsControl Margin="3,0,0,0"
-                                        ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Width="{Binding Path=ActualWidth}"
-                                                    BorderThickness="0,0,1,0"
-                                                    BorderBrush="{DynamicResource verticalLineColor}" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                </ItemsControl>-->
-
-                                <ListView.View>
-                                    <GridView>
-                                        <GridView.ColumnHeaderContainerStyle>
-                                            <Style TargetType="GridViewColumnHeader">
-                                                <!--<Setter Property="BorderThickness" Value="1"></Setter>
-                                                <Setter Property="BorderBrush" Value="Green"></Setter>-->
-                                                <Setter Property="Height" Value="Auto"></Setter>
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                            <GradientStop Offset="0.0" Color="White" />
-                                                            <GradientStop Offset="1.0" Color="Beige" />
-                                                        </LinearGradientBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </GridView.ColumnHeaderContainerStyle>
+                            <StackPanel>
+                                <ListView x:Name="lvReactions" 
+                                          ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
+                                          MinHeight="50" MaxHeight="150"
+                                          >
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridView.ColumnHeaderContainerStyle>
+                                                <Style TargetType="GridViewColumnHeader">
+                                                    <!--<Setter Property="BorderThickness" Value="1"></Setter>
+                                                    <Setter Property="BorderBrush" Value="Green"></Setter>-->
+                                                    <Setter Property="Height" Value="Auto"></Setter>
+                                                    <Setter Property="Background">
+                                                        <Setter.Value>
+                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                <GradientStop Offset="0.0" Color="White" />
+                                                                <GradientStop Offset="1.0" Color="Beige" />
+                                                            </LinearGradientBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </GridView.ColumnHeaderContainerStyle>
                                         
-                                        <GridViewColumn Width="80" Header="Rate constant">
-                                            <GridViewColumn.CellTemplate>                                                
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding rate_const}">       
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Width="300" Header="Reaction" >
+                                            <GridViewColumn Width="80" Header="Rate constant">
+                                                <GridViewColumn.CellTemplate>                                                
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding rate_const}">       
+                                                            <TextBlock.Style>
+                                                                <Style>
+                                                                    <Setter Property="TextBlock.Foreground" 
+                                                                            Value="Black">
+                                                                    </Setter>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Width="300" Header="Reaction" >
 
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding TotalReactionString}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding TotalReactionString}">
+                                                            <TextBlock.Style>
+                                                                <Style>
+                                                                    <Setter Property="TextBlock.Foreground" 
+                                                                            Value="Black">
+                                                                    </Setter>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
                                             
-                                        </GridViewColumn>                                        
-                                    </GridView>
-                                </ListView.View>                                
-                            </ListView>
-                            <Button x:Name="btnRemoveReaction" Grid.Column="2" Grid.Row="1" Width="100" HorizontalAlignment="Right" Click="btnRemoveReaction_Click">Remove</Button>
-                                
+                                            </GridViewColumn>                                        
+                                        </GridView>
+                                    </ListView.View>                                
+                                </ListView>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button x:Name="btnCopyReaction" Grid.Column="2" Grid.Row="1" Width="100" Click="btnCopyReaction_Click">Copy</Button>
+                                    <Button x:Name="btnRemoveReaction" Grid.Column="2" Grid.Row="1" Width="100" Click="btnRemoveReaction_Click">Remove</Button>
+                                </StackPanel>
+
                             <!--</Expander>-->
                             <Expander 
                                     Padding="10" ExpandDirection="Down"
@@ -2600,7 +2580,7 @@
                                     <local:AddReactionControl />
                                 </Grid>
                             </Expander>
-                        </Grid>
+                        </StackPanel>
                     </Expander>
                     
                     <!-- REACTION COMPLEXES -->
@@ -2968,6 +2948,7 @@
                                     SelectionChanged="CellsListBox_SelectionChanged"
                                     />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="CopyCellButton"  Width="50" Content="Copy" Click="CopyCellButton_Click" />
                                 <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click_1"/>
                                 <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click_1" />
                             </StackPanel>

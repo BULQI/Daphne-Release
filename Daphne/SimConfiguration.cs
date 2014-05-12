@@ -1567,6 +1567,25 @@ namespace Daphne
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
         }
 
+        public ConfigReaction(ConfigReaction reac)
+        {
+            Guid id = Guid.NewGuid();
+            reaction_guid = id.ToString();
+            reaction_template_guid_ref = reac.reaction_template_guid_ref;
+
+            rate_const = reac.rate_const;
+            ReadOnly =false;
+
+            reactants_molecule_guid_ref = new ObservableCollection<string>();
+            products_molecule_guid_ref = new ObservableCollection<string>();
+            modifiers_molecule_guid_ref = new ObservableCollection<string>();
+
+            reactants_molecule_guid_ref = reac.reactants_molecule_guid_ref;
+            products_molecule_guid_ref = reac.products_molecule_guid_ref;
+            modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
+        }
+
+
         public void GetTotalReactionString(EntityRepository repos)
         {
             string s = "";
@@ -1726,6 +1745,22 @@ namespace Daphne
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
             ReadOnly = true;
+        }
+
+        public ConfigCell Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonFile = "c:\\temp\\tempcell.json";
+            File.WriteAllText(jsonFile, jsonSpec);
+            string readText = File.ReadAllText(jsonFile);
+            ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(readText, Settings);
+            Guid id = Guid.NewGuid();
+            newcell.cell_guid = id.ToString();
+            newcell.ReadOnly = false;
+            return newcell;
         }
 
         public string CellName { get; set; }

@@ -21,7 +21,7 @@ using Ninject;
 using Ninject.Parameters;
 
 using Workbench;
-
+using Newtonsoft.Json;
 
 namespace DaphneGui
 {
@@ -874,7 +874,7 @@ namespace DaphneGui
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Cannot remove a predefined molecule");
+                System.Windows.Forms.MessageBox.Show("Cannot remove a predefined molecule.");
             }
         }
 
@@ -911,6 +911,18 @@ namespace DaphneGui
             {
                 MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
             }
+        }
+
+        private void btnCopyReaction_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
+            if (cr == null)
+            {
+                return;
+            }
+
+            ConfigReaction crNew = new ConfigReaction(cr);
+            MainWindow.SC.SimConfig.entity_repository.reactions.Add(crNew);
         }
 
         //CELLS EVENT HANDLERS
@@ -1824,13 +1836,61 @@ namespace DaphneGui
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined cell");
+                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined cell.");
                 }
 
             }            
         }
+
+        private void CopyCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+            {
+                return;
+            }
+
+            ConfigCell cellNew = cell.Clone();
+            
+            //Generate a new cell name
+            cellNew.CellName = GenerateNewCellName(cell);
+
+            MainWindow.SC.SimConfig.entity_repository.cells.Add(cellNew);
+            CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+            CellsListBox.ScrollIntoView(CellsListBox.SelectedItem);
+        }
+
+        private string GenerateNewCellName(ConfigCell cell)
+        {
+            int nSuffix = 1;
+            string sSuffix = string.Format("_Copy{0:000}", nSuffix);
+            string TempCellName = cell.CellName;
+            while (FindCellBySuffix(sSuffix) == true)
+            {
+                TempCellName = cell.CellName.Replace(sSuffix, "");
+                nSuffix++;
+                sSuffix = string.Format("_Copy{0:000}", nSuffix);
+            }
+            TempCellName += sSuffix;
+            return TempCellName;
+        }
+
+        // given a cell type name, check if it exists in repos
+        private static bool FindCellBySuffix(string suffix)
+        {
+            foreach (ConfigCell cc in MainWindow.SC.SimConfig.entity_repository.cells)
+            {
+                if (cc.CellName.EndsWith(suffix))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }    
                 
-    }                   
+    }      
+    
+     
 
     public class DataGridBehavior
     {
