@@ -1422,6 +1422,24 @@ namespace DaphneGui
             x++;
         }
 
+        private void MolPopDistributionTypeComboBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
+
+            ComboBox cb = sender as ComboBox;
+            ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(1));
+
+            cbi.IsEnabled = true;
+            if (cbToroidal.IsChecked == true)
+            {
+                cbi.IsEnabled = false;
+            }
+            else if (cmp.boundary_face == BoundaryFace.None)
+            {
+                cbi.IsEnabled = false;
+            }
+        }     
+
     }
 
     public class DataGridBehavior

@@ -1311,7 +1311,24 @@ namespace Daphne
         }
 
         private BoundaryFace _boundary_face;
-        public BoundaryFace boundary_face { get; set; }
+        public BoundaryFace boundary_face
+        {
+            get
+            {
+                return _boundary_face;
+            }
+            set {
+                _boundary_face = value;
+                if (_boundary_face != BoundaryFace.None) {
+                    if (mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    {
+                        MolPopLinear mpl = mpInfo.mp_distribution as MolPopLinear;
+                        mpl.dim = (int)_boundary_face - 1;
+                        
+                    }
+                }
+            }
+        }
 
         public ConfigMolecularPopulation(ReportType rt)
         {
@@ -1838,7 +1855,7 @@ namespace Daphne
         }
     }
 
-    public class CellPopulation : EntityModelBase
+    public class CellPopulation // : EntityModelBase
     {
         public string cell_guid_ref { get; set; }
         public string cellpopulation_name { get; set; }
@@ -1874,7 +1891,7 @@ namespace Daphne
                 else
                 {
                     _number = value;
-                    OnPropertyChanged("number");
+                    //OnPropertyChanged("number");
                 }
             }
         }
@@ -1913,7 +1930,7 @@ namespace Daphne
             {
                 _cell_locations = value;
                 number = _cell_locations.Count;
-                OnPropertyChanged("cell_locations");
+                //OnPropertyChanged("cell_locations");
             }
         } 
 
@@ -2365,7 +2382,7 @@ namespace Daphne
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian)),
      XmlInclude(typeof(MolPopCustom))]
-    public abstract class MolPopDistribution : EntityModelBase
+    public abstract class MolPopDistribution //: EntityModelBase
     {
         [XmlIgnore]
         public MolPopDistributionType mp_distribution_type { get; protected set; }
@@ -2393,50 +2410,12 @@ namespace Daphne
         public double x1 { get; set; }
         public double x2 { get; set; }
         public int dim { get; set; }
-        //public double[] gradient_direction { get; set; }
-        //public double min_concentration { get; set; }
-        //public double max_concentration { get; set; }
-        //public double x_direction
-        //{
-        //    get { return gradient_direction[0]; }
-        //    set
-        //    {
-        //        if (value != gradient_direction[0])
-        //        {
-        //            gradient_direction[0] = value;
-        //        }
-        //    }
-        //}
-        //public double y_direction
-        //{
-        //    get { return gradient_direction[1]; }
-        //    set
-        //    {
-        //        if (value != gradient_direction[1])
-        //        {
-        //            gradient_direction[1] = value;
-        //        }
-        //    }
-        //}
-        //public double z_direction
-        //{
-        //    get { return gradient_direction[2]; }
-        //    set
-        //    {
-        //        if (value != gradient_direction[2])
-        //        {
-        //            gradient_direction[2] = value;
-        //        }
-        //    }
-        //}
-
+        
         public MolPopLinear()
         {
-            //mp_distribution_type = MolPopDistributionType.Linear;
-            //gradient_direction = new double[3] { 1.0, 0.0, 0.0 };
-            //min_concentration = 0.0;
-            //max_concentration = 100.0;
+            mp_distribution_type = MolPopDistributionType.Linear;
             x1 = 0.0;
+            x2 = 500;
         }
     }
 
@@ -2454,7 +2433,7 @@ namespace Daphne
                 else
                 {
                     _gaussgrad_gauss_spec_guid_ref = value;
-                    OnPropertyChanged("gaussgrad_gauss_spec_guid_ref");
+                    //OnPropertyChanged("gaussgrad_gauss_spec_guid_ref");
                 }
             }
         }
@@ -2489,9 +2468,9 @@ namespace Daphne
                 {
                     _custom_gradient_file_uri = value;
                     _custom_gradient_file_string = value.AbsolutePath;
-                    OnPropertyChanged("custom_gradient_file_uri");
-                    OnPropertyChanged("custom_gradient_file_string");
-                    OnPropertyChanged("custom_gradient_file_name");
+                    //OnPropertyChanged("custom_gradient_file_uri");
+                    //OnPropertyChanged("custom_gradient_file_string");
+                    //OnPropertyChanged("custom_gradient_file_name");
                 }
             }
         }
@@ -2507,9 +2486,9 @@ namespace Daphne
                 {
                     _custom_gradient_file_string = value;
                     _custom_gradient_file_uri = new Uri(value);
-                    OnPropertyChanged("custom_gradient_file_uri");
-                    OnPropertyChanged("custom_gradient_file_string");
-                    OnPropertyChanged("custom_gradient_file_name");
+                    //OnPropertyChanged("custom_gradient_file_uri");
+                    //OnPropertyChanged("custom_gradient_file_string");
+                    //OnPropertyChanged("custom_gradient_file_name");
                 }
             }
         }

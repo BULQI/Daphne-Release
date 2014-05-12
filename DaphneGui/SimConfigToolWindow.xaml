@@ -1969,12 +1969,38 @@
                                 <TextBlock x:Name="tbLeft" Text="first face" Margin="0,0" 
                                            HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
                                            Width="100"/>
-                                <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" />
+                                <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
                             </StackPanel>
                             <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="6" Orientation="Horizontal" >
                                 <TextBlock x:Name="tbRight" Text="second face" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
                                            Width="100"/>
-                                <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"/>
+                                <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -1990,14 +2016,50 @@
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
                                 <TextBlock Text="distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                <!--<ComboBox Margin="10,0" 
+                                        Name="MolPopDistributionTypeComboBox"
+                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
+                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
+                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
+                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
+                                        MinWidth="120">
+
+                                    <ComboBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ComboBoxItem}">
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
+                                                        <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.ItemContainerStyle>
+                                </ComboBox>-->
                                 <ComboBox Margin="10,0" 
                                         Name="MolPopDistributionTypeComboBox"
                                         ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                         SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        MinWidth="120"
-                                        />
+                                        GotFocus="MolPopDistributionTypeComboBox_GotFocus"
+                                        MinWidth="120">
+                                    <ComboBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ComboBoxItem}">
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
+                                                        <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.ItemContainerStyle>
+                                </ComboBox>
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="1">
@@ -4267,7 +4329,7 @@
                                             <DataGridTemplateColumn Header="conc" Width="60">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=probe_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4275,14 +4337,15 @@
                                             <DataGridTemplateColumn Header="conc+gradient" Width="90">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=probe_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
-                            </Expander>                            
+                            </Expander>    
+                            
                             <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Molecules in membrane"
@@ -4294,7 +4357,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False" 
-                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.membrane.molpops}"                            
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.membraneMP}"                            
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -4326,7 +4389,8 @@
                                             <DataGridTemplateColumn Header="Membrane Mol Pop">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molpop_guid_ref, Converter={StaticResource MolPopGUIDtoMolPopNameConv},
+                                                            ConverterParameter={StaticResource molPopsListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4334,7 +4398,7 @@
                                             <DataGridTemplateColumn Header="mean" Width="60">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4342,7 +4406,7 @@
                                             <DataGridTemplateColumn Header="mean+gradient" Width="90">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
+                                                        <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=COMPLETE}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
@@ -4363,7 +4427,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                              ItemsSource="{Binding ElementName=lbRptCells, Path=SelectedItem.cytosol.molpops}"
+                              ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cytosolMP}"
                                                         
                             Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
