@@ -2523,6 +2523,7 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
+        //This helps in refreshing the available reactions for the ECM tab
         private void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (tabECM.IsSelected == true)
@@ -2530,10 +2531,6 @@ namespace DaphneGui
                 if (lvAvailableReacs.ItemsSource != null)
                     CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
             }
-
-            //ActiproSoftware.Windows.Controls.Editors.DoubleEditBox edd = new ActiproSoftware.Windows.Controls.Editors.DoubleEditBox();
-            //edd.Format = ("G3");
-            //edd.Format
         }
 
         
