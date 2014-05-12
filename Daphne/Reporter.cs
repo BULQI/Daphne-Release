@@ -24,8 +24,8 @@ namespace Daphne
         public void StartReporter(SimConfiguration sc)
         {
             startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
+            CloseReporter();
             startECM(sc);
-            cell_files.Clear();
             startCells(sc);
         }
 
@@ -120,7 +120,10 @@ namespace Daphne
 
         private void closeECM()
         {
-            ecm_mean_file.Close();
+            if (ecm_mean_file != null)
+            {
+                ecm_mean_file.Close();
+            }
         }
 
         private void startCells(SimConfiguration sc)
@@ -278,10 +281,15 @@ namespace Daphne
 
         private void closeCells()
         {
-            // close streams
-            foreach (StreamWriter writer in cell_files.Values)
+            if (cell_files != null)
             {
-                writer.Close();
+                // close streams
+                foreach (StreamWriter writer in cell_files.Values)
+                {
+                    writer.Close();
+                }
+                // remove the entries from the cell files dictionary
+                cell_files.Clear();
             }
         }
     }
