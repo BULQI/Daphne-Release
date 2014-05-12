@@ -105,13 +105,13 @@
                     <!--><Separator />
                     <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
                     <Separator />
-                    <MenuItem Header="Load past experiment" Name="loadExp" Click="OpenExpSelectWindow" />
+                    <MenuItem Header="Load past experiment" Name="loadExp" IsEnabled="False" Click="OpenExpSelectWindow" />
                     <local:RecentFileList x:Name="recentFileList" />
                     <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
                 </MenuItem>
                 <MenuItem Header="Analysis" Name="analysisMenu">
-                    <MenuItem Header="Fit Tracks" Name="fitMenu" Click="OpenLPFittingWindow" />
-                    <MenuItem Header="Cell Division" Name="cellDivMenu" Click="OpenCellDivisionWindow" />
+                    <MenuItem Header="Fit Tracks" Name="fitMenu" IsEnabled="False" Click="OpenLPFittingWindow" />
+                    <MenuItem Header="Cell Division" Name="cellDivMenu" IsEnabled="False" Click="OpenCellDivisionWindow" />
                 </MenuItem>
                 <MenuItem Header="Options" Name="optionsMenu">
                     <MenuItem Header="User preferences">

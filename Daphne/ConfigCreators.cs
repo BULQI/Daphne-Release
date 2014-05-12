@@ -1404,9 +1404,12 @@ namespace Daphne
             }
 
             guid = findReactionGuid(ReactionType.Association, sc);
-            crc.reactions_guid_ref.Add(guid);
+            if (guid != null)
+                crc.reactions_guid_ref.Add(guid);
+
             guid = findReactionGuid(ReactionType.Dissociation, sc);
-            crc.reactions_guid_ref.Add(guid);
+            if (guid != null)
+                crc.reactions_guid_ref.Add(guid);
 
             sc.entity_repository.reaction_complexes.Add(crc);
 

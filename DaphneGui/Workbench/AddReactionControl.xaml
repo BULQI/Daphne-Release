@@ -144,8 +144,7 @@
                 <StackPanel Orientation="Vertical"  Margin="10,10,0,0" Grid.Column="1" Grid.Row="1" >
                     <Button x:Name="btnReac" Content="Add to Reactants" Width="110" Click="btnReac_Click" />
                     <Button x:Name="btnProd" Content="Add to Products" Width="110"  Click="btnProd_Click"/>
-                    <Button x:Name="btnUnselectAll" Content="Unselect all" Width="110" Click="btnUnselectAll_Click" />
-                    <Button x:Name="btnSelectAll" Content="Select all" Width="110" Click="btnSelectAll_Click" />
+                    <Button x:Name="btnUnselectAll" Content="Clear" Width="110" Click="btnUnselectAll_Click" />
                 </StackPanel>
             </Grid>
 

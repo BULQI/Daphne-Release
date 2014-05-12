@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
-        Title="Add/Edit Reaction Complex" Height="400" Width="640"
+        Title="Add/Edit Reaction Complex" Height="359" Width="640"
         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
     
     <Window.Resources>
         <ResourceDictionary Source="..\Dictionary1.xaml" />
     </Window.Resources>
 
-    <StackPanel >
+    <StackPanel Height="319">
         <!-- Reaction Complex section -->
         <Grid>
             <Grid.Resources>
@@ -87,23 +87,23 @@
             <Button x:Name="btnSave" Grid.Column="3" Grid.Row="1" Width="80" Height="24"  HorizontalAlignment="Left" Click="btnSave_Click"  Margin="0,4,92,4">Save</Button>
             <Button x:Name="btnCancel" Grid.Column="3" Grid.Row="1" Width="80" Height="24" HorizontalAlignment="Right" Click="btnCancel_Click" Margin="0,4,0,4">Cancel</Button>
 
-            <Expander 
+            <!--<Expander 
                 Padding="10" ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Add Reactions"                                                  
-                                              x:Name="AddReactions"
-                                              Margin="0,10,0,0" 
-                                              Canvas.ZIndex="1"
-                                            BorderThickness="1"
-                                            BorderBrush="Black"
-                                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            IsExpanded="False"
+                            Header="Add Reactions"                                                  
+                            x:Name="AddReactions"
+                            Margin="0,10,0,0" 
+                            Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                 Expanded="AddReactions_Expanded" Collapsed="AddReactions_Collapsed"
                 Width="600"
                 Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4">
                 <Grid>
                     <local:AddReactionControl />
                 </Grid>
-            </Expander>
+            </Expander>-->
         </Grid>
     </StackPanel>
 </Window>

@@ -207,6 +207,10 @@ namespace DaphneGui
                             current_item.mp_distribution = prev_distribution;
                         }
                         break;
+
+                    case MolPopDistributionType.Explicit:
+                        break;
+
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
                 }
@@ -454,28 +458,7 @@ namespace DaphneGui
             //ConfigTabControl.SelectedIndex = 1;
             // Use list index here since not all solfacs.mp_distribution have this guid field
             lbEcsMolPops.SelectedIndex = index;
-        }
-
-        private void btnAddMolec_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecule gm = new ConfigMolecule();
-            gm.ReadOnly = false;
-            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
-            lbMol.SelectedIndex = lbMol.Items.Count - 1;
-        }
-
-        private void btnCopyMolec_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecule cm = (ConfigMolecule)lbMol.SelectedItem;
-
-            if (cm == null)
-                return;
-
-            ConfigMolecule gm = new ConfigMolecule(cm);
-            gm.ReadOnly = false;
-            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
-            lbMol.SelectedIndex = lbMol.Items.Count - 1;
-        }
+        }        
 
         //ECM TAB EVENT HANDLERS
         private void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
@@ -581,6 +564,9 @@ namespace DaphneGui
         private void btnEditComplex_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
+            if (crc == null)
+                return;
+
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
             arc.ShowDialog();
         }
@@ -694,50 +680,57 @@ namespace DaphneGui
         }
 
         //LIBRARIES TAB EVENT HANDLERS
-        //MOLECULES
-        private void lbMol_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //MOLECULES        
+        private void btnAddMolec_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecule cm = (ConfigMolecule)lbMol.SelectedItem;
+            ConfigMolecule gm = new ConfigMolecule();
+            gm.ReadOnly = false;
+            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
+            dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+
+            ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+            dgLibMolecules.ScrollIntoView(cm);
+        }
+
+        private void btnCopyMolec_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+
             if (cm == null)
                 return;
 
-            if (cm.molecule_location == MoleculeLocation.Boundary)
-            {
-                chkBoundary.IsChecked = true;
-            }
-            else
-            {
-                chkBoundary.IsChecked = false;
-            }
+            ConfigMolecule gm = new ConfigMolecule(cm);
+            gm.ReadOnly = false;
+            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
+            dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
-            if (cm.ReadOnly == true)
-            {
-                txtMolName.IsEnabled = false;
-                txtDiffCoeff.IsEnabled = false;
-            }
-            else
-            {
-                txtMolName.IsEnabled = true;
-                txtDiffCoeff.IsEnabled = true;
-            }
+            cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+            dgLibMolecules.ScrollIntoView(cm);
         }
-
         private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;
+            //ConfigMolecule gm = (ConfigMolecule)lbMol.SelectedValue;
+            ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
             if (gm.ReadOnly == false)
             {
-                int index = lbMol.SelectedIndex;
+                //int index = lbMol.SelectedIndex;
                 //MainWindow.SC.SimConfig.entity_repository.UserdefMolecules.Remove(gm);
+                //lbMol.SelectedIndex = index;
+                //if (index >= lbMol.Items.Count)
+                //    lbMol.SelectedIndex = lbMol.Items.Count - 1;
+
+                //if (lbMol.Items.Count == 0)
+                //    lbMol.SelectedIndex = -1;
+
+                int index = dgLibMolecules.SelectedIndex;
                 MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
+                dgLibMolecules.SelectedIndex = index;
 
-                lbMol.SelectedIndex = index;
+                if (index >= dgLibMolecules.Items.Count)
+                    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
-                if (index >= lbMol.Items.Count)
-                    lbMol.SelectedIndex = lbMol.Items.Count - 1;
-
-                if (lbMol.Items.Count == 0)
-                    lbMol.SelectedIndex = -1;
+                if (dgLibMolecules.Items.Count == 0)
+                    dgLibMolecules.SelectedIndex = -1;
 
             }
             else
@@ -746,10 +739,7 @@ namespace DaphneGui
             }
         }
 
-        private void btnAddReaction_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
+        //REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
@@ -771,29 +761,43 @@ namespace DaphneGui
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
-            if (cc != null && cr != null)
-                cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
 
-            //ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            //ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
-            //if (cc != null && cr != null)
-            //    cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+            foreach (var item in lvCellAvailableReacs.SelectedItems)
+            {
+                ConfigReaction cr = (ConfigReaction)item;
+                if (cc != null && cr != null)
+                {
+                    if (!cc.membrane.reaction_complexes_guid_ref.Contains(cr.reaction_guid)) {
+                        cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+                    }
+                }
+            }
+            ////ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
+            ////if (cc != null && cr != null)
+            ////    cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
 
-            if (cc != null && cr != null)
-                cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+            foreach (var item in lvCellAvailableReacs.SelectedItems)
+            {
+                ConfigReaction cr = (ConfigReaction)item;
+                if (cc != null && cr != null)
+                {
+                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
+                    {
+                        cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+                    }
+                }
+            }
 
-            //ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            //ConfigReaction cr = (ConfigReaction)lbCellAvailableReacs.SelectedItem;
+            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            ////ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
 
-            //if (cc != null && cr != null)
-            //    cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+            ////if (cc != null && cr != null)
+            ////    cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
@@ -1419,7 +1423,8 @@ namespace DaphneGui
                 return;
 
             ComboBox cb = sender as ComboBox;
-            ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(1));
+            int index = (int)MolPopDistributionType.Linear;
+            ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
 
             cbi.IsEnabled = true;
             if (cbToroidal.IsChecked == true)
@@ -1434,6 +1439,38 @@ namespace DaphneGui
             {
                 cbi.IsEnabled = false;
             }
+
+            index = (int)MolPopDistributionType.Explicit;
+            cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
+            cbi.IsEnabled = false;
+        }
+
+        private void RemoveCellButton_Click_1(object sender, RoutedEventArgs e)
+        {
+            int nIndex = CellsListBox.SelectedIndex;
+            
+            if (nIndex >= 0)
+            {
+                ConfigCell cell = (ConfigCell)CellsListBox.SelectedValue;
+
+                if (cell.ReadOnly == false)
+                {
+                    MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
+
+                    CellsListBox.SelectedIndex = nIndex;
+
+                    if (nIndex >= CellsListBox.Items.Count)
+                        CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+
+                    if (CellsListBox.Items.Count == 0)
+                        CellsListBox.SelectedIndex = -1;
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined cell");
+                }
+
+            }            
         }
                 
     }                   

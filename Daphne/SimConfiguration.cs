@@ -1223,7 +1223,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molecule_guid = id.ToString();
-            Name = "MolName" + "_" + DateTime.Now.ToString("hhmmssffff");
+            Name = "NewMolecule"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
@@ -1235,7 +1235,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molecule_guid = id.ToString();
-            Name = gm.Name + "_" + DateTime.Now.ToString("hhmmssffff");
+            Name = "CopyOf_" + gm.Name; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = gm.MolecularWeight;
             EffectiveRadius = gm.EffectiveRadius;
             DiffusionCoefficient = gm.DiffusionCoefficient;
@@ -1725,6 +1725,7 @@ namespace Daphne
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
+            ReadOnly = true;
         }
 
         public string CellName { get; set; }
@@ -1733,6 +1734,7 @@ namespace Daphne
         public double TransductionConstant { get; set; }
         public double DragCoefficient { get; set; }
         public string cell_guid { get; set; }
+        public bool ReadOnly { get; set; }
 
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }

@@ -117,12 +117,7 @@ namespace DaphneGui
         {
             lbMol.UnselectAll();
         }
-
-        private void btnSelectAll_Click(object sender, RoutedEventArgs e)
-        {
-            lbMol.SelectAll();
-        }
-
+        
         private void btnRClear_Click(object sender, RoutedEventArgs e)
         {
             txtReac.Text = "";
