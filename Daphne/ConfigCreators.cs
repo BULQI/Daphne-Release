@@ -266,6 +266,19 @@ namespace Daphne
 
         private static void PredefinedCellsCreator(SimConfiguration sc)
         {           
+
+            //Some input Grace sent on 6/19/13
+           
+            //T-Cell: radius = 5 micrometers, no molecules, no reactions, no reaction complexes
+            //FDC: radius = 5 micrometers, no molecules, no reactions, no reaction complexes
+            //B-Cell: radius = 5 micrometers
+            //          Cytoplasm Molecules: gCXCR5, CXCR5, driver
+            //          PlasmaMembrane Molecules: CXCR5, CXCR5:CXCL13
+            //          Reactions: 
+            //              gCXCR5 -> CXCR5  (cytosol)
+            //              CXCR5 (plasma membrane) + CXCL13 (ecm) -> CXCR5:CXCL13 (plasma membrane)
+            //              CXCR5:CXCL13 (plasma membrane) -> CXCR5 (plasma membrane) + CXCL13 (ecm)
+            //
             //---------------------------------------------------------------------------------------
             //BCell 
 
@@ -332,6 +345,16 @@ namespace Daphne
             }
 
             sc.entity_repository.cells.Add(gc);
+
+            //Reactions
+
+            //Reactions in membrane
+            string guid = findReactionGuid(ReactionType.BoundaryAssociation, sc);
+            gc.membrane.reactions_guid_ref.Add(guid);
+            guid = findReactionGuid(ReactionType.BoundaryDissociation, sc);
+            gc.membrane.reactions_guid_ref.Add(guid);
+
+            //Reactions in cytosol
 
             //---------------------------------------------------------------------------------------
             //TCell 
