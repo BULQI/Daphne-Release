@@ -406,6 +406,20 @@ namespace Daphne
 
         private static void PredefinedCellsCreator(SimConfiguration sc)
         {
+            // Generic death transition driver - move to PredefinedTransitionDriversCreator() ?
+            // Cell cytoplasm must contain sApop molecular population
+            ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+            config_td.Name = "generic apoptosis";
+            string[] stateName = new string[] { "alive", "dead" };
+            string[,] signal = new string[,] { { "", "sApop" }, { "", "" } };
+            double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+            double[,] beta = new double[,] { { 0, 0.002}, { 0, 0 } };
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, sc);
+            config_td.CurrentState = 0;
+            config_td.StateName = config_td.states[config_td.CurrentState];
+            sc.entity_repository.transition_drivers.Add(config_td);
+            sc.entity_repository.transition_drivers_dict.Add(config_td.driver_guid, config_td);
+
             ConfigCell gc;
             double[] conc;
             //ReactionType[] reacType;
@@ -453,8 +467,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[2] { 0, 1 };
-            type = new string[2] { "Apop", "gApop" };
+            conc = new double[1] { 0};
+            type = new string[1] { "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -474,23 +488,25 @@ namespace Daphne
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
 
-            // Reactions in Cytosol
-            type = new string[1] { "gApop -> Apop + gApop" };
+            // Add genes
+            type = new string[1] { "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], sc);
-                if (reac != null)
-                {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
-                }
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
             }
+
+            //
+            // ToDo: Add gene transcription for sApop
+
+            // Add death driver
+            // Cell cytoplasm must contain sApop molecular population
+            gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 
             gc.DragCoefficient = 1.0;
             sc.entity_repository.cells.Add(gc);
 
-            //
+            //////////////////////////////////////////////
             // Leukocyte_staticReceptor_motile
             // Leukocyte with fixed number of receptor molecules with locomotion driven by A*.
             //
@@ -681,7 +697,7 @@ namespace Daphne
 
             //MOLECULES IN Cytosol
             conc = new double[11] { 250,  0,     0,       1,       0,       0,       0,       0,        0,      0,       0};
-            type = new string[11] { "A", "A*", "Apop", "gApop", "Sdif1", "Sdif2", "Sdif3", "Sdif4", "Sdif5", "Sdif6", "Sdif7" };
+            type = new string[11] { "A", "A*", "Apop", "gApop", "sDif1", "sDif2", "sDif3", "sDif4", "sDif5", "sDif6", "sDif7" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -737,10 +753,8 @@ namespace Daphne
         private static void PredefinedDiffSchemesCreator(SimConfiguration sc)
         {
             // These can be reused to create other differentiation schemes
-            ConfigTransitionDriverElement driverElement;
             ConfigTransitionDriver driver;
             ConfigDiffScheme diffScheme;
-            ObservableCollection<ConfigTransitionDriverElement> row;
             ObservableCollection<double> actRow;
             string[] stateNames, geneNames;
             double[,] activations, alpha, beta;
@@ -816,26 +830,11 @@ namespace Daphne
             }
 
             // Add DriverElements to TransitionDriver
-            for (int i = 0; i < stateNames.Length; i++)
-            {
-                row = new ObservableCollection<ConfigTransitionDriverElement>();
-                for (int j = 0; j < stateNames.Length; j++)
-                {
-                    driverElement = new ConfigTransitionDriverElement();
-                    //if (signal[i, j] == "") continue;
-                    driverElement.CurrentState = i;
-                    driverElement.DestState = j;
-                    driverElement.CurrentStateName = stateNames[i];
-                    driverElement.DestStateName = stateNames[j];
-                    driverElement.Alpha = alpha[i,j];
-                    driverElement.Beta = beta[i,j];
-                    driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, sc);
-                    row.Add(driverElement);
-                }
-                driver.DriverElements.Add(row);
-            }
+            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, sc);
 
-            // Add differentiation scheme to Entity Repository
+            // Add to Entity Repository
+            sc.entity_repository.transition_drivers.Add(driver);
+            sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
         }
 
@@ -1005,7 +1004,7 @@ namespace Daphne
             }
 
             // generic cell apoptosis
-            cm = new ConfigMolecule("sAp", 1.0, 1.0, 1.0);
+            cm = new ConfigMolecule("sApop", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
@@ -1320,7 +1319,20 @@ namespace Daphne
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
             
         }
-        
+
+        // given a transition driver name, find its guid
+        public static string findTransitionDriverGuid(string name, SimConfiguration sc)
+        {
+            foreach (ConfigTransitionDriver s in sc.entity_repository.transition_drivers)
+            {
+                if (s.Name == name)
+                {
+                    return s.driver_guid;
+                }
+            }
+            return null;
+        }
+
         // given a diff scheme name, find its guid
         public static string findDiffSchemeGuid(string name, SimConfiguration sc)
         {
@@ -1866,6 +1878,43 @@ namespace Daphne
             }
             return null;
         }
-    }
 
+        /// <summary>
+        /// Add ConfigTransitionDriverElements to a ConfigTransitionDriver.
+        /// Null transition elements are included to facilitate use in the GUI.
+        /// </summary>
+        /// <param name="driver">The ConfigTransitionDriver</param>
+        /// <param name="signal">Square array of driver molecule names</param>
+        /// <param name="alpha">Square array of Alpha values</param>
+        /// <param name="beta">Square array of Beta values</param>
+        /// <param name="stateName"></param>
+        public static void LoadConfigTransitionDriverElements(ConfigTransitionDriver driver, string[,] signal, double[,] alpha, double[,] beta,string[] stateName, SimConfiguration sc)
+        {
+            ConfigTransitionDriverRow row;
+            driver.DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
+            driver.states = new ObservableCollection<string>();
+            for (int i = 0; i < signal.GetLength(0); i++)
+            {
+                row = new ConfigTransitionDriverRow();
+                row.elements = new ObservableCollection<ConfigTransitionDriverElement>();
+                driver.states.Add(stateName[i]);
+                for (int j = 0; j < signal.GetLength(1); j++)
+                {
+                    ConfigTransitionDriverElement driverElement = new ConfigTransitionDriverElement();
+                    if (signal[i, j] != "")
+                    {
+                        driverElement.CurrentState = i;
+                        driverElement.DestState = j;
+                        driverElement.CurrentStateName = stateName[i];
+                        driverElement.DestStateName = stateName[j];
+                        driverElement.Alpha = alpha[i, j];
+                        driverElement.Beta = beta[i, j];
+                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, sc);
+                    }
+                    row.elements.Add(driverElement);
+                }
+                driver.DriverElements.Add(row);
+            }
+        }
+    }
 }

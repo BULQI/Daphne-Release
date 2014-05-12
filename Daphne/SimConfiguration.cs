@@ -1417,12 +1417,9 @@ namespace Daphne
 
         //All molecules, reactions, cells - Combined Predefined and User defined
         public ObservableCollection<ConfigCell> cells { get; set; }
-
         public ObservableCollection<ConfigMolecule> molecules { get; set; }
         public ObservableCollection<ConfigGene> genes { get; set; }
-
         public ObservableCollection<ConfigReaction> reactions { get; set; }
-
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
 
         public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
@@ -1433,8 +1430,12 @@ namespace Daphne
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
         public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
 
+
         public ObservableCollection<ConfigDiffScheme> diff_schemes { get; set; }
         public Dictionary<string, ConfigDiffScheme> diff_schemes_dict;
+        public ObservableCollection<ConfigTransitionDriver> transition_drivers { get; set; }
+        public Dictionary<string, ConfigTransitionDriver> transition_drivers_dict;
+
 
         public EntityRepository()
         {
@@ -1455,6 +1456,8 @@ namespace Daphne
             gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
             diff_schemes = new ObservableCollection<ConfigDiffScheme>();
             diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
+            transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
+            transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
         }        
     }
 
@@ -2341,6 +2344,16 @@ namespace Daphne
         }
     }
 
+    public class ConfigTransitionDriverRow
+    {
+        public ObservableCollection<ConfigTransitionDriverElement> elements;
+
+        public ConfigTransitionDriverRow()
+        {
+            elements = new ObservableCollection<ConfigTransitionDriverElement>();
+        }
+    }
+
     public class ConfigTransitionDriver
     {
         public string Name { get; set; }
@@ -2348,16 +2361,16 @@ namespace Daphne
         public int CurrentState { get; set; }
         public string StateName { get; set; }
         
-        //public ObservableCollection<ConfigTransitionDriverElement> DriverElements { get; set; }
-        public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
+        public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
+        //public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
         public ObservableCollection<string> states;
 
         public ConfigTransitionDriver()
         {
             Guid id = Guid.NewGuid();
             driver_guid = id.ToString();
-            //DriverElements = new ObservableCollection<ConfigTransitionDriverElement>();
-            DriverElements = new ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>>();
+            DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
+            //DriverElements = new ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>>();
         }
     }
 
@@ -2399,11 +2412,6 @@ namespace Daphne
             diff_scheme_guid = id.ToString();
         }
     }
-
-    //end of Diff Scheme classes --------------------------------------------------------------
-
-
-
 
     public enum ExtendedReport { NONE, LEAN, COMPLETE };
 
@@ -3124,6 +3132,7 @@ namespace Daphne
             ReadOnly = true;
 
             genes_guid_ref = new ObservableCollection<string>();
+            
 
         }
 
@@ -3142,7 +3151,6 @@ namespace Daphne
 
         public string CellName { get; set; }
         public double CellRadius { get; set; }
-        public string signaling_mol_guid_ref { get; set; }
         private string _locomotor_mol_guid_ref;
         public string locomotor_mol_guid_ref
         {
@@ -3175,6 +3183,22 @@ namespace Daphne
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
         public string diff_scheme_guid_ref { get; set; }
+
+        // Guid for ConfigTransitionDriver that drives cell death
+        // ConfigTransitionDriver contains ConfigTransitionDriverElement
+        // ConfigTransitionDriverElement contains information about 
+        //      signaling molecule that drives cell death and alphas and betas
+        public string death_driver_guid;
+        // Guid for ConfigTransitionDriver that drives cell division
+        public string div_driver_guid;
+
+        public int CurrentDeathState;
+        public int CurrentDivState;
+
+        // This field should be deleted when the above implementation is completed
+        public string signaling_mol_guid_ref { get; set; }
+
+
     }
 
     public class CellPopDistType

@@ -957,7 +957,7 @@ namespace DaphneGui
         public void UpdateAllocatedCells()
         {
             // allow zero arrays; that's needed in order to totally clear the cells all of them die
-            if (Simulation.dataBasket.Cells != null)// && Simulation.dataBasket.Cells.Count > 0)
+            if (Simulation.dataBasket.Cells != null) // && Simulation.dataBasket.Cells.Count > 0)
             {
                 // NOTE: Make sure that all arrays get updated or there will be memory problems.
                 allocateArrays(Simulation.dataBasket.Cells.Count, 2);
@@ -968,7 +968,10 @@ namespace DaphneGui
                 {
                     AssignCell(i++, kvp.Value);
                 }
-                points.Modified();
+                if (points != null)
+                {
+                    points.Modified();
+                }
 
 #if WRITE_VTK_DATA
                 writeVTKfile("cells", MainWindow.Sim.RenderFrame);
