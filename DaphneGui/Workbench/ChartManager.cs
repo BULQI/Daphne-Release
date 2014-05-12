@@ -611,7 +611,8 @@ namespace Workbench
                     ToolWin.RC.EditConc(s.Name, s.Points[0].YValues[0]);                    
                 }
 
-                ToolWin.RC.SaveOriginalConcs();
+                //ToolWin.RC.SaveOriginalConcs();
+                ToolWin.RC.OverwriteOriginalConcs();
             }
         }    
    

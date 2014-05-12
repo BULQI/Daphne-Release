@@ -1050,78 +1050,9 @@ namespace DaphneGui
                     MessageBox.Show("Cannot remove a predefined reaction complex.");
                 }
             }
+
+            btnGraphReactionComplex.IsChecked = true;
         }
-
-        private void btnGraphReactionComplex_Click(object sender, RoutedEventArgs e)
-        {
-
-            if (lbComplexes.SelectedIndex < 0)
-            {
-                MessageBox.Show("Select a reaction complex to process.");
-                return;
-            }
-
-            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-
-            //
-
-            ConfigCell cc = new ConfigCell();
-            cc.CellName = "RCCell";
-            foreach (ConfigMolecularPopulation cmp in crc.molpops)
-            {
-                cc.cytosol.molpops.Add(cmp);
-            }
-            foreach (string rguid in crc.reactions_guid_ref)
-            {
-                cc.cytosol.reactions_guid_ref.Add(rguid);
-            }
-            MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
-            //MainWindow.SC.SimConfig.entity_repository.cells_dict.Add(cc.cell_guid, cc);
-            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
-
-            CellPopulation cp = new CellPopulation();
-            cp.cell_guid_ref = cc.cell_guid;
-            cp.cellpopulation_name = "RC cell";
-            cp.number = 1;
-
-            // Add cell population distribution information
-            double[] extents = new double[3] { MainWindow.SC.SimConfig.rc_scenario.environment.extent_x, 
-                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_y, 
-                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_z };
-            double minDisSquared = 2 * MainWindow.SC.SimConfig.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius;
-            minDisSquared *= minDisSquared;
-            cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
-            cp.cellPopDist.CellStates[0] = new CellState(   MainWindow.SC.SimConfig.rc_scenario.environment.extent_x,
-                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_y / 2,
-                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_z / 2);
-
-            cp.cellpopulation_constrained_to_region = false;
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
-            //
-
-            Simulation rcSim = new Simulation();
-            rcSim.Load(MainWindow.SC.SimConfig, true, true);
-            //rcSim.LoadReactionComplex(MainWindow.SC.SimConfig, grc, true);
-
-            ReactionComplexProcessor rcp = new ReactionComplexProcessor();
-            rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
-            rcp.Go();
-
-            MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
-            MainWindow.ST_ReacComplexChartWindow.RC = rcp;
-            MainWindow.ST_ReacComplexChartWindow.Render();
-            
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
-
-            MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
-
-            MW.VTKDisplayDocWindow.Activate();
-            MainWindow.ST_ReacComplexChartWindow.Activate();
-            
-        }
-
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -2446,15 +2377,6 @@ namespace DaphneGui
             int n = ColorComboBox.SelectedIndex;
         }
 
-        private void AddReacExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            //lvAvailableReacs.InvalidateVisual();
-            //lvAvailableReacs.ClearValue(ListView.ItemsSourceProperty);
-            //lvAvailableReacs.DataContext = null;
-            //lvAvailableReacs.DataContext = MainWindow.SC.SimConfig.entity_repository.molecules;
-            //EcmAvailableReactions.Refresh();
-        }
-
         private void molecule_combo_box2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
@@ -2498,6 +2420,125 @@ namespace DaphneGui
                 }
             }
         }
+
+        
+        private void DrawSelectedReactionComplex()
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+
+            //
+
+            ConfigCell cc = new ConfigCell();
+            cc.CellName = "RCCell";
+            foreach (ConfigMolecularPopulation cmp in crc.molpops)
+            {
+                cc.cytosol.molpops.Add(cmp);
+            }
+            foreach (string rguid in crc.reactions_guid_ref)
+            {
+                cc.cytosol.reactions_guid_ref.Add(rguid);
+            }
+            MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
+            //MainWindow.SC.SimConfig.entity_repository.cells_dict.Add(cc.cell_guid, cc);
+            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
+
+            CellPopulation cp = new CellPopulation();
+            cp.cell_guid_ref = cc.cell_guid;
+            cp.cellpopulation_name = "RC cell";
+            cp.number = 1;
+
+            // Add cell population distribution information
+            double[] extents = new double[3] { MainWindow.SC.SimConfig.rc_scenario.environment.extent_x, 
+                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_y, 
+                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_z };
+            double minDisSquared = 2 * MainWindow.SC.SimConfig.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+            cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
+            cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SC.SimConfig.rc_scenario.environment.extent_x,
+                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_y / 2,
+                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_z / 2);
+
+            cp.cellpopulation_constrained_to_region = false;
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
+            //
+
+            Simulation rcSim = new Simulation();
+            rcSim.Load(MainWindow.SC.SimConfig, true, true);
+            //rcSim.LoadReactionComplex(MainWindow.SC.SimConfig, grc, true);
+
+            ReactionComplexProcessor rcp = new ReactionComplexProcessor();
+            rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
+            rcp.Go();
+
+            MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
+            MainWindow.ST_ReacComplexChartWindow.RC = rcp;
+            MainWindow.ST_ReacComplexChartWindow.Render();
+
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
+
+            MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
+
+            MW.VTKDisplayDocWindow.Activate();
+            
+            MainWindow.ST_ReacComplexChartWindow.Activate();
+
+            MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
+
+        }
+
+        private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
+        {
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to process.");
+                return;
+            }
+
+            if (btnGraphReactionComplex.IsChecked == true)
+            {
+                DrawSelectedReactionComplex();
+                btnGraphReactionComplex.IsChecked = false;
+            }
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lvCellAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+        }
+
+        private void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (lvCellAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+        }
+
+        private void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
+        {
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+        }
+
+        private void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tabECM.IsSelected == true)
+            {
+                if (lvAvailableReacs.ItemsSource != null)
+                    CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            }
+
+            //ActiproSoftware.Windows.Controls.Editors.DoubleEditBox edd = new ActiproSoftware.Windows.Controls.Editors.DoubleEditBox();
+            //edd.Format = ("G3");
+            //edd.Format
+        }
+
+        
+        
+
     }      
     
      

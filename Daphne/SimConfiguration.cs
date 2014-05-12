@@ -22,9 +22,12 @@ namespace Daphne
         public string FileName { get; set; }
         public SimConfiguration SimConfig { get; set; }
 
+        public UserDefinedGroup userDefGroup { get; set; }
+
         public SimConfigurator()
         {
             this.SimConfig = new SimConfiguration();
+            userDefGroup = new UserDefinedGroup();
         }
 
         public SimConfigurator(string filename)
@@ -34,6 +37,8 @@ namespace Daphne
 
             this.FileName = filename;
             this.SimConfig = new SimConfiguration();
+
+            userDefGroup = new UserDefinedGroup();
         }
 
         public void SerializeSimConfigToFile()
@@ -42,8 +47,18 @@ namespace Daphne
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
+
+            userDefGroup.Reset();
+            userDefGroup.CopyFromConfig(SimConfig);
+            
+            //serialize SimConfig
             string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = FileName;
+            File.WriteAllText(jsonFile, jsonSpec);
+
+            //serialize user defined objects
+            jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);
+            jsonFile = "Config\\UserDefinedGroup.json";
             File.WriteAllText(jsonFile, jsonSpec);
         }
 
@@ -90,9 +105,19 @@ namespace Daphne
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+            //deserialize SimConfig
             string readText = File.ReadAllText(FileName);
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
             SimConfig.InitializeStorageClasses();
+
+            //deserialize user defined objects
+            if (File.Exists("\\config\\UserDefinedGroup.json"))
+            {
+                readText = File.ReadAllText("Config\\UserDefinedGroup.json");
+                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+                userDefGroup.CopyToConfig(SimConfig);
+            }
         }
 
         public void DeserializeSimConfigFromString(string simConfigJson)
@@ -101,7 +126,100 @@ namespace Daphne
             settings.TypeNameHandling = TypeNameHandling.Auto;
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(simConfigJson, settings);
             SimConfig.InitializeStorageClasses();
+
+            //deserialize user defined items
+            if (File.Exists("\\config\\UserDefinedGroup.json"))
+            {
+                string readText = File.ReadAllText("\\config\\UserDefinedGroup.json");
+                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+                userDefGroup.CopyToConfig(SimConfig);
+            }
         }
+    }
+
+    public class UserDefinedGroup
+    {
+        public ObservableCollection<ConfigMolecule> user_molecules { get; set; }
+        public ObservableCollection<ConfigCell> user_cells { get; set; }
+        public ObservableCollection<ConfigReaction> user_reactions { get; set; }
+
+        public UserDefinedGroup()
+        {
+            user_molecules = new ObservableCollection<ConfigMolecule>();
+            user_reactions = new ObservableCollection<ConfigReaction>();
+            user_cells = new ObservableCollection<ConfigCell>();
+        }
+
+        public void Reset()
+        {
+            user_molecules.Clear();
+            user_cells.Clear();
+            user_reactions.Clear();
+        }
+
+        public void CopyToConfig(SimConfiguration sc)
+        {
+            foreach (ConfigMolecule mol in user_molecules)
+            {
+                if (!sc.entity_repository.molecules_dict.ContainsKey(mol.molecule_guid))
+                    sc.entity_repository.molecules.Add(mol);
+            }
+            foreach (ConfigCell cell in user_cells)
+            {
+                if (!sc.entity_repository.cells_dict.ContainsKey(cell.cell_guid))
+                    sc.entity_repository.cells.Add(cell);
+            }
+            foreach (ConfigReaction reac in user_reactions)
+            {
+                if (!sc.entity_repository.reactions_dict.ContainsKey(reac.reaction_guid))
+                    sc.entity_repository.reactions.Add(reac);
+            }
+        }
+
+        public void CopyFromConfig(SimConfiguration sc)
+        {
+            //First copy all user defined from entity_repos
+            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
+            {
+                if (mol.ReadOnly == false)
+                {
+                    user_molecules.Add(mol);                    
+                }
+            }
+            foreach (ConfigCell cell in sc.entity_repository.cells)
+            {
+                if (cell.ReadOnly == false)
+                {
+                    user_cells.Add(cell);
+                }
+            }
+            foreach (ConfigReaction reac in sc.entity_repository.reactions)
+            {
+                if (reac.ReadOnly == false)
+                {
+                    user_reactions.Add(reac);
+                }
+            }
+
+            //////Then delete all user defined from entity_repos
+            ////foreach (ConfigMolecule mol in sc.entity_repository.molecules.ToList())
+            ////{
+            ////    if (mol.ReadOnly == false)
+            ////        sc.entity_repository.molecules.Remove(mol);
+            ////}
+            ////foreach (ConfigCell cell in sc.entity_repository.cells.ToList())
+            ////{
+            ////    if (cell.ReadOnly == false)
+            ////        sc.entity_repository.cells.Remove(cell);
+            ////}
+            ////foreach (ConfigReaction reac in sc.entity_repository.reactions.ToList())
+            ////{
+            ////    if (reac.ReadOnly == false)
+            ////        sc.entity_repository.reactions.Remove(reac);
+            ////}
+
+        }
+
     }
 
     public class SimConfiguration
@@ -815,7 +933,9 @@ namespace Daphne
 
         //All molecules, reactions, cells - Combined Predefined and User defined
         public ObservableCollection<ConfigCell> cells { get; set; }
+
         public ObservableCollection<ConfigMolecule> molecules { get; set; }
+
         public ObservableCollection<ConfigReaction> reactions { get; set; }
 
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
@@ -2091,11 +2211,24 @@ namespace Daphne
         }
     }
 
-    public class ConfigReactionComplex
+    public class ConfigReactionComplex : EntityModelBase
     {
         public string Name { get; set; }
         public string reaction_complex_guid { get; set; }
-        public ObservableCollection<string> reactions_guid_ref { get; set; }
+
+        private ObservableCollection<string> _reactions_guid_ref;
+        public ObservableCollection<string> reactions_guid_ref 
+        {
+            get
+            {
+                return _reactions_guid_ref;
+            }
+            set
+            {
+                _reactions_guid_ref = value;
+                OnPropertyChanged("reactions_guid_ref");
+            }
+        }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
         public bool ReadOnly { get; set; }
 

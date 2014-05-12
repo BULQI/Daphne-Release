@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using ActiproSoftware.Windows.Controls.Docking;
 using DaphneGui;
 using System.Collections.ObjectModel;
+using System.Windows.Controls.Primitives;
 
 namespace Workbench
 {
@@ -27,6 +28,9 @@ namespace Workbench
         private System.Drawing.Size chartSize;
         public ReactionComplexProcessor RC;
 
+        public ToggleButton toggleButton { get; set; }
+        private bool dragging = false;
+
         public ObservableCollection<MolConcInfo> tester { get; set; }
 
         public ChartViewToolWindow()
@@ -38,6 +42,8 @@ namespace Workbench
             
             //txtTestBox.DataContext = RC;
             tester = new ObservableCollection<MolConcInfo>();
+
+            
 
             
        
@@ -260,12 +266,15 @@ namespace Workbench
 
         private void btnRedraw_Click(object sender, RoutedEventArgs e)
         {
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                RC.EditConc(mci.molguid, mci.conc);
-            }
+            ////foreach (MolConcInfo mci in RC.initConcs)
+            ////{
+            ////    RC.EditConc(mci.molguid, mci.conc);
+            ////}
             
-            cm.RedrawSeries();
+            ////cm.RedrawSeries();
+
+            if (toggleButton != null)
+                toggleButton.IsChecked = true;
         }
 
         private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -281,8 +290,47 @@ namespace Workbench
 
         private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            cm.RedrawSeries();
+            ////if (toggleButton != null)
+            ////    toggleButton.IsChecked = true;
+            //cm.RedrawSeries();
+            //if (IsMouseCaptured == true)
+            //    return;
+
+            Slider sl = sender as Slider;
+
+            if (dragging == false)
+            {
+                sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
+                sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
+            }
+
+            dragging = true;
+
+            //if (toggleButton != null &&)
+            //    toggleButton.IsChecked = true;
         }
+
+        private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Slider sl = sender as Slider;
+
+            if (toggleButton != null && dragging == true)
+            {
+                dragging = false;
+                //sl.RemoveHandler(MouseLeftButtonDownEvent, null);
+                //sl.RemoveHandler(MouseLeftButtonUpEvent, null);
+
+                //This causes a redraw
+                toggleButton.IsChecked = true;
+            }
+        }
+
+        private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            dragging = true;
+        }
+
+              
         
     }
 }

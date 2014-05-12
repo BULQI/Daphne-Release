@@ -46,7 +46,14 @@
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
                 <TextBlock VerticalAlignment="Center" >Maximum time (seconds):</TextBlock>
-                <Slider x:Name="slMaxTime" Width="50"  Minimum="0.0" Maximum="10.0"  Margin="10,0,0,0" IsSnapToTickEnabled="True" ValueChanged="slMaxTime_ValueChanged"
+                <Slider x:Name="slMaxTime" 
+                        Orientation="Horizontal"
+                        Width="100" Height="24"
+                        RenderTransform="1.0,0,0,0.5,0,4"
+                        Minimum="0.00" 
+                        Maximum="10.00"                        
+                        Margin="10,0,0,0" IsSnapToTickEnabled="True" 
+                        ValueChanged="slMaxTime_ValueChanged"
                         Value="{Binding Path=dInitialTime}"                        
                         TickFrequency="0.1">
                 </Slider>
@@ -107,14 +114,14 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="150">
+                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="150" MaxWidth="250">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Slider x:Name="slConc" 
                                                 Orientation="Horizontal"
                                                 Width="100"
-                                                RenderTransform="2.0,0,0,0.5,0,4"
+                                                RenderTransform="1.0,0,0,0.5,0,4"
                                                 Minimum="0.00" 
                                                 Maximum="10.00"
                                                 Value="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
@@ -140,7 +147,7 @@
                 
                 <DataGrid x:Name="dgReactionRates" 
                                 ItemsSource="{Binding Path=ReactionsInComplex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                MaxHeight="200" MinWidth="100" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -173,14 +180,14 @@
                         <DataGridTemplateColumn x:Name="colReac" Header="Reaction"  Width="200" MinWidth="100" MaxWidth="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Width="{Binding ElementName=colReac, Path=Width}" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
+                                    <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
                                              Text="{Binding Path=TotalReactionString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
                                     </TextBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="150" MaxWidth="300">
+                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="250" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <!--<TextBox Width="{Binding ElementName=rate_const, Path=Width}" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" 
@@ -196,21 +203,24 @@
                                                 Margin="0,0,0,0" IsSnapToTickEnabled="True" 
                                                 TickFrequency="0.1"
                                                 ValueChanged="slRate_ValueChanged"
+                                                MouseLeftButtonUp="slRate_MouseLeftButtonUp"
+                                                MouseLeftButtonDown="slRate_MouseLeftButtonDown"
                                                 >
+                                            
                                         </Slider>
-                                        <TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
 
                                         <editors:DoubleEditBox 
                                             CheckBoxVisibility="Collapsed" 
                                             SpinnerVisibility="Collapsed"
                                             HorizontalAlignment="Left"
-                                            Format="F3"
+                                            Format="G"
                                             StepValue="10"
-                                            Width="50" 
+                                            Width="100" 
                                             CenterSlotHorizontalAlignment="Right"
                                             Value="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                             />
                                         
+                                        <!--<TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />-->
                                         
                                     </StackPanel>
                                 </DataTemplate>

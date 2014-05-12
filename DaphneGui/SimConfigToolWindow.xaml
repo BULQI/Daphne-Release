@@ -13,8 +13,8 @@
     <!-- xmlns:daph="clr-namespace:Daphne"-->
 
     
-    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top">
-        <TabControl.Resources>
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged">
+        <TabControl.Resources >
             <!-- For changing color of alternating rows of ListBox -->
             <Style  TargetType="{x:Type ListBoxItem}">
                 <Style.Triggers>
@@ -2294,7 +2294,7 @@
         </TabItem>
         
         <!-- Extracellular Medium -->
-        <TabItem x:Name="tabECM" Header="Extracellular Medium" >
+        <TabItem x:Name="tabECM" Header="Extracellular Medium"  >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
                     <!-- Environment -->
@@ -2626,7 +2626,6 @@
                                               x:Name="AddReacExpander"
                                               Margin="0,0,0,0" 
                                               Canvas.ZIndex="1"
-                                              Expanded="AddReacExpander_Expanded"
                                               >
                                 <StackPanel Orientation="Vertical" Margin="10,0">
                                     <TextBlock Text="Reactions Available in Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
@@ -3786,7 +3785,7 @@
                                         >
                                 </ListBox>-->
                                 <ListView x:Name="lvReacComplexReactions" 
-                                      ItemsSource="{Binding Path=reactions_guid_ref}"
+                                      ItemsSource="{Binding Path=reactions_guid_ref, Mode=TwoWay}"
                                       SelectedIndex="-1"
                                         >
                                     <ListView.View>
@@ -3843,7 +3842,11 @@
                                         </GridView>
                                     </ListView.View>
                                 </ListView>
-                                <Button x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphReactionComplex_Click">Run Reaction Complex</Button>
+                                
+                                <ToggleButton x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" 
+                                              Checked="btnGraphReactionComplex_Checked" >Run Reaction Complex</ToggleButton>
+                                
+                                <!--<Button x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphReactionComplex_Click">Run Reaction Complex</Button>-->
                             </StackPanel>
                         </StackPanel>
                     </Expander>
@@ -4008,9 +4011,9 @@
                                             </StackPanel.Resources>
                                             
                                             <StackPanel>
-                                                <TabControl>
+                                                <TabControl SelectionChanged="TabControl_SelectionChanged">
                                                     <!-- Membrane -->
-                                                    <TabItem>
+                                                    <TabItem >
                                                         <TabItem.Header>
                                                             <TextBlock Text="Membrane" FontWeight="Bold" />
                                                         </TabItem.Header>
@@ -4030,6 +4033,7 @@
                                                                       x:Name="CellAddReacExpander"
                                                                       Margin="0,0,0,0" 
                                                                       Canvas.ZIndex="1"
+                                                                          Expanded="CellAddReacExpander_Expanded"
                                                                       >
                                                                       <StackPanel Orientation="Vertical" Margin="10,0">
                                                                             <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
@@ -4119,6 +4123,7 @@
                                                                     x:Name="CellAddReacExpander2"
                                                                     Margin="0,0,0,0" 
                                                                     Canvas.ZIndex="1"
+                                                                          Expanded="CellAddReacExpander2_Expanded"
                                                                     >
                                                                     <StackPanel Orientation="Vertical" Margin="10,0">
                                                                         <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />                                                    

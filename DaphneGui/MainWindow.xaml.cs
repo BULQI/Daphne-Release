@@ -232,7 +232,7 @@ namespace DaphneGui
 
             this.ToolWinCellInfo.Close();
 
-            CreateAndSerializeDaphneScenarios();
+            //CreateAndSerializeDaphneScenarios();
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 

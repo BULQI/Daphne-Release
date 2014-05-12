@@ -19,6 +19,8 @@ namespace Workbench
     {
         Simulation Sim { get; set; }
         SimConfiguration SC { get; set; }
+        ConfigReactionComplex CRC { get; set; }
+
         public int nSteps { get; set; }
         public double dt { get; set; }
 
@@ -124,6 +126,7 @@ namespace Workbench
         {
             Sim = sim;
             SC = mainSC;
+            CRC = crc;
 
             double minVal = 1e7;
 
@@ -251,12 +254,12 @@ namespace Workbench
         public void EditConc(string moleculeKey, double conc)
         {
             dictInitialConcs[moleculeKey] = conc;
-            initConcsDict[moleculeKey].conc = conc;
+            //initConcsDict[moleculeKey].conc = conc;
             OnPropertyChanged("initConcs");
         }
 
 
-        //Save the initial concs in a temp array in case user wants to discard the changes
+        //Save the original concs in a temp array in case user wants to discard the changes
         public void SaveOriginalConcs()
         {
             dictOriginalConcs.Clear();
@@ -286,6 +289,38 @@ namespace Workbench
             {
                 dictInitialConcs[kvp.Key] = kvp.Value;
             }
+            OnPropertyChanged("initConcs");
+        }
+
+        public void OverwriteOriginalConcs()
+        {
+            if (Simulation.dataBasket.Cells.Count <= 0)
+                return;
+
+            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            if (comp == null)
+                return;
+
+            dictOriginalConcs.Clear();
+
+            double[] initArray = new double[1];
+
+            //Copy current (may have changed) initial concs to Originals dict
+            foreach (KeyValuePair<string, double> kvp in dictInitialConcs)
+            {
+                dictOriginalConcs[kvp.Key] = kvp.Value;
+
+                //Now overwrite the concs in SimConfiguration
+                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
+                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mpInfo.mp_distribution;
+                homo.concentration = kvp.Value;
+                
+                //initArray[0] = kvp.Value;
+                //ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+                //sf.Initialize("const", initArray);
+                //comp.Populations[kvp.Key].Conc *= 0;
+                //comp.Populations[kvp.Key].Conc += sf;
+            }           
         }
 
         //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
