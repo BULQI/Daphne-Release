@@ -236,8 +236,8 @@ namespace DaphneGui
                             MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
                             current_item.mp_distribution = shl;
                             break;
-                        case MolPopDistributionType.LinearGradient:
-                            MolPopLinearGradient slg = new MolPopLinearGradient();
+                        case MolPopDistributionType.Linear:
+                            MolPopLinear slg = new MolPopLinear();
                             current_item.mp_distribution = slg;
                             break;
                         case MolPopDistributionType.Gaussian:
@@ -246,14 +246,14 @@ namespace DaphneGui
                             {
                                 this.AddGaussianSpecification();
                             }
-                            MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                            MolPopGaussian sgg = new MolPopGaussian();
                             sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                             current_item.mp_distribution = sgg;
                             break;
-                        case MolPopDistributionType.CustomGradient:
+                        case MolPopDistributionType.Custom:
 
                             var prev_distribution = current_item.mp_distribution;
-                            MolPopCustomGradient scg = new MolPopCustomGradient();
+                            MolPopCustom scg = new MolPopCustom();
                             current_item.mp_distribution = scg;
 
                             // Configure open file dialog box
@@ -295,7 +295,7 @@ namespace DaphneGui
 
             // Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustomGradient)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
+            dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustom)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
             dlg.DefaultExt = ".txt"; // Default file extension
             dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
@@ -307,7 +307,7 @@ namespace DaphneGui
             {
                 // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
                 string filename = dlg.FileName;
-                ((MolPopCustomGradient)current_item.mp_distribution).custom_gradient_file_string = filename;
+                ((MolPopCustom)current_item.mp_distribution).custom_gradient_file_string = filename;
             }
         }
 

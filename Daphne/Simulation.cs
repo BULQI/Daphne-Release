@@ -98,7 +98,7 @@ namespace Daphne
             {
                 if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    MolPopGaussianGradient mpgg = (MolPopGaussianGradient)cmp.mpInfo.mp_distribution;
+                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mpInfo.mp_distribution;
 
                     // find the box_spec associated with this gaussian
                     int box_id = -1;

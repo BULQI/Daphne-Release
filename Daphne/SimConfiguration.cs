@@ -1822,7 +1822,7 @@ namespace Daphne
         }
     }
 
-    public enum MolPopDistributionType { Homogeneous, LinearGradient, Gaussian, CustomGradient }
+    public enum MolPopDistributionType { Homogeneous, Linear, Gaussian, Custom }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -1835,9 +1835,9 @@ namespace Daphne
         private List<string> _molpop_dist_type_strings = new List<string>()
                                 {
                                     "Homogeneous",
-                                    "Linear Gradient",
+                                    "Linear",
                                     "Gaussian",
-                                    "Custom Gradient"
+                                    "Custom"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -1862,9 +1862,9 @@ namespace Daphne
 
     // Base class for homog, linear, gauss distributions
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
-     XmlInclude(typeof(MolPopLinearGradient)),
-     XmlInclude(typeof(MolPopGaussianGradient)),
-     XmlInclude(typeof(MolPopCustomGradient))]
+     XmlInclude(typeof(MolPopLinear)),
+     XmlInclude(typeof(MolPopGaussian)),
+     XmlInclude(typeof(MolPopCustom))]
     public abstract class MolPopDistribution : EntityModelBase
     {
         [XmlIgnore]
@@ -1886,7 +1886,7 @@ namespace Daphne
         }
     }
 
-    public class MolPopLinearGradient : MolPopDistribution
+    public class MolPopLinear : MolPopDistribution
     {
         public double[] gradient_direction { get; set; }
         public double min_concentration { get; set; }
@@ -1925,16 +1925,16 @@ namespace Daphne
             }
         }
 
-        public MolPopLinearGradient()
+        public MolPopLinear()
         {
-            mp_distribution_type = MolPopDistributionType.LinearGradient;
+            mp_distribution_type = MolPopDistributionType.Linear;
             gradient_direction = new double[3] { 1.0, 0.0, 0.0 };
             min_concentration = 0.0;
             max_concentration = 100.0;
         }
     }
 
-    public class MolPopGaussianGradient : MolPopDistribution
+    public class MolPopGaussian : MolPopDistribution
     {
         public double peak_concentration { get; set; }
         private string _gaussgrad_gauss_spec_guid_ref;
@@ -1953,7 +1953,7 @@ namespace Daphne
             }
         }
 
-        public MolPopGaussianGradient()
+        public MolPopGaussian()
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
             peak_concentration = 100.0;
@@ -1961,14 +1961,14 @@ namespace Daphne
         }
     }
 
-    public class MolPopCustomGradient : MolPopDistribution
+    public class MolPopCustom : MolPopDistribution
     {
         private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
         private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
 
-        public MolPopCustomGradient()
+        public MolPopCustom()
         {
-            mp_distribution_type = MolPopDistributionType.CustomGradient;
+            mp_distribution_type = MolPopDistributionType.Custom;
         }
 
         [XmlIgnore]

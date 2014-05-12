@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using Daphne;
+using System.Diagnostics;
 
 namespace DaphneGui
 {
@@ -23,12 +24,19 @@ namespace DaphneGui
     {
         private List<string> reacmolguids;
         private List<string> prodmolguids;
+        private Dictionary<string, int> inputReactants;
+        private Dictionary<string, int> inputProducts;
+        public double inputRateConstant { get; set; }
+        
         public AddReactionControl()
         {
             InitializeComponent();
 
             reacmolguids = new List<string>();
             prodmolguids = new List<string>();
+            inputReactants = new Dictionary<string, int>();
+            inputProducts = new Dictionary<string, int>();
+            inputRateConstant = 2.0;
 
             //InitializeWordList();
 
@@ -103,9 +111,14 @@ namespace DaphneGui
             lbMol.UnselectAll();
         }
 
-        private void btnUnselect_Click(object sender, RoutedEventArgs e)
+        private void btnUnselectAll_Click(object sender, RoutedEventArgs e)
         {
             lbMol.UnselectAll();
+        }
+
+        private void btnSelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            lbMol.SelectAll();
         }
 
         private void btnRClear_Click(object sender, RoutedEventArgs e)
@@ -133,37 +146,48 @@ namespace DaphneGui
             return null;
         }
 
+        // given a molecule name, check if it exists in repository - return
+        private static string findMoleculeByName(string inputMolName)
+        {
+            string guid = null;
+            foreach (ConfigMolecule cm in MainWindow.SC.SimConfig.entity_repository.molecules)
+            {
+                if (cm.Name == inputMolName)
+                {
+                    guid = cm.molecule_guid;
+                    break;
+                }
+            }
+            return guid;
+        }
+
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            string rate = txtRate.Text.Trim();
-            if (rate.Length <= 0)
-            {
-                MessageBox.Show("Please enter a rate constant.");
-                txtRate.Focus();
-                return;
-            }
+            bool bValid = ParseUserInput();
 
-            bool bValid = ParseUserInput(txtReac.Text, txtProd.Text);
+            if (!bValid)
+                return;
 
             ConfigReaction cr = new ConfigReaction();
             cr.ReadOnly = false;
             cr.ForegroundColor = System.Windows.Media.Colors.Black;
-            cr.rate_const = Convert.ToDouble(txtRate.Text);
+            cr.rate_const = inputRateConstant;
 
-            //----------------------------------
-            //Reactants
-            foreach (string s in reacmolguids) {
-                if (!cr.reactants_molecule_guid_ref.Contains(s))
-                    cr.reactants_molecule_guid_ref.Add(s);
-            }
+            //NEED TO UPDATE THIS - SKG 8/6/13
+            //////----------------------------------
+            //////Reactants
+            ////foreach (string s in reacmolguids) {
+            ////    if (!cr.reactants_molecule_guid_ref.Contains(s))
+            ////        cr.reactants_molecule_guid_ref.Add(s);
+            ////}
 
-            //----------------------------------
-            //Products
-            foreach (string s in prodmolguids)
-            {
-                if (!cr.products_molecule_guid_ref.Contains(s))
-                    cr.products_molecule_guid_ref.Add(s);
-            }
+            //////----------------------------------
+            //////Products
+            ////foreach (string s in prodmolguids)
+            ////{
+            ////    if (!cr.products_molecule_guid_ref.Contains(s))
+            ////        cr.products_molecule_guid_ref.Add(s);
+            ////}
 
             //NEED MODIFIERS TOO IN GUI?  NO!
 
@@ -175,128 +199,163 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
         }
 
-        public class InputMol
-        {
-            public string molguid;
-            public int coeff;
-        }
-
-        private bool ParseUserInput(string txtLeftSide, string txtRightSide)
+        private bool ParseUserInput()
         {
             bool retval = true;
+            
+            inputReactants.Clear();
+            inputProducts.Clear();
 
-            //Dictionaries of molguid/coeff pairs
-            Dictionary<string, int> recordsLeft = new Dictionary<string, int>();
-            Dictionary<string, int> recordsRight = new Dictionary<string, int>();
+            //THIS CODE PARSES REACTION INPUT BY USER
+            //LEFT SIDE
+            string phrase = txtReac.Text;
 
-            //----------------------------------
-            //Reactants
-            foreach (string s in reacmolguids)
-            {
-                if (recordsLeft.ContainsKey(s)) {
-                    recordsLeft[s] += 1;
-                }
-                else 
-                    recordsLeft.Add(s, 1);
+            if (phrase.Contains("-")) {
+                string msg = string.Format("Reactants field contains invalid character '-'.  \nPlease fix and re-try.");
+                MessageBox.Show(msg);
+                txtReac.Focus();
+                return false;
             }
 
-            //----------------------------------
-            //Products
-            foreach (string s in prodmolguids)
+            string[] tokensLeft;
+            string[] stringSeparators = new string[] { "+" };
+
+            tokensLeft = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            int count = tokensLeft.Count();
+
+            for (int i = 0; i < count; i++)
             {
-                if (recordsRight.ContainsKey(s)) {
-                    recordsRight[s] += 1;
+                tokensLeft[i] = tokensLeft[i].Trim();
+            }
+
+            //RIGHT SIDE
+            phrase = txtProd.Text;
+
+            if (phrase.Contains("-")) {
+                string msg = string.Format("Products field contains invalid character '-'.  \nPlease fix and re-try.");
+                MessageBox.Show(msg);
+                txtProd.Focus();
+                return false;
+            }
+
+            string[] tokensRight;
+
+            tokensRight = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            count = tokensRight.Count();
+
+            for (int i = 0; i < count; i++)
+            {
+                tokensRight[i] = tokensRight[i].Trim();
+            }
+
+            //NOW IF THERE ARE COEFFICIENTS, LIKE N, STRIP THOSE OFF AND SAVE THEM
+
+            foreach (string str in tokensLeft)
+            {
+                string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
+                int len1 = sMol.Length;
+                int len2 = str.Length;
+                int diff = len2 - len1;
+
+                if (!ValidateMoleculeName(sMol))
+                    return false;
+
+                if (diff == 0)
+                {
+                    if (!inputReactants.ContainsKey(sMol))
+                        inputReactants.Add(sMol, 1);
+                    else
+                        inputReactants[sMol] += 1;
                 }
                 else
-                    recordsRight.Add(s, 1);
+                {
+                    string sCoeff = str.Substring(0, diff);
+                    int nCoeff = int.Parse(sCoeff);
+
+                    if (nCoeff <= 0)
+                    {
+                        //error and return
+                        MessageBox.Show("Reactants field contains invalid stoichiometric coefficient.  Please fix this and re-try.");
+                        return false;
+                    }
+                    if (!inputReactants.ContainsKey(sMol))
+                        inputReactants.Add(sMol, nCoeff);
+                    else
+                        inputReactants[sMol] += nCoeff;
+                    
+                }
             }
 
-            //////THIS CODE PARSES REACTION INPUT BY USER
-            //////LEFT SIDE
-            ////string phrase = txtLeftSide;
-            ////string[] tokensLeft;
-            ////string[] stringSeparators = new string[] { "+" };
+            foreach (string str in tokensRight)
+            {
+                string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
+                int len1 = sMol.Length;
+                int len2 = str.Length;
+                int diff = len2 - len1;
+                
+                if (!ValidateMoleculeName(sMol))
+                    return false;
 
-            ////tokensLeft = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-            ////int count = tokensLeft.Count();
+                if (diff == 0)
+                {
+                    if (!inputProducts.ContainsKey(sMol))
+                        inputProducts.Add(sMol, 1);
+                    else
+                        inputProducts[sMol] += 1;
+                }
+                else
+                {
+                    string sCoeff = str.Substring(0, diff);
+                    int nCoeff = int.Parse(sCoeff);
 
-            ////for (int i = 0; i < count; i++)
-            ////{
-            ////    tokensLeft[i] = tokensLeft[i].Trim();
-            ////}
+                    if (nCoeff <= 0)
+                    {
+                        //error and return
+                        MessageBox.Show("Products field contains invalid stoichiometric coefficient.  Please fix this and re-try.");
+                        return false;
+                    }
+                    if (!inputProducts.ContainsKey(sMol))
+                        inputProducts.Add(sMol, nCoeff);
+                    else
+                        inputProducts[sMol] += nCoeff;
 
-            //////RIGHT SIDE
-            ////phrase = txtRightSide;
-            ////string[] tokensRight;
+                }
+            }
 
-            ////tokensRight = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-            ////count = tokensRight.Count();
+            //Check rate constant
+            string rate = txtRate.Text.Trim();
+            if (rate.Length <= 0)
+            {
+                MessageBox.Show("Please enter a rate constant.");
+                txtRate.Focus();
+                return false;
+            }
 
-            ////for (int i = 0; i < count; i++)
-            ////{
-            ////    tokensRight[i] = tokensRight[i].Trim();
-            ////}
+            double dRate;
+            bool bRate = double.TryParse(rate, out dRate);
 
-            //////NOW IF THERE ARE COEFFICIENTS, LIKE N, STRIP THOSE OFF AND SAVE THEM OR CREATE N MOLECULES OF THAT TYPE IN REACTION CLASS.
-            //////FOR GUI MOCKUPS, COEFFICIENTS ARE NOT RELEVANT. BUT NEED TO STRIP THEM OFF SO WE GET THE MOLECULE NAME RIGHT.           
-            ////List<Molecule> molNames = new List<Molecule>();
-            ////List<Molecule> molLeft = new List<Molecule>();
-            ////List<int> stoicLeft = new List<int>();
-            ////List<int> stoicRight = new List<int>();
-            
+            if (bRate == false)
+            {
+                MessageBox.Show("Invalid rate constant entered.");
+                txtRate.Focus();
+                return false;
+            }
 
-            ////foreach (string str in tokensLeft)
-            ////{
-            ////    string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
-            ////    int len1 = sMol.Length;
-            ////    int len2 = str.Length;
-            ////    int diff = len2 - len1;
-            ////    if (diff == 0)
-            ////        stoicLeft.Add(1);
-            ////    else
-            ////    {
-            ////        string sCoeff = str.Substring(0, diff);
-            ////        stoicLeft.Add(int.Parse(sCoeff));
-            ////    }
-            ////    //Molecule molec = new Molecule(sMol, 1, 1, 1);
-            ////    //molNames.Add(molec);
-            ////    //molLeft.Add(molec);
-            ////}
-            ////List<Molecule> molRight = new List<Molecule>();
-            ////foreach (string str in tokensRight)
-            ////{
-            ////    string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
-            ////    int len1 = sMol.Length;
-            ////    int len2 = str.Length;
-            ////    int diff = len2 - len1;
-            ////    if (diff == 0)
-            ////        stoicRight.Add(1);
-            ////    else
-            ////    {
-            ////        string sCoeff = str.Substring(0, diff);
-            ////        stoicRight.Add(int.Parse(sCoeff));
-            ////    }
-            ////    //Molecule molec = new Molecule(sMol, 1, 1, 1);
-            ////    //molNames.Add(molec);
-            ////    //molRight.Add(molec);
-            ////}
-
-            //NOW CHECK TO SEE WHICH MOLECULES ARE NOT ALREADY DEFINED            
-            ////Dictionary<string, Molecule> newDic = new Dictionary<string, Molecule>();
-            ////foreach (Molecule mol in molNames)
-            ////{
-            ////    //Make sure molecule not already in main dictionary
-            ////    if (!Sim.MolecDict.ContainsKey(mol.Name))
-            ////    {
-            ////        //Now make sure molecule not already in the potential new list (dictionary)
-            ////        if (!newDic.ContainsKey(mol.Name))
-            ////        {
-            ////            newDic.Add(mol.Name, mol);
-            ////        }
-            ////    }
-            ////}
+            inputRateConstant = dRate; //double.Parse(rate);
 
             return retval;
+        }
+
+        private bool ValidateMoleculeName(string sMol)
+        {
+            string molGuid = findMoleculeByName(sMol);
+            if (molGuid == null)
+            {
+                string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", sMol);
+                MessageBox.Show(msg);
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -726,7 +726,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopLinearGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopLinear}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -833,7 +833,7 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopGaussianGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
                 <StackPanel Orientation="Vertical">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1567,7 +1567,7 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type daph:MolPopCustomGradient}">
+            <DataTemplate DataType="{x:Type daph:MolPopCustom}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />

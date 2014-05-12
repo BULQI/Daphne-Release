@@ -72,7 +72,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                MolPopGaussian sgg = new MolPopGaussian();
                 sgg.peak_concentration = 10;
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
@@ -169,7 +169,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                MolPopGaussian sgg = new MolPopGaussian();
                 sgg.peak_concentration = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23; //3.6132 // 10;              
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;                                               
@@ -254,7 +254,7 @@ namespace Daphne
                 gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                MolPopGaussian sgg = new MolPopGaussian();
                 sgg.peak_concentration = 10;
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;

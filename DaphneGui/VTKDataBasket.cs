@@ -132,7 +132,7 @@ namespace DaphneGui
             gradient = new double[] { grad[0], grad[1], grad[2] };
             this.min = min;
             this.max = max;
-            type = MolPopDistributionType.LinearGradient;
+            type = MolPopDistributionType.Linear;
         }
     }
 
@@ -186,7 +186,7 @@ namespace DaphneGui
         public MolpopTypeCustomController(string file)
         {
             datafile = file;
-            type = MolPopDistributionType.CustomGradient;
+            type = MolPopDistributionType.Custom;
         }
     }
 
@@ -305,7 +305,7 @@ namespace DaphneGui
                                                                ((MolPopDistributionType)solf.solfac_distribution).gaussgrad_gauss_spec_guid_ref);
                 chemokine.populateSolfacGaussian(solf, region, (MolpopTypeGaussianController)molpopControl);
             }
-            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.LinearGradient)
+            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Linear)
             {
                 molpopControl = new MolpopTypeLinearController(((MolPopDistributionType)solf.solfac_distribution).gradient_direction,
                                                              ((MolPopDistributionType)solf.solfac_distribution).min_concentration,
@@ -317,7 +317,7 @@ namespace DaphneGui
                 molpopControl = new MolpopTypeHomogeneousController(((MolPopDistributionType)solf.solfac_distribution).concentration);
                 chemokine.populateSolfacHomogeneous(solf, (MolpopTypeHomogeneousController)molpopControl);
             }
-            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.CustomGradient)
+            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Custom)
             {
                 molpopControl = new MolpopTypeCustomController(((SolfacCustomGradient)solf.solfac_distribution).custom_gradient_file_uri.LocalPath);
                 if (chemokine.populateSolfacCustom(solf, ref molpopControl) == false)
@@ -370,7 +370,7 @@ namespace DaphneGui
                 {
                     div = ((MolpopTypeHomogeneousController)kvp.Value).level;
                 }
-                else if (kvp.Value.Type == MolPopDistributionType.LinearGradient)
+                else if (kvp.Value.Type == MolPopDistributionType.Linear)
                 {
                     div = ((MolpopTypeLinearController)kvp.Value).max;
                 }
@@ -378,7 +378,7 @@ namespace DaphneGui
                 {
                     div = ((MolpopTypeGaussianController)kvp.Value).amplitude;
                 }
-                else if (kvp.Value.Type == MolPopDistributionType.CustomGradient)
+                else if (kvp.Value.Type == MolPopDistributionType.Custom)
                 {
                     div = ((MolpopTypeCustomController)kvp.Value).max;
                 }

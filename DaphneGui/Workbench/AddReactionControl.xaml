@@ -56,7 +56,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtRate" Width="60"/>
+                <TextBox x:Name="txtRate" Width="60" Text="{Binding Path=inputRateConstant, Mode=TwoWay}"/>
             </StackPanel>
         </StackPanel>
 
@@ -101,7 +101,8 @@
                 <StackPanel Orientation="Vertical"  Margin="10,10,0,0" Grid.Column="1" Grid.Row="1" >
                     <Button x:Name="btnReac" Content="Add to Reactants" Width="110" Click="btnReac_Click" />
                     <Button x:Name="btnProd" Content="Add to Products" Width="110"  Click="btnProd_Click"/>
-                    <Button x:Name="btnUnselect" Content="Unselect all" Width="110" Click="btnUnselect_Click" />
+                    <Button x:Name="btnUnselectAll" Content="Unselect all" Width="110" Click="btnUnselectAll_Click" />
+                    <Button x:Name="btnSelectAll" Content="Select all" Width="110" Click="btnSelectAll_Click" />
                 </StackPanel>
             </Grid>
 
