@@ -27,10 +27,11 @@ namespace Daphne
             Cytokinetic = false;
             PlasmaMembrane = new Compartment(new TinySphere());
             Cytosol = new Compartment(new TinyBall());
-            //OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
-            DirectTranslEmbedding cellEmbed = new DirectTranslEmbedding(PlasmaMembrane.Interior, Cytosol.Interior, new int[1]{0}, new double[1]{0.0});
+
+            OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
+
             Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior,cellEmbed);
+            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, cellEmbed);
 
             Index = safeIndex++;
         }

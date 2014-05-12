@@ -89,7 +89,7 @@ namespace Daphne
         }
 
         /// <summary>
-        /// Calculate the value the concentration in the embedding manifold at each array point in the embedded manifold
+        /// Calculate the value of the concentration in the embedding manifold at each array point in the embedded manifold
         /// </summary>
         public void UpdateBoundaryConcs()
         {
@@ -99,26 +99,29 @@ namespace Daphne
                 {
                     // Cases:
                     //
-                    // PlasmaMembrane -> Cytosol:  no spatial, arraySize = 1
+                    // PlasmaMembrane    -> Cytosol: no spatial, arraySize = 1
                     //
-                    // PlasmaMembrane -> Extracellular fluid: depends on position of cell in extracellular medium, 
-                    //                      arraySize = 1, one-to-one correspondance
-                     //
+                    // PlasmaMembrane    -> Extracellular fluid: depends on position of cell in extracellular medium, 
+                    //                      arraySize = 1, one-to-one correspondence
+                    //
                     // BoundedRectangles -> BoundedRectangularPrism
-                    //                      arraySize > 1,  one-to-one correspondance
+                    //                      arraySize > 1, one-to-one correspondence
                     // 
-
-
                     for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
                     {
                         // NOTE: This corresponds to the case where there is a one-to-one
                         // correspondance between the array points of the embedding and embedded manifolds
-                        //
-                        // Feed embedded manifold array index k to WhereIs() and return embeding manifold array inkex
-                        //BoundaryConcs[m].array[k] = Conc.array[Man.Boundaries[m].WhereIs(k)];
 
                         // Feed embedded manifold array index k to WhereIs and return a double[] point in the embedding manifold
-                        BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIs(k));
+                        // request interpolation if needed
+                        if (Man.Boundaries[m].NeedsInterpolation() == true)
+                        {
+                            BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIs(k));
+                        }
+                        else
+                        {
+                            BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIsIndex(k));
+                        }
                     }
                 }
             }
@@ -133,11 +136,24 @@ namespace Daphne
         {
             LocalMatrix[] lm = Man.Interpolation(point);
             double concentration = 0;
-            for (int i = 0; i < lm.Length; i++)
+
+            if (lm != null)
             {
-                concentration += lm[i].Coefficient * Conc.array[lm[i].Index];
+                for (int i = 0; i < lm.Length; i++)
+                {
+                    concentration += lm[i].Coefficient * Conc.array[lm[i].Index];
+                }
             }
             return concentration;
+        }
+
+        public double Concentration(int idx)
+        {
+            if (idx < 0 || idx >= Conc.array.Length)
+            {
+                return 0;
+            }
+            return Conc.array[idx];
         }
 
         // TODO: Implement gradient

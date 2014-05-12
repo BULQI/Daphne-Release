@@ -85,16 +85,34 @@ namespace Daphne
     {
         public int ArraySize;
         public LocalMatrix[][] Laplacian;
-        public abstract LocalMatrix[] Interpolation(double[] point);
-        //public double[,] Coordinates;
         public Dictionary<Manifold,Embedding> Boundaries;
         public int[] Extents = null;
+        protected LocalMatrix[] interpolator;
 
         public double[,] Coordinates;
         // min and max in each dimension
         public double[] spatialExtent;
         public double[] StepSize;
-        public double[] Origin;        
+
+        public abstract LocalMatrix[] Interpolation(double[] point);
+
+        public virtual int[] localToArr(double[] loc)
+        {
+            if (loc == null)
+            {
+                return null;
+            }
+            return new int[1];
+        }
+
+        public virtual int arrToIndex(int[] arr)
+        {
+            if (arr == null)
+            {
+                return -1;
+            }
+            return 0;
+        }
     }
 
     public class ScalarField
@@ -236,8 +254,6 @@ namespace Daphne
 
     public class TinySphere : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-
         public TinySphere()
         {
             Dim = 0;
@@ -245,10 +261,9 @@ namespace Daphne
             Boundaries = null;
             Laplacian = new LocalMatrix[0][];
             interpolator = new LocalMatrix[1] { new LocalMatrix() { Coefficient = 1.0, Index = 0 } };
-            Coordinates = new double[1,1];
+            Coordinates = new double[1, 1];
             Coordinates[0, 0] = 0.0;
-            Origin = new double[1] {0.0};
-            StepSize = new double[1] {1.0};
+            //StepSize = new double[1] { 1.0 };
          }
 
         public override LocalMatrix[] Interpolation(double[] point)
@@ -259,8 +274,6 @@ namespace Daphne
 
     public class TinyBall : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-
         public TinyBall()
         {
             Dim = 0;
@@ -270,25 +283,17 @@ namespace Daphne
             interpolator = new LocalMatrix[1] { new LocalMatrix() { Coefficient = 1.0, Index = 0 } };
             Coordinates = new double[1, 1];
             Coordinates[0, 0] = 0.0;
-            Origin = new double[1] {0.0};
-            StepSize = new double[1] { 1.0 };
+            //StepSize = new double[1] { 1.0 };
         }
 
         public override LocalMatrix[] Interpolation(double[] point)
         {
             return interpolator;
         }
-
-        //public override int PointToArray(double[] point)
-        //{
-        //    return 0;
-        //}
     }
 
     public class Rectangle : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-
         public Rectangle()
         {
             Dim = 2;
@@ -316,13 +321,10 @@ namespace Daphne
         {
             return interpolator;
         }
-
     }
 
     public class RectangularPrism : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-
         public RectangularPrism(int[] numGridPts)
         {
             Dim = 3;
@@ -339,18 +341,10 @@ namespace Daphne
         {
             return interpolator;
         }
-
-        //public override int PointToArray(double[] point)
-        //{
-        //    return new int();
-        //}
-
     }
 
     public class BoundedRectangle : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-
         public BoundedRectangle(int[] numGridPts, double[] _spatialExtent)
         {
             Dim = 2;
@@ -366,10 +360,6 @@ namespace Daphne
             Coordinates = new double[ArraySize, 2];
             spatialExtent = (double[])_spatialExtent.Clone();
 
-            Origin = new double[Dim];
-            Origin[0] = spatialExtent[0];
-            Origin[1] = spatialExtent[2];
-
             StepSize = new double[Dim];
             StepSize[0] = (spatialExtent[1] - spatialExtent[0]) / (Extents[0] - 1);
             StepSize[1] = (spatialExtent[3] - spatialExtent[2]) / (Extents[1] - 1);
@@ -379,38 +369,66 @@ namespace Daphne
             {
                 for (int i = 0; i < Extents[0]; i++)
                 {
-                    Coordinates[n, 0] = i * StepSize[0] + Origin[0];
-                    Coordinates[n, 1] = j * StepSize[1] + Origin[1];
+                    Coordinates[n, 0] = i * StepSize[0];
+                    Coordinates[n, 1] = j * StepSize[1];
                     n++;
                 }
             }
 
         }
 
-         private int[] localToArr(double[] loc)
+        public override int[] localToArr(double[] loc)
         {
             if (loc != null)
             {
-                return new int[] { (int)((loc[0] - Origin[0]) / StepSize[0]), (int)((loc[1] - Origin[1])/ StepSize[1]) };
+                return new int[] { (int)(loc[0] / StepSize[0]), (int)(loc[1] / StepSize[1]) };
             }
             return null;
         }
 
+        public override int arrToIndex(int[] arr)
+        {
+            if (arr != null)
+            {
+                return arr[0] + arr[1] * Extents[0];
+            }
+            return -1;
+        }
+
         // TODO: This needs to be checked for correctness
+        // uses en.wikipedia.org/wiki/Bilinear_interpolation
         public override LocalMatrix[] Interpolation(double[] point)
         {
             // Linear interpolation
             // The values in point are in terms of manifold coordinates
 
             int[] idx = localToArr(point);
-            if (idx.Length == 0) return interpolator;
+
+            if (idx == null)
+            {
+                return null;
+            }
 
             int i = idx[0];
             int j = idx[1];
 
-            if ((i < 0) || (i > Extents[0] - 1 ) ||
-                (j < 0) || (j > Extents[1] - 1 ) )
-                 return interpolator;
+            if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1))
+            {
+                return null;
+            }
+
+            // When i == Extents[0] - 1, we can't look at the (i + 1)th grid point
+            // In this case we can decrement the origin of the interpolation voxel and get the same result
+            // When we decrement i -> i-1, then dx = 1
+            // Similarly, for j and k.
+            if (i == Extents[0] - 1)
+            {
+                i--;
+            }
+            if (j == Extents[1] - 1)
+            {
+                j--;
+            }
 
             double dx = point[0] / StepSize[0] - i;
             double dy = point[1] / StepSize[1] - j;
@@ -435,12 +453,6 @@ namespace Daphne
 
     public class BoundedRectangularPrism : DiscretizedManifold
     {
-        LocalMatrix[] interpolator;
-        // min and max in each dimension
-        //public double[] spatialExtent;
-        //public double[] StepSize;
-        //public double[] Origin;
-
         public BoundedRectangularPrism(int[] numGridPts, double[] _spatialExtent)
         {
             Dim = 3;
@@ -454,11 +466,6 @@ namespace Daphne
 
             spatialExtent = (double[])_spatialExtent.Clone();
 
-            Origin = new double[Dim];
-            Origin[0] = spatialExtent[0];
-            Origin[1] = spatialExtent[2];
-            Origin[2] = spatialExtent[4];
-
             StepSize = new double[Dim];
             StepSize[0] = (spatialExtent[1] - spatialExtent[0]) / (Extents[0] - 1);
             StepSize[1] = (spatialExtent[3] - spatialExtent[2]) / (Extents[1] - 1);
@@ -471,9 +478,9 @@ namespace Daphne
                 {
                     for (int i = 0; i < Extents[0]; i++)
                     {
-                        Coordinates[n, 0] = i * StepSize[0] + Origin[0];
-                        Coordinates[n, 1] = j * StepSize[1] + Origin[1];
-                        Coordinates[n, 2] = k * StepSize[2] + Origin[2];
+                        Coordinates[n, 0] = i * StepSize[0];
+                        Coordinates[n, 1] = j * StepSize[1];
+                        Coordinates[n, 2] = k * StepSize[2];
                         n++;
                     }
                 }
@@ -613,26 +620,26 @@ namespace Daphne
 
             dimensionsMap = new int[2] { 0, 1 };
             // xyLower
-            origin = new double[3] {Origin[0], Origin[1], Origin[2]};
+            origin = new double[3] { spatialExtent[0], spatialExtent[2], spatialExtent[4] };
             DirectTranslEmbedding xyLowerEmbed = new DirectTranslEmbedding(xyLower, this, dimensionsMap, origin);
             // xyUpper
-            origin = new double[3] { Origin[0], Origin[1], spatialExtent[5] };
+            origin = new double[3] { spatialExtent[0], spatialExtent[2], spatialExtent[5] };
             DirectTranslEmbedding xyUpperEmbed = new DirectTranslEmbedding(xyUpper, this, dimensionsMap, origin);
 
             dimensionsMap = new int[2] { 0, 2 };
             // xzLower
-            origin = new double[3] { Origin[0], Origin[1], Origin[2] };
+            origin = new double[3] { spatialExtent[0], spatialExtent[2], spatialExtent[4] };
             DirectTranslEmbedding xzLowerEmbed = new DirectTranslEmbedding(xzLower, this, dimensionsMap, origin);
             // xzUpper
-            origin = new double[3] { Origin[0], spatialExtent[3], Origin[2] };
+            origin = new double[3] { spatialExtent[0], spatialExtent[3], spatialExtent[4] };
             DirectTranslEmbedding xzUpperEmbed = new DirectTranslEmbedding(xzUpper, this, dimensionsMap, origin);
 
             dimensionsMap = new int[2] { 1, 2 };
             // yzLower
-            origin = new double[3] { Origin[0], Origin[1], Origin[2] };
+            origin = new double[3] { spatialExtent[0], spatialExtent[2], spatialExtent[4] };
             DirectTranslEmbedding yzLowerEmbed = new DirectTranslEmbedding(yzLower, this, dimensionsMap, origin);
             // yzLower
-            origin = new double[3] { spatialExtent[1], Origin[1], Origin[2] };
+            origin = new double[3] { spatialExtent[1], spatialExtent[2], spatialExtent[4] };
             DirectTranslEmbedding yzUpperEmbed = new DirectTranslEmbedding(yzUpper, this, dimensionsMap, origin);
 
             Boundaries.Add(xyLower, xyLowerEmbed);
@@ -655,52 +662,67 @@ namespace Daphne
         //    return new int();
         //}
 
-        private int[] localToArr(double[] loc)
+        public override int[] localToArr(double[] loc)
         {
             if (loc != null)
             {
-                return new int[] { (int)((loc[0]-Origin[0]) / StepSize[0]), (int)((loc[1]-Origin[1]) / StepSize[1]), (int)((loc[2]-Origin[2]) / StepSize[2]) };
+                return new int[] { (int)(loc[0] / StepSize[0]), (int)(loc[1] / StepSize[1]), (int)(loc[2] / StepSize[2]) };
             }
             return null;
         }
 
+        public override int arrToIndex(int[] arr)
+        {
+            if (arr != null)
+            {
+                return arr[0] + arr[1] * Extents[0] + arr[2] * Extents[0] * Extents[1];
+            }
+            return -1;
+        }
 
         // TODO: This needs to be checked for correctness
+        // uses paulbourke.net/miscellaneous/interpolation/
         public override LocalMatrix[] Interpolation(double[] point)
         {
             // Linear interpolation
             // The values in point are in terms of manifold coordinates
 
             int[] idx = localToArr(point);
-            if (idx.Length == 0)
+
+            if (idx == null)
             {
-                // TODO: Send an error message
-                return interpolator;
+                return null;
             }
 
             int i = idx[0];
             int j = idx[1];
             int k = idx[2];
 
-            // TODO: Send an error message
-            if ((i < 0) || (i > Extents[0] - 1 ) ||
-                (j < 0) || (j > Extents[1] - 1 ) ||
-                (k < 0) || (k > Extents[2] - 1 ))
-                return interpolator;
+            if ((i < 0) || (i > Extents[0] - 1) || (j < 0) || (j > Extents[1] - 1) || (k < 0) || (k > Extents[2] - 1))
+            {
+                return null;
+            }
 
-            // When i== Extents[0]-1, we can't look at the (i+1)th grid point
+            // When i == Extents[0] - 1, we can't look at the (i + 1)th grid point
             // In this case we can decrement the origin of the interpolation voxel and get the same result
             // When we decrement i -> i-1, then dx = 1
             // Similarly, for j and k.
-            if (i == Extents[0] - 1) i--;
-            if (j == Extents[0] - 1) j--;
-            if (k == Extents[0] - 1) k--;
+            if (i == Extents[0] - 1)
+            {
+                i--;
+            }
+            if (j == Extents[1] - 1)
+            {
+                j--;
+            }
+            if (k == Extents[2] - 1)
+            {
+                k--;
+            }
  
-
-
-            double dx = (point[0] - Origin[0])/ StepSize[0] - i;
-            double dy = (point[1] - Origin[1])/ StepSize[1] - j;
-            double dz = (point[2] - Origin[2])/ StepSize[2] - k;
+            double dx = point[0] / StepSize[0] - i;
+            double dy = point[1] / StepSize[1] - j;
+            double dz = point[2] / StepSize[2] - k;
 
             // 000
             interpolator[0].Coefficient = (1 - dx) * (1 - dy) * (1 - dz);
@@ -728,7 +750,6 @@ namespace Daphne
             interpolator[7].Index = (i + 1) + (j + 1) * Extents[0] + (k + 1) * Extents[0] * Extents[1];
 
             return interpolator;
-
         }
     }   
 
@@ -747,7 +768,6 @@ namespace Daphne
 
     }
 
-
     abstract public class Embedding
     {
         public DiscretizedManifold Domain;
@@ -757,26 +777,26 @@ namespace Daphne
         //// return the corresponding position in the embedding (Range) manifold
         //abstract public double[] WhereIs(double[] point);
 
-        //// For an index in the embedded (Domain) manifold array,
-        //// return the corresponding index in the embedding (Range) manifold array
-        //abstract public int WhereIs(int index);
+        // For an index in the embedded (Domain) manifold array,
+        // return the corresponding index in the embedding (Range) manifold array
+        public abstract int WhereIsIndex(int index);
 
         /// <summary>
         /// Given an index into the embedded manifold array, return the spatial position in the embedding manifold
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        abstract public double[] WhereIs(int index);
+        public abstract double[] WhereIs(int index);
+
+        public abstract bool NeedsInterpolation();
     }
 
     /// <summary>
-    /// An embedding in which the coordinates of the embedded manifold can be converted into coordinates in thet
+    /// An embedding in which the coordinates of the embedded manifold can be converted into coordinates in the
     /// embedding manifold using a mapping of dimensions and translation.
+    /// Not a direct transform; can't be precomputed; needs interpolation
     /// If dimensionMap[i] = j, then the ith dimension in the embedded manifold maps to the jth dimension in the embedding manifold,
     /// where we count dimensions starting with 0.
-    /// Examples with the BoundedRectangularPrism as the embedding manifold: 
-    ///     XY rectangular face - dimensionsMap = {0,1}
-    ///     YZ rectangular face - dimensionsMap = {1,2}
     /// </summary>
     public class TranslEmbedding : Embedding
     {
@@ -801,25 +821,36 @@ namespace Daphne
             position = _pos;
         }
 
+        public override int WhereIsIndex(int index)
+        {
+            return -1;
+        }
+
         public override double[] WhereIs(int index)
         {
             // Input: array index in embedded manifold Domain
             // Output: corresponding point in embedding manifold Range
+            if (index < 0 || index >= Domain.ArraySize)
+            {
+                return null;
+            }
 
             double[] point = new double[position.Length];
 
             // Intialize point to the position in the embedding manifold of the embedded manifolds origin
-            for (int j = 0; j < position.Length; j++)
-            {
-                point[j] = position[j];
-            }
+            Array.Copy(position, point, position.Length);
 
-            for (int i=0; i<dimensionsMap.Length; i++)
+            for (int i = 0; i < dimensionsMap.Length; i++)
             {
-                point[dimensionsMap[i]] = point[dimensionsMap[i]] + (Domain.Coordinates[index,i] - Domain.Origin[i] ) ;
+                point[dimensionsMap[i]] += Domain.Coordinates[index, i] ;
             }
 
             return point;
+        }
+
+        public override bool NeedsInterpolation()
+        {
+            return true;
         }
 
     }
@@ -827,6 +858,7 @@ namespace Daphne
     /// <summary>
     /// A TranslEmbedding in which there is a one-to-one correspondance between grid points in the embedded and
     /// embedding manifolds.
+    /// A direct transform; can be precomputed; needs no interpolation
     /// Advantage: Boundary values in the embedding manifold can be updated without interpolation.
     /// Example: the rectangle manifolds that are boundary manifolds on the rectangular prism
     /// As currently implemented, this could also be applied to embeddings in which grid points don't coincide in the embedding
@@ -858,47 +890,84 @@ namespace Daphne
 
             indexMap = new int[Domain.ArraySize];
 
-            // Establish the one-to-one correspondance between the embedding and embedded manifold arrays
-
-            double[] point = new double[position.Length];
-            int prod;
-
+            // Establish the one-to-one correspondence between the embedding and embedded manifold arrays
             for (int i = 0; i < Domain.ArraySize; i++)
             {
-                // The spatial position in the embedding manifold of the grid point on the embedding manifold
-                point = WhereIs(i);
-
-                prod = 1;
-
-                // QUESTION: Is there a better way to do this that doesn't require converting to grid point indices?
-                indexMap[i] = indexMap[i] + (int)Math.Round((point[0] - Range.Origin[0]) / Range.StepSize[0]);
-                for (int j = 1; j < Range.Dim; j++)
-                {
-                    prod = prod * Range.Extents[j - 1];
-                    indexMap[i] = indexMap[i] + prod* (int)Math.Round((point[j] - Range.Origin[j]) / Range.StepSize[j]);
-                }
+                indexMap[i] = WhereIsIndex(i);
             }
+        }
+
+        public override int WhereIsIndex(int index)
+        {
+            // Input: array index in embedded manifold Domain
+            // Output: corresponding index in embedding manifold Range
+            double[] point = new double[position.Length];
+
+            // Intialize point to the position in the embedding manifold of the embedded manifolds origin
+            Array.Copy(position, point, position.Length);
+
+            for (int i = 0; i < dimensionsMap.Length; i++)
+            {
+                point[dimensionsMap[i]] += Domain.Coordinates[index, i];
+            }
+
+            return Range.arrToIndex(Range.localToArr(point));
         }
 
         public override double[] WhereIs(int index)
         {
             // Input: array index in embedded manifold Domain
             // Output: corresponding point in embedding manifold Range
-
-            double[] point = new double[position.Length];
-
-            // Intialize point to the position in the embedding manifold of the embedded manifolds origin
-            for (int j = 0; j < position.Length; j++)
+            index = indexMap[index];
+            if (index < 0 || index >= Range.ArraySize)
             {
-                point[j] = position[j];
+                return null;
             }
 
-            for (int i = 0; i < dimensionsMap.Length; i++)
-            {
-                point[dimensionsMap[i]] = point[dimensionsMap[i]] + (Domain.Coordinates[index, i] - Domain.Origin[i]);
-            }
+            double[] point = new double[Range.Dim];
 
+            for (int i = 0; i < Range.Dim; i++)
+            {
+                point[i] = Range.Coordinates[index, i];
+            }
             return point;
+        }
+
+        public override bool NeedsInterpolation()
+        {
+            return false;
+        }
+
+    }
+
+    /// <summary>
+    /// Embedding in which there is a one-to-one correspondence between the grid points 
+    /// of the embedded and embedding manifolds (e.g., cytoplasm and plasma membrane)
+    /// A direct transform; no need to precomputation; needs no interpolation
+    /// </summary>
+    public class OneToOneEmbedding : Embedding
+    {
+        public OneToOneEmbedding(DiscretizedManifold domain, DiscretizedManifold range)
+        {
+            Domain = domain;
+            Range = range;
+        }
+
+        public override int WhereIsIndex(int index)
+        {
+            return 0;
+        }
+
+        // there is no offset between domain and range here; the two manifolds share the origin
+        // NOTE: for now only we can return the origin itself; for non-zero dimensional manifolds we'd need 
+        public override double[] WhereIs(int index)
+        {
+            return new double[1];
+        }
+
+        public override bool NeedsInterpolation()
+        {
+            return false;
         }
 
     }
@@ -943,44 +1012,5 @@ namespace Daphne
     //    //    return Range.PointToArray(Loc.position);
     //    // }
     //}
-
-    ///// <summary>
-    ///// Embedding in which there is a one-to-one correspondance between the grid points 
-    ///// of the embedded and embedding manifolds (e.g., cytoplasm and plasma membrane)
-    ///// </summary>
-    //public class OneToOneEmbedding : Embedding
-    //{
-
-    //    // NOTE: This is a very subclass of Embedding which is used for TinySphere embedded
-    //    // in TinyBall
-
-    //    // A structure that contains information about the location of the cell in the embedding environment
-    //    Locator Loc;
-
-    //    public OneToOneEmbedding(DiscretizedManifold domain, DiscretizedManifold range)
-    //    {
-    //        Domain = domain;
-    //        Range = range;
-    //    }
-
-    //    public override double[] WhereIs(int index)
-    //    {
-
-    //        return Loc.position;
-    //    }
-
-    //    //public override double[] WhereIs(double[] point)
-    //    //{
-    //    //    // Spatial location not applicable here
-    //    //    return new double[Range.Dim];
-    //    //}
-
-    //    //public override int WhereIs(int index)
-    //    //{
-    //    //    return index;
-    //    //}
-    //}
-
-
 
 }
