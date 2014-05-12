@@ -80,9 +80,9 @@
                 <TextBox x:Name="txtProd" Width="320"/>
                 <Button x:Name="btnPClear" Content="Clear" Width="40" Click="btnPClear_Click"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" >
                 <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtRate" Width="60" Text="{Binding Path=inputRateConstant, Mode=TwoWay}">
+                <TextBox x:Name="txtRate" Width="60" Text="2.0">
                     <!--<TextBox.BitmapEffect>
                         <DropShadowBitmapEffect ShadowDepth=".4" Softness=".1"></DropShadowBitmapEffect>
                     </TextBox.BitmapEffect>-->
