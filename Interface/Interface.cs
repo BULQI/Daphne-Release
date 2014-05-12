@@ -23,10 +23,12 @@ namespace Interface
     public interface IMolecule
     {
         string name { get; }
+	    double molecularWeight { get; }
+	    double stokesRadius { get; }
     }
 
     /* Manifolds */
-    public abstract class Manifold
+    public class Manifold
     {
         public int dim { get; private set; }
 
@@ -35,24 +37,32 @@ namespace Interface
             this.dim = dim;
         }
 
-        public abstract double distance(double[] source, double[] target);
-    }
-
-    public class TinyManifold : Manifold
-    {
-        public TinyManifold(int dim)
-            : base(dim)
-        {
-        }
-
-        public override double distance(double[] source, double[] target)
+        public double distance(double[] source, double[] target)
         {
             return 0;
         }
+    }
 
+    public class TinySphere : Manifold
+    {
+        public TinySphere(int dim)
+            : base(dim)
+        {
+        }
+    }
+
+    public class TinyBall : Manifold
+    {
+        public TinyBall(int dim)
+            : base(dim)
+        {
+        }
     }
 
     /* ScalarField */
+
+    // Should probably move into an Initializer interface so that delegates 
+    // and classes can be used
     // Initializer delegate for scalar field
     public delegate double Del(double[] point);
 
@@ -186,12 +196,14 @@ namespace Interface
     public class Molecule : IMolecule
     {
         public string name { get; private set; }
-        public double mass { get; private set; }
+        public double molecularWeight { get; private set; }
+        public double stokesRadius { get; private set; }
 
-        public Molecule(string name, double mass)
+        public Molecule(string name, double molecularWeight, double stokesRadius)
         {
             this.name = name;
-            this.mass = mass;
+            this.molecularWeight = molecularWeight;
+            this.stokesRadius = stokesRadius;
         }
 
     }
@@ -291,24 +303,24 @@ namespace Interface
     }
 
 
-    /* Reaction Complex */
-    public class ReactionComplex : IDynamic
-    {
-        private Reaction[] reactions;
+    // /* Reaction Complex */
+    // public class ReactionComplex : IDynamic
+    // {
+    //     private Reaction[] reactions;
 
-        public ReactionComplex(Reaction[] reactions)
-        {
-            this.reactions = reactions;
-        }
+    //     public ReactionComplex(Reaction[] reactions)
+    //     {
+    //         this.reactions = reactions;
+    //     }
 
-        public void step(double dt)
-        {
-            foreach (Reaction reaction in reactions)
-            {
-                reaction.step(dt);
-            }
-        }
-    }
+    //     public void step(double dt)
+    //     {
+    //         foreach (Reaction reaction in reactions)
+    //         {
+    //             reaction.step(dt);
+    //         }
+    //     }
+    // }
 
     /* Driver */
     public class Driver
@@ -316,16 +328,16 @@ namespace Interface
         public static void Main(string[] args)
         {
             // Eventually move this section to an IOC container
-            Manifold cytosol = new TinyManifold(3);
-            Manifold membrane = new TinyManifold(2);
+            Manifold cytosol = new TinyBall(3);
+            Manifold membrane = new TinySphere(2);
             double[] origin = new double[3];
             double[,] rotation = new double[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
             Embedding cytosolToMembrane = new Embedding(cytosol, membrane, origin, rotation);
             ScalarField concentration = new DiscreteScalarField(cytosol, _ => 0);
             ScalarField flux = new DiscreteScalarField(membrane, _ => 0);
-            IMolecule a = new Molecule("molecule", 0.0);
-            IMolecule b = new Molecule("molecule", 0.0);
-            IMolecule c = new Molecule("molecule", 0.0);
+            IMolecule a = new Molecule("molecule", 0.0, 0.0);
+            IMolecule b = new Molecule("molecule", 0.0, 0.0);
+            IMolecule c = new Molecule("molecule", 0.0, 0.0);
             MolecularPopulation molecularPopulationA = new MolecularPopulation(a, concentration, flux);
             MolecularPopulation molecularPopulationB = new MolecularPopulation(b, concentration, flux);
             MolecularPopulation molecularPopulationC = new MolecularPopulation(c, concentration, flux);
@@ -341,7 +353,7 @@ namespace Interface
             Reaction interiorReaction = new InteriorReaction(sigmas, taus, reactants, products, rate);
             Reaction boundaryReaction = new BoundaryReaction(sigmas, taus, interiorReactants, interiorProducts, boundaryReactants, boundaryProducts, rate);
             Reaction[] reactions = new Reaction[] { interiorReaction, boundaryReaction };
-            ReactionComplex reactionComplex = new ReactionComplex(reactions);
+            //ReactionComplex reactionComplex = new ReactionComplex(reactions);
 
             Debug.Print("Construction success!");
         }
