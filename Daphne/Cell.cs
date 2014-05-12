@@ -197,9 +197,9 @@ namespace Daphne
             if (Differentiator.TransitionOccurred == true)
             {
                 // Epigentic changes
-                for (int i = 0; i < Differentiator.gene_guid.Length; i++)
+                for (int i = 0; i < Differentiator.gene_id.Length; i++)
                 {
-                    Genes[Differentiator.gene_guid[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
+                    Genes[Differentiator.gene_id[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
                 }
                 Differentiator.TransitionOccurred = false;
             }

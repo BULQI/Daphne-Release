@@ -894,6 +894,13 @@ namespace DaphneGui
             ObservableCollection<string> bulk = new ObservableCollection<string>();
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
 
+            if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            {
+                e.Accepted = true;
+
+                return;
+            }
+
             foreach (string molguid in cr.reactants_molecule_guid_ref)
                 if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
                     membBound.Add(molguid);

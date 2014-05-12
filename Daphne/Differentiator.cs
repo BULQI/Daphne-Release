@@ -17,9 +17,9 @@ namespace Daphne
         public int nStates;
         protected int nGenes;
         public abstract void AddActivity(int _state, int _gene, double _activity);
-        public abstract void AddGene(int _state, string _gene_guid);
+        public abstract void AddGene(int _state, string _gene_id);
         public abstract void AddState(int _state, string stateName);
-        public string[] gene_guid { get; set; }
+        public string[] gene_id { get; set; }
         public double[,] activity { get; set; }
         public abstract void Step(double dt);
         public string[] State { get; set; }
@@ -56,7 +56,7 @@ namespace Daphne
             nStates = _nStates;
             nGenes = _nGenes;
             activity = new double[nStates, nGenes];
-            gene_guid = new string[nGenes];
+            gene_id = new string[nGenes];
         }
 
         public override void AddActivity(int _state, int _gene, double _activity)
@@ -66,7 +66,7 @@ namespace Daphne
 
         public override void AddGene(int _gene, string _gene_guid)
         {
-            gene_guid[_gene] = _gene_guid;
+            gene_id[_gene] = _gene_guid;
         }
 
         public override void AddState(int _state, string stateName)
