@@ -900,6 +900,162 @@ namespace Daphne
 
             sc.entity_repository.cells.Add(gc);
 
+            ////////////////////////
+            // Stromal CXCL12-secreting
+            //
+            gc = new ConfigCell();
+            gc.CellName = "Stromal CXCL12-secreting";
+            gc.CellRadius = 5.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[1] { 0 };
+            type = new string[1] { "CXCL12|" };
+            //colors = new float[2, 4]{ {0.3f, 0.9f, 0.1f, 0.1f},
+            //                                  {0.3f, 0.2f, 0.9f, 0.1f} };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    //gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[1] { 0 };
+            type = new string[1] { "CXCL12" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+
+            // Add genes
+            type = new string[1] { "gCXCL12" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+            }
+
+            // Reactions in Cytosol
+            type = new string[2] {"gCXCL12 -> CXCL12", "CXCL12 -> CXCL12|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
+
+            gc.DragCoefficient = 1.0;
+            gc.TransductionConstant = 0.0;
+            sc.entity_repository.cells.Add(gc);
+
+            ////////////////////////////////
+            // Stromal CXCL13-secreting
+            //
+            gc = new ConfigCell();
+            gc.CellName = "Stromal CXCL13-secreting";
+            gc.CellRadius = 5.0;
+
+            //MOLECULES IN MEMBRANE
+            conc = new double[1] { 0 };
+            type = new string[1] { "CXCL13|" };
+            colors = new float[2, 4]{ {0.3f, 0.9f, 0.1f, 0.1f},
+                                              {0.3f, 0.2f, 0.9f, 0.1f} };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    //gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.membrane.molpops.Add(gmp);
+                }
+            }
+
+            //MOLECULES IN Cytosol
+            conc = new double[1] { 0 };
+            type = new string[1] { "CXCL13" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+
+            // Add genes
+            type = new string[1] { "gCXCL13" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+            }
+
+            // Reactions in Cytosol
+            type = new string[2] { "gCXCL13 -> CXCL13", "CXCL13 -> CXCL13|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            } 
+            
+            gc.DragCoefficient = 1.0;
+            gc.TransductionConstant = 0.0;
+            sc.entity_repository.cells.Add(gc);
+
         }
 
         private static void PredefinedDiffSchemesCreator(SimConfiguration sc)
@@ -1059,6 +1215,9 @@ namespace Daphne
             sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
             sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
+
+
+
         }
 
         private static void PredefinedGenesCreator(SimConfiguration sc)
@@ -1189,6 +1348,18 @@ namespace Daphne
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // Molecules for secretion
+            cm = new ConfigMolecule("CXCL12|", MWt_CXCL12, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            cm = new ConfigMolecule("CXCL13|", MWt_CXCL12, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
 
             //
             // The following are generally intended as cytosol molecules 
@@ -1986,6 +2157,39 @@ namespace Daphne
             cr.rate_const = f2 * k1_CXCL12_CXCR4;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
+
+            //
+            // Secretion reactions
+            //
+            string[] mol_name =        { "CXCL12", "CXCL13" };
+            double[] k_cytosol_to_pm =  {   1.0,      1.0 };
+            double[] k_pm_to_ecs =      {   1.0,      1.0 };
+            // BoundaryTransportTo: cytosol to ECS
+            for (int i = 0; i < mol_name.Length; i++ )
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
+                // reactants
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, sc));
+                // products
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, sc));
+                cr.rate_const = k_cytosol_to_pm[i];
+                cr.GetTotalReactionString(sc.entity_repository);
+                sc.entity_repository.reactions.Add(cr);
+            }
+            // BoundaryTransportFrom: plasma membrane to ECS
+            for (int i = 0; i < mol_name.Length; i++)
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+                // reactants
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, sc));
+                // products
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, sc));
+                cr.rate_const = k_cytosol_to_pm[i];
+                cr.GetTotalReactionString(sc.entity_repository);
+                sc.entity_repository.reactions.Add(cr);
+            }
 
             //
             // These next reactions are in need of more informed reaction rates
