@@ -14,8 +14,6 @@ namespace Workbench
     //      If multiple graphs need to be supported, some changes will be needed.
     public class ChartManager
     {
-        private double Y_MIN = 0.0001;
-        private double X_MIN = 0.01;
         public Size ChartSize { get; set; }
         private System.Windows.Forms.DataVisualization.Charting.Chart cChart;
         public Panel PChart;
@@ -140,18 +138,25 @@ namespace Workbench
                 count++;
             }
             //**********
-            if (chartArear1.AxisX.IsLogarithmic)
-                chartArear1.AxisX.Minimum = X_MIN;
+            if (IsXLogarithmic)
+            {
+                chartArear1.AxisX.Minimum = ListTimes.Where(a => a > 0).Min();
+                chartArear1.AxisX.Minimum = Math.Pow(10, Math.Floor(Math.Log10(chartArear1.AxisX.Minimum)));
+            }
             else
+            {
                 chartArear1.AxisX.Minimum = 0;
+            }
 
-            if (chartArear1.AxisY.IsLogarithmic)
-                chartArear1.AxisY.Minimum = Y_MIN;
-            else
-                chartArear1.AxisY.Minimum = getMin_Series(DictConcs) * 0.9;
+            chartArear1.AxisY.Minimum = getMin_Series(DictConcs) * 0.9;
+            if (IsYLogarithmic)
+            {
+                chartArear1.AxisY.Minimum = Math.Pow(10,Math.Floor(Math.Log10(chartArear1.AxisY.Minimum)));
+            }
+            //if (chartArear1.AxisY.Minimum ==0 && chartArear1.AxisY.IsLogarithmic)
+            //    chartArear1.AxisY.Minimum = Y_MIN;
 
-            //chartArear1.AxisY.Minimum = Y_MIN;  // getMin_Series(DictConcs) * 0.9;
-            //chartArear1.AxisX.Minimum = X_MIN;  // x.Min() - 0.1;
+
 
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -159,7 +164,7 @@ namespace Workbench
             //LOGARITHMIC Y Axis
             if (IsYLogarithmic)
             {
-                chartArear1.AxisY.Minimum = Y_MIN;
+
                 chartArear1.AxisY.IsLogarithmic = true;
                 chartArear1.AxisY.LogarithmBase = 10;
                 LabelY = "Concentration (log)";
@@ -167,22 +172,13 @@ namespace Workbench
             //LOGARITHMIC X Axis
             if (IsXLogarithmic)
             {
-                chartArear1.AxisX.Minimum = X_MIN;  
                 chartArear1.AxisX.IsLogarithmic = true;
                 chartArear1.AxisX.LogarithmBase = 10;
                 LabelX = "Time (log)";
             }
-            //
 
-            //if (chartArear1.AxisY.Maximum <= 0)  
-                chartArear1.AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
+            chartArear1.AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
 
-            //if (chartArear1.AxisY.Maximum > 100000)
-            //    chartArear1.AxisY.Maximum = 100000;
-            //TickMark tick = new TickMark();
-            //tick.Interval = 0.1;
-
-            
             chartArear1.AxisX.Maximum = x.Max() * 1.11;   //x.Max() * 1.1 + 0.01;
             chartArear1.AxisX.Title = LabelX;
             chartArear1.AxisY.Title = LabelY;
@@ -206,15 +202,6 @@ namespace Workbench
             chartArear1.AxisX.LineColor = Color.Black;
             chartArear1.AxisY.LineColor = Color.Black;
 
-
-            //new
-            ////chartArear1.CursorX.IsUserEnabled = true;
-            ////chartArear1.CursorX.IsUserSelectionEnabled = true;
-            ////chartArear1.CursorY.IsUserEnabled = true;
-            ////chartArear1.CursorY.IsUserSelectionEnabled = true;
-
-
-
             //*********************
             //chartArear1.AxisY.ScrollBar.Enabled = true;
 
@@ -223,9 +210,8 @@ namespace Workbench
 
             cChart.Titles[0].Text = TitleXY;
 
-            cChart.Legends.Add("default"); cChart.Legends["default"].Position.Auto = true;
-            cChart.Legends["default"].InsideChartArea = "default";
-            //cChart.Legends["default"].BackColor = Color.Transparent;
+            cChart.Legends.Add("default");
+            cChart.Legends["default"].Docking = Docking.Right;
             cChart.Legends["default"].BackColor = Color.AliceBlue;
             cChart.Legends["default"].BorderColor = Color.Black;
             cChart.Legends["default"].BorderWidth = 1;
@@ -258,15 +244,10 @@ namespace Workbench
                 double yval = y[i];
                 double xval = x[i];
                 //if logarithmic
-                if (IsYLogarithmic && yval <= 0)
+                if (!((IsYLogarithmic && yval <= 0) || (IsXLogarithmic && xval <= 0)))
                 {
-                    yval = Y_MIN;
+                    s.Points.AddXY(xval, yval);
                 }
-                if (IsXLogarithmic && xval <= 0)
-                {
-                    xval = X_MIN;
-                }
-                s.Points.AddXY(xval, yval);
             }
 
             // Add series to the chart
@@ -287,25 +268,16 @@ namespace Workbench
             if (n/10 > 1)
                 s.MarkerStep = n / 10;
 
-            //if (s.MarkerStep <= 0)
-            //    s.MarkerStep = 1;
-
-            //s.MarkerBorderColor = Color.Black;
-            //s.MarkerColor = Color.Gold;
             s.Color = colorTable[_color % colorTable.Count];          
 
-            //cA.AxisY.Minimum = 0.0;//y.Min();  // *0.9;
-            //cA.AxisY.Maximum = y.Max() * 1.1 + 0.0001;
-
-            //This puts a max on y axis.  Not sure if we should have a max.  Should there be a limit??
-            //if (cA.AxisY.Maximum > 100000)
-            //    cA.AxisY.Maximum = 100000;
-
             //------------------------
-            s.Points[0].MarkerColor = Color.Gold;  
-            s.Points[0].MarkerBorderColor = Color.Black;
-            s.Points[0].MarkerSize = 10;
-            s.Points[0].MarkerStyle = MarkerStyle.Circle;           
+            if (s.Points[0].XValue == 0)
+            {
+                s.Points[0].MarkerColor = Color.Gold;
+                s.Points[0].MarkerBorderColor = Color.Black;
+                s.Points[0].MarkerSize = 10;
+                s.Points[0].MarkerStyle = MarkerStyle.Circle;
+            }
             //-------------------------
 
         }
@@ -316,9 +288,19 @@ namespace Workbench
             //go through the dictionary and get the min across
             foreach (KeyValuePair<string, List<double>> e in dt)
             {
-                if (min > e.Value.Min())
+                if (IsYLogarithmic) //(cChart.ChartAreas[0].AxisY.IsLogarithmic)
                 {
-                    min = e.Value.Min();
+                    if (min > e.Value.Where(a => a > 0).Min())
+                    {
+                        min = e.Value.Min();
+                    }
+                }
+                else
+                {
+                    if (min > e.Value.Min())
+                    {
+                        min = e.Value.Min();
+                    }
                 }
             }
 
@@ -399,12 +381,6 @@ namespace Workbench
 
         private void cChart_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            if (cChart.ChartAreas[0].AxisX.IsLogarithmic || cChart.ChartAreas[0].AxisY.IsLogarithmic)
-            {
-                MessageBox.Show("Mouse graph interaction not supported in logarithmic mode.");
-                return;
-            }
-
             HitTestResult result = cChart.HitTest(e.X, e.Y);
 
             System.Drawing.Point mouseDownLocation = new System.Drawing.Point(e.X, e.Y);
@@ -434,7 +410,6 @@ namespace Workbench
             }
 
             bDrag = false;
-            //ToolWin.txtMouseClick.Text = "";
 
 
             //If Left Mouse Down, then we need to do some work.
@@ -448,21 +423,13 @@ namespace Workbench
                 //If user clicked on an axis or on tick marks
                 if (result.ChartElementType == ChartElementType.Axis || result.ChartElementType == ChartElementType.TickMarks)
                 {
-                    double valX = result.Axis.PixelPositionToValue(mouseDownLocation.X);
-                    double valY = result.Axis.PixelPositionToValue(mouseDownLocation.Y);
+                    double valX = cChart.ChartAreas[0].AxisX.PixelPositionToValue(mouseDownLocation.X);
+                    double valY = cChart.ChartAreas[0].AxisY.PixelPositionToValue(mouseDownLocation.Y);
 
-                    //ChartArea ca = cChart.ChartAreas[0];
-                    //ca.CursorX.SetCursorPixelPosition(new Point(e.X, e.Y), true);
-                    //ca.CursorY.SetCursorPixelPosition(new Point(e.X, e.Y), true);
-
-                    ////This stuff is just for debugging
-                    //double pX = ca.CursorX.Position; //X Axis Coordinate of your mouse cursor
-                    //double pY = ca.CursorY.Position; //Y Axis Coordinate of your mouse cursor
-                    //string output = pX.ToString();
-                    //output += ", ";                    
-                    //output += valY.ToString("0.###");
-                    //output += " : Drag Series";
-                    ////
+                    if (cChart.ChartAreas[0].AxisY.IsLogarithmic)
+                    {
+                        valY = Math.Pow(10, valY);
+                    }
 
                     //Don't know which axis user clicked on.  Just that he/she clicked on an axis.  Hmm...
                     //User must have clicked on Y axis!
@@ -477,11 +444,7 @@ namespace Workbench
                         {
                             SeriesToDrag = ser;
                             bDrag = true;
-                            //ToolWin.txtMouseClick.Text = output;
                             ser.Points[0].MarkerColor = Color.Red;  //  .DataPoints.Item(1).Marker.Visible = True    
-                            //SeriesToDrag.ToolTip = "Test";
-                            //SeriesToDrag.IsValueShownAsLabel = true;
-                            //SeriesToDrag.Label = valY.ToString();
                             SeriesToDrag.Points[0].IsValueShownAsLabel = true;
                             
                         }
@@ -510,6 +473,11 @@ namespace Workbench
                     return;
 
                 double valu = cChart.ChartAreas[0].AxisY.PixelPositionToValue(e.Y);
+                if (cChart.ChartAreas[0].AxisY.IsLogarithmic)
+                {
+                    valu = Math.Pow(10, valu);
+                }
+
                 if (valu > 0)
                 {
                     ToolWin.txtMouseHover.Text = valu.ToString("#.00000");
@@ -614,6 +582,10 @@ namespace Workbench
                 string seriesName = "";
                 y = entry.Value.ToArray();
 
+
+                if ((y[0] <= 0) && cChart.ChartAreas[0].AxisY.IsLogarithmic)
+                    continue;
+
                 //Select the point if user clicked within 5% of it              
                 if (y[0] >= low && y[0] <= high)
                 {
@@ -657,40 +629,34 @@ namespace Workbench
                     {
                         double xval = x[i];
                         double yval = y[i];
-                        //if logarithmic
-                        if (IsYLogarithmic && yval <= 0)
+                        if (!((IsYLogarithmic && yval <= 0) || (IsXLogarithmic && xval <= 0)))
                         {
-                            yval = Y_MIN;
-                        } 
-                        if (IsXLogarithmic && xval <= 0)
-                        {
-                            xval = X_MIN;
-                        }                        
-                        s.Points.AddXY(xval, yval);
+                            s.Points.AddXY(xval, yval);
+                        }
                     }
 
                     if (s.Points.Count <= 0)
                         continue;
 
-                    s.Points[0].MarkerColor = Color.Gold;
-                    if (SeriesToDrag != null)
+                    if (s.Points[0].XValue == 0)
                     {
-                        if (s == SeriesToDrag)
+                        s.Points[0].MarkerColor = Color.Gold;
+                        if (SeriesToDrag != null)
                         {
-                            s.Points[0].MarkerColor = Color.Red;
-                            s.Points[0].Label = ToolWin.txtMouseHover.Text;
+                            if (s == SeriesToDrag)
+                            {
+                                s.Points[0].MarkerColor = Color.Red;
+                                s.Points[0].Label = ToolWin.txtMouseHover.Text;
+                            }
                         }
+                        s.Points[0].MarkerBorderColor = Color.Black;
+                        s.Points[0].MarkerSize = 10;
+                        s.Points[0].MarkerStyle = MarkerStyle.Circle;
                     }
-                    s.Points[0].MarkerBorderColor = Color.Black;
-                    s.Points[0].MarkerSize = 10;
-                    s.Points[0].MarkerStyle = MarkerStyle.Circle;                    
                 }
             }
             
-            //cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
-
             //HAVE TO UPDATE X AXIS MAX TOO
-            //cChart.ChartAreas[0].AxisX.Maximum = x.Max() * 1.11;
             CalculateXMax();
 
             cChart.Focus();
