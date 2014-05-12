@@ -40,6 +40,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MathNet.Iridium, Version=2008.8.16.470, Culture=neutral, PublicKeyToken=c061a3ec32cc0c6f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Daphne\dependencies\MathNet.Iridium.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Daphne\dependencies\Newtonsoft.Json.dll</HintPath>
@@ -109,6 +113,10 @@
     <ProjectReference Include="..\Daphne\Daphne.csproj">
       <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
       <Name>Daphne</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ManifoldRing\ManifoldRing.csproj">
+      <Project>{621278E2-936D-4F67-B2B2-B4E2705DE5BA}</Project>
+      <Name>ManifoldRing</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

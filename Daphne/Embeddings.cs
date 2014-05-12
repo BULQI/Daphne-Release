@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DAPHNE_MATH
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -253,3 +254,4 @@ namespace Daphne
     //    // }
     //}
 }
+#endif

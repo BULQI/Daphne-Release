@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</ProjectGuid>
+    <ProjectGuid>{621278E2-936D-4F67-B2B2-B4E2705DE5BA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Daphne</RootNamespace>
-    <AssemblyName>Daphne</AssemblyName>
+    <RootNamespace>ManifoldRing</RootNamespace>
+    <AssemblyName>ManifoldRing</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
@@ -34,13 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Iridium, Version=2008.8.16.470, Culture=neutral, PublicKeyToken=c061a3ec32cc0c6f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dependencies\MathNet.Iridium.dll</HintPath>
+    <Reference Include="MathNet.Iridium">
+      <HintPath>..\Daphne\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,39 +45,11 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Troschuetz.Random, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>dependencies\Troschuetz.Random.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cell.cs" />
-    <Compile Include="CellBuilder.cs" />
-    <Compile Include="CellManager.cs" />
-    <Compile Include="Chemistry.cs" />
-    <Compile Include="Compartment.cs" />
-    <Compile Include="Differentiator.cs" />
-    <Compile Include="Embeddings.cs" />
-    <Compile Include="Fields.cs" />
-    <Compile Include="Locomotor.cs" />
+    <Compile Include="Scalarfield.cs" />
     <Compile Include="Manifolds.cs" />
-    <Compile Include="Math.cs" />
-    <Compile Include="MolecularPopulation.cs" />
-    <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reaction.cs" />
-    <Compile Include="ReactionBuilder.cs" />
-    <Compile Include="ReactionTemplateBuilder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="dependencies\MathNet.Iridium.dll" />
-    <Content Include="dependencies\Troschuetz.Random.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ManifoldRing\ManifoldRing.csproj">
-      <Project>{621278E2-936D-4F67-B2B2-B4E2705DE5BA}</Project>
-      <Name>ManifoldRing</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

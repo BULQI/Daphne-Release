@@ -24,14 +24,11 @@ namespace Daphne
             TransductionConstant = constant;
         }
 
-        public double[] Force()
+        public double[] Force(double[] position)
         {
             double[] force = new double[3];
-            for (int i = 0; i < 3; i++)
-            {
-                force[i] = driver.GlobalGrad[0][i];
-            }
 
+            force = driver.Conc.Gradient(position);
             for (int i = 0; i < force.Length; i++)
             {
                 force[i] *= TransductionConstant;

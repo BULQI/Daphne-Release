@@ -13,11 +13,6 @@ namespace Interface
         void step(double dt);
     }
 
-    public interface IEmbedding
-    {
-        double[] map(double[] point);
-    }
-
     public interface IMolecule
     {
         string name { get; }
@@ -262,28 +257,6 @@ namespace Interface
         }
     }
 
-    /* Embedding */
-    public class Embedding : IEmbedding
-    {
-        private readonly Manifold domain;
-        private readonly Manifold range;
-        private double[] translation;
-        private double[,] rotation;
-
-        public Embedding(Manifold domain, Manifold range, double[] translation, double[,] rotation)
-        {
-            this.domain = domain;
-            this.range = range;
-            this.translation = translation;
-            this.rotation = rotation;
-        }
-
-        public double[] map(double[] point)
-        {
-            return new double[range.dim];
-        }
-    }
-
     /* Reaction */
     public class Reaction : IDynamic
     {
@@ -367,7 +340,6 @@ namespace Interface
             Manifold membrane = new TinySphere(2);
             double[] origin = new double[3];
             double[,] rotation = new double[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
-            Embedding cytosolToMembrane = new Embedding(cytosol, membrane, origin, rotation);
             IFieldInitializer init = new ConstFieldInitializer(0);
             ScalarField concentration = new DiscreteScalarField(cytosol, init);
             ScalarField flux = new DiscreteScalarField(membrane, init);

@@ -37,15 +37,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed annihilation a + e	→	e
-                        C.reactions.Add(new CatalyzedAnnihilation(catalyst,reactant0, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedAnnihilation(catalyst,reactant0, rt.rateConst));
                     }
                     else
                     {
                         // annihilation a	→	0
-                        C.reactions.Add(new Annihilation(reactant0, rt.rateConst));
+                        C.Reactions.Add(new Annihilation(reactant0, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("association"):
@@ -57,15 +57,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed association e + a + b	→	c + e
-                       C.reactions.Add(new CatalyzedAssociation(catalyst, reactant0, reactant1, product0, rt.rateConst));
+                       C.Reactions.Add(new CatalyzedAssociation(catalyst, reactant0, reactant1, product0, rt.rateConst));
                     }
                     else
                     {
                         // association  a + b	→	c
-                        C.reactions.Add(new Association(reactant0, reactant1, product0, rt.rateConst));
+                        C.Reactions.Add(new Association(reactant0, reactant1, product0, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 //case ("autocatalyticTransformation"):
@@ -95,7 +95,7 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed creation e →	a + e
-                        C.reactions.Add(new CatalyzedCreation(catalyst, product0, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedCreation(catalyst, product0, rt.rateConst));
                     }
                     else
                     {
@@ -103,7 +103,7 @@ namespace Daphne
                         // TODO: handle this error properly
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("dimerization"):
@@ -114,15 +114,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed dimerization a + a + e →	b + e
-                        C.reactions.Add(new CatalyzedDimerization(catalyst,reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedDimerization(catalyst,reactant0, product0, rt.rateConst));
                     }
                     else
                     {
                         // dimerizaton 2a → b
-                        C.reactions.Add(new Dimerization(reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new Dimerization(reactant0, product0, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("dimerDissociation"):
@@ -133,15 +133,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed dimerization a + a + e →	b + e
-                        C.reactions.Add(new CatalyzedDimerDissociation(catalyst,reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedDimerDissociation(catalyst,reactant0, product0, rt.rateConst));
                     }
                     else
                     {
                         // dimer dissociation b → 2a
-                        C.reactions.Add(new DimerDissociation(reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new DimerDissociation(reactant0, product0, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("dissociation"):
@@ -153,15 +153,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed dissociation a + e →	b + c + e
-                        C.reactions.Add(new CatalyzedDissociation(catalyst, reactant0, product0, product1, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedDissociation(catalyst, reactant0, product0, product1, rt.rateConst));
                     }
                     else
                     {
                         // dimer dissociation a → b + c
-                        C.reactions.Add(new Dissociation(reactant0, product0, product1, rt.rateConst));
+                        C.Reactions.Add(new Dissociation(reactant0, product0, product1, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("transformation"):
@@ -172,15 +172,15 @@ namespace Daphne
                     if (tfCat)
                     {
                         // Catalyzed dissociation a + e →	b + e
-                        C.reactions.Add(new CatalyzedTransformation(catalyst, reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new CatalyzedTransformation(catalyst, reactant0, product0, rt.rateConst));
                     }
                     else
                     {
                         // dimer dissociation a → b 
-                        C.reactions.Add(new Transformation(reactant0, product0, rt.rateConst));
+                        C.Reactions.Add(new Transformation(reactant0, product0, rt.rateConst));
                     }
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
                 case ("generalized"):
@@ -227,7 +227,7 @@ namespace Daphne
 
                     //C.reactions.Add(new GeneralizedReaction(molpopD, rateConstant);
 
-                    C.rtList.Add(rt);
+                    C.RTList.Add(rt);
                     break;
 
             }
@@ -521,8 +521,8 @@ namespace Daphne
                     complex = prodComp[0].Populations[rt.listOfProducts[0].species];
 
                     // boundary association  receptor + ligand	→	comples
-                    embeddedComp.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, rt.rateConst));
-                    embeddedComp.rtList.Add(rt);
+                    embeddedComp.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, rt.rateConst));
+                    embeddedComp.RTList.Add(rt);
 
                     break;
 
@@ -542,9 +542,9 @@ namespace Daphne
                     complex = reacComp[0].Populations[rt.listOfReactants[0].species];
 
                     // boundary association  receptor + ligand	→	complex
-                    embeddedComp.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, rt.rateConst));
- 
-                    embeddedComp.rtList.Add(rt);
+                    embeddedComp.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, rt.rateConst));
+
+                    embeddedComp.RTList.Add(rt);
                     break;
             }
         }

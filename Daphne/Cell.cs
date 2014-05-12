@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Troschuetz.Random;
 
+using ManifoldRing;
+
 namespace Daphne
 {
     public struct SpatialState
@@ -35,22 +37,31 @@ namespace Daphne
 
         public Cell(double radius)
         {
+            if (radius <= 0)
+            {
+                throw new Exception("Cell radius must be greater than zero.");
+            }
             Alive = true;
             Cytokinetic = false;
             this.radius = radius;
-            PlasmaMembrane = new Compartment(new TinySphere(new double[1] {radius} ));
-            Cytosol = new Compartment(new TinyBall(new double[1] { radius }));
+            PlasmaMembrane = new Compartment(new TinySphere(radius));
+            Cytosol = new Compartment(new TinyBall(radius));
 
-            OneToOneEmbedding cellEmbed = new OneToOneEmbedding(PlasmaMembrane.Interior, Cytosol.Interior);
-
-            Cytosol.Interior.Boundaries = new Dictionary<int, Embedding>();
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior.Id, cellEmbed);
+            // boundary and position
+            Cytosol.Boundaries.Add(PlasmaMembrane.Interior.Id, PlasmaMembrane);
+            Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
 
             Index = safeIndex++;
         }
+
+        public void setState(double[] pos, double[] vel)
+        {
+            state.X = pos;
+            state.V = vel;
+        }
         
         /// <summary>
-        /// Drives the cell's dynamics though time-step dt. The dyanamics is applied in-place: the
+        /// Drives the cell's dynamics through time-step dt. The dynamics is applied in-place: the
         /// cell's state is changed directly through this method.
         /// </summary>
         /// <param name="dt">Time interval.</param>
@@ -67,7 +78,7 @@ namespace Daphne
         /// </summary>
         public double[] Force(double dt, double[] position)
         {
-            return Locomotor.Force();
+            return Locomotor.Force(position);
            // get { return Locomotor.Force(dt, position); }
         }
 
@@ -92,11 +103,16 @@ namespace Daphne
         public Compartment Cytosol;
         public Compartment PlasmaMembrane;
         public Differentiator Differentiator;
+        private SpatialState state;
 
         public int Index;
         private static int safeIndex = 0;
 
-        public SpatialState State { get; set; }
+        public SpatialState State
+        {
+            get { return state; }
+            set { state = value; }
+        }
 
         public bool IsMotile = true;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DAPHNE_MATH
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -371,11 +372,11 @@ namespace Daphne
         {
             if (GetType() != f.GetType())
             {
-                throw new Exception("Scalar field multiplication is only defined between fields of the same type");
+                throw new Exception("Scalar field division is only defined between fields of the same type");
             }
             if (m != f.M)
             {
-                throw new Exception("Manifolds must be identical for scalar field multiplication.");
+                throw new Exception("Manifolds must be identical for scalar field division.");
             }
             if (((MomentExpansionScalarField)f).array[0] == 0)
             {
@@ -388,8 +389,7 @@ namespace Daphne
 
             for (int i = 1; i < parameterSize; i++)
             {
-                c.array[i] = (array[i] - array[0] * ((MomentExpansionScalarField)f).array[i] / ((MomentExpansionScalarField)f).array[0] ) 
-                              / ((MomentExpansionScalarField)f).array[0];
+                c.array[i] = (array[i] - array[0] * ((MomentExpansionScalarField)f).array[i] / ((MomentExpansionScalarField)f).array[0]) / ((MomentExpansionScalarField)f).array[0];
             }
 
             return c;
@@ -739,3 +739,4 @@ namespace Daphne
     }
 
 }
+#endif

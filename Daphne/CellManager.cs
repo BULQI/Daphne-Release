@@ -4,33 +4,16 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
+using ManifoldRing;
+
 
 namespace Daphne
 {
-    /*public struct SpatialState
-    {
-        public double[] X;
-        public double[] V;
-    }*/
-
     public class CellManager
     {
-        //private Dictionary<Cell, SpatialState> spatialStates;
-
         public CellManager()
         {
-            //spatialStates = new Dictionary<Cell, SpatialState>();
         }
-
-        //public void AddState(Cell c, SpatialState s)
-        //{
-        //    spatialStates.Add(c, s);
-        //}
-
-        //public Dictionary<Cell, SpatialState> States
-        //{
-        //    get { return spatialStates; }
-        //}
 
         public void Step(double dt)
         {
@@ -81,22 +64,33 @@ namespace Daphne
             cells = new Dictionary<int, Cell>();
         }
 
-        public void AddCell(double[] pos, double[] vel, double radius)
+        public void AddCell(Cell c)
         {
-            Cell c = new Cell(radius);
-            SpatialState s = new SpatialState();
-
-            s.X = pos;
-            s.V = vel;
-            //cellManager.AddState(c, s);
-            c.State = s;
             cells.Add(c.Index, c);
+            // add the cell membrane to the ecs
+            if (extracellularSpace == null)
+            {
+                throw new Exception("Need to create the ECS before adding cells.");
+            }
+
+            // no cell rotation currently
+            Transform t = new Transform(false);
+
+            extracellularSpace.Space.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+            // set translation by reference: when the cell moves then the transform gets updated automatically
+            t.setTranslationByReference(c.State.X);
+            extracellularSpace.Space.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
-        public Compartment ECS
+        public void CreateECS(Manifold m)
+        {
+            extracellularSpace = new ExtraCellularSpace(m);
+        }
+
+        public ExtraCellularSpace ECS
         {
             get { return extracellularSpace; }
-            set { extracellularSpace = value; }
+            //set { extracellularSpace = value; }
         }
 
         public CellManager CMGR
@@ -110,7 +104,7 @@ namespace Daphne
             set { cells = value; }
         }
 
-        private Compartment extracellularSpace;
+        private ExtraCellularSpace extracellularSpace;
         private CellManager cellManager;
         private Dictionary<int, Cell> cells;
     }
