@@ -231,7 +231,8 @@ namespace Daphne
             //Now do the steps
             dt = 1.0e-3;
             dt = 0.01;
-            nSteps = (int)((double)dInitialTime / dt);
+            // nSteps = (double)dInitialTime / dt);
+            nSteps = Math.Min((int)((double)dInitialTime / dt),10000);
             //We will not show all points;  we will show every nth point.
 
             if (nSteps <= 1)
@@ -248,12 +249,12 @@ namespace Daphne
 
             for (int i = 1; i < nSteps; i++)
             {
-                //Add to graph only if it is at an interval
-                bool AtInterval = (i % interval == 0);
-                if (AtInterval)
-                {
-                    listTimes.Add(dt * i);
-                }
+                ////Add to graph only if it is at an interval
+                //bool AtInterval = (i % interval == 0);
+                //if (AtInterval)
+                //{
+                //    listTimes.Add(dt * i);
+                //}
 #if false       
                 //stopwatch example code
                 //Stopwatch sw = new Stopwatch();
@@ -265,13 +266,15 @@ namespace Daphne
                 Sim.Step(dt);    //**************************STEP**********************************
 
                 //Add to graph, only if it is at interval
-                if (AtInterval)
+                if (i % interval == 0)
                 {
+                    listTimes.Add(dt * i);
                     foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
                     {
-                        string molguid = kvp.Key;
-                        double conc = comp.Populations[molguid].Conc.Value(defaultLoc);
-                        dictGraphConcs[molguid].Add(conc);
+                        //string molguid = kvp.Key;
+                        //double conc = comp.Populations[molguid].Conc.Value(defaultLoc);
+                        //dictGraphConcs[molguid].Add(conc);
+                        dictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
                     }
                 }
 
