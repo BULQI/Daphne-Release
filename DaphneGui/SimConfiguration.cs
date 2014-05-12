@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using Daphne;
 using Newtonsoft.Json;
 using Workbench;
+using System.Linq;
 
 namespace DaphneGui
 {
@@ -127,9 +128,6 @@ namespace DaphneGui
         // NOTE: These could be moved to entity_repository...
         [XmlIgnore]
         [JsonIgnore]
-        public Dictionary<string, CellSubset> cellsubset_guid_cellsubset_dict;
-        [XmlIgnore]
-        [JsonIgnore]
         public Dictionary<string, BoxSpecification> box_guid_box_dict;
         [XmlIgnore]
         [JsonIgnore]
@@ -154,7 +152,6 @@ namespace DaphneGui
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            cellsubset_guid_cellsubset_dict = new Dictionary<string, CellSubset>();   
             box_guid_box_dict = new Dictionary<string, BoxSpecification>();
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();   
         }
@@ -638,6 +635,426 @@ namespace DaphneGui
 
         }
 
+        public void CreateAndSerializeLigandReceptorScenario()
+        {
+            // Experiment
+            experiment_name = "Ligand Receptor Scenario";
+            experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold";
+            scenario.time_config.duration = 100;
+            scenario.time_config.rendering_interval = 0.3;
+            scenario.time_config.sampling_interval = 1440;
+
+            // Global Paramters
+            LoadDefaultGlobalParameters();
+            //ChartWindow = ReacComplexChartWindow;
+
+            // Entity Repository
+            EntityRepository repository = new EntityRepository();
+
+            entity_repository = repository;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            entity_repository.gaussian_specifications.Add(gg);
+
+            // Regions
+            box = new BoxSpecification();
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            box.x_trans = 300;
+            box.y_trans = 300;
+            box.z_trans = 300;
+            repository.box_specifications.Add(box);
+            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
+            scenario.regions.Add(reg);
+
+            box = new BoxSpecification();
+            box.x_scale = 50;
+            box.y_scale = 50;
+            box.z_scale = 300;
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 200;
+            repository.box_specifications.Add(box);
+            reg = new Region("Box region", RegionShape.Rectangular);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
+            scenario.regions.Add(reg);
+
+            //ADD ECS MOL POPS
+            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
+            var query =
+                from mol in PredefMolecules
+                where mol.Name == "CXCL13"
+                select mol;
+
+            GuiMolecularPopulation gmp = null;
+            foreach (GuiMolecule gm in query)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                gmp.Location = MolPopPosition.ECS;
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+                scenario.MolPops.Add(gmp);
+            }
+
+            //ADD CELLS AND MOLECULES IN THE CELLS
+            CellPopulation cp = new CellPopulation();
+            cp.cellpopulation_name = "Bcells starting in ellipsoid";
+            cp.number = 1;
+            cp.cellpopulation_constrained_to_region = true;
+            //cp.wrt_region = MolPopPosition.Cytosol;
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
+
+            var query1 =
+                from mol in PredefMolecules
+                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query1)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
+                {
+                    gmp.Location = MolPopPosition.Membrane;
+                }
+
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+
+                cp.CellMolPops.Add(gmp);
+            }
+
+            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
+
+            scenario.cellpopulations.Add(cp);
+
+            //-------------------------------------------------------------
+            int[] nGridPts = { 21, 21, 21 };
+            scenario.NumGridPts = nGridPts;
+            scenario.GridStep = 50;
+
+            // spatial extent in each dimension
+            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
+
+            //---------------------------------------------------------------
+
+            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(PredefReactions[0]);    //The 0'th reaction is Boundary Association
+            scenario.Reactions.Add(grt);
+
+            grt = (GuiBoundaryReactionTemplate)PredefReactions[1];    //The 1st reaction is Boundary Dissociation
+            scenario.Reactions.Add(grt);
+
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void CreateAndSerializeDriverLocomotionScenario()
+        {
+            // Experiment
+            experiment_name = "Driver Locomotion Scenario";
+            experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor";
+            scenario.time_config.duration = 100;
+            scenario.time_config.rendering_interval = 0.3;
+            scenario.time_config.sampling_interval = 1440;
+
+            // Global Paramters
+            LoadDefaultGlobalParameters();
+            //ChartWindow = ReacComplexChartWindow;
+
+            // Entity Repository
+            EntityRepository repository = new EntityRepository();
+            entity_repository = repository;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            entity_repository.gaussian_specifications.Add(gg);
+
+            // Regions
+            box = new BoxSpecification();
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            box.x_trans = 300;
+            box.y_trans = 300;
+            box.z_trans = 300;
+            repository.box_specifications.Add(box);
+            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
+            scenario.regions.Add(reg);
+
+            box = new BoxSpecification();
+            box.x_scale = 50;
+            box.y_scale = 50;
+            box.z_scale = 300;
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 200;
+            repository.box_specifications.Add(box);
+            reg = new Region("Box region", RegionShape.Rectangular);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
+            scenario.regions.Add(reg);
+
+            var query =
+                from mol in PredefMolecules
+                where mol.Name == "CXCL13"
+                select mol;
+
+            GuiMolecularPopulation gmp = null;
+            foreach (GuiMolecule gm in query)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                gmp.Location = MolPopPosition.ECS;
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+                scenario.MolPops.Add(gmp);
+            }
+
+            //ADD CELLS AND MOLECULES IN THE CELLS
+            CellPopulation cp = new CellPopulation();
+            cp.cellpopulation_name = "Bcells starting in ellipsoid";
+            cp.number = 1;
+            cp.cellpopulation_constrained_to_region = true;
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
+
+            //MOLECULES IN MEMBRANE
+            var query1 =
+                from mol in PredefMolecules
+                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query1)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
+                {
+                    gmp.Location = MolPopPosition.Membrane;
+                }
+
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                if (gm.Name == "CXCR5")
+                    sgg.peak_concentration = 125;
+                else
+                    sgg.peak_concentration = 130;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+
+                cp.CellMolPops.Add(gmp);
+            }
+
+            //MOLECULES IN CYTOSOL
+            var query2 =
+                from mol in PredefMolecules
+                where mol.Name == "driver"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query2)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "driver")
+                {
+                    gmp.Location = MolPopPosition.Cytosol;
+                }
+
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 250;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+
+                cp.CellMolPops.Add(gmp);
+            }
+
+            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
+
+            scenario.cellpopulations.Add(cp);
+
+            //-------------------------------------------------------------
+            int[] nGridPts = { 21, 21, 21 };
+            scenario.NumGridPts = nGridPts;
+            scenario.GridStep = 50;
+
+            // spatial extent in each dimension
+            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
+
+            //---------------------------------------------------------------
+
+            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
+            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(PredefReactions[0]);    //The 0'th reaction is Boundary Association
+
+            scenario.Reactions.Add(grt);
+            grt = new GuiBoundaryReactionTemplate();
+            grt = (GuiBoundaryReactionTemplate)PredefReactions[1];    //The 1st reaction is Boundary Dissociation
+
+            scenario.Reactions.Add(grt);
+
+        }
+
+        /// <summary>
+        /// New default scenario for first pass of Daphne
+        /// </summary>
+        public void CreateAndSerializeDiffusionScenario()
+        {
+            // Experiment
+            experiment_name = "Diffusion Scenario";
+            experiment_description = "Initial scenario with 1 Compartment ECM with 1 molecular population, no cells or reactions";
+            scenario.time_config.duration = 100;
+            scenario.time_config.rendering_interval = 0.3;
+            scenario.time_config.sampling_interval = 1440;
+
+            // Global Paramters
+            LoadDefaultGlobalParameters();
+            //ChartWindow = ReacComplexChartWindow;
+
+            // Entity Repository
+            EntityRepository repository = new EntityRepository();
+
+            entity_repository = repository;
+
+            // Gaussian Gradients
+            GaussianSpecification gg = new GaussianSpecification();
+            BoxSpecification box = new BoxSpecification();
+            box.x_scale = 125;
+            box.y_scale = 125;
+            box.z_scale = 125;
+            box.x_trans = 100;
+            box.y_trans = 300;
+            box.z_trans = 100;
+            repository.box_specifications.Add(box);
+            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.gaussian_spec_name = "Off-center gaussian";
+            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            entity_repository.gaussian_specifications.Add(gg);
+
+            // Regions
+            box = new BoxSpecification();
+            box.x_scale = 100;
+            box.y_scale = 100;
+            box.z_scale = 100;
+            box.x_trans = 300;
+            box.y_trans = 300;
+            box.z_trans = 300;
+            repository.box_specifications.Add(box);
+            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
+            scenario.regions.Add(reg);
+
+            box = new BoxSpecification();
+            box.x_scale = 50;
+            box.y_scale = 50;
+            box.z_scale = 300;
+            box.x_trans = 100;
+            box.y_trans = 100;
+            box.z_trans = 200;
+            repository.box_specifications.Add(box);
+            reg = new Region("Box region", RegionShape.Rectangular);
+            reg.region_box_spec_guid_ref = box.box_guid;
+            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
+            scenario.regions.Add(reg);
+            //end skg
+
+            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
+
+            //Dictionary<string, Molecule> MolDict;
+            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            //MolDict = MoleculeBuilder.Go(molSpec);
+
+            var query =
+                from mol in PredefMolecules
+                where mol.Name == "CXCL13"
+                select mol;
+
+            GuiMolecularPopulation gmp = null;
+            foreach (GuiMolecule gm in query)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                gmp.mpInfo.mp_name = "Gaussian gradient";
+                //gmp.mpInfo.mp_type_guid_ref = entity_repository.solfac_types[0].solfac_type_guid;
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                sgg.peak_concentration = 10;
+                sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                gmp.mpInfo.mp_distribution = sgg;
+                scenario.MolPops.Add(gmp);
+            }
+
+        }
+
+
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
@@ -709,27 +1126,6 @@ namespace DaphneGui
             }
             scenario.cellpopulations.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsets_CollectionChanged);
 
-        }
-
-        // Keeping utility storage up to date when collections change
-        private void cellsubsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    CellSubset ct = nn as CellSubset;
-                    cellsubset_guid_cellsubset_dict.Add(ct.cell_subset_guid, ct);   
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    CellSubset ct = dd as CellSubset;
-                    cellsubset_guid_cellsubset_dict.Remove(ct.cell_subset_guid);   
-                }
-            }
         }
 
         private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -1205,342 +1601,6 @@ namespace DaphneGui
         }
     }
 
-    
-    public enum CellBaseTypeLabel { BCell, TCell, FDC }
-
-    public class CellSubset : EntityModelBase
-    {
-        public string cell_subset_guid { get; set; }
-   
-        private CellSubsetType _cell_subset_type;
-        public CellSubsetType cell_subset_type
-        {
-            get { return _cell_subset_type; }
-            set
-            {
-                if (_cell_subset_type == value)
-                    return;
-                else
-                {
-                    _cell_subset_type = value;
-                    OnPropertyChanged("cell_subset_type");
-                }
-            }
-        }
-
-        public CellSubset()
-        {
-            Guid id = Guid.NewGuid();
-            cell_subset_guid = id.ToString();
-            
-            //SKG REMOVED THIS LINE - IT WAS CAUSING A PROBLEM DURING JSON DESERIALIZATION - Monday, May 13, 2013
-            //cell_subset_type = new BCellSubsetType();            
-        }
-
-        public int FindSolfacIndex(string guid)
-        {
-            int idx = -1;
-            //skg 5/31/12 changed
-            if (cell_subset_type is BCellSubsetType)
-            {
-                BCellSubsetType bcst = (BCellSubsetType)cell_subset_type;
-                for (int ii = 0; ii < bcst.cell_subset_type_receptor_params.Count; ii++)
-                {
-                    //skg 5/27/12 changed
-                    if (bcst.cell_subset_type_receptor_params[ii].receptor_solfac_type_guid_ref == guid)
-                    {
-                        idx = ii;
-                        break;
-                    }
-                }
-            }
-            else if (cell_subset_type is TCellSubsetType)
-            {
-                TCellSubsetType tcst = (TCellSubsetType)cell_subset_type;
-                for (int ii = 0; ii < tcst.cell_subset_type_receptor_params.Count; ii++)
-                {                    
-                    if (tcst.cell_subset_type_receptor_params[ii].receptor_solfac_type_guid_ref == guid)
-                    {
-                        idx = ii;
-                        break;
-                    }
-                }
-            }
-            return idx;
-        }
-
-        //public void InitializeReceptorLevels(ObservableCollection<SolfacType> solfac_types)
-        //{
-        //    //skg 6/1/12
-        //    if (cell_subset_type is BCellSubsetType)
-        //    {
-        //        BCellSubsetType bcst = (BCellSubsetType)cell_subset_type;
-        //        bcst.cell_subset_type_receptor_params.Clear();
-        //        foreach (SolfacType st in solfac_types)
-        //        {
-        //            bcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-        //        }
-        //    }
-        //    else if (cell_subset_type is TCellSubsetType)
-        //    {
-        //        TCellSubsetType tcst = (TCellSubsetType)cell_subset_type;
-        //        tcst.cell_subset_type_receptor_params.Clear();
-        //        foreach (SolfacType st in solfac_types)
-        //        {
-        //            tcst.cell_subset_type_receptor_params.Add(new ReceptorParameters(st.solfac_type_guid));
-        //        }
-        //    }
-        //}
-    }
-
-    //skg 5/24/12
-    //base class for BCellSubsetType , TCellSubsetType , FDCellSubsetType 
-    [XmlInclude(typeof(BCellSubsetType)),
-     XmlInclude(typeof(TCellSubsetType)),
-     XmlInclude(typeof(FDCellSubsetType))]
-    public class CellSubsetType
-    {
-        //public ObservableCollection<ReceptorParameters> cell_subset_type_receptor_params { get; set; }
-        public string cell_subset_name { get; set; }
-        public CellBaseTypeLabel baseCellType { get; set; }
-
-        //Common Activation parameters
-        public double initialActivationSignal { get; set; }
-
-        [XmlIgnore]
-        [JsonIgnore] 
-        public bool cell_subset_type_divides { get; set; }
-        
-        //[XmlIgnore]
-        //public int cell_subset_type_receptor_index { get; set; }
-
-        public CellSubsetType()
-        {
-            //baseCellTypeLabel = CellBaseTypeLabel.BCell;
-            //cell_type_name = "Default cell type name";
-            cell_subset_type_divides = false;
-            //cell_subset_type_receptor_params = new ObservableCollection<ReceptorParameters>();
-            //cell_subset_type_receptor_index = 0;
-        }
-    }
-
-    public enum BCellPhenotype:int { ShortLivedPlasmaCyte, Centroblast, Centrocyte, LongLivedPlasmacyte, MemoryCell };
-
-    public class BCellSubsetType : CellSubsetType
-    {
-        public ObservableCollection<ReceptorParameters> cell_subset_type_receptor_params { get; set; }
-
-        [XmlIgnore]
-        [JsonIgnore]
-        public int cell_subset_type_receptor_index { get; set; }
-
-        public BCellPhenotype Phenotype { get; set; }
-
-        //Activation parameters        
-        public double alpha { get; set; }
-        public double bcr0 { get; set; }
-        public double secondRoundActivationSignal { get; set; }
-
-        //Mutation parameters
-        public double initialMutationRate { get; set; }
-        public double secondRoundMutationRate { get; set; }
-        public double lambdaPlus { get; set; }
-        public double lambdaMinus { get; set; }
-        public double initialAffinity { get; set; }
-
-        //CC Rescue parameters
-        public double rateRescue { get; set; }
-        public double probPlasmacyte { get; set; }
-        public double probRecycle { get; set; }
-        public double complexDepletionRate { get; set; }
-
-        //Intracellular Signaling parameters        
-        public double mitoticInterval { get; set; }
-        public double lambdaAp { get; set; }
-        public double lambdaDif { get; set; }
-        public double lambdaDiv { get; set; }
-        public double lambdaResc { get; set; }
-        public double kappaAp { get; set; }
-        public double kappaDif { get; set; }
-        public double kappaDiv { get; set; }
-        public double kappaResc { get; set; }
-        public double muAp { get; set; }
-        public double muDif { get; set; }
-        public double muResc { get; set; }
-
-        public BCellSubsetType()
-            : base()
-        {
-            //Set base cell label type
-            baseCellType = CellBaseTypeLabel.BCell;
-            cell_subset_name = "Centroblast";
-            cell_subset_type_divides = true;
-            cell_subset_type_receptor_params = new ObservableCollection<ReceptorParameters>();
-            cell_subset_type_receptor_index = 0;
-
-            //Activation properties
-            initialActivationSignal = 128;
-            alpha = 1;
-            bcr0 = 320;
-            secondRoundActivationSignal = 8;
-
-            //Mutation params
-            initialMutationRate = 0;
-            secondRoundMutationRate = 0.001;
-            lambdaPlus = 0.333;
-            lambdaMinus = 0.111;
-            initialAffinity = 1000000;
-
-            //Intracellular Signaling properties
-            mitoticInterval = 360;
-            lambdaAp = 0.00556;
-            lambdaDif = 0.00556;
-            lambdaDiv = 0.00556;
-            lambdaResc = 0.00556;
-            kappaAp = 3.86E-6;
-            kappaDif = 1.54e-5;
-            kappaDiv = 1.54e-5;
-            kappaResc = 3.86E-6;
-            muAp = 0.0444;
-            muDif = 0.1778;
-            muResc = 0.0444;
-
-            //CC Rescue properties
-            rateRescue = 0.01667;
-            probPlasmacyte = 0.25;
-            probRecycle = 0.65;
-            complexDepletionRate = 2.0E-6;
-
-            //Phenotype
-            Phenotype = BCellPhenotype.Centroblast;
-
-            //Receptors
-
-        }
-
-    }
-    public enum TCellPhenotype { FollicularHelper };
-
-    public class TCellSubsetType : CellSubsetType
-    {
-        public ObservableCollection<ReceptorParameters> cell_subset_type_receptor_params { get; set; }
-        public TCellPhenotype Phenotype { get; set; }
-
-        [XmlIgnore]
-        [JsonIgnore]
-        public int cell_subset_type_receptor_index { get; set; }
-
-        //Activation parameters  - //SET TO ZERO
-        public double alpha { get; set; }
-        public double tcr0 { get; set; }       
-
-        //Intracellular Signaling parameters  //SET TO ZERO      
-        public double mitoticInterval { get; set; }
-        public double lambdaAp { get; set; }
-        public double lambdaDif { get; set; }
-        public double lambdaDiv { get; set; }
-        public double lambdaResc { get; set; }
-        public double kappaAp { get; set; }
-        public double kappaDif { get; set; }
-        public double kappaDiv { get; set; }
-        public double kappaResc { get; set; }
-        public double muAp { get; set; }
-        public double muDif { get; set; }
-        public double muResc { get; set; }
-
-        public TCellSubsetType()
-            : base()
-        {
-            baseCellType = CellBaseTypeLabel.TCell;
-            cell_subset_name = "T Follicular Helper";
-            cell_subset_type_divides = true;
-            cell_subset_type_receptor_params = new ObservableCollection<ReceptorParameters>();
-            cell_subset_type_receptor_index = 0;
-
-            //Phenotype
-            Phenotype = TCellPhenotype.FollicularHelper;
-
-            //Activation properties            
-            initialActivationSignal = 0;
-            alpha = 1;
-            tcr0 = 320;                        
-
-            //Intracellular Signaling properties
-            mitoticInterval = 360;
-            lambdaAp = 0.00556;
-            lambdaDif = 0.00556;
-            lambdaDiv = 0.00556;
-            lambdaResc = 0.00556;
-            kappaAp = 3.86E-6;
-            kappaDif = 1.54e-5;
-            kappaDiv = 1.54e-5;
-            kappaResc = 3.86E-6;
-            muAp = 0.0444;
-            muDif = 0.1778;
-            muResc = 0.0444;
-        }
-    }
-    public class FDCellSubsetType : CellSubsetType
-    {
-        public double FCReceptorDensity     { get; set; }   //molecules/square micron
-        public double TotalSurfaceArea      { get; set; }   //square microns
-        public double InitialMeanAffinity   { get; set; }   //inverse molar
-        public double SynapseArea           { get; set; }   //square microns
-
-        public FDCellSubsetType()
-            : base()
-        {
-            baseCellType = CellBaseTypeLabel.FDC;
-            cell_subset_name = "FDC";
-            initialActivationSignal = 0;
-
-            //FDC Parameters
-            FCReceptorDensity = 320;
-            TotalSurfaceArea = 1.3E3;
-            InitialMeanAffinity = 1.0E6;
-            SynapseArea = 25;            
-        }
-    }
-
-    public class ReceptorParameters
-    {
-        public string receptor_solfac_type_guid_ref { get; set; }
-        //public CkReceptorParams receptor_params { get; set; }
-
-        public ReceptorParameters()
-        {
-            receptor_solfac_type_guid_ref = "";
-            //receptor_params = new CkReceptorParams();
-        }
-
-        public ReceptorParameters(string guid)
-        {
-            receptor_solfac_type_guid_ref = guid;
-            //receptor_params = new CkReceptorParams();
-        }
-    }
-
-    //public class CkReceptorParams
-    //{
-    //    public double ckr_epsilon { get; set; }
-    //    public double ckr_kappa { get; set; }
-    //    public double ckr_pi { get; set; }
-    //    public double ckr_tau { get; set; }
-    //    public double ckr_delta { get; set; }
-    //    public double ckr_u { get; set; }
-
-    //    public CkReceptorParams()
-    //    {
-    //        ckr_epsilon = 0.1;
-    //        ckr_kappa = 0.1;
-    //        ckr_pi = 0.1;
-    //        ckr_tau = 0.0;
-    //        ckr_delta = 0.001;
-    //        ckr_u = 0.0;
-    //    }
-    //}
-
-
     // skg daphne
     // MolPopInfo ==================================
     public class MolPopInfo : EntityModelBase
@@ -1629,60 +1689,6 @@ namespace DaphneGui
             mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             mp_render_blending_weight = 1.0;
             mp_render_on = true;
-        }
-    }
-
-    // Solfac type and receptor name are both keyed off of solfac_type_guid.
-    // So, in reality, both names are just for human readability.
-    ////public class SolfacType
-    ////{
-    ////    public string solfac_type_guid { get; set; }
-    ////    public string solfac_type_name { get; set; }
-    ////    public string solfac_type_receptor_name { get; set; }
-
-    ////    public SolfacType()
-    ////    {
-    ////        Guid id = Guid.NewGuid();
-    ////        solfac_type_guid = id.ToString();
-    ////        solfac_type_name = "Solfac_A";
-    ////        solfac_type_receptor_name = "Receptor_A";
-    ////    }
-    ////}
-
-    /// <summary>
-    /// Converter to go between cell type GUID references in CellSets
-    /// and cell type names kept in the repository list of CellSubset(s).
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class CellTypeGUIDtoNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string cell_subset_name = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<CellSubset> cell_subset_list = cvs.Source as ObservableCollection<CellSubset>;
-            if (cell_subset_list != null)
-            {
-                foreach (CellSubset ct in cell_subset_list)
-                {
-                    if (ct.cell_subset_guid == guid)
-                    {
-                        //skg 5/25/12 Changed this                         
-                        cell_subset_name = ct.cell_subset_type.cell_subset_name;
-
-                        break;
-                    }
-                }
-            }
-            return cell_subset_name;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
         }
     }
 

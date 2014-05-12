@@ -29,7 +29,7 @@
             <local:SolfacDistributionTypeToStringConverter x:Key="SolfacDistTypeEnumConv" />
             <!--<local:SolfacGUIDtoReceptorNameConverter x:Key="SolfacGUIDtoReceptorNameConv" />-->
             <local:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
-            <local:CellTypeGUIDtoNameConverter x:Key="CellTypeGUIDtoNameConv" />
+            <!--<local:CellTypeGUIDtoNameConverter x:Key="CellTypeGUIDtoNameConv" />-->
             <!--<local:SolfacGUIDtoSolfacNameConverter x:Key="SolfacGUIDtoSolfacNameConv" />-->
             <local:RegionGUIDtoNameConverter x:Key="RegionGUIDtoNameConv" />
             <local:RelativePositionToShortStringConverter x:Key="RelativePosEnumConv" />
@@ -59,15 +59,6 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
             
-            <!-- skg 5/29/12 -->
-            <ObjectDataProvider x:Key="baseCellTypesEnum"
-                            MethodName="GetValues" 
-                            ObjectType="{x:Type sys:Enum}">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="local:CellBaseTypeLabel" />
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
-            <!-- end skg-->
             <ObjectDataProvider x:Key="bPhenotypesEnum"
                             MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
@@ -998,9 +989,9 @@
                                                Stroke="Black" StrokeThickness="0.5"/>
                     <TextBlock Text="{Binding Path=number}" Margin="5,0,0,0"/>
                     <TextBlock Text=" " />
-                    <TextBlock Text="{Binding Path=cell_subset_guid_ref, 
+                    <!--<TextBlock Text="{Binding Path=cell_subset_guid_ref, 
                                                                 Converter={StaticResource CellTypeGUIDtoNameConv}, 
-                                                                ConverterParameter={StaticResource cellsetCellTypesListView}}" />
+                                                                ConverterParameter={StaticResource cellsetCellTypesListView}}" />-->
                     <StackPanel Orientation="Horizontal">
                         <!-- Only want an "s" to show up if more than one cell -->
                         <StackPanel.Style>
@@ -1063,20 +1054,6 @@
                                    HorizontalAlignment="Right" VerticalAlignment="Center" />
                     <TextBox Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged}"
                                  Grid.Column="1" Grid.Row="0"  Margin="0,2"   />
-                    <TextBlock Text="subset" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="1"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"  />
-                    
-                    <!-- skg 5/25/12  -->
-                    <ComboBox Name="cell_type_cbox"
-                                    Grid.Column="1" Grid.Row="1" 
-                                    MinWidth="80"
-                                    ItemsSource="{Binding Source={StaticResource cellsetCellTypesListView}}" 
-                                    DisplayMemberPath="cell_subset_type.cell_subset_name"
-                                    SelectedValue="{Binding Path=cell_subset_guid_ref}"
-                                    SelectedValuePath="cell_subset_guid"
-                                    Margin="0,2"  />
-                    <!-- end skg -->
                     <TextBlock Text="number" Margin="6,0"
                                    Grid.Column="0" Grid.Row="2"  
                                    HorizontalAlignment="Right" VerticalAlignment="Center"  />
@@ -1335,7 +1312,7 @@
 
                     <TextBox Margin="0,2" x:Name="txtReactionType"
                             Grid.Column="1" Grid.Row="1"  
-                                Text="{Binding Path=TypeOfReaction, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                                Text="{Binding Path=ReacTypeString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                              IsReadOnly="True" />
 
                     

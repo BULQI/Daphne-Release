@@ -64,11 +64,7 @@ namespace DaphneGui
                 else
                 {
                     blueHandToolButton_IsChecked = value;
-
                     MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, value);
-                    //gc.Rwc.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
-                    //Rwc.Invalidate();
-                    //base.OnPropertyChanged("HandToolButton_IsChecked");
                 }
             }
         }
@@ -218,11 +214,6 @@ namespace DaphneGui
             e.CanExecute = true;
         }
 
-
-
-
-
-
         public MainWindow()
         {
             InitializeComponent();
@@ -232,11 +223,12 @@ namespace DaphneGui
             // Generate a test sim configuration
             //These generate the default and blank scenarios so should be uncommented to do so and then commented out again
             
+            //skg Wednesday, June 12, 2013
+            CreateAndSerializeDaphneScenarios();
             //skg daphne Thursday, April 18, 2013
             //CreateAndSerializeDiffusionScenario();
-            CreateAndSerializeLigandReceptorScenario();
+            //CreateAndSerializeLigandReceptorScenario();
             //CreateAndSerializeDriverLocomotionScenario();
-            //CreateAndSerializeTestScenario();
 
             //CreateAndSerializeDefaultScenario();
             //CreateAndSerializeBlankScenario();
@@ -445,697 +437,70 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Test scenario for first pass of Daphne
+        /// Create and serialize all scenarios
         /// </summary>
-        public void CreateAndSerializeLigandReceptorScenario()
+        public void CreateAndSerializeDaphneScenarios()
         {
+            //LIGAND-RECEPTOR SCENARIO
             var config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
-            
-            //THIS LINE IS ONLY FOR TESTING
-            //config.DeserializeSimConfig();
-
             var sim_config = config.SimConfig;
-
-            // Experiment
-            sim_config.experiment_name = "Ligand Receptor Scenario";
-            sim_config.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold";
-            sim_config.scenario.time_config.duration = 100;
-            sim_config.scenario.time_config.rendering_interval = 0.3;
-            sim_config.scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            sim_config.LoadDefaultGlobalParameters();
-            sim_config.ChartWindow = ReacComplexChartWindow;
-
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-
-            sim_config.entity_repository = repository;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            sim_config.entity_repository.gaussian_specifications.Add(gg);
-
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            sim_config.scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            sim_config.scenario.regions.Add(reg);
-
-            //ADD ECS MOL POPS
-            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-            var query =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                sim_config.scenario.MolPops.Add(gmp);
-            }
-
-            //ADD CELLS AND MOLECULES IN THE CELLS
-            CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "Bcells starting in ellipsoid";
-            cp.number = 1;
-            cp.cellpopulation_constrained_to_region = true;
-            //cp.wrt_region = MolPopPosition.Cytosol;
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-
-            var query1 =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            foreach (GuiMolecule gm in query1)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
-                {
-                    gmp.Location = MolPopPosition.Membrane;
-                }
-                
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                cp.CellMolPops.Add(gmp);
-            }
-
-            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
-
-            sim_config.scenario.cellpopulations.Add(cp);
-
-            //-------------------------------------------------------------
-            int[] nGridPts = { 21, 21, 21 };            
-            sim_config.scenario.NumGridPts = nGridPts;
-            sim_config.scenario.GridStep = 50;
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //---------------------------------------------------------------
-
-            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(sim_config.PredefReactions[0]);    //The 0'th reaction is Boundary Association
-            sim_config.scenario.Reactions.Add(grt);
-
-            grt = (GuiBoundaryReactionTemplate)sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
-            sim_config.scenario.Reactions.Add(grt);
-
-            //End skg daphne
-
-            // Serialize to JSON file
+            sim_config.CreateAndSerializeLigandReceptorScenario();
+            //serialize to json
             config.SerializeSimConfigToFile();
 
-            ////skg daphne serialize to json Thursday, April 18, 2013
-            //var Settings = new JsonSerializerSettings();
-            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //Settings.TypeNameHandling = TypeNameHandling.Auto;
-            //string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
-            //string jsonFile = config.FileName;
-            //File.WriteAllText(jsonFile, jsonSpec);
-
-        }
-
-        /// <summary>
-        /// Test scenario for first pass of Daphne
-        /// </summary>
-        public void CreateAndSerializeDriverLocomotionScenario()
-        {
-            var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-            var sim_config = config.SimConfig;
-
-            // Experiment
-            sim_config.experiment_name = "Driver Locomotion Scenario";
-            sim_config.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor";
-            sim_config.scenario.time_config.duration = 100;
-            sim_config.scenario.time_config.rendering_interval = 0.3;
-            sim_config.scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            sim_config.LoadDefaultGlobalParameters();
-            sim_config.ChartWindow = ReacComplexChartWindow;
-
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-            sim_config.entity_repository = repository;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            sim_config.entity_repository.gaussian_specifications.Add(gg);
-
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            sim_config.scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            sim_config.scenario.regions.Add(reg);
-
-            var query =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                sim_config.scenario.MolPops.Add(gmp);
-            }
-
-            //ADD CELLS AND MOLECULES IN THE CELLS
-            CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "Bcells starting in ellipsoid";
-            cp.number = 1;
-            cp.cellpopulation_constrained_to_region = true;
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
-
-            //MOLECULES IN MEMBRANE
-            var query1 =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
-                select mol;
-
-            gmp = null;
-            foreach (GuiMolecule gm in query1)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
-                {
-                    gmp.Location = MolPopPosition.Membrane;
-                }
-
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                if (gm.Name == "CXCR5")
-                    sgg.peak_concentration = 125;
-                else 
-                    sgg.peak_concentration = 130;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                cp.CellMolPops.Add(gmp);
-            }
-
-            //MOLECULES IN CYTOSOL
-            var query2 =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "driver"
-                select mol;
-
-            gmp = null;
-            foreach (GuiMolecule gm in query2)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                if (gm.Name == "driver")
-                {
-                    gmp.Location = MolPopPosition.Cytosol;
-                }
-
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 250;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-
-                cp.CellMolPops.Add(gmp);
-            }
-
-            //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
-
-            sim_config.scenario.cellpopulations.Add(cp);
-
-            //-------------------------------------------------------------
-            int[] nGridPts = { 21, 21, 21 };
-            sim_config.scenario.NumGridPts = nGridPts;
-            sim_config.scenario.GridStep = 50;
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //---------------------------------------------------------------
-
-            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            GuiBoundaryReactionTemplate grt = (GuiBoundaryReactionTemplate)(sim_config.PredefReactions[0]);    //The 0'th reaction is Boundary Association
-
-            sim_config.scenario.Reactions.Add(grt);
-            grt = new GuiBoundaryReactionTemplate();
-            grt = (GuiBoundaryReactionTemplate)sim_config.PredefReactions[1];    //The 1st reaction is Boundary Dissociation
-
-            sim_config.scenario.Reactions.Add(grt);
-
-            //skg daphne serialize to json Thursday, June 9, 2013
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = config.FileName;
-            File.WriteAllText(jsonFile, jsonSpec);
-        }
-
-        /// <summary>
-        /// New default scenario for first pass of Daphne
-        /// </summary>
-        public void CreateAndSerializeDiffusionScenario()
-        {
-            var config = new SimConfigurator("Config\\daphne_ecm_scenario.json");
-            var sim_config = config.SimConfig;
-
-            // Experiment
-            sim_config.experiment_name = "Diffusion Scenario";
-            sim_config.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with 1 molecular population";
-            sim_config.scenario.time_config.duration = 100;
-            sim_config.scenario.time_config.rendering_interval = 0.3;
-            sim_config.scenario.time_config.sampling_interval = 1440;
-            //sim_config.scenario.ManType = ManifoldType.BoundedRectangularPrism;
-
-            // Global Paramters
-            sim_config.LoadDefaultGlobalParameters();
-            sim_config.ChartWindow = ReacComplexChartWindow;
-
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-
-            ////////// Possible solfac types
-            ////SolfacType st = new SolfacType();
-            ////st.solfac_type_name = "cxcl13";
-            ////st.solfac_type_receptor_name = "cxcr5";
-            //repository.solfac_types.Add(st);
-
-            sim_config.entity_repository = repository;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            sim_config.entity_repository.gaussian_specifications.Add(gg);
-
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            sim_config.scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            sim_config.scenario.regions.Add(reg);
-            //end skg
-            
-            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-
-            //Dictionary<string, Molecule> MolDict;
-            //string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
-            //MolDict = MoleculeBuilder.Go(molSpec);
-
-            var query =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCL13"
-                select mol;
-
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                //gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                sim_config.scenario.MolPops.Add(gmp);
-            }
-
-            //
-            // Create Extracellular fluid
-            // 
-
-            int[] numGridPts = { 21, 21, 21 };  //{ 21, 21, 21 };
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //
-            // Add all molecular populations
-            //
-
-            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-
-            ////////double maxConc = 2 * (3.0) * (1e-6) * (1e-18) * (6.022e23);
-
-            ////////double[] sigma = { Interior.Extents[0] / 5.0, 
-            ////////                   Interior.Extents[1] / 5.0, 
-            ////////                   Interior.Extents[2] / 5.0 };
-
-            ////////double[] center = new double[Interior.Dim];
-            ////////center[0] = Interior.Extents[0] / 2.0;
-            ////////center[1] = Interior.Extents[1] / 2.0;
-            ////////center[2] = Interior.Extents[2] / 2.0;
-
-            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            //ScalarField gsf = new DiscreteScalarField(ECS.Interior, new GaussianFieldInitializer(center, sigma, maxConc));
-
-            //ECS.AddMolecularPopulation(MolDict["CXCL13"], gsf);
-            //ECS.AddMolecularPopulation(MyMol, gsf);
-
-            //Diffusion scenario has no reactions
-            //BUT WE'LL TRY SOME ANYWAY
-            GuiReactionTemplate grt = new GuiReactionTemplate();
-
-            // Write out XML file - SHOULD REMOVE THIS!
+            //DRIVER-LOCOMOTOR SCENARIO
+            config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
+            sim_config = config.SimConfig;
+            sim_config.CreateAndSerializeDriverLocomotionScenario();
+            //serialize to json
             config.SerializeSimConfigToFile();
 
-            //Write out listOfReactions to json file
-            //JsonSerializer serializer = new JsonSerializer();
-            //using (StreamWriter sw = new StreamWriter(@"c:\temp\json_output2.txt"))
-            //using (JsonWriter writer = new JsonTextWriter(sw))
-            //{
-            //    //serializer.Serialize(writer, sim_config.ReactionTemplateList);
-            //    serializer.Serialize(writer, sim_config.GuiReactionTemplates);
-            //}
-
-
-            //skg daphne serialize to json Thursday, April 18, 2013
-            var settings = new JsonSerializerSettings();
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-
-            string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, settings);
-            string jsonFile = config.FileName;
-            //jsonFile = jsonFile.Replace(".xml", ".txt");
-            File.WriteAllText(jsonFile, jsonSpec);
-
-        }
-
-        /// <summary>
-        /// Test scenario for first pass of Daphne
-        /// </summary>
-        public void CreateAndSerializeTestScenario()
-        {
-            var config = new SimConfigurator("Config\\daphne_test_scenario.json");
-            var sim_config = config.SimConfig;
-
-            // Experiment
-            sim_config.experiment_name = "Test Scenario";
-            sim_config.experiment_description = "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold";
-            sim_config.scenario.time_config.duration = 100;
-            sim_config.scenario.time_config.rendering_interval = 0.3;
-            sim_config.scenario.time_config.sampling_interval = 1440;
-
-            // Global Paramters
-            sim_config.LoadDefaultGlobalParameters();
-            sim_config.ChartWindow = ReacComplexChartWindow;
-
-            // Entity Repository
-            EntityRepository repository = new EntityRepository();
-
-            // Possible solfac types - Do we still need these?
-            ////SolfacType st = new SolfacType();
-            ////st.solfac_type_name = "cxcl13";
-            ////st.solfac_type_receptor_name = "cxcr5";
-            //repository.solfac_types.Add(st);
-
-            sim_config.entity_repository = repository;
-
-            // Gaussian Gradients
-            GaussianSpecification gg = new GaussianSpecification();
-            BoxSpecification box = new BoxSpecification();
-            box.x_scale = 125;
-            box.y_scale = 125;
-            box.z_scale = 125;
-            box.x_trans = 100;
-            box.y_trans = 300;
-            box.z_trans = 100;
-            repository.box_specifications.Add(box);
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
-            gg.gaussian_spec_name = "Off-center gaussian";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            sim_config.entity_repository.gaussian_specifications.Add(gg);
-
-            // Regions
-            box = new BoxSpecification();
-            box.x_scale = 100;
-            box.y_scale = 100;
-            box.z_scale = 100;
-            box.x_trans = 300;
-            box.y_trans = 300;
-            box.z_trans = 300;
-            repository.box_specifications.Add(box);
-            Region reg = new Region("Ellipsoidal region", RegionShape.Ellipsoid);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 1.0f, 0.5f);
-            sim_config.scenario.regions.Add(reg);
-
-            box = new BoxSpecification();
-            box.x_scale = 50;
-            box.y_scale = 50;
-            box.z_scale = 300;
-            box.x_trans = 100;
-            box.y_trans = 100;
-            box.z_trans = 200;
-            repository.box_specifications.Add(box);
-            reg = new Region("Box region", RegionShape.Rectangular);
-            reg.region_box_spec_guid_ref = box.box_guid;
-            reg.region_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.5f, 0.7f, 1.0f);
-            sim_config.scenario.regions.Add(reg);
-
-            //SKG DAPHNE Wednesday, April 10, 2013 4:04:14 PM
-            var query =
-                from mol in sim_config.PredefMolecules
-                where mol.Name == "CXCL13" || mol.Name == "CXCR5"
-                select mol;
-
-            GuiMolecularPopulation gmp = null;
-            foreach (GuiMolecule gm in query)
-            {
-                gmp = new GuiMolecularPopulation();
-                gmp.Molecule = new GuiMolecule(gm);
-                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-                gmp.Name = "My " + gm.Name;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
-                //gmp.mpInfo.mp_type_guid_ref = sim_config.entity_repository.solfac_types[0].solfac_type_guid;
-                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                gmp.mpInfo.mp_render_blending_weight = 2.0;
-                MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                sgg.peak_concentration = 10;
-                sgg.gaussgrad_gauss_spec_guid_ref = sim_config.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                gmp.mpInfo.mp_distribution = sgg;
-                sim_config.scenario.MolPops.Add(gmp);
-            }
-
-            int[] numGridPts = { 2, 2, 2 };  //{ 21, 21, 21 };
-
-            // spatial extent in each dimension
-            double[] XCellExtent = { 1000.0, 1000.0, 1000.0 };
-
-            //Try some reactions
-            GuiReactionTemplate grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[1];
-            sim_config.scenario.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[2];
-            sim_config.scenario.Reactions.Add(grt);
-
-            //Try some reaction complexes
-            GuiReactionComplex rc = new GuiReactionComplex();
-            rc.Name = "RC1";
-            
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[5];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[6];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[7];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[8];
-            rc.Reactions.Add(grt);
-
-            sim_config.scenario.ReactionComplexes.Add(rc);
-
-            rc = new GuiReactionComplex();
-            rc.Name = "RC2";
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[1];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[2];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[3];
-            rc.Reactions.Add(grt);
-
-            grt = new GuiReactionTemplate();
-            grt = sim_config.PredefReactions[4];
-            rc.Reactions.Add(grt);
-
-            sim_config.scenario.ReactionComplexes.Add(rc);
-
-            //End skg daphne
-
-            // Serialize to XML file - REMOVE THIS
+            //DIFFUSIION SCENARIO
+            config = new SimConfigurator("Config\\daphne_ecm_scenario.json");
+            sim_config = config.SimConfig;
+            sim_config.CreateAndSerializeDiffusionScenario();
+            //Serialize to json
             config.SerializeSimConfigToFile();
-
-            //skg daphne serialize to json Thursday, April 18, 2013
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(config.SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = config.FileName;
-            File.WriteAllText(jsonFile, jsonSpec);
-
         }
 
+        ///// <summary>
+        ///// LIGAND-RECEPTOR scenario for first pass of Daphne
+        ///// </summary>
+        //public void CreateAndSerializeLigandReceptorScenario()
+        //{
+        //    var config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
+        //    var sim_config = config.SimConfig;
+        //    sim_config.CreateAndSerializeLigandReceptorScenario();
+
+        //    //serialize to json
+        //    config.SerializeSimConfigToFile();
+        //}
+
+        ///// <summary>
+        ///// DRIVER-LOCOMOTOR scenario for first pass of Daphne
+        ///// </summary>
+        //public void CreateAndSerializeDriverLocomotionScenario()
+        //{
+        //    var config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
+        //    var sim_config = config.SimConfig;
+        //    sim_config.CreateAndSerializeDriverLocomotionScenario();
+
+        //    //serialize to json
+        //    config.SerializeSimConfigToFile();
+        //}
+
+        ///// <summary>
+        ///// DIFFUSIION scenario for first pass of Daphne
+        ///// </summary>
+        //public void CreateAndSerializeDiffusionScenario()
+        //{
+        //    var config = new SimConfigurator("Config\\daphne_ecm_scenario.json");
+        //    var sim_config = config.SimConfig;
+        //    sim_config.CreateAndSerializeDiffusionScenario();
+        //    //Serialize to json
+        //    config.SerializeSimConfigToFile();
+        //}
         
-
         private void showScenarioInitial()
         {
             lockAndResetSim(true, "");
@@ -1147,13 +512,6 @@ namespace DaphneGui
             saveScenario.IsEnabled = true;
         }
 
-        //skg daphne
-        //private void setScenarioPaths(string filename)
-        //{
-        //    xmlPath = new Uri(filename);
-        //    orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
-        //    displayTitle();
-        //}
         private void setScenarioPaths(string filename)
         {
             jsonPath = new Uri(filename);
@@ -1172,9 +530,6 @@ namespace DaphneGui
             // Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.InitialDirectory = orig_path;
-            //skg daphne changes
-            //dlg.DefaultExt = ".xml"; // Default file extension
-            //dlg.Filter = "Sim Config XML docs (.xml)|*.xml"; // Filter files by extension
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Sim Config JSON docs (.json)|*.json"; // Filter files by extension
 
@@ -1206,8 +561,6 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = orig_path;
             dlg.FileName = "scenario"; // Default file name
-            //dlg.DefaultExt = ".xml"; // Default file extension
-            //dlg.Filter = "Sim Config XML docs (.xml)|*.xml"; // Filter files by extension
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Sim Config JSON docs (.json)|*.json"; // Filter files by extension
 
@@ -1222,6 +575,8 @@ namespace DaphneGui
                 
                 configurator.FileName = filename;
                 configurator.SerializeSimConfigToFile();
+
+                //NEED TO CLARIFY WHAT THIS IS DOING!!!!
                 orig_content = configurator.SerializeSimConfigToStringSkipDeco();
                 xmlPath = new Uri(filename);
                 orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
@@ -1434,13 +789,6 @@ namespace DaphneGui
             }
         }
 
-        //skg daphne
-        //private string extractFileName()
-        //{
-        //    string[] segments = xmlPath.LocalPath.Split('\\');
-
-        //    return segments.Last();
-        //}
         private string extractFileName()
         {
             string[] segments = jsonPath.LocalPath.Split('\\');
@@ -1934,132 +1282,6 @@ namespace DaphneGui
             
         }
 
-        /// <summary>
-        /// draw the initial cell states
-        /// </summary>
-        /// <param name="newFile">true to indicate we are reading a new file</param>
-        /// <param name="completeReset">true to fully reinitialize the simulation</param>
-        /// <param name="xmlScenarioString">string representation of a scenario</param>
-//        private void initialState(bool newFile, bool completeReset, string xmlScenarioString)
-//        {
-//            // if we read a new file we may have to disconnect event handlers if they were connected previously;
-//            // we always must deserialize the file
-//            if (newFile == true)
-//            {
-//                if (configurator != null)
-//                {
-//                    // if we configured a simulation prior to this call, remove all property changed event handlers
-//                    for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-//                    {
-//                        configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= configurator.GUIInteractionToWidgetCallback;
-//                    }
-//                    for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-//                    {
-//                        configurator.SimConfig.scenario.regions[i].PropertyChanged -= configurator.GUIRegionSurfacePropertyChange;
-//                    }
-//                    for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-//                    {
-//                        configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= configurator.GUIGaussianSurfaceVisibilityToggle;
-//                    }
-//                }
-//                // load past experiment
-//                if (xmlScenarioString != "")
-//                {
-//                    // reinitialize the configurator
-//                    configurator = new SimConfigurator();
-//                    // catch xaml parse exception if it's not a good sim config file
-//                    try
-//                    {
-//                        configurator.DeserializeSimConfigFromString(xmlScenarioString);
-//                    }
-//                    catch
-//                    {
-//                        //MessageBoxResult tmp = MessageBox.Show("That configuration has problems. Please select another experiment.");
-//                        handleLoadFailure("That configuration has problems. Please select another experiment.");
-//                        return;
-//                    }
-//                }
-//                else
-//                {
-//                    configurator = new SimConfigurator(xmlPath.LocalPath);
-//                    // catch xaml parse exception if it's not a good sim config file
-//                    try
-//                    {
-//                        //SKG Tuesday, May 07, 2013 - HERE MUST REPLACE WITH JSON DESERIALIZER
-//                        configurator.DeserializeSimConfig();
-//                        configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
-//                    }
-//                    catch
-//                    {
-//                        //MessageBox.Show("There is a problem loading the configuration file.\nPress OK, then try to load another.", "Application error", MessageBoxButton.OK, MessageBoxImage.Error);
-//                        handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
-//                        return;
-//                    }
-//                }
-//                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-//                orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
-//            }
-
-//            // (re)connect the handlers for the property changed event
-//            for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-//            {
-//                configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += configurator.GUIInteractionToWidgetCallback;
-//            }
-//            for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-//            {
-//                configurator.SimConfig.scenario.regions[i].PropertyChanged += configurator.GUIRegionSurfacePropertyChange;
-//            }
-//            for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-//            {
-//                configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += configurator.GUIGaussianSurfaceVisibilityToggle;
-//            }
-
-//            // GUI Resources
-//            // Set the data context for the main tab control config GUI
-//            this.SimConfigToolWindow.DataContext = configurator.SimConfig;
-
-//            // set up the simulation
-//            //////////if (sim.setupSimulation(completeReset) == false)
-//            //////////{
-//            //////////    handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
-//            //////////    return;
-//            //////////}
-
-//            // Create all VTK visualization pipelines and elements
-//            gc.CreatePipelines();
-
-//            // clear the vcr cache
-//            if (vcrControl != null)
-//            {
-//                vcrControl.ReleaseVCR();
-//            }
-
-//            if (newFile)
-//            {
-//                gc.recenterCamera();
-//            }
-//            gc.Rwc.Invalidate();
-
-//            // TODO: Need to do this for all GCs eventually...
-//            // Add the RegionControl interaction event handlers here for easier reference to callback method
-//            foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
-//            {
-//                // NOTE: For now not doing any callbacks on property change for RegionControls...
-//                kvp.Value.ClearCallbacks();
-//                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
-//                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
-//            }
-
-//            VCR_Toolbar.IsEnabled = false;
-//            gc.ToolsToolbar_IsEnabled = true;
-//            gc.DisablePickingButtons();
-
-//#if LANGEVIN_TIMING
-//            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-//#endif
-//            loadSuccess = true;
-//        }
-
         private void initialState(bool newFile, bool completeReset, string jsonScenarioString)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
@@ -2109,7 +1331,7 @@ namespace DaphneGui
                     {
                         //SKG Tuesday, May 07, 2013 - HERE MUST REPLACE WITH JSON DESERIALIZER
                         configurator.DeserializeSimConfig();
-                        configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
+                        //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }
                     catch
                     {
@@ -2230,7 +1452,9 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// initiate a simulation run
+        /// Initiate a simulation run
+        /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
+        /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
         private void runSim()
         {
@@ -2300,7 +1524,6 @@ namespace DaphneGui
                             {
                                 double initConc = 250;
                                 cell.Cytosol.AddMolecularPopulation(mol, initConc);
-                                //cell.Cytosol.AddMolecularPopulation(mol, new GaussianFieldInitializer(center, sigma, maxConc));
                             }
                         }
                         
@@ -2311,7 +1534,6 @@ namespace DaphneGui
                     {
                         foreach (GuiReactionTemplate grt in cp.CellReactions)
                         {
-                            //if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
                             if (grt.ReacType == ReactionType.Association)
                             {
                                 double k1plus = 2.0;
@@ -2501,36 +1723,6 @@ namespace DaphneGui
 
                 }
             }
-
-            //ADD CELLS' REACTIONS
-            ////////foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
-            ////////{
-            ////////    // add receptor ligand boundary association and dissociation
-            ////////    // R+L-> C
-            ////////    // C -> R+L
-            ////////    receptor = kvp.Value.PlasmaMembrane.Populations["CXCR5"];
-            ////////    ligand = sim.ECS.Space.Populations["CXCL13"];
-            ////////    complex = kvp.Value.PlasmaMembrane.Populations["CXCR5:CXCL13"];
-
-            ////////    // QUESTION: Does it matter to which manifold we assign the boundary reactions?
-            ////////    //kvp.Value.PlasmaMembrane.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, k1plus));
-            ////////    //kvp.Value.PlasmaMembrane.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
-            ////////    // sim.ECS.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-            ////////    sim.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
-            ////////    sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
-
-            ////////    kvp.Value.IsMotile = false;
-            ////////}
-
-            
-
-            
-
-
-
-
-
-
 
             double T = 100;   // minutes
             double dt = 0.01;  //0.01;
