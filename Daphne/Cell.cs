@@ -196,13 +196,19 @@ namespace Daphne
             if (Differentiator.TransitionOccurred == true)
             {
                 // Epigentic changes
-                for (int i = 0; i < Differentiator.gene_id.Length; i++)
-                {
-                    Genes[Differentiator.gene_id[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
-                }
+                SetGeneActivities();
                 Differentiator.TransitionOccurred = false;
+                DifferentiationState = Differentiator.CurrentState;
             }
+        }
 
+        public void SetGeneActivities()
+        {
+            // Set gene activity levels based on current differentiation state
+            for (int i = 0; i < Differentiator.gene_id.Length; i++)
+            {
+                Genes[Differentiator.gene_id[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
+            }
         }
 
         /// <summary>
@@ -348,6 +354,7 @@ namespace Daphne
             }
 
             // differentiation
+            daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
             foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
             {
                 foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
@@ -361,7 +368,12 @@ namespace Daphne
                     daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
             }
-            
+            Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
+            Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
+            Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
+            daughter.DifferentiationState = Differentiator.CurrentState;
+            daughter.SetGeneActivities();
+
             return daughter;
         }
 
