@@ -148,13 +148,86 @@ namespace ManifoldRing
             return laplacian;
         }
 
+        /// <summary>
+        /// Return a scalar field (in the volume) representing the applied flux at a surface.
+        /// Uses interpolation to distribute the flux source to surrounding nodes.
+        /// NOTES: 
+        ///     This may not be well suited for flux from interpolated-node fields, like natural boundaries 
+        ///     Doesn't make use of rotation information in Transform, 
+        ///     so interpolated-node surface normals are assumed to be coincident with volume axes.
+        /// </summary>
+        /// <param name="flux">Flux from the surface element of the volume</param>
+        /// <param name="t">Transform information about embedding of surface in volume </param>
+        /// <returns></returns>
         public ScalarField DiffusionFlux(ScalarField flux, Transform t)
+        {
+            ScalarField temp = new ScalarField(m);
+            int[] indices = new int[3];
+            int n;
+            double volFactor;
+
+            // This loop is intended to accomodate flux from surfaces using interpolated-node scalar fields
+            // For interpolated-node scalar fields:
+            //      Each node on the surface would be a principle point
+            // For moment-expansion scalar fields: 
+            //      There is only one principle point (0,0,0), so the flux gradient is not used.
+            for (int i = 0; i < flux.M.PrincipalPoints.Length; i++)
+            {
+                // The concentration source term
+                double concAdd = flux.M.Area() * flux.array[i] / m.VoxelVolume();
+
+                // Indices of nodes surround source and proportions for dividing the concentration source among them
+                LocalMatrix[] lm = interpolationMatrix(t.toContaining(flux.M.PrincipalPoints[i]));
+
+                // Find the node in this manifold that is closest to the principal point
+                n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(flux.M.PrincipalPoints[i])));
+
+                for (int k = 0; k < lm.Length; k++)
+                {
+                    // Boundary nodes don't have the full voxel volume. Correct accordingly.
+                    volFactor = 1;
+                    indices = m.linearIndexToIndexArray(lm[k].Index);
+                    if ((indices[0] == 0) || (indices[0] == m.NodesPerSide(0) - 1))
+                    {
+                        volFactor *= 2;
+                    }
+                    if ((indices[1] == 0) || (indices[1] == m.NodesPerSide(1) - 1))
+                    {
+                        volFactor *= 2;
+                    } if ((indices[2] == 0) || (indices[2] == m.NodesPerSide(2) - 1))
+                    {
+                        volFactor *= 2;
+                    }
+
+                    temp.array[lm[k].Index] += volFactor * lm[k].Coefficient * concAdd;
+                }
+            }
+
+            return temp;
+        }
+
+         /// <summary>
+        /// Return a scalar field (in the volume) representing the applied flux at a surface.
+        /// Assigns the entire flux source to the closest node.
+        /// NOTES: 
+        ///     Doesn't make use of rotation information in Transform, 
+        ///     so interpolated-node surface normals are assumed to be coincident with volume axes.
+        /// </summary>
+        /// <param name="flux">Flux from the surface element of the volume</param>
+        /// <param name="t">Transform information about the location and orientation of surface in volume </param>
+        /// <returns></returns>       
+        public ScalarField DiffusionFlux_1Pt(ScalarField flux, Transform t)
         {
             ScalarField temp = new ScalarField(m); 
             int n;
             int[] indices = new int[3];
             double volFactor;
 
+            // This loop is intended to accomodate flux from surfaces using interpolated-node scalar fields
+            // For interpolated-node scalar fields:
+            //      Each node on the surface would be a principle point
+            // For moment-expansion scalar fields: 
+            //      There is only one principle point (0,0,0), so the flux gradient is not used.
             for (int i = 0; i < flux.M.PrincipalPoints.Length; i++)
             {
                 // Find the node in this manifold that is closest to the principal point
@@ -177,7 +250,7 @@ namespace ManifoldRing
                         volFactor *= 2;
                     }
 
-                    temp.array[n] += volFactor * flux.M.Area() * flux.array[0] / m.VoxelVolume();
+                    temp.array[n] += volFactor * flux.M.Area() * flux.array[i] / m.VoxelVolume();
                 }
                 else
                 {
