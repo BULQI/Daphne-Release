@@ -627,7 +627,7 @@ namespace DaphneGui
             if (cell.diff_scheme_guid_ref == "")
                 return;
 
-            ConfigDiffScheme ds = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
             if (ds != null)
@@ -2967,6 +2967,7 @@ namespace DaphneGui
             //DIFFERENTIATION REGULATORS SECTION
 
             DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
+            //DiffRegGrid.DataContext = diff_scheme.Driver;
             DiffRegGrid.CanUserAddRows = true;
             DiffRegGrid.CanUserDeleteRows = true;
 
