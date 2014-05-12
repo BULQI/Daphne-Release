@@ -477,35 +477,20 @@ namespace Daphne
             //entity_repository.reactions = JsonConvert.DeserializeObject<ObservableCollection<ConfigReaction>>(readText);
             ConfigReactionTemplate crt;
 
-            //BoundaryAssociation
+            //Annihilation
             crt = new ConfigReactionTemplate();
-
-            // reactants
-            crt.reactants_stoichiometric_const.Add(1);
-            crt.reactants_stoichiometric_const.Add(1);
-            //products
-            crt.products_stoichiometric_const.Add(1);
-            // type
-            crt.reac_type = ReactionType.BoundaryAssociation;
-            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            sc.entity_repository.reaction_templates.Add(crt);
-
-            //BoundaryDissociation
-            crt = new ConfigReactionTemplate();
-
             // reactants
             crt.reactants_stoichiometric_const.Add(1);
             //products
-            crt.products_stoichiometric_const.Add(1);
-            crt.products_stoichiometric_const.Add(1);
+            //crt.products_stoichiometric_const.Add(1);
             // type
-            crt.reac_type = ReactionType.BoundaryDissociation;
+            crt.reac_type = ReactionType.Annihilation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            
             //Association
             crt = new ConfigReactionTemplate();
-
             // reactants
             crt.reactants_stoichiometric_const.Add(1);
             crt.reactants_stoichiometric_const.Add(1);
@@ -516,6 +501,29 @@ namespace Daphne
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Dimerization
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.Dimerization;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Dimer Dissociation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.DimerDissociation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
 
             //Dissociation
             crt = new ConfigReactionTemplate();
@@ -530,21 +538,21 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
-            //Annihilation
+            // Transformation
             crt = new ConfigReactionTemplate();
             // reactants
             crt.reactants_stoichiometric_const.Add(1);
-            //products
-            //crt.products_stoichiometric_const.Add(1);
+            // products
+            crt.products_stoichiometric_const.Add(1);
             // type
-            crt.reac_type = ReactionType.Annihilation;
+            crt.reac_type = ReactionType.Transformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
+
             // CatalyzedBoundaryActivation
             crt = new ConfigReactionTemplate();
-
             // reactants
             crt.reactants_stoichiometric_const.Add(1);
             crt.reactants_stoichiometric_const.Add(1);
@@ -557,18 +565,29 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
-            // Transformation
+            //BoundaryAssociation
             crt = new ConfigReactionTemplate();
-
             // reactants
             crt.reactants_stoichiometric_const.Add(1);
-            // products
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
             crt.products_stoichiometric_const.Add(1);
             // type
-            crt.reac_type = ReactionType.Transformation;
+            crt.reac_type = ReactionType.BoundaryAssociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            //BoundaryDissociation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.BoundaryDissociation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
 
             // BoundaryTransportFrom
             crt = new ConfigReactionTemplate();
@@ -594,6 +613,33 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
+            // CatalyzedBoundaryActivation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            // products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedBoundaryActivation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Autocatalytic Transformation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.AutocatalyticTransformation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
             // Catalyzed Annihilation
             crt = new ConfigReactionTemplate();
             // reactants
@@ -603,6 +649,21 @@ namespace Daphne
             crt.products_stoichiometric_const.Add(1);
             // type
             crt.reac_type = ReactionType.CatalyzedAnnihilation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Catalyzed Association
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedAssociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
@@ -620,7 +681,59 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
+            // Catalyzed Dimerization
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedDimerization;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
+            // Catalyzed Dimer Dissociation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedDimerDissociation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Catalyzed Dissociation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedDissociation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+
+            // Catalyzed Transformation
+            crt = new ConfigReactionTemplate();
+            // reactants
+            crt.reactants_stoichiometric_const.Add(1);
+            //products
+            crt.products_stoichiometric_const.Add(1);
+            // type
+            crt.reac_type = ReactionType.CatalyzedTransformation;
+            crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
+            sc.entity_repository.reaction_templates.Add(crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -696,7 +809,6 @@ namespace Daphne
 
             // BoundaryAssociation: CXCR5_membrane + CXCL13 -> CXCR5:CXCL13_membrane
             ConfigReaction cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5_membrane", MoleculeLocation.Boundary, sc));
@@ -708,7 +820,6 @@ namespace Daphne
 
             // BoundaryDissociation:  CXCR5:CXCL13_membrane ->  CXCR5_membrane + CXCL13
             cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
@@ -718,9 +829,10 @@ namespace Daphne
             cr.rate_const = 1.0;
             sc.entity_repository.reactions.Add(cr);
 
+            /////////////////////////////////////////////
+            // NOTE: These next 2 seem to be holdover from previous naming convention. Look into eliminating.
             // Association: CXCR5 + CXCL13 -> CXCR5:CXCL13
             cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
@@ -732,7 +844,6 @@ namespace Daphne
 
             // Dissociation: CXCR5:CXCL13 -> CXCR5 + CXCL13
             cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Dissociation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
@@ -741,6 +852,7 @@ namespace Daphne
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = 2.0;
             sc.entity_repository.reactions.Add(cr);
+            //////////////////////////////////////////////////
 
             // Annihiliation: CXCR5 -> 
             cr = new ConfigReaction();
@@ -760,7 +872,6 @@ namespace Daphne
 
             // CatalyzedBoundaryActivation: CXCR5:CXCL13_membrane + A -> CXCR5:CXCL13_membrane + A*
             cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13_membrane", MoleculeLocation.Boundary, sc));
@@ -773,7 +884,6 @@ namespace Daphne
 
             // Transformation: A -> A*
             cr = new ConfigReaction();
-
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
@@ -827,6 +937,23 @@ namespace Daphne
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
+            // Annihiliation: CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 1e-1;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCR5:CXCL13 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 1e-1;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
