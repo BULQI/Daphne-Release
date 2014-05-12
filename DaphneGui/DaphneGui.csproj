@@ -98,7 +98,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CellEnvironment.cs" />
     <Compile Include="Chemokine.cs" />
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
@@ -125,7 +124,6 @@
     <Compile Include="Grid.cs" />
     <Compile Include="GuiExtension.cs" />
     <Compile Include="GuiReactionTemplate.cs" />
-    <Compile Include="Interfaces.cs" />
     <Compile Include="Workbench\ReactionComplex.cs" />
     <Compile Include="RecentFileList.cs" />
     <Compile Include="RegionControl.cs" />
