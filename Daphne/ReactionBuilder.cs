@@ -68,24 +68,18 @@ namespace Daphne
             return true;
         }
 
-        public static bool AddNeededProducts(ReactionTemplate rt, Compartment C, Dictionary<string, Molecule> MolDict)
+        public static void AddNeededProducts(ReactionTemplate rt, Compartment C, Dictionary<string, Molecule> MolDict)
         {
             // Check the product molecules exist as MolecularPopulations in the Compartment
             // If not, add a molecular population to the compartment
-
-            bool addedProduct = false;
-
             foreach (SpeciesReference spRef in rt.listOfProducts)
             {
                 // not contained? add it
                 if (C.Populations.ContainsKey(spRef.species) == false)
                 {
                     C.AddMolecularPopulation(spRef.species, MolDict[spRef.species], 0.0);
-                    addedProduct = true;
                 }
             }
-
-            return addedProduct;
         }
 
         public static void ReactionSwitch(Compartment C, ReactionTemplate rt)
@@ -269,10 +263,7 @@ namespace Daphne
                     if (HasAllReactants(C.Populations, rt) == true && HasAllModifiers(C.Populations, rt) == true)
                     {
                         // Add any missing products
-                        // NOTE/CHECK: why do we need to check for added products? we only check products because we are adding a reaction; the
-                        // latter is already a qualifying change, which is why you always set changed = true three statements down regardless of what
-                        // AddNeededProducts returns; should AddNeededProducts not return anything and be void?
-                        changed = AddNeededProducts(rt, C, MolDict);
+                        AddNeededProducts(rt, C, MolDict);
 
                         // Add reaction and reaction template to Compartment
                         ReactionSwitch(C, rt);
