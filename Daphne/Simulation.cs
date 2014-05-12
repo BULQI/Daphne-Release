@@ -64,20 +64,22 @@ namespace Daphne
             dataBasket.ECS.Space.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
-        private void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        private void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp, SimConfiguration sc)
         {
             foreach (ConfigMolecularPopulation cmp in configComp.molpops)
             {
                 if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussianGradient mpgg = (MolPopGaussianGradient)cmp.mpInfo.mp_distribution;
-                    // READ FROM CONFIG
-                    double[] extent = new double[] { dataBasket.ECS.Space.Interior.Extent(0), 
-                                                     dataBasket.ECS.Space.Interior.Extent(1), 
-                                                     dataBasket.ECS.Space.Interior.Extent(2) },
-                             initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
-                                                        extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
+                    
+                    double[] initArray = new double[] {  sc.entity_repository.box_specifications[0].x_trans, 
+                                                sc.entity_repository.box_specifications[0].y_trans,
+                                                sc.entity_repository.box_specifications[0].z_trans,
+                                                sc.entity_repository.box_specifications[0].x_scale,
+                                                sc.entity_repository.box_specifications[0].y_scale,
+                                                sc.entity_repository.box_specifications[0].z_scale,
                                                         mpgg.peak_concentration };
+
 
                     simComp.AddMolecularPopulation(dataBasket.Molecules[cmp.molecule_guid_ref], "gauss", initArray);
                 }
@@ -395,7 +397,7 @@ namespace Daphne
 
                     for (int comp = 0; comp < 2; comp++)
                     {
-                        addCompartmentMolpops(simComp[comp], configComp[comp]);
+                        addCompartmentMolpops(simComp[comp], configComp[comp], sc);
                     }
 
                     //CELL REACTIONS
@@ -425,7 +427,7 @@ namespace Daphne
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
 
             // ADD ECS MOLECULAR POPULATIONS
-            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs);
+            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, sc);
             // set non-diffusing
             foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
             {

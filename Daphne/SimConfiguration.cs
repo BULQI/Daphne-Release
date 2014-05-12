@@ -648,6 +648,7 @@ namespace Daphne
 
         public ConfigEnvironment()
         {
+            gridstep = 50;
             extent_x = 400;
             extent_y = 400;
             extent_z = 400;
@@ -655,7 +656,6 @@ namespace Daphne
             extent_max = 1000;
             gridstep_min = 1;
             gridstep_max = 100;
-            gridstep = 50;
             initialized = true;
 
             CalculateNumGridPts();
@@ -664,7 +664,7 @@ namespace Daphne
         }
 
         private bool initialized = false;
-
+        
         private void CalculateNumGridPts()
         {
             if (initialized == false)
@@ -673,15 +673,103 @@ namespace Daphne
             }
 
             int[] pt = new int[3];
-
             pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
             pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
             pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;
 
             NumGridPts = pt;
         }
+
+    
     }
 
+    
+    public enum RegionShape { Rectangular, Ellipsoid }
+    
+    public class Region : EntityModelBase
+    {
+        private string _region_name = "";
+        public string region_name
+        {
+            get { return _region_name; }
+            set
+            {
+                if (_region_name == value)
+                    return;
+                else
+                {
+                    _region_name = value;
+                    OnPropertyChanged("region_name");
+                }
+            }
+        }
+        private RegionShape _region_type = RegionShape.Ellipsoid;
+        public RegionShape region_type 
+        {
+            get { return _region_type; }
+            set
+            {
+                if (_region_type == value)
+                    return;
+                else
+                {
+                    _region_type = value;
+                    OnPropertyChanged("region_type");
+                }
+            }
+        }
+        public string region_box_spec_guid_ref { get; set; }
+        private bool _region_visibility = true;
+        public bool region_visibility
+        {
+            get { return _region_visibility; }
+            set
+            {
+                if (_region_visibility == value)
+                    return;
+                else
+                {
+                    _region_visibility = value;
+                    OnPropertyChanged("region_visibility");
+                }
+            }
+        }
+        private System.Windows.Media.Color _region_color;
+        public System.Windows.Media.Color region_color
+        {
+            get { return _region_color; }
+            set
+            {
+                if (_region_color == value)
+                    return;
+                else
+                {
+                    _region_color = value;
+                    OnPropertyChanged("region_color");
+                }
+            }
+        }
+
+        public Region()
+        {
+            region_name = "Default Region";
+            region_box_spec_guid_ref = "";
+            region_visibility = true;
+            region_color = new System.Windows.Media.Color();
+            region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+        }
+
+        public Region(string name, RegionShape type)
+        {
+            region_name = name;
+            region_type = type;
+            region_box_spec_guid_ref = "";
+            region_visibility = true;
+            region_color = new System.Windows.Media.Color();
+            region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+        }
+    }
+ 
     public enum RelativePosition { Inside, Surface, Outside }
 
     /// <summary>
