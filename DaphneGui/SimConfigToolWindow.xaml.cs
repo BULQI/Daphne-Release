@@ -23,6 +23,7 @@ using Ninject.Parameters;
 using Workbench;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace DaphneGui
 {
@@ -2862,8 +2863,6 @@ namespace DaphneGui
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            string diffGuid = er.diff_schemes[0].diff_scheme_guid;
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[diffGuid];
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
             {
@@ -2871,6 +2870,10 @@ namespace DaphneGui
                 return;
             }
 
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
             //EPIGENETIC MAP SECTION
             EpigeneticMapGrid.Columns.Clear();
@@ -2883,7 +2886,7 @@ namespace DaphneGui
                 //SET UP COLUMN HEADINGS
                 ConfigGene gene = er.genes_dict[gene_guid];
                 DataGridTextColumn col = new DataGridTextColumn();
-                col.Header = gene.Name;
+                col.Header = gene.Name;                
                 col.CanUserSort = false;
                 col.Binding = new Binding(string.Format("activations[{0}]", nn));
                 EpigeneticMapGrid.Columns.Add(col);
@@ -3173,7 +3176,7 @@ namespace DaphneGui
       
         }
 
-        private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
             // TODO: Add event handler implementation here.
             DependencyObject dep = (DependencyObject)e.OriginalSource;
@@ -3193,7 +3196,7 @@ namespace DaphneGui
                 // do something
                 DataGridBehavior.SetHighlightColumn(columnHeader.Column, true);
                 //columnHeader.Column.SetValue(DataGridColumn.Highlight
-	            MessageBox.Show(columnHeader.Column.Header.ToString());
+	            //MessageBox.Show(columnHeader.Column.Header.ToString());
 		        //MessageBox.Show(columnHeader.Column.DisplayIndex.ToString());
             }
  
@@ -3242,13 +3245,21 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void comboAddGeneToEpigeneticMap_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
             ComboBox combo = sender as ComboBox;
+
             if (combo != null && combo.Items.Count > 0)
             {
                 if (combo.SelectedIndex > 0)
                 {
                     ConfigGene gene = (ConfigGene)combo.SelectedItem;
-                    ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes[0];
                     if (!scheme.genes.Contains(gene.gene_guid))
                     {
                         scheme.genes.Add(gene.gene_guid);
@@ -3388,17 +3399,25 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void EpigeneticItemContainerGenerator_StatusChanged(object sender, EventArgs e)
         {
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
             int rowcount = EpigeneticMapGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
             {
-                if (ii >= MainWindow.SC.SimConfig.entity_repository.diff_schemes[0].Driver.states.Count)
+                if (ii >= scheme.Driver.states.Count)
                     break;
 
                 DataGridRow row = EpigeneticMapGrid.GetRow(ii);
                 if (row != null)
                 {
-                    //HARD CODED RIGHT NOW TO USE diff_schemes[0]. THIS WILL HAVE TO BE UPDATED!!
-                    row.SetValue(DataGridRow.HeaderProperty, MainWindow.SC.SimConfig.entity_repository.diff_schemes[0].Driver.states[ii]);
+                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
                 }
             }
 
@@ -3588,6 +3607,11 @@ namespace DaphneGui
             }
             return foundChild;
         }
+
+        private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
     }    
 
     public class DataGridBehavior
@@ -3651,7 +3675,9 @@ namespace DaphneGui
 
         public static void SetHighlightColumn(DependencyObject obj, bool value)
         {
-            obj.SetValue(HighlightColumnProperty, value);
+            bool oldvalue = GetHighlightColumn(obj);
+            
+            obj.SetValue(HighlightColumnProperty, !oldvalue);
         }
 
         // Using a DependencyProperty as the backing store for HighlightColumn.  This enables animation, styling, binding, etc...
@@ -3693,6 +3719,24 @@ namespace DaphneGui
                         currentCell.SetValue(DataGridBehavior.IsCellHighlightedProperty, e.NewValue);
                     }
                 }
+            }
+            else
+            {
+                DataGridColumn col = sender as DataGridColumn;
+                if (col == null)
+                    return;
+                
+                DataGrid dg = GetDataGridFromColumn(col);
+                for (int i = 0; i < dg.Items.Count; i++)
+                {
+                    DataGridRow row = dg.ItemContainerGenerator.ContainerFromIndex(i) as DataGridRow;
+                    DataGridCell currentCell = GetCell(row, col);
+                    if (currentCell != null)
+                    {
+                        currentCell.SetValue(DataGridBehavior.IsCellHighlightedProperty, e.NewValue);
+                    }
+                }
+
 
             }
         }
@@ -3708,6 +3752,15 @@ namespace DaphneGui
                 else
                     fe = VisualTreeHelper.GetParent(fe) as FrameworkElement;
             }
+            return retVal;
+        }
+
+        private static DataGrid GetDataGridFromColumn(DataGridColumn col)
+        {
+            DataGrid retVal = null;
+
+            retVal = col.GetType().GetProperty("DataGridOwner", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(col, null) as DataGrid;
+
             return retVal;
         }
 

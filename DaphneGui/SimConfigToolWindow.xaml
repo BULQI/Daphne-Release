@@ -4391,8 +4391,66 @@
                                                             AlternatingRowBackground="Beige"
                                                             SelectionMode="Single"
                                                             SelectionUnit="Cell"
-                                                          PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+                                                            PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
+                                                           PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
                                                             >
+
+                                                    <DataGrid.Resources>
+                                                        <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
+                                                            <Setter Property="Background" Value="Transparent" />
+                                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                                                                BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                                                                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                            <Style.Triggers>
+                                                                <!-- This trigger highlights a column if user clicks on column header -->
+                                                                <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                                                                    <Setter Property="Background" Value="LightGray"/>
+                                                                </Trigger>
+                                                                
+                                                                <!-- This trigger highlights a grid cell if user hovers over it -->
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
+                                                                    <Setter Property="Background" Value="LightGray"/>
+                                                                </Trigger>
+
+                                                                <!-- This trigger highlights a grid cell if user hovers over it -->
+                                                                <Trigger Property="IsSelected" Value="true">
+                                                                    <Setter Property="Background" Value="LightBlue" />
+                                                                    <Setter Property="Foreground" Value="Black" />
+                                                                    <Setter Property="BorderBrush" Value="Black" />
+                                                                </Trigger>
+
+                                                                <!-- This trigger highlights a grid cell if user hovers over it -->
+                                                                <!--<Trigger Property="IsKeyboardFocusWithin" Value="true">
+                                                                    <Setter Property="BorderBrush" Value="Gray" />
+                                                                </Trigger>-->
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                                                                    <Setter Property="Background"  Value="LightGray"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                        <!--<Style TargetType="{x:Type DataGridRow}">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="LightGray"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>-->
+                                                    </DataGrid.Resources>
+
 
                                                     <!--<DataGrid.RowHeaderTemplate>
                                                                 <DataTemplate>
