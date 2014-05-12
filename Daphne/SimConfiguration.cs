@@ -772,7 +772,7 @@ namespace Daphne
             {
                 entity_repository.diff_schemes_dict.Add(ds.diff_scheme_guid, ds);
             }
-            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
         }
 
 
@@ -783,7 +783,7 @@ namespace Daphne
             {
                 entity_repository.genes_dict.Add(cg.gene_guid, cg);
             }
-            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
 
         
@@ -946,7 +946,7 @@ namespace Daphne
                     ConfigDiffScheme cds = dd as ConfigDiffScheme;
 
                     //Remove gene from genes_dict
-                    entity_repository.genes_dict.Remove(cds.diff_scheme_guid);
+                    entity_repository.diff_schemes_dict.Remove(cds.diff_scheme_guid);
                 }
             }
         }
@@ -2331,6 +2331,58 @@ namespace Daphne
             ActivationLevel = actlevel;
         }
 
+        public ConfigGene Clone(SimConfiguration sc)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
+            Guid id = Guid.NewGuid();
+            newgene.gene_guid = id.ToString();
+            newgene.Name = newgene.GenerateNewName(sc, "_Copy");
+
+            return newgene;
+        }
+
+        public string GenerateNewName(SimConfiguration sc, string ending)
+        {
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempMolName = OriginalName + suffix;
+            while (FindGeneByName(sc, TempMolName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempMolName = OriginalName + suffix;
+            }
+
+            return TempMolName;
+        }
+
+        public static bool FindGeneByName(SimConfiguration sc, string geneName)
+        {
+            bool ret = false;
+            foreach (ConfigGene gene in sc.entity_repository.genes)
+            {
+                if (gene.Name == geneName)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+
     }
     
     public class ConfigTransitionDriverElement 
@@ -2465,9 +2517,10 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
-                e.driver_mol_guid_ref = "";
+                e.driver_mol_guid_ref = null;
                 e.CurrentStateName = sname;
                 e.CurrentState = Driver.states.Count - 1;
+                trow.elements.Add(e);
             }
 
             Driver.DriverElements.Add(trow);

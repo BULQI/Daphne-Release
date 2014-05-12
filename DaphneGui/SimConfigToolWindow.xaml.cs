@@ -599,6 +599,24 @@ namespace DaphneGui
             }
         }
 
+        private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
+            if (driver != null)
+            {
+                // Filter out driver if its guid does not match selected cell's driver guid
+                if (cell != null && driver.driver_guid == cell.div_driver_guid)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
@@ -2801,17 +2819,51 @@ namespace DaphneGui
 
         private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
         {
+            ConfigGene gene = (ConfigGene)dgLibGenes.SelectedValue;
+            MessageBoxResult res;
+
+            res = MessageBox.Show("Are you sure you would like to remove this gene?", "Warning", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.No)
+                return;
+
+            int index = dgLibMolecules.SelectedIndex;
+            //MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
+            MainWindow.SC.SimConfig.entity_repository.genes.Remove(gene);
+            dgLibGenes.SelectedIndex = index;
+
+            if (index >= dgLibMolecules.Items.Count)
+                dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
+
+            if (dgLibGenes.Items.Count == 0)
+                dgLibGenes.SelectedIndex = -1;
 
         }
 
         private void btnCopyGene_Click(object sender, RoutedEventArgs e)
         {
+            ConfigGene gene = (ConfigGene)dgLibGenes.SelectedItem;
 
+            if (gene == null)
+                return;
+
+            ConfigGene newgene = gene.Clone(MainWindow.SC.SimConfig);
+            MainWindow.SC.SimConfig.entity_repository.genes.Add(newgene);
+            dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
+
+            gene = (ConfigGene)dgLibMolecules.SelectedItem;
+            dgLibGenes.ScrollIntoView(newgene);
         }
 
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
+            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
+            gm.Name = gm.GenerateNewName(MainWindow.SC.SimConfig, "_New");
+            MainWindow.SC.SimConfig.entity_repository.genes.Add(gm);
+            dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
+            ConfigGene cm = (ConfigGene)dgLibGenes.SelectedItem;
+            dgLibGenes.ScrollIntoView(cm);
         }
 
         private void cyto_gene_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -3098,7 +3150,7 @@ namespace DaphneGui
 
                 //Expander
                 FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
-                expAlphaBeta.SetValue(Expander.HeaderProperty, "Values");
+                expAlphaBeta.SetValue(Expander.HeaderProperty, "Production rate values");
                 expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
                 expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
                 expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
@@ -3112,9 +3164,9 @@ namespace DaphneGui
                 spAlpha.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
 
                 FrameworkElementFactory tbAlpha = new FrameworkElementFactory(typeof(TextBlock));
-                tbAlpha.SetValue(TextBlock.TextProperty, "Background production rate:  ");
+                tbAlpha.SetValue(TextBlock.TextProperty, "Background:  ");
                 tbAlpha.SetValue(TextBlock.ToolTipProperty, "Background production rate");
-                tbAlpha.SetValue(TextBox.WidthProperty, 200D);
+                tbAlpha.SetValue(TextBox.WidthProperty, 110D);
                 //tbAlpha.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
                 spAlpha.AppendChild(tbAlpha); 
 
@@ -3137,8 +3189,8 @@ namespace DaphneGui
                 spBeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
 
                 FrameworkElementFactory tbBeta = new FrameworkElementFactory(typeof(TextBlock));
-                tbBeta.SetValue(TextBlock.TextProperty, "Production rate linear coefficient:  ");
-                tbBeta.SetValue(TextBox.WidthProperty, 200D);
+                tbBeta.SetValue(TextBlock.TextProperty, "Linear coefficient:  ");
+                tbBeta.SetValue(TextBox.WidthProperty, 110D);
                 //tbBeta.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
                 tbBeta.SetValue(TextBlock.ToolTipProperty, "Production rate linear coefficient");
                 spBeta.AppendChild(tbBeta); 
@@ -3345,7 +3397,7 @@ namespace DaphneGui
             b.Mode = BindingMode.TwoWay;
             b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             col.Binding = b;
-            EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count-1, col);
+            EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
 
             combo.SelectedIndex = 0;
 
@@ -3362,14 +3414,90 @@ namespace DaphneGui
             //DiffSchemeExpander_Expanded(null, null);
         }
 
-        //For adding a state
-        //ConfigActivationRow act = new ConfigActivationRow();
-        //scheme.activations.Add(act);
-        //int nRows = scheme.Driver.states.Count;
-        //                for (int i = 0; i < nRows; i++)
-        //                {
-        //                    act.values.Add(1.0);
-        //                }
+        /// <summary>
+        /// This method is called on right-click + "delete selected genes", 
+        /// on the epigenetic map data grid. Selected columns (genes) will 
+        /// get deleted.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void menuDeleteGenes_Click(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+            {
+                return;
+            }
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            foreach (DataGridTextColumn col in EpigeneticMapGrid.Columns.ToList())
+            {
+                bool isSelected = DataGridBehavior.GetHighlightColumn(col);
+                string gene_name = col.Header as string;
+                string guid = MainWindow.SC.SimConfig.findGeneGuid(gene_name, MainWindow.SC.SimConfig);
+                if (isSelected && guid != null && guid.Length > 0)
+                {
+                    diff_scheme.genes.Remove(guid);
+                    EpigeneticMapGrid.Columns.Remove(col);
+                }
+            }
+
+            //This deletes the last column
+            int colcount = EpigeneticMapGrid.Columns.Count;
+            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
+            EpigeneticMapGrid.Columns.Remove(comboCol);
+
+            //This regenerates the last column
+            comboCol = CreateUnusedGenesColumn(er);
+            EpigeneticMapGrid.Columns.Add(comboCol);
+        }
+
+        private void menuDeleteStates_Click(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
+            {
+                if (EpigeneticMapGrid.SelectedItems.Contains(diffrow))
+                {
+                    diff_scheme.RemoveActivationRow(diffrow);
+                }
+            }
+        }
+        
+        private void menuAddState_Click(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            diff_scheme.AddState("NewState");
+
+
+            //EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
+
+        }
 
         /// <summary>
         /// This method is called when the user changes a combo box selection in a grid cell
@@ -3725,94 +3853,7 @@ namespace DaphneGui
 
         }
 
-        /// <summary>
-        /// This method is called on right-click + "delete selected genes", 
-        /// on the epigenetic map data grid. Selected columns (genes) will 
-        /// get deleted.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void menuDeleteGenes_Click(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            if (cell == null)
-            {
-                return;
-            }
 
-            if (cell.diff_scheme_guid_ref == null)
-                return;
-
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
-
-            foreach (DataGridTextColumn col in EpigeneticMapGrid.Columns.ToList())
-            {
-                bool isSelected = DataGridBehavior.GetHighlightColumn(col);
-                string gene_name = col.Header as string;
-                string guid = MainWindow.SC.SimConfig.findGeneGuid(gene_name, MainWindow.SC.SimConfig);
-                if (isSelected && guid != null && guid.Length > 0)
-                {
-                    diff_scheme.genes.Remove(guid);
-                    EpigeneticMapGrid.Columns.Remove(col);
-                }
-            }
-
-            //This deletes the last column
-            int colcount = EpigeneticMapGrid.Columns.Count;
-            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
-            EpigeneticMapGrid.Columns.Remove(comboCol);
-
-            //This regenerates the last column
-            comboCol = CreateUnusedGenesColumn(er);
-            EpigeneticMapGrid.Columns.Add(comboCol);
-        }
-
-        private void menuDeleteStates_Click(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            if (cell.diff_scheme_guid_ref == null)
-                return;
-
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
-
-            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
-            {
-                if (EpigeneticMapGrid.SelectedItems.Contains(diffrow))
-                {
-                    diff_scheme.RemoveActivationRow(diffrow);
-                }
-            }
-        }
-
-        private void ReacComplexExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
-        private void menuAddState_Click(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            if (cell.diff_scheme_guid_ref == null)
-                return;
-
-            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
-
-            diff_scheme.AddState("NewlyCreatedState");
-
-            
-
-        }
     }    
 
     public class DataGridBehavior
