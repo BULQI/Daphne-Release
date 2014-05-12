@@ -4137,7 +4137,7 @@
                                                 Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
                                         <StackPanel>
-                                            <StackPanel x:Name="spDeath" Orientation="Vertical" >
+                                            <StackPanel x:Name="spDeath" Orientation="Vertical">
                                                 <CheckBox x:Name="chkHasDeathDriver" Content="Has Death Driver" Margin="4,0"   
                                                           IsChecked="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver, Mode=TwoWay, UpdateSourceTrigger=Explicit,
                                                                         Converter={StaticResource TransitionDriverToBoolConv}}" 
@@ -4145,17 +4145,26 @@
                                                            />
                                                 <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
                                                 <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
-                                                          ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"
                                                           DisplayMemberPath="Name" 
                                                           DropDownOpened="comboDeathMolPop_DropDownOpened"
                                                           SelectionChanged="comboDeathMolPop_SelectionChanged"
                                                           SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           SelectedValuePath="molecule_guid_ref"
                                                           IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"
+                                                          ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"
+                                                          DropDownClosed="comboDeathMolPop2_DropDownClosed"
                                                           >
 
                                                     <!--ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"-->
 
+                                                    <!--<ComboBox.ItemsSource>
+                                                        <CompositeCollection>
+                                                            <ComboBoxItem>None</ComboBoxItem>
+                                                            <CollectionContainer Collection="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" />
+                                                        </CompositeCollection>
+                                                    </ComboBox.ItemsSource>-->
+
+                                                    
                                                     
                                                 </ComboBox>
                                                 <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
@@ -4225,10 +4234,7 @@
                                         Canvas.ZIndex="1"
                                         BorderThickness="1"
                                         BorderBrush="Black"
-                                        
                                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                                        <!--Expanded="DiffSchemeExpander_Expanded"-->
 
                                         <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                                             <StackPanel>
@@ -4368,7 +4374,7 @@
                                                 <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
                                                             AutoGenerateColumns="False"
                                                             IsReadOnly="False"
-                                                            CanUserAddRows="True"       
+                                                            CanUserAddRows="False"       
                                                             CanUserReorderColumns="False"
                                                             CanUserSortColumns="False"
                                                             AlternatingRowBackground="Beige"

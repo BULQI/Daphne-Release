@@ -1595,7 +1595,7 @@ namespace DaphneGui
             if (lvCytosolAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
 
-            DiffSchemeExpander_Expanded(null, null);
+            LoadDiffScheme();
 
         }
 
@@ -2931,7 +2931,7 @@ namespace DaphneGui
             }
         }
 
-        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        private void LoadDiffScheme()
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
@@ -2942,7 +2942,9 @@ namespace DaphneGui
             }
 
             //Clear the grids
+            EpigeneticMapGrid.ItemsSource = null;
             EpigeneticMapGrid.Columns.Clear();
+            DiffRegGrid.ItemsSource = null;
             DiffRegGrid.Columns.Clear();
 
             //if cell does not have a diff scheme, return
@@ -2953,7 +2955,7 @@ namespace DaphneGui
             ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
 
             //EPIGENETIC MAP SECTION
-            EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
+            //EpigeneticMapGrid.DataContext = diff_scheme.activationRows;
             EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
 
             int nn = 0;
@@ -2983,8 +2985,8 @@ namespace DaphneGui
 
             DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
             //DiffRegGrid.DataContext = diff_scheme.Driver;
-            DiffRegGrid.CanUserAddRows = true;
-            DiffRegGrid.CanUserDeleteRows = true;
+            DiffRegGrid.CanUserAddRows = false;
+            DiffRegGrid.CanUserDeleteRows = false;
 
             int i = 0;
             foreach (string s in diff_scheme.Driver.states)
@@ -3491,8 +3493,6 @@ namespace DaphneGui
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             comboCol = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(comboCol);
-
-            //DiffSchemeExpander_Expanded(null, null);
         }
 
         /// <summary>
@@ -3694,6 +3694,10 @@ namespace DaphneGui
 
             ConfigDiffScheme scheme = cell.diff_scheme;
 
+            if (scheme == null)
+                return;
+
+
             int rowcount = DiffRegGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
             {
@@ -3724,6 +3728,8 @@ namespace DaphneGui
                 return;
 
             ConfigDiffScheme scheme = cell.diff_scheme;
+            if (scheme == null)
+                return;
 
             int rowcount = EpigeneticMapGrid.Items.Count;
             for (int ii = 0; ii < rowcount; ii++)
@@ -3774,7 +3780,11 @@ namespace DaphneGui
         }
 
         private void comboDeathMolPop_DropDownOpened(object sender, EventArgs e)
-        {            
+        {
+            ComboBox combo = sender as ComboBox;
+            ConfigMolecularPopulation dummy = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            dummy.Name = "None";
+            combo.Items.Add(dummy);
         }
 
         private void comboDeathMolPop_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3907,6 +3917,9 @@ namespace DaphneGui
             else
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
+                if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
+                    return;
+
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                 if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
                 {
@@ -4013,6 +4026,16 @@ namespace DaphneGui
 
             return driver;
         }
+
+        private void comboDeathMolPop2_DropDownClosed(object sender, EventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            ComboBoxItem item = (ComboBoxItem)combo.Items[combo.Items.Count - 1];
+
+
+        }
+
+        
     }    
 
     public class DataGridBehavior
