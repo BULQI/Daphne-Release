@@ -48,9 +48,9 @@ namespace Daphne
         /// </summary>
         public virtual void distance(double[] gridSize)
         {
-            Vector tmp = new Vector(a.State.X);
+            Vector tmp = new Vector(a.SpatialState.X);
 
-            tmp -= b.State.X;
+            tmp -= b.SpatialState.X;
 
             // correction for periodic boundary conditions
             if (Simulation.dataBasket.ECS.toroidal == true)
@@ -155,9 +155,9 @@ namespace Daphne
 
                 if (force != 0.0)
                 {
-                    Vector normal = new Vector(b.State.X);
+                    Vector normal = new Vector(b.SpatialState.X);
 
-                    normal -= a.State.X;
+                    normal -= a.SpatialState.X;
                     normal = normal.Normalize();
 
                     //Console.WriteLine(String.Format("Distance: {2:N}, Force: {0:N}, B: {1:N}", force, b_ij, dist));

@@ -278,15 +278,15 @@ namespace Daphne
 
                     if (cp.report_xvf.position == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.X[0], c.State.X[1], c.State.X[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.SpatialState.X[0], c.SpatialState.X[1], c.SpatialState.X[2]);
                     }
                     if (cp.report_xvf.velocity == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.V[0], c.State.V[1], c.State.V[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.SpatialState.V[0], c.SpatialState.V[1], c.SpatialState.V[2]);
                     }
                     if (cp.report_xvf.force == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.F[0], c.State.F[1], c.State.F[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.SpatialState.F[0], c.SpatialState.F[1], c.SpatialState.F[2]);
                     }
 
                     // cell molpop concentrations
@@ -324,12 +324,12 @@ namespace Daphne
 
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
-                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.State.X));
+                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.SpatialState.X));
 
                             // gradient
                             if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
-                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.State.X);
+                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.SpatialState.X);
 
                                 cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                             }

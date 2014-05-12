@@ -2305,23 +2305,23 @@ namespace DaphneGui
 
             CellXVF xvf = new CellXVF();
             xvf.name = "Location (μm)";
-            xvf.x = selectedCell.State.X[0];
-            xvf.y = selectedCell.State.X[1];
-            xvf.z = selectedCell.State.X[2];
+            xvf.x = selectedCell.SpatialState.X[0];
+            xvf.y = selectedCell.SpatialState.X[1];
+            xvf.z = selectedCell.SpatialState.X[2];
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
             xvf.name = "Velocity (μm/min)";
-            xvf.x = selectedCell.State.V[0];
-            xvf.y = selectedCell.State.V[1];
-            xvf.z = selectedCell.State.V[2];
+            xvf.x = selectedCell.SpatialState.V[0];
+            xvf.y = selectedCell.SpatialState.V[1];
+            xvf.z = selectedCell.SpatialState.V[2];
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
             xvf.name = "Force (/\u03bc\u33a1)";
-            xvf.x = selectedCell.State.F[0];
-            xvf.y = selectedCell.State.F[1];
-            xvf.z = selectedCell.State.F[2];
+            xvf.x = selectedCell.SpatialState.F[0];
+            xvf.y = selectedCell.SpatialState.F[1];
+            xvf.z = selectedCell.SpatialState.F[2];
             SelectedCellInfo.ciList.Add(xvf);
 
             //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
@@ -2338,7 +2338,7 @@ namespace DaphneGui
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
-            double[] pos = selectedCell.State.X;
+            double[] pos = selectedCell.SpatialState.X;
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
@@ -2357,14 +2357,13 @@ namespace DaphneGui
             foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
             {
                 string name = MainWindow.SC.SimConfig.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.State.X);
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
                 cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
-
 
             lvCellMolConcs.ItemsSource = currConcs;
 

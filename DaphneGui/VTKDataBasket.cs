@@ -868,7 +868,7 @@ namespace DaphneGui
         /// <param name="generation">division generation number</param>
         public void AssignCell(long idx, Cell cell)
         {
-            double[] pos = cell.State.X;
+            double[] pos = cell.SpatialState.X;
             int id = cell.Cell_id;
             int color = ColorMap[cell.Population_id];
             int generation = 0;

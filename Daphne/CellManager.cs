@@ -32,10 +32,10 @@ namespace Daphne
                     kvp.Value.BoundaryForce();
 
                     // A simple implementation of movement. For testing.
-                    for (int i = 0; i < kvp.Value.State.X.Length; i++)
+                    for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
                     {
-                        kvp.Value.State.X[i] += kvp.Value.State.V[i] * dt;
-                        kvp.Value.State.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
+                        kvp.Value.SpatialState.X[i] += kvp.Value.SpatialState.V[i] * dt;
+                        kvp.Value.SpatialState.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.SpatialState.V[i] + kvp.Value.SpatialState.F[i]) * dt;
                     }
 
                     // enforce boundary condition

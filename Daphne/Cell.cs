@@ -10,7 +10,7 @@ using Ninject.Parameters;
 
 namespace Daphne
 {
-    public struct SpatialState
+    public struct CellSpatialState
     {
         public double[] X;
         public double[] V;
@@ -147,20 +147,20 @@ namespace Daphne
 
         public void setState(double[] s)
         {
-            if(s.Length != SpatialState.Dim)
+            if(s.Length != CellSpatialState.Dim)
             {
                 throw new Exception("Cell state length implausible.");
             }
-            state.X = new double[] { s[0], s[1], s[2] };
-            state.V = new double[] { s[3], s[4], s[5] };
-            state.F = new double[] { s[6], s[7], s[8] };
+            spatialState.X = new double[] { s[0], s[1], s[2] };
+            spatialState.V = new double[] { s[3], s[4], s[5] };
+            spatialState.F = new double[] { s[6], s[7], s[8] };
         }
 
-        public void setState(SpatialState s)
+        public void setState(CellSpatialState s)
         {
-            state.X = new double[] { s.X[0], s.X[1], s.X[2] };
-            state.V = new double[] { s.V[0], s.V[1], s.V[2] };
-            state.F = new double[] { s.F[0], s.F[1], s.F[2] };
+            spatialState.X = new double[] { s.X[0], s.X[1], s.X[2] };
+            spatialState.V = new double[] { s.V[0], s.V[1], s.V[2] };
+            spatialState.F = new double[] { s.F[0], s.F[1], s.F[2] };
         }
         
         /// <summary>
@@ -232,9 +232,9 @@ namespace Daphne
             cytokinetic = false;
             
             // force reset
-            state.F[0] = state.F[1] = state.F[2] = 0;
+            spatialState.F[0] = spatialState.F[1] = spatialState.F[2] = 0;
             // velocity reset
-            state.V[0] = state.V[1] = state.V[2] = 0;
+            spatialState.V[0] = spatialState.V[1] = spatialState.V[2] = 0;
             // halve the chemistry
             foreach (MolecularPopulation mp in Cytosol.Populations.Values)
             {
@@ -250,14 +250,14 @@ namespace Daphne
             // same population id
             daughter.Population_id = Population_id;
             // same state
-            daughter.setState(state);
+            daughter.setState(spatialState);
             // but offset the daughter randomly
-            double[] delta = radius * Rand.RandomDirection(daughter.state.X.Length);
+            double[] delta = radius * Rand.RandomDirection(daughter.spatialState.X.Length);
 
             for (int i = 0; i < delta.Length; i++)
             {
-                this.state.X[i] -= delta[i];
-                daughter.state.X[i] += delta[i];
+                this.spatialState.X[i] -= delta[i];
+                daughter.spatialState.X[i] += delta[i];
             }
 
             daughter.cytokinetic = false;
@@ -386,7 +386,7 @@ namespace Daphne
         public Compartment Cytosol { get; private set; }
         public Compartment PlasmaMembrane { get; private set; }
         //public Differentiator Differentiator { get; private set; }
-        private SpatialState state;
+        private CellSpatialState spatialState;
         public double DragCoefficient { get; set; }
 
         public int Cell_id { get; private set; }
@@ -395,10 +395,10 @@ namespace Daphne
         protected int[] gridIndex = { -1, -1, -1 };
         public static double defaultRadius = 5.0;
 
-        public SpatialState State
+        public CellSpatialState SpatialState
         {
-            get { return state; }
-            set { state = value; }
+            get { return spatialState; }
+            set { spatialState = value; }
         }
 
         public bool IsMotile
@@ -437,7 +437,7 @@ namespace Daphne
         /// </summary>
         public void resetForce()
         {
-            state.F[0] = state.F[1] = state.F[2] = 0;
+            spatialState.F[0] = spatialState.F[1] = spatialState.F[2] = 0;
         }
 
         /// <summary>
@@ -446,9 +446,9 @@ namespace Daphne
         /// <param name="f"></param>
         public void addForce(double[] f)
         {
-            state.F[0] += f[0];
-            state.F[1] += f[1];
-            state.F[2] += f[2];
+            spatialState.F[0] += f[0];
+            spatialState.F[1] += f[1];
+            spatialState.F[2] += f[2];
         }
 
         /// <summary>
@@ -478,36 +478,36 @@ namespace Daphne
 
                 // X
                 // left
-                if ((dist = State.X[0]) < radius)
+                if ((dist = SpatialState.X[0]) < radius)
                 {
                     applyBoundaryForce(new double[] { 1, 0, 0 }, dist);
                 }
                 // right
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(0) - State.X[0]) < radius)
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(0) - SpatialState.X[0]) < radius)
                 {
                     applyBoundaryForce(new double[] { -1, 0, 0 }, dist);
                 }
 
                 // Y
                 // bottom
-                if ((dist = State.X[1]) < radius)
+                if ((dist = SpatialState.X[1]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, 1, 0 }, dist);
                 }
                 // top
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(1) - State.X[1]) < radius)
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(1) - SpatialState.X[1]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, -1, 0 }, dist);
                 }
 
                 // Z
                 // far
-                if ((dist = State.X[2]) < radius)
+                if ((dist = SpatialState.X[2]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, 0, 1 }, dist);
                 }
                 // near
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(2) - State.X[2]) < radius)
+                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(2) - SpatialState.X[2]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
                 }
@@ -528,14 +528,14 @@ namespace Daphne
                     double safetySlab = 1e-3;
 
                     // displace the cell such that it wraps around
-                    if (State.X[i] < 0.0)
+                    if (SpatialState.X[i] < 0.0)
                     {
                         // use a small fudge factor to displace the cell just back into the grid
-                        State.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
+                        SpatialState.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
                     }
-                    else if (State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    else if (SpatialState.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
                     {
-                        State.X[i] = 0.0;
+                        SpatialState.X[i] = 0.0;
                     }
                 }
             }
@@ -544,7 +544,7 @@ namespace Daphne
                 for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
                 {
                     // detect out of bounds cells
-                    if (State.X[i] < 0.0 || State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    if (SpatialState.X[i] < 0.0 || SpatialState.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
                     {
                         // cell dies
                         alive = false;

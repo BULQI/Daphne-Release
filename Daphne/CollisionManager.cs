@@ -281,7 +281,7 @@ namespace Daphne
             // look at all cells to see if they changed in the grid
             foreach (KeyValuePair<int, Cell> kvpc in Simulation.dataBasket.Cells)
             {
-                int[] idx = findGridIndex(kvpc.Value.State.X);
+                int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
 
                 // if the grid index changed we have to:
                 // -put it in its new one

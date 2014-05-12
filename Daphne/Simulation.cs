@@ -107,7 +107,7 @@ namespace Daphne
 
             dataBasket.ECS.Space.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
             // set translation by reference: when the cell moves then the transform gets updated automatically
-            t.setTranslationByReference(c.State.X);
+            t.setTranslationByReference(c.SpatialState.X);
             dataBasket.ECS.Space.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
@@ -516,7 +516,7 @@ namespace Daphne
                                              dataBasket.ECS.Space.Interior.Extent(2) };
 
             // ADD CELLS            
-            double[] state = new double[SpatialState.Dim];
+            double[] state = new double[CellSpatialState.Dim];
             // convenience arrays to save code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             Compartment[] simComp = new Compartment[2];

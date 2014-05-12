@@ -113,7 +113,7 @@ namespace DaphneGui
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
-                cell_state.setState(cell.State);
+                cell_state.setState(cell.SpatialState);
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)

@@ -4170,9 +4170,9 @@ namespace Daphne
 
         //map concentration info into molpop info.
         public Dictionary<string, double[]> configMolPop = new Dictionary<string, double[]>();
-        public void setState(SpatialState state)
+        public void setState(CellSpatialState state)
         {
-            List<double> tmp = new List<double>(SpatialState.Dim);
+            List<double> tmp = new List<double>(CellSpatialState.Dim);
             tmp.AddRange(state.X);
             tmp.AddRange(state.V);
             tmp.AddRange(state.F);
