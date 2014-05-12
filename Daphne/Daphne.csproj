@@ -77,10 +77,10 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="Cell.cs" />
-    <Compile Include="CellBuilder.cs" />
     <Compile Include="CellManager.cs" />
     <Compile Include="Chemistry.cs" />
     <Compile Include="Compartment.cs" />
+    <Compile Include="DataBasket.cs" />
     <Compile Include="Differentiator.cs" />
     <Compile Include="GuiReactionComplex.cs" />
     <Compile Include="Locomotor.cs" />
@@ -91,6 +91,7 @@
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
     <Compile Include="SimConfiguration.cs" />
+    <Compile Include="Simulation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

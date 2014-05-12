@@ -35,7 +35,6 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
-
         /// <summary>
         /// the absulute path where the installed, running executable resides
         /// </summary>
@@ -46,7 +45,6 @@ namespace DaphneGui
         private VCRControl vcrControl;
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
-
 
         private static Simulation sim;
         public static Simulation Sim
@@ -360,7 +358,7 @@ namespace DaphneGui
 
             //SKIP VTK GRAPHICS WINDOW FOR NOW            
             // data basket to hold simulation entities
-            //////////dataBasket = new DataBasket();
+            dataBasket = new DataBasket();
             // vtk data basket to hold vtk data for entities with graphical representation
             //////////vtkdataBasket = new VTKDataBasket();
             // graphics controller to manage vtk objects
@@ -1470,7 +1468,7 @@ namespace DaphneGui
             MessageBox.Show("Started processing...num steps = " + nSteps);
             for (int i = 0; i < nSteps; i++)
             {
-                sim.ECS.Space.Step(dt);
+                Simulation.dataBasket.ECS.Space.Step(dt);
                 sim.CMGR.Step(dt);
             }
             MessageBox.Show("Finished processing...");
@@ -1613,16 +1611,16 @@ namespace DaphneGui
                 
                 for (int i = 0; i < nSteps; i++)
                 {
-                    sim.ECS.Space.Step(dt);
+                    Simulation.dataBasket.ECS.Space.Step(dt);
                     sim.CMGR.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
-                    driverLoc = sim.ECS.Space.BoundaryTransforms[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(sim.Cells.First().Value.State.X);
-                    ligandBoundaryConc = sim.ECS.Space.Populations["CXCL13"].BoundaryConcs[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(driverLoc);
+                    driverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(Simulation.dataBasket.Cells.First().Value.State.X);
+                    ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(driverLoc);
 
                     // membrane; already in membrane's coordinate system
-                    receptorConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(driverLoc);
-                    complexConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
+                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(driverLoc);
+                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc;
                     writer.WriteLine(output);
@@ -1648,21 +1646,21 @@ namespace DaphneGui
 
                 for (int i = 0; i < nSteps; i++)
                 {
-                    sim.ECS.Space.Step(dt);
+                    Simulation.dataBasket.ECS.Space.Step(dt);
                     sim.CMGR.Step(dt);
 
                     // ecs boundary; convert cell position to the membrane's coordinate system
-                    driverLoc = sim.Cells.First().Value.State.X;
-                    convDriverLoc = sim.ECS.Space.BoundaryTransforms[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(driverLoc);
-                    ligandBoundaryConc = sim.ECS.Space.Populations["CXCL13"].BoundaryConcs[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(convDriverLoc);
+                    driverLoc = Simulation.dataBasket.Cells.First().Value.State.X;
+                    convDriverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(driverLoc);
+                    ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(convDriverLoc);
 
                     // membrane; already in membrane's coordinate system
-                    receptorConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(convDriverLoc);
-                    complexConc = sim.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(convDriverLoc);
+                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(convDriverLoc);
+                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(convDriverLoc);
 
                     // cytosol; convert from the membrane's to the cytosol's system
-                    convDriverLoc = sim.Cells.First().Value.Cytosol.BoundaryTransforms[sim.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
-                    driverConc = sim.Cells.First().Value.Cytosol.Populations["driver"].Conc.Value(convDriverLoc);
+                    convDriverLoc = Simulation.dataBasket.Cells.First().Value.Cytosol.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
+                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["driver"].Conc.Value(convDriverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
                              driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];
