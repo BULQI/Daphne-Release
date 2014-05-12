@@ -28,6 +28,8 @@ namespace DaphneGui
             {
                 //copy initial settings, only done once
                 SimConfigSaver = new SimConfigurator();
+                SimConfigSaver.TempScenarioFile = orig_path + @"\temp_scenario.json";
+                SimConfigSaver.TempUserDefFile = orig_path + @"\temp_userdef.json";
             }
             SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
  

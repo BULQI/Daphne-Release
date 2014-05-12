@@ -17,6 +17,7 @@ namespace Daphne
         private Dictionary<int, StreamWriter> cell_files;
         private DateTime startTime;
         private string reportFolder, fileName;
+        public string AppPath { get; set; } //non uri
 
         public Reporter()
         {
@@ -75,13 +76,14 @@ namespace Daphne
             {
                 nameStart = fileName + "_";
             }
-            fullPath = rootPath + nameStart + file + "." + extension;
+
+            fullPath = AppPath + nameStart + file + "." + extension;
 
             do
             {
                 if (File.Exists(fullPath) == true)
                 {
-                    fullPath = rootPath + nameStart + "_" + file + "(" + version + ")." + extension;
+                    fullPath = AppPath + nameStart + "_" + file + "(" + version + ")." + extension;
                     version++;
                 }
                 else

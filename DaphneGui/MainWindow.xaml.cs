@@ -433,6 +433,7 @@ namespace DaphneGui
             sim = new Simulation();
             // reporter
             reporter = new Reporter();
+            reporter.AppPath = orig_path + @"\" ;
 
             // vtk data basket to hold vtk data for entities with graphical representation
             vtkDataBasket = new VTKDataBasket();
@@ -1671,6 +1672,8 @@ namespace DaphneGui
                 {
                     // reinitialize the configurator
                     configurator = new SimConfigurator();
+                    configurator.TempScenarioFile = orig_path + @"\temp_scenario.json";
+                    configurator.TempUserDefFile = orig_path + @"\temp_userdef.json";
                     // catch xaml parse exception if it's not a good sim config file
                     try
                     {
@@ -1688,6 +1691,8 @@ namespace DaphneGui
                     try
                     {
                         configurator = new SimConfigurator(scenario_path.LocalPath);
+                        configurator.TempScenarioFile = orig_path + @"\temp_scenario.json";
+                        configurator.TempUserDefFile = orig_path + @"\temp_userdef.json";
                         configurator.DeserializeSimConfig(tempFileContent);
                         //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }

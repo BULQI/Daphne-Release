@@ -10,6 +10,7 @@
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         Title="Daphne"
         Width="900" Height="770" Closing="Window_Closing"
+        Icon="Daphne.ico"
         >
 
     <Window.Resources>

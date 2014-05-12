@@ -21,8 +21,11 @@ namespace Daphne
     public class SimConfigurator
     {
         public string FileName { get; set; }
-        public const string TempScenarioFile = "Config\\temp_scenario.json", TempUserDefFile = "Config\\temp_userdef.json";
+       // public const string TempScenarioFile; // = "Config\\temp_scenario.json", TempUserDefFile = "Config\\temp_userdef.json";
         public SimConfiguration SimConfig { get; set; }
+
+        public string TempScenarioFile { get; set; }
+        public string TempUserDefFile { get; set; }
 
         //public UserDefinedGroup userDefGroup { get; set; }
 
@@ -30,6 +33,8 @@ namespace Daphne
         {
             this.SimConfig = new SimConfiguration();
             //userDefGroup = new UserDefinedGroup();
+            TempScenarioFile = "Config\\temp_scenario.json";
+            TempUserDefFile = "Config\\temp_userdef.json";
         }
 
         public SimConfigurator(string filename)
@@ -38,6 +43,9 @@ namespace Daphne
             {
                 throw new ArgumentNullException("filename");
             }
+
+            TempScenarioFile = "Config\\temp_scenario.json";
+            TempUserDefFile = "Config\\temp_userdef.json";
 
             this.FileName = filename;
             this.SimConfig = new SimConfiguration();
@@ -68,7 +76,14 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = tempFiles == true ? TempScenarioFile : FileName;
 
-            File.WriteAllText(jsonFile, jsonSpec);
+            try
+            {
+                File.WriteAllText(jsonFile, jsonSpec);
+            }
+            catch
+            {
+                MessageBox.Show("File.WriteAllText failed in SerializeSimConfigToFile. Filename and TempScenarioFile = " + FileName + ", " + TempScenarioFile);
+            }
 
             ////serialize user defined objects
             //jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);

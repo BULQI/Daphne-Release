@@ -87,6 +87,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_64A3BB1DDFF04D308E78E3CC1324B6F6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_69243CBEF97BD047AF89C1A26096C274"
         "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
         "MsmSig" = "8:_UNDEFINED"
@@ -131,12 +137,6 @@
         {
         "MsmKey" = "8:_901E25C78B1AEB87A3BFEA477DD01642"
         "OwnerKey" = "8:_2F220E3B9DFA79530D2AA0E38B0DFAED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_AACDFE9395D946EEB571F561684A5A30"
-        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -387,6 +387,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.0,Profile=Client"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4 Client Profile (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.0,Profile=Client"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
     }
@@ -873,6 +886,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_64A3BB1DDFF04D308E78E3CC1324B6F6"
+            {
+            "SourcePath" = "8:..\\DaphneGui\\Daphne.ico"
+            "TargetName" = "8:Daphne.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_69243CBEF97BD047AF89C1A26096C274"
             {
             "AssemblyRegister" = "3:1"
@@ -995,26 +1028,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AACDFE9395D946EEB571F561684A5A30"
-            {
-            "SourcePath" = "8:..\\DaphneGui\\Daphne.ico"
-            "TargetName" = "8:Daphne.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_C2E46D3EAEBCE237FDA6713A7E2B3320"
@@ -1335,7 +1348,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DaphneInstall"
         "ProductCode" = "8:{69199841-3934-4040-A109-2B48AC3FA38E}"
-        "PackageCode" = "8:{167AFFDC-2218-434D-8964-A093C49D25E5}"
+        "PackageCode" = "8:{662BE49A-E4F1-46F5-95A9-B68C5D87E937}"
         "UpgradeCode" = "8:{642F6AE4-CB8E-48B2-B116-3AF0C7AD12C7}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
