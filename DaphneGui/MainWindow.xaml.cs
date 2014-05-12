@@ -1249,12 +1249,12 @@ namespace DaphneGui
             blueHandToolButton_IsChecked = !blueHandToolButton_IsChecked;
 
             MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, false);
-            /////gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
+            gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
 
             if (blueHandToolButton_IsChecked)
             {
                 MainWindow.SetControlFlag(MainWindow.CONTROL_MOLCONCS_ENABLED, true);
-                /////gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
+                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
             }
         }
 
