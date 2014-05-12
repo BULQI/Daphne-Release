@@ -74,7 +74,7 @@ namespace Daphne
         public override void Step(double dt)
         {
             intensity = RateConstant * dt * reactant.Conc * reactant.Conc;
-            reactant.Conc -= 2*intensity;
+            reactant.Conc -= 2 * intensity;
             product.Conc += intensity;
         }
     }
@@ -95,10 +95,10 @@ namespace Daphne
         {
             intensity = RateConstant * dt * reactant.Conc;
             reactant.Conc -= intensity;
-            product.Conc += 2*intensity;
+            product.Conc += 2 * intensity;
         }
     }
-   
+
     public class Dissociation : Reaction
     {
         MolecularPopulation reactant;
@@ -141,7 +141,7 @@ namespace Daphne
             product.Conc += intensity;
         }
     }
-    
+
     // Catalyzed reactions
 
     public class AutocatalyticTransformation : Reaction
@@ -275,7 +275,7 @@ namespace Daphne
             product.Conc += 2 * intensity;
         }
     }
-    
+
     public class CatalyzedDissociation : Reaction
     {
         MolecularPopulation catalyst;
@@ -388,6 +388,7 @@ namespace Daphne
     }
 
     // Boundary reactions
+    // Use the convention that positive flux reduces the concentration.
 
     /// <summary>
     /// Appropriate for boundary manifolds that are not zero-dimensional.
@@ -457,6 +458,42 @@ namespace Daphne
         }
     }
 
+    public class CatalyzedBoundaryActivation : Reaction
+    {
+        MolecularPopulation bulk;
+        MolecularPopulation bulkActivated;
+        MolecularPopulation receptor;
+        Manifold boundary;
+        double fluxIntensityConstant;
+
+        public CatalyzedBoundaryActivation(MolecularPopulation _bulk, MolecularPopulation _bulkActivated, MolecularPopulation _receptor, double _RateConst)
+        {
+            bulk = _bulk;
+            bulkActivated = _bulkActivated;
+            receptor = _receptor;
+            boundary = receptor.Man;
+            fluxIntensityConstant = 1.0 / bulk.Molecule.DiffusionCoefficient;
+            RateConstant = _RateConst;
+
+            if (bulk.BoundaryConcs[boundary.Id].M != receptor.Man)
+            {
+                throw new Exception("Receptor and ligand boundary concentration manifolds are unequal.");
+            }
+            if (receptor.Man != receptor.Man)
+            {
+                throw new Exception("Receptor and complex manifolds are unequal.");
+            }
+
+        }
+        public override void Step(double dt)
+        {
+            intensity = (RateConstant * dt) * receptor.Conc * bulk.BoundaryConcs[boundary.Id];
+
+            bulk.BoundaryFluxes[boundary.Id] += fluxIntensityConstant * intensity;
+            bulkActivated.BoundaryFluxes[boundary.Id] -= fluxIntensityConstant * intensity;
+        }
+
+    }
 }
 
 

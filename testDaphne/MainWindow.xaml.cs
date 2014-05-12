@@ -62,8 +62,8 @@ namespace testDaphne
             initialize();
 
             // Run through scenarios to make sure nothing crashes after changes
-            for (int n=1; n<=6; n++)
-            // int n = 2;
+            //for (int n=1; n<=6; n++)
+            int n = 3;
             {
                 switch (n)
                 {
@@ -87,8 +87,8 @@ namespace testDaphne
 
                     case 3:
                         // Console.WriteLine("\n DriverLocomotionScenario \n");
-                        //DriverLocomotionScenario();
-                        //TestStepperLocomotion(nSteps, dt);
+                        DriverLocomotionScenario();
+                        TestStepperLocomotion(nSteps, dt);
                         break;
 
                     case 4:
@@ -206,11 +206,13 @@ namespace testDaphne
             double receptorConc,
                    ligandBoundaryConc,
                    complexConc,
-                   driverConc;
+                   driverConc,
+                   driverAConc;
             double[] driverLoc, convDriverLoc;
 
             string output;
             string filename = "DriverDynamics.txt";
+            nSteps = (int)(100 / dt);
 
             using (StreamWriter writer = File.CreateText(filename))
             {
@@ -231,25 +233,177 @@ namespace testDaphne
                     // cytosol; convert from the membrane's to the cytosol's system
                     convDriverLoc = Simulation.dataBasket.Cells.First().Value.Cytosol.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
                     driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["driver"].Conc.Value(convDriverLoc);
+                    driverAConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["driverA"].Conc.Value(convDriverLoc);
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
-                             driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];
+                             driverConc + "\t" + driverAConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];
                     //Console.WriteLine(output);
                     writer.WriteLine(output);
                 }
             }
-        }
+
+            // Check results
+
+            InterpolatedNodes inm = (InterpolatedNodes)Simulation.dataBasket.ECS.Space.Interior;
+            ScalarField conc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc;
+            MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations["CXCL13"];
+            double value, min, max, slope;
+            double stepSize = inm.StepSize();
+            int numNodes_x, numNodes_y, numNodes_z, m;
+
+            numNodes_x = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0);
+            numNodes_y = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1);
+            numNodes_z = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2);
+            min = mp.NaturalBoundaryConcs[Simulation.dataBasket.ECS.Sides["right"]].Value(new double[3] { 0.0, 0.0, 0.0 });
+            max = mp.NaturalBoundaryConcs[Simulation.dataBasket.ECS.Sides["left"]].Value(new double[3] { 0.0, 0.0, 0.0 });
+            slope = (max - min) / inm.Extent(0);
+
+            // CXCL13 concentration profile
+
+            // along midline of xy-plane at z=midpoint
+            for (int i = 0; i < numNodes_x; i++)
+            {
+                m = i + ((int)numNodes_y / 2) * numNodes_x + ((int)numNodes_z / 2) * numNodes_x * numNodes_y;
+                value = conc.Value(inm.linearIndexToLocal(m));
+                Console.WriteLine(i + " " +  value);
+            }
+       }
           
 
         // 
         // Scenarios
         //
 
+        //private void DriverLocomotionScenario()
+        //{
+        //    // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
+        //    // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
+        //    // NOTE: Make the diffusion coefficient for CXCL13 small so the CXCL13 gradient doesn't dissipate too fast,
+        //    // otherwise add Dirchlet boundary conditions. Diffusion coefficient value of zero causes NaN values.
+        //    string molSpec = "CXCR5\t1.0\t0.0\t0.0\nCXCL13\t\t\t1.0\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t1.0e3\ndriverA\t\t\t1.0\nCXCL12\t7.96\t\t6.0e3\n";
+        //    MolDict = MoleculeBuilder.Go(molSpec);
+
+        //    config = new ReactionsConfigurator();
+        //    config.deserialize("ReacSpecFile1.xml");
+        //    config.TemplReacType(config.content.listOfReactions);
+
+        //    //
+        //    // Scenario: Ligand:Receptor dynamics without ligand diffusion and driver:complex dynamics
+        //    //      extracellular fluid with CXCL13 
+        //    //      one cell with CXCR5 and CXCR5:CXCL13 surface molecules and driver molecules in the cytosol
+        //    // The CXCL13 distribution is centered in the ECM.
+        //    // The cell position is shifted negatively on the x-axis by one quarter of the length of the cube 
+        //    // from the center of the CXCL13 distribution.
+        //    //
+
+        //    // NOTE:The order in which compartments and molecular populations are instantiated matters
+        //    // because of the BoundaryConcs and Fluxes in MolecularPopulations
+        //    // Assign all compartments first, then molecular populations
+
+        //    //
+        //    // Create Extracellular fluid
+        //    // 
+
+        //    // executes the ninject bindings; call this after the config is initialized with valid values
+        //    SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
+
+        //    Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+
+        //    // Create Cells
+        //    //
+        //    double[] cellPos = new double[3],
+        //             veloc = new double[3] { 0.0, 0.0, 0.0 },
+        //             extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
+        //                                     Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
+        //                                     Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
+        //    double cellRadius = 5.0;
+
+        //    // One cell
+        //    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
+
+        //    cellPos[0] = extent[0] / 4.0;
+        //    cellPos[1] = extent[1] / 4.0;
+        //    cellPos[2] = extent[2] / 4.0;
+        //    cell.setState(cellPos, veloc);
+        //    sim.AddCell(cell);
+
+        //    //
+        //    // Add all molecular populations
+        //    //
+
+
+        //    // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+        //    // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+        //    // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
+        //    double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+        //                                        extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+        //                                        2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
+        //    // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+        //    Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+        //    //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
+        //    //Simulation.dataBasket.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
+
+        //    // Add PlasmaMembrane molecular populations
+        //    // Approximately, 20,000 CXCR5 receptors per cell
+        //    foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+        //    {
+        //        kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 255.0 });
+        //        kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 0.0 });
+        //    }
+
+        //    // Add Cytosol molecular populations
+        //    foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+        //    {
+        //        kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], "const", new double[] { 250.0 });
+        //        kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driverA"], "const", new double[] { 0.0 });
+        //    }
+
+        //    //
+        //    // Add reactions
+        //    //
+
+        //    MolecularPopulation receptor, ligand, complex;
+        //    double k1plus = 2.0, k1minus = 1;
+        //    MolecularPopulation driver, driverA;
+        //    double  k2plus = 1.0, 
+        //            k2minus = 10.0,
+        //            transductionConstant = 1e4;
+
+        //    foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+        //    {
+        //        // add receptor ligand boundary association and dissociation
+        //        // R+L-> C
+        //        // C -> R+L
+        //        receptor = kvp.Value.PlasmaMembrane.Populations["CXCR5"];
+        //        ligand = Simulation.dataBasket.ECS.Space.Populations["CXCL13"];
+        //        complex = kvp.Value.PlasmaMembrane.Populations["CXCR5:CXCL13"];
+
+        //        // QUESTION: Does it matter to which manifold we assign the boundary reactions?
+        //        //kvp.Value.PlasmaMembrane.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, k1plus));
+        //        //kvp.Value.PlasmaMembrane.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+        //        // sim.ECS.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+        //        Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
+        //        Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
+
+        //        // Choose false to have the driver dynamics, but no movement
+        //        kvp.Value.IsMotile = true;
+
+        //        // Add driver dynamics for locomotion
+        //        driver = kvp.Value.Cytosol.Populations["driver"];
+        //        driverA = kvp.Value.Cytosol.Populations["driverA"];
+        //        kvp.Value.Cytosol.Reactions.Add(new CatalyzedBoundaryActivation(driver, driverA, complex, k2plus));
+        //        kvp.Value.Cytosol.Reactions.Add(new Transformation(driverA, driver, k2minus));
+
+        //        kvp.Value.Locomotor = new Locomotor(driver, transductionConstant);
+        //    }
+
+        //}
+
         private void DriverLocomotionScenario()
         {
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
-            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
+            string molSpec = "CXCR5\t1.0\t0.0\t0.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t1.0e3\ndriverA\t\t\t1.0\nCXCL12\t7.96\t\t6.0e3\n";
             MolDict = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
@@ -258,11 +412,18 @@ namespace testDaphne
 
             //
             // Scenario: Ligand:Receptor dynamics without ligand diffusion and driver:complex dynamics
-            //      extracellular fluid with CXCL13 
-            //      one cell with CXCR5 and CXCR5:CXCL13 surface molecules and driver molecules in the cytosol
-            // The CXCL13 distribution is centered in the ECM.
-            // The cell position is shifted negatively on the x-axis by one quarter of the length of the cube 
-            // from the center of the CXCL13 distribution.
+            //      extracellular fluid with CXCL13 and one cell 
+            //      PlasmaMembrane CXCR5 and CXCR5:CXCL13 surface molecules 
+            //      Cytosol driver and activated driver molecules
+            //      Dirichlet boundary conditions on the CXCL13 distribution 
+            //        with maximum on the left face (yz-plane at x=0) and 
+            //        minimum on the right face (yz-plane at x=xmax) of the ECM.
+            //      The CXCL13 initial distribution is uniform.
+            //      The initial position of the cell is at the middle of the ECM.
+            // 
+            // As currently configured, the cell moves with positive vx=vy=vz. 
+            // Not sure why vy and vz are not zero.
+            // Not sure why vx is not negative.
             //
 
             // NOTE:The order in which compartments and molecular populations are instantiated matters
@@ -277,7 +438,7 @@ namespace testDaphne
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
-
+            
             // Create Cells
             //
             double[] cellPos = new double[3],
@@ -290,7 +451,7 @@ namespace testDaphne
             // One cell
             Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
 
-            cellPos[0] = extent[0] / 4.0;
+            cellPos[0] = extent[0] / 2.0;
             cellPos[1] = extent[1] / 2.0;
             cellPos[2] = extent[2] / 2.0;
             cell.setState(cellPos, veloc);
@@ -300,30 +461,66 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-
-            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
-            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
-            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
-            double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
-                                                extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0,
-                                                2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
             // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
-            //sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
-            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
+
+            double midConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
+            double leftConc = 2 * midConc;
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { midConc });
+
+            Manifold m;
+            ScalarField sf;
+
+            int n = Simulation.dataBasket.ECS.Sides["right"];
+            Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[n].Dirichlet = true;
+
+            // m is the manifold corresponding to the right face
+            m = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].NaturalBoundaryConcs[n].M;
+
+            // Specify the value of the CXCL13 concentration to be enforced at the right face
+            sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+            sf.Initialize("const", new double[] { 0.0 });
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].NaturalBoundaryConcs[n] = sf;
+            // Enforce that concentration to start
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.DirichletBC(sf, Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[n]);
+
+            n = Simulation.dataBasket.ECS.Sides["left"];
+            Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[n].Dirichlet = true;
+
+            // m is the manifold corresponding to the left face
+            m = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].NaturalBoundaryConcs[n].M;
+
+            // Specify the value of the CXCL13 concentration to be enforce at the left face
+            sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+            sf.Initialize("const", new double[] { leftConc });
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].NaturalBoundaryConcs[n] = sf;
+            // Enforce that concentration to start
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.DirichletBC(sf, Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[n]);
+
+
+            //// Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+            //// Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+            //// 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
+            //double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+            //                                    extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+            //                                    2 * 3.0 * 1e-6 * 1e-18 * 6.022e23 };
+            //// Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            //Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+            ////sim.ECS.AddMolecularPopulation(MolDict["CXCL13"], 1.0);
+            //Simulation.dataBasket.ECS.Space.Populations["CXCL13"].IsDiffusing = false;
 
             // Add PlasmaMembrane molecular populations
             // Approximately, 20,000 CXCR5 receptors per cell
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 125.0 });
-                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 130.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], "const", new double[] { 255.0 });
+                kvp.Value.PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5:CXCL13"], "const", new double[] { 0.0 });
             }
 
             // Add Cytosol molecular populations
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
                 kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driver"], "const", new double[] { 250.0 });
+                kvp.Value.Cytosol.AddMolecularPopulation(MolDict["driverA"], "const", new double[] { 0.0 });
             }
 
             //
@@ -332,11 +529,10 @@ namespace testDaphne
 
             MolecularPopulation receptor, ligand, complex;
             double k1plus = 2.0, k1minus = 1;
-            MolecularPopulation driver;
-            double  //k2plus = 1.0, 
-                    //k2minus = 10.0,
-                    //driverTotal = 500,
-                    transductionConstant = 1e4;
+            MolecularPopulation driver, driverA;
+            double k2plus = 2.0,
+                    k2minus = 10.0,
+                    transductionConstant = 1e6;
 
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
@@ -359,15 +555,17 @@ namespace testDaphne
 
                 // Add driver dynamics for locomotion
                 driver = kvp.Value.Cytosol.Populations["driver"];
-                //kvp.Value.Cytosol.Reactions.Add(new CatalyzedConservedBoundaryActivation(driver, complex, k2plus, driverTotal));
-                //kvp.Value.Cytosol.Reactions.Add(new BoundaryConservedDeactivation(driver, complex, k2minus));
-                //kvp.Value.Cytosol.Reactions.Add(new DriverDiffusion(driver));
+                driverA = kvp.Value.Cytosol.Populations["driverA"];
+                kvp.Value.Cytosol.Reactions.Add(new CatalyzedBoundaryActivation(driver, driverA, complex, k2plus));
+                kvp.Value.Cytosol.Reactions.Add(new Transformation(driverA, driver, k2minus));
 
                 kvp.Value.Locomotor = new Locomotor(driver, transductionConstant);
             }
 
+
+
         }
-        
+
         private void LigandReceptorScenario(double k1plus, double k1minus)
         {
             FakeConfig.gridStep = 50;
