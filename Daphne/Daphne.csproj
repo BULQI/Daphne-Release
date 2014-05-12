@@ -131,6 +131,7 @@
     <Compile Include="SimConfiguration.cs" />
     <Compile Include="Simulation.cs" />
     <Compile Include="Terminator.cs" />
+    <Compile Include="TransitionDriver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
