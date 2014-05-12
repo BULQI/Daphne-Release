@@ -230,6 +230,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Resource Include="Daphne.ico" />
+    <Resource Include="DaphneNew.ico" />
     <Content Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

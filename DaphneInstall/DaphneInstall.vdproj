@@ -1348,7 +1348,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DaphneInstall"
         "ProductCode" = "8:{69199841-3934-4040-A109-2B48AC3FA38E}"
-        "PackageCode" = "8:{662BE49A-E4F1-46F5-95A9-B68C5D87E937}"
+        "PackageCode" = "8:{111B3CC0-DF35-4F40-AD2F-D426ABB5EBC0}"
         "UpgradeCode" = "8:{642F6AE4-CB8E-48B2-B116-3AF0C7AD12C7}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1479,7 +1479,7 @@
             "Target" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
             "Folder" = "8:_72D61EFFC7B44057862DD23B6C3DABDD"
             "WorkingFolder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
-            "Icon" = "8:"
+            "Icon" = "8:_64A3BB1DDFF04D308E78E3CC1324B6F6"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_ACA89C8D147E4F0AA3F98402CC7E6F66"
@@ -1493,7 +1493,7 @@
             "Target" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
             "Folder" = "8:_8BB8223BF8DE4DBC8C18B08E12A9731C"
             "WorkingFolder" = "8:_EDABCB59995D4F62A76BBBAF2A426FFD"
-            "Icon" = "8:"
+            "Icon" = "8:_64A3BB1DDFF04D308E78E3CC1324B6F6"
             "Feature" = "8:"
             }
         }
