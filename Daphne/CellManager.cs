@@ -27,9 +27,12 @@ namespace Daphne
 
     public class Simulation
     {
+        public Simulation()
+        {
+            CellManager = new CellManager();
+        }
         public Compartment ExtracellularSpace;
         public CellManager CellManager;
-
-
+        public Dictionary<int, Cell> cells;
     }
 }

@@ -281,7 +281,18 @@ namespace Daphne
     {
         public Manifold Domain;
         public Manifold Range;
-        
+
+        // gmk
+        public Embedding(Manifold domain, Manifold range)
+        {
+            Domain = domain;
+            Range = range;
+        }
+        // gmk
+        public Embedding()
+        {
+        }
+
         public double[] WhereIs(double[] point)
         {
             return new double[Range.Dim];

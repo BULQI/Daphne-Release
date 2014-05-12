@@ -5,14 +5,6 @@ using System.Text;
 
 namespace Daphne
 {
-    public class ReactionTemplate
-    {
-        public Molecule[] Reactants;
-        public Molecule[] Products;
-        public double RateConstant;
-        public List<int[]> StoichiometricCoefficients;
-    }
-
     public abstract class Reaction
     {
         public double RateConstant;
@@ -21,6 +13,23 @@ namespace Daphne
         public abstract void Step(double dt);
     }
 
+    public class Annihilation : Reaction
+    {
+        MolecularPopulation reactant;
+
+        public Annihilation(MolecularPopulation _reactant)
+        {
+            reactant = _reactant;
+        }
+
+        public override void Step(double dt)
+        {
+            intensity = (dt * RateConstant) * reactant.Conc;
+            reactant.Conc += intensity;
+        }
+    }
+ 
+    
     public class CatalyzedCreation : Reaction
     {
         MolecularPopulation catalyst;

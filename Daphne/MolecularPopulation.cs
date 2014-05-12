@@ -13,6 +13,15 @@ namespace Daphne
         public double DiffusionCoefficient;
         private static double boltzmannConstant = 0;
 
+        // gmk
+        public Molecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
+        {
+            Name = thisName;
+            MolecularWeight = thisMW;
+            EffectiveRadius = thisEffRad;
+            DiffusionCoefficient = thisDiffCoeff;
+        }
+
         public void ComputeDiffusionCoefficient(double viscosity, double temperature)
         {
             DiffusionCoefficient = boltzmannConstant * temperature / (6 *  Math.PI * viscosity * EffectiveRadius);
@@ -43,6 +52,30 @@ namespace Daphne
             {
                 Fluxes.Add(m, new ScalarField(m));
                 BoundaryConcs.Add(m, new ScalarField(m));
+            }
+        }
+
+        // gmk
+        public MolecularPopulation(string name, Molecule mol, DiscretizedManifold man, ScalarField initConc)
+        {
+            Name = name;
+            Molecule = mol;
+            Man = man;
+            Conc = new ScalarField(man);
+            Initialize(initConc);
+
+            // gmk
+            if (man.Boundaries != null)
+            {
+                // gmk
+                Dictionary<Manifold, ScalarField> Fluxes = new Dictionary<Manifold, ScalarField>();
+                Dictionary<Manifold, ScalarField> BoundaryConcs = new Dictionary<Manifold, ScalarField>();
+
+                foreach (DiscretizedManifold m in Man.Boundaries.Keys)
+                {
+                    Fluxes.Add(m, new ScalarField(m));
+                    BoundaryConcs.Add(m, new ScalarField(m));
+                }
             }
         }
 

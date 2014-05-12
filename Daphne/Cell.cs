@@ -23,18 +23,23 @@ namespace Daphne
 
         public Cell()
         {
+            // Original
+            //Alive = true;
+            //Cytokinetic = false;
+            //Cytosol = new Compartment(new TinyBall());
+            //PlasmaMembrane = new Compartment(new TinySphere());
+            //Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, new Embedding());
+
+            // gmk
             Alive = true;
             Cytokinetic = false;
-            Cytosol = new Compartment(new TinyBall());
             PlasmaMembrane = new Compartment(new TinySphere());
+            Cytosol = new Compartment(new TinyBall());
+            Embedding cellEmbed = new Embedding(PlasmaMembrane.Interior, Cytosol.Interior);
+            Cytosol.Interior.Boundaries = new Dictionary<Manifold, Embedding>();
+            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior,cellEmbed);
 
-            Embedding e = new Embedding();
-
-            // set domain and range
-            e.Domain = PlasmaMembrane.Interior;
-            e.Range = Cytosol.Interior;
-            // add the embedding
-            Cytosol.Interior.Boundaries.Add(PlasmaMembrane.Interior, e);
+            Index = safeIndex++;
         }
 
         /// <summary>
@@ -79,6 +84,9 @@ namespace Daphne
         public Compartment Cytosol;
         public Compartment PlasmaMembrane;
         public Differentiator Differentiator;
+
+        public int Index;
+        private static int safeIndex = 0;
 
         // There may be other components specific to a given cell type.
     }

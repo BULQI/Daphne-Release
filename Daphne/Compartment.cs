@@ -26,6 +26,13 @@ namespace Daphne
             Populations.Add(molpop);
         }
 
+        // gmk
+        public void AddMolecularPopulation(string name, Molecule mol, double initConc)
+        {
+            ScalarField s = new ScalarField(Interior, initConc);
+            Populations.Add(new MolecularPopulation(name, mol, Interior, s));
+        }
+
         /// <summary>
         /// Carries out the dynamics in-place for its molecular populations over time interval dt.
         /// </summary>
@@ -40,8 +47,8 @@ namespace Daphne
             }
         }
 
-        List<MolecularPopulation> Populations;
-        List<Reaction> reactions;
+        public List<MolecularPopulation> Populations;
+        public List<Reaction> reactions;
         public DiscretizedManifold Interior;
 
     }

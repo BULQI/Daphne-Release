@@ -61,9 +61,11 @@
     <Compile Include="Locomotor.cs" />
     <Compile Include="Math.cs" />
     <Compile Include="MolecularPopulation.cs" />
+    <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
+    <Compile Include="ReactionTemplateBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="dependencies\MathNet.Iridium.dll" />
