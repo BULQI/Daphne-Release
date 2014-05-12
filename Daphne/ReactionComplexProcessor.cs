@@ -166,7 +166,7 @@ namespace Daphne
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
-            dInitialTime = 5 / minVal;
+            dInitialTime = 1 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
 
@@ -187,7 +187,7 @@ namespace Daphne
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
-            dInitialTime = 5 / minVal;
+            dInitialTime = 1 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
         }
