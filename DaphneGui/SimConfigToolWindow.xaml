@@ -3582,7 +3582,7 @@
                                         <GridViewColumn Width="80" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}"> 
+                                                    <!--<TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}"> 
                                                             <TextBlock.Style>
                                                                 <Style>
                                                                     <Setter Property="TextBlock.Foreground" 
@@ -3590,7 +3590,23 @@
                                                                     </Setter>
                                                                 </Style>
                                                             </TextBlock.Style>
-                                                    </TextBlock>
+                                                    </TextBlock>-->
+                                                    <TextBox Text="{Binding rate_const, StringFormat={}{0:#.00}}">
+                                                        <TextBox.Style>
+                                                            <Style>                                                                
+                                                                <Setter Property="TextBox.Foreground" Value="Black"> </Setter>
+                                                                <Setter Property="TextBox.Text" Value="{Binding Path=rate_const}"></Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
+                                                                        <Setter Property="TextBox.IsReadOnly" Value="True" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
+                                                                        <Setter Property="TextBox.IsReadOnly" Value="False" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBox.Style>
+                                                    </TextBox>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
