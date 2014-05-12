@@ -204,6 +204,7 @@ namespace Daphne
             //ADD CELLS AND MOLECULES IN THE CELLS
             ConfigCell gc = findCell("BCell", sc);            
             CellPopulation cp = new CellPopulation();
+
             cp.cellpopulation_name = "My-B-Cell";
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
@@ -217,7 +218,7 @@ namespace Daphne
             cp.cell_locations.Add(cl);
 
             //MOLECULES IN MEMBRANE
-            var query1 =
+            /**var query1 =
                 from mol in sc.entity_repository.molecules
                 where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
                 select mol;
@@ -280,7 +281,7 @@ namespace Daphne
                 gmp.mpInfo.mp_distribution = hl;
 
                 gc.cytosol.molpops.Add(gmp);
-            }
+            }*/
 
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
 
