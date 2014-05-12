@@ -1551,6 +1551,9 @@ namespace DaphneGui
                 return;
             }
 
+            // reporter file name
+            reporter.FileName = configurator.SimConfig.reporter_file_name;
+
             //temporary solution to avoid popup resaving states -axin
             if (true)
             {

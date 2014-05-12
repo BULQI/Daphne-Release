@@ -116,6 +116,7 @@ namespace Daphne
         public Scenario rc_scenario { get; set; }
         public EntityRepository entity_repository { get; set; }
         public SimulationParams sim_params { get; set; }
+        public string reporter_file_name { get; set; }
 
         //public ChartViewToolWindow ChartWindow;
 
@@ -146,7 +147,9 @@ namespace Daphne
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
             box_guid_box_dict = new Dictionary<string, BoxSpecification>();            
-            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();   
+            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
+
+            reporter_file_name = "";
         }
 
         /// <summary>

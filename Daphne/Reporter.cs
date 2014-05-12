@@ -16,7 +16,7 @@ namespace Daphne
         private StreamWriter ecm_mean_file;
         private Dictionary<int, StreamWriter> cell_files;
         private DateTime startTime;
-        private string reportFolder;
+        private string reportFolder, fileName;
 
         public Reporter()
         {
@@ -28,6 +28,12 @@ namespace Daphne
         {
             get { return reportFolder; }
             set { reportFolder = value; }
+        }
+
+        public string FileName
+        {
+            get { return fileName; }
+            set { fileName = value; }
         }
 
         public void StartReporter(SimConfiguration sc)
@@ -54,21 +60,28 @@ namespace Daphne
         {
             int version = 1;
             string rootPath = reportFolder,
-                   timeStamp,
+                   nameStart,
                    fullPath;
             
             if(rootPath != "")
             {
                 rootPath += @"\";
             }
-            timeStamp = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
-            fullPath = rootPath + timeStamp + file + "." + extension;
+            if (fileName == "")
+            {
+                nameStart = startTime.Month + "." + startTime.Day + "." + startTime.Year + "_" + startTime.Hour + "h" + startTime.Minute + "m" + startTime.Second + "s_";
+            }
+            else
+            {
+                nameStart = fileName;
+            }
+            fullPath = rootPath + nameStart + file + "." + extension;
 
             do
             {
                 if (File.Exists(fullPath) == true)
                 {
-                    fullPath = rootPath + timeStamp + "_" + file + "(" + version + ")." + extension;
+                    fullPath = rootPath + nameStart + "_" + file + "(" + version + ")." + extension;
                     version++;
                 }
                 else
