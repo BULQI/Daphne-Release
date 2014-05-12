@@ -36,7 +36,7 @@
                 <TextBox x:Name="txtMouseHover" Width="150" HorizontalAlignment="Left" >Dragging Conc</TextBox>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" MouseWheel="windowsFormsHost1_MouseWheel">
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
                 <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
                 <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
                 <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" IsEnabled="False">Save Changes</Button>
@@ -64,33 +64,17 @@
             <StackPanel Grid.Column="0" Grid.Row="3" Margin="30,0">
                 <!-- new code -->
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
-                
-                <!--<DataGrid x:Name="dgInitConcs"                         
-                        ItemsSource="{Binding Path=initConcs}"
-                        AutoGenerateColumns="False" 
-                        Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
+                <DataGrid x:Name="dgInitConcs" 
+                        ItemsSource="{Binding Path=initConcs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                        Height="150" MinWidth="150" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                         CanUserReorderColumns="False" CanUserResizeRows="False"
-                        CanUserSortColumns="False" RowHeaderWidth="0"
+                        CanUserSortColumns="True" RowHeaderWidth="0"
+                        HorizontalAlignment="Left"
                         VerticalContentAlignment="Center"
                         CanUserAddRows="False"
                         BorderThickness="1"
                         BorderBrush="Black"
-                        CellEditEnding ="dgInitConcs_CellEditEnding"
-                        KeyDown="dgInitConcs_KeyDown"
-                          >
-                </DataGrid>-->
-
-                <DataGrid x:Name="dgInitConcs" 
-                                ItemsSource="{Binding Path=initConcs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                Height="150" MinWidth="150" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
-                                CanUserReorderColumns="False" CanUserResizeRows="False"
-                                CanUserSortColumns="True" RowHeaderWidth="0"
-                                HorizontalAlignment="Left"
-                                VerticalContentAlignment="Center"
-                                CanUserAddRows="False"
-                                BorderThickness="1"
-                                BorderBrush="Black"
-                                >
+                        >
 
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader" >
@@ -122,10 +106,32 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="110">
+                        <!--<DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=conc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>-->
+
+                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Slider x:Name="slConc" 
+                                                Orientation="Horizontal"
+                                                Width="100"
+                                                RenderTransform="2.0,0,0,0.5,0,4"
+                                                Minimum="0.00" 
+                                                Maximum="10.00"
+                                                Value="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Margin="0,0,0,0" IsSnapToTickEnabled="True" 
+                                                TickFrequency="0.01"
+                                                ValueChanged="slConc_ValueChanged"
+                                                >
+                                        </Slider>
+                                        <TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                    </StackPanel>    
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

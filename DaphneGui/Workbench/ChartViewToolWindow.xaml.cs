@@ -268,28 +268,14 @@ namespace Workbench
             cm.RedrawSeries();
         }
 
-        private void dgInitConcs_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-        }
-        
-        private void dgInitConcs_KeyDown(object sender, KeyEventArgs e)
-        {
-            DataGridCellInfo cell = dgInitConcs.CurrentCell;
-            if (cell.Column.Header.ToString() == "conc") {
-                if (cell.Column.GetType() == typeof(TextBox)) {
-                    //TextBox tb = cell.Column.GetValue();
-                }
-                //double c = double.Parse(cell.ToString());
-                DataGridColumn col = dgInitConcs.CurrentColumn;
-                //string sConc = col. as string;
-                MolConcInfo mci = cell.Item as MolConcInfo;
-                //RC.EditConc(mci.molguid, c);
-                //cm.RedrawSeries();
+            foreach (MolConcInfo mci in RC.initConcs)
+            {
+                RC.EditConc(mci.molguid, mci.conc);
             }
-        }
 
-        private void windowsFormsHost1_MouseWheel(object sender, MouseWheelEventArgs e)
-        {            
+            cm.RedrawSeries();
         }
         
     }
