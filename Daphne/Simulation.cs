@@ -745,7 +745,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if ((config_tde.driver_mol_guid_ref != null) && (config_tde.driver_mol_guid_ref != ""))
+                    if (config_tde.driver_mol_guid_ref != "")
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;

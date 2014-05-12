@@ -2493,6 +2493,7 @@ namespace Daphne
         {
             //Guid id = Guid.NewGuid();
             //driver_element_guid = id.ToString();
+            driver_mol_guid_ref = "";
         }
     }
 

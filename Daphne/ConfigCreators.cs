@@ -1785,7 +1785,7 @@ namespace Daphne
                     return s.driver_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         // given a diff scheme name, find its guid
@@ -1798,7 +1798,7 @@ namespace Daphne
                     return s.diff_scheme_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         // given a gene name, find its guid
@@ -1811,7 +1811,7 @@ namespace Daphne
                     return gene.gene_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         // given a molecule name and location, find its guid
@@ -1824,7 +1824,7 @@ namespace Daphne
                     return cm.molecule_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         // given a reaction template type, find its guid
@@ -1837,7 +1837,7 @@ namespace Daphne
                     return crt.reaction_template_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         // The assumption below is no longer valid.

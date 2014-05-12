@@ -3057,249 +3057,17 @@ namespace DaphneGui
             {
                 //SET UP COLUMN HEADINGS
                 DataGridTemplateColumn col2 = new DataGridTemplateColumn();
-
-                //New
-                string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", i);
-                Binding bcol = new Binding(sbind);
-                bcol.ElementName = "CellsListBox";
-                bcol.Path = new PropertyPath(sbind);
-                bcol.Mode = BindingMode.OneWay;
-
-                //Create a TextBox so the state name is editable
-                FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-                txtStateName.SetValue(TextBlock.StyleProperty, null);
-                txtStateName.SetBinding(TextBlock.TextProperty, bcol);
-
-                //DataGridRowHeader header = new DataGridRowHeader();
-                DataTemplate colHeaderTemplate = new DataTemplate();
-
-                colHeaderTemplate.VisualTree = txtStateName;
-                col2.HeaderStyle = null;
-                col2.HeaderTemplate = colHeaderTemplate;
-                //col2.HeaderStyle = null;
-                //col2.Header = header;
-                //End New
-
-
-
-                //Old
-                //col2.Header = s;
-
-
-
-
-                col2.CanUserSort = false;                
-                col2.MinWidth = 50;
-
-                //SET UP CELL LAYOUT
-
-                //NON-EDITING TEMPLATE
-                DataTemplate cellTemplate = new DataTemplate();
-                
-                //SET UP A TEXTBLOCK
-                Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
-                bn.Mode = BindingMode.TwoWay;
-                bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
-                bn.Converter = c;
-                CollectionViewSource cvs = new CollectionViewSource();
-                cvs.Source = er.molecules;
-                bn.ConverterParameter = cvs;
-                FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
-                txtDriverMol.Name = "DriverTextBlock";
-                txtDriverMol.SetBinding(TextBlock.TextProperty, bn);
-                cellTemplate.VisualTree = txtDriverMol;
-
-                //EDITING TEMPLATE
-
-                //SET UP A STACK PANEL THAT WILL CONTAIN A COMBOBOX AND AN EXPANDER
-                FrameworkElementFactory spFactory = new FrameworkElementFactory(typeof(StackPanel));
-                spFactory.Name = "mySpFactory";
-                spFactory.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
-                
-                DataTemplate cellEditingTemplate = new DataTemplate();
-
-#if false
-                //This TextBlock is just for debugging
-                //SET UP THE TEXTBLOCK
-                Binding b = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
-                b.Converter = c;
-                CollectionViewSource cvs = new CollectionViewSource();
-                cvs.Source = er.molecules;
-                b.ConverterParameter = cvs;
-                FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
-                txtDriverMol.Name = "DriverTextBlock";
-                txtDriverMol.SetBinding(TextBlock.TextProperty, b);
-                txtDriverMol.SetValue(TextBlock.MaxHeightProperty, 1);
-                txtDriverMol.SetValue(TextBlock.MaxWidthProperty, 1);
-                spFactory.AppendChild(txtDriverMol);     
-                
-                /* Sample XAML for MultiBinding
-                <MultiBinding 
-                    Converter="{StaticResource MolGuidToMolPopForDiffMultiConv}" 
-                    ConverterParameter="{StaticResource transitionDriversListView}">
-                    <Binding ElementName="CellsListBox" Path="SelectedItem.death_driver_guid"  />
-                    <Binding ElementName="CellsListBox" Path="SelectedItem.cytosol" />
-                </MultiBinding>
-                */
-           
-                //Sample code to create MultiBinding - not needed now but we might need to use something like this in the future
-                MolGuidToMolPopForDiffMultiConverter conv = new MolGuidToMolPopForDiffMultiConverter();
-                MultiBinding mb = new MultiBinding();
-                mb.Converter = conv;
-                //CollectionViewSource cvs2 = new CollectionViewSource();
-                //cvs2.Source = er.transition_drivers;
-                //mb.ConverterParameter = cvs2;
-
-                mb.ConverterParameter = cell.cytosol;
-
-                Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
-                b3.Mode = BindingMode.TwoWay;
-                b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                mb.Bindings.Add(b3);
-
-                Binding b4 = new Binding();
-                b4.Source = CellsListBox;
-                b4.Path = new PropertyPath("SelectedItem.cytosol");
-                b4.Mode = BindingMode.TwoWay;
-                b4.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-
-                mb.Bindings.Add(b4);
-                comboMolPops.SetBinding(ComboBox.SelectedValueProperty, mb);
-#endif
-                //SET UP THE COMBO BOX
-                FrameworkElementFactory comboMolPops = new FrameworkElementFactory(typeof(ComboBox));
-                comboMolPops.Name = "MolPopComboBox";
-
-                //------ Use a composite collection to insert "None" item
-                CompositeCollection coll = new CompositeCollection();
-                ComboBoxItem nullItem = new ComboBoxItem();
-                nullItem.IsEnabled = true;
-                nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-                nullItem.Content = "None";
-                coll.Add(nullItem);
-                CollectionContainer cc = new CollectionContainer();
-                cc.Collection = cell.cytosol.molpops;
-                coll.Add(cc);
-                comboMolPops.SetValue(ComboBox.ItemsSourceProperty, coll);
-
-                //--------------
-
-                comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
-                comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
-
-                //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
-                MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
-                Binding b3 = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
-                b3.Mode = BindingMode.TwoWay;
-                b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                b3.Converter = conv2;
-                b3.ConverterParameter = cell.cytosol;
-                comboMolPops.SetBinding(ComboBox.SelectedValueProperty, b3);
-                comboMolPops.SetValue(ComboBox.ToolTipProperty, "Mol Pop Name");
-
-                spFactory.AppendChild(comboMolPops);
-
-                //--------------------------------------------------
-
-                //SET UP AN EXPANDER THAT WILL CONTAIN ALPHA AND BETA
-
-                //This disables the expander if no driver molecule is selected
-                DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
-                Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", i));
-                bEnabled.Mode = BindingMode.OneWay;
-                bEnabled.Converter = enabledConv;
-
-                //Expander
-                FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
-                expAlphaBeta.SetValue(Expander.HeaderProperty, "Transition rate values");
-                expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
-                expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
-                expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
-                expAlphaBeta.SetValue(Expander.BackgroundProperty, Brushes.White);
-                expAlphaBeta.SetBinding(Expander.IsEnabledProperty, bEnabled);
-
-                FrameworkElementFactory spProduction = new FrameworkElementFactory(typeof(StackPanel));
-                spProduction.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
-
-                FrameworkElementFactory spAlpha = new FrameworkElementFactory(typeof(StackPanel));
-                spAlpha.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-
-                FrameworkElementFactory tbAlpha = new FrameworkElementFactory(typeof(TextBlock));
-                tbAlpha.SetValue(TextBlock.TextProperty, "Background:  ");
-                tbAlpha.SetValue(TextBlock.ToolTipProperty, "Background production rate");
-                tbAlpha.SetValue(TextBox.WidthProperty, 110D);
-                //tbAlpha.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
-                spAlpha.AppendChild(tbAlpha); 
-
-                //SET UP THE ALPHA TEXTBOX
-                Binding b = new Binding(string.Format("elements[{0}].Alpha", i));
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                FrameworkElementFactory txtDriverAlpha = new FrameworkElementFactory(typeof(TextBox));
-                txtDriverAlpha.SetBinding(TextBox.TextProperty, b);
-
-                //Binding w = new Binding(string.Format("DiffRegGrid.Columns[{0}].ActualWidth", i));
-                //w.Mode = BindingMode.OneWay;
-                //txtDriverAlpha.SetBinding(TextBox.WidthProperty, w);
-                txtDriverAlpha.SetValue(TextBox.ToolTipProperty, "Background production rate");
-                txtDriverAlpha.SetValue(TextBox.WidthProperty, 50D);
-                spAlpha.AppendChild(txtDriverAlpha);
-                spProduction.AppendChild(spAlpha);
-
-                FrameworkElementFactory spBeta = new FrameworkElementFactory(typeof(StackPanel));
-                spBeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-
-                FrameworkElementFactory tbBeta = new FrameworkElementFactory(typeof(TextBlock));
-                tbBeta.SetValue(TextBlock.TextProperty, "Linear coefficient:  ");
-                tbBeta.SetValue(TextBox.WidthProperty, 110D);
-                //tbBeta.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
-                tbBeta.SetValue(TextBlock.ToolTipProperty, "Production rate linear coefficient");
-                spBeta.AppendChild(tbBeta); 
-
-                //SET UP THE BETA TEXTBOX
-                Binding beta = new Binding(string.Format("elements[{0}].Beta", i));
-                beta.Mode = BindingMode.TwoWay;
-                beta.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                FrameworkElementFactory txtDriverBeta = new FrameworkElementFactory(typeof(TextBox));
-                txtDriverBeta.SetBinding(TextBox.TextProperty, beta);
-                txtDriverBeta.SetValue(TextBox.WidthProperty, 50D);
-                //txtDriverBeta.SetBinding(TextBox.WidthProperty, new Binding(""));
-                txtDriverBeta.SetValue(TextBox.ToolTipProperty, "Production rate linear coefficient");
-                spBeta.AppendChild(txtDriverBeta);
-                spProduction.AppendChild(spBeta);
-
-                expAlphaBeta.AppendChild(spProduction);
-                spFactory.AppendChild(expAlphaBeta);
-
-                //spFactory.AppendChild(spProduction);
-
-
-                //---------------------------
-
-                //set the visual tree of the data template
-                cellEditingTemplate.VisualTree = spFactory;
-
-                //set cell layout
-                col2.CellTemplate = cellTemplate;
-                col2.CellEditingTemplate = cellEditingTemplate;
-
-                DiffRegGrid.Columns.Add(col2);
+                DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, s));
                 i++;
             }
 
             DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(DiffRegItemContainerGenerator_StatusChanged);
-      
         }
 
         private DataGridTemplateColumn CreateDiffRegColumn(EntityRepository er, ConfigCell cell, string state)
         {
             DataGridTemplateColumn col = new DataGridTemplateColumn();
 
-            //New
             string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", DiffRegGrid.Columns.Count);
             Binding bcol = new Binding(sbind);
             bcol.ElementName = "CellsListBox";
@@ -3317,18 +3085,12 @@ namespace DaphneGui
             colHeaderTemplate.VisualTree = txtStateName;
             col.HeaderStyle = null;
             col.HeaderTemplate = colHeaderTemplate;
-            //End New
-
-            //Old
-            ////col.Header = state;
-
-
             col.CanUserSort = false;
             col.MinWidth = 50;
 
-            //SET UP CELL LAYOUT
+            //SET UP CELL LAYOUT - COMBOBOX OF MOLECULES PLUS ALPHA AND BETA VALUES
 
-            //NON-EDITING TEMPLATE
+            //NON-EDITING TEMPLATE - THIS IS WHAT SHOWS WHEN NOT EDITING THE GRID CELL
             DataTemplate cellTemplate = new DataTemplate();
 
             //SET UP A TEXTBLOCK ONLY
@@ -3345,7 +3107,7 @@ namespace DaphneGui
             txtDriverMol.SetBinding(TextBlock.TextProperty, bn);
             cellTemplate.VisualTree = txtDriverMol;
 
-            //EDITING TEMPLATE
+            //EDITING TEMPLATE - THIS IS WHAT SHOWS WHEN USER EDITS THE GRID CELL
 
             //SET UP A STACK PANEL THAT WILL CONTAIN A COMBOBOX AND AN EXPANDER
             FrameworkElementFactory spFactory = new FrameworkElementFactory(typeof(StackPanel));
@@ -3623,9 +3385,6 @@ namespace DaphneGui
                 b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
                 col.Binding = b;
             }
-
-            //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
-            //    return;                        
 
             //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
             //    return;                        
