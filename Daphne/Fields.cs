@@ -310,88 +310,158 @@ namespace Daphne
 
     }
 
+    /// <summary>
+    /// A scalar field represented by the zeroth and first order terms in a moment expansion in a 3D space.
+    /// </summary>
     public class MomentExpansionScalarField : ScalarField
     {
+        protected double[] array;
+
         public MomentExpansionScalarField(Manifold m) : base(m)
         {
+            array = new double[m.ArraySize];
         }
 
+        // Should allow specification of the the initial 0th and 1st moments. 
         public MomentExpansionScalarField(Manifold m, IFieldInitializer init) : this(m)
         {
         }
 
         public override ScalarField mult(double d)
         {
-            return null;
+            MomentExpansionScalarField c = new MomentExpansionScalarField(m);
+
+            for (int i = 0; i < m.ArraySize; i++)
+            {
+                c.array[i] = d * array[i];
+            }
+
+            return c;
         }
 
         public override ScalarField mult(ScalarField f)
         {
-            //if (GetType() != f.GetType())
-            //{
-            //    throw new Exception("Scalar field multiplication is only defined between fields of the same type");
-            //}
-            //if (m != f.m)
-            //{
-            //    throw new Exception("Manifolds must be identical for scalar field multiplication.");
-            //}
-            return null;
+            if (GetType() != f.GetType())
+            {
+                throw new Exception("Scalar field multiplication is only defined between fields of the same type");
+            }
+            if (m != f.M)
+            {
+                throw new Exception("Manifolds must be identical for scalar field multiplication.");
+            }
+
+            MomentExpansionScalarField c = new MomentExpansionScalarField(m);
+
+            c.array[0] = array[0] * ((MomentExpansionScalarField)f).array[0];
+
+            for (int i = 1; i < m.ArraySize; i++)
+            {
+                c.array[i] = array[i] * ((MomentExpansionScalarField)f).array[0] + array[0] * ((MomentExpansionScalarField)f).array[i];
+            }
+
+            return c;
         }
 
+        /// <summary>
+        /// Valid when the dot product of f1 and x is much less than f0
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns></returns>
         public override ScalarField div(ScalarField f)
         {
-            //if (GetType() != f.GetType())
-            //{
-            //    throw new Exception("Scalar field division is only defined between fields of the same type");
-            //}
-            //if (m != f.m)
-            //{
-            //    throw new Exception("Manifolds must be identical for scalar field division.");
-            //}
-            return null;
+            if (GetType() != f.GetType())
+            {
+                throw new Exception("Scalar field multiplication is only defined between fields of the same type");
+            }
+            if (m != f.M)
+            {
+                throw new Exception("Manifolds must be identical for scalar field multiplication.");
+            }
+            if (((MomentExpansionScalarField)f).array[0] == 0)
+            {
+                throw new Exception("Moment expansion division by zero.");
+            }
+
+            MomentExpansionScalarField c = new MomentExpansionScalarField(m);
+
+            c.array[0] = array[0] / ((MomentExpansionScalarField)f).array[0];
+
+            for (int i = 1; i < m.ArraySize; i++)
+            {
+                c.array[i] = (array[i] - array[0] * ((MomentExpansionScalarField)f).array[i] / ((MomentExpansionScalarField)f).array[0] ) 
+                              / ((MomentExpansionScalarField)f).array[0];
+            }
+
+            return c;
+
         }
 
         public override ScalarField div(double d)
         {
-            //if (d == 0)
-            //{
-            //    throw new Exception("Division by zero.");
-            //}
-            return null;
+            if (d == 0)
+            {
+                throw new Exception("Moment expansion division by zero.");
+            }
+            return this * (1.0 / d);
         }
 
         public override ScalarField add(ScalarField f)
         {
-            //if (GetType() != f.GetType())
-            //{
-            //    throw new Exception("Scalar field addition is only defined between fields of the same type");
-            //}
-            //if (m != f.m)
-            //{
-            //    throw new Exception("Manifolds must be identical for scalar field addition.");
-            //}
-            return null;
+            if (GetType() != f.GetType())
+            {
+                throw new Exception("Scalar field addition is only defined between fields of the same type");
+            }
+            if (m != f.M)
+            {
+                throw new Exception("Manifolds must be identical for scalar field addition.");
+            }
+
+            MomentExpansionScalarField c = new MomentExpansionScalarField(m);
+
+            for (int i = 0; i < m.ArraySize; i++)
+            {
+                c.array[i] = array[i] + ((MomentExpansionScalarField)f).array[i];
+            }
+            return c;
         }
 
         public override ScalarField sub(ScalarField f)
         {
-            //if (GetType() != f.GetType())
-            //{
-            //    throw new Exception("Scalar field subtraction is only defined between fields of the same type");
-            //}
-            //if (m != f.m)
-            //{
-            //    throw new Exception("Manifolds must be identical for scalar field subtraction.");
-            //}
-            return null;
+            if (GetType() != f.GetType())
+            {
+                throw new Exception("Scalar field addition is only defined between fields of the same type");
+            }
+            if (m != f.M)
+            {
+                throw new Exception("Manifolds must be identical for scalar field addition.");
+            }
+
+            MomentExpansionScalarField c = new MomentExpansionScalarField(m);
+
+            for (int i = 0; i < m.ArraySize; i++)
+            {
+                c.array[i] = array[i] - ((MomentExpansionScalarField)f).array[i];
+            }
+            return c;
         }
 
         public override double Get(double[] point)
         {
-            // return value at point
-            return 0;
+            LocalMatrix[] lm = m.Interpolation(point);
+            double value = 0;
+
+            if (lm != null)
+            {
+                for (int i = 0; i < lm.Length; i++)
+                {
+                    value += lm[i].Coefficient * array[lm[i].Index];
+                }
+            }
+
+            return value;             
         }
 
+        // Implementation of this method only seems to be relevant for DiscreteScalarField
         public override double Get(int i)
         {
             // return value at i-th point of the underlying manifold
@@ -405,7 +475,7 @@ namespace Daphne
 
         public override double[] Gradient(double[] point)
         {
-            return null;
+             return null;
         }
 
         public override double Laplacian(double[] point)
