@@ -117,7 +117,7 @@ namespace Daphne
                     if (((ReportECM)c.report_mp).mean == true)
                     {
                         // mean concentration of this ecm molecular population
-                        ecm_mean_file.Write("\t{0}", Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref].Conc.MeanValue());
+                        ecm_mean_file.Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref].Conc.MeanValue());
                     }
                 }
                 // terminate line
@@ -143,14 +143,14 @@ namespace Daphne
                     {
                         double[] pos = prism.linearIndexToLocal(i);
 
-                        writer.Write("{0}\t{1}\t{2}\t{3}", pos[0], pos[1], pos[2], mp.Conc.Value(pos).ToString("G3", CultureInfo.InvariantCulture));
+                        writer.Write("{0:G4}\t{1:G4}\t{2:G4}\t{3:G4}", pos[0], pos[1], pos[2], mp.Conc.Value(pos));
 
                         // gradient
                         if (c.report_mp.mp_extended == ExtendedReport.COMPLETE)
                         {
                             double[] grad = mp.Conc.LatticeGradient(i);
 
-                            writer.Write("\t{0}\t{1}\t{2}", grad[0].ToString("G3", CultureInfo.InvariantCulture), grad[1].ToString("G3", CultureInfo.InvariantCulture), grad[2].ToString("G3", CultureInfo.InvariantCulture));
+                            writer.Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                         }
                         writer.WriteLine();
                     }
@@ -262,15 +262,15 @@ namespace Daphne
 
                     if (cp.report_xvf.position == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0}\t{1}\t{2}", c.State.X[0], c.State.X[1], c.State.X[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.X[0], c.State.X[1], c.State.X[2]);
                     }
                     if (cp.report_xvf.velocity == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0}\t{1}\t{2}", c.State.V[0], c.State.V[1], c.State.V[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.V[0], c.State.V[1], c.State.V[2]);
                     }
                     if (cp.report_xvf.force == true)
                     {
-                        cell_files[cp.cellpopulation_id].Write("\t{0}\t{1}\t{2}", c.State.F[0], c.State.F[1], c.State.F[2]);
+                        cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", c.State.F[0], c.State.F[1], c.State.F[2]);
                     }
 
                     // cell molpop concentrations
@@ -288,14 +288,14 @@ namespace Daphne
                             // concentration
                             if (cmp.report_mp.mp_extended > ExtendedReport.NONE)
                             {
-                                cell_files[cp.cellpopulation_id].Write("\t{0}", mp.Conc.MeanValue());
+                                cell_files[cp.cellpopulation_id].Write("\t{0:G4}", mp.Conc.MeanValue());
 
                                 // gradient
                                 if (cmp.report_mp.mp_extended == ExtendedReport.COMPLETE)
                                 {
                                     double[] grad = mp.Conc.Gradient(pos);
 
-                                    cell_files[cp.cellpopulation_id].Write("\t{0}\t{1}\t{2}", grad[0], grad[1], grad[2]);
+                                    cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                                 }
                             }
                         }
@@ -308,14 +308,14 @@ namespace Daphne
 
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
-                            cell_files[cp.cellpopulation_id].Write("\t{0}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.State.X));
+                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.State.X));
 
                             // gradient
                             if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
                                 double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.State.X);
 
-                                cell_files[cp.cellpopulation_id].Write("\t{0}\t{1}\t{2}", grad[0], grad[1], grad[2]);
+                                cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                             }
                         }
                     }
