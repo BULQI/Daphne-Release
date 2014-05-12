@@ -153,7 +153,7 @@ namespace ManifoldRing
     public class GaussianFieldInitializer : IFieldInitializer
     {
         private double[] center;
-        private double[] sigma;
+        private double[,] Sigma;
         private double max;
         private bool initialized;
 
@@ -172,14 +172,25 @@ namespace ManifoldRing
         /// <param name="parameters">the Gaussian's center, sigma/decay vector, maximum value packed into an array</param>
         public void setParameters(double[] parameters)
         {
-            if (parameters.Length != 7)
+            if (parameters.Length != 13)
             {
-                throw new Exception("GaussianFieldInitializer length must be 7.");
+                throw new Exception("GaussianFieldInitializer length must be 13: center, peak value, and sigma matrix by columns.");
+            }
+            
+            this.center = new double[] { parameters[0], parameters[1], parameters[2] };
+
+            // fill by columns
+            this.Sigma = new double[3,3];
+            int k = 3;
+            for (int i = 0; i < 3; i++, k += 3)
+            {
+                this.Sigma[0, i] = parameters[0 + k];
+                this.Sigma[1, i] = parameters[1 + k];
+                this.Sigma[2, i] = parameters[2 + k];
             }
 
-            this.center = new double[] { parameters[0], parameters[1], parameters[2] };
-            this.sigma = new double[] { parameters[3], parameters[4], parameters[5] };
-            this.max = parameters[6];
+            this.max = parameters[12];
+
             initialized = true;
         }
 
@@ -194,7 +205,7 @@ namespace ManifoldRing
             {
                 throw new Exception("Initializing Gaussian needs a valid point.");
             }
-            if (point.Length != center.Length || point.Length != sigma.Length)
+            if (point.Length != center.Length || point.Length != Sigma.GetLength(0))
             {
                 throw new Exception("Exception initializing Gaussian field, array length mismatch.");
             }
@@ -203,14 +214,20 @@ namespace ManifoldRing
                 throw new Exception("Must call setParameters prior to using FieldInitializer.");
             }
 
-            double f = 0, d = 1.0;
-            // double d = Math.Pow(2.0 * Math.PI, 1.5) * sigma[0] * sigma[1] * sigma[2];
+            double f = 0;
+            double[] temp = new double[3];
+            for (int i = 0; i < point.Length; i++)
+            {
+                temp[i] =   (center[0] - point[0]) * Sigma[0, i]
+                          + (center[1] - point[1]) * Sigma[1, i]
+                          + (center[2] - point[2]) * Sigma[2, i];
+            }
 
             for (int i = 0; i < point.Length; i++)
             {
-                f += (center[i] - point[i]) * (center[i] - point[i]) / (2 * sigma[i] * sigma[i]);
+                f += temp[i] * (center[i] - point[i]);
             }
-            return max * Math.Exp(-f) / d;
+            return max * Math.Exp(-f / 2);
         }
 
         public double initialize(int index)

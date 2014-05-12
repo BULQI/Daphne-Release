@@ -116,7 +116,7 @@ namespace Daphne
                 {
                     MolPopGaussian mpgg = (MolPopGaussian)cmp.mpInfo.mp_distribution;
 
-                    // find the box_spec associated with this gaussian
+                    // find the box associated with this gaussian
                     int box_id = -1;
 
                     for (int j = 0; j < sc.entity_repository.box_specifications.Count; j++)
@@ -134,16 +134,56 @@ namespace Daphne
                         return;
                     }
 
+                    BoxSpecification box = sc.entity_repository.box_specifications[box_id];
+
+                    double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
+
+                    // compute rotation matrix from box data
+                    // R is vtk's rotation matrix (tranpose of traditional definition)
+                    double[,] R = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        R[i, 0] = box.transform_matrix[i][0] / box.getScale((byte)0);
+                        R[i, 1] = box.transform_matrix[i][1] / box.getScale((byte)1);
+                        R[i, 2] = box.transform_matrix[i][2] / box.getScale((byte)2);
+                    }
+
+                    // Rotate diagonal covariance (Sigma) matrix: D[i,j] = delta_ij sigma[i]^(-2)
+                    // Given vtk format where R is the transpose of the usual definition of the rotation matrix:  
+                    //      S = R' D R
+                    //      S is the rotated covariance matrix
+                    //      R is vtk's rotation matrix (tranpose of traditional definition)
+                    //      R' is the transpose of R
+
+                    // T = R D
+                    double[,] S = new double[3, 3];
+                    double[,] T = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        T[i, 0] = R[i, 0] / (sigma[0] * sigma[0]);
+                        T[i, 1] = R[i, 1] / (sigma[1] * sigma[1]);
+                        T[i, 2] = R[i, 2] / (sigma[2] * sigma[2]);
+                    }
+
+                    // S = T R'
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            for (int k = 0; k < 3; k++)
+                            {
+                                S[i, j] += T[i, k] * R[j,k];
+                            }
+                         }
+                    }
+
                     // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
                     // box x,y,z_scale parameters are 2*sigma
-                    double[] initArray = new double[] { sc.entity_repository.box_specifications[box_id].x_trans, 
-                                                        sc.entity_repository.box_specifications[box_id].y_trans,
-                                                        sc.entity_repository.box_specifications[box_id].z_trans,
-                                                        sc.entity_repository.box_specifications[box_id].x_scale / 2,
-                                                        sc.entity_repository.box_specifications[box_id].y_scale / 2,
-                                                        sc.entity_repository.box_specifications[box_id].z_scale / 2,
+                    double[] initArray = new double[] { box.x_trans, box.y_trans, box.z_trans,
+                                                        S[0,0], S[1,0], S[2,0],
+                                                        S[0,1], S[1,1], S[2,1],
+                                                        S[0,2], S[1,2], S[2,2],
                                                         mpgg.peak_concentration };
-
 
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "gauss", initArray);
                 }

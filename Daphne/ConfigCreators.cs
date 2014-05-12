@@ -306,7 +306,7 @@ namespace Daphne
             // Experiment
             sc.experiment_name = "Diffusion Scenario";
             sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Gaussian initial distribution. No flux BCs.";
-            sc.scenario.time_config.duration = 10;
+            sc.scenario.time_config.duration = 10.0;
             sc.scenario.time_config.rendering_interval = 1;
             sc.scenario.time_config.sampling_interval = 1.0;
 
@@ -327,13 +327,23 @@ namespace Daphne
             box.x_trans = sc.scenario.environment.extent_x / 2;
             box.y_trans = sc.scenario.environment.extent_y / 2;
             box.z_trans = sc.scenario.environment.extent_z / 2;
-            box.x_scale = sc.scenario.environment.extent_x / 5;
-            box.y_scale = sc.scenario.environment.extent_y / 5;
+            box.x_scale = sc.scenario.environment.extent_x / 2;
+            box.y_scale = sc.scenario.environment.extent_y / 4;
             box.z_scale = sc.scenario.environment.extent_z / 5;
             sc.entity_repository.box_specifications.Add(box);
             gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
             //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            // Rotate the box by 45 degrees about the box's y-axis.
+            double theta = Math.PI / 4,
+                   cos = Math.Cos(theta),
+                   sin = Math.Cos(theta);
+            double[][] trans_matrix = new double[4][];
+            trans_matrix[0] = new double[4] { box.x_scale * cos, 0, box.z_scale * sin, box.x_trans };
+            trans_matrix[1] = new double[4] { 0, box.y_scale, 0, box.y_trans };
+            trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
+            trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
+            box.SetMatrix(trans_matrix);
             sc.entity_repository.gaussian_specifications.Add(gaussSpec);
 
             var query =
