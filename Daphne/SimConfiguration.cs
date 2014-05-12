@@ -1227,7 +1227,7 @@ namespace Daphne
                     return gene.gene_guid;
                 }
             }
-            return null;
+            return "";
         }
 
 

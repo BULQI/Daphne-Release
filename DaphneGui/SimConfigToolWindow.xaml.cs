@@ -3828,7 +3828,7 @@ namespace DaphneGui
                     return cm.molecule_guid;
                 }
             }
-            return null;
+            return "";
         }
 
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
