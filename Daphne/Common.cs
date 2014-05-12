@@ -21,7 +21,7 @@ namespace Daphne
         {
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
-            gridStep = 50;
+            gridStep = 10;
             numGridPts = new int[] { 21, 21, 21 };
             toroidal = false;
         }
