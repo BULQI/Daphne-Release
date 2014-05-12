@@ -144,7 +144,27 @@ namespace Daphne
 
         private void addCompartmentReactions(Compartment comp, Compartment boundary, ConfigCompartment configComp, EntityRepository er)
         {
-            foreach (string guid in configComp.reactions_guid_ref)
+            List<string> reac_guids = new List<string>();
+
+            foreach (string rguid in configComp.reactions_guid_ref)
+            {
+                reac_guids.Add(rguid);
+            }
+
+            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            {
+                ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
+                foreach (string rguid in crc.reactions_guid_ref)
+                {
+                    if (reac_guids.Contains(rguid) == false)
+                    {
+                        reac_guids.Add(rguid);
+                    }
+                }
+            }
+
+            foreach( string guid in reac_guids)
+            //foreach (string guid in configComp.reactions_guid_ref)
             {
                 ConfigReaction cr = er.reactions_dict[guid];
 
@@ -390,7 +410,7 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
                 {
-                    comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.Reactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
                                                        comp.Populations[cr.products_molecule_guid_ref[1]],
                                                        cr.rate_const));
@@ -482,9 +502,12 @@ namespace Daphne
             }
         }
 
-        public bool Load(SimConfiguration sc, bool completeReset)
+        public bool Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex=false)
         {
             Scenario scenario = sc.scenario;
+
+            if (is_reaction_complex == true)
+                scenario = sc.rc_scenario;
 
             duration = scenario.time_config.duration;
             sampleStep = scenario.time_config.sampling_interval;
@@ -609,7 +632,7 @@ namespace Daphne
 
             return true;
         }
-
+        
         public void RunForward()
         {
             if (RunStatus == RUNSTAT_RUN)
