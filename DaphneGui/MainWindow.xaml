@@ -421,7 +421,7 @@
                                                             ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
                                                             SelectedValue="{Binding Path=ECSRenderingMethod}"
                                                             BorderBrush="LightGray" 
-                                                            ToolBar.OverflowMode="Never" ToolTip="Chemokine rendering style">
+                                                            ToolBar.OverflowMode="Never" ToolTip="Extracellular medium rendering style">
                                                 </ComboBox>
                                                 <ToggleButton x:Name="ScalarBarMarkerButton" 
                                                         IsChecked="{Binding ScalarBarMarker_IsChecked}" 
