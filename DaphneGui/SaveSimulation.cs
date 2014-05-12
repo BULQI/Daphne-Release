@@ -96,6 +96,12 @@ namespace DaphneGui
                 cmp.mpInfo.mp_distribution = mpex;
             }
 
+            foreach (var kvp in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
+            {
+                CellPopulation cp = kvp.Value;
+                cp.number = 0;
+            }
+
             //add cells into their respenctive populaiton
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
@@ -104,6 +110,8 @@ namespace DaphneGui
                 int cell_set_id = cell.Population_id;
 
                 CellPopulation target_cp = SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                target_cp.number++;
+
                 CellState cell_state = new CellState();
                 cell_state.setState(cell.State);
 
