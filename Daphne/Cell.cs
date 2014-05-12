@@ -339,10 +339,7 @@ namespace Daphne
                 foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
                 {
                     TransitionDriverElement tde = new TransitionDriverElement();
-                    // set both the mother's and the daughter's driver populations to zero
-                    this.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey].Conc.reset(0);
                     tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                    tde.DriverPop.Conc.reset(0);
                     tde.Alpha = kvp_inner.Value.Alpha;
                     tde.Beta = kvp_inner.Value.Beta;
                     // add it to the daughter
