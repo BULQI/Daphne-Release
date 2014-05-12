@@ -2285,13 +2285,6 @@ namespace Daphne
             }
         }
 
-        public CellPopDistribution()
-        {
-        }
-    }
-
-    public class CellPopSpecific : CellPopDistribution
-    {
         private ObservableCollection<CellState> _spec_cell_list;
         public ObservableCollection<CellState> spec_cell_list
         {
@@ -2302,6 +2295,24 @@ namespace Daphne
                 OnPropertyChanged("spec_cell_list");
             }
         } 
+
+        public CellPopDistribution()
+        {
+        }
+    }
+
+    public class CellPopSpecific : CellPopDistribution
+    {
+        //private ObservableCollection<CellState> _spec_cell_list;
+        //public ObservableCollection<CellState> spec_cell_list
+        //{
+        //    get { return _spec_cell_list; }
+        //    set
+        //    {
+        //        _spec_cell_list = value;
+        //        OnPropertyChanged("spec_cell_list");
+        //    }
+        //} 
         public CellPopSpecific()
         {
             DistType = CellPopDistributionType.Specific;
@@ -2313,7 +2324,7 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(cp.cell_list, Newtonsoft.Json.Formatting.Indented, Settings);
-            _spec_cell_list = JsonConvert.DeserializeObject<ObservableCollection<CellState>>(jsonSpec, Settings);
+            spec_cell_list = JsonConvert.DeserializeObject<ObservableCollection<CellState>>(jsonSpec, Settings);
             OnPropertyChanged("spec_cell_list");
         }
     }
