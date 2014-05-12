@@ -854,8 +854,8 @@ namespace DaphneGui
         public void AssignCell(long idx, Cell cell)
         {
             double[] pos = cell.State.X;
-            int id = cell.Index;
-            int color = ColorMap[cell.CellSetId];
+            int id = cell.Cell_id;
+            int color = ColorMap[cell.Population_id];
             int generation = 0;
 
             points.SetPoint(idx, pos[0], pos[1], pos[2]);

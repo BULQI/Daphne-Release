@@ -72,12 +72,12 @@ namespace Daphne
                 foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                 {
                     // no self-pairing
-                    if (del.Index == kvp.Value.Index)
+                    if (del.Cell_id == kvp.Value.Cell_id)
                     {
                         continue;
                     }
 
-                    int hash = pairHash(del.Index, kvp.Value.Index);
+                    int hash = pairHash(del.Cell_id, kvp.Value.Cell_id);
 
                     // remove the pair; will only act if the pair exists
                     if (pairs.Remove(hash))
@@ -100,18 +100,18 @@ namespace Daphne
                 foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                 {
                     // no self-pairing
-                    if (oldKey == kvp.Value.Index)
+                    if (oldKey == kvp.Value.Cell_id)
                     {
                         continue;
                     }
 
-                    int hash = pairHash(oldKey, kvp.Value.Index);
+                    int hash = pairHash(oldKey, kvp.Value.Cell_id);
 
                     // remove the pair; will only act if the pair exists
                     if (pairs.ContainsKey(hash) == true)
                     {
                         // insert with new key
-                        pairs.Add(pairHash(cell.Index, kvp.Value.Index), pairs[hash]);
+                        pairs.Add(pairHash(cell.Cell_id, kvp.Value.Cell_id), pairs[hash]);
                         // remove old key
                         pairs.Remove(hash);
                         //Console.WriteLine("rekeying of pair " + oldKey + " " + kvp.Value.Index);
@@ -129,7 +129,7 @@ namespace Daphne
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
             if (legalIndex(del.GridIndex) == true && grid[del.GridIndex[0], del.GridIndex[1], del.GridIndex[2]] != null)
             {
-                grid[del.GridIndex[0], del.GridIndex[1], del.GridIndex[2]].Remove(del.Index);
+                grid[del.GridIndex[0], del.GridIndex[1], del.GridIndex[2]].Remove(del.Cell_id);
             }
         }
 
@@ -143,14 +143,14 @@ namespace Daphne
             // NOTE: if FDCs start to move, die, divide, we'll have to account for that here
             if (legalIndex(cell.GridIndex) == true && grid[cell.GridIndex[0], cell.GridIndex[1], cell.GridIndex[2]] != null)
             {
-                grid[cell.GridIndex[0], cell.GridIndex[1], cell.GridIndex[2]].Add(cell.Index, cell);
+                grid[cell.GridIndex[0], cell.GridIndex[1], cell.GridIndex[2]].Add(cell.Cell_id, cell);
                 grid[cell.GridIndex[0], cell.GridIndex[1], cell.GridIndex[2]].Remove(oldKey);
             }
         }
 
         private int multiplier()
         {
-            return (int)Math.Pow(10, Math.Round(0.5 + Math.Log10(Cell.SafeCellIndex)));
+            return (int)Math.Pow(10, Math.Round(0.5 + Math.Log10(Cell.SafeCell_id)));
         }
 
         private void updateExistingPairs()
@@ -178,16 +178,16 @@ namespace Daphne
             {
                 pairs = new Dictionary<int, Pair>();
                 pairKeyMultiplier = multiplier();
-                fastMultiplierDecide = Cell.SafeCellIndex;
+                fastMultiplierDecide = Cell.SafeCell_id;
             }
             else
             {
                 // update the multiplier if needed
-                if (Cell.SafeCellIndex > fastMultiplierDecide)
+                if (Cell.SafeCell_id > fastMultiplierDecide)
                 {
                     int tmp = multiplier();
 
-                    fastMultiplierDecide = Cell.SafeCellIndex;
+                    fastMultiplierDecide = Cell.SafeCell_id;
                     if (tmp > pairKeyMultiplier)
                     {
                         pairKeyMultiplier = tmp;
@@ -237,7 +237,7 @@ namespace Daphne
                     // where the whole array of voxels that had an fdc gets cleared
                     if (legalIndex(kvpc.Value.GridIndex) == true && grid[kvpc.Value.GridIndex[0], kvpc.Value.GridIndex[1], kvpc.Value.GridIndex[2]] != null)
                     {
-                        grid[kvpc.Value.GridIndex[0], kvpc.Value.GridIndex[1], kvpc.Value.GridIndex[2]].Remove(kvpc.Value.Index);
+                        grid[kvpc.Value.GridIndex[0], kvpc.Value.GridIndex[1], kvpc.Value.GridIndex[2]].Remove(kvpc.Value.Cell_id);
                     }
 
                     // have the cell remember its position in the grid
@@ -302,7 +302,7 @@ namespace Daphne
                             grid[idx[0], idx[1], idx[2]] = new Dictionary<int, Cell>();
                         }
                         // use the cell's list index as key
-                        grid[idx[0], idx[1], idx[2]].Add(kvpc.Value.Index, kvpc.Value);
+                        grid[idx[0], idx[1], idx[2]].Add(kvpc.Value.Cell_id, kvpc.Value);
 
                         // schedule to find any new pairs
                         if (criticalCells == null)
@@ -340,7 +340,7 @@ namespace Daphne
                                             continue;
                                         }
 
-                                        int hash = pairHash(cell.Index, kvpg.Value.Index);
+                                        int hash = pairHash(cell.Cell_id, kvpg.Value.Cell_id);
 
                                         // not already inserted
                                         if (pairs.ContainsKey(hash) == false)

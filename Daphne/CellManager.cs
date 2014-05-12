@@ -16,6 +16,9 @@ namespace Daphne
         {
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
+                // reset the force
+                kvp.Value.resetForce();
+                // cell takes a step
                 kvp.Value.Step(dt);
 
                 if (kvp.Value.IsMotile == true)
@@ -31,8 +34,6 @@ namespace Daphne
                         kvp.Value.State.V[i] += (-Simulation.dataBasket.ECS.Gamma * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
                 }
-                // after the cell had its update applied, reset the force for the next simulation step
-                kvp.Value.resetForce();
             }
         }
 

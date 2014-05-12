@@ -42,7 +42,7 @@ namespace Daphne
         public Simulation()
         {
             cellManager = new CellManager();
-            dataBasket = new DataBasket();
+            dataBasket = new DataBasket(this);
             reset();
         }
 
@@ -400,8 +400,10 @@ namespace Daphne
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
+            // clear the databasket dictionaries
+            dataBasket.Clear();
+
             // molecules
-            dataBasket.Molecules.Clear();
             foreach (ConfigMolecule cm in sc.entity_repository.molecules)
             {
                 Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cm.Name),
@@ -421,9 +423,6 @@ namespace Daphne
             collisionManager = SimulationModule.kernel.Get<CollisionManager>(new ConstructorArgument("gridSize", box), new ConstructorArgument("gridStep", 2 * Cell.defaultRadius));
 
             // cells
-            dataBasket.Cells.Clear();
-            Cell.SafeCellIndex = 0;
-
             double[] extent = new double[] { dataBasket.ECS.Space.Interior.Extent(0), 
                                              dataBasket.ECS.Space.Interior.Extent(1), 
                                              dataBasket.ECS.Space.Interior.Extent(2) };
@@ -437,12 +436,18 @@ namespace Daphne
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
+                // if this is a new cell population, add it
+                dataBasket.AddPopulation(cp.cellpopulation_id);
+
                 configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
                 configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
                 
                 for (int i = 0; i < cp.number; i++)
                 {
                     Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
+
+                    // cell population id
+                    cell.Population_id = cp.cellpopulation_id;
 
                     // set location, keep remaining state variables equal to zero
                     state[0] = cp.cell_locations[i].X;
@@ -560,11 +565,13 @@ namespace Daphne
             {
                 localStep = Math.Min(integratorStep, dt - t);
                 dataBasket.ECS.Space.Step(localStep);
+                // force reset happens in cell manager; call cellManager.Step first
+                cellManager.Step(localStep);
+                // handle collisions second
                 if (collisionManager != null)
                 {
                     collisionManager.Step(localStep);
                 }
-                cellManager.Step(localStep);
                 t += localStep;
             }
             accumulatedTime += dt;
@@ -602,6 +609,11 @@ namespace Daphne
             }
 
             return percent;
+        }
+
+        public CollisionManager CollisionManager
+        {
+            get { return CollisionManager; }
         }
 
         private CellManager cellManager;

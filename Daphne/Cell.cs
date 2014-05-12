@@ -56,7 +56,7 @@ namespace Daphne
             Cytokinetic = false;
             this.radius = radius;
 
-            Index = SafeCellIndex++;
+            Cell_id = SafeCell_id++;
         }
 
         [Inject]
@@ -145,9 +145,9 @@ namespace Daphne
         public Differentiator Differentiator { get; private set; }
         private SpatialState state;
 
-        public int Index { get; private set; }
-        public static int SafeCellIndex = 0;
-        public int CellSetId { get; set; }
+        public int Cell_id { get; private set; }
+        public static int SafeCell_id = 0;
+        public int Population_id { get; set; }
         protected int[] gridIndex = { -1, -1, -1 };
         public static double defaultRadius = 5.0;
 

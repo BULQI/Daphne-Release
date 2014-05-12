@@ -26,9 +26,17 @@ namespace Daphne
         /// </summary>
         private Dictionary<int, Cell> cells;
         /// <summary>
+        /// cell populations
+        /// </summary>
+        private Dictionary<int, Dictionary<int, Cell>> populations;
+        /// <summary>
         /// dictionary of molecules
         /// </summary>
         private Dictionary<string, Molecule> molecules;
+        /// <summary>
+        /// handle to the simulation
+        /// </summary>
+        private Simulation hSim;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -49,13 +57,26 @@ namespace Daphne
         /// <summary>
         /// constructor
         /// </summary>
-        public DataBasket()
+        public DataBasket(Simulation s)
         {
+            hSim = s;
             cells = new Dictionary<int,Cell>();
+            populations = new Dictionary<int, Dictionary<int, Cell>>();
             molecules = new Dictionary<string, Molecule>();
 #if ALL_DATA
             ResetTrackData();
 #endif
+        }
+
+        /// <summary>
+        /// clear the dictionaries
+        /// </summary>
+        public void Clear()
+        {
+            cells.Clear();
+            Cell.SafeCell_id = 0;
+            populations.Clear();
+            molecules.Clear();
         }
 
         /// <summary>
@@ -374,6 +395,21 @@ namespace Daphne
 #endif
 #endif
         /// <summary>
+        /// add a cell population
+        /// </summary>
+        /// <param name="id">population id</param>
+        /// <returns>true if it was added, false if it existed already</returns>
+        public bool AddPopulation(int id)
+        {
+            if (populations.ContainsKey(id) == false)
+            {
+                populations.Add(id, new Dictionary<int, Cell>());
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// add a given cell
         /// </summary>
         /// <param name="cell">the cell to add</param>
@@ -385,7 +421,9 @@ namespace Daphne
                 // cause the cell to be updated into the grid in the next simulation round
                 cell.GridIndex[0] = cell.GridIndex[1] = cell.GridIndex[2] = -1;
                 // add the cell
-                cells.Add(cell.Index, cell);
+                cells.Add(cell.Cell_id, cell);
+                // add it to the population
+                populations[cell.Population_id].Add(cell.Cell_id, cell);
                 return true;
             }
             return false;
@@ -402,20 +440,19 @@ namespace Daphne
             {
                 Cell cell = cells[key];
 
-#if ALL_DATA
                 // remove all pairs that contain this cell
-                MainWindow.Sim.CellManager.RemoveAllPairsContainingCell(cell, cells);
+                hSim.CollisionManager.RemoveAllPairsContainingCell(cell);
                 // remove the cell from the grid
-                MainWindow.Sim.CellManager.RemoveCellFromGrid(cell);
-#endif
+                hSim.CollisionManager.RemoveCellFromGrid(cell);
+                // remove the cell from the population
+                populations[cell.Population_id].Remove(cell.Cell_id);
                 // remove the cell itself
-                cells.Remove(cell.Index);
+                cells.Remove(cell.Cell_id);
                 return true;
             }
             return false;
         }
 
-#if ALL_DATA
         /// <summary>
         /// rekey the cell and its pairs and grid locations containing it
         /// </summary>
@@ -428,11 +465,15 @@ namespace Daphne
                 Cell cell = cells[oldKey];
 
                 // rekey all pairs that contain this cell
-                MainWindow.Sim.CellManager.RekeyAllPairsContainingCell(cell, oldKey, cells);
+                hSim.CollisionManager.RekeyAllPairsContainingCell(cell, oldKey);
                 // rekey the cell in the grid
-                MainWindow.Sim.CellManager.RekeyCellInGrid(cell, oldKey);
+                hSim.CollisionManager.RekeyCellInGrid(cell, oldKey);
+                // add the new key in the population
+                populations[cell.Population_id].Add(cells[oldKey].Cell_id, cell);
+                // remove the old key from the population
+                populations[cell.Population_id].Remove(oldKey);
                 // add the new key
-                cells.Add(MainWindow.Basket.Cells[oldKey].Index, cell);
+                cells.Add(cells[oldKey].Cell_id, cell);
                 // remove the old key
                 cells.Remove(oldKey);
                 return true;
@@ -440,6 +481,7 @@ namespace Daphne
             return false;
         }
 
+#if ALL_DATA
         /// <summary>
         /// update all cells given a list of db rows
         /// </summary>
