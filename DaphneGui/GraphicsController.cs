@@ -1889,11 +1889,13 @@ namespace DaphneGui
                 AddGaussSpecRegionWidget(gs);
             }
 
+#if CELL_REGIONS
             // Regions
             foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
             {
                 AddRegionRegionWidget(rr);
             }
+#endif
         }
 
         /// <summary>

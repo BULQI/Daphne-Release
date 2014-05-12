@@ -965,21 +965,15 @@ namespace DaphneGui
 
         private void CollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
-
         }
 
         private void membraneMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
-            
         }
 
         private void cytosolMoleculesCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
         }
-
-        
-        
-        
 
         private void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1038,6 +1032,7 @@ namespace DaphneGui
                     // Select the correct region/solfac/gauss_spec in the GUI's lists
                     bool gui_spot_found = false;
 
+#if CELL_REGIONS
                     for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
                     {
                         // See whether the current widget is for a Region
@@ -1048,6 +1043,7 @@ namespace DaphneGui
                             break;
                         }
                     }
+#endif
                     if (!gui_spot_found)
                     {
                         // Next check whether any Solfacs use this right gaussian_spec for this box

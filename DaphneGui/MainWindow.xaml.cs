@@ -564,27 +564,29 @@ namespace DaphneGui
                 // next time around, force a reset
                 MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
+#if CELL_REGIONS
                 // hide the cell regions
-                //foreach (Region rr in configurator.SimConfig.scenario.regions)
-                //{
-                //    // Use the utility dict to find the box associated with this region
-                //    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[rr.region_box_spec_guid_ref];
+                foreach (Region rr in configurator.SimConfig.scenario.regions)
+                {
+                    // Use the utility dict to find the box associated with this region
+                    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[rr.region_box_spec_guid_ref];
 
-                //    // Property changed notifications will take care of turning off the Widgets and Actors
-                //    bb.box_visibility = false;
-                //    rr.region_visibility = false;
-                //}
+                    // Property changed notifications will take care of turning off the Widgets and Actors
+                    bb.box_visibility = false;
+                    rr.region_visibility = false;
+                }
+#endif
 
-                //// hide the regions used to control Gaussians
-                //foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
-                //{
-                //    // Use the utility dict to find the box associated with this region
-                //    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+                // hide the regions used to control Gaussians
+                foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
+                {
+                    // Use the utility dict to find the box associated with this region
+                    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
 
-                //    // Property changed notifications will take care of turning off the Widgets and Actors
-                //    bb.box_visibility = false;
-                //    gg.gaussian_region_visibility = false;
-                //}
+                    // Property changed notifications will take care of turning off the Widgets and Actors
+                    bb.box_visibility = false;
+                    gg.gaussian_region_visibility = false;
+                }
 
                 //// always reset the simulation for now to start at the beginning
                 //if (Properties.Settings.Default.skipDataBaseWrites == false)
@@ -1343,6 +1345,7 @@ namespace DaphneGui
             }
         }
 
+#if CELL_REGIONS
         public static void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
         {
             Region region = (Region)sender;
@@ -1371,7 +1374,7 @@ namespace DaphneGui
             }
             return;
         }
-
+#endif
         public static void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
         {
             GaussianSpecification gauss = (GaussianSpecification)sender;
@@ -1409,10 +1412,12 @@ namespace DaphneGui
                     {
                         configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
                     }
+#if CELL_REGIONS
                     for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
                     {
                         configurator.SimConfig.scenario.regions[i].PropertyChanged -= GUIRegionSurfacePropertyChange;
                     }
+#endif
                     for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
                     {
                         configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
@@ -1462,10 +1467,12 @@ namespace DaphneGui
             {
                 configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
             }
+#if CELL_REGIONS
             for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
             {
                 configurator.SimConfig.scenario.regions[i].PropertyChanged += GUIRegionSurfacePropertyChange;
             }
+#endif
             for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
             {
                 configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
