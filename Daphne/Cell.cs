@@ -32,15 +32,15 @@ namespace Daphne
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is alive or dead.
         /// </summary>
-        private bool Alive;
+        //private bool Alive;
+        /// <summary>
+        /// A flag that signals to the cell manager whether the cell is ready to divide. 
+        /// </summary>
+        //private bool Cytokinetic;
         /// <summary>
         /// a flag that signals that the cell is motile
         /// </summary>
         private bool isMotile = true;
-        /// <summary>
-        /// A flag that signals to the cell manager whether the cell is ready to divide. 
-        /// </summary>
-        private bool Cytokinetic;
 
         /// <summary>
         /// The radius of the cell
@@ -54,8 +54,8 @@ namespace Daphne
             {
                 throw new Exception("Cell radius must be greater than zero.");
             }
-            Alive = true;
-            Cytokinetic = false;
+            //Alive = true;
+            //Cytokinetic = false;
             this.radius = radius;
 
             Cell_id = SafeCell_id++;
