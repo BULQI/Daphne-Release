@@ -815,7 +815,7 @@
                     </StackPanel.Style>
                     
                     <StackPanel  Grid.Column="0" Grid.Row="4">
-                        <TextBlock Text="impose gradient" Margin="0,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60">
+                        <TextBlock Text="impose gradient" Margin="60,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="100">
                             
                         </TextBlock>
                 </StackPanel>
@@ -830,10 +830,10 @@
                                            SelectionChanged="cbBoundFace_SelectionChanged">                        
                     </ComboBox>
                 </StackPanel>
-                <StackPanel Grid.Column="0" Grid.Row="6" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
-                        <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="20,0" 
+                    <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
+                        <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
                                            HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
-                                           Width="100"/>
+                                           Width="160"/>
                 </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
                     <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
@@ -894,19 +894,19 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="peak conc" Margin="6,0"
+                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
+                            <TextBlock Text="peak concentration" Margin="0,0"
                                    Grid.Column="0" Grid.Row="0"  
                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                    />
-                        <StackPanel Orientation="Horizontal"
-                                    Grid.Column="1" Grid.Row="0"
-                                    Margin="0,2">
+                        
                             <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
                                                     SpinnerVisibility="Collapsed"
                                                     HorizontalAlignment="Right"
                                                     Format="F2"
                                                     StepValue="10"
                                                     Width="50" 
+                                                    Margin="4,0"
                                                     CenterSlotHorizontalAlignment="Right"
                                                     Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
                                                     />
