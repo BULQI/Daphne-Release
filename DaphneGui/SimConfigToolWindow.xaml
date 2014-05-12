@@ -47,7 +47,7 @@
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
             <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
-            <!--<daph:CellGuidToCellReactionsPopsConverter x:Key="CellGuidToCellReactionsPopsConv" />-->
+            <daph:CellGuidToCellReactionsConverter x:Key="CellGuidToCellReactionsConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1101,13 +1101,7 @@
 
             <DataTemplate x:Key="cellPopDetailsTemplate">
                 <DataTemplate.Resources>
-                    <CollectionViewSource x:Key="cellCoordinates"  Source="{Binding Path=cell_list}"/>
-                    <ObjectDataProvider x:Key="odpTester"
-                             ObjectType="{x:Type daph:EntityRepository}"
-                             MethodName="GetCellReactions">
-                        
-                    </ObjectDataProvider>
-                    
+                    <CollectionViewSource x:Key="cellCoordinates"  Source="{Binding Path=cell_list}"/>                    
                 </DataTemplate.Resources>
                 <StackPanel>
                     <Grid>
@@ -1140,26 +1134,39 @@
                                         MinWidth="80"
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
-                                        ToolTipOpening="cell_type_combo_box_ToolTipOpening"
-                                        ToolTipClosing="cell_type_combo_box_ToolTipClosing"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=cell_guid_ref}"
+                                        SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=PropertyChanged}"
                                         SelectedValuePath="cell_guid">
-                            <ComboBox.ToolTip>
-                                    <StackPanel Tag="{Binding Source={StaticResource odpTester}}">
-                                        <ListBox x:Name="lbTT" Width="200" Height="100"
-                                            ItemsSource="{Binding Path=Tag}">                                        
-                                        </ListBox>
-                                    </StackPanel>
-                            </ComboBox.ToolTip>
-
+                            
                         </ComboBox>
-                        
+
+                        <Popup Name="myPopup" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" PlacementTarget="{Binding ElementName=cell_type_combo_box}" >
+                            
+                            <Popup.Style>
+                                <Style TargetType="Popup">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsMouseOver}" Value="True">
+                                            <Setter Property="IsOpen" Value="True" />
+                                            <!--This does not work! <Setter Property="StaysOpen" Value="True"/>-->
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsDropDownOpen}" Value="True">
+                                            <Setter Property="IsOpen" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Popup.Style>
+
+                            <ListBox x:Name="lbTTt" MaxWidth="500" 
+                                 ItemsSource="{Binding ElementName=cell_type_combo_box, Path=SelectedItem, Converter={StaticResource CellGuidToCellReactionsConv}, ConverterParameter={StaticResource ecmReactionsListView}}">
+                            </ListBox>
+
+                        </Popup>
+
                         <TextBlock Text="number" Margin="6,0"
-                                        Grid.Column="0" Grid.Row="2"  
+                                        Grid.Column="0" Grid.Row="3"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"  />
                         <StackPanel Orientation="Horizontal"
-                                    Grid.Column="1" Grid.Row="2"
+                                    Grid.Column="1" Grid.Row="3"
                                     Margin="0,4">
                             <Slider x:Name="number_slider"
                                     Orientation="Horizontal"
@@ -1187,11 +1194,11 @@
                         </StackPanel>
 
                         <TextBlock Text="color" Margin="6,0"
-                                        Grid.Column="0" Grid.Row="3"  
+                                        Grid.Column="0" Grid.Row="4"  
                                         HorizontalAlignment="Right" VerticalAlignment="Center"
                                         />
                         <editors:ColorEditBox x:Name="cellColorEditBox"
-                                        Grid.Column="1" Grid.Row="3"
+                                        Grid.Column="1" Grid.Row="4"
                                         CheckBoxVisibility="Collapsed"
                                         SpinnerVisibility="Collapsed"
                                         Width="140"
@@ -3900,10 +3907,11 @@
 
                         <StackPanel>
                             <ListBox x:Name="CellPopsListBox" MinHeight="50" 
-                                             ItemsSource="{Binding Path=scenario.cellpopulations}" 
+                                             ItemsSource="{Binding Path=scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
                                              ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
                                              SelectedIndex="0"
                                              SelectionChanged="cellPopsListBoxSelChanged"
+                                     
                                              />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellButton_Click"/>

@@ -1425,6 +1425,9 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
 
+            if (cmp == null)
+                return;
+
             ComboBox cb = sender as ComboBox;
             ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(1));
 
@@ -1438,32 +1441,7 @@ namespace DaphneGui
                 cbi.IsEnabled = false;
             }
         }
-        
-        private void cell_type_combo_box_ToolTipOpening(object sender, ToolTipEventArgs e)
-        {
-            CellPopulation pop = (CellPopulation)(CellPopsListBox.SelectedItem);
-            string guid = pop.cell_guid_ref;
-            
-
-            //ObservableCollection<string> reacStrings = MainWindow.SC.SimConfig.entity_repository.GetCellReactions(guid);
-            //ComboBox combo = (ComboBox)sender;
-            //ToolTip tt = (ToolTip)(combo.ToolTip);
-            //tt.Inv
-
-            //tt.DataContext = reacStrings;
-            //combo.ToolTip.
-
-            //combo.
-        }
-
-        private void cell_type_combo_box_ToolTipClosing(object sender, ToolTipEventArgs e)
-        {
-            //ToolTip tt = sender as ToolTip;
-            //tt.IsLoaded = false;
-        }
-
-        
-        
+                
     }                   
 
     public class DataGridBehavior
@@ -1546,8 +1524,6 @@ namespace DaphneGui
 
         #endregion // Get Visuals
     }
-
-
     public class RowToIndexConverter : MarkupExtension, IValueConverter
     {
         static RowToIndexConverter converter;

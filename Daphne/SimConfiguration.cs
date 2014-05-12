@@ -691,39 +691,7 @@ namespace Daphne
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
             gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
-        }
-
-        public ObservableCollection<string> GetCellReactions()
-        {
-            if (cells.Count == 0)
-                return null;
-
-            ////ObservableCollection<string> cellReacStrings = new ObservableCollection<string>();
-            ////ConfigCell cc = cells_dict[cguid];
-            ////foreach (string rguid in cc.membrane.reactions_guid_ref) {
-            ////    ConfigReaction cr = reactions_dict[rguid];
-            ////    string reacString = cr.TotalReactionString;
-            ////    cellReacStrings.Add(reacString);
-            ////}
-            ////foreach (string rguid in cc.cytosol.reactions_guid_ref)
-            ////{
-            ////    ConfigReaction cr = reactions_dict[rguid];
-            ////    string reacString = cr.TotalReactionString;
-            ////    cellReacStrings.Add(reacString);
-            ////}
-
-            ////return cellReacStrings;
-
-
-
-            ObservableCollection<string> cellNames = new ObservableCollection<string>();
-            foreach (ConfigCell cc in cells)
-            {
-                string cname = cc.CellName;
-                cellNames.Add(cname);
-            }
-            return cellNames;
-        }
+        }        
     }
 
     public class TimeConfig
@@ -2380,40 +2348,53 @@ namespace Daphne
         }
     }
 
-    /////// <summary>
-    /////// Converter to go between cell pop and cell reaction strings
-    /////// </summary>
-    ////[ValueConversion(typeof(string), typeof(ObservableCollection<string>))]
-    ////public class CellGuidToCellReactionsPopsConverter : IValueConverter
-    ////{
-    ////    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        string guid = value as string;
-    ////        ObservableCollection<string> reacStrings = new ObservableCollection<string>();
-    ////        System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-    ////        ObservableCollection<ConfigCell> cell_list = cvs.Source as ObservableCollection<ConfigCell>;
-    ////        if (cell_list != null)
-    ////        {
-    ////            foreach (ConfigCell cel in cell_list)
-    ////            {
-    ////                if (cel.cell_guid == guid)
-    ////                {
-    ////                    foreach (string rguid in cel.membrane.reactions_guid_ref)
-    ////                    {
-    ////                    }
-    ////                }
-    ////            }
-    ////        }
-    ////        return null;
-    ////    }
+    /// <summary>
+    /// Converter to go between cell pop and cell reaction strings
+    /// </summary>
+    [ValueConversion(typeof(ConfigCell), typeof(ObservableCollection<string>))]
+    public class CellGuidToCellReactionsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigCell cc = value as ConfigCell;
+            ObservableCollection<string> reacStrings = new ObservableCollection<string>();
+            reacStrings.Add("Reactions:");
 
-    ////    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-    ////    {
-    ////        // TODO: Should probably put something real here, but right now it never gets called,
-    ////        // so I'm not sure what the value and parameter objects would be...
-    ////        return "y";
-    ////    }
-    ////}
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
+            if (reac_list != null)
+            {
+                foreach (ConfigReaction reac in reac_list)
+                {
+                    foreach (string rguid in cc.membrane.reactions_guid_ref) 
+                    {
+                        if (reac.reaction_guid == rguid) {
+                            reacStrings.Add("membrane: " + reac.TotalReactionString);
+                        }
+                    }
+                    foreach (string rguid in cc.cytosol.reactions_guid_ref)
+                    {
+                        if (reac.reaction_guid == rguid)
+                        {
+                            reacStrings.Add("cytosol: " + reac.TotalReactionString);
+                        }
+                    }
+                }
+            }
+
+            if (reacStrings.Count == 1)
+                reacStrings.Add("No reactions in this cell.");
+
+            return reacStrings;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
 
 
 
