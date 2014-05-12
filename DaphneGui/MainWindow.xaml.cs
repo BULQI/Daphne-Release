@@ -2231,12 +2231,96 @@ namespace DaphneGui
                         
                     }
 
-                    //REACTIONS
-                    //foreach (GuiReactionTemplate grt in cp.CellReactions)
-                    //{
-                    //}
+                    //CELL REACTIONS
+                    if (cp.CellReactions != null)
+                    {
+                        foreach (GuiReactionTemplate grt in cp.CellReactions)
+                        {
+                            if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
+                            {
+                                MolecularPopulation receptor, ligand, complex;
+                                double k1plus = 2.0, k1minus = 1;
+                                string rec, lig, comp;
+                                string recLocation, ligLocation, compLocation;
 
-                    
+                                GuiSpeciesReference gsr = grt.MolsByType["receptor"];
+                                rec = gsr.species;
+                                recLocation = gsr.Location;
+
+                                gsr = grt.MolsByType["ligand"];
+                                lig = gsr.species;
+                                ligLocation = gsr.Location;
+
+                                gsr = grt.MolsByType["complex"];
+                                comp = gsr.species;
+                                compLocation = gsr.Location;
+
+                                // add receptor ligand boundary association and dissociation
+                                ////////    // R+L-> C
+                                ////////    // C -> R+L
+                                receptor = cell.Cytosol.Populations[rec];
+                                ligand = cell.Cytosol.Populations[lig];
+                                complex = cell.Cytosol.Populations[comp];
+
+                                if (grt.TypeOfReaction == "association")
+                                {
+                                    cell.Cytosol.Reactions.Add(new Association(receptor, ligand, complex, k1plus));
+                                }
+                                else
+                                {
+                                    cell.Cytosol.Reactions.Add(new Dissociation(receptor, ligand, complex, k1minus));
+                                }
+                            }
+                            else if (grt.TypeOfReaction == "annihilation") {
+                                cell.Cytosol.Reactions.Add(new Annihilation( cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "dimerization")
+                            {
+                                cell.Cytosol.Reactions.Add(new Dimerization(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "dimerdissociation")
+                            {
+                                cell.Cytosol.Reactions.Add(new DimerDissociation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "transformation")
+                            {
+                                cell.Cytosol.Reactions.Add(new Transformation(cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "autocatalytictransformation")
+                            {
+                                cell.Cytosol.Reactions.Add(new AutocatalyticTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "catalyzedannihilation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "catalyzedassociation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedAssociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfReactants[1].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "catalyzedcreation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedAnnihilation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                            }
+                            else if (grt.TypeOfReaction == "catalyzeddimerization")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedDimerization(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+                            }
+                            else if (grt.TypeOfReaction == "catalyzeddimerdissociation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedDimerDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+                            }
+                            else if (grt.TypeOfReaction == "catalyzeddissociation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedDissociation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], cell.Cytosol.Populations[grt.listOfProducts[1].species], grt.RateConst));                            
+                            }
+                            else if (grt.TypeOfReaction == "catalyzedtransformation")
+                            {
+                                cell.Cytosol.Reactions.Add(new CatalyzedTransformation(cell.Cytosol.Populations[grt.listOfModifiers[0].species], cell.Cytosol.Populations[grt.listOfReactants[0].species], cell.Cytosol.Populations[grt.listOfProducts[0].species], grt.RateConst));                            
+                            }
+                        }
+                    }
+
                     sim.AddCell(cell);
 
                 }
@@ -2306,6 +2390,87 @@ namespace DaphneGui
                         {
                             sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
                         }
+                    }
+                    else if (grt.TypeOfReaction == "association" || grt.TypeOfReaction == "dissociation")
+                    {
+                        string rec, lig, comp;
+                        string recLocation, ligLocation, compLocation;
+
+                        GuiSpeciesReference gsr = grt.MolsByType["receptor"];
+                        rec = gsr.species;
+                        recLocation = gsr.Location;
+
+                        gsr = grt.MolsByType["ligand"];
+                        lig = gsr.species;
+                        ligLocation = gsr.Location;
+
+                        gsr = grt.MolsByType["complex"];
+                        comp = gsr.species;
+                        compLocation = gsr.Location;
+
+                        // add receptor ligand association and dissociation
+                        ////////    // R+L-> C
+                        ////////    // C -> R+L
+                        receptor = sim.ECS.Space.Populations[rec];
+                        ligand = sim.ECS.Space.Populations[lig];
+                        complex = sim.ECS.Space.Populations[comp];
+
+                        if (grt.TypeOfReaction == "association")
+                        {
+                            sim.ECS.Space.Reactions.Add(new Association(receptor, ligand, complex, k1plus));
+                        }
+                        else
+                        {
+                            sim.ECS.Space.Reactions.Add(new Dissociation(receptor, ligand, complex, k1minus));
+                        }
+                    }
+                    else if (grt.TypeOfReaction == "annihilation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new Annihilation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "dimerization")
+                    {
+                        sim.ECS.Space.Reactions.Add(new Dimerization(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "dimerdissociation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new DimerDissociation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "transformation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new Transformation(sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "autocatalytictransformation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new AutocatalyticTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzedannihilation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzedassociation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedAssociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfReactants[1].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzedcreation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedAnnihilation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzeddimerization")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedDimerization(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzeddimerdissociation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedDimerDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzeddissociation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedDissociation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], sim.ECS.Space.Populations[grt.listOfProducts[1].species], grt.RateConst));
+                    }
+                    else if (grt.TypeOfReaction == "catalyzedtransformation")
+                    {
+                        sim.ECS.Space.Reactions.Add(new CatalyzedTransformation(sim.ECS.Space.Populations[grt.listOfModifiers[0].species], sim.ECS.Space.Populations[grt.listOfReactants[0].species], sim.ECS.Space.Populations[grt.listOfProducts[0].species], grt.RateConst));
                     }
 
                 }
