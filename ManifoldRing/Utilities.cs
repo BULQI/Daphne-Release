@@ -249,18 +249,12 @@ namespace ManifoldRing
             }
         }
 
-        // a hack to increase compute time
-        public bool IsFluxing = false;
+        // Specify type of boundary condition at boundary manifold
+        // Neumann: specify flux at boundary
+        // Dirichlet: specify value at boundary
+        // Zero flux is the default boundary condition when Neumann=false and Dirichlet=false
+        public bool Neumann = false;
+        public bool Dirichlet = false;
+
     }
-
-    ///// <summary>
-    ///// LocalVectorMatrix is similar to local matrix, but indicates which component of a vector to use 
-    ///// </summary>
-    //public struct LocalVectorMatrix 
-    //{
-    //    public int Index;
-    //    public double Coefficient;
-    //    public int Component;
-    //}
-
 }

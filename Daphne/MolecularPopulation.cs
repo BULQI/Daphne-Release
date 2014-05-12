@@ -140,22 +140,31 @@ namespace Daphne
             UpdateBoundary();
 
             concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
-            // boundary fluxes
+
+            // Apply boundary fluxes
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
             {
-                //concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key].Translation);
                 concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
             }
 
+            // Apply Neumann natural boundary conditions
             foreach (KeyValuePair<int, ScalarField> kvp in NaturalBoundaryFluxes)
             {
-                // NOTE: This loop is computationally expensive for molecules in the ECM, especially when most faces have zero flux.
-                if (compartment.NaturalBoundaryTransforms[kvp.Key].IsFluxing)
+                if (compartment.NaturalBoundaryTransforms[kvp.Key].Neumann)
                 {
-                    // concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key].Translation);
                     concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]) / Molecule.DiffusionCoefficient;
                 }
             }
+
+            // Apply Dirichlet natural boundary conditions
+            foreach (KeyValuePair<int, ScalarField> kvp in NaturalBoundaryConcs)
+            {
+                if (compartment.NaturalBoundaryTransforms[kvp.Key].Dirichlet)
+                {
+                    concentration = concentration.DirichletBC(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]);
+                }
+            }
+       
         }
     }
 
