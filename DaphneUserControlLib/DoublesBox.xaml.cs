@@ -20,6 +20,22 @@ namespace DaphneUserControlLib
     /// </summary>
     public partial class DoublesBox : UserControl, INotifyPropertyChanged
     {
+        /*  Enhancement: Feb 19, 2014
+         *   
+         *  We need to display the number using significant digits instead 
+         *  of just decimal places. Here are the details:
+         *  
+         *  x = actual original number
+         *  d = number of significant digits
+         *  n = floor(log10(x))
+         *  m = d-1-n
+         *  y = number to display
+         *    = round(x*10^m) * (10^-m)
+         *    
+         *  Then take y and run it through the existing formatter
+         * 
+         */
+
         private bool SliderInitialized = false;
         private double min;                         //minimum value allowed
         private double max;                         //maximum value allowed 
@@ -35,14 +51,15 @@ namespace DaphneUserControlLib
             }
             set
             {
-                if (AutoRange)
-                {
-                    max = Number + Number / RangeFactor;
-                }
-                else
-                {
-                    max = AbsMaximum;
-                }
+                max = value;
+                //if (AutoRange)
+                //{
+                //    max = Number + Number / RangeFactor;
+                //}
+                //else
+                //{
+                //    max = AbsMaximum;
+                //}
 
                 OnPropertyChanged("Maximum");
             }
@@ -56,14 +73,15 @@ namespace DaphneUserControlLib
             }
             set
             {
-                if (AutoRange)
-                {
-                    min = Number - Number / RangeFactor;
-                }
-                else
-                {
-                    min = AbsMinimum;
-                }
+                min = value;
+                //if (AutoRange)
+                //{
+                //    min = Number - Number / RangeFactor;
+                //}
+                //else
+                //{
+                //    min = AbsMinimum;
+                //}
                 
                 OnPropertyChanged("Minimum");
             }
@@ -77,7 +95,7 @@ namespace DaphneUserControlLib
             }
             set
             {
-                fnumber = string.Format(_format, Number);
+                fnumber = value;
                 OnPropertyChanged("FNumber");
             }
         }
@@ -90,41 +108,98 @@ namespace DaphneUserControlLib
             }
             set
             {
-                _format = "{0:N" + DecimalPlaces.ToString() + "}";
-                if (Number >= SNUpperThreshold || Number < 0)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "0"; //#
-                    }
-
-                    _format += "e+00}";
-                }
-                else if (Number <= SNLowerThreshold && Number > 0)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "#";
-                    }
-
-                    _format += "e-00}";
-                }
+                _format = value;                
                 OnPropertyChanged("Format");
             }
         }
 
         private void SetMinMax()
         {
-            Minimum = 1;    //dummy
-            Maximum = 1;    //dummy
+            if (AutoRange)
+            {
+                Minimum = Number - Number / RangeFactor;
+                Maximum = Number + Number / RangeFactor;
+            }
+        }
+
+        private void SetMinMax(double min, double max)
+        {
+            Minimum = min;
+            Maximum = max;
+        }
+
+        private string ToFormatted(double number)
+        {
+            string result = "";
+
+            //Default format
+            string newFormat = "{0:0.";
+            for (int i = 0; i < DecimalPlaces; i++)
+            {
+                newFormat += "0"; //#
+            }
+            newFormat += "}";
+
+            //If need scientific notation - positive exponent
+            if (number >= SNUpperThreshold || number < 0 || (number >= 1 && Number < SNLowerThreshold))
+            {
+                if (DecimalPlaces == 0)
+                    DecimalPlaces++;
+
+                newFormat = "{0:#.";
+                for (int i = 0; i < DecimalPlaces; i++)
+                {
+                    newFormat += "0"; //#
+                }
+
+                if (Number >= 1 && Number < 10)
+                {
+                    newFormat += "}";
+                }
+                else
+                {
+                    newFormat += "E+00}";
+                }
+            }
+            //Need scientific notation - negative exponent
+            else if (number <= SNLowerThreshold && number > 0 && number < 1)
+            {
+                if (DecimalPlaces == 0)
+                    DecimalPlaces++;
+
+                newFormat = "{0:#.";
+                for (int i = 0; i < DecimalPlaces; i++)
+                {
+                    newFormat += "0";  //"#";
+                }
+
+                newFormat += "E-00}";
+            }
+
+            Format = newFormat;
+            result = string.Format(Format, number);
+            OnPropertyChanged("Format");
+
+            return result;
+        }
+
+        public double ToDisplayNumber()
+        {
+            if (Number <= 0)
+                return 0.0;
+
+            double result = 1;
+            double logvalue = Math.Log10(Number);
+            double n = Math.Floor(logvalue);
+            double m = SignificantDigits - 1 - n;
+
+            double temp1 = Number * (Math.Pow(10, m));
+            double temp2 = Math.Round(temp1);
+
+            double multiplier = (Math.Pow(10,-m));
+            result = temp2 * multiplier;
+
+            return result;
         }
 
         /// <summary>
@@ -212,8 +287,7 @@ namespace DaphneUserControlLib
             set
             {
                 SetValue(NumberProperty, value);
-                Format = "";
-                FNumber = string.Format(_format, Number);
+                FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
                 {
                     SetMinMax();
@@ -228,6 +302,27 @@ namespace DaphneUserControlLib
             uc.Number = (double)(e.NewValue);
         }
 
+        //SIGNIFICANT DIGITS        
+        public static DependencyProperty SignificantDigitsProperty = DependencyProperty.Register("SignificantDigits", typeof(int), typeof(DoublesBox), new FrameworkPropertyMetadata(3, SignificantDigitsPropertyChanged));
+        public int SignificantDigits
+        {
+            get { return (int)GetValue(SignificantDigitsProperty); }
+            set
+            {
+                SetValue(SignificantDigitsProperty, value);
+                FNumber = ToFormatted(ToDisplayNumber());
+
+                OnPropertyChanged("SignificantDigits");
+            }
+        }
+        private static void SignificantDigitsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.SignificantDigits = (int)(e.NewValue);
+        }
+
+
         //DECIMAL PLACES        
         public static DependencyProperty DecimalPlacesProperty = DependencyProperty.Register("DecimalPlaces", typeof(int), typeof(DoublesBox), new FrameworkPropertyMetadata(3, DecimalPlacesPropertyChanged));
         public int DecimalPlaces
@@ -236,9 +331,7 @@ namespace DaphneUserControlLib
             set
             {
                 SetValue(DecimalPlacesProperty, value);
-
-                Format = "";
-                FNumber = string.Format(_format, Number);
+                FNumber = ToFormatted(ToDisplayNumber());
 
                 OnPropertyChanged("DecimalPlaces");
             }
@@ -276,7 +369,6 @@ namespace DaphneUserControlLib
             DoublesBox uc = d as DoublesBox;
             uc.RangeFactor = (int)(e.NewValue);
         }
-
         
         //SCIENTIFIC NOTATION LOWER THRESHOLD       
         public static DependencyProperty SNLowerThresholdProperty = DependencyProperty.Register("SNLowerThreshold", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(0.01, SNLowerThresholdPropertyChanged));
@@ -286,10 +378,7 @@ namespace DaphneUserControlLib
             set
             {
                 SetValue(SNLowerThresholdProperty, value);
-
-                Format = "";
-                FNumber = string.Format(_format, Number);
-
+                FNumber = ToFormatted(ToDisplayNumber());
                 OnPropertyChanged("SNLowerThreshold");
             }
         }
@@ -310,8 +399,7 @@ namespace DaphneUserControlLib
             {
                 SetValue(SNUpperThresholdProperty, value);
                 OnPropertyChanged("SNUpperThreshold");
-                Format = "";
-                FNumber = string.Format(Format, Number);
+                FNumber = ToFormatted(ToDisplayNumber());
             }
         }
         private static void SNUpperThresholdPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -319,26 +407,6 @@ namespace DaphneUserControlLib
             // insert your code here
             DoublesBox uc = d as DoublesBox;
             uc.SNUpperThreshold = (double)(e.NewValue);
-        }
-
-        
-        //CAPTION          
-        public static DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(DoublesBox), new FrameworkPropertyMetadata("CAP", CaptionPropertyChanged));
-        public string Caption
-        {
-            get { return (string)GetValue(CaptionProperty); }
-            set
-            {
-                SetValue(CaptionProperty, value);
-                SetMinMax();
-                OnPropertyChanged("Caption");
-            }
-        }
-        private static void CaptionPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            // insert your code here
-            DoublesBox uc = d as DoublesBox;
-            uc.Caption = (string)(e.NewValue);
         }
 
         //SLIDERENABLED          
@@ -451,8 +519,17 @@ namespace DaphneUserControlLib
             get { return (bool)GetValue(AutoRangeProperty); }
             set
             {
-                SetValue(AutoRangeProperty, value);                
+                SetValue(AutoRangeProperty, value);
                 OnPropertyChanged("AutoRange");
+
+                if (value == true)
+                {
+                    SetMinMax();
+                }
+                else
+                {
+                    SetMinMax(AbsMinimum, AbsMaximum); 
+                }
             }
         }
         private static void AutoRangePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -466,14 +543,17 @@ namespace DaphneUserControlLib
         /// <summary>
         /// If automatic range calculation is not desired, use this to indicate slider min value.
         /// </summary>
-        public static DependencyProperty AbsMinimumProperty = DependencyProperty.Register("AbsMinimum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(AbsMinimumPropertyChanged));
+        public static DependencyProperty AbsMinimumProperty = DependencyProperty.Register("AbsMinimum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(1.0, AbsMinimumPropertyChanged));
         public double AbsMinimum
         {
             get { return (double)GetValue(AbsMinimumProperty); }
             set
             {
                 SetValue(AbsMinimumProperty, value);
-                SetMinMax();
+                if (!AutoRange)
+                {
+                    Minimum = value; //SetMinMax();
+                }
                 OnPropertyChanged("AbsMinimum");
             }
         }
@@ -487,14 +567,17 @@ namespace DaphneUserControlLib
         /// <summary>
         /// If automatic range calculation is not desired, use this to indicate slider max value.
         /// </summary>
-        public static DependencyProperty AbsMaximumProperty = DependencyProperty.Register("AbsMaximum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(AbsMaximumPropertyChanged));
+        public static DependencyProperty AbsMaximumProperty = DependencyProperty.Register("AbsMaximum", typeof(double), typeof(DoublesBox), new FrameworkPropertyMetadata(100.0, AbsMaximumPropertyChanged));
         public double AbsMaximum
         {
             get { return (double)GetValue(AbsMaximumProperty); }
             set
             {
                 SetValue(AbsMaximumProperty, value);
-                SetMinMax();
+                if (!AutoRange)
+                {
+                    Maximum = value;  //SetMinMax();
+                }
                 OnPropertyChanged("AbsMaximum");
             }
         }
@@ -503,6 +586,31 @@ namespace DaphneUserControlLib
             DoublesBox uc = d as DoublesBox;
             uc.AbsMaximum = (double)(e.NewValue);
         }
+
+
+
+#if USE_CAPTION
+		//CAPTION          
+        public static DependencyProperty CaptionProperty = DependencyProperty.Register("Caption", typeof(string), typeof(DoublesBox), new FrameworkPropertyMetadata("CAP", CaptionPropertyChanged));
+        public string Caption
+        {
+            get { return (string)GetValue(CaptionProperty); }
+            set
+            {
+                SetValue(CaptionProperty, value);
+                SetMinMax();
+                OnPropertyChanged("Caption");
+            }
+        }
+        private static void CaptionPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.Caption = (string)(e.NewValue);
+        } 
+#endif
+
+
     }
 }
 

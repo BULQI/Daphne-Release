@@ -549,21 +549,21 @@
                                                         <GridViewColumn Width="100" Header="X">
                                                             <GridViewColumn.CellTemplate>
                                                                 <DataTemplate>
-                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=x}"></uc:DoublesBox>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=x}"></uc:DoublesBox>
                                                                 </DataTemplate>
                                                             </GridViewColumn.CellTemplate>
                                                         </GridViewColumn>
                                                         <GridViewColumn Width="100" Header="Y" >
                                                             <GridViewColumn.CellTemplate>
                                                                 <DataTemplate>
-                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=y}"></uc:DoublesBox>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=y}"></uc:DoublesBox>
                                                                 </DataTemplate>
                                                             </GridViewColumn.CellTemplate>
                                                         </GridViewColumn>
                                                         <GridViewColumn Width="100" Header="Z">
                                                             <GridViewColumn.CellTemplate>
                                                                 <DataTemplate>
-                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=z}"></uc:DoublesBox>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=z}"></uc:DoublesBox>
                                                                 </DataTemplate>
                                                             </GridViewColumn.CellTemplate>
                                                         </GridViewColumn>

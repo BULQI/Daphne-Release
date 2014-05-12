@@ -241,7 +241,6 @@
                                                 RangeFactor="2"
                                                 SNLowerThreshold="0.001"
                                                 SNUpperThreshold="1000"
-                                                Caption=""
                                                 PropertyChanged="dblReacRate_PropertyChanged"
                                             />
                                         </StackPanel>

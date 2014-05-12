@@ -724,7 +724,7 @@
                                                 SNLowerThreshold="0.001"
                                                 SNUpperThreshold="1000"
                                                 SliderEnabled="False"                                                
-                                                Caption="">
+                                                >
                             </uc:DoublesBox>
                             
                         </StackPanel>
