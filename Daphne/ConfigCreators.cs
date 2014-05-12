@@ -420,6 +420,19 @@ namespace Daphne
             sc.entity_repository.transition_drivers.Add(config_td);
             sc.entity_repository.transition_drivers_dict.Add(config_td.driver_guid, config_td);
 
+            // generic division driver
+            config_td = new ConfigTransitionDriver();
+            config_td.Name = "generic division";
+            stateName = new string[] { "quiescent", "mitotic" };
+            signal = new string[,] { { "", "sDiv" }, { "", "" } };
+            alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+            beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, sc);
+            config_td.CurrentState = 0;
+            config_td.StateName = config_td.states[config_td.CurrentState];
+            sc.entity_repository.transition_drivers.Add(config_td);
+            sc.entity_repository.transition_drivers_dict.Add(config_td.driver_guid, config_td);
+
             ConfigCell gc;
             double[] conc;
             //ReactionType[] reacType;
@@ -467,7 +480,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[1] { 0};
+#if LEUKOCYTE_HAS_DEATH // remove to reenable death as a default behavior for leukocytes
+            conc = new double[1] { 0 };
             type = new string[1] { "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -502,6 +516,7 @@ namespace Daphne
             // Add death driver
             // Cell cytoplasm must contain sApop molecular population
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
+#endif
 
             gc.DragCoefficient = 1.0;
             sc.entity_repository.cells.Add(gc);
@@ -560,7 +575,6 @@ namespace Daphne
                 }
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
-            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
 
             // Reactions in Cytosol
             type = new string[3] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
@@ -633,7 +647,6 @@ namespace Daphne
                 }
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
-            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
 
             // Reactions in Cytosol
             type = new string[9] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
@@ -757,6 +770,9 @@ namespace Daphne
             // Add apoptosis
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
 
+            // add division
+            gc.div_driver_guid = findTransitionDriverGuid("generic division", sc);
+
             sc.entity_repository.cells.Add(gc);
 
             ///////////////////////////////////
@@ -854,6 +870,9 @@ namespace Daphne
 
             // Add apoptosis
             gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
+
+            // add division
+            gc.div_driver_guid = findTransitionDriverGuid("generic division", sc);
 
             sc.entity_repository.cells.Add(gc);
 
@@ -1186,7 +1205,7 @@ namespace Daphne
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
 
-            // Signaling (psuedo) molecules
+            // Signaling (pseudo) molecules
 
             // generic cell division
             cm = new ConfigMolecule("sDiv", 1.0, 1.0, 1.0);

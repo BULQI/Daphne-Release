@@ -3307,11 +3307,6 @@ namespace Daphne
 
         public int CurrentDeathState;
         public int CurrentDivState;
-
-        // This field should be deleted when the above implementation is completed
-        public string signaling_mol_guid_ref { get; set; }
-
-
     }
 
     public class CellPopDistType

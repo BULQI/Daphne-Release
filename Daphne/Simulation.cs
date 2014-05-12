@@ -632,16 +632,6 @@ namespace Daphne
                         }
                     }
 
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != null)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref];
-                        tde.Alpha = 0;
-                        tde.Beta = 0.002;
-
-                        cell.DeathBehavior.AddDriverElement(0, 1, tde);
-                    }
                     // division behavior
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid != null)
                     {
