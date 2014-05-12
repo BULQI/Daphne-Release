@@ -130,6 +130,7 @@
     <Compile Include="Reporter.cs" />
     <Compile Include="SimConfiguration.cs" />
     <Compile Include="Simulation.cs" />
+    <Compile Include="Terminator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

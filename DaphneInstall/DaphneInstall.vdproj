@@ -7,10 +7,10 @@
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
-"SccProjectName" = "8:"
-"SccLocalPath" = "8:"
-"SccAuxPath" = "8:"
-"SccProvider" = "8:"
+"SccProjectName" = "8:SAK"
+"SccLocalPath" = "8:SAK"
+"SccAuxPath" = "8:SAK"
+"SccProvider" = "8:SAK"
     "Hierarchy"
     {
         "Entry"
@@ -196,13 +196,13 @@
         "Entry"
         {
         "MsmKey" = "8:_EA437055A8189348A4C15624C9EB30CC"
-        "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
+        "OwnerKey" = "8:_CCE0D6D4883393E0138AA2C5D6A4D831"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_EA437055A8189348A4C15624C9EB30CC"
-        "OwnerKey" = "8:_CCE0D6D4883393E0138AA2C5D6A4D831"
+        "OwnerKey" = "8:_892AE9FA56A74D73928B0A353AE7AEBA"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -316,19 +316,19 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_CCE0D6D4883393E0138AA2C5D6A4D831"
+        "OwnerKey" = "8:_4AD1ECA89CCE0823AF68F934D94ED16C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_80216F9B6D855D960B9672BE22FA6B29"
+        "OwnerKey" = "8:_72800854646836EDADF2A35D32264DF1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_EA437055A8189348A4C15624C9EB30CC"
+        "OwnerKey" = "8:_FCA79FA46B606D609F17FD8B13FE49BD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -950,11 +950,6 @@
             "AssemblyAsmDisplayName" = "8:ActiproSoftware.Docking.Wpf351, Version=11.1.542.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_80216F9B6D855D960B9672BE22FA6B29"
-                    {
-                    "Name" = "8:ActiproSoftware.Docking.Wpf351.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:ActiproSoftware.Docking.Wpf351.dll"
             "TargetName" = "8:"
@@ -1187,11 +1182,6 @@
             "AssemblyAsmDisplayName" = "8:ActiproSoftware.Shared.Wpf351, Version=11.1.542.0, Culture=neutral, PublicKeyToken=36ff2196ab5654b9, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_EA437055A8189348A4C15624C9EB30CC"
-                    {
-                    "Name" = "8:ActiproSoftware.Shared.Wpf351.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:ActiproSoftware.Shared.Wpf351.dll"
             "TargetName" = "8:"
