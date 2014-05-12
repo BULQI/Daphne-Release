@@ -82,7 +82,11 @@ namespace Workbench
         {
             rc = new ReactionComplex(grc.Name, new TinyBall(5.0));
             
-            grc.CopyReactionsTo(rc);
+            //grc.CopyReactionsTo(rc);
+            foreach (GuiReactionTemplate grt in grc.Reactions)
+            {
+                rc.ReactionsInComplex.Add(grt);
+            }
             grc.ParseForMolecules();
             //grc.CopyMoleculesTo(rc);
             rc.Initialize();

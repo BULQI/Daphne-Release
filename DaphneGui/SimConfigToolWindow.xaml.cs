@@ -6,6 +6,9 @@ using System.Windows.Controls;
 using ActiproSoftware.Windows.Controls.Docking;
 
 using Workbench;
+using Daphne;
+using System.Windows.Data;
+using System.Collections.ObjectModel;
 
 
 namespace DaphneGui
@@ -101,12 +104,12 @@ namespace DaphneGui
             cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.scenario.cellpopulations.Add(cs);
-            CellSetsListBox.SelectedIndex = CellSetsListBox.Items.Count - 1;
+            CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
         private void RemoveCellButton_Click(object sender, RoutedEventArgs e)
         {
-            CellPopulation current_item = (CellPopulation)CellSetsListBox.SelectedItem;
+            CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
         }
 
@@ -195,7 +198,7 @@ namespace DaphneGui
             }
         }
 
-        private void SolfacDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of solfacs list
@@ -207,7 +210,7 @@ namespace DaphneGui
             MolPopInfo current_item = current_mol.mpInfo;
             MolPopDistributionType new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
-            // Only want to change solfac distribution type if the combo box isn't just selecting 
+            // Only want to change distribution type if the combo box isn't just selecting 
             // the type of current item in the solfacs list box (e.g. when list selection is changed)
             if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
             {
@@ -427,7 +430,7 @@ namespace DaphneGui
             GuiMolecularPopulation gmp = new GuiMolecularPopulation();
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo();
-            gmp.mpInfo.mp_name = "New Soluble Factor";
+            gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mpInfo.mp_is_time_varying = false;
             MainWindow.SC.SimConfig.scenario.MolPops.Add(gmp);
@@ -513,12 +516,12 @@ namespace DaphneGui
             //*******************************
             //THIS IS NOT OK
             //*****************************
-            MainWindow.SC.SimConfig.ChartWindow.Title = "Reaction Complex: " + grc.Name;
-            MainWindow.SC.SimConfig.ChartWindow.RC = rcs.RC;
-            MainWindow.SC.SimConfig.ChartWindow.Activate();
-            MainWindow.SC.SimConfig.ChartWindow.Render();
-            MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Maximum = rcs.RC.dMaxTime;
-            MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Value = rcs.RC.dInitialTime;
+            ////////MainWindow.SC.SimConfig.ChartWindow.Title = "Reaction Complex: " + grc.Name;
+            ////////MainWindow.SC.SimConfig.ChartWindow.RC = rcs.RC;
+            ////////MainWindow.SC.SimConfig.ChartWindow.Activate();
+            ////////MainWindow.SC.SimConfig.ChartWindow.Render();
+            ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Maximum = rcs.RC.dMaxTime;
+            ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Value = rcs.RC.dInitialTime;
               
             //////////rc = Sim.FindReactionComplex(rcname);
 
@@ -537,5 +540,10 @@ namespace DaphneGui
             //////////ReacComplexChartWindow.slMaxTime.Value = rc.dInitialTime;
 
         }
+
+        
     }
+
+   
+    
 }

@@ -109,7 +109,6 @@
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GuiReactionComplex.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
     </Compile>
@@ -128,13 +127,11 @@
       <DependentUpon>EditRCReactions.xaml</DependentUpon>
     </Compile>
     <Compile Include="GuiExtension.cs" />
-    <Compile Include="GuiReactionTemplate.cs" />
     <Compile Include="Workbench\ReactionComplex.cs" />
     <Compile Include="RecentFileList.cs" />
     <Compile Include="SimConfigToolWindow.xaml.cs">
       <DependentUpon>SimConfigToolWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SimConfiguration.cs" />
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
     <Compile Include="Workbench\ReactionComplexSimulation.cs" />

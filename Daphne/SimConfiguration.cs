@@ -6,14 +6,17 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Windows.Data;
+
 using System.Xml.Serialization;
-using Daphne;
+//using Daphne;
 using Newtonsoft.Json;
-using Workbench;
+//using Workbench;
 using System.Linq;
 
-namespace DaphneGui
+using System.Windows.Media;
+using System.Windows.Data;
+
+namespace Daphne
 {
     public class SimConfigurator
     {
@@ -115,14 +118,15 @@ namespace DaphneGui
         public ObservableCollection<GlobalParameter> global_parameters { get; set; }
         public EntityRepository entity_repository { get; set; }
 
-        //skg daphne Tuesday, April 16, 2013                             
+        //skg daphne Tuesday, April 16, 2013        
         public ObservableCollection<GuiReactionTemplate>    PredefReactions { get; set; }
         public ObservableCollection<GuiMolecule>            PredefMolecules { get; set; }
         public ObservableCollection<GuiReactionComplex> PredefReactionComplexes { get; set; }
+        public ObservableCollection<GuiCell> PredefCells { get; set; }
 
-        [XmlIgnore]
-        [JsonIgnore]
-        public ChartViewToolWindow ChartWindow;
+        //[XmlIgnore]
+        //[JsonIgnore]
+        //public ChartViewToolWindow ChartWindow;
 
         // Convenience utility storage (not serialized)
         // NOTE: These could be moved to entity_repository...
@@ -146,9 +150,12 @@ namespace DaphneGui
             entity_repository = new EntityRepository();
 
             //skg daphne
+            
             PredefReactions = new ObservableCollection<GuiReactionTemplate>();
             PredefMolecules = new ObservableCollection<GuiMolecule>();
             PredefReactionComplexes = new ObservableCollection<GuiReactionComplex>();
+            PredefCells = new ObservableCollection<GuiCell>();
+            //LoadDefaultGlobalParameters();
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
@@ -212,6 +219,103 @@ namespace DaphneGui
             bs.z_scale_min = scenario.environment.extent_min;
             bs.z_trans_max = 1.5 * scenario.environment.extent_z;
             bs.z_trans_min = -scenario.environment.extent_z / 2.0;
+        }
+
+        private void PREDEFINEDCELLSCREATOR()
+        {
+            
+            //---------------------------------------------------------------------------------------
+            //BCell 
+
+            GuiCell gc = new GuiCell();
+            gc.CellName = "BCell";
+            gc.CellRadius = 5.0;
+
+            //MOLECULES IN MEMBRANE
+            var query1 =
+                from mol in PredefMolecules
+                where mol.Name == "CXCR5" || mol.Name == "CXCR5:CXCL13"
+                select mol;
+
+            GuiMolecularPopulation gmp = null;
+            foreach (GuiMolecule gm in query1)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "CXCR5" || gm.Name == "CXCR5:CXCL13")
+                {
+                    gmp.Location = MolPopPosition.Membrane;
+                }
+
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                //if (gm.Name == "CXCR5")
+                //    sgg.peak_concentration = 125;
+                //else
+                //    sgg.peak_concentration = 130;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //gmp.mpInfo.mp_distribution = sgg;
+                
+                gc.CellMolPops.Add(gmp);
+            }
+
+            //MOLECULES IN CYTOSOL
+            var query2 =
+                from mol in PredefMolecules
+                where mol.Name == "driver"
+                select mol;
+
+            gmp = null;
+            foreach (GuiMolecule gm in query2)
+            {
+                gmp = new GuiMolecularPopulation();
+                gmp.Molecule = new GuiMolecule(gm);
+                gmp.mpInfo = new MolPopInfo("My " + gm.Name);
+                gmp.Name = "My " + gm.Name;
+                if (gm.Name == "driver")
+                {
+                    gmp.Location = MolPopPosition.Cytosol;
+                }
+
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
+                gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                gmp.mpInfo.mp_render_blending_weight = 2.0;
+                //MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                //sgg.peak_concentration = 250;
+                //sgg.gaussgrad_gauss_spec_guid_ref = entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                //gmp.mpInfo.mp_distribution = sgg;
+
+                gc.CellMolPops.Add(gmp);
+            }
+
+            PredefCells.Add(gc);
+
+            //---------------------------------------------------------------------------------------
+            //TCell 
+
+            gc = new GuiCell();
+            gc.CellName = "TCell";
+            gc.CellRadius = 5.0;
+
+            PredefCells.Add(gc);
+
+            gc = new GuiCell();
+            gc.CellName = "FDC";
+            gc.CellRadius = 5.0;
+
+            PredefCells.Add(gc);
+
+            //Write out into json file!
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(PredefCells, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonFile = "Config\\DaphnePredefinedCells.txt";
+            File.WriteAllText(jsonFile, jsonSpec);
         }
 
         //Following function needs to be called only once
@@ -601,6 +705,7 @@ namespace DaphneGui
             //skg daphne
 
             PREDEFINEDREACTIONSCREATOR();
+            
 
             string path = "Config\\DaphnePredefinedReactions.txt";
             //string readText = File.ReadAllText(path);
@@ -616,6 +721,13 @@ namespace DaphneGui
             path = "Config\\DaphnePredefinedMolecules.txt";
             readText = File.ReadAllText(path);
             PredefMolecules = JsonConvert.DeserializeObject<ObservableCollection<GuiMolecule>>(readText);
+
+            PREDEFINEDCELLSCREATOR();
+
+            PredefCells.Clear();
+            path = "Config\\DaphnePredefinedCells.txt";
+            readText = File.ReadAllText(path);
+            PredefCells = JsonConvert.DeserializeObject<ObservableCollection<GuiCell>>(readText, settings);
 
             GuiReactionComplex rc = new GuiReactionComplex();
             rc.Name = "Bistable";
@@ -711,7 +823,7 @@ namespace DaphneGui
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -722,11 +834,15 @@ namespace DaphneGui
             }
 
             //ADD CELLS AND MOLECULES IN THE CELLS
+            GuiCell gc = new GuiCell();
+            gc.CellName = "BCell";
+            gc.CellRadius = 4.0;
+           
             CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "Bcells starting in ellipsoid";
+            cp.cellpopulation_name = "My BCell";
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
-            //cp.wrt_region = MolPopPosition.Cytosol;
+            cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
 
             var query1 =
@@ -746,7 +862,7 @@ namespace DaphneGui
                     gmp.Location = MolPopPosition.Membrane;
                 }
 
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -755,6 +871,7 @@ namespace DaphneGui
                 gmp.mpInfo.mp_distribution = sgg;
 
                 cp.CellMolPops.Add(gmp);
+                gc.CellMolPops.Add(gmp);
             }
 
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
@@ -856,7 +973,7 @@ namespace DaphneGui
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
                 gmp.Location = MolPopPosition.ECS;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -867,10 +984,15 @@ namespace DaphneGui
             }
 
             //ADD CELLS AND MOLECULES IN THE CELLS
+            GuiCell gc = new GuiCell();
+            gc.CellName = "BCell";
+            gc.CellRadius = 4.0;
+
             CellPopulation cp = new CellPopulation();
-            cp.cellpopulation_name = "Bcells starting in ellipsoid";
+            cp.cellpopulation_name = "My-B-Cell";
             cp.number = 1;
             cp.cellpopulation_constrained_to_region = true;
+            cp.wrt_region = RelativePosition.Inside;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
 
             //MOLECULES IN MEMBRANE
@@ -891,7 +1013,7 @@ namespace DaphneGui
                     gmp.Location = MolPopPosition.Membrane;
                 }
 
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -903,6 +1025,7 @@ namespace DaphneGui
                 gmp.mpInfo.mp_distribution = sgg;
 
                 cp.CellMolPops.Add(gmp);
+                gc.CellMolPops.Add(gmp);
             }
 
             //MOLECULES IN CYTOSOL
@@ -923,7 +1046,7 @@ namespace DaphneGui
                     gmp.Location = MolPopPosition.Cytosol;
                 }
 
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
                 MolPopGaussianGradient sgg = new MolPopGaussianGradient();
@@ -932,6 +1055,7 @@ namespace DaphneGui
                 gmp.mpInfo.mp_distribution = sgg;
 
                 cp.CellMolPops.Add(gmp);
+                gc.CellMolPops.Add(gmp);
             }
 
             //NO REACTIONS INSIDE CELL FOR THIS SCENARIO
@@ -1041,7 +1165,7 @@ namespace DaphneGui
                 gmp.Molecule = new GuiMolecule(gm);
                 gmp.mpInfo = new MolPopInfo("My " + gm.Name);
                 gmp.Name = "My " + gm.Name;
-                gmp.mpInfo.mp_name = "Gaussian gradient";
+                gmp.mpInfo.mp_dist_name = "Gaussian gradient";
                 //gmp.mpInfo.mp_type_guid_ref = entity_repository.solfac_types[0].solfac_type_guid;
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
@@ -1541,6 +1665,24 @@ namespace DaphneGui
         }
     }
 
+    public class GuiCell
+    {
+        public GuiCell()
+        {
+            CellName = "Default Cell";
+            CellRadius = 5.0;
+
+            CellMolPops = new ObservableCollection<GuiMolecularPopulation>();
+        }
+
+        public string CellName { get; set; }
+        public double CellRadius { get; set; }
+
+        public ObservableCollection<GuiMolecularPopulation> CellMolPops { get; set; }
+        public ObservableCollection<GuiReactionTemplate> CellReactions { get; set; }
+        public ObservableCollection<GuiReactionComplex> CellReactionComplexes { get; set; }
+    }
+
     public class CellPopulation
     {
         public string cellpopulation_name { get; set; }
@@ -1574,7 +1716,7 @@ namespace DaphneGui
         public System.Windows.Media.Color cellpopulation_color { get; set; }
 
         //skg Daphne
-        public double CellRadius { get; set; }
+        public GuiCell CellType { get; set; }
         public double MaxConc { get; set; }
         public double[] Sigma { get; set; }
         public double[] Center { get; set; }
@@ -1586,7 +1728,7 @@ namespace DaphneGui
         {
             Guid id = Guid.NewGuid();
             cellpopulation_guid = id.ToString();
-            cellpopulation_name = "Default Cell";
+            cellpopulation_name = "";
             cell_subset_guid_ref = "";
             number = 100;
             cellpopulation_constrained_to_region = false;
@@ -1606,18 +1748,18 @@ namespace DaphneGui
     public class MolPopInfo : EntityModelBase
     {
         public string mp_guid { get; set; }
-        private string _mp_name = "";
-        public string mp_name
+        private string _mp_dist_name = "";
+        public string mp_dist_name
         {
-            get { return _mp_name; }
+            get { return _mp_dist_name; }
             set
             {
-                if (_mp_name == value)
+                if (_mp_dist_name == value)
                     return;
                 else
                 {
-                    _mp_name = value;
-                    OnPropertyChanged("mp_name");
+                    _mp_dist_name = value;
+                    OnPropertyChanged("mp_dist_name");
                 }
             }
         }
@@ -1679,7 +1821,7 @@ namespace DaphneGui
         {
             Guid id = Guid.NewGuid();
             mp_guid = id.ToString();
-            mp_name = name;
+            mp_dist_name = name;
             mp_type_guid_ref = "";
             // Default is static homogeneous level
             mp_distribution = new MolPopHomogeneousLevel();
@@ -1829,7 +1971,7 @@ namespace DaphneGui
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
     [ValueConversion(typeof(MolPopDistributionType), typeof(string))]
-    public class SolfacDistributionTypeToStringConverter : IValueConverter
+    public class MolPopDistributionTypeToStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the GlobalParameterType enum...
@@ -1860,6 +2002,9 @@ namespace DaphneGui
             return (MolPopDistributionType)Enum.ToObject(typeof(MolPopDistributionType), (int)idx);
         }
     }
+
+
+    
 
     // Base class for homog, linear, gauss distributions
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
@@ -1964,8 +2109,8 @@ namespace DaphneGui
 
     public class MolPopCustomGradient : MolPopDistribution
     {
-        private Uri _custom_gradient_file_uri = new Uri(MainWindow.appPath);
-        private string _custom_gradient_file_string = MainWindow.appPath;
+        private Uri _custom_gradient_file_uri = new Uri("c:\\temp2"/*DaphneGui.MainWindow.appPath*/);
+        private string _custom_gradient_file_string = "c:\\temp2"; //DaphneGui.MainWindow.appPath;
 
         public MolPopCustomGradient()
         {

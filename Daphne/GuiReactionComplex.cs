@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
-using Daphne;
-using Workbench;
+//using Daphne;
+//using Workbench;
 using System.Xml.Serialization;
+//using DaphneGui;
 
-namespace DaphneGui
+namespace Daphne
 {
     public class GuiReactionComplex
     {
@@ -33,7 +34,7 @@ namespace DaphneGui
             {
                 foreach (SpeciesReference sr in grt.listOfReactants)
                 {
-                    GuiMolecule gm = MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    GuiMolecule gm = null;  // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null) {
                         if (!MolDict.ContainsKey(sr.species))
                         {
@@ -44,7 +45,7 @@ namespace DaphneGui
                 }
                 foreach (SpeciesReference sr in grt.listOfProducts)
                 {
-                    GuiMolecule gm = MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    GuiMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null)
                     {
                         if (!MolDict.ContainsKey(sr.species))
@@ -56,7 +57,7 @@ namespace DaphneGui
                 }
                 foreach (SpeciesReference sr in grt.listOfModifiers)
                 {
-                    GuiMolecule gm = MainWindow.SC.SimConfig.FindMolecule(sr.species);
+                    GuiMolecule gm = null; // MainWindow.SC.SimConfig.FindMolecule(sr.species);
                     if (gm != null)
                     {
                         if (!MolDict.ContainsKey(sr.species))
@@ -69,29 +70,29 @@ namespace DaphneGui
             }
 
             // Write out XML file
-            MainWindow.SC.SerializeSimConfigToFile();
+            //MainWindow.SC.SerializeSimConfigToFile();
         }
 
-        public void CopyReactionsTo(ReactionComplex rc)
-        {
-            //Copy reactions
-            foreach (GuiReactionTemplate grt in Reactions)
-            {
-                rc.ReactionsInComplex.Add(grt);
-            }
+        ////public void CopyReactionsTo(ReactionComplex rc)
+        ////{
+        ////    //Copy reactions
+        ////    foreach (GuiReactionTemplate grt in Reactions)
+        ////    {
+        ////        rc.ReactionsInComplex.Add(grt);
+        ////    }
 
             
-        }
+        ////}
 
-        public void CopyMoleculesTo(ReactionComplex rc)
-        {
-            //Copy molecules
-            foreach (KeyValuePair<string, Molecule> kvp in MolDict)
-            {
-                Molecule mol = new Molecule(kvp.Value.Name, kvp.Value.MolecularWeight, kvp.Value.EffectiveRadius, kvp.Value.DiffusionCoefficient);
-                rc.AddMolecularPopulation(mol, 2.0);
-            }
-        }
+        ////public void CopyMoleculesTo(ReactionComplex rc)
+        ////{
+        ////    //Copy molecules
+        ////    foreach (KeyValuePair<string, Molecule> kvp in MolDict)
+        ////    {
+        ////        Molecule mol = new Molecule(kvp.Value.Name, kvp.Value.MolecularWeight, kvp.Value.EffectiveRadius, kvp.Value.DiffusionCoefficient);
+        ////        rc.AddMolecularPopulation(mol, 2.0);
+        ////    }
+        ////}
 
         //public void Run()
         //{

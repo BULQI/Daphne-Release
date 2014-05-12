@@ -48,9 +48,14 @@
     <Reference Include="MathNet.Iridium">
       <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\dependencies\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.0.2-unstable-9\lib\net40\Ninject.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -61,6 +66,7 @@
     <Reference Include="Troschuetz.Random">
       <HintPath>..\dependencies\Troschuetz.Random.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common.cs" />
@@ -70,6 +76,8 @@
     <Compile Include="Chemistry.cs" />
     <Compile Include="Compartment.cs" />
     <Compile Include="Differentiator.cs" />
+    <Compile Include="GuiReactionComplex.cs" />
+    <Compile Include="GuiReactionTemplate.cs" />
     <Compile Include="Locomotor.cs" />
     <Compile Include="MolecularPopulation.cs" />
     <Compile Include="MoleculeBuilder.cs" />
@@ -77,6 +85,7 @@
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
+    <Compile Include="SimConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
