@@ -151,6 +151,8 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
                                   />
+            <CollectionViewSource x:Key="cytoGenesListView"  
+                                  Source="{Binding Path=entity_repository.genes}"/>
             <CollectionViewSource x:Key="ecmReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   />
@@ -1352,7 +1354,7 @@
                                     <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                                     <ComboBox  MinWidth="100"
                                                 DisplayMemberPath="Name"
-                                                SelectedValue="{Binding Path=locomotor_mol_guid_ref}"
+                                                SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
                                                 SelectedValuePath="molecule_guid">
 
                                         <ComboBox.ItemsSource>
@@ -1578,9 +1580,16 @@
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
-                                <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
-                                <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
+                                <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                        ItemsSource="{Binding Source={StaticResource cytoBulkMoleculesListView}}"
+                                        DisplayMemberPath="Name"                                                    
+                                        SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                        SelectedValuePath="molecule_guid"
+                                        SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
+                                        GotFocus="cyto_molecule_combo_box_GotFocus"
+                                        />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                 <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
@@ -1597,37 +1606,30 @@
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
                                 <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                 <Slider x:Name="solfac_weight_slider"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                    HorizontalAlignment="Left"
-                                Width="50"
-                                    Margin="4,0"
-                                RenderTransform="1.0,0,0,0.5,0,7"
-                                Minimum="0" 
-                                Maximum="5" 
-                                Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
-                                IsSnapToTickEnabled="True" 
-                                TickFrequency="0.1" 
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                            HorizontalAlignment="Left"
+                                        Width="50"
+                                            Margin="4,0"
+                                        RenderTransform="1.0,0,0,0.5,0,7"
+                                        Minimum="0" 
+                                        Maximum="5" 
+                                        Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
+                                        IsSnapToTickEnabled="True" 
+                                        TickFrequency="0.1" 
                                 />
                                 <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                VerticalAlignment="Center"
-                                TextAlignment="Right"
-                                Margin="5,0,0,0"
-                                MinWidth="20"
+                                        VerticalAlignment="Center"
+                                        TextAlignment="Right"
+                                        Margin="5,0,0,0"
+                                        MinWidth="20"
                                 />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
-                                <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                
-                                <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                    ItemsSource="{Binding Source={StaticResource cytoBulkMoleculesListView}}"
-                                                    DisplayMemberPath="Name"                                                    
-                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="molecule_guid"
-                                                    SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
-                                                    GotFocus="cyto_molecule_combo_box_GotFocus"
-                                                    />
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
+                                <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
                             </StackPanel>
+                            
                         </Grid>
                     </StackPanel>
                     <StackPanel Margin="10,0">
@@ -1637,6 +1639,8 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
@@ -1655,8 +1659,23 @@
                                         ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
                                         Margin="6,2"/>
                             </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="10,10">
+                                <TextBlock Text="gene" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+
+                                <ComboBox  x:Name="cyto_gene_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                    ItemsSource="{Binding Source={StaticResource cytoGenesListView}}"
+                                                    DisplayMemberPath="Name"                                                    
+                                                    SelectedValue="{Binding Path=gene_guid_ref, UpdateSourceTrigger=Explicit}"
+                                                    />
+                            </StackPanel>
+
+
+
                         </Grid>
+                        
                     </StackPanel>
+                    
                 </local:DaphneStackPanel>
             </DataTemplate>
             

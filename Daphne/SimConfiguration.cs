@@ -2867,7 +2867,28 @@ namespace Daphne
 
         public string CellName { get; set; }
         public double CellRadius { get; set; }
-        public string locomotor_mol_guid_ref { get; set; }
+
+        private string _locomotor_mol_guid_ref;
+        public string locomotor_mol_guid_ref
+        {
+            get
+            {
+                return _locomotor_mol_guid_ref;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    _locomotor_mol_guid_ref = "";
+                }                
+                else
+                {
+                    _locomotor_mol_guid_ref = value;
+                }
+            }
+        }
+
+
         public double TransductionConstant { get; set; }
         public double DragCoefficient { get; set; }
         public string cell_guid { get; set; }
