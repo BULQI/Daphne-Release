@@ -15,6 +15,135 @@ using System.ComponentModel;
 
 namespace DaphneUserControlLib
 {
+
+    ///------------------------------------------------------------------------------------------
+    /// <summary>
+    /// Helper class
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
+    class Maths
+    {
+
+        private static String m_strZeros = "000000000000000000000000000000000";
+        /// <summary>
+        ///     The minus sign
+        /// </summary>
+        public const char m_cDASH = '-';
+
+        /// <summary>
+        ///     Determines the number of digits before the decimal point
+        /// </summary>            
+        /// <param name="strValue">
+        ///     Value to be parsed
+        /// </param>
+        /// <returns>
+        ///     Number of digits before the decimal point
+        /// </returns>
+        private static ushort NumOfDigitsBeforeDecimal(String strValue)
+        {
+            char cDecimal = '.';
+            short nDecimalPosition = (short)strValue.IndexOf(cDecimal);
+            ushort usSignificantDigits = 0;
+
+            if (nDecimalPosition >= 0)
+            {
+                strValue = strValue.Substring(0, nDecimalPosition + 1);
+            }
+
+            for (int i = 0; i < strValue.Length; i++)
+            {
+                if (strValue[i] != m_cDASH) usSignificantDigits++;
+
+                if (strValue[i] == cDecimal)
+                {
+                    usSignificantDigits--;
+                    break;
+                }
+            }
+
+            return usSignificantDigits;
+        }
+
+        /// <summary>
+        ///     Rounds to a fixed number of significant digits
+        /// </summary>
+        /// <param name="d">
+        ///     Number to be rounded
+        /// </param>
+        /// <param name="usSignificants">
+        ///     Requested significant digits
+        /// </param>
+        /// <returns>
+        ///     The rounded number
+        /// </returns>
+        public static String Round(char cDecimal, double d, int nSignificants)
+        {
+            StringBuilder value = new StringBuilder(Convert.ToString(d));
+
+            int nDecimalPosition = value.ToString().IndexOf(cDecimal);
+            int nAfterDecimal = 0;
+            int nDigitsBeforeDecimalPoint = NumOfDigitsBeforeDecimal(value.ToString());
+
+            if (nDigitsBeforeDecimalPoint == 1)
+            {
+                nAfterDecimal = (d == 0) ? nSignificants : value.Length - nDecimalPosition - 1;
+            }
+            else
+            {
+                if (nSignificants >= nDigitsBeforeDecimalPoint)
+                {
+                    nAfterDecimal = nSignificants - nDigitsBeforeDecimalPoint;
+                }
+                else
+                {
+                    double dPower = Math.Pow(10, nDigitsBeforeDecimalPoint - nSignificants);
+                    d = dPower * (long)(d / dPower);
+                }
+            }
+
+            double dRounded = Math.Round(d, nAfterDecimal);
+            StringBuilder result = new StringBuilder();
+
+            result.Append(dRounded);
+
+            double scale = Math.Pow(10, Math.Floor(Math.Log10(Math.Abs(dRounded))) + 1);
+            dRounded = dRounded / scale;
+
+            string sRounded = dRounded.ToString();
+
+            char[] charsToTrim1 = {'0', '-'};
+            sRounded = sRounded.Trim(charsToTrim1);
+            char[] charsToTrim2 = { '.' };
+            sRounded = sRounded.Trim(charsToTrim2);
+
+            int nDigits = sRounded.Length;
+
+            //int nDigits = dRounded.ToString().Replace(Convert.ToString(cDecimal), "").Replace(Convert.ToString(m_cDASH), "").Length;
+
+            // Add lagging zeros, if necessary:
+            if (nDigits < nSignificants)
+            {
+                int nToAppend = nSignificants - nDigits;
+                result.Append(m_strZeros.Substring(0, nToAppend));
+                ////if (nAfterDecimal != 0)
+                ////{
+                ////    if (result.ToString().IndexOf(cDecimal) == -1)
+                ////    {
+                ////        result.Append(cDecimal);
+                ////    }
+
+                ////    int i = (d == 0) ? 0 : Math.Min(0, nDigits - nSignificants);
+
+                ////    result.Append(m_strZeros.Substring(0, nAfterDecimal + i));
+                ////}
+            }
+
+            return result.ToString();
+        }
+    }
+    //-----------------------------------------------------------------------------------
+
     /// <summary>
     /// Interaction logic for DoublesBox.xaml
     /// </summary>
@@ -42,7 +171,7 @@ namespace DaphneUserControlLib
         public double Tick { get; set; }            //slider/edit box increment if applicable
         private string _format;                     //format specifier string
         private string fnumber;                     //string that represents value after formatting is applied
-
+        
         public double Maximum
         {
             get
@@ -128,65 +257,81 @@ namespace DaphneUserControlLib
             Maximum = max;
         }
 
+
         private string ToFormatted(double number)
         {
-            string result = "";
-
-            //Default format
-            string newFormat = "{0:0.";
-            for (int i = 0; i < DecimalPlaces; i++)
-            {
-                newFormat += "0"; //#
-            }
-            newFormat += "}";
-
-            //If need scientific notation - positive exponent
-            if (number >= SNUpperThreshold || number < 0 || (number >= 1 && Number < SNLowerThreshold))
-            {
-                if (DecimalPlaces == 0)
-                    DecimalPlaces++;
-
-                newFormat = "{0:#.";
-                for (int i = 0; i < DecimalPlaces; i++)
-                {
-                    newFormat += "0"; //#
-                }
-
-                if (Number >= 1 && Number < 10)
-                {
-                    newFormat += "}";
-                }
-                else
-                {
-                    newFormat += "E+00}";
-                }
-            }
-            //Need scientific notation - negative exponent
-            else if (number <= SNLowerThreshold && number > 0 && number < 1)
-            {
-                if (DecimalPlaces == 0)
-                    DecimalPlaces++;
-
-                newFormat = "{0:#.";
-                for (int i = 0; i < DecimalPlaces; i++)
-                {
-                    newFormat += "0";  //"#";
-                }
-
-                newFormat += "E-00}";
-            }
-
-            Format = newFormat;
-            result = string.Format(Format, number);
-            OnPropertyChanged("Format");
-
-            return result;
+            return number.ConvertToSignificantDigits(SignificantDigits, SNLowerThreshold, SNUpperThreshold);
         }
+
+        ////private string ToFormatted(double number)
+        ////{
+        ////    string sTemp = Maths.Round('.', number, SignificantDigits);
+        ////    return sTemp;
+        ////}
+
+        
+
+        ////private string ToFormatted(double number)
+        ////{
+
+            
+        ////    string result = "";
+
+        ////    //Default format
+        ////    string newFormat = "{0:0.";
+        ////    for (int i = 0; i < DecimalPlaces; i++)
+        ////    {
+        ////        newFormat += "0"; //#
+        ////    }
+        ////    newFormat += "}";
+
+        ////    //If need scientific notation - positive exponent
+        ////    if (number >= SNUpperThreshold || number < 0 || (number >= 1 && Number < SNLowerThreshold))
+        ////    {
+        ////        if (DecimalPlaces == 0)
+        ////            DecimalPlaces++;
+
+        ////        newFormat = "{0:#.";
+        ////        for (int i = 0; i < DecimalPlaces; i++)
+        ////        {
+        ////            newFormat += "0"; //#
+        ////        }
+
+        ////        if (Number >= 1 && Number < 10)
+        ////        {
+        ////            newFormat += "}";
+        ////        }
+        ////        else
+        ////        {
+        ////            newFormat += "E+00}";
+        ////        }
+        ////    }
+        ////    //Need scientific notation - negative exponent
+        ////    else if (number <= SNLowerThreshold && number > 0 && number < 1)
+        ////    {
+        ////        if (DecimalPlaces == 0)
+        ////            DecimalPlaces++;
+
+        ////        newFormat = "{0:#.";
+        ////        for (int i = 0; i < DecimalPlaces; i++)
+        ////        {
+        ////            newFormat += "0";  //"#";
+        ////        }
+
+        ////        newFormat += "E-00}";
+        ////    }
+
+        ////    Format = newFormat;
+        ////    result = string.Format(Format, number);
+        ////    OnPropertyChanged("Format");
+
+        ////    return result;
+        ////}
 
         public double ToDisplayNumber()
         {
             if (Number <= 0)
-                return 0.0;
+                return Number;
 
             double result = 1;
             double logvalue = Math.Log10(Number);
