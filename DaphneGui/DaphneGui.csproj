@@ -51,14 +51,15 @@
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>Dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="Kitware.VTK">
+    <Reference Include="Kitware.VTK, Version=5.8.0.607, Culture=neutral, PublicKeyToken=995c7fb9db2c1b44, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\vtk\Kitware.VTK.dll</HintPath>
     </Reference>
     <Reference Include="ManifoldRing">
       <HintPath>..\ManifoldRing\bin\Debug\ManifoldRing.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Iridium">
-      <HintPath>Dependencies\MathNet.Iridium.dll</HintPath>
+      <HintPath>..\Daphne\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
     <Reference Include="Meta.Numerics">
       <HintPath>Dependencies\Meta.Numerics.dll</HintPath>
@@ -189,6 +190,63 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Content Include="Dependencies\vtk\Cosmo.dll" />
+    <Content Include="Dependencies\vtk\EventMonitor.exe" />
+    <Content Include="Dependencies\vtk\FileTree.exe" />
+    <Content Include="Dependencies\vtk\Kitware.mummy.Runtime.dll" />
+    <Content Include="Dependencies\vtk\Kitware.mummy.Runtime.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkCharts.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkCommon.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkFiltering.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGenericFiltering.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGeovis.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGraphics.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkHybrid.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkImaging.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkInfovis.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkIO.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkParallel.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkRendering.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkViews.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkVolumeRendering.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\Kitware.VTK.vtkWidgets.Unmanaged.dll" />
+    <Content Include="Dependencies\vtk\msvcm90.dll" />
+    <Content Include="Dependencies\vtk\msvcp90.dll" />
+    <Content Include="Dependencies\vtk\msvcr90.dll" />
+    <Content Include="Dependencies\vtk\VPIC.dll" />
+    <Content Include="Dependencies\vtk\vtkalglib.dll" />
+    <Content Include="Dependencies\vtk\vtkCharts.dll" />
+    <Content Include="Dependencies\vtk\vtkCommon.dll" />
+    <Content Include="Dependencies\vtk\vtkDICOMParser.dll" />
+    <Content Include="Dependencies\vtk\vtkexoIIc.dll" />
+    <Content Include="Dependencies\vtk\vtkexpat.dll" />
+    <Content Include="Dependencies\vtk\vtkFiltering.dll" />
+    <Content Include="Dependencies\vtk\vtkfreetype.dll" />
+    <Content Include="Dependencies\vtk\vtkftgl.dll" />
+    <Content Include="Dependencies\vtk\vtkGenericFiltering.dll" />
+    <Content Include="Dependencies\vtk\vtkGeovis.dll" />
+    <Content Include="Dependencies\vtk\vtkGraphics.dll" />
+    <Content Include="Dependencies\vtk\vtkHybrid.dll" />
+    <Content Include="Dependencies\vtk\vtkImaging.dll" />
+    <Content Include="Dependencies\vtk\vtkInfovis.dll" />
+    <Content Include="Dependencies\vtk\vtkIO.dll" />
+    <Content Include="Dependencies\vtk\vtkjpeg.dll" />
+    <Content Include="Dependencies\vtk\vtklibxml2.dll" />
+    <Content Include="Dependencies\vtk\vtkmetaio.dll" />
+    <Content Include="Dependencies\vtk\vtkNetCDF.dll" />
+    <Content Include="Dependencies\vtk\vtkNetCDF_cxx.dll" />
+    <Content Include="Dependencies\vtk\vtkParallel.dll" />
+    <Content Include="Dependencies\vtk\vtkpng.dll" />
+    <Content Include="Dependencies\vtk\vtkproj4.dll" />
+    <Content Include="Dependencies\vtk\vtkRendering.dll" />
+    <Content Include="Dependencies\vtk\vtksys.dll" />
+    <Content Include="Dependencies\vtk\vtktiff.dll" />
+    <Content Include="Dependencies\vtk\vtkverdict.dll" />
+    <Content Include="Dependencies\vtk\vtkViews.dll" />
+    <Content Include="Dependencies\vtk\vtkVolumeRendering.dll" />
+    <Content Include="Dependencies\vtk\vtkWidgets.dll" />
+    <Content Include="Dependencies\vtk\vtkzlib.dll" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -213,6 +271,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Dependencies\vtk\Kitware.VTK.xml" />
     <Resource Include="Images\cartoonEyeClosed.png" />
     <Resource Include="Images\cartoonEyeOpen.png" />
     <Resource Include="Images\cursors_bk_arrow.png" />
@@ -259,64 +318,6 @@
     <Content Include="Dependencies\TBKMath_64.dll" />
     <Content Include="Dependencies\TBKMath_AnyCPU.dll" />
     <Content Include="Dependencies\Troschuetz.Random.dll" />
-    <Content Include="Dependencies\vtk\Cosmo.dll" />
-    <Content Include="Dependencies\vtk\EventMonitor.exe" />
-    <Content Include="Dependencies\vtk\FileTree.exe" />
-    <Content Include="Dependencies\vtk\Kitware.mummy.Runtime.dll" />
-    <Content Include="Dependencies\vtk\Kitware.mummy.Runtime.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkCharts.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkCommon.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkFiltering.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGenericFiltering.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGeovis.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkGraphics.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkHybrid.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkImaging.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkInfovis.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkIO.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkParallel.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkRendering.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkViews.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkVolumeRendering.Unmanaged.dll" />
-    <Content Include="Dependencies\vtk\Kitware.VTK.vtkWidgets.Unmanaged.dll" />
-    <Resource Include="Dependencies\vtk\Kitware.VTK.xml" />
-    <Content Include="Dependencies\vtk\msvcm90.dll" />
-    <Content Include="Dependencies\vtk\msvcp90.dll" />
-    <Content Include="Dependencies\vtk\msvcr90.dll" />
-    <Content Include="Dependencies\vtk\VPIC.dll" />
-    <Content Include="Dependencies\vtk\vtkalglib.dll" />
-    <Content Include="Dependencies\vtk\vtkCharts.dll" />
-    <Content Include="Dependencies\vtk\vtkCommon.dll" />
-    <Content Include="Dependencies\vtk\vtkDICOMParser.dll" />
-    <Content Include="Dependencies\vtk\vtkexoIIc.dll" />
-    <Content Include="Dependencies\vtk\vtkexpat.dll" />
-    <Content Include="Dependencies\vtk\vtkFiltering.dll" />
-    <Content Include="Dependencies\vtk\vtkfreetype.dll" />
-    <Content Include="Dependencies\vtk\vtkftgl.dll" />
-    <Content Include="Dependencies\vtk\vtkGenericFiltering.dll" />
-    <Content Include="Dependencies\vtk\vtkGeovis.dll" />
-    <Content Include="Dependencies\vtk\vtkGraphics.dll" />
-    <Content Include="Dependencies\vtk\vtkHybrid.dll" />
-    <Content Include="Dependencies\vtk\vtkImaging.dll" />
-    <Content Include="Dependencies\vtk\vtkInfovis.dll" />
-    <Content Include="Dependencies\vtk\vtkIO.dll" />
-    <Content Include="Dependencies\vtk\vtkjpeg.dll" />
-    <Content Include="Dependencies\vtk\vtklibxml2.dll" />
-    <Content Include="Dependencies\vtk\vtkmetaio.dll" />
-    <Content Include="Dependencies\vtk\vtkNetCDF.dll" />
-    <Content Include="Dependencies\vtk\vtkNetCDF_cxx.dll" />
-    <Content Include="Dependencies\vtk\vtkParallel.dll" />
-    <Content Include="Dependencies\vtk\vtkpng.dll" />
-    <Content Include="Dependencies\vtk\vtkproj4.dll" />
-    <Content Include="Dependencies\vtk\vtkRendering.dll" />
-    <Content Include="Dependencies\vtk\vtksys.dll" />
-    <Content Include="Dependencies\vtk\vtktiff.dll" />
-    <Content Include="Dependencies\vtk\vtkverdict.dll" />
-    <Content Include="Dependencies\vtk\vtkViews.dll" />
-    <Content Include="Dependencies\vtk\vtkVolumeRendering.dll" />
-    <Content Include="Dependencies\vtk\vtkWidgets.dll" />
-    <Content Include="Dependencies\vtk\vtkzlib.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Daphne\Daphne.csproj">
