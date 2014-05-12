@@ -197,11 +197,18 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// multiplier to calculate the pair hash key
+        /// </summary>
+        /// <returns></returns>
         private int multiplier()
         {
             return (int)Math.Pow(10, Math.Round(0.5 + Math.Log10(Cell.SafeCell_id)));
         }
 
+        /// <summary>
+        /// recalculates and updates the distance for existing pairs
+        /// </summary>
         private void updateExistingPairs()
         {
             if (pairs != null)
@@ -211,6 +218,17 @@ namespace Daphne
                     // recalculate the distance for pairs
                     kvp.Value.distance(gridSize);
                 }
+            }
+        }
+
+        /// <summary>
+        /// zero all cell forces
+        /// </summary>
+        private void resetCellForces()
+        {
+            foreach (Cell c in Simulation.dataBasket.Cells.Values)
+            {
+                c.resetForce();
             }
         }
 
@@ -465,6 +483,9 @@ namespace Daphne
 
         private void pairInteractions(double dt)
         {
+            // zero all cell forces
+            resetCellForces();
+            // compute interaction forces for all pairs and apply to the cells in the pairs (accumulate)
             foreach (KeyValuePair<int, Pair> kvp in pairs)
             {
                 kvp.Value.pairInteract(dt);

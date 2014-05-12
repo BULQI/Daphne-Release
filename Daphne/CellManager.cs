@@ -35,8 +35,6 @@ namespace Daphne
                         kvp.Value.State.V[i] += (-kvp.Value.DragCoefficient * kvp.Value.State.V[i] + kvp.Value.State.F[i]) * dt;
                     }
                 }
-                // reset the force
-                kvp.Value.resetForce();
             }
         }
 

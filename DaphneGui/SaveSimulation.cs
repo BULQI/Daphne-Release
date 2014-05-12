@@ -108,33 +108,33 @@ namespace DaphneGui
 
     }
 
-        public class PauseButtonTextToBoolConverter : MarkupExtension, IValueConverter
+    public class PauseButtonTextToBoolConverter : MarkupExtension, IValueConverter
+    {
+        public static PauseButtonTextToBoolConverter _converter = null;
+
+        //not needed, to avoid designer error
+        public PauseButtonTextToBoolConverter() { }
+        public PauseButtonTextToBoolConverter(object x) { }
+
+
+        object IValueConverter.Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            public static PauseButtonTextToBoolConverter _converter = null;
-
-            //not needed, to avoid designer error
-            public PauseButtonTextToBoolConverter() { }
-            public PauseButtonTextToBoolConverter(object x) { }
-
-
-            object IValueConverter.Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-            {
-                return value as string == "Continue";
-            }
-
-            object IValueConverter.ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override object ProvideValue(IServiceProvider serviceProvider)
-            {
-                if (_converter == null)
-                {
-                    _converter = new PauseButtonTextToBoolConverter();
-                }
-                return _converter;
-            }
+            return value as string == "Continue";
         }
+
+        object IValueConverter.ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (_converter == null)
+            {
+                _converter = new PauseButtonTextToBoolConverter();
+            }
+            return _converter;
+        }
+    }
     
 }
