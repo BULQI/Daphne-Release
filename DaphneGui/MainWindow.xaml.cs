@@ -719,8 +719,6 @@ namespace DaphneGui
 
                     // prevent the user from running certain tasks immediately, crashing the simulation
                     resetButton.IsEnabled = false;
-                    //resetButton.Content = "Abort";
-                    //runButton.IsEnabled = false;
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
@@ -750,7 +748,6 @@ namespace DaphneGui
             loadExp.IsEnabled = enable;
             recentFileList.IsEnabled = enable;
             newScenario.IsEnabled = enable;
-            //exitApp.IsEnabled = enable;
         }
 
         /// <summary>
@@ -759,7 +756,6 @@ namespace DaphneGui
         /// <param name="enable">false to disable</param>
         private void enableCritical(bool enable)
         {
-            //resetButton.IsEnabled = enable;
             runButton.IsEnabled = enable;
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
@@ -1345,18 +1341,20 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
+            ////////Trying to add some code to preserve focus to the element that was in focus before the click on "Apply" button.
+            ////////Not yet working.
+
+            ////////IInputElement controlInFocus = Keyboard.FocusedElement;
+            ////////int selectedTab = SimConfigToolWindow.ConfigTabControl.SelectedIndex;
+
             runButton.IsEnabled = false;
             mutex = true;
 
-            //if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-            //{
-            //    sim.RunStatus = Simulation.RUNSTAT_ABORT;
-            //}
-            //else
-            //{
-                saveTempFiles();
-                updateGraphicsAndGUI();
-            //}
+            saveTempFiles();
+            updateGraphicsAndGUI();
+
+            ////////SimConfigToolWindow.ConfigTabControl.SelectedIndex = selectedTab;
+            ////////controlInFocus.Focus();
         }
 
         /// <summary>
@@ -1950,10 +1948,8 @@ namespace DaphneGui
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
             resetButton.IsEnabled = true;
             abortButton.IsEnabled = false;
-            //resetButton.Content = "Apply";
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready";
-            //runButton.IsEnabled = true;
             enableFileMenu(true);
             saveButton.IsEnabled = true;
             optionsMenu.IsEnabled = true;
@@ -1991,7 +1987,6 @@ namespace DaphneGui
 
         private void simControlUpdate()
         {
-            //resetButton.IsEnabled = true;
             abortButton.IsEnabled = true;
             runButton.IsEnabled = true;
         }
@@ -2081,8 +2076,6 @@ namespace DaphneGui
             //sim.refreshDatabaseBufferRows();
             if (sim.RunStatus == Simulation.RUNSTAT_RUN)
             {
-                //resetButton.IsEnabled = true;
-                //resetButton.Content = "Abort";
                 abortButton.IsEnabled = true;
                 sim.RunStatus = Simulation.RUNSTAT_PAUSE;
 
@@ -2100,8 +2093,6 @@ namespace DaphneGui
             }
             else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
-                //resetButton.IsEnabled = false;
-                //resetButton.Content = "Abort";
                 abortButton.IsEnabled = false;
                 sim.RunStatus = Simulation.RUNSTAT_RUN;
                 runButton.Content = "Pause";

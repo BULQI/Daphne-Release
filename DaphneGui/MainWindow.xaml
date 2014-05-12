@@ -193,10 +193,7 @@
                                 <StackPanel Width="200" Orientation="Horizontal">
                                     <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
                                                         VerticalAlignment="Top" Padding="5" Width="200">
-                                            Reset the simulation to the initial state as defined by
-                                            the scenario parameters. You can also use this button to refresh
-                                            the 3D visualization with the current scenario options while
-                                            setting up the simulated experiment (before hitting run).
+                                            Refresh the 3D visualization with the current scenario options while setting up the simulated experiment (before hitting run).
                                     </TextBlock>
                                 </StackPanel>
                             </ToolTip>
