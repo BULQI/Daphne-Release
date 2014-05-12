@@ -49,7 +49,7 @@ namespace DaphneGui
     public partial class MainWindow : Window
     {
         /// <summary>
-        /// the absulute path where the installed, running executable resides
+        /// the absolute path where the installed, running executable resides
         /// </summary>
         public static string appPath;
 
