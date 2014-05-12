@@ -2367,17 +2367,17 @@ namespace Daphne
         public string cellpopulation_region_guid_ref { get; set; }
         public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
-        public System.Windows.Media.Color cellpopulation_color { get; set; }
-        private ColorList _cellpopulation_color2;
-        public ColorList cellpopulation_color2 
+        public System.Windows.Media.Color cellpopulation_color { get; set; }    //this is used if cellpopulation_predef_color is set to ColorList.Custom
+        private ColorList _cellpopulation_predef_color;                         //these are predefined colors plus a "Custom" option
+        public ColorList cellpopulation_predef_color 
         {
             get
             {
-                return _cellpopulation_color2;
+                return _cellpopulation_predef_color;
             }
             set
             {
-                _cellpopulation_color2 = value;
+                _cellpopulation_predef_color = value;
                 ColorListToColorConverter conv = new ColorListToColorConverter();
                 Color cc = (Color)conv.Convert(value, typeof(Color), cellpopulation_color, System.Globalization.CultureInfo.CurrentCulture);
                 cellpopulation_color = cc;                
@@ -2457,7 +2457,7 @@ namespace Daphne
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-            cellpopulation_color2 = ColorList.Orange;
+            cellpopulation_predef_color = ColorList.Orange;
             cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
 
             //cellPopDist = new CellPopSpecific();

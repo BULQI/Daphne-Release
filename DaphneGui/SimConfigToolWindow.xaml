@@ -1304,11 +1304,9 @@
                         <TextBlock Text="color" Margin="6,0" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <ComboBox x:Name="cbCellColor"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
                                         ItemsSource="{Binding Source={StaticResource colorList}}"                                        
-                                        SelectedIndex="{Binding Path=cellpopulation_color2, Converter={StaticResource ColorListToIntConv}, 
+                                        SelectedIndex="{Binding Path=cellpopulation_predef_color, Converter={StaticResource ColorListToIntConv}, 
                                            Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         >
-                           
-                            <!--SelectedIndex="{Binding Path=cellpopulation_color2, Converter={StaticResource textToColorConv}, UpdateSourceTrigger=PropertyChanged}">-->
                         </ComboBox>
 
                         <StackPanel Grid.Column="1" Grid.Row="5" >
