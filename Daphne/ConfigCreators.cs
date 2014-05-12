@@ -1544,7 +1544,9 @@ namespace Daphne
                     grp.ReactionComplexRate = reac.rate_const;
 
                     grp.OriginalRate2.Value = reac.daph_rate_const.Value;
-                    grp.ReactionComplexRate2.Value = reac.daph_rate_const.Value;    
+                    grp.OriginalRate2.SetMinMax();
+                    grp.ReactionComplexRate2.Value = reac.daph_rate_const.Value;
+                    grp.ReactionComplexRate2.SetMinMax();
 
                     crc.reactions_guid_ref.Add(reac.reaction_guid);
                     crc.ReactionRates.Add(grp);

@@ -3493,7 +3493,7 @@
                                                     <!--<TextBox Text="{Binding rate_const, StringFormat={}{0:#.00}}">-->
                                                     <TextBox Width="{Binding ElementName=colRate, Path=Width}">
                                                         <TextBox.Text>
-                                                            <Binding Path="daph_rate_const.Value" Mode="TwoWay" UpdateSourceTrigger="LostFocus" Converter="{StaticResource DoubleToFormattedStringConv}">
+                                                            <Binding Path="rate_const" Mode="TwoWay" UpdateSourceTrigger="LostFocus" Converter="{StaticResource DoubleToFormattedStringConv}">
                                                                 <Binding.ConverterParameter>
                                                                     <FrameworkElement DataContext="{TemplateBinding DataContext}" />
                                                                 </Binding.ConverterParameter>

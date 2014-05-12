@@ -382,7 +382,7 @@ namespace Daphne
             {
                 string guid = grp.Guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
-                cr.rate_const = grp.ReactionComplexRate;
+                cr.rate_const = grp.ReactionComplexRate2.Value;
             }
 
             //Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
@@ -406,8 +406,10 @@ namespace Daphne
             {
                 string guid = grp.Guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
-                cr.rate_const = grp.OriginalRate;
-                grp.ReactionComplexRate = grp.OriginalRate;
+                ////////cr.rate_const = grp.OriginalRate;
+                ////////grp.ReactionComplexRate = grp.OriginalRate;
+                cr.rate_const = grp.OriginalRate2.Value;
+                grp.ReactionComplexRate2.Value = grp.OriginalRate2.Value;
             }            
         }
 

@@ -457,19 +457,31 @@ namespace Daphne
             }
         }
 
+        public void SetMinMax()
+        {
+            Max = _value + _value / RangeFactor;
+            Min = _value - _value / RangeFactor;
+        }
+
+        public void SetMinMax(double d)
+        {
+            Max = d + d / RangeFactor;
+            Min = d - d / RangeFactor;
+        }
+
         //Constructor
         public DaphneDouble()
         {
-            _value = 0;
+            ////_value = 20;
             _decimal_places = 3;
             SnUpperThreshold = 100;
             SnLowerThreshold = 0.01;
             RangeMultFactor = 10;
             RangeFactor = 2;
             Format = "-";
-            fvalue = string.Format(_format, _value);
-            Max = _value + _value / RangeFactor;
-            Min = _value - _value / RangeFactor;
+            ////fvalue = string.Format(_format, _value);
+            ////Max = _value + _value / RangeFactor;
+            ////Min = _value - _value / RangeFactor;
         }
 
         //Notification handling
@@ -1727,7 +1739,8 @@ namespace Daphne
                 System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
                 ConfigReaction reac = (ConfigReaction)(fe.DataContext);
                 
-                output = string.Format(reac.daph_rate_const.Format, dd);
+                ////output = string.Format(reac.daph_rate_const.Format, dd);
+                output = string.Format("", dd);
             }
             catch
             {
@@ -1742,7 +1755,8 @@ namespace Daphne
             double val = double.Parse((string)value);
             System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
             ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-            reac.daph_rate_const.Value = val;
+            ////reac.daph_rate_const.Value = val;
+            reac.rate_const = val;
 
             return val;
         }
@@ -2552,12 +2566,12 @@ namespace Daphne
             }
             set
             { 
-                _rate_const = value; 
+                _rate_const = value;
                 daph_rate_const.Value = value;                
             } 
         }
         private DaphneDouble _daph_rate_const;
-        public DaphneDouble daph_rate_const 
+        public DaphneDouble daph_rate_const
         {
             get
             {
@@ -2635,9 +2649,9 @@ namespace Daphne
             }
         }
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public DaphneDouble OriginalRate2 { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public DaphneDouble ReactionComplexRate2 { get; set; }
 
         public ConfigReactionGuidRatePair()

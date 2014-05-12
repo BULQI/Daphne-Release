@@ -38,6 +38,8 @@ namespace Workbench
             InitializeComponent();
             chartSize = new System.Drawing.Size(500, 300);
             DataContext = RC;
+
+            
         }
 
         public void ClearChart()
@@ -283,20 +285,29 @@ namespace Workbench
             cm.RedrawSeries();
             cm.RecalculateYMax();
 
-
-
             ////Slider sl = sender as Slider;
+            ////sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
+            ////sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
 
-            ////if (dragging == false)
-            ////{
-            ////    sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
-            ////    sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
-            ////}
+
+
+            Slider sl = sender as Slider;
+
+            if (dragging == false)
+            {
+                sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
+                sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
+            }
         }
 
         private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            ////Slider sl = sender as Slider;
+            Slider sl = sender as Slider;
+            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)sl.DataContext;
+            pair.ReactionComplexRate2.SetMinMax();
+
+
+            //sl.Minimum 
 
             ////if (dragging == true)
             ////{
@@ -328,6 +339,9 @@ namespace Workbench
         private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             dragging = true;
+            
+            Slider s = sender as Slider;
+            double m = s.Minimum;
         }
 
         private void txtFormattedValue_GotFocus(object sender, RoutedEventArgs e)
@@ -336,8 +350,9 @@ namespace Workbench
             //ConfigReaction reac = (ConfigReaction)tb.DataContext;
             //tb.Text = reac.daph_rate_const.Value.ToString();
 
-            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
-            tb.Text = pair.ReactionComplexRate.ToString();
+            ////ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
+            ////tb.Text = pair.ReactionComplexRate.ToString();
+            
         }
 
         private void txtFormattedValue_LostFocus(object sender, RoutedEventArgs e)
@@ -352,7 +367,8 @@ namespace Workbench
             //reac.daph_rate_const.Value = d;
 
             ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
-            pair.ReactionComplexRate = d;
+            //pair.ReactionComplexRate = d;
+            pair.ReactionComplexRate2.SetMinMax();
         }
 
         private string GetNumerics(string input)
