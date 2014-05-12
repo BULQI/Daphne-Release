@@ -868,9 +868,10 @@
                                         </Style>
                                     </TextBlock.Style>
                     </TextBlock>
-                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[0].concVal, 
-                                        UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}" >                        
-                    </TextBox>
+                        <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
+                                        Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SliderEnabled="False">
+                        </uc:DoublesBox>
                 </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
                     <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
@@ -890,10 +891,11 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryCondition[1].concVal, 
-                                UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.00}}">                        
-                    </TextBox>
-                </StackPanel>
+                        <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
+                                        Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SliderEnabled="False">
+                        </uc:DoublesBox>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
 
@@ -3668,9 +3670,6 @@
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
                                                         
-                                                        <!--<TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView},
-                                                            ConverterCulture='de-DE'}">-->
                                                         <TextBlock Text="{Binding Path=ReactionComplexRate}">
                                                         <TextBlock.Style>
                                                             <Style>
@@ -3680,6 +3679,7 @@
                                                             </Style>
                                                         </TextBlock.Style>
                                                         </TextBlock>
+                                                        
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
