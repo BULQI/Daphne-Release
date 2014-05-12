@@ -725,6 +725,35 @@ namespace DaphneGui
             cell.membrane.molpops.Add(gmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
         }
+        private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        {            
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.membrane.molpops.Remove(cmp);
+            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+        }
+        private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            gmp.Name = "NewMP";
+            gmp.mpInfo = new MolPopInfo("");
+            gmp.mpInfo.mp_dist_name = "New distribution";
+            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            gmp.mpInfo.mp_render_on = true;
+            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.cytosol.molpops.Add(gmp);
+            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+        }
+        private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.cytosol.molpops.Remove(cmp);
+            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+        }
         
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -927,7 +956,7 @@ namespace DaphneGui
                 }
 
                 cp.number = cp.cell_locations.Count;
-                
+
             }
 
             
@@ -950,6 +979,8 @@ namespace DaphneGui
                 CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
                 cp.cell_locations.Add(cl);
             }
+            cp.number = cp.cell_locations.Count;
+            e.Handled = true;
 
         }
 

@@ -41,6 +41,10 @@
             <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
             <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
             
+            <ContextMenu x:Key="menuCoordinates">
+                <MenuItem Header="Paste" Name="menuCoordinates" Click="menuCoordinatesPaste_Click"></MenuItem>
+            </ContextMenu>
+            
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
@@ -99,6 +103,8 @@
             <CollectionViewSource x:Key="cellTypesListView"  
                                   Source="{Binding Path=entity_repository.cells}"/>
             <CollectionViewSource x:Key="moleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"/>
+            <CollectionViewSource x:Key="moleculesListView2"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="reactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
@@ -902,6 +908,24 @@
                                     />
                 </Grid>
             </DataTemplate>
+            <DataTemplate x:Key="molpopDistributionDetailsTemplate2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <ContentControl Name="solfac_dist_cc"
+                                    Grid.ColumnSpan="2" Grid.Row="0"
+                                    Margin="0,6"
+                                    BorderBrush="DarkGray" BorderThickness="1"
+                                    Content="{Binding Path=mpInfo.mp_distribution}"
+                                    />
+                </Grid>
+            </DataTemplate>
 
             <DataTemplate x:Key="cellPopProbDistributionDetailsTemplate">
                 <Grid>
@@ -1250,11 +1274,11 @@
                                 Canvas.ZIndex="1"
                                 >
 
-                            <Expander.Resources>
+                            <!--<Expander.Resources>
                                 <ContextMenu x:Key="menuCoordinates">
                                     <MenuItem Header="Paste" Name="menuCoordinates" Click="menuCoordinatesPaste_Click"></MenuItem>
                                 </ContextMenu>
-                            </Expander.Resources>
+                            </Expander.Resources>-->
 
 
                             <StackPanel Orientation="Vertical">
@@ -1334,11 +1358,13 @@
                                                                     local:DataGridBehavior.DisplayRowNumber="True"
                                                                     KeyDown="dgLocations_KeyDown"
                                                                   
-                                                                    ContextMenu= "{Binding Source={StaticResource menuCoordinates}}"
+                                                                    
                                                                     ScrollBar.Scroll="dgLocations_Scroll"
                                                                     ScrollViewer.ScrollChanged="dgLocations_Scroll"
                                                                     SourceUpdated="dgLocations_Unloaded"
                                                                     >
+
+                                                            <!--ContextMenu= "{Binding Source={StaticResource menuCoordinates}}"-->
 
                                                             <DataGrid.ColumnHeaderStyle>
                                                                 <Style TargetType="DataGridColumnHeader" >
@@ -1523,6 +1549,11 @@
                     <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate x:Key="molpopDistributionTypeTemplate2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
+                </StackPanel>
+            </DataTemplate>
 
             <DataTemplate x:Key="solfacTimeAmpListItemTemplate">
                 <StackPanel Orientation="Horizontal">
@@ -1564,26 +1595,26 @@
                 </Grid>
             </DataTemplate>
 
-            <DataTemplate x:Key="newMolPopDetailsTemplate">
+            <DataTemplate x:Key="cytosolMolPopDetailsTemplate">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
                                 <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                 <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                 <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
                                 <editors:ColorEditBox x:Name="solfacColorEditBox"
                                     CheckBoxVisibility="Collapsed"
@@ -1594,10 +1625,10 @@
                                     Value="{Binding Path=mpInfo.mp_color}"
                                     Margin="4,2"
                                     />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
-                            <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
-                            <Slider x:Name="solfac_weight_slider"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
+                                <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
+                                <Slider x:Name="solfac_weight_slider"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                     HorizontalAlignment="Left"
@@ -1610,31 +1641,124 @@
                                 IsSnapToTickEnabled="True" 
                                 TickFrequency="0.1" 
                                 />
-                            <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
+                                <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
                                 VerticalAlignment="Center"
                                 TextAlignment="Right"
                                 Margin="5,0,0,0"
                                 MinWidth="20"
                                 />
-                        </StackPanel>
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Margin="0,10">
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                    <!--<ComboBox x:Name="molecule_combo_box"
-                                            Grid.Column="1" Grid.Row="0" Margin="0,2"
-                                            MinWidth="80"
-                                            ItemsSource="{Binding entity_repository.molecules}" 
-                                            DisplayMemberPath="Name"
-                                            SelectedValue="{Binding molecule_guid_ref, 
-                                            Converter={StaticResource MolGUIDtoMolNameConv}, 
-                                            ConverterParameter={StaticResource moleculesListView}}"
-                                            />-->
+                                
+                                <ComboBox  x:Name="molecule_combo_box2" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                    ItemsSource="{Binding Source={StaticResource moleculesListView2}}"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedValue="{Binding Path=molecule_guid_ref}"
+                                                    SelectedValuePath="molecule_guid"
+                                                    />
+                                <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
 
-                                    <ComboBox  x:Name="molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Margin="10,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <ComboBox Margin="10,0"
+                                        Name="MolPopDistributionTypeComboBox"
+                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
+                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
+                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay}"
+                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
+                                        MinWidth="120"
+                                        />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="0" Grid.Row="1">
+                                <ContentControl Name="SolfacDistributionDetails"
+                                        Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                        Margin="6,2"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="newMolPopDetailsTemplate">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
+                                <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
+                                <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
+                                <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
+                                <editors:ColorEditBox x:Name="solfacColorEditBox"
+                                    CheckBoxVisibility="Collapsed"
+                                    SpinnerVisibility="Collapsed"
+                                    Width="140"
+                                    HorizontalAlignment="Left" 
+                                    Format="a r g b"
+                                    Value="{Binding Path=mpInfo.mp_color}"
+                                    Margin="4,2"
+                                    />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
+                                <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
+                                <Slider x:Name="solfac_weight_slider"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                Width="50"
+                                    Margin="4,0"
+                                RenderTransform="1.0,0,0,0.5,0,7"
+                                Minimum="0" 
+                                Maximum="5" 
+                                Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
+                                IsSnapToTickEnabled="True" 
+                                TickFrequency="0.1" 
+                                />
+                                <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
+                                VerticalAlignment="Center"
+                                TextAlignment="Right"
+                                Margin="5,0,0,0"
+                                MinWidth="20"
+                                />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Margin="0,10">
+                                <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+
+                                <ComboBox  x:Name="molecule_combo_box2" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource moleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref}"
                                                     SelectedValuePath="molecule_guid"
                                                     />
+                                <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->
+                                
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -2239,7 +2363,7 @@
                                                 
                                                     <!-- Membrane Mol Pops -->
                                                     <StackPanel Orientation="Vertical">
-                                                            <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,-5,0,0" >
+                                                            <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,4,0,0" >
                                                             </TextBlock>
                                                             <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="230"
                                                                 ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}" 
@@ -2249,21 +2373,21 @@
 
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                                 <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
-                                                                <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" />
+                                                        <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" Click="MembraneRemoveMolButton_Click"/>
                                                             </StackPanel>
                                                     </StackPanel>
 
                                                     <!-- Cytosol Mol Pops -->
                                                     <StackPanel Orientation="Vertical" >
-                                                            <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-5,0,0" ></TextBlock>
+                                                            <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,4,0,0" ></TextBlock>
                                                             <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="230"
                                                                     ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
                                                                     DisplayMemberPath="Name"                                                    
                                                                     SelectedIndex="-1"
                                                                      SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"/>
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                                <Button Name="CytosolAddMolButton"  Width="50" Content="Add" />
-                                                                <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" />
+                                                        <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
+                                                        <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
                                                             </StackPanel>
                                                     </StackPanel>
 
@@ -2295,9 +2419,10 @@
                                                           >
                                                     <StackPanel Orientation="Vertical">
                                                         <ContentControl Name="CytoMolPopDetails"
-                                                                    Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
-                                                                    ContentTemplate="{StaticResource newMolPopDetailsTemplate}" 
-                                                                    Margin="6"/>
+                                                                    Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"    
+                                                                        ContentTemplate="{StaticResource cytosolMolPopDetailsTemplate}"
+                                                                    Margin="6">
+                                                        </ContentControl>
                                                     </StackPanel>
                                                 </Expander>
                                             </StackPanel>
@@ -3272,6 +3397,7 @@
         <TabItem Header="Cell Populations">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
+                    
                     <!-- CELL POPULATIONS -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
@@ -3315,6 +3441,63 @@
                         </StackPanel>
                     </Expander>
                 </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- GUID VIEWER -->
+        <TabItem Header="GUID Viewer" Visibility="Hidden">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical" Margin="8">
+                    <StackPanel.Resources>
+                        <DataTemplate x:Key="molGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=molecule_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="cellGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=CellName}" Margin="5,0,0,0"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=cell_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                        <DataTemplate x:Key="reactionGuidsListItemTemplate">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=TotalReactionString}" Margin="5,0,0,0"/>
+                                <TextBlock Text="    " Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=reaction_guid}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </StackPanel.Resources>
+
+                    <!-- Molecules -->
+                    <TextBlock Text="Molecules" FontWeight="Bold" Margin="0,5,0,0" />
+                    <ListBox x:Name="MolGuids" MinHeight="50" 
+                                ItemsSource="{Binding Path=entity_repository.molecules}" 
+                                ItemTemplate="{Binding Source={StaticResource molGuidsListItemTemplate}}"
+                                SelectedIndex="0"
+                                />
+                    
+                    <!-- Cells -->
+                    <TextBlock Text="Cells" FontWeight="Bold" Margin="0,5,0,0" />
+                    <ListBox x:Name="CellGuids" MinHeight="50" 
+                                ItemsSource="{Binding Path=entity_repository.cells}" 
+                                ItemTemplate="{Binding Source={StaticResource cellGuidsListItemTemplate}}"
+                                SelectedIndex="0"
+                                />
+                    
+                    <!-- Reactions -->
+                    <TextBlock Text="Reactions" FontWeight="Bold" Margin="0,10,0,0" />
+                    <ListBox x:Name="ReactionGuids" MinHeight="50" 
+                                ItemsSource="{Binding Path=entity_repository.reactions}" 
+                                ItemTemplate="{Binding Source={StaticResource reactionGuidsListItemTemplate}}"
+                                SelectedIndex="0"
+                                />
+                    
+                </StackPanel>
+                    
             </ScrollViewer>
         </TabItem>
 
