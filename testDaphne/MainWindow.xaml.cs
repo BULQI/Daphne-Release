@@ -78,7 +78,7 @@ namespace testDaphne
                         // Cells: one, receptor and complex molecular populations
                         // Reactions: boundary association and dissociation
                         Console.WriteLine("\n LigandReceptorScenario \n");
-                        LigandReceptorScenario(2.0, 1.0);
+                        LigandReceptorScenario( 2.0, 1.0);
                         TestStepperLigandReceptor(nSteps, dt, 2.0, 1.0);
                         break;
 
@@ -120,7 +120,7 @@ namespace testDaphne
         {
             go();
         }
-
+        
         private void TestStepperDiffusion(int nSteps, double dt)
         {
             double initQ, finalQ, relDiff;
@@ -171,7 +171,7 @@ namespace testDaphne
 
                     output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc;
                     //Console.WriteLine(output);
-                    writer.WriteLine(output);
+                    writer.WriteLine( output );
                 }
             }
 
@@ -193,9 +193,9 @@ namespace testDaphne
                 result = "BAD";
             }
             Console.WriteLine("Relative error in R-L complex concentration = " + relError + "\t" + result);
-
+            
         }
-
+        
         private void TestStepperLocomotion(int nSteps, double dt)
         {
             double receptorConc,
@@ -208,7 +208,7 @@ namespace testDaphne
             Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
             string output;
             string filename = "DriverDynamics.txt";
-            nSteps = (int)(20 / dt);
+            nSteps = (int)(20/ dt);
 
             using (StreamWriter writer = File.CreateText(filename))
             {
@@ -260,13 +260,13 @@ namespace testDaphne
             {
                 m = i + ((int)numNodes_y / 2) * numNodes_x + ((int)numNodes_z / 2) * numNodes_x * numNodes_y;
                 value = conc.Value(inm.linearIndexToLocal(m));
-                Console.WriteLine(i + " " + value);
+                Console.WriteLine(i + " " +  value);
             }
 
             Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
 
-        }
-
+       }
+          
 
         // 
         // Scenarios
@@ -436,7 +436,7 @@ namespace testDaphne
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
             Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
-
+            
             // Create Cells
             //
             double[] state = new double[SpatialState.Dim],
@@ -463,7 +463,7 @@ namespace testDaphne
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
             double midConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-            double leftConc = 2 * midConc;
+            double leftConc = 2 * midConc; 
             double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
                                                     extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
                                                     midConc };
@@ -749,10 +749,10 @@ namespace testDaphne
                 {
                     indices = m.linearIndexToIndexArray(i);
                     x = m.linearIndexToLocal(i);
-                    X = Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[kvp.Value].toContaining(x);
+                    X = Simulation.dataBasket.ECS.Space.NaturalBoundaryTransforms[kvp.Value].toContaining(x); 
 
-                    Console.WriteLine("\t" + i
-                                        + "\t local indices: " + indices[0] + ", " + indices[1]
+                    Console.WriteLine("\t" + i 
+                                        + "\t local indices: " + indices[0] + ", " + indices[1] 
                                         + "\t local coordinates: " + x[0] + ", " + x[1]
                                         + "\t global coordinates: " + X[0] + ", " + X[1] + ", " + X[2]);
                 }
@@ -872,8 +872,8 @@ namespace testDaphne
             numNodes_x = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0);
             numNodes_y = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1);
             numNodes_z = Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2);
-            min = conc.Value(inm.indexArrayToLocal(new int[3] { numNodes_x - 1, numNodes_y / 2, numNodes_z / 2 }));
-            max = conc.Value(inm.indexArrayToLocal(new int[3] { 0, numNodes_y / 2, numNodes_z / 2 }));
+            min = conc.Value(inm.indexArrayToLocal(new int[3]{numNodes_x-1, numNodes_y/2, numNodes_z/2}));
+            max = conc.Value(inm.indexArrayToLocal(new int[3]{0, numNodes_y/2, numNodes_z/2}));
             slope = (max - min) / inm.Extent(0);
 
             // Sum deviation from expected linear distribution at three locations
@@ -1053,13 +1053,13 @@ namespace testDaphne
             // Sum deviation from expected linear distribution at three locations
 
             // along midline of xy-plane 
-            for (int i = 0; i < numNodes_x; i++)
+            for (int i = 0; i < numNodes_x; i++ )
             {
-                m = i + ((int)numNodes_y / 2) * numNodes_x;
+                m = i + ((int)numNodes_y/2)*numNodes_x;
                 value = conc.Value(inm.linearIndexToLocal(m));
                 theor_value = max - slope * i * stepSize;
                 diff = diff + Math.Abs((double)(theor_value - value));
-                Console.WriteLine(i + ": " + theor_value + "\t" + value + "\t" + diff);
+                Console.WriteLine(i + ": " + theor_value + "\t" + value + "\t" + diff); 
             }
 
             // along midline of xy-plane at z=midpoint
@@ -1069,7 +1069,7 @@ namespace testDaphne
                 value = conc.Value(inm.linearIndexToLocal(m));
                 theor_value = max - slope * i * stepSize;
                 diff = diff + Math.Abs((double)(theor_value - value));
-                Console.WriteLine(i + ": " + theor_value + "\t" + value + "\t" + diff);
+                Console.WriteLine(i + ": " + theor_value + "\t" + value + "\t" + diff); 
             }
 
             // along midline of xy-plane at z=midpoint
@@ -1093,7 +1093,7 @@ namespace testDaphne
 
             Console.WriteLine("Sum of differences along gradient direction at three locations: " + diff + "\t Result: " + result);
 
-        }
+         }
     }
 
 }
