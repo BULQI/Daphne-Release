@@ -42,6 +42,7 @@ using Workbench;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
+using SBMLayer;
 namespace DaphneGui
 {
     /// <summary>
@@ -255,8 +256,8 @@ namespace DaphneGui
             // when not running in Visual Studio, check if there are options
             if (AssumeIDE() == false && args.Length > 1)
             {
-                AttachConsole( ATTACH_PARENT_PROCESS );
-                for (int i = 1; i < args.Length; i++ )
+                AttachConsole(ATTACH_PARENT_PROCESS);
+                for (int i = 1; i < args.Length; i++)
                 {
                     string s = args[i].ToLowerInvariant();
 
@@ -373,7 +374,7 @@ namespace DaphneGui
                 uniqueNamesMenu.IsChecked = Properties.Settings.Default.suggestExpNameChange;
             }
 
-            if(argScenarioFile != "")
+            if (argScenarioFile != "")
             {
                 file = argScenarioFile;
             }
@@ -588,6 +589,32 @@ namespace DaphneGui
             saveScenarioUsingDialog();
         }
 
+
+
+        /// <summary>
+        /// Exports a model specification into SBML
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void exportSBML_Click(object sender, RoutedEventArgs e)
+        {
+            AddlibSBMLEnv();
+            SBMLModel encodedSBML = new SBMLModel(appPath, configurator);
+            encodedSBML.ConvertToSBML();
+        }
+
+        /// <summary>
+        /// Adds User environment variable for libSBML
+        /// </summary>
+        private void AddlibSBMLEnv()
+        {
+            //Path of the dependencies folder
+            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
+            //Adds the dependecies folder to the environment variable PATH stored in the current process
+            string newPathEnv = System.Environment.GetEnvironmentVariable("PATH") + ";" + dependencies.Replace(@"/", @"\");
+            System.Environment.SetEnvironmentVariable("PATH", newPathEnv);
+        }
+
         private Nullable<bool> saveScenarioUsingDialog()
         {
             // Configure save file dialog box
@@ -605,7 +632,7 @@ namespace DaphneGui
             {
                 string filename = dlg.FileName;
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
-                
+
                 configurator.FileName = filename;
                 configurator.SerializeSimConfigToFile();
 
@@ -1333,7 +1360,7 @@ namespace DaphneGui
         {
             save_simulation_state();
         }
-        
+
         /// <summary>
         /// set or clear a particular control flag
         /// </summary>
@@ -1749,7 +1776,7 @@ namespace DaphneGui
                             else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
                             {
                                 // autosave the state
-                                if(argSave == true)
+                                if (argSave == true)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(save_simulation_state));
                                 }
@@ -1962,7 +1989,7 @@ namespace DaphneGui
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
 
-                
+
             }
             else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
@@ -2067,12 +2094,12 @@ namespace DaphneGui
                     reporter.StartReporter(configurator.SimConfig);
                 }
                 else
-                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
-                {
-                    runButton.Content = "Pause";
-                    runButton.ToolTip = "Pause the Simulation.";
-                    statusBarMessagePanel.Content = "Running...";
-                }
+                    if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                    {
+                        runButton.Content = "Pause";
+                        runButton.ToolTip = "Pause the Simulation.";
+                        statusBarMessagePanel.Content = "Running...";
+                    }
             }
         }
 
@@ -2105,7 +2132,7 @@ namespace DaphneGui
                 cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
             }
-            
+
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
@@ -2265,7 +2292,7 @@ namespace DaphneGui
                 gc.HandToolButton_IsEnabled = false;
             else
                 gc.HandToolButton_IsEnabled = true;
-            
+
         }
     }
 }
