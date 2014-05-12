@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+//using System.Windows.Controls;
 
 using MathNet.Numerics.LinearAlgebra;
 
@@ -97,13 +99,31 @@ namespace Daphne
                 if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussianGradient mpgg = (MolPopGaussianGradient)cmp.mpInfo.mp_distribution;
-                    
-                    double[] initArray = new double[] {  sc.entity_repository.box_specifications[0].x_trans, 
-                                                sc.entity_repository.box_specifications[0].y_trans,
-                                                sc.entity_repository.box_specifications[0].z_trans,
-                                                sc.entity_repository.box_specifications[0].x_scale,
-                                                sc.entity_repository.box_specifications[0].y_scale,
-                                                sc.entity_repository.box_specifications[0].z_scale,
+
+                    // find the box_spec associated with this gaussian
+                    int box_id = -1;
+
+                    for (int j = 0; j < sc.entity_repository.box_specifications.Count; j++)
+                    {
+                        if (sc.entity_repository.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
+                        {
+                            box_id = j;
+                            break;
+                        }
+                    }
+                    if (box_id == -1)
+                    {
+                        // Should never reach here... pop up notice
+                        MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
+                        return;
+                    }
+
+                    double[] initArray = new double[] { sc.entity_repository.box_specifications[box_id].x_trans, 
+                                                        sc.entity_repository.box_specifications[box_id].y_trans,
+                                                        sc.entity_repository.box_specifications[box_id].z_trans,
+                                                        sc.entity_repository.box_specifications[box_id].x_scale,
+                                                        sc.entity_repository.box_specifications[box_id].y_scale,
+                                                        sc.entity_repository.box_specifications[box_id].z_scale,
                                                         mpgg.peak_concentration };
 
 
@@ -393,7 +413,7 @@ namespace Daphne
             }
 
             // set up the collision manager
-            Vector box = new Vector(3);
+            MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             
             box[0] = sc.scenario.environment.extent_x;
             box[1] = sc.scenario.environment.extent_y;
