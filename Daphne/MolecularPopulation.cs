@@ -107,18 +107,21 @@ namespace Daphne
                     // BoundedRectangles -> BoundedRectangularPrism
                     //                      arraySize > 1, one-to-one correspondence
                     // 
-                    for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
-                    {
-                        // NOTE: This corresponds to the case where there is a one-to-one
-                        // correspondance between the array points of the embedding and embedded manifolds
+                    // NOTE: This corresponds to the case where there is a one-to-one
+                    // correspondance between the array points of the embedding and embedded manifolds
 
-                        // Feed embedded manifold array index k to WhereIs and return a double[] point in the embedding manifold
-                        // request interpolation if needed
-                        if (Man.Boundaries[m].NeedsInterpolation() == true)
+                    // Feed embedded manifold array index k to WhereIs and return a double[] point in the embedding manifold
+                    // request interpolation if needed
+                    if (Man.Boundaries[m].NeedsInterpolation() == true)
+                    {
+                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
                         {
                             BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIs(k));
                         }
-                        else
+                    }
+                    else
+                    {
+                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
                         {
                             BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIsIndex(k));
                         }

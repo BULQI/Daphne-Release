@@ -64,15 +64,9 @@ namespace testDaphne
             // Assign all compartments first, then molecular populations
 
             int[] numGridPts = {5, 5, 5};
-            // min and max spatial extent in each dimension
-            double[] XCellSpatialExtent = { 0.0, 10.0, 0.0, 10.0, 0.0, 10.0 };
-
-            // NOTE: Create a BoundedRectangularPrism locally in order to be able to use GaussianDensity
-            // to define a Gaussian density distribution for CXCL13 
-            // If not, we could use the commented statement below
-            //Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellSpatialExtent));
-            BoundedRectangularPrism b = new BoundedRectangularPrism(numGridPts, XCellSpatialExtent);
-            Compartment XCellSpace = new Compartment(b);
+            // patial extent in each dimension
+            double[] XCellExtent = { 10.0, 10.0, 10.0 };
+            Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellExtent));
 
             // Uniformly populate the extracellular fluid with cells 
             int numCells = 1;
@@ -83,9 +77,9 @@ namespace testDaphne
 
             for (int i = 0; i < numCells; i++)
             {
-                cellPos[0] = XCellSpatialExtent[0] + (i + 1) * (XCellSpatialExtent[1] - XCellSpatialExtent[0]) / (numCells + 1);
-                cellPos[1] = XCellSpatialExtent[2] + (i + 1) * (XCellSpatialExtent[3] - XCellSpatialExtent[2]) / (numCells + 1);
-                cellPos[2] = XCellSpatialExtent[4] + (i + 1) * (XCellSpatialExtent[5] - XCellSpatialExtent[4]) / (numCells + 1);
+                cellPos[0] = (i + 1) * XCellSpace.Interior.Extents[0] / (numCells + 1);
+                cellPos[1] = (i + 1) * XCellSpace.Interior.Extents[1] / (numCells + 1);
+                cellPos[2] = (i + 1) * XCellSpace.Interior.Extents[2] / (numCells + 1);
 
                 // create the cell with its Cytoplasm and PlasmaMembrane compartments
                 sim.AddCell(cellPos, new double[] { 0, 0, 0 });
@@ -118,9 +112,9 @@ namespace testDaphne
             double[] sigma = { 1.0, 1.0, 1.0 };
             double[] center = new double[XCellSpace.Interior.Dim];
 
-            center[0] = (XCellSpatialExtent[1] + XCellSpatialExtent[0]) / 2.0;
-            center[1] = (XCellSpatialExtent[3] + XCellSpatialExtent[2]) / 2.0;
-            center[2] = (XCellSpatialExtent[5] + XCellSpatialExtent[4]) / 2.0;
+            center[0] = XCellSpace.Interior.Extents[0] / 2.0;
+            center[1] = XCellSpace.Interior.Extents[1] / 2.0;
+            center[2] = XCellSpace.Interior.Extents[2] / 2.0;
             gsf.Initialize(center, sigma, maxConc);
             XCellSpace.AddMolecularPopulation(MolDict["CXCL13"], gsf);
 
