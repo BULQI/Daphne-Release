@@ -133,6 +133,8 @@ namespace Daphne
                 cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);                
             }
 
+            sc.reporter_file_name = "lig-rec_test";
+
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
                                   "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
@@ -282,6 +284,8 @@ namespace Daphne
                 cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
 
+            sc.reporter_file_name = "Loco_test";
+
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
                                   "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
@@ -371,6 +375,8 @@ namespace Daphne
                 ReportECM r = configMolPop.report_mp as ReportECM;
                 r.mean = true;
 
+                sc.reporter_file_name = "Diffusion_test";
+
                 sc.scenario.environment.ecs.molpops.Add(configMolPop);
             }
         }
@@ -402,6 +408,10 @@ namespace Daphne
             ConfigMolecule cm;
             ConfigReaction reac;
 
+            // concentration of CXCR5 on B cells
+            // Barroso2012:  13,851 per cell = 44 um^{-2} for cells with 5 um radius
+            double cxcr5Conc_5umRadius = 44;
+
             //
             // Leukocyte_staticReceptor
             // Leukocyte with fixed number of receptor molecules and no locomotion
@@ -411,7 +421,7 @@ namespace Daphne
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
-            conc = new double[2] { 250, 0 };
+            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
             float[,] colors = new float[2,4]{ {0.3f, 0.9f, 0.1f, 0.1f},
                                               {0.3f, 0.2f, 0.9f, 0.1f} };
@@ -446,7 +456,7 @@ namespace Daphne
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
-            conc = new double[2] { 250, 0 };
+            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -505,7 +515,7 @@ namespace Daphne
             }
 
             gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 1e5;
+            gc.TransductionConstant = 100;
 
             sc.entity_repository.cells.Add(gc);
 
@@ -518,7 +528,7 @@ namespace Daphne
             gc.CellRadius = 5.0;
 
             //MOLECULES IN MEMBRANE
-            conc = new double[2] { 250, 0 };
+            conc = new double[2] { cxcr5Conc_5umRadius, 0 };
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
             for (int i = 0; i < type.Length; i++)
             {
@@ -584,109 +594,9 @@ namespace Daphne
             }
 
             gc.DragCoefficient = 1.0;
-            gc.TransductionConstant = 1e5;
+            gc.TransductionConstant = 1e2;
 
             sc.entity_repository.cells.Add(gc);
-
-
-            ////Some input Grace sent on 6/19/13
-           
-            ////T-Cell: radius = 5 micrometers, no molecules, no reactions, no reaction complexes
-            ////FDC: radius = 5 micrometers, no molecules, no reactions, no reaction complexes
-            ////B-Cell: radius = 5 micrometers
-            ////          Cytoplasm Molecules: gCXCR5, CXCR5, driver
-            ////          PlasmaMembrane Molecules: CXCR5, CXCL13:CXCR5
-            ////          Reactions: 
-            ////              gCXCR5 -> CXCR5  (cytosol)
-            ////              CXCR5 (plasma membrane) + CXCL13 (ecm) -> CXCL13:CXCR5 (plasma membrane)
-            ////              CXCL13:CXCR5 (plasma membrane) -> CXCR5 (plasma membrane) + CXCL13 (ecm)
-            ////
-            ////---------------------------------------------------------------------------------------
-            ////BCell 
-
-            //gc = new ConfigCell();
-            //gc.CellName = "BCell";
-            //gc.CellRadius = 5.0;
-            //gc.TransductionConstant = 1e4;
-            //gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
-
-            ////MOLECULES IN MEMBRANE
-            //var query1 =
-            //    from mol in sc.entity_repository.molecules
-            //    where mol.Name == "CXCR5|" || mol.Name == "CXCL13:CXCR5|"
-            //    select mol;
-
-            //gmp = null;
-            //foreach (ConfigMolecule gm in query1)
-            //{
-            //    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //    gmp.molecule_guid_ref = gm.molecule_guid;
-            //    gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-            //    gmp.Name = "My " + gm.Name;
-            //    gmp.mpInfo.mp_dist_name = "Constant level";
-            //    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //    gmp.mpInfo.mp_render_blending_weight = 2.0;
-
-            //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-
-            //    if (gm.Name == "CXCR5|")
-            //    {
-            //        hl.concentration = 125;
-            //    }
-            //    else
-            //    {
-            //        hl.concentration = 130;
-            //    }
-            //    gmp.mpInfo.mp_distribution = hl;
-                
-            //    //gc
-            //    gc.membrane.molpops.Add(gmp);
-            //}
-
-            ////MOLECULES IN CYTOSOL
-            //var query2 =
-            //    from mol in sc.entity_repository.molecules
-            //    where mol.molecule_guid == gc.locomotor_mol_guid_ref
-            //    select mol;
-
-            //gmp = null;
-            //foreach (ConfigMolecule gm in query2)
-            //{
-            //    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //    gmp.molecule_guid_ref = gm.molecule_guid;
-            //    gmp.mpInfo = new MolPopInfo("My " + gm.Name);
-            //    gmp.Name = "My " + gm.Name;
-            //    gmp.mpInfo.mp_dist_name = "Constant level";
-            //    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //    gmp.mpInfo.mp_render_blending_weight = 2.0;
-
-            //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-
-            //    hl.concentration = 250;
-            //    gmp.mpInfo.mp_distribution = hl;
-
-            //    gc.cytosol.molpops.Add(gmp);
-            //}
-
-            //sc.entity_repository.cells.Add(gc);
-
-            ////Reactions
-            ////None
-
-            ////---------------------------------------------------------------------------------------
-            ////TCell 
-
-            //gc = new ConfigCell();
-            //gc.CellName = "TCell";
-            //gc.CellRadius = 5.0;
-
-            //sc.entity_repository.cells.Add(gc);
-
-            //gc = new ConfigCell();
-            //gc.CellName = "FDC";
-            //gc.CellRadius = 5.0;
-
-            //sc.entity_repository.cells.Add(gc);
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
@@ -699,67 +609,106 @@ namespace Daphne
 
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
         {
+            // Molecular weight in kDa
+            // Effective radius in micrometers (um)
+            // Diffusion coefficient in um^{2} / min
             ConfigMolecule cm;
 
-            cm = new ConfigMolecule("CXCL13", 1.0, 1.0, 6e3);
+            //
+            // The following are generally intended as ECS molecules
+            //
+
+            // Wang2011, CXCL12:  MWt = 7.96 kDa, D = 4.5e3
+            double MWt_CXCL12 = 7.96;
+            cm = new ConfigMolecule("CXCL12", MWt_CXCL12, 1.0, 4.5e3);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCL12", 1.0, 1.0, 6e3);
+            // Use CXCL13 values for CXCL13, for now
+            cm = new ConfigMolecule("CXCL13", MWt_CXCL12, 1.0, 4.5e3);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCR5|", 1.0, 1.0, 1e-7);
+            //
+            // Membrane bound
+            // 
+
+            // Set the diffusion coefficients very low, for now.
+            double membraneDiffCoeff = 1e-7;
+
+            // Marchese2001, CXCR4:  MWt = 43 kDa
+            double MWt_CXCR4 = 43;
+            cm = new ConfigMolecule("CXCR4|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCR4|", 1.0, 1.0, 1e-7);
+            // Use CXCR4 value for CXCR5
+            cm = new ConfigMolecule("CXCR5|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCL13:CXCR5|", 1.0, 1.0, 1e-7);
+            // Add values for CXCL12 and CXCR4
+            cm = new ConfigMolecule("CXCL12:CXCR4|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
+            cm.molecule_location = MoleculeLocation.Boundary;
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            
+            // Use CXCL12:CXCR4 values, for now
+            cm = new ConfigMolecule("CXCL13:CXCR5|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("CXCL12:CXCR4|", 1.0, 1.0, 1e-7);
-            cm.molecule_location = MoleculeLocation.Boundary;
+            //
+            // The following are generally intended as cytosol molecules 
+            //
+
+            // Bionumbers: diffusion coefficient for cytoplasmic proteins ~ 300 - 900
+            // Francis1997: diffusion coefficient for signalling molecules ~ 600 - 6000
+            // Use mean of common range 600 - 900
+            double cytoDiffCoeff = 750;
+
+            cm = new ConfigMolecule("CXCR5", MWt_CXCR4, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("A", 1.0, 1.0, 6e3);
+            cm = new ConfigMolecule("CXCR4", MWt_CXCR4, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            cm = new ConfigMolecule("A*", 1.0, 1.0, 6e3);
+            cm = new ConfigMolecule("CXCL13:CXCR5", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            cm = new ConfigMolecule("CXCL12:CXCR4", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            // These are pseudo cytoplasmic molecules
+            //
+            // Set diffusion coefficient for A to same as other cytoplasmic proteins
+            cm = new ConfigMolecule("A", 1.0, 1.0, cytoDiffCoeff);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            // Make the diffusion coefficient for A* much less than A
+            // A* encompasses the tubulin structure and polarity of the cell 
+            // If the diffusion coefficient is too large, the polarity will not be maintained and the cell will not move
+            double f = 1e-2;
+            cm = new ConfigMolecule("A*", 1.0, 1.0, f * cytoDiffCoeff);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            //
+            // Genes
+            //
 
             cm = new ConfigMolecule("gCXCR5", 1.0, 1.0, 1e-7);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             cm = new ConfigMolecule("gCXCR4", 1.0, 1.0, 1e-7);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            // CXCR5 in the cytosol
-            cm = new ConfigMolecule("CXCR5", 1.0, 1.0, 1e3);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            cm = new ConfigMolecule("CXCR4", 1.0, 1.0, 1e3);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            // CXCL13:CXCR5 in the cytosol
-            cm = new ConfigMolecule("CXCL13:CXCR5", 1.0, 1.0, 1e3);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            cm = new ConfigMolecule("CXCL12:CXCR4", 1.0, 1.0, 1e3);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
@@ -1084,23 +1033,24 @@ namespace Daphne
             return null;
         }
 
-        // this only works if we have only one reaction per type of reaction
-        public static string findReactionGuid(ReactionType rt, SimConfiguration sc)
-        {
-            string template_guid = findReactionTemplateGuid(rt, sc);
+        // The assumption below is no longer valid.
+        //// this only works if we have only one reaction per type of reaction
+        //public static string findReactionGuid(ReactionType rt, SimConfiguration sc)
+        //{
+        //    string template_guid = findReactionTemplateGuid(rt, sc);
 
-            if (template_guid != null)
-            {
-                foreach (ConfigReaction cr in sc.entity_repository.reactions)
-                {
-                    if (cr.reaction_template_guid_ref == template_guid)
-                    {
-                        return cr.reaction_guid;
-                    }
-                }
-            }
-            return null;
-        }
+        //    if (template_guid != null)
+        //    {
+        //        foreach (ConfigReaction cr in sc.entity_repository.reactions)
+        //        {
+        //            if (cr.reaction_template_guid_ref == template_guid)
+        //            {
+        //                return cr.reaction_guid;
+        //            }
+        //        }
+        //    }
+        //    return null;
+        //}
 
         // given a cell type name like BCell, find the ConfigCell object
         public static ConfigCell findCell(string name, SimConfiguration sc)
@@ -1123,20 +1073,91 @@ namespace Daphne
 
             double kr, kf;
 
+            // These values are waiting for more informed choices:
+            //
+            // Default degradation rate for ECS proteins  (min)
+            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
+            double ecsDefaultDegradRate = 0.1; 
+            //
+            // Default degradation rate for cytoplasm proteins  (min)
+            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
+            double cytoDefaultDegradRate = 0.1;
+
+            ConfigReaction cr = new ConfigReaction();
+
+            // Annihiliation: CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13:CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCR4 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL12:CXCR4 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants 
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, sc));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL12 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
+            cr.rate_const = ecsDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
+            cr.rate_const = ecsDefaultDegradRate;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
             ////////////////////////////////////////////////////////////////////////////////////
+            // CXCL13 + CXCR5| <-> CXCL13:CXCR5|
+            //
             // Barroso, Munoz, et al.
             // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
             // The FASEB Journal vol. 26 no. 12 4841-485
             // CXCL13/CXCR5 binding affinity:  KD = 5.05e-8 M  = (50.5e-9)*(1e-18)*(6.022e23) molec/um^3 = 0.0304 molec/um^3
             //
             // KD = k_reverse / k_forward
-            // Arbitrarily, choose k_reverse = 1/0.1 min^{-1} = 10 min^{-1}
-            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 32.9 um^3/(molec-min)
+            // Use k_reverse from CXCL12/CXCR4| binding/unbinding.
+            // Vega2011 k_off = 8.24e-3/s = 0.494/min
+            // Use same for CXCL13:CXCR5| unbinding k_reverse = 0.494 min^{-1}
+            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 1.625 um^3/(molec-min)
             //
-            kr = 1 / 0.1;
-            kf = kr / 0.0304;
+            kr = 0.494;
+            kf = 16.25;
+            //
             // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
-            ConfigReaction cr = new ConfigReaction();
+            cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
@@ -1146,6 +1167,7 @@ namespace Daphne
             cr.rate_const = kf;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
+            //
             // BoundaryDissociation:  CXCL13:CXCR5| ->  CXCR5| + CXCL13
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
@@ -1159,34 +1181,28 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
             //////////////////////////////////////////////////////////////////////////////////
             
-            // Annihiliation: CXCR5 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 2.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCL13:CXCR5 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 2.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
 
             /////////////////////////////////////////////////////////////////////////////
-            // The A* gradient drives the locomotion force, but encompasses many processes, including tubulin network growth.
-            // The rate constant has units min^{-1}, similar to the units for dissociation.
-            // Choose activation rate that is significantly less than simple dissocation rates 
-            // (1/0.1 min^{-1} for CXCL13:CXCR5 and CXCL12:CXCR4). (?)
-            // k_activation ~ 1 min^{-1}
-            // Choose much slower deactivation rate k_deactivation = k_activation / 100;
+            // CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
+            // A* -> A
+            // CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
             //
-            kf = 1;
-            kr = kf / 100;
+            // The A* gradient drives the locomotion force.
+            // The rate constant has units min^{-1}, similar to the units for off rate for receptor/ligand binding,
+            // but this reaction encompasses many processes, including tubulin network growth. Therefore, we expect
+            // this pseudo-reaction to occur at a slower rate, and we will choose a rate constant (activation rate) 
+            // that is significantly less than simple off rates.
+            // 
+            // For simple unbinding k_off ~ 0.5 min^{-1} (CXCL12:CXCR4, Vega2011), so arbitrarily, choose a reduction factor 
+            double f1 = 1e-2;
+            // Then  k_activation ~ 0.5 * f = 5e-3 min^{-1}
+            //
+            // Choose a slower deactivation (A* -> A) rate   k_deactivation = k_activation / 100;
+            double f2 = 1e-1;
+            // 
+            kf = 0.5 * f1;
+            kr = kf * f2;
+            //
             // CatalyzedBoundaryActivation: CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
@@ -1199,6 +1215,7 @@ namespace Daphne
             cr.rate_const = kf;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
+            //
             // Transformation: A* -> A
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
@@ -1209,7 +1226,133 @@ namespace Daphne
             cr.rate_const = kr;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
+            //
+            // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // CXCL12 + CXCR4| -> CXCL12:CXCR4|
+            //
+            ////// Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
+            ////// CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
+            //////
+            ////// KD = k_reverse / k_forward
+            ////// Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
+            ////// k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
+            //////
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Vega et al., Technical Advance: Surface plasmon resonance-based analysis of CXCL12 binding 
+            // using immobilized lentiviral particles. Journal of Leukocyte Biology Vol 90, 1-10, 2011. 
+            // 
+            // CXCL12/CXCR4 binding affinity:  KD = 2.09e-2 molec/um^3
+            // k_reverse (k_off) = 0.494/min
+            //
+            // KD = k_reverse / k_forward
+            // k_forward = k_reverse / KD = 0.494 / 2.09e-2  um^3/(molec-min) = 23.6 um^3/(molec-min)
+            //
+            kr = 0.494;
+            kf = 23.6;
+            //
+            // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            //
+            // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // Internalization of bound receptor
+            // 
+            // Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
+            // heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
+            // Fit of fig. S3b:
+            //          k = 0.010 min(-1)
+            double k1_CXCL13_CXCR5 = 0.010;
+            //
+            // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = k1_CXCL13_CXCR5;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            //
+            // Hesselgesser et al.,  Identification and Characterization of the CXCR4 Chemokine, J Immunol 1998; 160:877-883.
+            // Fit of curve on pg 880, SDF-1alpha(CXCL12):CXCR4 internalization:
+            //          k = 0.027 min(-1)
+            double k1_CXCL12_CXCR4 = 0.027;
+            //
+            // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, sc));
+            cr.rate_const = k1_CXCL12_CXCR4;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            //
+            // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
+            // Arbitrarily choose a factor of 100
+            f2 = 1e-2;
+            //
+            // BoundaryTransportFrom: CXCR5| -> CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = f2 * k1_CXCL13_CXCR5;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+            //
+            // BoundaryTransportFrom: CXCR4| -> CXCR4
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
+            cr.rate_const = f2 * k1_CXCL12_CXCR4;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            //
+            // These next reactions are in need of more informed reaction rates
+            //
 
             // Catalyzed Creation: gCXCR5 -> gCXCR5 + CXCR5
             cr = new ConfigReaction();
@@ -1218,6 +1361,17 @@ namespace Daphne
             cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 10.0;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // Catalyzed Creation: gCXCR4 -> gCXCR4 + CXCR4
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gCXCR4", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             cr.rate_const = 10.0;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
@@ -1233,73 +1387,6 @@ namespace Daphne
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
-            // BoundaryTransportFrom: CXCR5| -> CXCR5
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1.0e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1.0e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            /////////////////////////////////////////////////////////////////////////////////
-            // Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
-            // CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
-            //
-            // KD = k_reverse / k_forward
-            // Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
-            // k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
-            //
-            kr = 1 / 0.1;
-            kf = kr / 2.2e-3;
-            // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-            // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-            ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-            // Catalyzed Creation: gCXCR4 -> gCXCR4 + CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gCXCR4", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 10.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
             // BoundaryTransportTo: CXCR4 -> CXCR4|
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
@@ -1311,60 +1398,14 @@ namespace Daphne
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
-            // BoundaryTransportFrom: CXCR4| -> CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1.0e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1.0e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            /////////////////////////////////////////////////////////////////////////////
-            // The A* gradient drives the locomotion force, but encompasses many processes, including tubulin network growth.
-            // The rate constant has units min^{-1}, similar to the units for dissociation.
-            // Choose activation rate that is significantly less than simple dissocation rates 
-            // (1/0.1 min^{-1} for CXCL12:CXCR4 )
-            // k_activation ~ 1 min^{-1}
-            // Choose much slower deactivation rate k_deactivation = k_activation / 100;
-            //
-            kf = 1;
-            kr = kf / 100;
-            // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-            // Transformation: A* -> A  (Already implemented)
-            ////////////////////////////////////////////////////////////////
-
-
             ///////////////////////////////////////////////
-            // NOTE: These reactions may not be biologically meaningful, but are used for reaction complexes
+            // NOTE: These reactions may not be biologically meaningful for bulk molecules, 
+            // but are used for reaction complexes
             //
             // Association: CXCR5 + CXCL13 -> CXCL13:CXCR5
-            kr = 1 / 0.1;
-            kf = kr / 0.0304;
+            kr = 0.494;
+            kf = 16.25;
+            //
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, sc);
             // reactants
@@ -1386,22 +1427,7 @@ namespace Daphne
             cr.rate_const = kr;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
-            kf = 1;
-            kr = kf / 100;
-            // CatalyzedActivation: CXCL13:CXCR5 + A -> CXCL13:CXCR5 + A*
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedTransformation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, sc));
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
-
 
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
@@ -1417,127 +1443,124 @@ namespace Daphne
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
             //MOLECULES
-            var query =
-                from mol in sc.entity_repository.molecules
-                where mol.Name == "CXCR5" || mol.Name == "CXCL13:CXCR5" || mol.Name == "CXCL13"
-                select mol;
 
-            ConfigMolecularPopulation cmp = null;
-            foreach (ConfigMolecule cm in query)
+            double[] conc = new double[3] { 0.0304, 1, 0 };
+            string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            for (int i = 0; i < type.Length; i++)
             {
-                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                cmp.molecule_guid_ref = cm.molecule_guid;
-                cmp.mpInfo = new MolPopInfo("My " + cm.Name);
-                cmp.Name = "My " + cm.Name;
-                cmp.mpInfo.mp_dist_name = "Constant level";
-                cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                cmp.mpInfo.mp_render_blending_weight = 2.0;
-
-                MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                if (cm.Name == "CXCR5")
+                ConfigMolecule configMolecule = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (configMolecule != null)
                 {
-                    hl.concentration = 1.0;
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                    configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
+                    configMolPop.Name = configMolecule.Name;
+                    configMolPop.mpInfo.mp_dist_name = "Uniform";
+                    configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mpInfo.mp_distribution = hl;
+                    crc.molpops.Add(configMolPop);
                 }
-                else
-                {
-                    hl.concentration = 2.0;
-                }
-                cmp.mpInfo.mp_distribution = hl;
-
-                crc.molpops.Add(cmp);
             }
+
+            //var query =
+            //    from mol in sc.entity_repository.molecules
+            //    where mol.Name == "CXCR5" || mol.Name == "CXCL13:CXCR5" || mol.Name == "CXCL13"
+            //    select mol;
+
+            //ConfigMolecularPopulation cmp = null;
+            //foreach (ConfigMolecule cm in query)
+            //{
+            //    cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            //    cmp.molecule_guid_ref = cm.molecule_guid;
+            //    cmp.mpInfo = new MolPopInfo("My " + cm.Name);
+            //    cmp.Name = "My " + cm.Name;
+            //    cmp.mpInfo.mp_dist_name = "Constant level";
+            //    cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+            //    cmp.mpInfo.mp_render_blending_weight = 2.0;
+
+            //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+            //    if (cm.Name == "CXCR5")
+            //    {
+            //        hl.concentration = 1.0;
+            //    }
+            //    else
+            //    {
+            //        hl.concentration = 2.0;
+            //    }
+            //    cmp.mpInfo.mp_distribution = hl;
+
+            //    crc.molpops.Add(cmp);
+            //}
 
             //REACTIONS
-            string guid = findReactionGuid(ReactionType.Association, sc);
 
-            if (guid != null)
-            {
-                ConfigReaction reac = findReactionByGuid(guid, sc);
-                ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                grp.Guid = guid;
-                grp.OriginalRate = reac.rate_const;
-                grp.ReactionComplexRate = reac.rate_const;
-                crc.reactions_guid_ref.Add(guid);
-                crc.ReactionRates.Add(grp);
-            }
+            //string guid = findReactionGuid(ReactionType.Association, sc);
 
-            guid = findReactionGuid(ReactionType.Dissociation, sc);
+            // Reaction strings
+            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5",
+                                            "CXCL13 + CXCR5 -> CXCL13:CXCR5"}; 
+                                            //"CXCR5 ->",
+                                            //"CXCL13 ->"};
             
-            if (guid != null)
+            for (int i = 0; i < type.Length; i++)
             {
-                ConfigReaction reac = findReactionByGuid(guid, sc);
-                ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                grp.Guid = guid;
-                grp.OriginalRate = reac.rate_const;
-                grp.ReactionComplexRate = reac.rate_const;
-                crc.reactions_guid_ref.Add(guid);
-                crc.ReactionRates.Add(grp);
+                ConfigReaction reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                    grp.Guid = reac.reaction_guid;
+                    grp.OriginalRate = reac.rate_const;
+                    grp.ReactionComplexRate = reac.rate_const;
+                    crc.reactions_guid_ref.Add(reac.reaction_guid);
+                    crc.ReactionRates.Add(grp);
+                }
             }
 
-            foreach (ConfigReaction cr in sc.entity_repository.reactions)
-            {
-                foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
-                {
-                    if (cr.reaction_template_guid_ref == crt.reaction_template_guid && crt.reac_type == ReactionType.Annihilation)
-                    {
-                        crc.reactions_guid_ref.Add(cr.reaction_guid);
-                        ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                        grp.Guid = cr.reaction_guid;
-                        grp.OriginalRate = cr.rate_const;
-                        grp.ReactionComplexRate = cr.rate_const;
-                        crc.ReactionRates.Add(grp);
-                    }
-                }                
-            }
+            //if (guid != null)
+            //{
+            //    ConfigReaction reac = findReactionByGuid(guid, sc);
+            //    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+            //    grp.Guid = guid;
+            //    grp.OriginalRate = reac.rate_const;
+            //    grp.ReactionComplexRate = reac.rate_const;
+            //    crc.reactions_guid_ref.Add(guid);
+            //    crc.ReactionRates.Add(grp);
+            //}
+
+            //guid = findReactionGuid(ReactionType.Dissociation, sc);
+            
+            //if (guid != null)
+            //{
+            //    ConfigReaction reac = findReactionByGuid(guid, sc);
+            //    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+            //    grp.Guid = guid;
+            //    grp.OriginalRate = reac.rate_const;
+            //    grp.ReactionComplexRate = reac.rate_const;
+            //    crc.reactions_guid_ref.Add(guid);
+            //    crc.ReactionRates.Add(grp);
+            //}
+
+            //foreach (ConfigReaction cr in sc.entity_repository.reactions)
+            //{
+            //    foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
+            //    {
+            //        if (cr.reaction_template_guid_ref == crt.reaction_template_guid && crt.reac_type == ReactionType.Annihilation)
+            //        {
+            //            crc.reactions_guid_ref.Add(cr.reaction_guid);
+            //            ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+            //            grp.Guid = cr.reaction_guid;
+            //            grp.OriginalRate = cr.rate_const;
+            //            grp.ReactionComplexRate = cr.rate_const;
+            //            crc.ReactionRates.Add(grp);
+            //        }
+            //    }                
+            //}
 
             sc.entity_repository.reaction_complexes.Add(crc);
 
-            //----------------------------
-
-            //////////////////// Locomotor_1 Reaction complex
-
-            //ConfigMolecule configMolec = new ConfigMolecule();
-            //crc = new ConfigReactionComplex("Locomotor_1");
-
-            //double[] conc = new double[5] { 250, 0, 0.0304, 250, 0 };
-            //string[] type = new string[5] { "A", "A*", "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    configMolec = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
-            //    if (configMolec != null)
-            //    {
-            //        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            //        configMolPop.molecule_guid_ref = configMolec.molecule_guid;
-            //        configMolPop.mpInfo = new MolPopInfo(configMolec.Name);
-            //        configMolPop.Name = configMolec.Name;
-            //        configMolPop.mpInfo.mp_dist_name = "Uniform";
-            //        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-            //        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
-
-            //        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-            //        hl.concentration = conc[i];
-            //        configMolPop.mpInfo.mp_distribution = hl;
-
-            //        crc.molpops.Add(configMolPop);
-            //    }
-            //}
-
-            //// Reactions 
-            //ConfigReaction reac = new ConfigReaction();
-            //type = new string[4] {"A + CXCL13:CXCR5 -> A* + CXCL13:CXCR5",
-            //                              "A* -> A",
-            //                       "CXCL13 + CXCR5 -> CXCL13:CXCR5",
-            //                       "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
-            //for (int i = 0; i < type.Length; i++)
-            //{
-            //    reac = findReaction(type[i], sc);
-            //    if (reac != null)
-            //    {
-            //        crc.reactions_guid_ref.Add(reac.reaction_guid);
-            //    }
-            //}
-
-            //sc.entity_repository.reaction_complexes.Add(crc);
         }
 
         // given a string description of a reaction, return the ConfigReaction that matches

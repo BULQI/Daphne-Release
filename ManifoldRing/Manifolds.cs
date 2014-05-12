@@ -584,6 +584,7 @@ namespace ManifoldRing
 
         /// <summary>
         /// TinyBall Laplacian field
+        /// Contributions from boundary terms must be applied separately through flux update.
         /// </summary>
         /// <param name="sf">field operand</param>
         /// <returns>resulting field</returns>

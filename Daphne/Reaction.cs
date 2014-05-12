@@ -399,8 +399,14 @@ namespace Daphne
     }
 
     // Boundary reactions
-    // Use the convention that positive flux reduces the concentration.
+    // Concentrations of bulk molecules are updated through the flux terms.
+    // Flux of material through a surface is the number of molecules per area per time (molecules / um^2-min)
+    // Convention: the outward pointing normal to the surface is defined relative to the bulk volume 
+    //             and positive when pointing out of the volume.
+    // With this convention, positive flux reduces the bulk concentration.
     // Flux terms are accumulating and need to be zeroed in the diffusion step.
+    // NOTE: The flux terms are not multiplied by the time step until the diffusion step. If, in the future,
+    //       we use different time step-sizes for reactions and diffusion, will this still work?
 
     /// <summary>
     /// Appropriate for boundary manifolds that are not zero-dimensional.
@@ -411,15 +417,13 @@ namespace Daphne
         MolecularPopulation ligand;
         MolecularPopulation complex;
         Manifold boundary;
-        double fluxIntensityConstant;
-
+ 
         public BoundaryAssociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
         {
             receptor = _receptor;
             ligand = _ligand;
             complex = _complex;
             boundary = complex.Man;
-            fluxIntensityConstant = 1.0; // / ligand.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
@@ -434,11 +438,11 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * receptor.Conc * ligand.BoundaryConcs[boundary.Id];
+            intensity = RateConstant * receptor.Conc * ligand.BoundaryConcs[boundary.Id];
 
-            ligand.BoundaryFluxes[boundary.Id] += fluxIntensityConstant * intensity;
-            receptor.Conc -= intensity;
-            complex.Conc += intensity;
+            ligand.BoundaryFluxes[boundary.Id] += intensity;
+            receptor.Conc -= intensity * dt;
+            complex.Conc += intensity * dt;
         }
     }
 
@@ -448,7 +452,6 @@ namespace Daphne
         MolecularPopulation ligand;
         MolecularPopulation complex;
         Manifold boundary;
-        double fluxIntensityConstant;
 
         public BoundaryDissociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
         {
@@ -456,17 +459,16 @@ namespace Daphne
             ligand = _ligand;
             complex = _complex;
             boundary = complex.Man;
-            fluxIntensityConstant = 1.0; // / ligand.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
         }
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * complex.Conc;
+            intensity = RateConstant * complex.Conc;
 
-            ligand.BoundaryFluxes[boundary.Id] -= fluxIntensityConstant * intensity;
-            receptor.Conc += intensity;
-            complex.Conc -= intensity;
+            ligand.BoundaryFluxes[boundary.Id] -= intensity;
+            receptor.Conc += intensity * dt;
+            complex.Conc -= intensity * dt;
         }
     }
 
@@ -478,14 +480,12 @@ namespace Daphne
         MolecularPopulation membrane;
         MolecularPopulation bulk;
         Manifold boundary;
-        double fluxIntensityConstant;
 
         public BoundaryTransportFrom(MolecularPopulation _membrane, MolecularPopulation _bulk, double _RateConst)
         {
             bulk = _bulk;
             membrane = _membrane;
             boundary = membrane.Man;
-            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
@@ -496,10 +496,10 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * bulk.BoundaryConcs[boundary.Id];
+            intensity = RateConstant  * membrane.Conc;
 
-            bulk.BoundaryFluxes[boundary.Id] -= fluxIntensityConstant * intensity;
-            membrane.Conc -= intensity;
+            bulk.BoundaryFluxes[boundary.Id] -= intensity;
+            membrane.Conc -= intensity * dt;
         }
     }
 
@@ -511,14 +511,12 @@ namespace Daphne
         MolecularPopulation membrane;
         MolecularPopulation bulk;
         Manifold boundary;
-        double fluxIntensityConstant;
 
         public BoundaryTransportTo(MolecularPopulation _bulk, MolecularPopulation _membrane, double _RateConst)
         {
             bulk = _bulk;
             membrane = _membrane;
             boundary = membrane.Man;
-            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
@@ -529,10 +527,10 @@ namespace Daphne
 
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * bulk.BoundaryConcs[boundary.Id];
+            intensity = RateConstant * bulk.BoundaryConcs[boundary.Id];
 
-            bulk.BoundaryFluxes[boundary.Id] += fluxIntensityConstant * intensity;
-            membrane.Conc += intensity;
+            bulk.BoundaryFluxes[boundary.Id] += intensity;
+            membrane.Conc += intensity * dt;
         }
     }
 
@@ -542,7 +540,6 @@ namespace Daphne
         MolecularPopulation bulkActivated;
         MolecularPopulation receptor;
         Manifold boundary;
-        double fluxIntensityConstant;
 
         public CatalyzedBoundaryActivation(MolecularPopulation _bulk, MolecularPopulation _bulkActivated, MolecularPopulation _receptor, double _RateConst)
         {
@@ -550,7 +547,6 @@ namespace Daphne
             bulkActivated = _bulkActivated;
             receptor = _receptor;
             boundary = receptor.Man;
-            fluxIntensityConstant = 1.0; // / bulk.Molecule.DiffusionCoefficient;
             RateConstant = _RateConst;
 
             if (bulk.BoundaryConcs[boundary.Id].M != receptor.Man)
@@ -565,10 +561,10 @@ namespace Daphne
         }
         public override void Step(double dt)
         {
-            intensity = (RateConstant * dt) * receptor.Conc * bulk.BoundaryConcs[boundary.Id];
+            intensity = RateConstant * receptor.Conc * bulk.BoundaryConcs[boundary.Id];
 
-            bulk.BoundaryFluxes[boundary.Id] += fluxIntensityConstant * intensity;
-            bulkActivated.BoundaryFluxes[boundary.Id] -= fluxIntensityConstant * intensity;
+            bulk.BoundaryFluxes[boundary.Id] += intensity;
+            bulkActivated.BoundaryFluxes[boundary.Id] -= intensity ;
         }
 
     }

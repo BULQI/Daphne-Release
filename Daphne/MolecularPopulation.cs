@@ -215,6 +215,7 @@ namespace Daphne
             }
 
             // Natural boundary conditions
+            // NOTE: we should be able to incorporate these into Laplacian()
             foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
             {
                 if (bc.Value == MolBoundaryType.Dirichlet)

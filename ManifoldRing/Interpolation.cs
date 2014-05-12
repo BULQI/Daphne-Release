@@ -152,23 +152,46 @@ namespace ManifoldRing
         {
             ScalarField temp = new ScalarField(m); 
             int n;
+            int[] indices = new int[3];
+            double volFactor;
 
             for (int i = 0; i < flux.M.PrincipalPoints.Length; i++)
             {
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(flux.M.PrincipalPoints[i])));
+
                 if (n >= 0 && n < temp.array.Length)
                 {
-                    temp.array[n] += 2 * flux.Value(flux.M.PrincipalPoints[i]) / m.StepSize();
+                    // Boundary nodes don't have the full voxel volume. Correct accordingly.
+                    volFactor = 1;
+                    indices = m.linearIndexToIndexArray(n);
+                    if ( (indices[0] == 0 ) || (indices[0] == m.NodesPerSide(0) - 1 ) )
+                    {
+                        volFactor *= 2;
+                    }
+                    if ((indices[1] == 0) || (indices[1] == m.NodesPerSide(1) - 1))
+                    {
+                        volFactor *= 2;
+                    } if ((indices[2] == 0) || (indices[2] == m.NodesPerSide(2) - 1))
+                    {
+                        volFactor *= 2;
+                    }
+
+                    temp.array[n] += volFactor * flux.M.Area() * flux.array[0] / m.VoxelVolume();
+                }
+                else
+                {
+                    throw new Exception("Could not apply flux. Could not find valid lattice point.");
                 }
             }
+
             return temp;
         }
 
         /// <summary>
         /// Impose Dirichlet boundary conditions
         /// NOTE: This algorithm is best when there is a one-to-one correspondance between 
-        /// boundary and interior manifold principla points (nodes). May not be as accurate
+        /// boundary and interior manifold principal points (nodes). May not be as accurate
         /// when there is not a one-to-one correspondance.
         /// </summary>
         /// <param name="from">Field specified on the boundary manifold</param>

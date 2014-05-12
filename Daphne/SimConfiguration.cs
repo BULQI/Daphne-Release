@@ -1105,6 +1105,11 @@ namespace Daphne
 
     public class SimulationParams
     {
+        public SimulationParams()
+        {
+            // default value
+            phi1 = 100;
+        }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
     }
