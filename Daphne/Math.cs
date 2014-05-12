@@ -164,6 +164,15 @@ namespace Daphne
             return c;
         }
 
+        public ScalarField MultInPlace(double f)
+        {
+            for (int i = 0; i < M.ArraySize; i++)
+            {
+                array[i] *= f;
+            }
+            return this;
+        }
+
         public static ScalarField operator *(ScalarField a, ScalarField b)
         {
             if (a.M != b.M)
@@ -179,6 +188,48 @@ namespace Daphne
             }
 
             return c;
+        }
+
+    }
+
+    public class GaussianScalarField : ScalarField
+    {
+        public GaussianScalarField(DiscretizedManifold m) : base(m)
+        {
+
+        }
+
+        /// <summary>
+        /// Calculate and return values of a Gaussian density funtion at each array point in the manifold
+        /// The value at the center is max
+        /// </summary>
+        public bool Initialize(double[] x0, double[] sigma, double max)
+        {
+            if (M.Dim != x0.Length || M.Dim != sigma.Length)
+            {
+                return false;
+            }
+
+            // QUESTION: Do we need this to avoid negative concentrations in the diffusion algorithm?
+            double SMALL = 1e-4,
+                   f, d = 1.0;
+            //double d = Math.Pow(2.0 * Math.PI, 1.5) * Math.Sqrt(sigma[0] * sigma[1] * sigma[2]);
+
+            for (int i = 0; i < M.ArraySize; i++)
+            {
+                f = 0;
+                for (int j = 0; j < M.Dim; j++)
+                {
+                    f += (x0[j] - M.Coordinates[i, j]) * (x0[j] - M.Coordinates[i, j]) / (2 * sigma[j]);
+                }
+                array[i] = max * Math.Exp(-f) / d;
+
+                if (array[i] < SMALL)
+                {
+                    array[i] = 0;
+                }
+            }
+            return true;
         }
 
     }
@@ -590,7 +641,6 @@ namespace Daphne
             Boundaries.Add(xzUpper, xzUpperEmbed);
             Boundaries.Add(yzLower, yzLowerEmbed);
             Boundaries.Add(yzUpper, yzUpperEmbed);
-
         }
 
         //public override int PointToArray(double[] loc)
@@ -680,53 +730,6 @@ namespace Daphne
             return interpolator;
 
         }
-
-        /// <summary>
-        /// Calculate and return values of a Gaussian density funtion at each array point in the manifold
-        /// The value at the center is 1
-        /// </summary>
-        public ScalarField GaussianField(double[] x0, double[] sigma)
-        {
-            // QUESTION: Do we need this to avoid negative concentrations in the diffusion algorithm?
-            double SMALL = 1e-4;
-
-            // Any reason not to allow the center of the distribution to be outside the Extents?
- 
-            //// Check that x0 is in the bounded manifold
-            //if ((x0[0] < this.spatialExtent[0]) || (x0[0] > this.spatialExtent[0]) ||
-            //    (x0[1] < this.spatialExtent[1]) || (x0[1] > this.spatialExtent[1]) ||
-            //    (x0[2] < this.spatialExtent[2]) || (x0[2] > this.spatialExtent[2]))
-            //{
-            //    // The center of the distribution is 
-            //    double d = 1.0/((Extents[1] - Extents[0]) * (Extents[3] - Extents[2]) * (Extents[5] - Extents[4]));
-            //    ScalarField s = new ScalarField(this, d);
-            //}
-            //else
-            //{
-                ScalarField s = new ScalarField(this);
-                double f;
-
-                double d = 1.0;
-                //double d = Math.Pow(2.0 * Math.PI, 1.5) * Math.Sqrt(sigma[0] * sigma[1] * sigma[2]);
-
-                for (int i = 0; i < ArraySize; i++)
-                {
-                    f = 0;
-                    for (int j = 0; j < Dim; j++)
-                    {
-                        f = f + (x0[j] - Coordinates[i, j]) * (x0[j] - Coordinates[i, j]) / (2 * sigma[j]);
-                    }
-                    s.array[i] = Math.Exp(-f) / d;
-
-                    if (s.array[i] < SMALL)
-                    {
-                        s.array[i] = 0;
-                    }
-                }
-            //}
-
-            return s; 
-        }
     }   
 
     /// <summary>
@@ -792,8 +795,10 @@ namespace Daphne
             dimensionsMap = new int[_dimMap.Length];
             Array.Copy(_dimMap, dimensionsMap, Domain.Dim);
 
-            position = new double[_pos.Length];
-            Array.Copy(_pos, position, Range.Dim);
+            //position = new double[_pos.Length];
+            //Array.Copy(_pos, position, Range.Dim);
+            // point to the 'original': when the original changes, position reflects that
+            position = _pos;
         }
 
         public override double[] WhereIs(int index)

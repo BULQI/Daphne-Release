@@ -96,8 +96,6 @@ namespace testDaphne
             // Add entries into Dictionary<Manifold,Compartment> that is required for adding Boundary reactions
             // 
 
-            // TODO: TranslEmbedding has a position field that should get updated as the cell moves.
-            // The Locator structure may not be needed.
             // We need to determine how we will implement cell motion. 
             foreach(KeyValuePair<int, Cell> kvp in sim.Cells)
             {
@@ -116,14 +114,15 @@ namespace testDaphne
 
             // Add a new MolecularPopulation whose concentration is a Gaussian density function
             double maxConc = 9.0;
-            ScalarField s = new ScalarField(XCellSpace.Interior);
+            GaussianScalarField gsf = new GaussianScalarField(XCellSpace.Interior);
             double[] sigma = { 1.0, 1.0, 1.0 };
             double[] center = new double[XCellSpace.Interior.Dim];
+
             center[0] = (XCellSpatialExtent[1] + XCellSpatialExtent[0]) / 2.0;
             center[1] = (XCellSpatialExtent[3] + XCellSpatialExtent[2]) / 2.0;
             center[2] = (XCellSpatialExtent[5] + XCellSpatialExtent[4]) / 2.0;
-            s = maxConc * b.GaussianField(center, sigma);
-            XCellSpace.AddMolecularPopulation(MolDict["CXCL13"], s);
+            gsf.Initialize(center, sigma, maxConc);
+            XCellSpace.AddMolecularPopulation(MolDict["CXCL13"], gsf);
 
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
             {
@@ -197,37 +196,28 @@ namespace testDaphne
             //}
 
             // this needs to go into the simulation's variable for that
-            sim.ECS = XCellSpace;
+            sim.ECS = XCellSpace;           
+        }
 
-            nSteps = 3;
-            dt = 1.0e-3;
+        private void step(int nSteps, double dt)
+        {
+            this.dt = dt;
             for (int i = 0; i < nSteps; i++)
             {
-                XCellSpace.Step(dt);
+                sim.ECS.Step(dt);
                 foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
                 {
                     kvp.Value.Step(dt);
-
-                    // XCellSpace.Interior.Boundaries[cells[j].PlasmaMembrane.Interior].position;
                 }
             }
-
-            
         }
 
         private void go()
         {
-            //if (cell == null)
+            // initialize the simulations: ecs, cells, compartments, molpops, etc.
             initialize();
-
-            //// set parameters for run
-            //nSteps = 1000;
-            //dt = 0.1;
-
-            //for (int i = 0; i < nSteps; i++)
-            //{
-            //    cell.Step(dt);
-            //}
+            // run it by stepping it forward
+            step(3, 0.001);
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
