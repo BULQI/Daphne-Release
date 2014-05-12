@@ -1888,80 +1888,28 @@ namespace DaphneGui
                     statusBarMessagePanel.Content = "Running...";
                 }
             }
-        }
-        /*
-        private void TestStepperLigandReceptor(int nSteps, double dt)
+        }        
+
+        public void DisplayCellInfo(int cellID)
         {
-            double receptorConc,
-                   ligandBoundaryConc,
-                   complexConc;
-            double[] driverLoc;
+            Cell selectedCell = Simulation.dataBasket.Cells[cellID];
+            List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
-            string output;
-            string filename = "Config\\Ligand_Receptor_Output.txt";
-            using (StreamWriter writer = File.CreateText(filename))
+            //need the ecm probe concentrations for this purpose
+            foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
             {
-                MessageBox.Show("Start processing Ligand Receptor...");
-                
-                for (int i = 0; i < nSteps; i++)
-                {
-                    sim.Step(dt);
-
-                    // ecs boundary; convert cell position to the membrane's coordinate system
-                    driverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(Simulation.dataBasket.Cells.First().Value.State.X);
-                    ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(driverLoc);
-
-                    // membrane; already in membrane's coordinate system
-                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(driverLoc);
-                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(driverLoc);
-
-                    output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc;
-                    writer.WriteLine(output);
-                }
-
-                MessageBox.Show("Processing finished.");
+                string name = MainWindow.SC.SimConfig.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.State.X);
+                CellMolecularInfo cmi = new CellMolecularInfo();
+                cmi.Molecule = name;
+                cmi.Concentration = conc.ToString();
+                currConcs.Add(cmi);
             }
+
+            dgCellMolConcs.ItemsSource = currConcs;
+            ToolWinCellInfo.Open();
+            TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
         }
-        private void TestStepperLocomotion(int nSteps, double dt)
-        {
-            double receptorConc,
-                   ligandBoundaryConc,
-                   complexConc,
-                   driverConc;
-            double[] driverLoc, convDriverLoc;
-
-            string output;
-            string filename = "Config\\DriverLocomotor_Output.txt";
-
-            using (StreamWriter writer = File.CreateText(filename))
-            {
-                MessageBox.Show("Start processing Driver Locomotion...");
-
-                for (int i = 0; i < nSteps; i++)
-                {
-                    sim.Step(dt);
-
-                    // ecs boundary; convert cell position to the membrane's coordinate system
-                    driverLoc = Simulation.dataBasket.Cells.First().Value.State.X;
-                    convDriverLoc = Simulation.dataBasket.ECS.Space.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toLocal(driverLoc);
-                    ligandBoundaryConc = Simulation.dataBasket.ECS.Space.Populations["CXCL13"].BoundaryConcs[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].Value(convDriverLoc);
-
-                    // membrane; already in membrane's coordinate system
-                    receptorConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5"].Conc.Value(convDriverLoc);
-                    complexConc = Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Populations["CXCR5:CXCL13"].Conc.Value(convDriverLoc);
-
-                    // cytosol; convert from the membrane's to the cytosol's system
-                    convDriverLoc = Simulation.dataBasket.Cells.First().Value.Cytosol.BoundaryTransforms[Simulation.dataBasket.Cells.First().Value.PlasmaMembrane.Interior.Id].toContaining(convDriverLoc);
-                    driverConc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations["A*"].Conc.Value(convDriverLoc);
-
-                    output = i * dt + "\t" + ligandBoundaryConc + "\t" + receptorConc + "\t" + complexConc + "\t" +
-                             driverConc + "\t" + driverLoc[0] + "\t" + driverLoc[1] + "\t" + driverLoc[2];
-                    writer.WriteLine(output);
-                }
-
-                MessageBox.Show("Processing finished.");
-            }
-        }*/
 
         private void hideFit()
         {

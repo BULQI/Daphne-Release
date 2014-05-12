@@ -490,7 +490,7 @@
                                                 </Label>
                                             </Grid>
                                             <Grid>
-                                                <DataGrid x:Name="dg" Height="250" Width="400" HorizontalAlignment="Left">
+                                                <DataGrid x:Name="dgCellMolConcs" Height="250" Width="400" HorizontalAlignment="Left">
                                                 </DataGrid>
                                             </Grid>
                                         </StackPanel>
