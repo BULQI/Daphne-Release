@@ -503,13 +503,134 @@ namespace DaphneGui
 
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigReaction selected_grt = (ConfigReaction)lvAvailableReacs.SelectedItem;
-            if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(selected_grt.reaction_guid))
+            ConfigReaction reac = (ConfigReaction)lvAvailableReacs.SelectedItem;
+
+            //HERE MUST CHECK IF THE ECM HAS THE MOLECULES NEEDED BY THIS REACTION
+            //Reactants
+            foreach (string newmolguid in reac.reactants_molecule_guid_ref)
             {
-                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(selected_grt.reaction_guid);
+                bool bFound = false;
+
+                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                if (cm != null)
+                {
+                    if (cm.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        if (CellPopsHaveMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+                    else
+                    {
+                        if (EcmHasMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+
+                    if (bFound == false)
+                    {
+                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
+                        MessageBox.Show(msg);
+                        return;
+                    }
+                }
+            }
+            //Products
+            foreach (string newmolguid in reac.products_molecule_guid_ref)
+            {
+                bool bFound = false;
+
+                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                if (cm != null)
+                {
+                    if (cm.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        if (CellPopsHaveMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+                    else
+                    {
+                        if (EcmHasMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+
+                    if (bFound == false)
+                    {
+                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
+                        MessageBox.Show(msg);
+                        return;
+                    }
+                }
+            }
+            //Modifiers
+            foreach (string newmolguid in reac.modifiers_molecule_guid_ref)
+            {
+                bool bFound = false;
+
+                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                if (cm != null)
+                {
+                    if (cm.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        if (CellPopsHaveMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+                    else
+                    {
+                        if (EcmHasMolecule(newmolguid))
+                        {
+                            bFound = true;
+                        }
+                    }
+
+                    if (bFound == false)
+                    {
+                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
+                        MessageBox.Show(msg);
+                        return;
+                    }
+                }
+            }
+
+
+            if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.reaction_guid))
+            {
+                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
             }
 
         }
+
+        private bool EcmHasMolecule(string molguid)
+        {
+            foreach (ConfigMolecularPopulation molpop in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
+            {
+                if (molpop.molecule_guid_ref == molguid)
+                    return true;
+            }
+            return false;
+        }
+
+        private bool CellPopsHaveMolecule(string molguid)
+        {
+            bool ret = false;
+            foreach (CellPopulation cell_pop in MainWindow.SC.SimConfig.scenario.cellpopulations)
+            {
+                ConfigCell cell = MainWindow.SC.SimConfig.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                if (MembraneHasMolecule(cell, molguid))
+                    return true;
+            }
+            
+            return ret;
+        }
+
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = lvEcsReactions.SelectedIndex;
