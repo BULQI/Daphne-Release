@@ -491,21 +491,14 @@ namespace Daphne
 
     public class Scenario
     {
-        public string description { get; set; }
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
-        ////////skg daphne       
-        //////public ObservableCollection<ConfigReaction> Reactions { get; set; }
-        //////public ObservableCollection<ConfigMolecularPopulation> MolPops { get; set; }
-        //////public ObservableCollection<GuiReactionComplex> ReactionComplexes { get; set; }
-
         public Scenario()
         {
-            description = "Scenario description";
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
@@ -1065,6 +1058,8 @@ namespace Daphne
             reaction_guid = id.ToString();
 
             rate_const = 0;
+            ReadOnly = true;
+            ForegroundColor = Colors.Red;
 
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
@@ -1144,6 +1139,8 @@ namespace Daphne
         public string reaction_guid { get; set; }
         public string reaction_template_guid_ref { get; set; }
         public double rate_const { get; set; }
+        public bool ReadOnly { get; set; }
+        public Color ForegroundColor { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
@@ -1207,6 +1204,7 @@ namespace Daphne
         public double CellRadius { get; set; }
         public string locomotor_mol_guid_ref { get; set; }
         public double TransductionConstant { get; set; }
+        public double DragCoefficient { get; set; }
         public string cell_guid { get; set; }
 
         public ConfigCompartment membrane { get; set; }
@@ -1403,9 +1401,21 @@ namespace Daphne
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
+
+        public CellLocation()
+        {
+        }
+
+        public CellLocation(double x, double y, double z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
     }
 
-    public class CellPopulation
+    public class CellPopulation : EntityModelBase
+
     {
         public string cell_guid_ref { get; set; }
         public string cellpopulation_name { get; set; }
@@ -1423,7 +1433,8 @@ namespace Daphne
                     return;
                 else
                 {
-                    _number = value;                    
+                    _number = value;
+                    OnPropertyChanged("number");
                 }
             }
         }
@@ -1453,7 +1464,19 @@ namespace Daphne
         public bool cellpopulation_render_on { get; set; }
         public System.Windows.Media.Color cellpopulation_color { get; set; }
         public CellPopDistribution cellPopDist { get; set; }
-        public ObservableCollection<CellLocation> cell_locations { get; set; }  //number of items = 'number' from above       
+
+        private ObservableCollection<CellLocation> _cell_locations;
+        public ObservableCollection<CellLocation> cell_locations
+        {
+            get { return _cell_locations; }
+            set
+            {
+                _cell_locations = value;
+                number = _cell_locations.Count;
+                OnPropertyChanged("cell_locations");
+            }
+        } 
+
         public ObservableCollection<CellPopDistType> CellPopDistTypes { get; set; }
         private void InitDistTypes()
         {
@@ -1559,7 +1582,6 @@ namespace Daphne
                 }
             }
         }
-        public bool mp_is_time_varying { get; set; }
         public ObservableCollection<TimeAmpPair> mp_amplitude_keyframes { get; set; }
         private System.Windows.Media.Color _mp_color;
         public System.Windows.Media.Color mp_color
@@ -1590,7 +1612,6 @@ namespace Daphne
             mp_type_guid_ref = "";
             // Default is static homogeneous level
             mp_distribution = new MolPopHomogeneousLevel();
-            mp_is_time_varying = false;
             mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
             mp_color = new System.Windows.Media.Color();
             mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
@@ -2684,4 +2705,5 @@ namespace Daphne
 
         #endregion // IDisposable Members
     }
+
 }

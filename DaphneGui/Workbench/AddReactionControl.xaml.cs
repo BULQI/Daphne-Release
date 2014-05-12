@@ -80,6 +80,7 @@ namespace DaphneGui
             reac = reac.Substring(0, reac.Length - 3);
 
             txtReac.Text = txtReac.Text + reac;
+            lbMol.UnselectAll();
         }
 
         private void btnProd_Click(object sender, RoutedEventArgs e)
@@ -99,6 +100,7 @@ namespace DaphneGui
             prod = prod.Substring(0, prod.Length - 3);
 
             txtProd.Text = txtProd.Text + prod;
+            lbMol.UnselectAll();
         }
 
         private void btnUnselect_Click(object sender, RoutedEventArgs e)
@@ -133,7 +135,19 @@ namespace DaphneGui
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            string rate = txtRate.Text.Trim();
+            if (rate.Length <= 0)
+            {
+                MessageBox.Show("Please enter a rate constant.");
+                txtRate.Focus();
+                return;
+            }
+
+            bool bValid = ParseUserInput(txtReac.Text, txtProd.Text);
+
             ConfigReaction cr = new ConfigReaction();
+            cr.ReadOnly = false;
+            cr.ForegroundColor = System.Windows.Media.Colors.Black;
             cr.rate_const = Convert.ToDouble(txtRate.Text);
 
             //----------------------------------
@@ -151,7 +165,7 @@ namespace DaphneGui
                     cr.products_molecule_guid_ref.Add(s);
             }
 
-            //NEED MODIFIERS TOO IN GUI
+            //NEED MODIFIERS TOO IN GUI?  NO!
 
             //THIS IS NOT OK
             //UNTIL WE HAVE AUTOMATIC REACTIONS, WE NEED USER TO INPUT REACTION_TYPE
@@ -159,6 +173,130 @@ namespace DaphneGui
 
             //Add the reaction to repository collection
             MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+        }
+
+        public class InputMol
+        {
+            public string molguid;
+            public int coeff;
+        }
+
+        private bool ParseUserInput(string txtLeftSide, string txtRightSide)
+        {
+            bool retval = true;
+
+            //Dictionaries of molguid/coeff pairs
+            Dictionary<string, int> recordsLeft = new Dictionary<string, int>();
+            Dictionary<string, int> recordsRight = new Dictionary<string, int>();
+
+            //----------------------------------
+            //Reactants
+            foreach (string s in reacmolguids)
+            {
+                if (recordsLeft.ContainsKey(s)) {
+                    recordsLeft[s] += 1;
+                }
+                else 
+                    recordsLeft.Add(s, 1);
+            }
+
+            //----------------------------------
+            //Products
+            foreach (string s in prodmolguids)
+            {
+                if (recordsRight.ContainsKey(s)) {
+                    recordsRight[s] += 1;
+                }
+                else
+                    recordsRight.Add(s, 1);
+            }
+
+            //////THIS CODE PARSES REACTION INPUT BY USER
+            //////LEFT SIDE
+            ////string phrase = txtLeftSide;
+            ////string[] tokensLeft;
+            ////string[] stringSeparators = new string[] { "+" };
+
+            ////tokensLeft = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            ////int count = tokensLeft.Count();
+
+            ////for (int i = 0; i < count; i++)
+            ////{
+            ////    tokensLeft[i] = tokensLeft[i].Trim();
+            ////}
+
+            //////RIGHT SIDE
+            ////phrase = txtRightSide;
+            ////string[] tokensRight;
+
+            ////tokensRight = phrase.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            ////count = tokensRight.Count();
+
+            ////for (int i = 0; i < count; i++)
+            ////{
+            ////    tokensRight[i] = tokensRight[i].Trim();
+            ////}
+
+            //////NOW IF THERE ARE COEFFICIENTS, LIKE N, STRIP THOSE OFF AND SAVE THEM OR CREATE N MOLECULES OF THAT TYPE IN REACTION CLASS.
+            //////FOR GUI MOCKUPS, COEFFICIENTS ARE NOT RELEVANT. BUT NEED TO STRIP THEM OFF SO WE GET THE MOLECULE NAME RIGHT.           
+            ////List<Molecule> molNames = new List<Molecule>();
+            ////List<Molecule> molLeft = new List<Molecule>();
+            ////List<int> stoicLeft = new List<int>();
+            ////List<int> stoicRight = new List<int>();
+            
+
+            ////foreach (string str in tokensLeft)
+            ////{
+            ////    string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
+            ////    int len1 = sMol.Length;
+            ////    int len2 = str.Length;
+            ////    int diff = len2 - len1;
+            ////    if (diff == 0)
+            ////        stoicLeft.Add(1);
+            ////    else
+            ////    {
+            ////        string sCoeff = str.Substring(0, diff);
+            ////        stoicLeft.Add(int.Parse(sCoeff));
+            ////    }
+            ////    //Molecule molec = new Molecule(sMol, 1, 1, 1);
+            ////    //molNames.Add(molec);
+            ////    //molLeft.Add(molec);
+            ////}
+            ////List<Molecule> molRight = new List<Molecule>();
+            ////foreach (string str in tokensRight)
+            ////{
+            ////    string sMol = str.TrimStart('1', '2', '3', '4', '5', '6', '7', '8', '9', '0');
+            ////    int len1 = sMol.Length;
+            ////    int len2 = str.Length;
+            ////    int diff = len2 - len1;
+            ////    if (diff == 0)
+            ////        stoicRight.Add(1);
+            ////    else
+            ////    {
+            ////        string sCoeff = str.Substring(0, diff);
+            ////        stoicRight.Add(int.Parse(sCoeff));
+            ////    }
+            ////    //Molecule molec = new Molecule(sMol, 1, 1, 1);
+            ////    //molNames.Add(molec);
+            ////    //molRight.Add(molec);
+            ////}
+
+            //NOW CHECK TO SEE WHICH MOLECULES ARE NOT ALREADY DEFINED            
+            ////Dictionary<string, Molecule> newDic = new Dictionary<string, Molecule>();
+            ////foreach (Molecule mol in molNames)
+            ////{
+            ////    //Make sure molecule not already in main dictionary
+            ////    if (!Sim.MolecDict.ContainsKey(mol.Name))
+            ////    {
+            ////        //Now make sure molecule not already in the potential new list (dictionary)
+            ////        if (!newDic.ContainsKey(mol.Name))
+            ////        {
+            ////            newDic.Add(mol.Name, mol);
+            ////        }
+            ////    }
+            ////}
+
+            return retval;
         }
     }
 }

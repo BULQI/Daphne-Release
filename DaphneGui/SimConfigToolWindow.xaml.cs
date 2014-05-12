@@ -12,10 +12,95 @@ using System.Collections.ObjectModel;
 using System.Windows.Markup;
 //using System.Windows.Forms;
 using Microsoft.Win32;
-
+using System.Windows.Media;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace DaphneGui
 {
+    public class DataGridBehavior
+    {
+        #region DisplayRowNumber
+
+        public static DependencyProperty DisplayRowNumberProperty =
+            DependencyProperty.RegisterAttached("DisplayRowNumber",
+                                                typeof(bool),
+                                                typeof(DataGridBehavior),
+                                                new FrameworkPropertyMetadata(false, OnDisplayRowNumberChanged));
+        public static bool GetDisplayRowNumber(DependencyObject target)
+        {
+            return (bool)target.GetValue(DisplayRowNumberProperty);
+        }
+        public static void SetDisplayRowNumber(DependencyObject target, bool value)
+        {
+            target.SetValue(DisplayRowNumberProperty, value);
+        }
+
+        private static void OnDisplayRowNumberChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
+        {
+            DataGrid dataGrid = target as DataGrid;
+            if ((bool)e.NewValue == true)
+            {
+                EventHandler<DataGridRowEventArgs> loadedRowHandler = null;
+                loadedRowHandler = (object sender, DataGridRowEventArgs ea) =>
+                {
+                    if (GetDisplayRowNumber(dataGrid) == false)
+                    {
+                        dataGrid.LoadingRow -= loadedRowHandler;
+                        return;
+                    }
+                    int num = ea.Row.GetIndex();
+                    ea.Row.Header = ea.Row.GetIndex() + 1;
+                };
+                dataGrid.LoadingRow += loadedRowHandler;
+
+                ItemsChangedEventHandler itemsChangedHandler = null;
+                itemsChangedHandler = (object sender, ItemsChangedEventArgs ea) =>
+                {
+                    if (GetDisplayRowNumber(dataGrid) == false)
+                    {
+                        dataGrid.ItemContainerGenerator.ItemsChanged -= itemsChangedHandler;
+                        return;
+                    }
+                    GetVisualChildCollection<DataGridRow>(dataGrid).
+                        ForEach(d => d.Header = d.GetIndex());
+                };
+                dataGrid.ItemContainerGenerator.ItemsChanged += itemsChangedHandler;
+            }
+        }
+
+        #endregion // DisplayRowNumber
+
+        #region Get Visuals
+
+        private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
+        {
+            List<T> visualCollection = new List<T>();
+            GetVisualChildCollection(parent as DependencyObject, visualCollection);
+            return visualCollection;
+        }
+
+        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
+        {
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T)
+                {
+                    visualCollection.Add(child as T);
+                }
+                if (child != null)
+                {
+                    GetVisualChildCollection(child, visualCollection);
+                }
+            }
+        }
+
+        #endregion // Get Visuals
+    }
+
+
     public class RowToIndexConverter : MarkupExtension, IValueConverter
     {
         static RowToIndexConverter converter;
@@ -24,7 +109,10 @@ namespace DaphneGui
         {
             DataGridRow row = value as DataGridRow;
             if (row != null)
+            {
+                int ind = row.GetIndex();
                 return row.GetIndex() + 1;
+            }
             else
                 return -1;
         }
@@ -50,6 +138,7 @@ namespace DaphneGui
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
     {
+        private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
             InitializeComponent();
@@ -286,7 +375,6 @@ namespace DaphneGui
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_is_time_varying = false;
             MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
@@ -474,8 +562,15 @@ namespace DaphneGui
 
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
-            ConfigReaction cr = (ConfigReaction)lbReactions.SelectedItem;
-            MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
+            ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
+            if (cr.ReadOnly == true)
+            {
+                MessageBox.Show("Cannot remove a predefined reaction.");
+            }
+            else
+            {
+                MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
+            }
         }
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -623,9 +718,7 @@ namespace DaphneGui
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_is_time_varying = false;
             gmp.mpInfo.mp_render_on = true;
-
             gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
@@ -761,8 +854,185 @@ namespace DaphneGui
 
         }
 
-        
+        private void numberBox_ValueChanged(object sender, ActiproSoftware.Windows.PropertyChangedRoutedEventArgs<int?> e)
+        {
+            if (e.OldValue == null || e.NewValue == null)
+                return;
+
+            int numOld = (int)e.OldValue;
+            int numNew = (int)e.NewValue;
+
+            if (numNew == numOld)
+                return;
+            
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+
+            if (numNew > numOld && numNew > cp.cell_locations.Count)
+            {
+                int rows_to_add = numNew - numOld;
+                for (int i = 0; i < rows_to_add; i++)
+                {
+                    CellLocation cl = new CellLocation();
+                    cl.X = 1; cl.Y = 1; cl.Z = 1;
+                    cp.cell_locations.Add(cl);                    
+                }
+            }
+            else if (numNew < numOld)
+            {
+                if (numOld > cp.cell_locations.Count)
+                    numOld = cp.cell_locations.Count;
+
+                int rows_to_delete = numOld - numNew;
+            
+                for (int i = rows_to_delete; i > 0; i--)
+                {
+                    cp.cell_locations.RemoveAt(numNew + i - 1);
+                }
+            }
+            cp.number = cp.cell_locations.Count;
+
+        }
+
+        private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
+        {
+            newCellPopSelected = true;
+        }
+
+        private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            e.Row.Header = (e.Row.GetIndex() + 1).ToString();
+        }
+
+        private void dgLocations_KeyDown(object sender, KeyEventArgs e)
+        {
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+
+            if (e.Key == Key.V &&
+                (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                string s = (string)Clipboard.GetData(DataFormats.Text);
+
+                char[] delim = { '\t', '\r', '\n' };
+                string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+
+                cp.cell_locations.Clear();
+                for (int i = 0; i < paste.Length; i += 3)
+                {
+                    CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
+                    cp.cell_locations.Add(cl);
+                }
+
+                cp.number = cp.cell_locations.Count;
+                
+            }
+
+            
+        }
+
+        private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
+        {
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+
+            string s = (string)Clipboard.GetData(DataFormats.Text);
+
+            char[] delim = { '\t', '\r', '\n' };
+            string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
+
+            cp.cell_locations.Clear();
+            for (int i = 0; i < paste.Length; i += 3)
+            {
+                CellLocation cl = new CellLocation(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2]));
+                cp.cell_locations.Add(cl);
+            }
+
+        }
+
+        private void dgLocations_Scroll(object sender, RoutedEventArgs e)
+        {
+            DataGrid dgData = (DataGrid)sender;
+            //BindingExpression b = dgData.GetBindingExpression(System.Windows.Controls.DataGrid.ItemsSourceProperty);
+            //b.UpdateTarget();
+            //if (e.RoutedEvent.Name == 
+
+
+            //IF CURRENTLY EDITING A CELL, WANT TO PREVENT CALLING REFRESH!  HOW TO DO?
+            //if (dgData.IsEditing())  //DOESN'T WORK
+            //if (dgData.SelectedIndex > -1)
+            //    return;
+
+            //if (dgData.SelectedCells.Count > 0)
+            //{
+            //    //DataGridCellInfo dgci = dgData.SelectedCells[0];
+            //    DataGridCellInfo dgci = (DataGridCellInfo)dgData.SelectedCells[0];
+            //    DataGridCell dgc = TryToFindGridCell(dgData, dgci);
+
+            //    bool bEditing = dgc.IsEditing;
+            //    if (bEditing == true)
+            //        return;
+            //}
+
+            try
+            {
+                dgData.Items.Refresh();
+            }
+            catch 
+            {
+            }
+        }
+
+        private void dgLocations_Unloaded(Object sender, RoutedEventArgs e)
+        {
+            CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cp == null)
+                return;
+            cp.number = cp.cell_locations.Count;
+        }
+
+        static DataGridCell TryToFindGridCell(DataGrid grid, DataGridCellInfo cellInfo)
+        {
+            DataGridCell result = null;
+            DataGridRow row = (DataGridRow)grid.ItemContainerGenerator.ContainerFromItem(cellInfo.Item);
+            if (row != null)
+            {
+                int columnIndex = grid.Columns.IndexOf(cellInfo.Column);
+                if (columnIndex > -1)
+                {
+                    DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(row);
+                    result = presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex) as DataGridCell;
+                }
+            }
+            return result;
+        }
+
+        static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = v as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(v);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+
     }
+
+
 
     
 }
