@@ -539,7 +539,7 @@
                                                             </Style>
                                                         </GridView.ColumnHeaderContainerStyle>
 
-                                                        <GridViewColumn Width="100" Header="Property">
+                                                        <GridViewColumn Width="120" Header="Property">
                                                             <GridViewColumn.CellTemplate>
                                                                 <DataTemplate>
                                                                     <TextBlock Text="{Binding Path=name}"></TextBlock>
