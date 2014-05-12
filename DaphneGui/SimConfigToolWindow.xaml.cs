@@ -2816,43 +2816,43 @@ namespace DaphneGui
 
             DiffRegGrid.Columns.Clear();
 
-            ObservableCollection<ConfigTransitionDriver> TheData = diff_scheme.Drivers;
+            ////ObservableCollection<ConfigTransitionDriver> TheData = diff_scheme.Drivers;
 
-            if (TheData.Count > 0)
-            {
-                // Find num columns
-                int numCols = TheData[0].DriverElements.Count;
-                int i = 0;
-                foreach (ConfigTransitionDriverElement driver_element in TheData[0].DriverElements)
-                {
-                    DiffRegGrid.Columns.Add(
-                        new DataGridComboBoxColumn
-                        {
-                            Header = string.Format("{0}", TheData[i].StateName),
-                            ItemsSource = cell.cytosol.molpops,
-                            DisplayMemberPath = "Name",
-                            CanUserSort = false,
-                            //SelectedItemBinding = new Binding(string.Format("{0}", cs.MolName))                           
-                            //SelectedItemBinding = new Binding(string.Format("TheData[0].DriverElements[{0}].driver_mol_guid_ref", i))
-                            //SelectedItemBinding = new Binding("abcd")
-                            SelectedItemBinding = new Binding("Name")
-                        }
-                    );
-                    ////DiffRegGrid.Columns.Add(
-                    ////    new DataGridTemplateColumn
-                    ////    {
-                    ////        Header = string.Format("{0}", TheData[i].StateName),
-                    ////        CellTemplate = cellProductionDetailsTemplate,
-                    ////        CanUserSort = false
-                    ////    }
-                    ////);
+            ////if (TheData.Count > 0)
+            ////{
+            ////    // Find num columns
+            ////    int numCols = TheData[0].DriverElements.Count;
+            ////    int i = 0;
+            ////    foreach (ConfigTransitionDriverElement driver_element in TheData[0].DriverElements)
+            ////    {
+            ////        DiffRegGrid.Columns.Add(
+            ////            new DataGridComboBoxColumn
+            ////            {
+            ////                Header = string.Format("{0}", TheData[i].StateName),
+            ////                ItemsSource = cell.cytosol.molpops,
+            ////                DisplayMemberPath = "Name",
+            ////                CanUserSort = false,
+            ////                //SelectedItemBinding = new Binding(string.Format("{0}", cs.MolName))                           
+            ////                //SelectedItemBinding = new Binding(string.Format("TheData[0].DriverElements[{0}].driver_mol_guid_ref", i))
+            ////                //SelectedItemBinding = new Binding("abcd")
+            ////                SelectedItemBinding = new Binding("Name")
+            ////            }
+            ////        );
+            ////        ////DiffRegGrid.Columns.Add(
+            ////        ////    new DataGridTemplateColumn
+            ////        ////    {
+            ////        ////        Header = string.Format("{0}", TheData[i].StateName),
+            ////        ////        CellTemplate = cellProductionDetailsTemplate,
+            ////        ////        CanUserSort = false
+            ////        ////    }
+            ////        ////);
 
-                    i++;
-                }
-            }
+            ////        i++;
+            ////    }
+            ////}
 
-            DiffRegGrid.ItemsSource = TheData;
-            DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(ItemContainerGenerator_StatusChanged);
+            ////DiffRegGrid.ItemsSource = TheData;
+            ////DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(ItemContainerGenerator_StatusChanged);
         }
 
         private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
