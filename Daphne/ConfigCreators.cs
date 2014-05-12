@@ -1356,9 +1356,12 @@ namespace Daphne
 
             //REACTIONS
             string guid = findReactionGuid(ReactionType.Association, sc);
-            crc.reactions_guid_ref.Add(guid);
+            if (guid != null)
+                crc.reactions_guid_ref.Add(guid);
+
             guid = findReactionGuid(ReactionType.Dissociation, sc);
-            crc.reactions_guid_ref.Add(guid);
+            if (guid != null)
+                crc.reactions_guid_ref.Add(guid);
 
             foreach (ConfigReaction cr in sc.entity_repository.reactions)
             {

@@ -70,6 +70,11 @@ namespace Workbench
                 menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
                 menu.MenuItems[4].Click += new System.EventHandler(this.btnChange_Click);
 
+                btnIncSize.IsEnabled = true;
+                btnDecSize.IsEnabled = true;
+                btnDiscard.IsEnabled = true;
+                btnSave.IsEnabled = true;
+
                 cm.DrawChart();
 
             }

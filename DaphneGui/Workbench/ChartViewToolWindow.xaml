@@ -26,10 +26,10 @@
             </Grid.RowDefinitions>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" >Bigger</Button>
-                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click">Smaller</Button>
-                <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" >Save Changes</Button>
-                <Button x:Name="btnDiscard" Width="100" Height="24" HorizontalAlignment="Left"  Click="btnDiscard_Click" >Discard Changes</Button>
+                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Bigger</Button>
+                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Smaller</Button>
+                <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" IsEnabled="False">Save Changes</Button>
+                <Button x:Name="btnDiscard" Width="100" Height="24" HorizontalAlignment="Left"  Click="btnDiscard_Click" IsEnabled="False">Discard Changes</Button>
             </StackPanel>
 
             <!--<TextBlock Grid.Column="0" Grid.Row="1">Mouse Down Pos:</TextBlock>
