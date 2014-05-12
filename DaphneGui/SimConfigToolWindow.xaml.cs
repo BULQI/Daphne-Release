@@ -1736,21 +1736,25 @@ namespace DaphneGui
                 for (int i = 0; i < rows_to_add; i++)
                 {
                     CellState cs = new CellState();
-                    cp.cell_list.Add(cs);
-                    //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
-                    //{
-                    //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                    //    cps.spec_cell_list.Add(cs);
-                    //}
-                }
-                //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
-                //{
-                //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                //    for (int i = 0; i < rows_to_add; i++)
-                //    {
-                //        cps.spec_cell_list.Add(new CellState());
-                //    }
-                //}
+
+                    int count = cp.cell_list.Count;
+                    if (count > 0)
+                    {
+                        cs.X = cp.cell_list[count - 1].X;
+                        cs.Y = cp.cell_list[count - 1].Y;
+                        cs.Z = cp.cell_list[count - 1].Z;
+                    }
+                    cs.X += 7;
+                    cs.Y += 11;
+                    cs.Z += 13;
+                    if (cs.X > MainWindow.SC.SimConfig.scenario.environment.extent_x)
+                        cs.X = 1;
+                    if (cs.Y > MainWindow.SC.SimConfig.scenario.environment.extent_y)
+                        cs.Y = 1;
+                    if (cs.Z > MainWindow.SC.SimConfig.scenario.environment.extent_z)
+                        cs.Z = 1;
+                    cp.cell_list.Add(cs);                    
+                }                
             }
             else if (numNew < numOld)
             {
@@ -1762,21 +1766,7 @@ namespace DaphneGui
                 for (int i = rows_to_delete; i > 0; i--)
                 {
                     cp.cell_list.RemoveAt(numNew + i - 1);
-                    //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
-                    //{
-                    //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                    //    cps.spec_cell_list.RemoveAt(numNew + i - 1);
-                    //}
-
                 }
-                //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
-                //{
-                //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                //    for (int i = rows_to_delete; i > 0; i--)
-                //    {
-                //        cps.spec_cell_list.RemoveAt(numNew + i - 1);
-                //    }
-                //}
             }
             cp.number = cp.cell_list.Count;
             if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
@@ -1784,8 +1774,6 @@ namespace DaphneGui
                 CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
                 cps.CopyLocations(cp);
             }
-            
-
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)

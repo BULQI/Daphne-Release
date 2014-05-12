@@ -52,6 +52,7 @@
             <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
             <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
             <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
+            <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1030,82 +1031,6 @@
                 </StackPanel>
             </DataTemplate>
 
-            <!--<DataTemplate x:Key="cellPopProbDistributionTypeTemplate">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Converter={StaticResource CellPopProbDistTypeEnumConv}}"/>
-                </StackPanel>
-            </DataTemplate>-->
-
-            <!--<DataTemplate DataType="{x:Type daph:CellPopDistribution}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="dist type" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
-                    <TextBox Text="{Binding Path=DistType, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,2"
-                                 />
-                </StackPanel>
-
-            </DataTemplate>-->
-
-            <!-- CellPopUniformDistribution -->
-            <!--<DataTemplate DataType="{x:Type daph:CellPopUniformDistribution}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="conc" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center"       />
-                    <TextBox Text="{Binding Path=Conc, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,2"
-                                 />
-                </StackPanel>
-                
-            </DataTemplate>-->
-
-
-            <!--<DataTemplate DataType="{x:Type daph:CellPopGaussianDistribution}">
-                <StackPanel Orientation="Vertical">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="peak conc" Margin="6,0"
-                                   Grid.Column="0" Grid.Row="0"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-                        <StackPanel Orientation="Horizontal"
-                                    Grid.Column="1" Grid.Row="0"
-                                    Margin="0,2">
-                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                    SpinnerVisibility="Collapsed"
-                                                    HorizontalAlignment="Right"
-                                                    Format="F2"
-                                                    StepValue="10"
-                                                    Width="50" 
-                                                    CenterSlotHorizontalAlignment="Right"
-                                                    Value="{Binding Path=Peak, UpdateSourceTrigger=PropertyChanged}"
-                                                    />
-                            <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                        </StackPanel>
-                        
-                    </Grid>
-                    <ListView x:Name="molPopGaussianBoxSpecsListView"
-                                              ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
-                                              DisplayMemberPath="box_guid"
-                                              SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
-                                              SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
-                                              />
-                    <ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding ElementName=molPopGaussianBoxSpecsListView, Path=SelectedItem}" 
-                                                    HorizontalAlignment="Center"
-                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
-                                                    Margin="0,2"/>
-                </StackPanel>
-            </DataTemplate>-->
-
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
                     <!--<CheckBox IsChecked="{Binding Path=cellpopulation_render_on}" Style="{StaticResource EyeballCheckboxStyle}"/>-->
@@ -1114,6 +1039,8 @@
                                                VerticalAlignment="Center"
                                                Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
                                                Stroke="Black" StrokeThickness="0.5"/>
+
+                    <!--Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"-->
 
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
                     
@@ -1327,8 +1254,8 @@
                                         Width="140"
                                         HorizontalAlignment="Left" 
                                         Format="a r g b"
-                                        Value="{Binding Path=cellpopulation_color}"
-                                        Margin="0,2">
+                                        Value="{Binding Path=cellpopulation_color, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,2" >
 
                             </editors:ColorEditBox>
                         </StackPanel>
@@ -1362,26 +1289,7 @@
                                                 SelectionChanged="cbCellLocationType_SelectionChanged">
                                             </ComboBox>
                                         </StackPanel>
-                                            <StackPanel Orientation="Vertical" Margin="16,0">
-                                            <!--<ContentControl Name="CellLocationDetails"
-                                                    ContentTemplate="{StaticResource cellCoordsTemplate}">
-                                                    <ContentControl.Style>
-                                                        <Style>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="0">
-                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellCoordsTemplate}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="1">
-                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellUniformTemplate}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding ElementName=cbCellLocationType , Path=SelectedIndex}" Value="2">
-                                                                    <Setter  Property="ContentControl.ContentTemplate" Value="{StaticResource cellGaussianTemplate}"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ContentControl.Style>
-                                            </ContentControl>-->
-                                            
+                                            <StackPanel Orientation="Vertical" Margin="16,0">                                            
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -1389,17 +1297,7 @@
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
-
-                                                <!--<StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
-                                                    
-                                                    <ContentControl Name="cellPopDistrib"
-                                                        ContentTemplate="{StaticResource cellPopDistributionDetailsTemplate}" 
-                                                        Margin="6,2"/>
-                                                    
-                                                    
-                                                </StackPanel>-->
-
-
+                                                
                                                 <StackPanel Grid.Column="0" Grid.Row="0">
                                                     <ContentControl Name="cellPopDistrib"
                                                         Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
