@@ -162,8 +162,8 @@ namespace Daphne
                 {
                     MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
 
-                    mpl.c1 = cmp.boundaryCondition[0].val;
-                    mpl.c2 = cmp.boundaryCondition[1].val;
+                    mpl.c1 = mpl.boundaryCondition[0].val;
+                    mpl.c2 = mpl.boundaryCondition[1].val;
                     double x2;
                     switch (mpl.dim)
                     {
@@ -525,19 +525,27 @@ namespace Daphne
             // ECS molpops boundary conditions
             foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops)
             {
-                foreach (BoundaryCondition bc in cmp.boundaryCondition)
-                {
-                    int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
+                if (cmp.mpInfo.mp_distribution.GetType() == typeof(MolPopLinear)) {
+                    MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                    foreach (BoundaryCondition bc in mpl.boundaryCondition)
+                    //foreach (BoundaryCondition bc in cmp.boundaryCondition)
+                    {
+                        int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
 
-                    dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
-                    if (bc.boundaryType == MolBoundaryType.Dirichlet)
-                    {
-                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
-                    }
-                    else
-                    {
-                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.val });
-                    }
+                        if (!dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.ContainsKey(face))
+                        {
+                            dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
+
+                            if (bc.boundaryType == MolBoundaryType.Dirichlet)
+                            {
+                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
+                            }
+                            else
+                            {
+                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.val });
+                            }
+                        }
+                }
                 }
             }
 

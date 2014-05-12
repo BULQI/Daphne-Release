@@ -831,7 +831,7 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Grid.Column="0" Grid.Row="6" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
-                    <TextBlock x:Name="tbConc" Text="concentration" Margin="20,0" 
+                        <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="20,0" 
                                            HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
                                            Width="100"/>
                 </StackPanel>
@@ -853,7 +853,7 @@
                                         </Style>
                                     </TextBlock.Style>
                     </TextBlock>
-                    <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1}">                        
+                        <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1, StringFormat={}{0:0.00}}" >                        
                     </TextBox>
                 </StackPanel>
                 <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
@@ -875,7 +875,7 @@
                         </TextBlock.Style>
                     </TextBlock>
 
-                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">                        
+                        <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2, StringFormat={}{0:0.00}}">                        
                     </TextBox>
                 </StackPanel>
                 </StackPanel>
@@ -1350,7 +1350,6 @@
                                                                     ScrollBar.Scroll="dgLocations_Scroll"
                                                                     ScrollViewer.ScrollChanged="dgLocations_Scroll"
                                                                     SourceUpdated="dgLocations_Unloaded"
-                                                                    
                                                                     >
                                                         <DataGrid.ContextMenu>
                                                             <ContextMenu >
@@ -1374,7 +1373,7 @@
                                                                     </Setter.Value>
                                                                 </Setter>
                                                             </Style>
-                                                        </DataGrid.ColumnHeaderStyle>
+                                                        </DataGrid.ColumnHeaderStyle>                                                        
                                                         <DataGrid.Columns>
                                                             <DataGridTextColumn  Header="Cell" Width="40" 
                                                                 ScrollViewer.CanContentScroll ="False"
@@ -1784,7 +1783,7 @@
                             </StackPanel>
 
 
-                            <StackPanel Grid.Column="0" Grid.Row="4">
+                            <!--<StackPanel Grid.Column="0" Grid.Row="4">
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Style.Triggers>
@@ -1913,7 +1912,10 @@
                                         </TextBox.Style>
                                     </TextBox>
                                 </StackPanel>
-                            </StackPanel>
+                            </StackPanel>-->
+                            
+                            
+                            
                         </Grid>
                     </StackPanel>
                     <StackPanel Margin="10,0">
@@ -2245,7 +2247,7 @@
                         <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"
                                   SelectedIndex="{Binding scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
                                   ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
-                                  
+                                  SelectionChanged="comboToroidal_SelectionChanged"
                                   >
                         </ComboBox>
                         <!--<Button Click="Button_Click"></Button>-->

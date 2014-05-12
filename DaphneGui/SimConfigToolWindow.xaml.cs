@@ -232,16 +232,19 @@ namespace DaphneGui
                         current_item.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
-                        if (current_mol.boundaryCondition.Count != 2)
-                        {
-                            MessageBox.Show("Specify values for boundary conditions first.");
-                            return;
-                        }
+                        //MolPopLinear cur = current_mol.mpInfo.mp_distribution as MolPopLinear;
+                        //if (cur.boundaryCondition.Count != 2)
+                        //{
+                        //    MessageBox.Show("Specify values for boundary conditions first.");
+                        //    return;
+                        //}
                         MolPopLinear slg = new MolPopLinear();
-                        slg.dim = (int)current_mol.boundary_face - 1;
-                        slg.c1 = current_mol.boundaryCondition[0].val;
-                        slg.c2 = current_mol.boundaryCondition[1].val;
                         current_item.mp_distribution = slg;
+                        
+                        //slg.dim = (int)cur.boundary_face - 1;
+                        //slg.c1 = cur.boundaryCondition[0].val;
+                        //slg.c2 = cur.boundaryCondition[1].val;
+                        //current_item.mp_distribution = slg;
                         break;
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
@@ -1979,7 +1982,6 @@ namespace DaphneGui
         private void MolPopDistributionTypeComboBox_GotFocus(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
-
             if (cmp == null)
                 return;
 
@@ -1997,9 +1999,13 @@ namespace DaphneGui
             {
                 cbi.IsEnabled = false;
             }
-            else if (cmp.boundary_face == BoundaryFace.None)
+            else if (cmp.mpInfo.mp_distribution.GetType() == typeof(MolPopLinear))
             {
-                cbi.IsEnabled = false;
+                MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                if (mpl.boundary_face == BoundaryFace.None)
+                {
+                    cbi.IsEnabled = false;
+                }
             }
 
             index = (int)MolPopDistributionType.Explicit;
@@ -2143,6 +2149,30 @@ namespace DaphneGui
                 return;
 
             cm.ValidateName(MainWindow.SC.SimConfig);
+        }
+
+        private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = e.Source as ComboBox;
+            if (cb.SelectedIndex == (int)(BoundaryType.Toroidal))
+            {
+                MessageBoxResult res;
+                res = MessageBox.Show("If you change the boundary condition to toroidal, all molecular populations using Linear initial distribution will be changed to Homogeneous.  Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                {
+                    cb.SelectedIndex = (int)(BoundaryType.Zero_Flux);
+                    return;
+                }
+
+                foreach (ConfigMolecularPopulation cmp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
+                {
+                    if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    {
+                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        cmp.mpInfo.mp_distribution = shl;
+                    }
+                }
+            }
         }
 
         //private ComboBox MolPopDistComboBox;
