@@ -1580,10 +1580,10 @@ namespace Daphne
 
         public ConfigEnvironment()
         {
-            gridstep = 50;
-            extent_x = 400;
-            extent_y = 400;
-            extent_z = 400;
+            gridstep = 10;
+            extent_x = 200;
+            extent_y = 200;
+            extent_z = 200;
             extent_min = 5;
             extent_max = 1000;
             gridstep_min = 1;
