@@ -1426,7 +1426,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove membrane reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
@@ -1440,6 +1440,15 @@ namespace DaphneGui
                     cell.membrane.reactions_guid_ref.Remove(reacguid);
                 }
             }
+            //added 1/10/14
+            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            {
+                ConfigReaction reac = MainWindow.SC.SimConfig.entity_repository.reactions_dict[reacguid];
+                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                {
+                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                }
+            }            
 
             cell.membrane.molpops.Remove(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
@@ -1475,7 +1484,7 @@ namespace DaphneGui
             if (cmp == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cytosol reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
             
@@ -1490,11 +1499,21 @@ namespace DaphneGui
                 }
             }
 
+            //added 1/10/14
+            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            {
+                ConfigReaction reac = MainWindow.SC.SimConfig.entity_repository.reactions_dict[reacguid];
+                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                {
+                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                }
+            }
+
             cell.cytosol.molpops.Remove(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
 
             if (lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();            
         }
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2667,6 +2686,18 @@ namespace DaphneGui
                 molpop.Name = new_mol_name;
 
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+        }
+
+        private void molecule_combo_box3_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
+        }
+
+        private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
         }
 
 

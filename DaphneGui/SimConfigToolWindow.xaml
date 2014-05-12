@@ -1613,6 +1613,7 @@
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
                                                     SelectionChanged="molecule_combo_box3_SelectionChanged"
+                                                    GotFocus="molecule_combo_box3_GotFocus"
                                                     />
                             </StackPanel>
                         </Grid>
@@ -1703,6 +1704,7 @@
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
                                                     SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
+                                                    GotFocus="cyto_molecule_combo_box_GotFocus"
                                                     />
                             </StackPanel>
                         </Grid>
