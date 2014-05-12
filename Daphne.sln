@@ -7,13 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daphne", "Daphne\Daphne.csp
 		{858658F6-6BD4-4009-A49D-AB893B266755} = {858658F6-6BD4-4009-A49D-AB893B266755}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testDaphne", "testDaphne\testDaphne.csproj", "{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B88B4859-8E76-41ED-AA84-6B48A90EA338} = {B88B4859-8E76-41ED-AA84-6B48A90EA338}
-		{621278E2-936D-4F67-B2B2-B4E2705DE5BA} = {621278E2-936D-4F67-B2B2-B4E2705DE5BA}
-		{858658F6-6BD4-4009-A49D-AB893B266755} = {858658F6-6BD4-4009-A49D-AB893B266755}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface", "Interface\Interface.csproj", "{858658F6-6BD4-4009-A49D-AB893B266755}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManifoldRing", "ManifoldRing\ManifoldRing.csproj", "{621278E2-936D-4F67-B2B2-B4E2705DE5BA}"
@@ -45,31 +38,28 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstall", "DaphneInst
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 8
+		SccNumberOfProjects = 7
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://hippocrates.bumc.bu.edu:8080/tfs/galapagos
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = Daphne\\Daphne.csproj
 		SccProjectName1 = Daphne
 		SccLocalPath1 = Daphne
-		SccProjectUniqueName2 = testDaphne\\testDaphne.csproj
-		SccProjectName2 = testDaphne
-		SccLocalPath2 = testDaphne
-		SccProjectUniqueName3 = Interface\\Interface.csproj
-		SccProjectName3 = Interface
-		SccLocalPath3 = Interface
-		SccProjectUniqueName4 = ManifoldRing\\ManifoldRing.csproj
-		SccProjectName4 = ManifoldRing
-		SccLocalPath4 = ManifoldRing
-		SccProjectUniqueName5 = DaphneGui\\DaphneGui.csproj
-		SccProjectName5 = DaphneGui
-		SccLocalPath5 = DaphneGui
-		SccProjectUniqueName6 = SBMLayer\\SBMLayer.csproj
-		SccProjectName6 = SBMLayer
-		SccLocalPath6 = SBMLayer
-		SccProjectUniqueName7 = DaphneInstall\\DaphneInstall.vdproj
-		SccProjectName7 = DaphneInstall
-		SccLocalPath7 = DaphneInstall
+		SccProjectUniqueName2 = Interface\\Interface.csproj
+		SccProjectName2 = Interface
+		SccLocalPath2 = Interface
+		SccProjectUniqueName3 = ManifoldRing\\ManifoldRing.csproj
+		SccProjectName3 = ManifoldRing
+		SccLocalPath3 = ManifoldRing
+		SccProjectUniqueName4 = DaphneGui\\DaphneGui.csproj
+		SccProjectName4 = DaphneGui
+		SccLocalPath4 = DaphneGui
+		SccProjectUniqueName5 = SBMLayer\\SBMLayer.csproj
+		SccProjectName5 = SBMLayer
+		SccLocalPath5 = SBMLayer
+		SccProjectUniqueName6 = DaphneInstall\\DaphneInstall.vdproj
+		SccProjectName6 = DaphneInstall
+		SccLocalPath6 = DaphneInstall
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,18 +86,6 @@ Global
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|x64.ActiveCfg = Release|x64
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|x64.Build.0 = Release|x64
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338}.Release|x86.ActiveCfg = Release|Any CPU
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|x64.ActiveCfg = Debug|x64
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|x86.ActiveCfg = Debug|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Debug|x86.Build.0 = Debug|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Any CPU.ActiveCfg = Release|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Mixed Platforms.Build.0 = Release|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x64.ActiveCfg = Release|x64
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.ActiveCfg = Release|x86
-		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.Build.0 = Release|x86
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Mixed Platforms.Build.0 = Debug|x86
