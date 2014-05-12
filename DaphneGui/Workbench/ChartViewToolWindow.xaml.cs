@@ -24,7 +24,7 @@ namespace Workbench
         public List<double> lTimes = new List<double>();
         private ChartManager cm;
         private System.Drawing.Size chartSize;
-        public ReactionComplex RC;
+        public ReactionComplexProcessor RC;
 
         public ChartViewToolWindow()
         {

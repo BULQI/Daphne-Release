@@ -144,7 +144,27 @@ namespace Daphne
 
         private void addCompartmentReactions(Compartment comp, Compartment boundary, ConfigCompartment configComp, EntityRepository er)
         {
-            foreach (string guid in configComp.reactions_guid_ref)
+            List<string> reac_guids = new List<string>();
+
+            foreach (string rguid in configComp.reactions_guid_ref)
+            {
+                reac_guids.Add(rguid);
+            }
+
+            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            {
+                ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
+                foreach (string rguid in crc.reactions_guid_ref)
+                {
+                    if (reac_guids.Contains(rguid) == false)
+                    {
+                        reac_guids.Add(rguid);
+                    }
+                }
+            }
+
+            foreach( string guid in reac_guids)
+            //foreach (string guid in configComp.reactions_guid_ref)
             {
                 ConfigReaction cr = er.reactions_dict[guid];
 
@@ -381,6 +401,64 @@ namespace Daphne
                     }
                     comp.Reactions.Add(new BoundaryTransportFrom(membrane, bulk, cr.rate_const));
                 }
+                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
+                {
+                    if (boundary == null)
+                    {
+                        throw new Exception("Can't have a null boundary in a boundary reaction.");
+                    }
+
+                    MolecularPopulation membrane = null, bulk = null;
+
+                    // reactant
+                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.reactants_molecule_guid_ref[0]];
+                    }
+                    else 
+                    {
+                            throw new Exception("BoundaryTransportTo reactant must be a bulk molecule.");
+                    }
+                    // product
+                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                    {
+                        membrane = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                    }
+                    else 
+                    {
+                            throw new Exception("BoundaryTransportTo product must be a boundary molecule.");
+                    }
+                    comp.Reactions.Add(new BoundaryTransportTo(bulk, membrane, cr.rate_const));
+                }
+                else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
+                {
+                    if (boundary == null)
+                    {
+                        throw new Exception("Can't have a null boundary in a boundary reaction.");
+                    }
+
+                    MolecularPopulation membrane = null, bulk = null;
+
+                    // product
+                    if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        bulk = comp.Populations[cr.products_molecule_guid_ref[0]];
+                    }
+                    else
+                    {
+                        throw new Exception("BoundaryTransportFrom product must be a bulk molecule.");
+                    }
+                    // reactant
+                    if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
+                    {
+                        membrane = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                    }
+                    else
+                    {
+                        throw new Exception("BoundaryTransportFrom reactant must be a boundary molecule.");
+                    }
+                    comp.Reactions.Add(new BoundaryTransportFrom(membrane, bulk, cr.rate_const));
+                }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
                     comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
@@ -390,7 +468,7 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
                 {
-                    comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.Reactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                        comp.Populations[cr.products_molecule_guid_ref[0]],
                                                        comp.Populations[cr.products_molecule_guid_ref[1]],
                                                        cr.rate_const));
@@ -482,9 +560,12 @@ namespace Daphne
             }
         }
 
-        public bool Load(SimConfiguration sc, bool completeReset)
+        public bool Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex=false)
         {
             Scenario scenario = sc.scenario;
+
+            if (is_reaction_complex == true)
+                scenario = sc.rc_scenario;
 
             duration = scenario.time_config.duration;
             sampleStep = scenario.time_config.sampling_interval;
@@ -609,7 +690,7 @@ namespace Daphne
 
             return true;
         }
-
+        
         public void RunForward()
         {
             if (RunStatus == RUNSTAT_RUN)

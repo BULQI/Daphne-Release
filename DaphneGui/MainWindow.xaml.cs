@@ -1697,6 +1697,7 @@ namespace DaphneGui
         /// </summary>
         private void runSim()
         {
+            VTKDisplayDocWindow.Activate();
             //MessageBox.Show("In runSim()");
 
             //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP

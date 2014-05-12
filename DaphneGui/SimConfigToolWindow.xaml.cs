@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using ActiproSoftware.Windows.Controls.Docking;
 
-using Workbench;
+
 using Daphne;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
@@ -19,6 +19,9 @@ using System.Linq;
 
 using Ninject;
 using Ninject.Parameters;
+
+using Workbench;
+
 
 namespace DaphneGui
 {
@@ -690,143 +693,53 @@ namespace DaphneGui
                 return;
             }
 
-            ConfigReactionComplex grc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
-            ////// executes the ninject bindings; call this after the config is initialized with valid values
-            ////SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
-
-            // Create Cells
             //
-            double[] state = new double[SpatialState.Dim];
-            double[] cellPos = new double[Simulation.dataBasket.ECS.Space.Interior.Dim],
-                     extent = new double[] { Simulation.dataBasket.ECS.Space.Interior.Extent(0), 
-                                             Simulation.dataBasket.ECS.Space.Interior.Extent(1), 
-                                             Simulation.dataBasket.ECS.Space.Interior.Extent(2) };
-            double cellRadius = 5.0;
-
-            // One cell
-            Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cellRadius));
-
-            state[0] = extent[0] / 3.0;
-            state[1] = extent[1] / 3.0;
-            state[2] = extent[2] / 3.0;
-            cell.setState(state);
-            MainWindow.Sim.AddCell(cell);
-
-
-            foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+            
+            ConfigCell cc = new ConfigCell();
+            cc.CellName = "RCCell";
+            foreach (ConfigMolecularPopulation cmp in crc.molpops)
             {
-                foreach (ConfigMolecularPopulation cmp in grc.molpops)
-                {
-                    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref];
-                    //Molecule mol = new Molecule(cm.Name, cm.MolecularWeight, cm.EffectiveRadius, cm.DiffusionCoefficient);
-                    kvp.Value.Cytosol.AddMolecularPopulation(cm.molecule_guid, "const", new double[] { 2.0 });
-                }
-                foreach (string rguid in grc.reactions_guid_ref)
-                {
-                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                    ConfigReaction cr = er.reactions_dict[rguid];
-                    Compartment comp = kvp.Value.Cytosol;
-                    if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
-                    {
-                        //comp.Reactions.Add(new Association(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                        //                               comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name],
-                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
-                        //                               cr.rate_const));
-                        comp.Reactions.Add(new Association(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                       comp.Populations[cr.reactants_molecule_guid_ref[1]],
-                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                       cr.rate_const));
-                    }
-                    else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Dissociation)
-                    {
-                        //comp.Reactions.Add(new Dissociation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[0]].Name],
-                        //                               comp.Populations[er.molecules_dict[cr.products_molecule_guid_ref[1]].Name],
-                        //                               cr.rate_const));
-                        comp.Reactions.Add(new Dissociation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
-                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
-                                                       comp.Populations[cr.products_molecule_guid_ref[1]],
-                                                       cr.rate_const));
-                    }
-                    else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Annihilation)
-                    {
-                        //comp.Reactions.Add(new Annihilation(comp.Populations[er.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name],
-                        //                               cr.rate_const));
-                        comp.Reactions.Add(new Annihilation(comp.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
-                    }
-                }
-                kvp.Value.IsMotile = false;
+                cc.cytosol.molpops.Add(cmp);
             }
-
-
-            double T = 5;   // minutes
-            double dt = 0.001;
-            int nSteps = (int)(T / dt);
-            TestStepperReactionComplex(MainWindow.Sim, grc, nSteps, dt, 2.0, 1.0);
-
-
-
-            //*******************************
-            //THIS IS NOT OK
-            //*****************************
-            ////////MainWindow.SC.SimConfig.ChartWindow.Title = "Reaction Complex: " + grc.Name;
-            ////////MainWindow.SC.SimConfig.ChartWindow.RC = rcs.RC;
-            ////////MainWindow.SC.SimConfig.ChartWindow.Activate();
-            ////////MainWindow.SC.SimConfig.ChartWindow.Render();
-            ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Maximum = rcs.RC.dMaxTime;
-            ////////MainWindow.SC.SimConfig.ChartWindow.slMaxTime.Value = rcs.RC.dInitialTime;
-
-            //////////rc = Sim.FindReactionComplex(rcname);
-
-            ////////////The Go function calculates the initial list (dictionary) of concs for each molecule   
-            //////////rc.Go();
-
-            //ReacComplexChartWindow.Title = "Reaction Complex: " + grc.Name;
-
-            //ChartViewToolWindow tw = (ChartViewToolWindow)(MainWindow.GetWindow(ReacComplexChartWindow));
-
-            //tw.Title = "Reaction Complex: " + grc.Name;
-            //////////ReacComplexChartWindow.RC = rc;
-            //tw.Activate();
-            //tw.Render();
-            //////////ReacComplexChartWindow.slMaxTime.Maximum = rc.dMaxTime;
-            //////////ReacComplexChartWindow.slMaxTime.Value = rc.dInitialTime;
-
-        }
-
-        private void TestStepperReactionComplex(Simulation sim, ConfigReactionComplex grc, int nSteps, double dt, double k1plus, double k1minus)
-        {
-            double mol1Conc,
-                   mol2Conc,
-                   mol3Conc;
-
-            double[] defaultLoc = {0.0, 0.0, 0.0};
-
-            string output;
-            string filename = "Config\\ReactionComplexOutput.txt";
-
-            using (StreamWriter writer = File.CreateText(filename))
+            foreach (string rguid in crc.reactions_guid_ref)
             {
-                for (int i = 0; i < nSteps; i++)
-                {
-                    sim.Step(dt);
-
-                    // cytosol
-                    mol1Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[0].molecule_guid_ref].Conc.Value(defaultLoc);
-                    mol2Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[1].molecule_guid_ref].Conc.Value(defaultLoc);
-                    mol3Conc = Simulation.dataBasket.Cells.First().Value.Cytosol.Populations[grc.molpops[2].molecule_guid_ref].Conc.Value(defaultLoc);
-
-                    output = i * dt + "\t" + mol1Conc + "\t" + mol2Conc + "\t" + mol3Conc;
-                    writer.WriteLine( output );
-                }
+                cc.cytosol.reactions_guid_ref.Add(rguid);
             }
+            MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
+            //MainWindow.SC.SimConfig.entity_repository.cells_dict.Add(cc.cell_guid, cc);
+            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
 
-            MessageBox.Show("Finished processing reaction complex.");
+            CellPopulation cp = new CellPopulation();
+            cp.cell_guid_ref = cc.cell_guid;
+            cp.cellpopulation_name = "RC cell";
+            cp.number = 1;
+            CellLocation cl = new CellLocation();
+            cl.X = 0; cl.Y = 0; cl.Z = 0;
+            cp.cell_locations.Add(cl);
+            cp.cellpopulation_constrained_to_region = false;
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
+            //
 
+            Simulation rcSim = new Simulation();
+            rcSim.Load(MainWindow.SC.SimConfig, true, true);
+            //rcSim.LoadReactionComplex(MainWindow.SC.SimConfig, grc, true);
+
+            ReactionComplexProcessor rcp = new ReactionComplexProcessor();
+            rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
+            rcp.Go();
+
+            MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
+            MainWindow.ST_ReacComplexChartWindow.RC = rcp;
             MainWindow.ST_ReacComplexChartWindow.Activate();
+            MainWindow.ST_ReacComplexChartWindow.Render();
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
 
-        }
+            MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
+        }        
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

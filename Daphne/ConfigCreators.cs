@@ -937,24 +937,6 @@ namespace Daphne
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
-            // Annihiliation: CXCR5 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCR5:CXCL13 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5:CXCL13", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1e-1;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
             //Write out into json file!
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -989,11 +971,11 @@ namespace Daphne
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 if (cm.Name == "CXCR5")
                 {
-                    hl.concentration = 125;
+                    hl.concentration = 1.0;
                 }
                 else
                 {
-                    hl.concentration = 130;
+                    hl.concentration = 2.0;
                 }
                 cmp.mpInfo.mp_distribution = hl;
 
@@ -1036,11 +1018,11 @@ namespace Daphne
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 if (cm.Name == "CXCR5")
                 {
-                    hl.concentration = 125;
+                    hl.concentration = 2.0;
                 }
                 else
                 {
-                    hl.concentration = 130;
+                    hl.concentration = 4.0;
                 }
                 cmp.mpInfo.mp_distribution = hl;
 

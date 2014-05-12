@@ -1883,7 +1883,7 @@
                                 <ComboBox  x:Name="molecule_combo_box2" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource ecmMoleculesListView}}"
                                                     DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule_guid_ref}"
+                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"
                                                     SelectedValuePath="molecule_guid"
                                                     />
                                 <!--<TextBox Text="{Binding Path=molecule_guid_ref}"></TextBox>-->

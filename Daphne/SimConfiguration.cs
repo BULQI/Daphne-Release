@@ -113,6 +113,7 @@ namespace Daphne
         public string experiment_guid { get; set; }
         public string experiment_description { get; set; }
         public Scenario scenario { get; set; }
+        public Scenario rc_scenario { get; set; }
         public EntityRepository entity_repository { get; set; }
 
         //public ChartViewToolWindow ChartWindow;
@@ -133,6 +134,7 @@ namespace Daphne
             experiment_reps = 1;
             experiment_description = "Whole sim config description";
             scenario = new Scenario();
+            rc_scenario = new Scenario();
             entity_repository = new EntityRepository();
 
             ////LoadDefaultGlobalParameters();
@@ -1005,8 +1007,21 @@ namespace Daphne
 
     //skg daphne new classes
     public class ConfigMolecularPopulation : EntityModelBase
-    {        
-        public string molecule_guid_ref { get; set; }  // the molecule_guid of the molecule this mp contains
+    {
+        private string _molecule_guid_ref;
+        public string molecule_guid_ref 
+        {
+            get
+            {
+                return _molecule_guid_ref;
+            }
+            set {
+                _molecule_guid_ref = value;
+                if (mpInfo != null)
+                    mpInfo.mp_type_guid_ref = value;
+            }
+
+        }  // the molecule_guid of the molecule this mp contains
         public string Name { get; set; }
         private MolPopInfo _mp_Info;
         public MolPopInfo mpInfo
@@ -1235,17 +1250,8 @@ namespace Daphne
         public ObservableCollection<string> reactions_guid_ref { get; set; }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
 
-        [JsonIgnore]
-        //public ObservableCollection<ConfigReaction> Reactions { get; set; }
-        //public ObservableCollection<ConfigMolecule> Molecules { get; set; }
-
         public bool ReadOnly { get; set; }
         public Color ForegroundColor { get; set; }
-
-        //public ConfigCompartment ball { get; set; }
-
-        [JsonIgnore]
-        public Dictionary<string, Molecule> MolDict { get; set; }
 
         public ConfigReactionComplex()
         {
