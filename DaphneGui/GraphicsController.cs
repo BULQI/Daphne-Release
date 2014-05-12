@@ -945,7 +945,7 @@ namespace DaphneGui
             // cells
             cellController = new VTKCellController(rw);
             
-            // chemokine
+            // extracellular medium
             ecsController = new VTKECSController(rw);
 #if ALL_GRAPHICS
             // cell tracks

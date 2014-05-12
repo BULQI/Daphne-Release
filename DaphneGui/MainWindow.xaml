@@ -416,7 +416,7 @@
                                                             Visibility="{Binding ColorScaleSlider_IsEnabled}"
                                                             Text="{Binding ColorScaleMaxFactor, StringFormat={}{0:F2}, Mode=OneWay}"
                                                             />
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Chemokines</Label>
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Extracellular medium</Label>
                                                 <ComboBox x:Name="SolfacRenderingCB" Width="120" 
                                                             ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
                                                             SelectedValue="{Binding Path=ECSRenderingMethod}"
