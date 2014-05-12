@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Ninject;
+using Ninject.Parameters;
+
 using ManifoldRing;
 
 namespace Daphne
@@ -121,7 +124,7 @@ namespace Daphne
                 r.Step(dt);
             }
 
-            double[] pos;
+            //double[] pos;
             foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
                 // Update boundary concentrations
@@ -153,63 +156,59 @@ namespace Daphne
         public Dictionary<int, Manifold> NaturalBoundaries { get; private set; }
         public Dictionary<int, Transform> NaturalBoundaryTransforms { get; private set; }
     }
-    
+
     public class ExtraCellularSpace
     {
         private Compartment space;
         private Dictionary<string, int> sides;
 
-        public ExtraCellularSpace(Manifold m)
+        public ExtraCellularSpace(int[] numGridPts, double gridStep, IKernel kernel)
         {
-            // at least for now, have this
-            if (m.GetType() != typeof(InterpolatedRectangularPrism))
-            {
-                throw new Exception("The ECS must be based on an InterpolatedRectangularPrism manifold");
-            }
+            InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>(new ConstructorArgument("nNodesPerSide", numGridPts), new ConstructorArgument("stepSize", gridStep));
 
-            space = new Compartment(m);
+            space = new Compartment(p);
             sides = new Dictionary<string, int>();
 
             // add the sides and transforms
-            
+
             InterpolatedRectangle r;
             Transform t;
-            int[] nodes = new int[m.Dim - 1]; // can't access r.Dim before creating an instance
+            int[] nodes = new int[space.Interior.Dim - 1]; // can't access r.Dim before creating an instance
             double[] axis = new double[Transform.Dim];
-            
+
             // front: no rotation, translate +z
-            nodes[0] = m.NodesPerSide(0);
-            nodes[1] = m.NodesPerSide(1);
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            nodes[0] = space.Interior.NodesPerSide(0);
+            nodes[1] = space.Interior.NodesPerSide(1);
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
-            t.translate(new double[] { 0, 0, m.Extent(2) });
+            t.translate(new double[] { 0, 0, space.Interior.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("front", r.Id);
 
             // back: rotate by pi about y, translate +x
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
             axis[1] = 1;
             t.rotate(axis, Math.PI);
-            t.translate(new double[] { m.Extent(0), 0, 0 });
+            t.translate(new double[] { space.Interior.Extent(0), 0, 0 });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("back", r.Id);
 
             // right: rotate by pi/2 about y, translate +x, +z
-            nodes[0] = m.NodesPerSide(2);
-            nodes[1] = m.NodesPerSide(1);
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            nodes[0] = space.Interior.NodesPerSide(2);
+            nodes[1] = space.Interior.NodesPerSide(1);
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
-            t.translate(new double[] { m.Extent(0), 0, m.Extent(2) });
+            t.translate(new double[] { space.Interior.Extent(0), 0, space.Interior.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("right", r.Id);
 
             // left: rotate by -pi/2 about y, no translation
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
             t.rotate(axis, -Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);
@@ -217,20 +216,20 @@ namespace Daphne
             sides.Add("left", r.Id);
 
             // top: rotate by -pi/2 about x, translate +y, +z
-            nodes[0] = m.NodesPerSide(0);
-            nodes[1] = m.NodesPerSide(2);
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            nodes[0] = space.Interior.NodesPerSide(0);
+            nodes[1] = space.Interior.NodesPerSide(2);
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
             axis[0] = 1;
             axis[1] = 0;
             t.rotate(axis, -Math.PI / 2.0);
-            t.translate(new double[] { 0, m.Extent(1), m.Extent(2) });
+            t.translate(new double[] { 0, space.Interior.Extent(1), space.Interior.Extent(2) });
             space.NaturalBoundaries.Add(r.Id, r);
             space.NaturalBoundaryTransforms.Add(r.Id, t);
             sides.Add("top", r.Id);
 
             // bottom: rotate by pi/2 about x, no translation
-            r = new InterpolatedRectangle(nodes, m.StepSize());
+            r = kernel.Get<InterpolatedRectangle>(new ConstructorArgument("nNodesPerSide", nodes), new ConstructorArgument("stepSize", space.Interior.StepSize()));
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
             space.NaturalBoundaries.Add(r.Id, r);
@@ -242,12 +241,11 @@ namespace Daphne
         {
             get { return space; }
         }
+
         public Dictionary<string, int> Sides
         {
             get { return sides; }
         }
-
-
     }
 
 }

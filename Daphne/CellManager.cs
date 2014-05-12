@@ -82,15 +82,10 @@ namespace Daphne
             extracellularSpace.Space.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
         }
 
-        public void CreateECS(Manifold m)
-        {
-            extracellularSpace = new ExtraCellularSpace(m);
-        }
-
         public ExtraCellularSpace ECS
         {
             get { return extracellularSpace; }
-            //set { extracellularSpace = value; }
+            set { extracellularSpace = value; }
         }
 
         public CellManager CMGR

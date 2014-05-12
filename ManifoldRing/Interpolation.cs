@@ -7,10 +7,21 @@ using System.Text;
 
 namespace ManifoldRing
 {
-    public abstract class NodeInterpolation
+    /// <summary>
+    /// interpolator interface
+    /// </summary>
+    public interface Interpolator
+    {
+        void Init(InterpolatedNodes m);
+        double Interpolate(double[] x, ScalarField sf);
+        double[] Gradient(double[] x, ScalarField sf);
+        ScalarField Laplacian(ScalarField sf);
+        ScalarField DiffusionFlux(ScalarField flux, Transform t);
+    }
+
+    public abstract class NodeInterpolator : Interpolator
     {
         protected InterpolatedNodes m;
-
         // Used to create the value, gradient, and laplacian operators
         // We may be able to change access to 'protected' if Convert() is moved out of ScalarField
         protected abstract LocalMatrix[] interpolationMatrix(double[] x);
@@ -27,9 +38,13 @@ namespace ManifoldRing
         protected ScalarField laplacian;
         public abstract double Integration(ScalarField sf);
 
-        public NodeInterpolation(InterpolatedNodes _m)
+        public NodeInterpolator()
         {
-            m = _m;
+        }
+
+        public virtual void Init(InterpolatedNodes m)
+        {
+            this.m = m;
             laplacian = new ScalarField(m);
             laplacianOperator = new LocalMatrix[m.ArraySize][];
             laplacianOperator = laplacianMatrix();
@@ -41,6 +56,7 @@ namespace ManifoldRing
         {
             LocalMatrix[] lm = interpolationMatrix(x);
             double value = 0;
+
             if (lm != null)
             {
                 for (int i = 0; i < lm.Length; i++)
@@ -54,6 +70,7 @@ namespace ManifoldRing
         public double[] Gradient(double[] x, ScalarField sf)
         {
             LocalMatrix[][] lm = gradientMatrix(x);
+
             if (lm != null)
             {
                 for (int i = 0; i < m.Dim; i++)
@@ -87,6 +104,7 @@ namespace ManifoldRing
         {
             ScalarField temp = new ScalarField(m); 
             int n;
+
             for (int i = 0; i < flux.M.PrincipalPoints.Length; i++)
             {
                 // Find the node in this manifold that is closest to the principal point
@@ -101,11 +119,16 @@ namespace ManifoldRing
     /// <summary>
     /// Trilinear 3D interpolation
     /// </summary>
-    public class Trilinear3D : NodeInterpolation
+    public class Trilinear3D : NodeInterpolator
     {
-        public Trilinear3D(InterpolatedNodes _m) : base(_m)
+        public Trilinear3D() : base()
         {
             interpolationOperator = new LocalMatrix[8];
+        }
+
+        public override void Init(InterpolatedNodes m)
+        {
+            base.Init(m);
             for (int i = 0; i < m.Dim; i++)
             {
                 gradientOperator[i] = new LocalMatrix[2];
@@ -361,13 +384,18 @@ namespace ManifoldRing
     /// <summary>
     /// Trilinear 2D interpolation
     /// </summary>
-    public class Trilinear2D : NodeInterpolation
+    public class Trilinear2D : NodeInterpolator
     {
 
-        public Trilinear2D(InterpolatedNodes _m)
-            : base(_m)
+        public Trilinear2D()
+            : base()
         {
             interpolationOperator = new LocalMatrix[4];
+        }
+
+        public override void  Init(InterpolatedNodes m)
+        {
+ 	         base.Init(m);
             // laplacianOperator = laplacianMatrix();
             for (int i = 0; i < m.Dim; i++)
             {
@@ -397,11 +425,11 @@ namespace ManifoldRing
             {
                 for (int dj = 0; dj < 2; dj++)
                 {
-                        dxmult = di == 0 ? (1 - dx) : dx;
-                        dymult = dj == 0 ? (1 - dy) : dy;
-                        interpolationOperator[n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0);
-                        interpolationOperator[n].Coefficient = dxmult * dymult;
-                        n++;
+                    dxmult = di == 0 ? (1 - dx) : dx;
+                    dymult = dj == 0 ? (1 - dy) : dy;
+                    interpolationOperator[n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0);
+                    interpolationOperator[n].Coefficient = dxmult * dymult;
+                    n++;
                 }
             }
             return interpolationOperator;
@@ -490,76 +518,76 @@ namespace ManifoldRing
             int idxplus, idxminus;
             double coeff0, coeff;
 
-                for (int j = 0; j < m.NodesPerSide(1); j++)
+            for (int j = 0; j < m.NodesPerSide(1); j++)
+            {
+                for (int i = 0; i < m.NodesPerSide(0); i++)
                 {
-                    for (int i = 0; i < m.NodesPerSide(0); i++)
+                    // Laplacian index n corresponds to grid indices (i,j,k)
+
+                    laplacianOperator[n][0].Coefficient = 0;
+                    laplacianOperator[n][0].Index = i + j * m.NodesPerSide(0);
+
+
+                    coeff = 1.0 / (m.StepSize() * m.StepSize());
+                    coeff0 = -2.0 * coeff;
+
+                    if (i == 0)
                     {
-                        // Laplacian index n corresponds to grid indices (i,j,k)
-
-                        laplacianOperator[n][0].Coefficient = 0;
-                        laplacianOperator[n][0].Index = i + j * m.NodesPerSide(0);
-
-
-                        coeff = 1.0 / (m.StepSize() * m.StepSize());
-                        coeff0 = -2.0 * coeff;
-
-                        if (i == 0)
-                        {
-                            idxplus = (i + 1) + j * m.NodesPerSide(0);
-                            idxminus = idxplus;
-                        }
-                        else if (i == m.NodesPerSide(0) - 1)
-                        {
-                            idxminus = (i - 1) + j * m.NodesPerSide(0);
-                            idxplus = idxminus;
-                        }
-                        else
-                        {
-                            idxplus = (i + 1) + j * m.NodesPerSide(0);
-                            idxminus = (i - 1) + j * m.NodesPerSide(0);
-                        }
-
-                        // (i+1), j
-                        laplacianOperator[n][1].Coefficient = coeff;
-                        laplacianOperator[n][1].Index = idxplus;
-
-                        // (i-1), j
-                        laplacianOperator[n][2].Coefficient = coeff;
-                        laplacianOperator[n][2].Index = idxminus;
-
-                        // i,j
-                        laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
-
-                        if (j == 0)
-                        {
-                            idxplus = i + (j + 1) * m.NodesPerSide(0);
-                            idxminus = idxplus;
-                        }
-                        else if (j == m.NodesPerSide(1) - 1)
-                        {
-                            idxminus = i + (j - 1) * m.NodesPerSide(0);
-                            idxplus = idxminus;
-                        }
-                        else
-                        {
-                            idxplus = i + (j + 1) * m.NodesPerSide(0);
-                            idxminus = i + (j - 1) * m.NodesPerSide(0);
-                        }
-
-                        // i, (j+1)
-                        laplacianOperator[n][3].Coefficient = coeff;
-                        laplacianOperator[n][3].Index = idxplus;
-
-                        // i, (j-1)
-                        laplacianOperator[n][4].Coefficient = coeff;
-                        laplacianOperator[n][4].Index = idxminus;
-
-                        // i,j
-                        laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
-
-                        n++;
+                        idxplus = (i + 1) + j * m.NodesPerSide(0);
+                        idxminus = idxplus;
                     }
+                    else if (i == m.NodesPerSide(0) - 1)
+                    {
+                        idxminus = (i - 1) + j * m.NodesPerSide(0);
+                        idxplus = idxminus;
+                    }
+                    else
+                    {
+                        idxplus = (i + 1) + j * m.NodesPerSide(0);
+                        idxminus = (i - 1) + j * m.NodesPerSide(0);
+                    }
+
+                    // (i+1), j
+                    laplacianOperator[n][1].Coefficient = coeff;
+                    laplacianOperator[n][1].Index = idxplus;
+
+                    // (i-1), j
+                    laplacianOperator[n][2].Coefficient = coeff;
+                    laplacianOperator[n][2].Index = idxminus;
+
+                    // i,j
+                    laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
+
+                    if (j == 0)
+                    {
+                        idxplus = i + (j + 1) * m.NodesPerSide(0);
+                        idxminus = idxplus;
+                    }
+                    else if (j == m.NodesPerSide(1) - 1)
+                    {
+                        idxminus = i + (j - 1) * m.NodesPerSide(0);
+                        idxplus = idxminus;
+                    }
+                    else
+                    {
+                        idxplus = i + (j + 1) * m.NodesPerSide(0);
+                        idxminus = i + (j - 1) * m.NodesPerSide(0);
+                    }
+
+                    // i, (j+1)
+                    laplacianOperator[n][3].Coefficient = coeff;
+                    laplacianOperator[n][3].Index = idxplus;
+
+                    // i, (j-1)
+                    laplacianOperator[n][4].Coefficient = coeff;
+                    laplacianOperator[n][4].Index = idxminus;
+
+                    // i,j
+                    laplacianOperator[n][0].Coefficient = laplacianOperator[n][0].Coefficient + coeff0;
+
+                    n++;
                 }
+            }
             return laplacianOperator;
         }
 
@@ -576,12 +604,62 @@ namespace ManifoldRing
     /// <param name="x"></param>
     /// <param name="m"></param>
     /// <returns></returns>
-    public class Tricubic3D : NodeInterpolation
+    public class Tricubic3D : NodeInterpolator
     {
-        public Tricubic3D(InterpolatedNodes _m) : base(_m)
+        public Tricubic3D()
+            : base()
         {
             throw new NotImplementedException();
             // interpolator = new LocalMatrix[27];
+        }
+
+        public override void Init(InterpolatedNodes m)
+        {
+            base.Init(m);
+        }
+
+        public override double Integration(ScalarField sf)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override LocalMatrix[] interpolationMatrix(double[] x)
+        {
+            throw new NotImplementedException();
+            //return interpolator;
+        }
+
+        protected override LocalMatrix[][] gradientMatrix(double[] x)
+        {
+            throw new NotImplementedException();
+            //return gradient;
+        }
+
+        protected override LocalMatrix[][] laplacianMatrix()
+        {
+            throw new NotImplementedException();
+            // return laplacian;
+        }
+    }
+    
+    /// <summary>
+    /// Tricubic 2D interpolation.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="m"></param>
+    /// <returns></returns>
+    public class Tricubic2D : NodeInterpolator
+    {
+        public Tricubic2D()
+            : base()
+        {
+            throw new NotImplementedException();
+            // interpolator = new LocalMatrix[27];
+        }
+
+        public override void Init(InterpolatedNodes m)
+        {
+            base.Init(m);
         }
 
         public override double Integration(ScalarField sf)

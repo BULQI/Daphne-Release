@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Troschuetz.Random;
 
+using Ninject;
+
 using ManifoldRing;
 
 namespace Daphne
@@ -14,6 +16,9 @@ namespace Daphne
         public double[] V;
     }
 
+    public class Cytosol : Attribute { }
+    public class Membrane : Attribute { }
+
     /// <summary>
     /// The basic representation of a biological cell. 
     /// </summary>
@@ -23,7 +28,10 @@ namespace Daphne
         /// A flag that signals to the cell manager whether the cell is alive or dead.
         /// </summary>
         private bool Alive;
-
+        /// <summary>
+        /// a flag that signals that the cell is motile
+        /// </summary>
+        private bool isMotile = true;
         /// <summary>
         /// A flag that signals to the cell manager whether the cell is ready to divide. 
         /// </summary>
@@ -44,14 +52,37 @@ namespace Daphne
             Alive = true;
             Cytokinetic = false;
             this.radius = radius;
-            PlasmaMembrane = new Compartment(new TinySphere(radius));
-            Cytosol = new Compartment(new TinyBall(radius));
 
+            Index = safeIndex++;
+        }
+
+        [Inject]
+        [Cytosol]
+        public void InjectCytosol(Compartment c)
+        {
+            Cytosol = c;
+            if (PlasmaMembrane != null)
+            {
+                initBoundary();
+            }
+        }
+
+        [Inject]
+        [Membrane]
+        public void InjectMembrane(Compartment c)
+        {
+            PlasmaMembrane = c;
+            if (Cytosol != null)
+            {
+                initBoundary();
+            }
+        }
+
+        private void initBoundary()
+        {
             // boundary and position
             Cytosol.Boundaries.Add(PlasmaMembrane.Interior.Id, PlasmaMembrane);
             Cytosol.BoundaryTransforms.Add(PlasmaMembrane.Interior.Id, new Transform(false));
-
-            Index = safeIndex++;
         }
 
         public void setState(double[] pos, double[] vel)
@@ -99,13 +130,13 @@ namespace Daphne
 
         public int DifferentiationState;
 
-        public Locomotor Locomotor;
-        public Compartment Cytosol;
-        public Compartment PlasmaMembrane;
-        public Differentiator Differentiator;
+        public Locomotor Locomotor { get; set; }
+        public Compartment Cytosol { get; private set; }
+        public Compartment PlasmaMembrane { get; private set; }
+        public Differentiator Differentiator { get; private set; }
         private SpatialState state;
 
-        public int Index;
+        public int Index { get; private set; }
         private static int safeIndex = 0;
 
         public SpatialState State
@@ -114,8 +145,11 @@ namespace Daphne
             set { state = value; }
         }
 
-        public bool IsMotile = true;
-
+        public bool IsMotile
+        {
+            get { return isMotile; }
+            set { isMotile = value; }
+        }
 
         // There may be other components specific to a given cell type.
     }

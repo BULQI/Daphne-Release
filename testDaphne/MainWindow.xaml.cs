@@ -7,6 +7,9 @@ using System.Windows;
 
 using MathNet.Numerics.LinearAlgebra;
 
+using Ninject;
+using Ninject.Parameters;
+
 using Daphne;
 using ManifoldRing;
 using Newtonsoft.Json;
@@ -290,7 +293,7 @@ namespace testDaphne
             //TestStepperLocomotion(nSteps, dt);
 
             //// Displays ECM natural boundary coordinates
-            // ECM_NaturalBoundaries_Test();
+            //ECM_NaturalBoundaries_Test();
 
             // ECM: single molecular population, diffusing with applied flux at the natural boundary
             // Cells: none
@@ -411,7 +414,6 @@ namespace testDaphne
 
         private void DriverLocomotionScenario()
         {
-
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
             string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t\nCXCL12\t7.96\t\t6.0e3\n";
@@ -438,14 +440,13 @@ namespace testDaphne
             // Create Extracellular fluid
             // 
 
-            int[] numGridPts = { 21, 21, 21 };
-            double gridStep = 50;
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
 
-            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             // Create Cells
             //
-            double cellRadius = 5.0;
             double[] cellPos = new double[3],
                      veloc = new double[3] { 0.0, 0.0, 0.0 },
                      extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
@@ -453,7 +454,7 @@ namespace testDaphne
                                              sim.ECS.Space.Interior.Extent(2) };
 
             // One cell
-            Cell cell = new Cell(cellRadius);
+            Cell cell = SimulationModule.kernel.Get<Cell>();
 
             cellPos[0] = extent[0] / 4.0;
             cellPos[1] = extent[1] / 2.0;
@@ -562,21 +563,20 @@ namespace testDaphne
             // Create Extracellular fluid
             // 
 
-            int[] numGridPts = { 21, 21, 21 };
-            double gridStep = 50;
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
 
-            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             // Create Cells
             //
-            double cellRadius = 5.0;
             double[] cellPos = new double[sim.ECS.Space.Interior.Dim],
                      extent = new double[] { sim.ECS.Space.Interior.Extent(0), 
                                              sim.ECS.Space.Interior.Extent(1), 
                                              sim.ECS.Space.Interior.Extent(2) };
 
             // One cell
-            Cell cell = new Cell(cellRadius);
+            Cell cell = SimulationModule.kernel.Get<Cell>();
 
             cellPos[0] = extent[0] / 3.0;
             cellPos[1] = extent[1] / 3.0;
@@ -666,10 +666,10 @@ namespace testDaphne
             // Create Extracellular fluid
             // 
 
-            int[] numGridPts = { 21, 21, 21 };
-            double gridStep = 50;
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
 
-            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             //
             // Add all molecular populations
@@ -698,10 +698,13 @@ namespace testDaphne
 
         public void ECM_NaturalBoundaries_Test()
         {
-            int[] numGridPts = { 3, 4, 5 };
-            double gridStep = 2;
+            FakeConfig.numGridPts = new int[] { 3, 4, 5 };
+            FakeConfig.gridStep = 2;
 
-            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             InterpolatedNodes m;
             double[] x = new double[3];
@@ -749,11 +752,10 @@ namespace testDaphne
             // Create Extracellular fluid
             // 
 
-            //int[] numGridPts = { 31, 21, 11 };
-            int[] numGridPts = { 21, 21, 21 };
-            double gridStep = 50;
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
 
-            sim.CreateECS(new InterpolatedRectangularPrism(numGridPts, gridStep));
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             //
             // Add all molecular populations

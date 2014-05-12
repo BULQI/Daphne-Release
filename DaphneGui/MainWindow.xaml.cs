@@ -18,6 +18,9 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
+using Ninject;
+using Ninject.Parameters;
+
 using Daphne;
 using ManifoldRing;
 using Workbench;
@@ -1462,8 +1465,14 @@ namespace DaphneGui
 
             Scenario scenario = configurator.SimConfig.scenario;
 
+            FakeConfig.numGridPts = scenario.NumGridPts;
+            FakeConfig.gridStep = scenario.GridStep;
+
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule());
+
             //INSTANTIATE EXTRA CELLULAR MEDIUM
-            sim.CreateECS(new InterpolatedRectangularPrism(scenario.NumGridPts, configurator.SimConfig.scenario.GridStep));
+            sim.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
 
             sim.Cells.Clear();            
 
@@ -1472,7 +1481,6 @@ namespace DaphneGui
                                              sim.ECS.Space.Interior.Extent(2) };
 
             // ADD CELLS            
-            double cellRadius = 5.0;
             double[] cellPos = new double[sim.ECS.Space.Interior.Dim];
                      
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
@@ -1481,7 +1489,8 @@ namespace DaphneGui
                 double transductionConstant = 1e4;
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = new Cell(cellRadius);
+                    Cell cell = SimulationModule.kernel.Get<Cell>();
+
                     cellPos[0] = extent[0] / 4.0;
                     cellPos[1] = extent[1] / 2.0;
                     cellPos[2] = extent[2] / 2.0;

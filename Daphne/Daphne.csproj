@@ -48,6 +48,9 @@
     <Reference Include="MathNet.Iridium">
       <HintPath>..\dependencies\MathNet.Iridium.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.3.0.2-unstable-9\lib\net40\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -60,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="CellBuilder.cs" />
     <Compile Include="CellManager.cs" />
@@ -73,6 +77,9 @@
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

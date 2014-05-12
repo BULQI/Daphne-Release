@@ -231,7 +231,8 @@ namespace ManifoldRing
         /// constructor
         /// </summary>
         /// <param name="radius">sphere radius</param>
-        public TinySphere(double radius) : base(2)
+        public TinySphere(double radius)
+            : base(2)
         {
             this.radius = radius;
         }
@@ -405,7 +406,8 @@ namespace ManifoldRing
         /// constructor
         /// </summary>
         /// <param name="radius">ball radius</param>
-        public TinyBall(double radius) : base(3)
+        public TinyBall(double radius)
+            : base(3)
         {
             this.radius = radius;
         }
@@ -583,7 +585,7 @@ namespace ManifoldRing
         protected int[] nNodesPerSide;
         protected double stepSize;
         protected double[] extent;
-        protected NodeInterpolation interpolation;
+        protected Interpolator interpolator;
 
         /// <summary>
         /// constructor
@@ -591,7 +593,9 @@ namespace ManifoldRing
         /// <param name="nNodesPerSide">nodes per side array</param>
         /// <param name="stepSize">uniform stepsize</param>
         /// <param name="dim">dimension</param>
-        public InterpolatedNodes(int[] nNodesPerSide, double stepSize, int dim) : base(dim)
+        /// <param name="interpolator">handle to the interpolator instance used</param>
+        public InterpolatedNodes(int[] nNodesPerSide, double stepSize, int dim, Interpolator interpolator)
+            : base(dim)
         {
             if (nNodesPerSide.Length != Dim)
             {
@@ -614,6 +618,8 @@ namespace ManifoldRing
             {
                 PrincipalPoints[i] = linearIndexToLocal(i);
             }
+            this.interpolator = interpolator;
+            this.interpolator.Init(this);
         }
 
         /// <summary>
@@ -836,7 +842,7 @@ namespace ManifoldRing
                 // Note: is returning zero the right thing to do when x is out of bounds?
                 return 0;
             }
-            return interpolation.Interpolate(x, sf);
+            return interpolator.Interpolate(x, sf);
         }
 
         /// <summary>
@@ -846,7 +852,7 @@ namespace ManifoldRing
         /// <returns>resulting field</returns>
         public override ScalarField Laplacian(ScalarField sf)
         {
-            return interpolation.Laplacian(sf);
+            return interpolator.Laplacian(sf);
         }
 
         /// <summary>
@@ -861,7 +867,7 @@ namespace ManifoldRing
             {
                 return new double[Dim];
             }
-            return interpolation.Gradient(x, sf);
+            return interpolator.Gradient(x, sf);
         }
 
         /// <summary>
@@ -875,6 +881,7 @@ namespace ManifoldRing
         {
             double[] pos = t.Translation;
             Vector x;
+
             for (int i = 0; i < ArraySize; i++)
             {
                 // the coordinates of this interpolation point in this boundary manifold
@@ -887,7 +894,7 @@ namespace ManifoldRing
 
         public override ScalarField DiffusionFluxTerm(ScalarField flux, Transform t)
         {
-            return interpolation.DiffusionFlux(flux, t);
+            return interpolator.DiffusionFlux(flux, t);
         }
     }
 
@@ -901,11 +908,10 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="nNodesPerSide">nodes per side array</param>
         /// <param name="stepSize">uniform stepsize</param>
-        /// <param name="dim">dimension</param>
-        public InterpolatedRectangle(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 2)
+        /// <param name="interpolator">handle to the interpolator instance used</param>
+        public InterpolatedRectangle(int[] nNodesPerSide, double stepSize, Interpolator interpolator)
+            : base(nNodesPerSide, stepSize, 2, interpolator)
         {
-            // The right side should be specified by a parameter
-            interpolation = new Trilinear2D(this);
         }
 
         /// <summary>
@@ -972,11 +978,10 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="nNodesPerSide">nodes per side array</param>
         /// <param name="stepSize">uniform stepsize</param>
-        /// <param name="dim">dimension</param>
-        public InterpolatedRectangularPrism(int[] nNodesPerSide, double stepSize) : base(nNodesPerSide, stepSize, 3)
+        /// <param name="interpolator">handle to the interpolator instance used</param>
+        public InterpolatedRectangularPrism(int[] nNodesPerSide, double stepSize, Interpolator interpolator)
+            : base(nNodesPerSide, stepSize, 3, interpolator)
         {
-            // The right side should be specified by a parameter
-            interpolation = new Trilinear3D(this);
         }
 
         /// <summary>

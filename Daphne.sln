@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaphneGui", "DaphneGui\Daph
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 6
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://hippocrates.bumc.bu.edu:8080/tfs/galapagos
 		SccLocalPath0 = .
@@ -29,6 +29,9 @@ Global
 		SccProjectUniqueName4 = ManifoldRing\\ManifoldRing.csproj
 		SccProjectName4 = ManifoldRing
 		SccLocalPath4 = ManifoldRing
+		SccProjectUniqueName5 = DaphneGui\\DaphneGui.csproj
+		SccProjectName5 = DaphneGui
+		SccLocalPath5 = DaphneGui
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

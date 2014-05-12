@@ -10,18 +10,18 @@ namespace Daphne
 {
     public class Molecule
     {
-        public string Name;
-        public double MolecularWeight;
-        public double EffectiveRadius;
-        public double DiffusionCoefficient;
+        public string Name { get; private set; }
+        public double MolecularWeight { get; private set; }
+        public double EffectiveRadius { get; private set; }
+        public double DiffusionCoefficient { get; private set; }
         private static double boltzmannConstant = 0;
 
-        public Molecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
+        public Molecule(string name, double mw, double effRad, double diffCoeff)
         {
-            Name = thisName;
-            MolecularWeight = thisMW;
-            EffectiveRadius = thisEffRad;
-            DiffusionCoefficient = thisDiffCoeff;
+            Name = name;
+            MolecularWeight = mw;
+            EffectiveRadius = effRad;
+            DiffusionCoefficient = diffCoeff;
         }
 
         public void ComputeDiffusionCoefficient(double viscosity, double temperature)
