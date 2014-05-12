@@ -116,6 +116,8 @@
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphicsController.cs" />
+    <Compile Include="RegionControl.cs" />
+    <Compile Include="RegionWidget.cs" />
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>

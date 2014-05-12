@@ -221,21 +221,21 @@ namespace DaphneGui
             box.SetBounds(0, extX, 0, extY, 0, extZ);
         }
     }
-#if ALL_VTK
+
     /// <summary>
-    /// encapsulates the basic VTK data for a chemokine (vtkImageData)
-    /// along with the individual chemokine controllers
+    /// encapsulates the basic VTK data for the ecs chemistry rendering (vtkImageData)
+    /// along with the individual molecular population controllers
     /// </summary>
-    public class VTKMolpopDataController
+    public class VTKECSDataController
     {
         private vtkImageData imageGrid;
         private Dictionary<string, MolPopTypeController> molpopTypeControllers;
-        // TODO: Need to add repository for chemokine color maps
+        // TODO: Need to add repository for ecs color maps
 
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKMolpopDataController()
+        public VTKECSDataController()
         {
             molpopTypeControllers = new Dictionary<string, MolPopTypeController>();
         }
@@ -265,16 +265,15 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// set up the image grid and box outline for the chemokine
+        /// set up the image grid and box outline for the ecs
         /// </summary>
-        /// <param name="chemokine">pointer to the chemokine object</param>
-        public void setupGradient3D(Chemokine chemokine)
+        public void setupGradient3D()
         {
             imageGrid = vtkImageData.New();
 
             // set up the grid and allocate data
-            imageGrid.SetExtent(0, chemokine.GridDim[0], 0, chemokine.GridDim[1], 0, chemokine.GridDim[2]);
-            imageGrid.SetSpacing(chemokine.GridStep, chemokine.GridStep, chemokine.GridStep);
+            imageGrid.SetExtent(0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0), 0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1), 0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2));
+            imageGrid.SetSpacing(Simulation.dataBasket.ECS.Space.Interior.StepSize(), Simulation.dataBasket.ECS.Space.Interior.StepSize(), Simulation.dataBasket.ECS.Space.Interior.StepSize());
             //imageGrid.SetOrigin(0.0, 0.0, 0.0);
             // the four component scalar data requires the type to be uchar
             imageGrid.SetScalarTypeToUnsignedChar();
@@ -283,14 +282,13 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// set up the chemokine gradient in 3D
+        /// set up the ecs gradient in 3D
         /// </summary>
-        /// <param name="chemokine">the chemokine to draw</param>
-        /// <param name="solf">entity describing the molpop</param>
+        /// <param name="molpop">entity describing the molpop</param>
         /// <param name="region">pointer to the region controlling this gradient, if any</param>
-        public void addGradient3D(Chemokine chemokine, Solfac solf, RegionControl region)
+        public void addGradient3D(MolPopInfo molpop, RegionControl region)
         {
-            if (molpopTypeControllers.ContainsKey(solf.solfac_guid) == true)
+            if (molpopTypeControllers.ContainsKey(molpop.mp_guid) == true)
             {
                 MessageBox.Show("Duplicate molpop guid! Aborting insertion.");
                 return;
@@ -299,71 +297,78 @@ namespace DaphneGui
             MolPopTypeController molpopControl;
 
             // check here for linear, Gaussian, homogeneous...
-            if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Gaussian)
+            if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
-                molpopControl = new MolpopTypeGaussianController(((MolPopDistributionType)solf.solfac_distribution).peak_concentration,
-                                                               ((MolPopDistributionType)solf.solfac_distribution).gaussgrad_gauss_spec_guid_ref);
-                chemokine.populateSolfacGaussian(solf, region, (MolpopTypeGaussianController)molpopControl);
+                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
+                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
             }
-            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Linear)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                molpopControl = new MolpopTypeLinearController(((MolPopDistributionType)solf.solfac_distribution).gradient_direction,
-                                                             ((MolPopDistributionType)solf.solfac_distribution).min_concentration,
-                                                             ((MolPopDistributionType)solf.solfac_distribution).max_concentration);
-                chemokine.populateSolfacLinear(solf, (MolpopTypeLinearController)molpopControl);
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).gradient_direction,
+                                                               ((MolPopLinear)molpop.mp_distribution).min_concentration,
+                                                               ((MolPopLinear)molpop.mp_distribution).max_concentration);
             }
-            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Homogeneous)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {
-                molpopControl = new MolpopTypeHomogeneousController(((MolPopDistributionType)solf.solfac_distribution).concentration);
-                chemokine.populateSolfacHomogeneous(solf, (MolpopTypeHomogeneousController)molpopControl);
+                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mp_distribution).concentration);
             }
-            else if (solf.solfac_distribution.solfac_distribution_type == MolPopDistributionType.Custom)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
             {
-                molpopControl = new MolpopTypeCustomController(((SolfacCustomGradient)solf.solfac_distribution).custom_gradient_file_uri.LocalPath);
-                if (chemokine.populateSolfacCustom(solf, ref molpopControl) == false)
-                {
-                    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
-                    string messageBoxText = "Aborting custom chemokine insertion, possible file format problem in\n\n" + ((SolfacCustomGradient)solf.solfac_distribution).custom_gradient_file_uri.LocalPath;
-                    string caption = "Error creating custom chemokine";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Error;
+                molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mp_distribution).custom_gradient_file_uri.LocalPath);
+                //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
+                //{
+                //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
+                //    string messageBoxText = "Aborting custom chemokine insertion, possible file format problem in\n\n" + ((MolPopCustomGradient)molpop.mp_distribution).custom_gradient_file_uri.LocalPath;
+                //    string caption = "Error creating custom chemokine";
+                //    MessageBoxButton button = MessageBoxButton.OK;
+                //    MessageBoxImage icon = MessageBoxImage.Error;
 
-                    // display the message box
-                    MessageBox.Show(messageBoxText, caption, button, icon);
-                    return;
-                }
+                //    // display the message box
+                //    MessageBox.Show(messageBoxText, caption, button, icon);
+                //    return;
+                //}
             }
             else
             {
                 return;
             }
 
-            // set the remaining solfac controller fields
-            molpopControl.RenderGradient = solf.solfac_render_on;
+            // set the remaining molpop controller fields
+            molpopControl.RenderGradient = molpop.mp_render_on;
             // assign color and weight
-            molpopControl.Color[0] = solf.solfac_color.R;
-            molpopControl.Color[1] = solf.solfac_color.G;
-            molpopControl.Color[2] = solf.solfac_color.B;
+            molpopControl.Color[0] = molpop.mp_color.R;
+            molpopControl.Color[1] = molpop.mp_color.G;
+            molpopControl.Color[2] = molpop.mp_color.B;
             // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = solf.solfac_color.A;
-            molpopControl.BlendingWeight = solf.solfac_render_blending_weight;
-            molpopControl.TypeGUID = solf.solfac_type_guid_ref;
+            molpopControl.Color[3] = molpop.mp_color.A;
+            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
+            molpopControl.TypeGUID = molpop.mp_type_guid_ref;
 
             // add the controller to the dictionary
-            molpopTypeControllers.Add(solf.solfac_guid, molpopControl);
+            molpopTypeControllers.Add(molpop.mp_guid, molpopControl);
         }
 
         /// <summary>
-        /// update the image gradient according to all chemokine concentrations
+        /// update the image gradient according to all ecs concentrations
         /// </summary>
-        /// <param name="chemokine">the chemokine to update</param>
-        /// <param name="mod">cause a redraw (or not, default)</param>
-        public void updateGradients3D(Chemokine chemokine, bool mod = false)
+        /// <param name="update">external flag to indicate if ecs rendering is on</param>
+        /// <param name="modified">cause a redraw</param>
+        public void updateGradients3D(bool update, bool modified)
         {
+            if (update == false)
+            {
+                return;
+            }
+
             bool first = true;
 
             foreach (KeyValuePair<string, MolPopTypeController> kvp in molpopTypeControllers)
             {
+                if (kvp.Value.RenderGradient == false)
+                {
+                    continue;
+                }
+
                 double div = 0.0;
 
                 if (kvp.Value.Type == MolPopDistributionType.Homogeneous)
@@ -383,22 +388,22 @@ namespace DaphneGui
                     div = ((MolpopTypeCustomController)kvp.Value).max;
                 }
 
-                if (kvp.Value.RenderGradient == false || div == 0.0)
+                if (div == 0.0)
                 {
                     continue;
                 }
 
                 // generate scalar data
-                for (int iz = 0; iz < chemokine.GridDim[2]; iz++)
+                for (int iz = 0; iz < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2); iz++)
                 {
-                    for (int iy = 0; iy < chemokine.GridDim[1]; iy++)
+                    for (int iy = 0; iy < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1); iy++)
                     {
-                        for (int ix = 0; ix < chemokine.GridDim[0]; ix++)
+                        for (int ix = 0; ix < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0); ix++)
                         {
-                            int[] idx = { ix, iy, iz };
+                            double[] point = { Simulation.dataBasket.ECS.Space.Interior.StepSize() * ix, Simulation.dataBasket.ECS.Space.Interior.StepSize() * iy, Simulation.dataBasket.ECS.Space.Interior.StepSize() * iz };
 
                             double val,
-                                   conc = Utilities.AddDoubleValues(chemokine.getChemokineConcentrations(idx)[kvp.Value.TypeGUID]),
+                                   conc = Simulation.dataBasket.ECS.Space.Populations[kvp.Value.TypeGUID].Conc.Value(point),//Utilities.AddDoubleValues(chemokine.getChemokineConcentrations(idx)[kvp.Value.TypeGUID]),
                                    scaledConcentration = kvp.Value.BlendingWeight * conc / div;
 
                             // rgba
@@ -422,13 +427,13 @@ namespace DaphneGui
             }
 
             // causes a redraw in the pipeline
-            if (mod == true)
+            if (modified == true)
             {
                 imageGrid.Modified();
             }
         }
     }
-
+#if ALL_VTK
     /// <summary>
     /// entity encapsulating a cell track
     /// </summary>
@@ -1041,14 +1046,14 @@ namespace DaphneGui
     public class VTKDataBasket
     {
         // the environment
-        private VTKEnvironmentDataController environmentController;
+        private VTKEnvironmentDataController environmentDataController;
         // the cells
-        private VTKCellDataController cellController;
-#if ALL_VTK
-        //  the chemokine
-        private VTKMolpopDataController chemokineController;
+        private VTKCellDataController cellDataController;
+        //  the ecs
+        private VTKECSDataController ecsDataController;
         // dictionary of regions
         private Dictionary<string, RegionControl> regions;
+#if ALL_VTK
         // dictionary holding track data keyed by cell id
         private Dictionary<int, VTKCellTrackData> cellTracks;
         // dictionary relating cell receptor guids to names
@@ -1069,19 +1074,19 @@ namespace DaphneGui
         public VTKDataBasket()
         {
             // environment
-            environmentController = new VTKEnvironmentDataController();
+            environmentDataController = new VTKEnvironmentDataController();
 
             // cells
-            cellController = new VTKCellDataController();
-#if ALL_VTK
-            // chemokine
-            chemokineController = new VTKMolpopDataController();
+            cellDataController = new VTKCellDataController();
 
-            // cell tracks
-            cellTracks = new Dictionary<int, VTKCellTrackData>();
+            // ecs
+            ecsDataController = new VTKECSDataController();
 
             // regions
             regions = new Dictionary<string, RegionControl>();
+#if ALL_VTK
+            // cell tracks
+            cellTracks = new Dictionary<int, VTKCellTrackData>();
 
             // cell receptor info
             cellReceptorGuidNames = new Dictionary<string, string>();
@@ -1109,24 +1114,51 @@ namespace DaphneGui
             {
                 useThisZValue = sc.scenario.environment.extent_z;
             }
-            environmentController.setupBox(sc.scenario.environment.extent_x, sc.scenario.environment.extent_y, useThisZValue);
+            environmentDataController.setupBox(sc.scenario.environment.extent_x, sc.scenario.environment.extent_y, useThisZValue);
 
-            cellController.CreateCellColorTable(sc.scenario.cellpopulations.Count);
+            cellDataController.CreateCellColorTable(sc.scenario.cellpopulations.Count);
             for (int i = 0; i < sc.scenario.cellpopulations.Count; i++)
             {
                 // add the cell set's color to the color table
-                cellController.AddCellSetColor(i,
+                cellDataController.AddCellSetColor(i,
                                                sc.scenario.cellpopulations[i].cellpopulation_color.ScR,
                                                sc.scenario.cellpopulations[i].cellpopulation_color.ScG,
                                                sc.scenario.cellpopulations[i].cellpopulation_color.ScB,
                                                sc.scenario.cellpopulations[i].cellpopulation_color.ScA);
                 // create the color map entry
-                if (cellController.ColorMap.ContainsKey(sc.scenario.cellpopulations[i].cellpopulation_id) == false)
+                if (cellDataController.ColorMap.ContainsKey(sc.scenario.cellpopulations[i].cellpopulation_id) == false)
                 {
-                    cellController.ColorMap.Add(sc.scenario.cellpopulations[i].cellpopulation_id, i);
+                    cellDataController.ColorMap.Add(sc.scenario.cellpopulations[i].cellpopulation_id, i);
                 }
             }
             CreateAllocatedCells();
+
+            // region controls
+            MainWindow.VTKBasket.CreateRegionControls();
+
+            // ecs rendering
+            // set up the 3d image grid for the ecs
+            ecsDataController.setupGradient3D();
+
+            for (int i = 0; i < sc.scenario.environment.ecs.molpops.Count; i++)
+            {
+                RegionControl region = null;
+
+                if (sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    region = regions[((MolPopGaussian)sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref];
+                }
+
+                // 3D gradient
+                ecsDataController.addGradient3D(sc.scenario.environment.ecs.molpops[i].mpInfo, region);
+
+                // finish 3d gradient-related graphics after processing the last molpop
+                if (i == sc.scenario.environment.ecs.molpops.Count - 1)
+                {
+                    // update all gradients; do not cause a redraw
+                    ecsDataController.updateGradients3D(true, false);
+                }
+            }
         }
         
         /// <summary>
@@ -1134,17 +1166,16 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-#if ALL_VTK
             foreach (KeyValuePair<string, RegionControl> kvp in regions)
             {
                 kvp.Value.CleanUp();
             }
             regions.Clear();
-#endif
-            cellController.Cleanup();
+
+            cellDataController.Cleanup();
+            ecsDataController.Cleanup();
 #if ALL_VTK
             CleanupTracks();
-            chemokineController.Cleanup();
             cellReceptorGuidNames.Clear();
             cellReceptorNameGuids.Clear();
             cellReceptorMaxConcs.Clear();
@@ -1164,7 +1195,7 @@ namespace DaphneGui
             }
             cellTracks.Clear();
         }
-
+#endif
         public void AddGaussSpecRegionControl(GaussianSpecification gs)
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
@@ -1182,9 +1213,9 @@ namespace DaphneGui
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
-            Regions.Add(box_guid, rc);
+            regions.Add(box_guid, rc);
         }
-
+#if ALL_VTK
         public void AddRegionRegionControl(Region rr)
         {
             string box_guid = rr.region_box_spec_guid_ref;
@@ -1204,7 +1235,7 @@ namespace DaphneGui
 
             Regions.Add(box_guid, rc);
         }
-
+#endif
         public void CreateRegionControls()
         {
             // Gaussian specs
@@ -1212,20 +1243,21 @@ namespace DaphneGui
             {
                 AddGaussSpecRegionControl(gs);
             }
-
+#if ALL_VTK
             // Regions
             foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
             {
                 AddRegionRegionControl(rr);
             }
+#endif
         }
 
         public void RemoveRegionControl(string current_guid)
         {
-            Regions[current_guid].CleanUp();
-            Regions.Remove(current_guid);
+            regions[current_guid].CleanUp();
+            regions.Remove(current_guid);
         }
-#endif
+
         /// <summary>
         /// create the graphics for all cells, but use pre-allocated arrays for speed
         /// </summary>
@@ -1328,16 +1360,16 @@ namespace DaphneGui
                     }
                     cellController.StartAllocatedCells(Simulation.dataBasket.Cells.Count, this.cellReceptorGuidNames);
 #else
-                    cellController.StartAllocatedCells(Simulation.dataBasket.Cells.Count);
+                    cellDataController.StartAllocatedCells(Simulation.dataBasket.Cells.Count);
 #endif
 
                     long i = 0;
 
                     foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                     {
-                        cellController.AssignCell(i++, kvp.Value);
+                        cellDataController.AssignCell(i++, kvp.Value);
                     }
-                    cellController.FinishCells();
+                    cellDataController.FinishCells();
                 }
             }
         }
@@ -1347,7 +1379,7 @@ namespace DaphneGui
         /// </summary>
         public VTKEnvironmentDataController EnvironmentController
         {
-            get { return environmentController; }
+            get { return environmentDataController; }
         }
 
         /// <summary>
@@ -1355,16 +1387,15 @@ namespace DaphneGui
         /// </summary>
         public VTKCellDataController CellController
         {
-            get { return cellController; }
+            get { return cellDataController; }
         }
-#if ALL_VTK
 
         /// <summary>
-        /// retrieve the chemokineController object
+        /// retrieve the ecsController object
         /// </summary>
-        public VTKMolpopDataController ChemokineController
+        public VTKECSDataController ECSController
         {
-            get { return chemokineController; }
+            get { return ecsDataController; }
         }
 
         /// <summary>
@@ -1374,7 +1405,7 @@ namespace DaphneGui
         {
             get { return regions; }
         }
-
+#if ALL_VTK
         /// <summary>
         /// retrieve the cell tracks
         /// </summary>
@@ -1457,9 +1488,10 @@ namespace DaphneGui
         public void UpdateData()
         {
             // update all the cells
-            cellController.UpdateAllocatedCells();
+            cellDataController.UpdateAllocatedCells();
 
-            // TODO: Eventually also update chemokine imagedata here...
+            // ecs
+            ecsDataController.updateGradients3D(MainWindow.GC.ECSController.RenderGradient, true);
         }
     }
 }

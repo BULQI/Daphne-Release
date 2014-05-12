@@ -17,12 +17,6 @@ namespace Daphne
     /// </summary>
     public class DataBasket
     {
-#if ALL_DATA
-        /// <summary>
-        /// safe cell id, guaranteed to be unused
-        /// </summary>
-        private int safeCellID;
-#endif
         /// <summary>
         /// cell environment data object
         /// </summary>
@@ -47,11 +41,7 @@ namespace Daphne
         /// <summary>
         /// data reader for grabbing cell data from database
         /// </summary>
-        /// 
-
-
         private DataReader dr;
-
 
         private bool validFile = false;
         public int dimension { get; set; }
@@ -64,21 +54,9 @@ namespace Daphne
             cells = new Dictionary<int,Cell>();
             molecules = new Dictionary<string, Molecule>();
 #if ALL_DATA
-            safeCellID = 0;
             ResetTrackData();
 #endif
         }
-
-#if ALL_DATA
-        /// <summary>
-        /// accessor for the safe cell id
-        /// </summary>
-        public int SafeCellID
-        {
-            get { return safeCellID; }
-            set { safeCellID = value; }
-        }
-#endif
 
         /// <summary>
         /// accessor for the cell environment
@@ -317,11 +295,11 @@ namespace Daphne
             {
                 if (type == CellBaseTypeLabel.BCell)
                 {
-                    cell = new BCell(index > -1 ? index : safeCellID++, cellset_id);
+                    cell = new BCell(index > -1 ? index : Cell.SafeCellIndex++, cellset_id);
                 }
                 else if (type == CellBaseTypeLabel.TCell)
                 {
-                    cell = new TCell(index > -1 ? index : safeCellID++, cellset_id);
+                    cell = new TCell(index > -1 ? index : Cell.SafeCellIndex++, cellset_id);
                 }
                 else
                 {
@@ -346,7 +324,7 @@ namespace Daphne
             }
             else if (type == CellBaseTypeLabel.FDC && chemokineReceptorInitialStates == null)
             {
-                cell = new FDC(index > -1 ? index : safeCellID++, cellset_id);
+                cell = new FDC(index > -1 ? index : Cell.SafeCellIndex++, cellset_id);
             }
             else
             {
@@ -374,7 +352,7 @@ namespace Daphne
             BaseCell clone = (BaseCell)Utilities.DeepClone(mother);
 
             // set safe index
-            clone.CellIndex = safeCellID++;
+            clone.CellIndex = Cell.SafeCellIndex++;
             // reset force
             clone.LM.resetForce();
             // create the division model
@@ -404,10 +382,8 @@ namespace Daphne
         {
             if (cell != null)
             {
-#if ALL_DATA
                 // cause the cell to be updated into the grid in the next simulation round
                 cell.GridIndex[0] = cell.GridIndex[1] = cell.GridIndex[2] = -1;
-#endif
                 // add the cell
                 cells.Add(cell.Index, cell);
                 return true;

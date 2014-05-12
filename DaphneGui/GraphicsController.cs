@@ -166,11 +166,11 @@ namespace DaphneGui
             }
         }
     }
-#if ALL_GRAPHICS
+
     /// <summary>
-    /// encapsulates the VTK rendering pipeline for chemokines
+    /// encapsulates the VTK rendering pipeline for the ecs
     /// </summary>
-    public class VTKChemokineController
+    public class VTKECSController
     {
         private GraphicsProp gradientActor;
         private bool renderGradient;
@@ -179,7 +179,7 @@ namespace DaphneGui
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKChemokineController(vtkRenderWindow _rw)
+        public VTKECSController(vtkRenderWindow _rw)
         {
             rw = _rw;
             gradientActor = new GraphicsProp();
@@ -203,18 +203,18 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// finish the pipelines for all solfacs in the chemokine
+        /// finish the pipelines for all molpop in the ecs
         /// </summary>
         public void finish3DPipelines()
         {
-            Chemokine chemokine = MainWindow.Basket.CellEnv.Ckine;
-            
+            Compartment ecs = Simulation.dataBasket.ECS.Space;
             // create a transfer function mapping scalar value to opacity
             vtkPiecewiseFunction fOpacity = vtkPiecewiseFunction.New();
             // set the opacity: assume it is one along the volume's diagonal
-            double diag = Math.Sqrt(chemokine.GridSize[0] * chemokine.GridSize[0] + chemokine.GridSize[1] * chemokine.GridSize[1] + chemokine.GridSize[2] * chemokine.GridSize[2]);
+            double diag = Math.Sqrt(ecs.Interior.Extent(0) * ecs.Interior.Extent(0) + ecs.Interior.Extent(1) * ecs.Interior.Extent(1) + ecs.Interior.Extent(2) * ecs.Interior.Extent(2));
+
             fOpacity.AddPoint(0, 1.0 / diag);
-            fOpacity.AddPoint(chemokine.GridDim[0] * chemokine.GridDim[1] * chemokine.GridDim[2], 1.0 / diag);
+            fOpacity.AddPoint(ecs.Interior.NodesPerSide(0) * ecs.Interior.NodesPerSide(1) * ecs.Interior.NodesPerSide(2), 1.0 / diag);
 
             vtkVolumeProperty volProp = vtkVolumeProperty.New();
             // create a transfer function mapping scalar value to color
@@ -257,7 +257,7 @@ namespace DaphneGui
 
             vtkSmartVolumeMapper vmSmart = vtkSmartVolumeMapper.New();
             vmSmart.SetRequestedRenderModeToDefault();
-            vmSmart.SetInput(MainWindow.VTKBasket.ChemokineController.ImageGrid);
+            vmSmart.SetInput(MainWindow.VTKBasket.ECSController.ImageGrid);
 
             // the actual volume
             vtkVolume volume = vtkVolume.New();
@@ -278,7 +278,7 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// draw the 3D chemokine
+        /// draw the 3D ecs
         /// </summary>
         public void draw3D()
         {
@@ -289,7 +289,7 @@ namespace DaphneGui
             }
         }
     }
-
+#if ALL_GRAPHICS
     /// <summary>
     /// entity encapsulating a cell track
     /// </summary>
@@ -816,14 +816,14 @@ namespace DaphneGui
         private GraphicsProp cornerAnnotation;
         // the cells
         private VTKCellController cellController;
+        // the ecs
+        private VTKECSController ecsController;
 #if ALL_GRAPHICS
-        // the chemokine
-        private VTKChemokineController chemokineController;
         // dictionary holding track data keyed by cell id
         private Dictionary<int, VTKCellTrack> cellTracks;
+#endif
         // dictionary holding all of the region widgets for this VTK window
         private Dictionary<string, RegionWidget> regions;
-#endif
         private RenderWindowControl rwc;
         private vtkRenderWindow rw;
         private WindowsFormsHost wfh;
@@ -849,12 +849,12 @@ namespace DaphneGui
         private System.Windows.Visibility colorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
         private double colorScaleMaxFactor = 1.0;
 
-        // Variables for binding cell and solfac rendering options to toolbar combo boxes
+        // Variables for binding cell and molpop rendering options to toolbar combo boxes
         private CellRenderMethod cellRenderMethod;
         public ObservableCollection<string> CellAttributeArrayNames { get; set; }
         private string cellColorArrayName;
-        public ObservableCollection<string> ChemokineRenderingMethodNames { get; set; }
-        private string chemokineRenderingMethod;
+        public ObservableCollection<string> ECSRenderingMethodNames { get; set; }
+        private string ecsRenderingMethod;
         private MainWindow MW;
 
         public static byte GET_CURSOR_ARROW
@@ -944,26 +944,24 @@ namespace DaphneGui
 
             // cells
             cellController = new VTKCellController(rw);
-#if ALL_GRAPHICS
-            // chemokine
-            chemokineController = new VTKChemokineController(rw);
             
+            // chemokine
+            ecsController = new VTKECSController(rw);
+#if ALL_GRAPHICS
             // cell tracks
             cellTracks = new Dictionary<int, VTKCellTrack>();
 #endif
             // This list will be regenerated on each CreatePipelines() call
             this.CellAttributeArrayNames = new ObservableCollection<string>();
 
-            // Fixed set of solfac rendering options, so pre-generate this list
-            this.ChemokineRenderingMethodNames = new ObservableCollection<string>();
-            this.ChemokineRenderingMethodNames.Add("No Rendering");
-            this.ChemokineRenderingMethodNames.Add("Outline");
-            this.ChemokineRenderingMethodNames.Add("Volume");
-            this.ChemokineRenderingMethodNames.Add("Outlined Volume");
-#if ALL_GRAPHICS
+            // Fixed set of molpop rendering options, so pre-generate this list
+            ECSRenderingMethodNames = new ObservableCollection<string>();
+            ECSRenderingMethodNames.Add("No Rendering");
+            ECSRenderingMethodNames.Add("Outline");
+            ECSRenderingMethodNames.Add("Volume");
+            ECSRenderingMethodNames.Add("Outlined Volume");
             // regions
             regions = new Dictionary<string, RegionWidget>();
-#endif
         }
         
         /// <summary>
@@ -971,7 +969,6 @@ namespace DaphneGui
         /// </summary>
         public void Cleanup()
         {
-#if ALL_GRAPHICS
             foreach (KeyValuePair<string, RegionWidget> kvp in regions)
             {
                 kvp.Value.ShowWidget(false);
@@ -979,17 +976,16 @@ namespace DaphneGui
                 kvp.Value.CleanUp();
             }
             regions.Clear();
-#endif
             environmentController.Cleanup();
             cellController.Cleanup();
+            ecsController.Cleanup();
 #if ALL_GRAPHICS
-            chemokineController.Cleanup();
             CleanupTracks();
 #endif
             CellAttributeArrayNames.Clear();
             // ColorScaleMaxFactor = 1.0;
         }
-#if ALL_GRAPHICS
+
         /// <summary>
         /// retrieve the list of regions
         /// </summary>
@@ -997,7 +993,7 @@ namespace DaphneGui
         {
             get { return regions; }
         }
-#endif
+
         public bool OrientationMarker_IsChecked
         {
             get { return orientationMarker_IsChecked; }
@@ -1044,50 +1040,51 @@ namespace DaphneGui
             }
         }
         
-#if ALL_GRAPHICS
-        public string ChemokineRenderingMethod
+        public string ECSRenderingMethod
         {
-            get { return chemokineRenderingMethod; }
+            get { return ecsRenderingMethod; }
             set
             {
-                if (value == this.chemokineRenderingMethod)
+                if (value == this.ecsRenderingMethod)
+                {
                     return;
+                }
                 else
                 {
-                    this.chemokineRenderingMethod = value;
-                    // Set up chemokine rendering based on value
+                    this.ecsRenderingMethod = value;
+                    // Set up ecs rendering based on value
                     if (value != null)
                     {
 
                         if (value == "Outlined Volume")
                         {
                             EnvironmentController.RenderBox = true;
-                            ChemokineController.RenderGradient = true;
+                            ECSController.RenderGradient = true;
                         }
                         else if (value == "Outline")
                         {
                             EnvironmentController.RenderBox = true;
-                            ChemokineController.RenderGradient = false;
+                            ECSController.RenderGradient = false;
                         }
                         else if (value == "Volume")
                         {
                             EnvironmentController.RenderBox = false;
-                            ChemokineController.RenderGradient = true;
+                            ECSController.RenderGradient = true;
                         }
                         else
                         {
                             EnvironmentController.RenderBox = false;
-                            ChemokineController.RenderGradient = false;
+                            ECSController.RenderGradient = false;
                         }
                         EnvironmentController.drawEnvBox();
-                        ChemokineController.draw3D();
+                        ECSController.draw3D();
                         Rwc.Invalidate();
                     }
-                    base.OnPropertyChanged("ChemokineRenderingMethod");
+                    base.OnPropertyChanged("ECSRenderingMethod");
                 }
             }
         }
-#endif
+
         public string CellColorArrayName
         {
             get { return this.cellColorArrayName; }
@@ -1378,7 +1375,7 @@ namespace DaphneGui
         {
             get { return wfh; }
         }
-#if ALL_GRAPHICS
+
         private void WigetTransformToBoxMatrix(RegionWidget rw, BoxSpecification bs)
         {
             vtkMatrix4x4 mat = rw.GetTransform(RegionControl.PARAM_SCALE).GetMatrix();
@@ -1513,7 +1510,7 @@ namespace DaphneGui
                 }
             }
         }
-#endif
+
         /// <summary>
         /// handler for left mouse button down
         /// </summary>
@@ -1688,13 +1685,13 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// recenter the camera and adjust the zoom to display the whole chemokine
+        /// recenter the camera and adjust the zoom to display the whole ecs
         /// </summary>
         public void recenterCamera()
         {
             if (EnvironmentController.BoxActor.Prop != null)
             {
-                // center the camera around the chemokine and adjust it to make sure it fits into the fov
+                // center the camera around the ecs and adjust it to make sure it fits into the fov
                 double[] bounds = new double[6];
 
                 bounds = EnvironmentController.BoxActor.Prop.GetBounds();
@@ -1748,16 +1745,17 @@ namespace DaphneGui
         }
 #endif
         /// <summary>
-        /// Create the VTK graphics pipelines for all cells and chemokines, but use pre-allocated arrays for speed
+        /// Create the VTK graphics pipelines for all cells and ecs, but use pre-allocated arrays for speed
         /// This will clear all old pipelines and generate new ones based on VTKDataBasket contents
         /// </summary>
         public void CreatePipelines()
         {
             Cleanup();
-#if ALL_GRAPHICS
+
             // Regions
             CreateRegionWidgets();
-#endif
+
+
             // Cells
             if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null)
             {
@@ -1812,18 +1810,19 @@ namespace DaphneGui
 
             // environment
             EnvironmentController.setupPipeline();
-#if ALL_GRAPHICS
-            // Chemokines
-            if (MainWindow.Basket.CellEnv.Ckine != null && MainWindow.VTKBasket.ChemokineController.ImageGrid != null)
+
+            // ecs
+            if (Simulation.dataBasket.ECS != null && MainWindow.VTKBasket.ECSController.ImageGrid != null)
             {
-                ChemokineController.finish3DPipelines();
+                ecsController.finish3DPipelines();
                 // Make "Outline" a hard-coded first-pass default for now, otherwise keep old value
-                if (this.ChemokineRenderingMethod == null)
-                    this.ChemokineRenderingMethod = "Outline";
+                if (ECSRenderingMethod == null)
+                {
+                    ECSRenderingMethod = "Outline";
+                }
             }
-#endif
         }
-#if ALL_GRAPHICS
+
         public void AddGaussSpecRegionWidget(GaussianSpecification gs)
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
@@ -1896,7 +1895,7 @@ namespace DaphneGui
                 AddRegionRegionWidget(rr);
             }
         }
-#endif
+
         /// <summary>
         /// retrieve the cellController object
         /// </summary>
@@ -1913,14 +1912,14 @@ namespace DaphneGui
             get { return environmentController; }
         }
 
-#if ALL_GRAPHICS
         /// <summary>
-        /// retrieve the chemokineController object
+        /// retrieve the ecsController object
         /// </summary>
-        public VTKChemokineController ChemokineController
+        public VTKECSController ECSController
         {
-            get { return chemokineController; }
+            get { return ecsController; }
         }
+#if ALL_GRAPHICS
 
         /// <summary>
         /// Access a cell track by key; if it doesn't exist create it
@@ -1967,13 +1966,13 @@ namespace DaphneGui
             {
                 environmentController.drawEnvBox();
             }
-#if ALL_GRAPHICS
-            // chemokine
-            if (chemokineController.GradientActor != null)
+
+            // ecs
+            if (ecsController.GradientActor != null)
             {
-                chemokineController.draw3D();
+                ecsController.draw3D();
             }
-#endif
+
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,9 +18,6 @@ using System.Windows.Shapes;
 
 using ActiproSoftware.Windows.Controls.Docking;
 using Kitware.VTK;
-using System.IO;
-using System.Diagnostics;
-using System.Threading;
 
 using Ninject;
 using Ninject.Parameters;
@@ -1319,6 +1320,81 @@ namespace DaphneGui
             //}
         }
 
+        public static void GUIInteractionToWidgetCallback(object sender, PropertyChangedEventArgs e)
+        {
+            BoxSpecification box = (BoxSpecification)sender;
+
+            if (box == null)
+            {
+                return;
+            }
+
+            if (e.PropertyName == "box_visibility")
+            {
+                MainWindow.GC.Regions[box.box_guid].ShowWidget(box.box_visibility);
+            }
+
+            // Catch-all for other scale / translation manipulations
+            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) && MainWindow.GC.Regions.ContainsKey(box.box_guid))
+            {
+                MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
+                MainWindow.GC.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+        }
+
+        public static void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
+        {
+            Region region = (Region)sender;
+
+            if (region == null)
+            {
+                return;
+            }
+
+            if (e.PropertyName == "region_visibility")
+            {
+                MainWindow.GC.Regions[region.region_box_spec_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, region.region_visibility);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+            if (e.PropertyName == "region_type")
+            {
+                MainWindow.VTKBasket.Regions[region.region_box_spec_guid_ref].SetShape(region.region_type);
+                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetShape(MainWindow.GC.Rwc.RenderWindow, region.region_type);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+            if (e.PropertyName == "region_color")
+            {
+                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetColor(region.region_color.ScR, region.region_color.ScG, region.region_color.ScB);
+                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetOpacity(region.region_color.ScA);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+            return;
+        }
+
+        public static void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
+        {
+            GaussianSpecification gauss = (GaussianSpecification)sender;
+
+            if (gauss == null)
+            {
+                return;
+            }
+
+            if (e.PropertyName == "gaussian_region_visibility")
+            {
+                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+            if (e.PropertyName == "gaussian_spec_color")
+            {
+                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
+                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetOpacity(gauss.gaussian_spec_color.ScA);
+                MainWindow.GC.Rwc.Invalidate();
+            }
+            return;
+        }
+
         private void initialState(bool newFile, bool completeReset, string jsonScenarioString)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
@@ -1329,19 +1405,18 @@ namespace DaphneGui
                 {
                     // if we configured a simulation prior to this call, remove all property changed event handlers
 
-                    //skg REMOVE VTK AND GRAPHICS STUFF FOR NOW
-                    //////////for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-                    //////////{
-                    //////////    configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= configurator.GUIInteractionToWidgetCallback;
-                    //////////}
-                    //////////for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-                    //////////{
-                    //////////    configurator.SimConfig.scenario.regions[i].PropertyChanged -= configurator.GUIRegionSurfacePropertyChange;
-                    //////////}
-                    //////////for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-                    //////////{
-                    //////////    configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= configurator.GUIGaussianSurfaceVisibilityToggle;
-                    //////////}
+                    for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+                    {
+                        configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
+                    }
+                    for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+                    {
+                        configurator.SimConfig.scenario.regions[i].PropertyChanged -= GUIRegionSurfacePropertyChange;
+                    }
+                    for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
+                    {
+                        configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
+                    }
                 }
                 // load past experiment
                 if (jsonScenarioString != "")
@@ -1383,19 +1458,18 @@ namespace DaphneGui
             }
 
             // (re)connect the handlers for the property changed event
-            //skg daphne REMOVE VTK AND GRAPHICS STUFF FOR NOW
-            //////////for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
-            //////////{
-            //////////    configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += configurator.GUIInteractionToWidgetCallback;
-            //////////}
-            //////////for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
-            //////////{
-            //////////    configurator.SimConfig.scenario.regions[i].PropertyChanged += configurator.GUIRegionSurfacePropertyChange;
-            //////////}
-            //////////for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-            //////////{
-            //////////    configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += configurator.GUIGaussianSurfaceVisibilityToggle;
-            //////////}
+            for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+            {
+                configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
+            }
+            for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+            {
+                configurator.SimConfig.scenario.regions[i].PropertyChanged += GUIRegionSurfacePropertyChange;
+            }
+            for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
+            {
+                configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
+            }
 
             // GUI Resources
             // Set the data context for the main tab control config GUI
@@ -1424,15 +1498,15 @@ namespace DaphneGui
             }
             gc.Rwc.Invalidate();
 
-            //////////// TODO: Need to do this for all GCs eventually...
-            //////////// Add the RegionControl interaction event handlers here for easier reference to callback method
-            //////////foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
-            //////////{
-            //////////    // NOTE: For now not doing any callbacks on property change for RegionControls...
-            //////////    kvp.Value.ClearCallbacks();
-            //////////    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
-            //////////    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
-            //////////}
+            // TODO: Need to do this for all GCs eventually...
+            // Add the RegionControl interaction event handlers here for easier reference to callback method
+            foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
+            {
+                // NOTE: For now not doing any callbacks on property change for RegionControls...
+                kvp.Value.ClearCallbacks();
+                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
+                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
+            }
 
             //////////VCR_Toolbar.IsEnabled = false;
             //////////gc.ToolsToolbar_IsEnabled = true;

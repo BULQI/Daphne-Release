@@ -494,6 +494,7 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
+        public ObservableCollection<Region> regions { get; set; }
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
@@ -502,12 +503,9 @@ namespace Daphne
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
+            regions = new ObservableCollection<Region>();
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
-
-            //////Reactions = new ObservableCollection<ConfigReaction>();
-            //////MolPops = new ObservableCollection<ConfigMolecularPopulation>();
-            //////ReactionComplexes = new ObservableCollection<GuiReactionComplex>();
         }
     }
 
@@ -666,6 +664,7 @@ namespace Daphne
             }
 
             int[] pt = new int[3];
+
             pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
             pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
             pt[2] = (int)Math.Ceiling((decimal)(extent_z / gridstep)) + 1;

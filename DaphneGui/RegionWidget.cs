@@ -5,6 +5,8 @@ using System.Text;
 
 using Kitware.VTK;
 
+using Daphne;
+
 namespace DaphneGui
 {
     /// <summary>
@@ -90,7 +92,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="rw">VTK render window object</param>
         /// <param name="shape">value indicating the shape</param>
-        public void SetShape(vtkRenderWindow rw, DaphneGui.RegionShape shape)
+        public void SetShape(vtkRenderWindow rw, RegionShape shape)
         {
             if (this.shape == shape || shapeActor.Prop == null)
             {

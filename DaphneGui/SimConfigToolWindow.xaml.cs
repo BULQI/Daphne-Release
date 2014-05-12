@@ -185,18 +185,18 @@ namespace DaphneGui
             gg.gaussian_spec_name = "New on-center gradient";
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
-            //////////gg.PropertyChanged += MainWindow.SC.GUIGaussianSurfaceVisibilityToggle;
+            gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
 
-            //////////// Add RegionControl & RegionWidget for the new gauss_spec
-            //////////MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-            //////////MainWindow.GC.AddGaussSpecRegionWidget(gg);
-            //////////// Connect the VTK callback
-            //////////// TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            //////////MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+            // Add RegionControl & RegionWidget for the new gauss_spec
+            MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
+            MainWindow.GC.AddGaussSpecRegionWidget(gg);
+            // Connect the VTK callback
+            // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
+            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
+            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
-            //////////MainWindow.GC.Rwc.Invalidate();
+            MainWindow.GC.Rwc.Invalidate();
         }
 
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -212,10 +212,12 @@ namespace DaphneGui
             if (current_mol != null)
             {
                 MolPopInfo current_item = current_mol.mpInfo;
-
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+
                 if (e.AddedItems.Count > 0)
+                {
                     new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+                }
 
                 
                 // Only want to change distribution type if the combo box isn't just selecting 
@@ -992,6 +994,91 @@ namespace DaphneGui
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
+        }
+
+        public void SelectRegionInGUI(int index, string guid)
+        {
+            // Regions are in the second (entities) tab panel
+            ConfigTabControl.SelectedIndex = 1;
+            // Because each region will have a unique box guid, can use data-binding-y way of setting selection
+            //RegionsListBox.SelectedIndex = index;
+            //RegionsListBox.SelectedValuePath = "region_box_spec_guid_ref";
+            //RegionsListBox.SelectedValue = guid;
+        }
+
+        public void SelectGaussSpecInGUI(int index, string guid)
+        {
+            // Gaussian specs are in the third tab panel
+            ConfigTabControl.SelectedIndex = 2;
+            // Use list index here since not all solfacs.solfac_distribution have this guid field
+            //GaussianSpecsListBox.SelectedIndex = index;
+            //GaussianSpecsListBox.SelectedValuePath = "gaussian_spec_box_guid_ref";
+            //GaussianSpecsListBox.SelectedValue = guid;
+        }
+
+        public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
+        {
+            // identify the widget's key
+            string key = "";
+
+            if (rw != null && MainWindow.GC.Regions.ContainsValue(rw) == true)
+            {
+                foreach (KeyValuePair<string, RegionWidget> kvp in MainWindow.GC.Regions)
+                {
+                    if (kvp.Value == rw)
+                    {
+                        key = kvp.Key;
+                        break;
+                    }
+                }
+
+                // found?
+                if (key != "")
+                {
+                    // Select the correct region/solfac/gauss_spec in the GUI's lists
+                    bool gui_spot_found = false;
+
+                    for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
+                    {
+                        // See whether the current widget is for a Region
+                        if (MainWindow.SC.SimConfig.scenario.regions[r].region_box_spec_guid_ref == key)
+                        {
+                            SelectRegionInGUI(r, key);
+                            gui_spot_found = true;
+                            break;
+                        }
+                    }
+                    if (!gui_spot_found)
+                    {
+                        // Next check whether any Solfacs use this right gaussian_spec for this box
+                        for (int r = 0; r < MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Count; r++)
+                        {
+                            // We'll just be picking the first one that uses 
+                            if (MainWindow.SC.SimConfig.scenario.environment.ecs.molpops[r].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
+                                ((MolPopGaussian)MainWindow.SC.SimConfig.scenario.environment.ecs.molpops[r].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
+                            {
+                                SelectSolfacInGUI(r);
+                                gui_spot_found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!gui_spot_found)
+                    {
+                        // Last check the gaussian_specs for this box guid
+                        for (int r = 0; r < MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count; r++)
+                        {
+                            // We'll just be picking the first one that uses 
+                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
+                            {
+                                SelectGaussSpecInGUI(r, key);
+                                gui_spot_found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void CellPopDistributionTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

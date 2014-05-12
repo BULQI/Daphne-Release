@@ -415,8 +415,8 @@
                                                             />
                                                 <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Chemokines</Label>
                                                 <ComboBox x:Name="SolfacRenderingCB" Width="120" 
-                                                            ItemsSource="{Binding Path=ChemokineRenderingMethodNames}" 
-                                                            SelectedValue="{Binding Path=ChemokineRenderingMethod}"
+                                                            ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
+                                                            SelectedValue="{Binding Path=ECSRenderingMethod}"
                                                             BorderBrush="LightGray" 
                                                             ToolBar.OverflowMode="Never" ToolTip="Chemokine rendering style">
                                                 </ComboBox>

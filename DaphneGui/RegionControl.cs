@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define ALL_REGIONS
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,8 @@ using System.Text;
 using Kitware.VTK;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.RandomSources;
+
+using Daphne;
 
 namespace DaphneGui
 {
@@ -64,7 +67,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="rw">VTK render window object</param>
         /// <param name="shape">value indicating the shape</param>
-        public void SetShape(DaphneGui.RegionShape shape)
+        public void SetShape(RegionShape shape)
         {
             if (this.shape == shape)
             {
@@ -792,7 +795,7 @@ namespace DaphneGui
                 return false;
             }
         }
-
+#if ALL_REGIONS
         /// <summary>
         /// generate a random point inside, outside, or on the surface of the region in local coordinates
         /// </summary>
@@ -942,7 +945,7 @@ namespace DaphneGui
             }
             return pos;
         }
-
+#endif
         /// <summary>
         /// retrieve the box axes as the columns of a matrix
         /// </summary>
