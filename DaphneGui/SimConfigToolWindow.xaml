@@ -1494,13 +1494,27 @@
                                     </StackPanel.Resources>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
-                                        <ComboBox  MinWidth="100"
-                                                ItemsSource="{Binding Source={StaticResource moleculesListView}}"
+                                    <!--<ComboBox  MinWidth="100"
+                                        ItemsSource="{Binding Source={StaticResource moleculesListView}}"
                                                 DisplayMemberPath="Name"
                                                 SelectedValue="{Binding Path=locomotor_mol_guid_ref}"
-                                                SelectedValuePath="molecule_guid"
-                                                />
-                                    </StackPanel>
+                                                SelectedValuePath="molecule_guid">
+                                    </ComboBox>-->
+                                    <ComboBox  MinWidth="100"
+                                                DisplayMemberPath="Name"
+                                                SelectedValue="{Binding Path=locomotor_mol_guid_ref}"
+                                                SelectedValuePath="molecule_guid">
+
+                                        <ComboBox.ItemsSource>
+                                            <CompositeCollection>
+                                                <ComboBoxItem>None</ComboBoxItem>
+                                                <CollectionContainer
+                                                    Collection="{Binding Source={StaticResource moleculesListView}}" />
+                                            </CompositeCollection>
+                                        </ComboBox.ItemsSource>
+                                    </ComboBox>
+
+                                </StackPanel>
                                 </StackPanel>
                                 
                                 <StackPanel Orientation="Horizontal">
