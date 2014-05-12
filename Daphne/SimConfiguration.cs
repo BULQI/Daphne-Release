@@ -2279,7 +2279,7 @@ namespace Daphne
             MolecularWeight = thisMW;
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
-            ReadOnly = true;
+            ReadOnly = false;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -2292,7 +2292,7 @@ namespace Daphne
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
-            ReadOnly = true;
+            ReadOnly = false;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -2997,7 +2997,7 @@ namespace Daphne
 
             daph_rate_const = new DaphneDouble();
             rate_const = 0;
-            ReadOnly = true;
+            ReadOnly = false;
 
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
@@ -3270,14 +3270,14 @@ namespace Daphne
             Name = "NewRC";
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
-            ReadOnly = true;
+            ReadOnly = false;
         }
         public ConfigReactionComplex(string name)
         {
             Guid id = Guid.NewGuid();
             reaction_complex_guid = id.ToString();
             Name = name;
-            ReadOnly = true;
+            ReadOnly = false;
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
