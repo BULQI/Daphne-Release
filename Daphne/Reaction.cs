@@ -53,6 +53,7 @@ namespace Daphne
             reactant2 = _reactant2;
             product = _product;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant1.Man);
             //Type = ReactionType.Association;
         }
 
@@ -76,6 +77,7 @@ namespace Daphne
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.Dimerization;
         }
 
@@ -98,6 +100,7 @@ namespace Daphne
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.DimerDissociation;
         }
 
@@ -122,6 +125,7 @@ namespace Daphne
             product1 = _product1;
             product2 = _product2;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.Dissociation;
         }
 
@@ -231,7 +235,7 @@ namespace Daphne
             product = _product;
             RateConstant = _RateConst;
             //Type = ReactionType.CatalyzedAssociation;
-            //intensity = new ScalarField(reactant1.Man);
+            intensity = new ScalarField(reactant1.Man);
         }
 
         public override void Step(double dt)
@@ -283,6 +287,7 @@ namespace Daphne
             product = _product;
             catalyst = _catalyst;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.CatalyzedDimerization;
         }
 
@@ -307,6 +312,7 @@ namespace Daphne
             product = _product;
             catalyst = _catalyst;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.CatalyzedDimerDissociation;
         }
 
@@ -333,6 +339,7 @@ namespace Daphne
             product1 = _product1;
             product2 = _product2;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.CatalyzedDissociation;
         }
 
@@ -358,6 +365,7 @@ namespace Daphne
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            intensity = new ScalarField(reactant.Man);
             //Type = ReactionType.CatalyzedTransformation;
         }
 
