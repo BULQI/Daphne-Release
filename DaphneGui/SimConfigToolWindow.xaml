@@ -4390,14 +4390,15 @@
                                                 <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
                                                             AutoGenerateColumns="False"
                                                             IsReadOnly="False"
-                                                            CanUserAddRows="True"       
+                                                            CanUserAddRows="False"       
                                                             CanUserReorderColumns="False"
                                                             CanUserSortColumns="False"
                                                             AlternatingRowBackground="Beige"
-                                                            SelectionMode="Single"
-                                                            SelectionUnit="Cell"
+                                                            SelectionMode="Extended"
+                                                            SelectionUnit="FullRow"
                                                             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
                                                             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+                                                            
                                                             >
 
                                                     <DataGrid.ContextMenu>
@@ -4434,7 +4435,7 @@
                                                                     <Setter Property="Background" Value="LightGray"/>
                                                                 </Trigger>
 
-                                                                <!-- This trigger highlights a grid cell if user hovers over it -->
+                                                                <!-- This trigger highlights a grid cell if user clicks on it -->
                                                                 <Trigger Property="IsSelected" Value="true">
                                                                     <Setter Property="Background" Value="LightBlue" />
                                                                     <Setter Property="Foreground" Value="Black" />
@@ -4450,6 +4451,13 @@
                                                         <Style TargetType="{x:Type DataGridColumnHeader}">
                                                             <Style.Triggers>
                                                                 <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                                                                    <Setter Property="Background"  Value="LightGray"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                        <Style TargetType="{x:Type DataGridRow}">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
                                                                     <Setter Property="Background"  Value="LightGray"/>
                                                                 </Trigger>
                                                             </Style.Triggers>
@@ -4495,14 +4503,14 @@
                                                             <Setter Property="Visibility" Value="Visible" />
                                                         </Style>
                                                     </DataGrid.Resources>
-
-                                                    <DataGrid.RowHeaderTemplate>
+                                                    
+                                                    <!--<DataGrid.RowHeaderTemplate>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                                     AncestorType={x:Type DataGridRow}}, 
                                                                                     Path=Item.elements[0].CurrentStateName, Mode=TwoWay}"/>
                                                         </DataTemplate>
-                                                    </DataGrid.RowHeaderTemplate>
+                                                    </DataGrid.RowHeaderTemplate>-->
                                                         
                                                 </DataGrid>
                                                     

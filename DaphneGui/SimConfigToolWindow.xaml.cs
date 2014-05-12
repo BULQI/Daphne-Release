@@ -1888,7 +1888,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigTabControl.SelectedItem = tabECM;
+                ConfigTabControl.SelectedItem = tabECM;                
             }
         }
 
@@ -2857,7 +2857,6 @@ namespace DaphneGui
 
         private void GeneRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
@@ -3219,9 +3218,9 @@ namespace DaphneGui
 		{
             // TODO: Add event handler implementation here.
             DependencyObject dep = (DependencyObject)e.OriginalSource;
-               
+
             // iteratively traverse the visual tree
-            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
+            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader) && !(dep is DataGridRowHeader))
             {
                 dep = VisualTreeHelper.GetParent(dep);
             }
@@ -3229,17 +3228,33 @@ namespace DaphneGui
             if (dep == null)
                 return;
  
-            if (dep is DataGridColumnHeader)
+            else if (dep is DataGridColumnHeader)
             {
                 DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
                 // do something
                 DataGridBehavior.SetHighlightColumn(columnHeader.Column, true);
             }
+
+            else if (dep is DataGridRowHeader)
+            {
+                //while ((dep != null) && !(dep is DataGridRow))
+                //{
+                //    dep = VisualTreeHelper.GetParent(dep);
+                //}
+                //if (dep == null)
+                //    return;
+
+                //// do something
+                //EpigeneticMapGrid.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
+                //DataGridRow row = dep as DataGridRow;
+                //row.IsSelected = true;
+            }
  
-            if (dep is DataGridCell)
+            else if (dep is DataGridCell)
             {
                 DataGridCell cell = dep as DataGridCell;
                 // do something
+                //EpigeneticMapGrid.SelectionUnit = DataGridSelectionUnit.Cell;
             }
 	    }
 
@@ -3328,6 +3343,16 @@ namespace DaphneGui
             EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count-1, col);
 
             combo.SelectedIndex = 0;
+
+            //This deletes the last column
+            int colcount = EpigeneticMapGrid.Columns.Count;
+            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
+            EpigeneticMapGrid.Columns.Remove(comboCol);
+
+            //This regenerates the last column
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            comboCol = CreateUnusedGenesColumn(er);
+            EpigeneticMapGrid.Columns.Add(comboCol);
 
             //DiffSchemeExpander_Expanded(null, null);
         }
@@ -3447,6 +3472,28 @@ namespace DaphneGui
                             ComboBox cbx = FindChild<ComboBox>(columnCell, "comboMolPops");
                         }
                     }
+                }
+            }
+
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            int rowcount = DiffRegGrid.Items.Count;
+            for (int ii = 0; ii < rowcount; ii++)
+            {
+                if (ii >= scheme.Driver.states.Count)
+                    break;
+
+                DataGridRow row = DiffRegGrid.GetRow(ii);
+                if (row != null)
+                {
+                    row.SetValue(DataGridRow.HeaderProperty, scheme.Driver.states[ii]);
                 }
             }
         }
@@ -3711,14 +3758,31 @@ namespace DaphneGui
             DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
             EpigeneticMapGrid.Columns.Remove(comboCol);
 
-            //Regenerate the last column
+            //This regenerates the last column
             comboCol = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(comboCol);
         }
 
         private void menuDeleteStates_Click(object sender, RoutedEventArgs e)
         {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
 
+            if (cell == null)
+                return;
+
+            if (cell.diff_scheme_guid_ref == null)
+                return;
+
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+
+            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
+            {
+                if (EpigeneticMapGrid.SelectedItems.Contains(diffrow))
+                {
+                    diff_scheme.RemoveActivationRow(diffrow);
+                }
+            }
         }
     }    
 

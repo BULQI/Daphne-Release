@@ -2436,6 +2436,17 @@ namespace Daphne
         {
             OnPropertyChanged("genes");
         }
+
+        public void RemoveActivationRow(ConfigActivationRow row)
+        {
+            int index = activationRows.IndexOf(row);
+            if (index > -1 && index < activationRows.Count)
+            {
+                activationRows.Remove(row);
+                Driver.states.RemoveAt(index);
+                Driver.DriverElements.RemoveAt(index);
+            }
+        }
         
     }
 
