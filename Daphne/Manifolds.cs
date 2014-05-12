@@ -82,17 +82,6 @@ namespace Daphne
             return true;
         }
 
-        public virtual double halfDiameter()
-        {
-            double diam = 0;
-
-            for (int i = 0; i < Extents.Length; i++)
-            {
-                diam += Extents[i] * Extents[i];
-            }
-            return Math.Sqrt(diam) / 2;
-        }
-
         public double distance(double[] p1, double[] p2)
         {
             if (isIn(p1) == true && isIn(p2) == true)
@@ -127,12 +116,6 @@ namespace Daphne
             gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
             // The radius of the sphere
             Extents = (double[])extent.Clone();
-        }
-
-        public override double halfDiameter()
-        {
-            // Extents[0] holds the radius
-            return Extents[0];
         }
 
         public override bool isIn(double[] loc)
@@ -213,12 +196,6 @@ namespace Daphne
             gradientOperator[0][0] = new LocalMatrix() { Coefficient = 1.0, Index = 0 };
             // The radius of the sphere
             Extents = (double[])extent.Clone();
-        }
-
-        public override double halfDiameter()
-        {
-            // Extents[0] holds the radius
-            return Extents[0];
         }
 
         public override bool isIn(double[] loc)
