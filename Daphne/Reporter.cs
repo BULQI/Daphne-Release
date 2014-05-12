@@ -65,7 +65,6 @@ namespace Daphne
 
             do
             {
-
                 if (File.Exists(fullPath) == true)
                 {
                     fullPath = rootPath + timeStamp + "_" + file + "(" + version + ")." + extension;
@@ -90,7 +89,7 @@ namespace Daphne
             // mean
             foreach (ConfigMolecularPopulation c in sc.scenario.environment.ecs.molpops)
             {
-                if (c.report_mp.mean == true)
+                if (((ReportECM)c.report_mp).mean == true)
                 {
                     header += "\t" + sc.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
                     create = true;
@@ -114,7 +113,7 @@ namespace Daphne
                 ecm_mean_file.Write(sim.AccumulatedTime);
                 foreach (ConfigMolecularPopulation c in sc.scenario.environment.ecs.molpops)
                 {
-                    if (c.report_mp.mean == true)
+                    if (((ReportECM)c.report_mp).mean == true)
                     {
                         // mean concentration of this ecm molecular population
                         ecm_mean_file.Write("\t{0}", Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref].Conc.MeanValue());
@@ -220,13 +219,13 @@ namespace Daphne
                 {
                     string name = sc.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
 
-                    if (mp.report_mp.probe_extended > ExtendedReport.NONE)
+                    if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
                         header += "\t" + name + "_probe";
                         create = true;
 
                         // gradient
-                        if (mp.report_mp.probe_extended == ExtendedReport.COMPLETE)
+                        if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                         {
                             header += "\t" + name + "_probe_grad_x\t" + name + "_probe_grad_y\t" + name + "_probe_grad_z";
                         }
@@ -250,6 +249,11 @@ namespace Daphne
             // create a file stream for each cell population
             foreach (CellPopulation cp in sc.scenario.cellpopulations)
             {
+                if (cell_files.ContainsKey(cp.cellpopulation_id) == false)
+                {
+                    continue;
+                }
+
                 foreach (Cell c in Simulation.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
                     // time cell_id
@@ -301,12 +305,12 @@ namespace Daphne
                     {
                         string name = sc.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
 
-                        if (mp.report_mp.probe_extended > ExtendedReport.NONE)
+                        if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
                             cell_files[cp.cellpopulation_id].Write("\t{0}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.State.X));
 
                             // gradient
-                            if (mp.report_mp.probe_extended == ExtendedReport.COMPLETE)
+                            if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
                                 double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.State.X);
 

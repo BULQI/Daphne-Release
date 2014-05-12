@@ -70,21 +70,20 @@ namespace Daphne
                 ConfigMolecule cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
                 if (cm != null)
                 {
-                    ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+                    ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
                     gmp.mpInfo.mp_dist_name = "Uniform";
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
 
                     // Reporting
                     gmp.report_mp.mp_extended = ExtendedReport.NONE;
-                    gmp.report_mp.mean = true;
+                    ((ReportECM)gmp.report_mp).mean = true;
 
                     sc.scenario.environment.ecs.molpops.Add(gmp);
                 }
@@ -107,14 +106,22 @@ namespace Daphne
             // Cell reporting
             cp.report_xvf.position = false;
             cp.report_xvf.velocity = false;
-            cp.report_xvf.force = false;            
+            cp.report_xvf.force = false;
+
             //foreach (ConfigMolecularPopulation mp in gc.membrane.molpops)
             //{
-            //    //ReportMP rmp = new ReportMP();
             //    mp.report_mp.mean = true;
             //    mp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             //}
-            //sc.scenario.cellpopulations.Add(cp);
+
+            foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
+            {
+                ReportECM rmp = new ReportECM();
+
+                rmp.molpop_guid_ref = cmp.molpop_guid;
+                cp.ecm_probe.Add(rmp);
+            }
+            sc.scenario.cellpopulations.Add(cp);
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
             type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
@@ -187,12 +194,11 @@ namespace Daphne
             // ecs
             foreach (ConfigMolecule gm in query)
             {
-                gmp = new ConfigMolecularPopulation();
+                gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 gmp.molecule_guid_ref = gm.molecule_guid;
                 gmp.mpInfo = new MolPopInfo(gm.Name);
                 gmp.Name = gm.Name;
                 gmp.mpInfo.mp_dist_name = "Gaussian";
-                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
                 //gmp.mpInfo.mp_type_guid_ref = gm.Name;
 
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -228,9 +234,10 @@ namespace Daphne
 
             foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
             {
-                ReportMP rmp = new ReportMP();
+                ReportECM rmp = new ReportECM();
+
                 rmp.molpop_guid_ref = cmp.molpop_guid;
-                cp.EcmProbeMP.Add(rmp);
+                cp.ecm_probe.Add(rmp);
             }
 
             sc.scenario.cellpopulations.Add(cp);
@@ -296,14 +303,13 @@ namespace Daphne
             // ecs
             foreach (ConfigMolecule gm in query)
             {
-                gmp = new ConfigMolecularPopulation();
+                gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 gmp.molecule_guid_ref = gm.molecule_guid;
                 gmp.mpInfo = new MolPopInfo(gm.Name);
                 gmp.Name = gm.Name;
                 gmp.mpInfo.mp_dist_name = "Gaussian";
                 gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 gmp.mpInfo.mp_render_blending_weight = 2.0;
-                gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
                 MolPopGaussian sgg = new MolPopGaussian();
 
@@ -381,7 +387,7 @@ namespace Daphne
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
                 if (cm != null)
                 {
-                    gmp = new ConfigMolecularPopulation();
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
@@ -390,7 +396,6 @@ namespace Daphne
                     //gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
@@ -415,7 +420,7 @@ namespace Daphne
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
                 if (cm != null)
                 {
-                    gmp = new ConfigMolecularPopulation();
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
@@ -423,7 +428,6 @@ namespace Daphne
                     gmp.mpInfo.mp_dist_name = "Uniform";
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
@@ -439,7 +443,7 @@ namespace Daphne
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
                 if (cm != null)
                 {
-                    gmp = new ConfigMolecularPopulation();
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
@@ -447,7 +451,6 @@ namespace Daphne
                     gmp.mpInfo.mp_dist_name = "Uniform";
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
@@ -489,7 +492,7 @@ namespace Daphne
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, sc)];
                 if (cm != null)
                 {
-                    gmp = new ConfigMolecularPopulation();
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
@@ -497,7 +500,6 @@ namespace Daphne
                     gmp.mpInfo.mp_dist_name = "Uniform";
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
@@ -513,7 +515,7 @@ namespace Daphne
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
                 if (cm != null)
                 {
-                    gmp = new ConfigMolecularPopulation();
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
@@ -521,7 +523,6 @@ namespace Daphne
                     gmp.mpInfo.mp_dist_name = "Uniform";
                     gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mpInfo.mp_render_blending_weight = 2.0;
-                    gmp.mpInfo.mp_type_guid_ref = cm.molecule_guid;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mpInfo.mp_distribution = hl;
@@ -585,14 +586,13 @@ namespace Daphne
             //gmp = null;
             //foreach (ConfigMolecule gm in query1)
             //{
-            //    gmp = new ConfigMolecularPopulation();
+            //    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             //    gmp.molecule_guid_ref = gm.molecule_guid;
             //    gmp.mpInfo = new MolPopInfo("My " + gm.Name);
             //    gmp.Name = "My " + gm.Name;
             //    gmp.mpInfo.mp_dist_name = "Constant level";
             //    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
             //    gmp.mpInfo.mp_render_blending_weight = 2.0;
-            //    gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
             //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
@@ -619,14 +619,13 @@ namespace Daphne
             //gmp = null;
             //foreach (ConfigMolecule gm in query2)
             //{
-            //    gmp = new ConfigMolecularPopulation();
+            //    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             //    gmp.molecule_guid_ref = gm.molecule_guid;
             //    gmp.mpInfo = new MolPopInfo("My " + gm.Name);
             //    gmp.Name = "My " + gm.Name;
             //    gmp.mpInfo.mp_dist_name = "Constant level";
             //    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
             //    gmp.mpInfo.mp_render_blending_weight = 2.0;
-            //    gmp.mpInfo.mp_type_guid_ref = gm.molecule_guid;
 
             //    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
@@ -1317,14 +1316,13 @@ namespace Daphne
             ConfigMolecularPopulation cmp = null;
             foreach (ConfigMolecule cm in query)
             {
-                cmp = new ConfigMolecularPopulation();
+                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                 cmp.molecule_guid_ref = cm.molecule_guid;
                 cmp.mpInfo = new MolPopInfo("My " + cm.Name);
                 cmp.Name = "My " + cm.Name;
                 cmp.mpInfo.mp_dist_name = "Constant level";
                 cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 cmp.mpInfo.mp_render_blending_weight = 2.0;
-                cmp.mpInfo.mp_type_guid_ref = cm.Name;
 
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 if (cm.Name == "CXCR5")
@@ -1364,14 +1362,13 @@ namespace Daphne
             crc = new ConfigReactionComplex("Bistable");
             foreach (ConfigMolecule cm in query)
             {
-                cmp = new ConfigMolecularPopulation();
+                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                 cmp.molecule_guid_ref = cm.molecule_guid;
                 cmp.mpInfo = new MolPopInfo("My " + cm.Name);
                 cmp.Name = "My " + cm.Name;
                 cmp.mpInfo.mp_dist_name = "Constant level";
                 cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 cmp.mpInfo.mp_render_blending_weight = 2.0;
-                cmp.mpInfo.mp_type_guid_ref = cm.Name;
 
                 MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                 if (cm.Name == "CXCR5")

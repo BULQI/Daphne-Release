@@ -4226,7 +4226,7 @@
                                 >
                                 <StackPanel>
                                     <DataGrid x:Name="dgEcmProbeMols" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.EcmProbeMP}"                                                         
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.ecm_probe}"                                                         
                                         Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"

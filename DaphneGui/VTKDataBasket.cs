@@ -282,9 +282,9 @@ namespace DaphneGui
         /// </summary>
         /// <param name="molpop">entity describing the molpop</param>
         /// <param name="region">pointer to the region controlling this gradient, if any</param>
-        public void addGradient3D(MolPopInfo molpop, RegionControl region)
+        public void addGradient3D(ConfigMolecularPopulation molpop, RegionControl region)
         {
-            if (molpopTypeControllers.ContainsKey(molpop.mp_guid) == true)
+            if (molpopTypeControllers.ContainsKey(molpop.mpInfo.mp_guid) == true)
             {
                 MessageBox.Show("Duplicate molpop guid! Aborting insertion.");
                 return;
@@ -293,26 +293,26 @@ namespace DaphneGui
             MolPopTypeController molpopControl;
 
             // check here for linear, Gaussian, homogeneous...
-            if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
-                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
-                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
+                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mpInfo.mp_distribution).peak_concentration,
+                                                                 ((MolPopGaussian)molpop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref);
             }
-            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).c1,
-                                                               ((MolPopLinear)molpop.mp_distribution).c2,
-                                                               ((MolPopLinear)molpop.mp_distribution).x1,
-                                                               ((MolPopLinear)molpop.mp_distribution).x2,
-                                                               ((MolPopLinear)molpop.mp_distribution).dim);
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).c1,
+                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).c2,
+                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).x1,
+                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).x2,
+                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).dim);
             }
-            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {
-                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mp_distribution).concentration);
+                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mpInfo.mp_distribution).concentration);
             }
-            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
+            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
             {
-                molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mp_distribution).custom_gradient_file_uri.LocalPath);
+                molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mpInfo.mp_distribution).custom_gradient_file_uri.LocalPath);
                 //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
                 //{
                 //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
@@ -332,18 +332,18 @@ namespace DaphneGui
             }
 
             // set the remaining molpop controller fields
-            molpopControl.RenderGradient = molpop.mp_render_on;
+            molpopControl.RenderGradient = molpop.mpInfo.mp_render_on;
             // assign color and weight
-            molpopControl.Color[0] = molpop.mp_color.R;
-            molpopControl.Color[1] = molpop.mp_color.G;
-            molpopControl.Color[2] = molpop.mp_color.B;
+            molpopControl.Color[0] = molpop.mpInfo.mp_color.R;
+            molpopControl.Color[1] = molpop.mpInfo.mp_color.G;
+            molpopControl.Color[2] = molpop.mpInfo.mp_color.B;
             // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = molpop.mp_color.A;
-            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
-            molpopControl.TypeGUID = molpop.mp_type_guid_ref;
+            molpopControl.Color[3] = molpop.mpInfo.mp_color.A;
+            molpopControl.BlendingWeight = molpop.mpInfo.mp_render_blending_weight;
+            molpopControl.TypeGUID = molpop.molecule_guid_ref;
 
             // add the controller to the dictionary
-            molpopTypeControllers.Add(molpop.mp_guid, molpopControl);
+            molpopTypeControllers.Add(molpop.mpInfo.mp_guid, molpopControl);
         }
 
         /// <summary>
@@ -1148,7 +1148,7 @@ namespace DaphneGui
                 }
 
                 // 3D gradient
-                ecsDataController.addGradient3D(sc.scenario.environment.ecs.molpops[i].mpInfo, region);
+                ecsDataController.addGradient3D(sc.scenario.environment.ecs.molpops[i], region);
 
                 // finish 3d gradient-related graphics after processing the last molpop
                 if (i == sc.scenario.environment.ecs.molpops.Count - 1)

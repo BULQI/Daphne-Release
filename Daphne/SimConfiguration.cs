@@ -219,7 +219,7 @@ namespace Daphne
             InitGaussSpecsAndGuidGaussDict();
             InitCellPopulationIDCellPopulationDict();
             InitMoleculeIDConfigMoleculeDict();
-            InitMolPopIDConfigMolecularPopDict();
+            InitMolPopIDConfigMolecularPopDict_ECMProbeDict();
             InitCellIDConfigCellDict();
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
@@ -282,7 +282,6 @@ namespace Daphne
                 cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs); 
             }
             scenario.cellpopulations.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsets_CollectionChanged);
-
         }
 
         private void InitMoleculeIDConfigMoleculeDict()
@@ -293,20 +292,28 @@ namespace Daphne
                 entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
             }
             entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
-
         }
 
-        private void InitMolPopIDConfigMolecularPopDict()
+        private void InitMolPopIDConfigMolecularPopDict_ECMProbeDict()
         {
-            ConfigCompartment cc = scenario.environment.ecs;
-            cc.molpops_dict.Clear();
-            foreach (ConfigMolecularPopulation cmp in cc.molpops)
-            {
-                cc.molpops_dict.Add(cmp.molpop_guid, cmp);
-            }
-            cc.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
-            //entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+            ConfigCompartment ecs = scenario.environment.ecs;
 
+            ecs.molpops_dict.Clear();
+            foreach (ConfigMolecularPopulation cmp in ecs.molpops)
+            {
+                ecs.molpops_dict.Add(cmp.molpop_guid, cmp);
+            }
+
+            // build ecm_probe_dict
+            foreach (CellPopulation cp in scenario.cellpopulations)
+            {
+                cp.ecm_probe_dict.Clear();
+                foreach (ReportECM recm in cp.ecm_probe)
+                {
+                    cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
+                }
+            }
+            ecs.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(ecm_molpops_CollectionChanged);
         }
 
         private void InitCellIDConfigCellDict()
@@ -319,6 +326,7 @@ namespace Daphne
             entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
 
         }
+
         private void InitReactionIDConfigReactionDict()
         {
             entity_repository.reactions_dict.Clear();
@@ -330,6 +338,7 @@ namespace Daphne
             entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
 
         }
+
         private void InitReactionComplexIDConfigReactionComplexDict()
         {
             entity_repository.reaction_complexes_dict.Clear();
@@ -340,7 +349,6 @@ namespace Daphne
             entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
 
         }
-        //
 
         private void InitReactionTemplateIDConfigReactionTempalteDict()
         {
@@ -402,7 +410,16 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     CellPopulation cs = nn as CellPopulation;
-                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);   
+
+                    foreach (ConfigMolecularPopulation mp in scenario.environment.ecs.molpops)
+                    {
+                        ReportECM er = new ReportECM();
+
+                        er.molpop_guid_ref = mp.molpop_guid;
+                        cs.ecm_probe.Add(er);
+                        cs.ecm_probe_dict.Add(mp.molpop_guid, er);
+                    }
+                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -410,7 +427,8 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     CellPopulation cs = dd as CellPopulation;
-                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);   
+
+                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
                 }
             }
         }
@@ -423,15 +441,15 @@ namespace Daphne
                 {
                     ConfigMolecule cm = nn as ConfigMolecule;
 
-                    foreach (ConfigMolecule mol in entity_repository.molecules)
-                    {
-                        if (mol.Name == cm.Name)
-                        {
-                            string output = string.Format("Molecule '{0}' already exists, please use a different name", cm.Name);
-                            MessageBox.Show(output);
-                            return;
-                        }
-                    }
+                    //foreach (ConfigMolecule mol in entity_repository.molecules)
+                    //{
+                    //    if (mol.Name == cm.Name)
+                    //    {
+                    //        string output = string.Format("Molecule '{0}' already exists, please use a different name", cm.Name);
+                    //        MessageBox.Show(output);
+                    //        return;
+                    //    }
+                    //}
                     
                     entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
                 }
@@ -445,36 +463,26 @@ namespace Daphne
                 }
             }
         }
-        private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+
+        private void ecm_molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
                 {
-                    ConfigMolecularPopulation cmp = nn as ConfigMolecularPopulation;
+                    ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
 
-                    //foreach (ConfigMolecularPopulation mp in scenario.environment.ecs.molpops)
-                    //{
-                    //    if (mp.Name == cmp.Name)
-                    //    {
-                    //        string output = string.Format("Molecular population '{0}' already exists, please use a different name.", cmp.Name);
-                    //        MessageBox.Show(output);
-                    //        return;
-                    //    }
-                    //}
+                    // add molpop into molpops_dict
+                    scenario.environment.ecs.molpops_dict.Add(mp.molpop_guid, mp);
 
-                    scenario.environment.ecs.molpops_dict.Add(cmp.molpop_guid, cmp);
-
-                    int count = scenario.cellpopulations.Count;
-                    for (int i = 0; i < count; i++)
+                    // add ecm report
+                    foreach (CellPopulation cp in scenario.cellpopulations)
                     {
-                        ReportMP rmp = new ReportMP();
-                        rmp.molpop_guid_ref = cmp.molpop_guid;
+                        ReportECM er = new ReportECM();
 
-                        CellPopulation cp = scenario.cellpopulations[i];
-                        //REPORTER-TO-DO   
-                        cp.EcmProbeMP.Add(rmp);
-                        
+                        er.molpop_guid_ref = mp.molpop_guid;
+                        cp.ecm_probe.Add(er);
+                        cp.ecm_probe_dict.Add(mp.molpop_guid, er);
                     }
                 }
             }
@@ -482,29 +490,22 @@ namespace Daphne
             {
                 foreach (var dd in e.OldItems)
                 {
-                    ConfigMolecularPopulation cmp = dd as ConfigMolecularPopulation;
-                    scenario.environment.ecs.molpops_dict.Remove(cmp.molpop_guid);
+                    ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
 
-                    int count = scenario.cellpopulations.Count;
-                    for (int i = 0; i < count; i++)
+                    // remove from molpops_dict
+                    scenario.environment.ecs.molpops_dict.Remove(mp.molpop_guid);
+
+                    // remove ecm report
+                    foreach (CellPopulation cp in scenario.cellpopulations)
                     {
-                        CellPopulation cp = scenario.cellpopulations[i];
-
-                        //REPORTER-TO-DO   
-                        //HERE DELETE REPORTMP FROM cp.EcmProbeMP
-                        /*
-                         * foreach (ReportMP rmp in cp.EcmProbeMP) {
-                         *     if (rmp.molpop_guid_ref == cmp.molpop_guid) {
-                         *         //cannot delete item inside loop
-                         *     }
-                         * }
-                         */
-                        
+                        // need to keep an eye on this; this poses an inefficient way of doing the removal; it should not happen excessively; if it did, we'd need a change here
+                        cp.ecm_probe.Remove(cp.ecm_probe_dict[mp.molpop_guid]);
+                        cp.ecm_probe_dict.Remove(mp.molpop_guid);
                     }
-                        
                 }
             }
         }
+
         private void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -1254,18 +1255,27 @@ namespace Daphne
 
     public class ReportMP
     {
-        public bool mean { get; set; }
         public ExtendedReport mp_extended { get; set; }
-        public ExtendedReport probe_extended { get; set; }
         public string molpop_guid_ref { get; set; }
 
         public ReportMP()
         {
-            mean = false;
             mp_extended = ExtendedReport.NONE;
-            probe_extended = ExtendedReport.NONE;
         }
     }
+
+    public class ReportECM : ReportMP
+    {
+        public bool mean { get; set; }
+
+        public ReportECM()
+            : base()
+        {
+            mean = false;
+        }
+    }
+
+    public enum ReportType { CELL_MP, ECM_MP };
 
     //skg daphne new classes
     public class ConfigMolecularPopulation //: EntityModelBase
@@ -1279,10 +1289,9 @@ namespace Daphne
             {
                 return _molecule_guid_ref;
             }
-            set {
+            set
+            {
                 _molecule_guid_ref = value;
-                if (mpInfo != null)
-                    mpInfo.mp_type_guid_ref = value;
             }
 
         }  // the molecule_guid of the molecule this mp contains
@@ -1304,12 +1313,26 @@ namespace Daphne
         private BoundaryFace _boundary_face;
         public BoundaryFace boundary_face { get; set; }
 
-        public ConfigMolecularPopulation()
+        public ConfigMolecularPopulation(ReportType rt)
         {
-            reportMP = new ReportMP();
-            boundary_face = BoundaryFace.None;
             Guid id = Guid.NewGuid();
+
             molpop_guid = id.ToString();
+            boundary_face = BoundaryFace.None;
+
+            if (rt == ReportType.CELL_MP)
+            {
+                reportMP = new ReportMP();
+            }
+            else if (rt == ReportType.ECM_MP)
+            {
+                reportMP = new ReportECM();
+            }
+            else
+            {
+                throw new Exception("Undefined report type in ConfigMolecularPopulation.");
+            }
+            reportMP.molpop_guid_ref = molpop_guid;
         }
     }
 
@@ -1318,7 +1341,6 @@ namespace Daphne
         // private to simConfig; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
         public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
-        //public ObservableCollection<string> reactions_guid_ref { get; set; }
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -1810,9 +1832,9 @@ namespace Daphne
 
         public ReportXVF()
         {
-            position = true;
-            velocity = true;
-            force = true;
+            position = false;
+            velocity = false;
+            force = false;
         }
     }
 
@@ -1833,6 +1855,13 @@ namespace Daphne
                 reportXVF = value;
             }
         }
+
+        private ObservableCollection<ReportECM> ecmProbe;
+        public ObservableCollection<ReportECM> ecm_probe
+        {
+            get { return ecmProbe; }
+        }
+        public Dictionary<string, ReportECM> ecm_probe_dict;
 
         private int _number;
         public int number
@@ -1920,19 +1949,6 @@ namespace Daphne
             CellPopDistTypes.Add(d);
         }
 
-        private ObservableCollection<ReportMP> ecmProbeMP; // report options per ecm molpop
-        public ObservableCollection<ReportMP> EcmProbeMP
-        {
-            get
-            {
-                return ecmProbeMP;
-            }
-            set
-            {
-                ecmProbeMP = value;
-            }
-        }
-
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -1953,10 +1969,11 @@ namespace Daphne
             InitDistTypes();
 
             cell_locations = new ObservableCollection<CellLocation>();
-            ecmProbeMP = new ObservableCollection<ReportMP>();
 
             // reporting
             reportXVF = new ReportXVF();
+            ecmProbe = new ObservableCollection<ReportECM>();
+            ecm_probe_dict = new Dictionary<string, ReportECM>();
         }
     }
 
@@ -1976,21 +1993,6 @@ namespace Daphne
                 {
                     _mp_dist_name = value;
                     OnPropertyChanged("mp_dist_name");
-                }
-            }
-        }
-        private string _mp_type_guid_ref;
-        public string mp_type_guid_ref
-        {
-            get { return _mp_type_guid_ref; }
-            set
-            {
-                if (_mp_type_guid_ref == value)
-                    return;
-                else
-                {
-                    _mp_type_guid_ref = value;
-                    OnPropertyChanged("mp_type_guid_ref");
                 }
             }
         }
@@ -2049,7 +2051,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             mp_guid = id.ToString();
             mp_dist_name = name;
-            mp_type_guid_ref = "";
             // Default is static homogeneous level
             mp_distribution = new MolPopHomogeneousLevel();
             mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();

@@ -484,7 +484,7 @@ namespace DaphneGui
             //SolfacsDetailsExpander.IsExpanded = true;
             // Default to HomogeneousLevel for now...
 
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -809,7 +809,7 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -821,6 +821,7 @@ namespace DaphneGui
             cell.membrane.molpops.Add(gmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
         }
+
         private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
@@ -828,9 +829,10 @@ namespace DaphneGui
             cell.membrane.molpops.Remove(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
         }
+
         private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             gmp.Name = "NewMP";
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -842,6 +844,7 @@ namespace DaphneGui
             cell.cytosol.molpops.Add(gmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
+
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
