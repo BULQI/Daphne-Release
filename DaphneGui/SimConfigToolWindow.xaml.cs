@@ -2935,17 +2935,18 @@ namespace DaphneGui
         {
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            if (cell == null)
-            {
-                //MessageBox.Show("No cell selected.");
-                return;
-            }
 
             //Clear the grids
             EpigeneticMapGrid.ItemsSource = null;
             EpigeneticMapGrid.Columns.Clear();
             DiffRegGrid.ItemsSource = null;
             DiffRegGrid.Columns.Clear();
+
+            if (cell == null)
+            {
+                //MessageBox.Show("No cell selected.");
+                return;
+            }
 
             //if cell does not have a diff scheme, return
             if (cell.diff_scheme_guid_ref == "" || cell.diff_scheme == null)
