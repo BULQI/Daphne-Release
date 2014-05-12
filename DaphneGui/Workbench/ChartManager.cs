@@ -14,6 +14,8 @@ namespace Workbench
     //      If multiple graphs need to be supported, some changes will be needed.
     public class ChartManager
     {
+        private double Y_MIN = 0.0001;
+        private double X_MIN = 0.01;
         public Size ChartSize { get; set; }
         private System.Windows.Forms.DataVisualization.Charting.Chart cChart;
         public Panel PChart;
@@ -47,6 +49,9 @@ namespace Workbench
                 listTimes = value;
             }
         }
+
+        public bool IsXLogarithmic { get; set; }
+        public bool IsYLogarithmic { get; set; }
         
         public string LabelX { get; set; }
         public string LabelY { get; set; }
@@ -69,6 +74,9 @@ namespace Workbench
             ChartSize = sz;
             ToolWin = win;
             DrawLine = true;
+
+            IsXLogarithmic = false;
+            IsYLogarithmic = true;
         }
 
         public ChartManager(ChartViewToolWindow win, Size sz, string title, string xlabel, string ylabel, bool line)
@@ -110,10 +118,10 @@ namespace Workbench
                 PChart.Controls.Remove(c);
             }
 
-            cChart = new Chart();            
+            cChart = new Chart();
             cChart.MouseDown += new MouseEventHandler(this.cChart_MouseDown);
             cChart.MouseUp += new MouseEventHandler(this.cChart_MouseUp);
-            cChart.MouseMove += new MouseEventHandler(this.cChart_MouseMove);   
+            cChart.MouseMove += new MouseEventHandler(this.cChart_MouseMove);
             cChart.BackColor = System.Drawing.SystemColors.ControlDark;
             cChart.ContextMenu = contextMenu;
   
@@ -122,7 +130,7 @@ namespace Workbench
             cChart.ChartAreas.Add(chartArear1);
             double[] x; double[] y; x = ListTimes.ToArray();
             int count = 0;
-
+            
             //For each molecule, call a function to create and draw the series 
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
             {
@@ -132,9 +140,41 @@ namespace Workbench
                 count++;
             }
             //**********
-            chartArear1.AxisY.Minimum = 0;  // getMin_Series(DictConcs) * 0.9;
+            if (chartArear1.AxisX.IsLogarithmic)
+                chartArear1.AxisX.Minimum = X_MIN;
+            else
+                chartArear1.AxisX.Minimum = 0;
 
-            if (chartArear1.AxisY.Maximum <= 0)  
+            if (chartArear1.AxisY.IsLogarithmic)
+                chartArear1.AxisY.Minimum = Y_MIN;
+            else
+                chartArear1.AxisY.Minimum = getMin_Series(DictConcs) * 0.9;
+
+            //chartArear1.AxisY.Minimum = Y_MIN;  // getMin_Series(DictConcs) * 0.9;
+            //chartArear1.AxisX.Minimum = X_MIN;  // x.Min() - 0.1;
+
+            LabelX = "Time (linear)";
+            LabelY = "Concentration (linear)";
+
+            //LOGARITHMIC Y Axis
+            if (IsYLogarithmic)
+            {
+                chartArear1.AxisY.Minimum = Y_MIN;
+                chartArear1.AxisY.IsLogarithmic = true;
+                chartArear1.AxisY.LogarithmBase = 10;
+                LabelY = "Concentration (log)";
+            }
+            //LOGARITHMIC X Axis
+            if (IsXLogarithmic)
+            {
+                chartArear1.AxisX.Minimum = X_MIN;  
+                chartArear1.AxisX.IsLogarithmic = true;
+                chartArear1.AxisX.LogarithmBase = 10;
+                LabelX = "Time (log)";
+            }
+            //
+
+            //if (chartArear1.AxisY.Maximum <= 0)  
                 chartArear1.AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
 
             //if (chartArear1.AxisY.Maximum > 100000)
@@ -142,7 +182,7 @@ namespace Workbench
             //TickMark tick = new TickMark();
             //tick.Interval = 0.1;
 
-            chartArear1.AxisX.Minimum = 0;  // x.Min() - 0.1;
+            
             chartArear1.AxisX.Maximum = x.Max() * 1.11;   //x.Max() * 1.1 + 0.01;
             chartArear1.AxisX.Title = LabelX;
             chartArear1.AxisY.Title = LabelY;
@@ -165,6 +205,16 @@ namespace Workbench
             chartArear1.AxisY.LineWidth = 1;
             chartArear1.AxisX.LineColor = Color.Black;
             chartArear1.AxisY.LineColor = Color.Black;
+
+
+            //new
+            ////chartArear1.CursorX.IsUserEnabled = true;
+            ////chartArear1.CursorX.IsUserSelectionEnabled = true;
+            ////chartArear1.CursorY.IsUserEnabled = true;
+            ////chartArear1.CursorY.IsUserSelectionEnabled = true;
+
+
+
             //*********************
             //chartArear1.AxisY.ScrollBar.Enabled = true;
 
@@ -205,7 +255,18 @@ namespace Workbench
             cChart.Series.Add(s);
             for (int i = 0; i < n; i++)
             {
-                s.Points.AddXY(x[i], y[i]);
+                double yval = y[i];
+                double xval = x[i];
+                //if logarithmic
+                if (IsYLogarithmic && yval <= 0)
+                {
+                    yval = Y_MIN;
+                }
+                if (IsXLogarithmic && xval <= 0)
+                {
+                    xval = X_MIN;
+                }
+                s.Points.AddXY(xval, yval);
             }
 
             // Add series to the chart
@@ -234,7 +295,7 @@ namespace Workbench
             s.Color = colorTable[_color % colorTable.Count];          
 
             //cA.AxisY.Minimum = 0.0;//y.Min();  // *0.9;
-            cA.AxisY.Maximum = y.Max() * 1.1 + 0.0001;
+            //cA.AxisY.Maximum = y.Max() * 1.1 + 0.0001;
 
             //This puts a max on y axis.  Not sure if we should have a max.  Should there be a limit??
             //if (cA.AxisY.Maximum > 100000)
@@ -309,6 +370,14 @@ namespace Workbench
             return max;
         }
 
+        public void CalculateXMax()
+        {
+            double max = -1 * 2E100;
+            if (ListTimes.Count > 0)
+                max = ListTimes.Max();
+            this.cChart.ChartAreas[0].AxisX.Maximum = max * 1.1;
+        }
+
         public string ConvertMolGuidToMolName(string guid)
         {
             string ret = "";
@@ -330,6 +399,12 @@ namespace Workbench
 
         private void cChart_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (cChart.ChartAreas[0].AxisX.IsLogarithmic || cChart.ChartAreas[0].AxisY.IsLogarithmic)
+            {
+                MessageBox.Show("Mouse graph interaction not supported in logarithmic mode.");
+                return;
+            }
+
             HitTestResult result = cChart.HitTest(e.X, e.Y);
 
             System.Drawing.Point mouseDownLocation = new System.Drawing.Point(e.X, e.Y);
@@ -580,8 +655,22 @@ namespace Workbench
                     int n = x.Count() <= y.Count() ? x.Count() : y.Count();
                     for (int i = 0; i < n; i++)
                     {
-                        s.Points.AddXY(x[i], y[i]);
+                        double xval = x[i];
+                        double yval = y[i];
+                        //if logarithmic
+                        if (IsYLogarithmic && yval <= 0)
+                        {
+                            yval = Y_MIN;
+                        } 
+                        if (IsXLogarithmic && xval <= 0)
+                        {
+                            xval = X_MIN;
+                        }                        
+                        s.Points.AddXY(xval, yval);
                     }
+
+                    if (s.Points.Count <= 0)
+                        continue;
 
                     s.Points[0].MarkerColor = Color.Gold;
                     if (SeriesToDrag != null)
@@ -601,7 +690,8 @@ namespace Workbench
             //cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            cChart.ChartAreas[0].AxisX.Maximum = x.Max() * 1.11;
+            //cChart.ChartAreas[0].AxisX.Maximum = x.Max() * 1.11;
+            CalculateXMax();
 
             cChart.Focus();
             cChart.Invalidate(); 

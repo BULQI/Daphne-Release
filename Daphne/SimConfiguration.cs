@@ -1740,7 +1740,6 @@ namespace Daphne
                 ConfigReaction reac = (ConfigReaction)(fe.DataContext);
                 
                 output = string.Format(reac.daph_rate_const.Format, dd);
-                //output = string.Format("", dd);
             }
             catch
             {
@@ -2649,10 +2648,41 @@ namespace Daphne
             }
         }
 
+        [JsonIgnore]
+        private DaphneDouble originalRate2;
         //[JsonIgnore]
-        public DaphneDouble OriginalRate2 { get; set; }
+        public DaphneDouble OriginalRate2
+        {
+            get
+            {
+                return originalRate2;
+            }
+            set
+            {
+                
+                    originalRate2 = value;
+                    OnPropertyChanged("OriginalRate2");
+                
+            }
+        }
+
+        [JsonIgnore]
+        private DaphneDouble reactionComplexRate2;
         //[JsonIgnore]
-        public DaphneDouble ReactionComplexRate2 { get; set; }
+        public DaphneDouble ReactionComplexRate2
+        {
+            get
+            {
+                return reactionComplexRate2;
+            }
+            set
+            {
+                
+                    reactionComplexRate2 = value;
+                    OnPropertyChanged("ReactionComplexRate2");
+               
+            }
+        }
 
         public ConfigReactionGuidRatePair()
         {

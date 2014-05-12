@@ -4,12 +4,12 @@
         xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking" 
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
         xmlns:local="clr-namespace:DaphneGui"
-                        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+        xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"           
         >
-    
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" >
+        <ScrollViewer VerticalScrollBarVisibility="Auto" >
         <Grid x:Name="ChartMainGrid" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -44,6 +44,8 @@
                 <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
                 <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" IsEnabled="False">Save Changes</Button>
                 <Button x:Name="btnDiscard" Width="100" Height="24" HorizontalAlignment="Left"  Click="btnDiscard_Click" IsEnabled="False">Discard Changes</Button>
+                <Button Content="X-Axis Log" Height="23" Name="btnLogX" Width="75" Click="btnX_Axis_Click" />
+                <Button Content="Y-Axis Log" Height="23" Name="btnLogY" Width="75" Click="btnY_Axis_Click" />
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
@@ -52,12 +54,12 @@
                         Orientation="Horizontal"
                         Width="100" Height="24"
                         RenderTransform="1.0,0,0,0.5,0,4"
-                        Minimum="0.00" 
-                        Maximum="10.00"                        
+                        Minimum="0.01" 
+                        Maximum="{Binding Path=dMaxTime}"                        
                         Margin="10,0,0,0" IsSnapToTickEnabled="True" 
                         ValueChanged="slMaxTime_ValueChanged"
                         Value="{Binding Path=dInitialTime}"                        
-                        TickFrequency="0.1">
+                        TickFrequency="0.01">
                 </Slider>
                 <TextBox x:Name="txtMaxTime" Width="50" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
                       Text="{Binding ElementName=slMaxTime, Path=Value}">
@@ -128,7 +130,7 @@
                                                 Maximum="10.00"
                                                 Value="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                                 Margin="0,0,0,0" IsSnapToTickEnabled="True" 
-                                                TickFrequency="0.01"
+                                                TickFrequency="0.01"                                                
                                                 ValueChanged="slConc_ValueChanged"
                                                 >
                                         </Slider>
@@ -158,7 +160,7 @@
                 
                 <DataGrid x:Name="dgReactionRates" 
                                 ItemsSource="{Binding Path=CRC.ReactionRates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -192,12 +194,8 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                              
                                               Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDToStringConv},
                                                             ConverterParameter={StaticResource ecmReacsListView}}">
-
-                                        <!--Text="{Binding Path=guid}">-->
-                                        <!--Text="{Binding Path=reac.TotalReactionString, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >-->
                                     </TextBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -206,28 +204,18 @@
                         <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="250" MaxWidth="350">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Slider x:Name="slRate" 
-                                                Orientation="Horizontal"
-                                                Width="100"
-                                                RenderTransform="1.0,0,0,0.5,0,4"
-                                                Minimum="{Binding Path=ReactionComplexRate2.Min}" 
-                                                Maximum="{Binding Path=ReactionComplexRate2.Max}"                                                
-                                                Value="{Binding Path=ReactionComplexRate2.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                                Margin="0,0,0,0" IsSnapToTickEnabled="True" 
-                                                TickFrequency="0.1"
-                                                ValueChanged="slRate_ValueChanged"
-                                                MouseLeftButtonUp="slRate_MouseLeftButtonUp"
-                                                MouseLeftButtonDown="slRate_MouseLeftButtonDown"
-                                                >
-                                        </Slider>
-
-                                        <!-- Text="{Binding Path=daph_rate_const.FValue}" -->
-                                        
-                                        <TextBox Height="24" Margin="20,0" Name="txtFormattedValue" Width="150" 
-                                            Text="{Binding ElementName=slRate, Path=Value}" 
-                                            GotFocus="txtFormattedValue_GotFocus" LostFocus="txtFormattedValue_LostFocus"/>
-                                        
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <uc:DoublesBox x:Name="dblReacRate" Margin="0,20"
+                                                Number="{Binding Path=ReactionComplexRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="3" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                Caption=""
+                                                PropertyChanged="dblReacRate_PropertyChanged"
+                                            />
+                                        </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -238,8 +226,26 @@
 
                 <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click">Redraw</Button>
             </StackPanel>
+
+                <!--<Menu DockPanel.Dock="Top">
+                    <MenuItem Header="_File">
+                    </MenuItem>
+                </Menu>-->
+
+                
             
+
         </Grid>
     </ScrollViewer>
 
+        <!--<StatusBar DockPanel.Dock="Bottom">
+            <TextBlock>Field 1</TextBlock>
+            <Separator/>
+            <TextBlock>Field 2</TextBlock>
+        </StatusBar>
+
+        <Grid x:Name="rootGrid">
+        </Grid>-->
+        
+       
 </docking:DocumentWindow>

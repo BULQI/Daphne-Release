@@ -45,6 +45,7 @@ namespace DaphneGui
             vtkBoxRepresentation boxRepresentation = vtkBoxRepresentation.New();
             boxRepresentation.GetOutlineProperty().SetColor(0.4, 0.4, 0.4);
             boxRepresentation.GetOutlineProperty().SetLineWidth(0.5f);
+            ////boxRepresentation.OutlineFaceWiresOn();
             boxWidget.SetRepresentation(boxRepresentation);
 
             dirtyFlags = RegionControl.DIRTY_ALL;
@@ -62,7 +63,7 @@ namespace DaphneGui
             }
             else if (shape == RegionShape.Ellipsoid)
             {
-                SetSphere();
+                SetSphere();                
             }
             else
             {
@@ -503,10 +504,15 @@ namespace DaphneGui
             mapper.SetInputConnection(shrink.GetOutputPort());
 
             // Link the data pipeline to the rendering subsystem
-            vtkActor actor = vtkActor.New();
+            vtkActor actor = vtkActor.New();            
             actor.SetMapper(mapper);
             actor.GetProperty().SetOpacity(opacity);
             actor.GetProperty().SetColor(red, green, blue);
+
+            //////skg new - this sets the blob to a wireframe but it does so for mol pop and cell pop
+            ////actor.GetProperty().SetRepresentationToWireframe();
+            ////actor.GetProperty().SetOpacity(0);                
+
             shapeActor.Prop = actor;
         }
 

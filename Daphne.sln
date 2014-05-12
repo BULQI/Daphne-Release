@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SBMLayer", "SBMLayer\SBMLay
 		{B88B4859-8E76-41ED-AA84-6B48A90EA338} = {B88B4859-8E76-41ED-AA84-6B48A90EA338}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaphneUserControlLib", "DaphneUserControlLib\DaphneUserControlLib.csproj", "{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
 		SccNumberOfProjects = 7
@@ -124,6 +126,16 @@ Global
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A21BE364-49F3-45E4-AF72-E6E2EEBCCA9B}.Release|x86.ActiveCfg = Release|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

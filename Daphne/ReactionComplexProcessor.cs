@@ -24,8 +24,40 @@ namespace Daphne
 
         //These are for graphing the concentrations.  This data is generated during the Go method.
         public int MaxTime { get; set; }
-        public double dMaxTime { get; set; }
-        public double dInitialTime { get; set; }
+
+        private double dmaxtime;
+        public double dMaxTime 
+        {
+            get
+            {
+                return dmaxtime;
+            }
+            set
+            {
+                if (dmaxtime != value)
+                {
+                    dmaxtime = value;
+                    OnPropertyChanged("dMaxTime");
+                }
+            }
+        }
+
+        private double dinittime;
+        public double dInitialTime
+        {
+            get
+            {
+                return dinittime;
+            }
+            set
+            {
+                if (dinittime != value)
+                {
+                    dinittime = value;
+                    OnPropertyChanged("dInitialTime");
+                }
+            }
+        }
 
         public int nTestVariable { get; set; }
 
@@ -128,23 +160,15 @@ namespace Daphne
             CRC = crc;
 
             double minVal = 1e7;
-
-            //foreach (string guid in crc.reactions_guid_ref)
-            //{
-            //    ConfigReaction cr = mainSC.entity_repository.reactions_dict[guid];
-            //    minVal = Math.Min(minVal, cr.rate_const);
-            //}
-
             foreach (ConfigReactionGuidRatePair grp in crc.ReactionRates)
             {
+                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
-
-            //dInitialTime = 3.33;
 
             SaveOriginalConcs();
             SaveInitialConcs();
@@ -153,10 +177,43 @@ namespace Daphne
 
         }
 
+        public void Reinitialize()
+        {
+            CRC.RCSim.Load(SC, true, true);
+
+            double minVal = 1e7;
+            foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            {
+                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
+                minVal = Math.Min(minVal, grp.ReactionComplexRate);
+            }
+
+            dInitialTime = 5 / minVal;
+            dMaxTime = 2 * dInitialTime;
+            MaxTime = (int)dMaxTime;
+
+            
+
+            //SaveOriginalConcs();
+            //SaveInitialConcs();
+            //SaveReactions(CRC);
+        }
+
         //*************************************************************************
         //This runs the simulation and calculates the concentrations with each step
         public void Go()
         {
+
+            ////double minVal = 1e7;
+            ////foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            ////{
+            ////    minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
+            ////}
+
+            ////dInitialTime = 5 / minVal;
+            ////dMaxTime = 2 * dInitialTime;
+            ////MaxTime = (int)dMaxTime;
+
             dictGraphConcs.Clear();
             listTimes.Clear();
 
@@ -191,6 +248,10 @@ namespace Daphne
             dt = 0.01;
             nSteps = (int)((double)dInitialTime / dt);
             //We will not show all points;  we will show every nth point.
+
+            if (nSteps <= 1)
+                return;
+
             int interval = nSteps / 100;
             if (interval == 0)
                 interval = 1;
@@ -253,6 +314,20 @@ namespace Daphne
 
         }
 
+        public void SetTimeMinMax()
+        {
+            double minVal = 1e7;
+            foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            {
+                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
+                minVal = Math.Min(minVal, grp.ReactionComplexRate);
+            }
+
+            
+            //MaxTime = (int)dMaxTime;
+            dInitialTime = 5 / minVal;
+            dMaxTime = 2 * dInitialTime;
+        }
 
         //This method updates the conc of the given molecule
         public void EditConc(string moleculeKey, double conc)
@@ -382,22 +457,9 @@ namespace Daphne
             {
                 string guid = grp.Guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
-                cr.rate_const = grp.ReactionComplexRate2.Value;
+                //cr.rate_const = grp.ReactionComplexRate2.Value;
+                cr.rate_const = grp.ReactionComplexRate;
             }
-
-            //Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
-
-            //comp.Reactions.Clear();
-
-            //foreach (ConfigReaction reac in ReactionsInComplex)
-            //{
-            //    double rate = reac.rate_const;                
-            //    //NEED TO UPDATE WITH THIS VALUE SOMEHOW
-
-            //    Reaction r = new Reaction();
-
-            //    //comp.Reactions.Add(
-            //}
         }
 
         public void RestoreOriginalRateConstants()
@@ -406,10 +468,10 @@ namespace Daphne
             {
                 string guid = grp.Guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
-                ////////cr.rate_const = grp.OriginalRate;
-                ////////grp.ReactionComplexRate = grp.OriginalRate;
-                cr.rate_const = grp.OriginalRate2.Value;
-                grp.ReactionComplexRate2.Value = grp.OriginalRate2.Value;
+                cr.rate_const = grp.OriginalRate;
+                grp.ReactionComplexRate = grp.OriginalRate;
+                ////////cr.rate_const = grp.OriginalRate2.Value;
+                ////////grp.ReactionComplexRate2.Value = grp.OriginalRate2.Value;
             }            
         }
 

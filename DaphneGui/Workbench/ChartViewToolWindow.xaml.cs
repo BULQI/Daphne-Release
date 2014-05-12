@@ -196,12 +196,28 @@ namespace Workbench
 
         private void slMaxTime_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (e.OldValue == e.NewValue)
+                return;
+
+            double dnew = e.NewValue;
+            if (dnew <= 0)
+                return;
+
+            if (dnew == 0.01)
+            {
+                int x = 1;
+                x++;
+            }
+                
+
             //if (RC != null && cm != null && RC.dInitialTime != slMaxTime.Value)
             if (RC != null && cm != null)
             {
                 //RC.MaxTime = (int)slMaxTime.Value;
                 //RC.dInitialTime = slMaxTime.Value;
-                cm.RedrawSeries();                      
+                //RC.SetTimeMinMax();
+                cm.RedrawSeries();
+                cm.RecalculateYMax();
             }
         }
 
@@ -215,8 +231,8 @@ namespace Workbench
             RC.RestoreOriginalConcs();
             RC.RestoreOriginalRateConstants();
 
-            ////////cm.RedrawSeries();
-            ////////cm.RecalculateYMax();
+            ////cm.RedrawSeries();
+            ////cm.RecalculateYMax();
 
             if (toggleButton != null)
             {
@@ -224,15 +240,17 @@ namespace Workbench
                 toggleButton.IsChecked = true;
             }
 
+            ////RC.Reinitialize();
+            ////RC.Go();
 
-            //RC.Go();
+            ////Render();
 
-            //if (cm == null)
-            //    return;
+            ////if (cm == null)
+            ////    return;
 
-            //cm.ListTimes = RC.ListTimes;
-            //cm.DictConcs = RC.DictGraphConcs;
-            //cm.DrawChart();
+            ////cm.ListTimes = RC.ListTimes;
+            ////cm.DictConcs = RC.DictGraphConcs;
+            ////cm.DrawChart();
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -271,6 +289,9 @@ namespace Workbench
             if (!s.IsLoaded)
                 return;
 
+            if (e.OldValue == e.NewValue)
+                return;
+
             foreach (MolConcInfo mci in RC.initConcs)
             {
                 RC.EditConc(mci.molguid, mci.conc);
@@ -286,9 +307,12 @@ namespace Workbench
             if (!s.IsLoaded)
                 return;
 
+            if (e.OldValue == e.NewValue)
+                return;
+
             RC.UpdateRateConstants();
             RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
-            RC.Go();
+            //RC.Go();
             cm.RedrawSeries();
             cm.RecalculateYMax();
 
@@ -312,7 +336,7 @@ namespace Workbench
             Slider sl = sender as Slider;
             ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)sl.DataContext;
             pair.ReactionComplexRate2.SetMinMax();
-
+            //RC.SetTimeMinMax();
 
             //sl.Minimum 
 
@@ -376,6 +400,7 @@ namespace Workbench
             ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
             //pair.ReactionComplexRate = d;
             pair.ReactionComplexRate2.SetMinMax();
+            //RC.SetTimeMinMax();
         }
 
         private string GetNumerics(string input)
@@ -389,6 +414,36 @@ namespace Workbench
             }
             string output = sb.ToString();
             return output;
+        }
+
+        private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Number")
+            {
+                RC.UpdateRateConstants();
+                RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+                cm.RedrawSeries();
+                cm.RecalculateYMax();
+            }
+        }
+
+        private void btnX_Axis_Click(object sender, RoutedEventArgs e)
+        {
+            if (cm == null)
+                return;
+
+            cm.IsXLogarithmic = !cm.IsXLogarithmic;
+            cm.DrawChart();
+        }
+
+        private void btnY_Axis_Click(object sender, RoutedEventArgs e)
+        {
+            if (cm == null)
+                return;
+
+            cm.IsYLogarithmic = !cm.IsYLogarithmic;
+            cm.DrawChart();
+
         }
         
     }

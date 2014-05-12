@@ -2474,7 +2474,17 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
             crc.PrepareToRun();
 
-            //
+            //Cleanup any previous RC stuff
+            foreach (ConfigCell cell in MainWindow.SC.SimConfig.entity_repository.cells.ToList())
+            {
+                if (cell.CellName == "RCCell")
+                {
+                    MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
+                }
+            }
+            crc.RCSim.reset();
+            MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
+            // end of cleanup
 
             ConfigCell cc = new ConfigCell();
             cc.CellName = "RCCell";
@@ -2538,6 +2548,8 @@ namespace DaphneGui
 
             MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
 
+            
+
         }
 
         private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
@@ -2553,6 +2565,17 @@ namespace DaphneGui
                 DrawSelectedReactionComplex();
                 btnGraphReactionComplex.IsChecked = false;
             }
+        }
+
+        private void btnGraphReactionComplex_Click(object sender, RoutedEventArgs e)
+        {
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to process.");
+                return;
+            }
+
+            DrawSelectedReactionComplex();
         }
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
