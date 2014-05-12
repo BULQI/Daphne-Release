@@ -25,120 +25,6 @@ using Workbench;
 
 namespace DaphneGui
 {
-    public class DataGridBehavior
-    {
-        #region DisplayRowNumber
-
-        public static DependencyProperty DisplayRowNumberProperty =
-            DependencyProperty.RegisterAttached("DisplayRowNumber",
-                                                typeof(bool),
-                                                typeof(DataGridBehavior),
-                                                new FrameworkPropertyMetadata(false, OnDisplayRowNumberChanged));
-        public static bool GetDisplayRowNumber(DependencyObject target)
-        {
-            return (bool)target.GetValue(DisplayRowNumberProperty);
-        }
-        public static void SetDisplayRowNumber(DependencyObject target, bool value)
-        {
-            target.SetValue(DisplayRowNumberProperty, value);
-        }
-
-        private static void OnDisplayRowNumberChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
-        {
-            DataGrid dataGrid = target as DataGrid;
-            if ((bool)e.NewValue == true)
-            {
-                EventHandler<DataGridRowEventArgs> loadedRowHandler = null;
-                loadedRowHandler = (object sender, DataGridRowEventArgs ea) =>
-                {
-                    if (GetDisplayRowNumber(dataGrid) == false)
-                    {
-                        dataGrid.LoadingRow -= loadedRowHandler;
-                        return;
-                    }
-                    int num = ea.Row.GetIndex();
-                    ea.Row.Header = ea.Row.GetIndex() + 1;
-                };
-                dataGrid.LoadingRow += loadedRowHandler;
-
-                ItemsChangedEventHandler itemsChangedHandler = null;
-                itemsChangedHandler = (object sender, ItemsChangedEventArgs ea) =>
-                {
-                    if (GetDisplayRowNumber(dataGrid) == false)
-                    {
-                        dataGrid.ItemContainerGenerator.ItemsChanged -= itemsChangedHandler;
-                        return;
-                    }
-                    GetVisualChildCollection<DataGridRow>(dataGrid).
-                        ForEach(d => d.Header = d.GetIndex());
-                };
-                dataGrid.ItemContainerGenerator.ItemsChanged += itemsChangedHandler;
-            }
-        }
-
-        #endregion // DisplayRowNumber
-
-        #region Get Visuals
-
-        private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
-        {
-            List<T> visualCollection = new List<T>();
-            GetVisualChildCollection(parent as DependencyObject, visualCollection);
-            return visualCollection;
-        }
-
-        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
-        {
-            int count = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < count; i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T)
-                {
-                    visualCollection.Add(child as T);
-                }
-                if (child != null)
-                {
-                    GetVisualChildCollection(child, visualCollection);
-                }
-            }
-        }
-
-        #endregion // Get Visuals
-    }
-
-
-    public class RowToIndexConverter : MarkupExtension, IValueConverter
-    {
-        static RowToIndexConverter converter;
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            DataGridRow row = value as DataGridRow;
-            if (row != null)
-            {
-                int ind = row.GetIndex();
-                return row.GetIndex() + 1;
-            }
-            else
-                return -1;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override object ProvideValue(IServiceProvider serviceProvider)
-        {
-            if (converter == null) converter = new RowToIndexConverter();
-            return converter;
-        }
-
-        public RowToIndexConverter()
-        {
-        }
-    }
 
     /// <summary>
     /// Interaction logic for SimConfigToolWindow.xaml
@@ -254,12 +140,16 @@ namespace DaphneGui
                     return;
                 }
 
-                if (new_dist_type != MolPopDistributionType.Gaussian && current_item.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (current_item.mp_distribution != null)
                 {
-                    DeleteGaussianSpecification(current_item.mp_distribution);
-                    MolPopGaussian mpg = current_item.mp_distribution as MolPopGaussian;
-                    mpg.gaussgrad_gauss_spec_guid_ref = "";
-                    MainWindow.GC.Rwc.Invalidate();
+                    if (new_dist_type != MolPopDistributionType.Gaussian && current_item.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                    {
+                        DeleteGaussianSpecification(current_item.mp_distribution);
+                        MolPopGaussian mpg = current_item.mp_distribution as MolPopGaussian;
+                        mpg.gaussgrad_gauss_spec_guid_ref = "";
+                        MainWindow.GC.Rwc.Invalidate();
+                    }
+                    }
                 }
                 switch (new_dist_type)
                 {
@@ -831,6 +721,17 @@ namespace DaphneGui
             {
                 chkBoundary.IsChecked = false;
             }
+
+            if (cm.ReadOnly == true)
+            {
+                txtMolName.IsEnabled = false;
+                txtDiffCoeff.IsEnabled = false;
+            }
+            else
+            {
+                txtMolName.IsEnabled = true;
+                txtDiffCoeff.IsEnabled = true;
+            }
         }
 
         private void btnRemoveMolec_Click(object sender, RoutedEventArgs e)
@@ -1079,6 +980,28 @@ namespace DaphneGui
                     e.Accepted = false;
                 }
             }
+        }
+
+        private void cellMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            //if (treeCellPops.SelectedItem != null)
+            //    return;
+
+            //ConfigCell cc = e.Item as ConfigCell;
+            //string guidCell = cc.cell_guid;
+
+            //e.Accepted = true;
+
+            //if (guidRC != null && cr != null)
+            //{
+            //    ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
+            //    e.Accepted = false;
+            //    // Filter out cr if not in ecm reaction list 
+            //    if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+            //    {
+            //        e.Accepted = true;
+            //    }
+            //}
         }
 
         
@@ -1438,6 +1361,12 @@ namespace DaphneGui
             }
         }
 
+        private void btnTesterClicked(object sender, RoutedEventArgs e)
+        {
+            int x = 1;
+            x++;
+        }
+
         static DataGridCell TryToFindGridCell(DataGrid grid, DataGridCellInfo cellInfo)
         {
             DataGridCell result = null;
@@ -1474,8 +1403,139 @@ namespace DaphneGui
             return child;
         }
 
+        private void cbBoundFace_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)sender;
+            if (cb.SelectedIndex == 0)
+            {                    
+            }
+            else
+            {
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int x = 1;
+            x++;
+        }
+
     }
 
+    public class DataGridBehavior
+    {
+        #region DisplayRowNumber
+
+        public static DependencyProperty DisplayRowNumberProperty =
+            DependencyProperty.RegisterAttached("DisplayRowNumber",
+                                                typeof(bool),
+                                                typeof(DataGridBehavior),
+                                                new FrameworkPropertyMetadata(false, OnDisplayRowNumberChanged));
+        public static bool GetDisplayRowNumber(DependencyObject target)
+        {
+            return (bool)target.GetValue(DisplayRowNumberProperty);
+        }
+        public static void SetDisplayRowNumber(DependencyObject target, bool value)
+        {
+            target.SetValue(DisplayRowNumberProperty, value);
+        }
+
+        private static void OnDisplayRowNumberChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
+        {
+            DataGrid dataGrid = target as DataGrid;
+            if ((bool)e.NewValue == true)
+            {
+                EventHandler<DataGridRowEventArgs> loadedRowHandler = null;
+                loadedRowHandler = (object sender, DataGridRowEventArgs ea) =>
+                {
+                    if (GetDisplayRowNumber(dataGrid) == false)
+                    {
+                        dataGrid.LoadingRow -= loadedRowHandler;
+                        return;
+                    }
+                    int num = ea.Row.GetIndex();
+                    ea.Row.Header = ea.Row.GetIndex() + 1;
+                };
+                dataGrid.LoadingRow += loadedRowHandler;
+
+                ItemsChangedEventHandler itemsChangedHandler = null;
+                itemsChangedHandler = (object sender, ItemsChangedEventArgs ea) =>
+                {
+                    if (GetDisplayRowNumber(dataGrid) == false)
+                    {
+                        dataGrid.ItemContainerGenerator.ItemsChanged -= itemsChangedHandler;
+                        return;
+                    }
+                    GetVisualChildCollection<DataGridRow>(dataGrid).
+                        ForEach(d => d.Header = d.GetIndex());
+                };
+                dataGrid.ItemContainerGenerator.ItemsChanged += itemsChangedHandler;
+            }
+        }
+
+        #endregion // DisplayRowNumber
+
+        #region Get Visuals
+
+        private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
+        {
+            List<T> visualCollection = new List<T>();
+            GetVisualChildCollection(parent as DependencyObject, visualCollection);
+            return visualCollection;
+        }
+
+        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
+        {
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T)
+                {
+                    visualCollection.Add(child as T);
+                }
+                if (child != null)
+                {
+                    GetVisualChildCollection(child, visualCollection);
+                }
+            }
+        }
+
+        #endregion // Get Visuals
+    }
+
+
+    public class RowToIndexConverter : MarkupExtension, IValueConverter
+    {
+        static RowToIndexConverter converter;
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            DataGridRow row = value as DataGridRow;
+            if (row != null)
+            {
+                int ind = row.GetIndex();
+                return row.GetIndex() + 1;
+            }
+            else
+                return -1;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (converter == null) converter = new RowToIndexConverter();
+            return converter;
+        }
+
+        public RowToIndexConverter()
+        {
+        }
+    }
 
 
     

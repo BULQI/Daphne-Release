@@ -408,6 +408,17 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecule cm = nn as ConfigMolecule;
+
+                    foreach (ConfigMolecule mol in entity_repository.molecules)
+                    {
+                        if (mol.Name == cm.Name)
+                        {
+                            string output = string.Format("Molecule '{0}' already exists, please use a different name", cm.Name);
+                            MessageBox.Show(output);
+                            return;
+                        }
+                    }
+                    
                     entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
                 }
             }
@@ -713,6 +724,8 @@ namespace Daphne
 
         public ConfigCompartment ecs { get; set; }
 
+        public bool toroidal { get; set; }
+
         public ConfigEnvironment()
         {
             gridstep = 50;
@@ -724,6 +737,7 @@ namespace Daphne
             gridstep_min = 1;
             gridstep_max = 100;
             initialized = true;
+            toroidal = false;
 
             CalculateNumGridPts();
 
@@ -909,7 +923,7 @@ namespace Daphne
         private List<string> _molecule_location_strings = new List<string>()
                                 {
                                     "bulk",
-                                    "bondary"
+                                    "boundary"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -988,6 +1002,111 @@ namespace Daphne
         #endregion
     }
 
+    public enum BoundaryType { NoFlux = 0, Toroidal }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(BoundaryType), typeof(string))]
+    public class BoundaryTypeToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the MoleculeLocation enum...
+        private List<string> _boundary_type_strings = new List<string>()
+                                {
+                                    "no flux",
+                                    "toroidal"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _boundary_type_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _boundary_type_strings.FindIndex(item => item == str);
+            return (BoundaryType)Enum.ToObject(typeof(BoundaryType), (int)idx);
+        }
+    }
+
+    public enum BoundaryFace {None=0, YZplane, XZplane, XYplane }
+
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(BoundaryType), typeof(string))]
+    public class BoundaryFaceToShortStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the BoundaryFace enum...
+        private List<string> _boundary_face_strings = new List<string>()
+                                {
+                                    "None",
+                                    "YZplane",
+                                    "XZplane",
+                                    "XYplane"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                return _boundary_face_strings[(int)value];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _boundary_face_strings.FindIndex(item => item == str);
+            return (BoundaryFace)Enum.ToObject(typeof(BoundaryFace), (int)idx);
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between enum values and boolean values for GUI checkbox
+    /// </summary>
+    [ValueConversion(typeof(BoundaryFace), typeof(string))]
+    public class BoundaryFaceToVisStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return "Hidden";
+
+            int n = (int)value;
+            if (n != (int)BoundaryFace.None)
+                return "Visible";
+            else
+                return "Hidden";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bVal = (bool)value;
+            int idx = 0;
+            if (bVal == true)
+                idx = 1;
+
+            return (BoundaryFace)Enum.ToObject(typeof(BoundaryFace), (int)idx);
+        }
+    }
+
+
+
     //skg daphne
     public class ConfigMolecule 
     {
@@ -1034,7 +1153,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molecule_guid = id.ToString();
-            Name = "MolName";
+            Name = "MolName" + "_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
@@ -1047,7 +1166,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molecule_guid = id.ToString();
-            Name = gm.Name;
+            Name = gm.Name + "_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = gm.MolecularWeight;
             EffectiveRadius = gm.EffectiveRadius;
             DiffusionCoefficient = gm.DiffusionCoefficient;
@@ -1068,7 +1187,7 @@ namespace Daphne
         public ReportMP()
         {
             mean = true;
-            mp_extended = ExtendedReport.COMPLETE;
+            mp_extended = ExtendedReport.LEAN;
             probe_extended = ExtendedReport.COMPLETE;
         }
     }
@@ -1105,9 +1224,13 @@ namespace Daphne
             set { reportMP = value; }
         }
 
+        private BoundaryFace _boundary_face;
+        public BoundaryFace boundary_face { get; set; }
+
         public ConfigMolecularPopulation()
         {
             reportMP = new ReportMP();
+            boundary_face = BoundaryFace.None;
         }
     }
 
@@ -2925,6 +3048,7 @@ namespace Daphne
 
             bool ret = parameterValue.Equals(value);
             return ret;
+
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2932,6 +3056,11 @@ namespace Daphne
             string parameterString = parameter as string;
             if (parameterString == null)
                 return DependencyProperty.UnsetValue;
+
+            bool chk = (bool)value;
+
+            if (chk == false)
+                return Enum.Parse(targetType, "NONE");
 
             return Enum.Parse(targetType, parameterString);
         }
