@@ -263,19 +263,11 @@
     </Compile>
     <Resource Include="Daphne.ico" />
     <Content Include="help\DaphneDevHelp.shfbproj" />
+    <EmbeddedResource Include="Licences.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Content Include="Config\DaphnePredefinedCells.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\DaphnePredefinedMolecules.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Config\DaphnePredefinedReactions.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="app.config" />
     <Content Include="Config\daphne_blank_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
