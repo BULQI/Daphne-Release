@@ -1510,6 +1510,55 @@ namespace Daphne
     }
 
     /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(int))]
+    public class MolGUIDtoMolIndexConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            int nIndex = -1;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            if (mol_list != null)
+            {
+                int i = 0;
+                foreach (ConfigMolecule mol in mol_list)
+                {
+                    
+                    if (mol.molecule_guid == guid)
+                    {
+                        nIndex = i;
+                        break;
+                    }
+                    i++;
+                }
+            }
+            return nIndex;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            int index = (int)value;
+            string ret = "not found";
+            ////if (index >= 0)
+            ////{
+            ////    System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ////    ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            ////    if (mol_list != null)
+            ////    {
+            ////        ret = mol_list[index].molecule_guid;
+            ////    }
+            ////}
+            return ret;
+        }
+    }
+
+    /// <summary>
     /// Converter to go between reaction GUID references in ECS
     /// and reaction info kept in the repository of reactions.
     /// </summary>

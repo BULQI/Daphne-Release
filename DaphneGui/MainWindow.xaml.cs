@@ -317,7 +317,7 @@ namespace DaphneGui
                 //file = "daphne_test_scenario.xml";
                 //file = "default_scenario.xml";
                 //file = "daphne_test_scenario.json";
-                file = "daphne_blank_scenario.json";
+                file = "daphne_driver_locomotion_scenario.json";
             }
 
             // attempt to load a default simulation file; if it doesn't exist disable the gui

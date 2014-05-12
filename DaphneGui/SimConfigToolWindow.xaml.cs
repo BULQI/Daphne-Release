@@ -83,66 +83,70 @@ namespace DaphneGui
 
 
             ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
-            MolPopInfo current_item = current_mol.mpInfo;
-            MolPopDistributionType new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
-            // Only want to change distribution type if the combo box isn't just selecting 
-            // the type of current item in the solfacs list box (e.g. when list selection is changed)
-            if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+            if (current_mol != null)
             {
-                return;
-            }
-            else
-            {
-                switch (new_dist_type)
+                MolPopInfo current_item = current_mol.mpInfo;
+                MolPopDistributionType new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+
+                // Only want to change distribution type if the combo box isn't just selecting 
+                // the type of current item in the solfacs list box (e.g. when list selection is changed)
+                if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
                 {
-                    case MolPopDistributionType.Homogeneous:
-                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_item.mp_distribution = shl;
-                        break;
-                    case MolPopDistributionType.LinearGradient:
-                        MolPopLinearGradient slg = new MolPopLinearGradient();
-                        current_item.mp_distribution = slg;
-                        break;
-                    case MolPopDistributionType.Gaussian:
-                        // Make sure there is at least one gauss_spec in repository
-                        if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
-                        {
-                            this.AddGaussianSpecification();
-                        }
-                        MolPopGaussianGradient sgg = new MolPopGaussianGradient();
-                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                        current_item.mp_distribution = sgg;
-                        break;
-                    case MolPopDistributionType.CustomGradient:
+                    return;
+                }
+                else
+                {
+                    switch (new_dist_type)
+                    {
+                        case MolPopDistributionType.Homogeneous:
+                            MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                            current_item.mp_distribution = shl;
+                            break;
+                        case MolPopDistributionType.LinearGradient:
+                            MolPopLinearGradient slg = new MolPopLinearGradient();
+                            current_item.mp_distribution = slg;
+                            break;
+                        case MolPopDistributionType.Gaussian:
+                            // Make sure there is at least one gauss_spec in repository
+                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
+                            {
+                                this.AddGaussianSpecification();
+                            }
+                            MolPopGaussianGradient sgg = new MolPopGaussianGradient();
+                            sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                            current_item.mp_distribution = sgg;
+                            break;
+                        case MolPopDistributionType.CustomGradient:
 
-                        var prev_distribution = current_item.mp_distribution;    
-                        MolPopCustomGradient scg = new MolPopCustomGradient();
-                        current_item.mp_distribution = scg;
+                            var prev_distribution = current_item.mp_distribution;
+                            MolPopCustomGradient scg = new MolPopCustomGradient();
+                            current_item.mp_distribution = scg;
 
-                    // Configure open file dialog box
-                        Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                        dlg.InitialDirectory = MainWindow.appPath;
-                        dlg.DefaultExt = ".txt"; // Default file extension
-                        dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+                            // Configure open file dialog box
+                            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                            dlg.InitialDirectory = MainWindow.appPath;
+                            dlg.DefaultExt = ".txt"; // Default file extension
+                            dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
 
-                        // Show open file dialog box
-                        Nullable<bool> result = dlg.ShowDialog();
+                            // Show open file dialog box
+                            Nullable<bool> result = dlg.ShowDialog();
 
-                        // Process open file dialog box results
-                        if (result == true)
-                        {
-                            // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                            string filename = dlg.FileName;
-                            scg.custom_gradient_file_string = filename;
-                        }
-                        else
-                        {
-                            current_item.mp_distribution = prev_distribution;
-                        }
-                        break;
-                    default:
-                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                            // Process open file dialog box results
+                            if (result == true)
+                            {
+                                // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+                                string filename = dlg.FileName;
+                                scg.custom_gradient_file_string = filename;
+                            }
+                            else
+                            {
+                                current_item.mp_distribution = prev_distribution;
+                            }
+                            break;
+                        default:
+                            throw new ArgumentException("MolPopInfo distribution type out of range");
+                    }
                 }
             }
         }
@@ -575,8 +579,19 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation();
+            gmp.Name = "NewMP";
+            gmp.mpInfo = new MolPopInfo();
+            gmp.mpInfo.mp_dist_name = "New distribution";
+            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            gmp.mpInfo.mp_is_time_varying = false;
+            gmp.mpInfo.mp_render_on = true;
+
+            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            string name = cell.membrane.molpops[0].Name;
+            cell.membrane.molpops.Add(gmp);
+            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
         }
         
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -598,6 +613,27 @@ namespace DaphneGui
                 if (MainWindow.SC.SimConfig.entity_repository.reactions_dict.ContainsKey(guid))
                     CytosolReacListBox.Items.Add(MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid]);
             }
+        }
+
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //ListBox lb = (ListBox)e.Source;
+            //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lb.SelectedItem;
+            //string molname = MainWindow.SC.SimConfig.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
+        }
+
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Binding b = new Binding();
+            b.ElementName = "CellCytosolMolPopsListBox";
+            //PropertyPath pp = new PropertyPath(CellCytosolMolPopsListBox.SelectedItem);
+            //DependencyProperty dp;
+            //dp.PropertyType = CellCytosolMolPopsListBox.SelectedItem.GetType();
+            //b.Path = pp;
+            //CytoMolPopDetails.SetBinding(dp, b);
+            
+            //cc.SetBinding(
+            //MembMolPopDetails.Content = cont
         }
     }
 }
