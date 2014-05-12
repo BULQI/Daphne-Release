@@ -658,6 +658,7 @@ namespace Daphne
                             for (int j = 0; j < cell.Differentiator.nStates; j++)
                             {
                                 cell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
+                                cell.Differentiator.AddState(j, config_diffScheme.Driver.states[j]);
                             }
                         }
                     }

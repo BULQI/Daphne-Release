@@ -2922,7 +2922,25 @@ namespace DaphneGui
 
         private void NucleusAddGeneButton_Click(object sender, RoutedEventArgs e)
         {
+            //Get selected cell
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
+            //if no cell selected, return
+            if (cell == null)
+                return;
+
+            //Show a dialog that gets the new gene's name
+            AddGeneToCell ads = new AddGeneToCell(cell);
+
+            //If user clicked 'apply' and not 'cancel'
+            if (ads.ShowDialog() == true)
+            {
+                ConfigGene geneToAdd = ads.SelectedGene;
+                if (geneToAdd == null)
+                    return;
+                
+                cell.genes_guid_ref.Add(geneToAdd.gene_guid);
+            }
         }
 
         private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)

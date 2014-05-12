@@ -20,10 +20,12 @@ namespace DaphneGui
     public class CellInfo
     {
         public ObservableCollection<CellXVF> ciList { get; set; }
+        public ObservableCollection<CellGeneInfo> GeneActivations { get; set; }
 
         public CellInfo()
         {
             ciList = new ObservableCollection<CellXVF>();
+            GeneActivations = new ObservableCollection<CellGeneInfo>();
         }
     }
 
@@ -35,14 +37,19 @@ namespace DaphneGui
         }
         public string Molecule { get; set; }        
         public string Concentration { get; set; }
+        public double[] Gradient { get; set; }
         //public bool Show { get; set; }
     }
 
-    public class MoleculeTriplet
+    public class CellGeneInfo
     {
+        public CellGeneInfo()
+        {
+            //Show = true;
+        }
         public string Name { get; set; }
-        public double Time { get; set; }
-        public double Conc { get; set; }
+        public double Activation { get; set; }
+        //public bool Show { get; set; }
     }
 
     public class TimeTrajectory
@@ -104,84 +111,88 @@ namespace DaphneGui
             }
         }
 
-        //public void Populate()
-        //{
-        //    //First set up the Show molecule in TT dictionary
-        //    showTT.Clear();
-        //    foreach (CellMolecularInfo cmi in currConcs)
-        //    {
-        //        showTT.Add(cmi.Molecule, cmi.Show);
-        //    }
+//Don't delete the following. It is for displaying time trajectory after we enable the database.
+#if false
+        public void Populate()
+        {
+            //First set up the Show molecule in TT dictionary
+            showTT.Clear();
+            foreach (CellMolecularInfo cmi in currConcs)
+            {
+                showTT.Add(cmi.Molecule, cmi.Show);
+            }
 
-        //    //Now populate the time trajectory dictionary, get data from database
-        //    //Need to write new code in Database.cs
-        //    dictTT.Clear();
-        //    DataReader reader = new DataReader(MainWindow.SC.SimConfig.experiment_db_id);
-        //    //dictTT = reader.GetCellMolecularConcs(CellId);
+            //Now populate the time trajectory dictionary, get data from database
+            //Need to write new code in Database.cs
+            dictTT.Clear();
+            DataReader reader = new DataReader(MainWindow.SC.SimConfig.experiment_db_id);
+            //dictTT = reader.GetCellMolecularConcs(CellId);
 
-        //    dictTT2.Clear();
+            dictTT2.Clear();
 
-        //    //THIS CODE GETS SIMPLE TRIPLETS FROM DATABASE - molecule name, time, conc
-        //    List<MoleculeTriplet> listMol = new List<MoleculeTriplet>();
-        //    listMol = reader.GetCellMolecularConcs(CellId);
+            //THIS CODE GETS SIMPLE TRIPLETS FROM DATABASE - molecule name, time, conc
+            List<MoleculeTriplet> listMol = new List<MoleculeTriplet>();
+            listMol = reader.GetCellMolecularConcs(CellId);
 
-        //    //Extract the list of times from the results
-        //    listTimes.Clear();
-        //    List<double> listConcs = new List<double>();
-        //    foreach (MoleculeTriplet mt in listMol)
-        //    {
-        //        if (!listTimes.Contains(mt.Time))
-        //        {
-        //            listTimes.Add(mt.Time);
-        //        }                
-        //    }
+            //Extract the list of times from the results
+            listTimes.Clear();
+            List<double> listConcs = new List<double>();
+            foreach (MoleculeTriplet mt in listMol)
+            {
+                if (!listTimes.Contains(mt.Time))
+                {
+                    listTimes.Add(mt.Time);
+                }                
+            }
 
-        //    //Now extract a dictionary of molecule and conc lists
-        //    string lastname = "";
-        //    double lastconc = 0;
-        //    int i = 0;
-        //    foreach (MoleculeTriplet mt in listMol)
-        //    {
-        //        string thisname = mt.Name;
-        //        double thisconc = mt.Conc;
-        //        if (i == 0)
-        //        {
-        //            lastname = thisname;
-        //            lastconc = thisconc;
-        //        }
-        //        i++;
+            //Now extract a dictionary of molecule and conc lists
+            string lastname = "";
+            double lastconc = 0;
+            int i = 0;
+            foreach (MoleculeTriplet mt in listMol)
+            {
+                string thisname = mt.Name;
+                double thisconc = mt.Conc;
+                if (i == 0)
+                {
+                    lastname = thisname;
+                    lastconc = thisconc;
+                }
+                i++;
 
-        //        if (thisname != lastname)
-        //        {
-        //            dictConcs.Add(lastname, listConcs);
-        //            listConcs = new List<double>();
-        //        }
-        //        listConcs.Add(thisconc);
-        //        lastconc = thisconc;
-        //        lastname = thisname;
-        //    }
+                if (thisname != lastname)
+                {
+                    dictConcs.Add(lastname, listConcs);
+                    listConcs = new List<double>();
+                }
+                listConcs.Add(thisconc);
+                lastconc = thisconc;
+                lastname = thisname;
+            }
 
-        //    if (listConcs.Count > 0)
-        //    {
-        //        dictConcs.Add(lastname, listConcs);
-        //    }
+            if (listConcs.Count > 0)
+            {
+                dictConcs.Add(lastname, listConcs);
+            }
 
-        //}
+        }
 
-        //Render data to MS chart - use ChartingManager class that is already implemented
-        //public void Render(System.Windows.Forms.Panel p)
-        //{
-        //    chtManager = new ChartingManager();
-        //    chtManager.setChartingPanel(p);
-        //    Size sz = new Size();
-        //    sz.Width = 700;
-        //    sz.Height = 400;
-        //    chtManager.ChartSize = sz;
+        Render data to MS chart - use ChartingManager class that is already implemented
+        public void Render(System.Windows.Forms.Panel p)
+        {
+            chtManager = new ChartingManager();
+            chtManager.setChartingPanel(p);
+            Size sz = new Size();
+            sz.Width = 700;
+            sz.Height = 400;
+            chtManager.ChartSize = sz;
 
-        //    if (listTimes.Count > 0 && dictConcs.Count > 0)
-        //    {
-        //        chtManager.chartXY_Series(listTimes, dictConcs, "Time Trajectory of Molecular Concentrations Cell " + CellId, "Time", "Concentration", true);
-        //    }
-        //}
+            if (listTimes.Count > 0 && dictConcs.Count > 0)
+            {
+                chtManager.chartXY_Series(listTimes, dictConcs, "Time Trajectory of Molecular Concentrations Cell " + CellId, "Time", "Concentration", true);
+            }
+        }
+#endif
+
     }
 }

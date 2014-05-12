@@ -2326,6 +2326,32 @@ namespace DaphneGui
 
             //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
+            
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
+            {
+                string mol_name = er.molecules_dict[kvp.Key].Name;
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                CellMolecularInfo cmi = new CellMolecularInfo();
+                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Concentration = conc.ToString("#.000");
+                currConcs.Add(cmi);
+                currentConcs.Add(cmi);
+            }
+            double[] pos = selectedCell.State.X;
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
+            {
+                string mol_name = er.molecules_dict[kvp.Key].Name;
+                //double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(selectedCell.State.X);
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                CellMolecularInfo cmi = new CellMolecularInfo();
+                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Concentration = conc.ToString("#.000");
+                currConcs.Add(cmi);
+                currentConcs.Add(cmi);
+
+                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
+            }
 
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
@@ -2339,30 +2365,29 @@ namespace DaphneGui
                 currentConcs.Add(cmi);
             }
 
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
-            {
-                string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-                CellMolecularInfo cmi = new CellMolecularInfo();
-                cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
-            }
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
-            {
-                string mol_name = er.molecules_dict[kvp.Key].Name;
-                //double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(selectedCell.State.X);
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
-                CellMolecularInfo cmi = new CellMolecularInfo();
-                cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
-                currConcs.Add(cmi);
-                currentConcs.Add(cmi);
-            }
 
             lvCellMolConcs.ItemsSource = currConcs;
+
+            int nDiffState = selectedCell.DifferentiationState;
+            if (selectedCell.Differentiator.State != null)
+            {
+                ObservableCollection<CellGeneInfo> gene_activations = new ObservableCollection<CellGeneInfo>();
+                txtCellState.Text = selectedCell.Differentiator.State[nDiffState];
+                ObservableCollection<double> activities = new ObservableCollection<double>();
+                int len = selectedCell.Differentiator.activity.GetLength(0);
+                for (int i = 0; i < len; i++)
+                {
+                    CellGeneInfo cgi = new CellGeneInfo();
+                    cgi.Name = selectedCell.Genes[selectedCell.Differentiator.gene_id[i]].Name;
+                    cgi.Activation = selectedCell.Differentiator.activity[nDiffState, i];
+                    //double d = selectedCell.Differentiator.activity[nDiffState, i];
+                    //activities.Add(d);  // = selectedCell.Differentiator.activity[nDiffState];
+                    gene_activations.Add(cgi);
+                }
+                //lvCellDiff.ItemsSource = activities;
+                lvCellDiff.ItemsSource = gene_activations; 
+            }
+
             ToolWinCellInfo.Open();
             TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
         }

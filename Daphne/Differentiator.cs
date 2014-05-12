@@ -57,6 +57,8 @@ namespace Daphne
             nGenes = _nGenes;
             activity = new double[nStates, nGenes];
             gene_id = new string[nGenes];
+            State = new string[nStates];
+
         }
 
         public override void AddActivity(int _state, int _gene, double _activity)

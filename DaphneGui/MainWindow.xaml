@@ -541,7 +541,30 @@
                                                                         <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
                                                                     </DataTemplate>
                                                                 </GridViewColumn.CellTemplate>
-                                                            </GridViewColumn>                                                            
+                                                            </GridViewColumn>
+
+                                                            <GridViewColumn Width="100" Header="Gradient X">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="Gradient Y" >
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="Gradient Z">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            
                                                         </GridView>
                                                     </ListView.View>
                                                 </ListView>
@@ -608,6 +631,52 @@
                                             </ListView>
                                         </StackPanel>
                                         
+                                    </TabItem>
+                                    <TabItem Header="Cell Differentiation" x:Name="TabItemCellDiff" >
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="0,4">Current State:  </TextBlock>
+                                                <TextBox x:Name="txtCellState" Width="200" Margin="10,0" IsEnabled="False"></TextBox>
+                                            </StackPanel>
+                                            <ListView x:Name="lvCellDiff" Margin="0,4"
+                                                      MinHeight="100" MaxHeight="150"
+                                                    >
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridView.ColumnHeaderContainerStyle>
+                                                            <Style TargetType="GridViewColumnHeader">
+                                                                <Setter Property="Height" Value="Auto"></Setter>
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                            <GradientStop Offset="0.0" Color="White" />
+                                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </GridView.ColumnHeaderContainerStyle>
+
+                                                        <GridViewColumn Width="120" Header="Gene">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Path=Name}"></TextBlock>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        
+                                                        <GridViewColumn Width="150" Header="Gene Activation Levels">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+                                        </StackPanel>
                                     </TabItem>
                                     <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj" Visibility="Hidden">
                                         <Grid>
