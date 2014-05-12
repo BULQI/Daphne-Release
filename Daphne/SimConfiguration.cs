@@ -223,20 +223,6 @@ namespace Daphne
             InitReactionComplexIDConfigReactionComplexDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
-
-            //int index = 0;
-            //foreach (ConfigEcmMolConc cemc in entity_repository.ecm_mol_pop_concs)
-            //{
-            //    cemc.molpop.molecule_guid_ref = entity_repository.molecules[index].molecule_guid;
-            //    index++;
-            //}
-
-            //ConfigCellMolDetail ccmd = new ConfigCellMolDetail(entity_repository.cells[0], true, true, true);
-            //entity_repository.cell_details.Add(ccmd);
-            //ccmd = new ConfigCellMolDetail(entity_repository.cells[1], false, false, false);
-            //entity_repository.cell_details.Add(ccmd);
-            //ccmd = new ConfigCellMolDetail(entity_repository.cells[2], true, false, true);
-            //entity_repository.cell_details.Add(ccmd);
         }
 
         /// <summary>
@@ -583,37 +569,8 @@ namespace Daphne
         public Dictionary<string, ConfigCell> cells_dict;
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
 
-        //public ObservableCollection<ConfigEcmMolConc> ecm_mol_pop_concs { get; set; }
-        //public ObservableCollection<ConfigCellMolConc> cell_mol_pop_concs { get; set; }
-        //public ObservableCollection<ConfigCellMolDetail> cell_details { get; set; }
-
         public EntityRepository()
         {
-            //ecm_mol_pop_concs = new ObservableCollection<ConfigEcmMolConc>();
-            //ecm_mol_pop_concs.Clear();
-            //ConfigEcmMolConc cemc = new ConfigEcmMolConc("mp1");
-            ////cemc.molpop.molecule_guid_ref = molecules[0].molecule_guid;
-            //ecm_mol_pop_concs.Add(cemc);
-            //cemc = new ConfigEcmMolConc("mp2");
-            //cemc.full = true;
-            //cemc.fullgrad = false;
-            ////cemc.molpop.molecule_guid_ref = molecules[1].molecule_guid;
-            //ecm_mol_pop_concs.Add(cemc);
-
-            //cell_mol_pop_concs = new ObservableCollection<ConfigCellMolConc>();
-            //ConfigCellMolConc ccmc = new ConfigCellMolConc();
-            //cell_mol_pop_concs.Add(ccmc);
-            //ccmc = new ConfigCellMolConc();
-            //ccmc.cell.CellName = "TestCell2";
-            //ccmc.meangrad = true;
-            //ccmc.mean = false;
-            //cell_mol_pop_concs.Add(ccmc);
-
-
-            //cell_details = new ObservableCollection<ConfigCellMolDetail>();
-
-            
-
             gaussian_specifications = new ObservableCollection<GaussianSpecification>();
             box_specifications = new ObservableCollection<BoxSpecification>();
             cells = new ObservableCollection<ConfigCell>();
@@ -1577,56 +1534,6 @@ namespace Daphne
             X = x;
             Y = y;
             Z = z;
-        }
-    }
-
-    public class ConfigEcmMolConc
-    {
-        public ConfigMolecularPopulation molpop { get; set; }
-        public bool mean { get; set; }
-        public bool full { get; set; }
-        public bool fullgrad { get; set; }
-
-        public ConfigEcmMolConc(string name)
-        {
-            molpop = new ConfigMolecularPopulation();
-            molpop.Name = name;
-            mean = true;
-            full = false;
-            fullgrad = true;
-        }
-    }
-
-    public class ConfigCellMolConc
-    {
-        public ConfigCell cell { get; set; }
-        public bool mean { get; set; }
-        public bool meangrad { get; set; }
-
-        public ConfigCellMolConc()
-        {
-            cell = new ConfigCell();
-            cell.CellName = "TestCell1";
-            mean = true;
-            meangrad = false;
-        }
-
-    }
-
-    public class ConfigCellMolDetail
-    {
-        public ConfigCell cell_type { get; set; }
-        public bool position { get; set; }
-        public bool velocity { get; set; }
-        public bool force { get; set; }
-
-        public ConfigCellMolDetail(ConfigCell cc, bool pos, bool vel, bool forc)
-        {
-            
-            cell_type = cc;
-            position = pos;
-            velocity = vel;
-            force = forc;    
         }
     }
     
