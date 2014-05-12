@@ -2450,6 +2450,10 @@ namespace DaphneGui
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = e.Source as ComboBox;
+
+            if (!cb.IsDropDownOpen)
+                return;
+
             if (cb.SelectedIndex == (int)(BoundaryType.Toroidal))
             {
                 MessageBoxResult res;
