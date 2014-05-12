@@ -12,11 +12,9 @@ namespace DaphneGui
 {
     public partial class MainWindow
     {
-
-
         internal static SimConfigurator SimConfigSaver = null;
         internal static string filepath_prefix = null;
-        internal static int save_conter = 1;
+        internal static int save_counter = 1;
 
         /// <summary>
         /// save simulation state, enabled when simulaiton is paused.
@@ -43,7 +41,7 @@ namespace DaphneGui
             //get filename to save
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = orig_path;
-            dlg.FileName = filepath_prefix + "-" + save_conter + ".json";
+            dlg.FileName = filepath_prefix + "-" + save_counter + ".json";
             dlg.DefaultExt = ".json"; // Default file extension
             dlg.Filter = "Sim State JSON docs (.json)|*.json"; // Filter files by extension
 
@@ -55,7 +53,7 @@ namespace DaphneGui
                 return;
             }
             SimConfigSaver.FileName = dlg.FileName;
-            save_conter++;
+            save_counter++;
 
             SimConfiguration save_config = SimConfigSaver.SimConfig;
             Scenario save_scenario = save_config.scenario;
@@ -108,21 +106,21 @@ namespace DaphneGui
 
     }
 
-    public class PauseButtonTextToBoolConverter : MarkupExtension, IValueConverter
+    public class SimulationStateToBoolConverter : MarkupExtension, IValueConverter
     {
-        public static PauseButtonTextToBoolConverter _converter = null;
+        public static SimulationStateToBoolConverter _converter = null;
 
         //not needed, to avoid designer error
-        public PauseButtonTextToBoolConverter() { }
-        public PauseButtonTextToBoolConverter(object x) { }
+        public SimulationStateToBoolConverter() { }
+        public SimulationStateToBoolConverter(object x) { }
 
 
-        object IValueConverter.Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return value as string == "Continue";
+            return (byte)value == Simulation.RUNSTAT_PAUSE || (byte)value == Simulation.RUNSTAT_FINISHED;
         }
 
-        object IValueConverter.ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
         }
@@ -131,7 +129,7 @@ namespace DaphneGui
         {
             if (_converter == null)
             {
-                _converter = new PauseButtonTextToBoolConverter();
+                _converter = new SimulationStateToBoolConverter();
             }
             return _converter;
         }

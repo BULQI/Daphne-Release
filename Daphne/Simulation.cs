@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-//using System.Windows.Controls;
 
 using MathNet.Numerics.LinearAlgebra;
 
@@ -14,7 +13,7 @@ using Ninject.Parameters;
 
 namespace Daphne
 {
-    public class Simulation : IDynamic
+    public class Simulation : EntityModelBase, IDynamic
     {
         /// <summary>
         /// constants used to set the run status
@@ -33,17 +32,31 @@ namespace Daphne
 
         public static DataBasket dataBasket;
 
-        public byte RunStatus { get; set; }
+        private byte runStatus;
         private byte simFlags;
         private double accumulatedTime, duration, renderStep, sampleStep;
         private int renderCount, sampleCount;
         private const double integratorStep = 0.001;
+
 
         public Simulation()
         {
             cellManager = new CellManager();
             dataBasket = new DataBasket(this);
             reset();
+        }
+
+        /// <summary>
+        /// accessor for the simulation's run status
+        /// </summary>
+        public byte RunStatus
+        {
+            get { return runStatus; }
+            set
+            {
+                runStatus = value;
+                OnPropertyChanged("RunStatus");
+            }
         }
 
         private void clearFlag(byte flag)

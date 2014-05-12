@@ -363,6 +363,8 @@ namespace DaphneGui
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             vtkDisplay_DockPanel.DataContext = gc;
             // this.SimConfigSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
+            // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
+            saveState.DataContext = sim;
 
             if (file_exists)
             {
@@ -1767,7 +1769,7 @@ namespace DaphneGui
                 gc.EnablePickingButtons();
             }
 
-            sim.RunStatus = Simulation.RUNSTAT_OFF;
+            //sim.RunStatus = Simulation.RUNSTAT_OFF;
             resetButton.IsEnabled = true;
             resetButton.Content = "Reset";
             runButton.Content = "Run";
@@ -1839,6 +1841,10 @@ namespace DaphneGui
                 if (vcrControl != null)
                 {
                     vcrControl.SetInactive();
+                }
+                if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                {
+                    sim.RunStatus = Simulation.RUNSTAT_OFF;
                 }
                 if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
                 {
