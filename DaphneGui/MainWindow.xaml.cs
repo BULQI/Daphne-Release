@@ -232,7 +232,6 @@ namespace DaphneGui
             // the event handler to run when clicking on an entry in the recent files list
             //RecentFileList.MenuClick += (s, e) => loadScenarioFromFile(e.Filepath);
 
-
             // get the screen size and set the application window size accordingly
             System.Drawing.Rectangle r = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
             double factor = 0.9,                    // 90% coverage
@@ -1846,10 +1845,6 @@ namespace DaphneGui
                 {
                     sim.RunStatus = Simulation.RUNSTAT_OFF;
                 }
-                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
-                {
-                    reporter.StartReporter(configurator.SimConfig);
-                }
 
                 // only check for unique names if database writing is on and the unique names option is on
                 /*if (skipDataWriteMenu.IsChecked == false && uniqueNamesMenu.IsChecked == true)
@@ -1923,6 +1918,12 @@ namespace DaphneGui
                             break;
                     }
                 }
+
+                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
+                {
+                    reporter.StartReporter(configurator.SimConfig);
+                }
+                else
                 if (sim.RunStatus == Simulation.RUNSTAT_RUN)
                 {
                     runButton.Content = "Pause";

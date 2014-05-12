@@ -73,7 +73,7 @@ namespace Daphne
             }
             else
             {
-                nameStart = fileName;
+                nameStart = fileName + "_";
             }
             fullPath = rootPath + nameStart + file + "." + extension;
 
