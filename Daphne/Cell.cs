@@ -214,32 +214,12 @@ namespace Daphne
         }
 
         /// <summary>
-        /// implement boundary conditions
+        /// boundary forces
         /// </summary>
-        public void EnforceBC()
+        public void BoundaryForce()
         {
-            // toroidal boundary conditions, wrap around
-            // NOTE: this assumes the environment has a lower bound of (0, 0, 0)
-            if (Simulation.dataBasket.ECS.toroidal == true)
-            {
-                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
-                {
-                    double safetySlab = 1e-3;
-
-                    // displace the cell such that it wraps around
-                    if (State.X[i] < 0.0)
-                    {
-                        // use a small fudge factor to displace the cell just back into the grid
-                        State.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
-                    }
-                    else if (State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
-                    {
-                        State.X[i] = 0.0;
-                    }
-                }
-            }
             // boundary force
-            else
+            if (Simulation.dataBasket.ECS.toroidal == false)
             {
                 double dist = 0.0;
 
@@ -277,6 +257,33 @@ namespace Daphne
                 else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(2) - State.X[2]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
+                }
+            }
+        }
+
+        /// <summary>
+        /// toroidal boundary condition
+        /// </summary>
+        public void ToroidalBC()
+        {
+            // toroidal boundary conditions, wrap around
+            // NOTE: this assumes the environment has a lower bound of (0, 0, 0)
+            if (Simulation.dataBasket.ECS.toroidal == true)
+            {
+                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
+                {
+                    double safetySlab = 1e-3;
+
+                    // displace the cell such that it wraps around
+                    if (State.X[i] < 0.0)
+                    {
+                        // use a small fudge factor to displace the cell just back into the grid
+                        State.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
+                    }
+                    else if (State.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    {
+                        State.X[i] = 0.0;
+                    }
                 }
             }
         }
