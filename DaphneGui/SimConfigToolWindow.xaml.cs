@@ -621,17 +621,25 @@ namespace DaphneGui
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
+            e.Accepted = false;
+
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
-                return;
+            //if (cell.diff_scheme_guid_ref == "")
+            //    return;
 
             ConfigDiffScheme ds = cell.diff_scheme;
             ConfigGene gene = e.Item as ConfigGene;
 
+            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
+            if (!cell.genes_guid_ref.Contains(gene.gene_guid))
+                return;
+
+
             if (ds != null)
             {
+                //if scheme already contains this gene, exclude it from the available gene pool
                 if (ds.genes.Contains(gene.gene_guid))
                 {
                     e.Accepted = false;
@@ -641,6 +649,11 @@ namespace DaphneGui
                     e.Accepted = true;
                 }
             }
+            else
+            {
+                e.Accepted = true;
+            }
+
         }
 
         
@@ -2948,13 +2961,15 @@ namespace DaphneGui
                 return;
             }
 
-            //Clear the grids
-            //EpigeneticMapGrid.Columns.Clear();
-            //DiffRegGrid.Columns.Clear();
-
             //if cell does not have a diff scheme, return
-            if (cell.diff_scheme_guid_ref == "" || cell.diff_scheme == null)
+            if (cell.diff_scheme == null)
+            {
+                //Create a column that allows the user to add genes to the grid
+                DataGridTextColumn combo_col = CreateUnusedGenesColumn(er);
+                EpigeneticMapGrid.Columns.Add(combo_col);
+                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
                 return;
+            }
 
             //Get the diff_scheme using the guid
             ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3447,8 +3462,24 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
-                return;
+            //if (cell.diff_scheme_guid_ref == "")
+            //    return;
+
+            //if cell does not have a diff scheme, create one
+            if (cell.diff_scheme == null)
+            {
+                ConfigDiffScheme ds = new ConfigDiffScheme();
+
+                ds.genes = new ObservableCollection<string>();
+                ds.Name = "New diff scheme";
+                ds.Driver = new ConfigTransitionDriver();
+                ds.activationRows = new ObservableCollection<ConfigActivationRow>();
+
+                cell.diff_scheme = ds;
+
+            }
+
+
 
             ConfigDiffScheme scheme = cell.diff_scheme;
             
@@ -3481,10 +3512,15 @@ namespace DaphneGui
             DataGridTextColumn col = new DataGridTextColumn();
             col.Header = gene.Name;
             col.CanUserSort = false;
-            Binding b = new Binding(string.Format("activations[{0}]", scheme.activationRows[0].activations.Count - 1));   //EpigeneticMapGrid.Columns.Count-1));  
-            b.Mode = BindingMode.TwoWay;
-            b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            col.Binding = b;
+
+            if (scheme.activationRows.Count > 0)
+            {
+                Binding b = new Binding(string.Format("activations[{0}]", scheme.activationRows[0].activations.Count - 1));   //EpigeneticMapGrid.Columns.Count-1));  
+                b.Mode = BindingMode.TwoWay;
+                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+                col.Binding = b;
+            }
+
             EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
 
             combo.SelectedIndex = 0;
@@ -3499,7 +3535,6 @@ namespace DaphneGui
             comboCol = CreateUnusedGenesColumn(er);
             EpigeneticMapGrid.Columns.Add(comboCol);
 
-            //DiffSchemeExpander_Expanded(null, null);
         }
 
         /// <summary>
@@ -3518,7 +3553,7 @@ namespace DaphneGui
                 return;
             }
 
-            if (cell.diff_scheme_guid_ref == "")
+            if (cell.diff_scheme == null)
                 return;
 
             ConfigDiffScheme diff_scheme = cell.diff_scheme;
@@ -3553,7 +3588,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
+            if (cell.diff_scheme == null)
                 return;
 
             ConfigDiffScheme diff_scheme = cell.diff_scheme;
@@ -3597,8 +3632,16 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
-                return;
+            if (cell.diff_scheme == null)
+            {
+                ConfigDiffScheme ds = new ConfigDiffScheme();
+
+                ds.genes = new ObservableCollection<string>();
+                ds.Name = "New diff scheme";
+                ds.Driver = new ConfigTransitionDriver();
+                ds.activationRows = new ObservableCollection<ConfigActivationRow>();
+                cell.diff_scheme = ds;
+            }
 
             //Show a dialog that gets the new state's name
             AddDiffState ads = new AddDiffState();
@@ -3696,7 +3739,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
+            if (cell.diff_scheme == null)
                 return;
 
             ConfigDiffScheme scheme = cell.diff_scheme;
@@ -3730,7 +3773,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == "")
+            if (cell.diff_scheme == null)
                 return;
 
             ConfigDiffScheme scheme = cell.diff_scheme;
