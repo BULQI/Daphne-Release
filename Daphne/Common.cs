@@ -21,16 +21,16 @@ namespace Daphne
 
         static FakeConfig()
         {
-            simGlobal = SimStates.Linear;
-            simCell = SimStates.Tiny;
+            simInterpolate = SimStates.Linear;
+            simCellSize = SimStates.Tiny;
             radius = 5.0;
             gridStep = 50;
             numGridPts = new int[] { 21, 21, 21 };
         }
 
         // these are static for simplicity only; they more than likely should be instance members in SimConfig
-        public static SimStates simGlobal { get; set; }
-        public static SimStates simCell { get; set; }
+        public static SimStates simInterpolate { get; set; }
+        public static SimStates simCellSize { get; set; }
         public static double radius { get; set; }
         public static double gridStep { get; set; }
         public static int[] numGridPts { get; set; }
@@ -51,16 +51,16 @@ namespace Daphne
             // bindings for manifolds
             Bind<Manifold>().To<TinyBall>().WhenParentNamed("Cytosol").WithConstructorArgument("radius", FakeConfig.radius);
             Bind<Manifold>().To<TinySphere>().WhenParentNamed("Membrane").WithConstructorArgument("radius", FakeConfig.radius);
-            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.ThreeD).WithMetadata("Interpolation", FakeConfig.simGlobal);
-            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.TwoD).WithMetadata("Interpolation", FakeConfig.simGlobal);
+            Bind<InterpolatedRectangularPrism>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.ThreeD).WithMetadata("Interpolation", FakeConfig.simInterpolate);
+            Bind<InterpolatedRectangle>().ToSelf().WithMetadata("Dimension", FakeConfig.SimStates.TwoD).WithMetadata("Interpolation", FakeConfig.simInterpolate);
 
             // bindings for compartment
             Bind<Compartment>().ToSelf().WhenMemberHas<Cytosol>().Named("Cytosol");
             Bind<Compartment>().ToSelf().WhenMemberHas<Membrane>().Named("Membrane");
             Bind<Compartment>().ToSelf();
 
-            // bindingss for entities
-            Bind<Cell>().ToSelf().WithConstructorArgument("radius", FakeConfig.radius).WithMetadata("Size", FakeConfig.simCell);
+            // bindings for entities
+            Bind<Cell>().ToSelf().WithConstructorArgument("radius", FakeConfig.radius).WithMetadata("Size", FakeConfig.simCellSize);
             Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", FakeConfig.numGridPts).WithConstructorArgument("gridStep", FakeConfig.gridStep);
         }
     }
