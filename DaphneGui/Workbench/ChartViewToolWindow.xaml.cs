@@ -333,9 +333,9 @@ namespace Workbench
 
         private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Slider sl = sender as Slider;
-            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)sl.DataContext;
-            pair.ReactionComplexRate2.SetMinMax();
+            //Slider sl = sender as Slider;
+            //ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)sl.DataContext;
+            //pair.ReactionComplexRate2.SetMinMax();
             //RC.SetTimeMinMax();
 
             //sl.Minimum 
@@ -388,18 +388,18 @@ namespace Workbench
 
         private void txtFormattedValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            TextBox tb = sender as TextBox;
-            string token = tb.Text;
-            token = GetNumerics(token);
+            //TextBox tb = sender as TextBox;
+            //string token = tb.Text;
+            //token = GetNumerics(token);
 
-            double d = double.Parse(token);
+            //double d = double.Parse(token);
 
-            //ConfigReaction reac = (ConfigReaction)tb.DataContext;
-            //reac.daph_rate_const.Value = d;
+            ////ConfigReaction reac = (ConfigReaction)tb.DataContext;
+            ////reac.daph_rate_const.Value = d;
 
-            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
-            //pair.ReactionComplexRate = d;
-            pair.ReactionComplexRate2.SetMinMax();
+            //ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
+            ////pair.ReactionComplexRate = d;
+            //pair.ReactionComplexRate2.SetMinMax();
             //RC.SetTimeMinMax();
         }
 

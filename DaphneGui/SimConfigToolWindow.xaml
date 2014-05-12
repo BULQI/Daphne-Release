@@ -7,6 +7,7 @@
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+                    xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     >
     
@@ -776,17 +777,17 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
-                    
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1" Grid.Row="0"
-                                Margin="-50,2">
-                        
-                        <TextBlock Text="concentration" Margin="0,0" 
+
+                    <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+                        <!--<StackPanel Orientation="Horizontal"
+                                >
+                            <TextBlock Text="concentration-old" Margin="0,0" 
                                Grid.Column="0" Grid.Row="0"  
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                />
-                        <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
+                            <editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
                                                 SpinnerVisibility="Collapsed"
                                                 HorizontalAlignment="Right"
                                                 Format="F2"
@@ -796,7 +797,21 @@
                                                 CenterSlotHorizontalAlignment="Right"
                                                 Value="{Binding Path=concentration, UpdateSourceTrigger=PropertyChanged}"
                                                 />
-                        <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                        </StackPanel>-->
+                        
+                        <StackPanel Orientation="Horizontal" Margin="20,0">
+                            
+                            <uc:DoublesBox      HorizontalAlignment="Left" 
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                Caption="">
+                            </uc:DoublesBox>
+                            
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
@@ -1607,13 +1622,13 @@
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
-                                <ComboBox  x:Name="molecule_combo_box3" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
                                                     DisplayMemberPath="Name"                                                    
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
-                                                    SelectionChanged="molecule_combo_box3_SelectionChanged"
-                                                    GotFocus="molecule_combo_box3_GotFocus"
+                                                    SelectionChanged="memb_molecule_combo_box_SelectionChanged"
+                                                    GotFocus="memb_molecule_combo_box_GotFocus"
                                                     />
                             </StackPanel>
                         </Grid>
@@ -1627,12 +1642,18 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>                                
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" Margin="28,10">
+                                    <TextBlock Text="concentration (" VerticalAlignment="Center" />
+                                    <TextBlock Text="molec/µm^2" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                    <TextBlock Text=")" VerticalAlignment="Center" />
+                                </StackPanel>
                             </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="1">
+                            
+                            <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                 <ContentControl Name="membraneMolPopDistributionDetails"
                                         Content="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}" 
                                         ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
@@ -1719,11 +1740,16 @@
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>                                
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                <TextBlock Text="Homogeneous Initial Distribution" Margin="20,0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" Margin="28,10">
+                                    <TextBlock Text="concentration (" VerticalAlignment="Center" />
+                                    <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                                    <TextBlock Text=")" VerticalAlignment="Center" />
+                                </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="0" Grid.Row="1">
+                            <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                 <ContentControl Name="SolfacDistributionDetails"
                                         Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
                                         ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 

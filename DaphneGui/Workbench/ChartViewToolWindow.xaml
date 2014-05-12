@@ -61,7 +61,7 @@
                         Value="{Binding Path=dInitialTime}"                        
                         TickFrequency="0.01">
                 </Slider>
-                <TextBox x:Name="txtMaxTime" Width="50" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
+                <TextBox x:Name="txtMaxTime" Width="150" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
                       Text="{Binding ElementName=slMaxTime, Path=Value}">
                 </TextBox>                
                 
@@ -206,7 +206,7 @@
                                 <DataTemplate>
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <uc:DoublesBox x:Name="dblReacRate" Margin="0,20"
+                                            <uc:DoublesBox x:Name="dblReacRate" Margin="0,0"
                                                 Number="{Binding Path=ReactionComplexRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
                                                 DecimalPlaces="3" 
                                                 RangeFactor="2"

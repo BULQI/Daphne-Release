@@ -7,18 +7,31 @@
              d:DesignHeight="30" d:DesignWidth="360"
              x:Name="UC"
              >
-    <StackPanel x:Name="stpMainPanel" Height="28" Width="340">  
+    <StackPanel x:Name="stpMainPanel" Height="28" Width="230">  
 
-        <StackPanel Orientation="Horizontal" Height="27" Width="320" >
+        <StackPanel x:Name="stpControl" Orientation="Horizontal" Height="27" Width="220" VerticalAlignment="Top">
             <!--<Label Width="100" x:Name="lblCaption" Content="{Binding Path=Caption, ElementName=UC}"></Label>-->
-            <Slider x:Name="slFNumber" Width="100" Height="24" VerticalAlignment="Top" Margin="0,-18" RenderTransform="1.0,0,0,0.5,0,4" 
+            <Slider x:Name="slFNumber" Height="24" VerticalAlignment="Top" Margin="0,0" RenderTransform="1.0,0,0,0.5,0,4" 
                     Minimum="{Binding Path=Minimum, Mode=OneWay, ElementName=UC}" 
                     Maximum="{Binding Path=Maximum, Mode=OneWay, ElementName=UC}"
                     Value="{Binding Path=Number, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ElementName=UC}"
                     LostMouseCapture="slFNumber_LostMouseCapture"
+                    
                     >
+                <Slider.Style>
+                    <Style TargetType="Slider">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Setter Property="Width" Value="100"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=SliderEnabled, Mode=OneWay, ElementName=UC}" Value="false">
+                                <Setter Property="Visibility" Value="Hidden"/>
+                                <Setter Property="Width" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Slider.Style>
             </Slider>
-            <TextBox x:Name="tbFNumber" Width="140" Height="24" VerticalAlignment="Top" Background="LightGreen" BorderThickness="0" Margin="0,-20" Text="{Binding Path=FNumber, ElementName=UC}"
+            <TextBox x:Name="tbFNumber" Width="100" Height="24" VerticalAlignment="Top" BorderThickness="1" Margin="0,0" Text="{Binding Path=FNumber, ElementName=UC}"
                 GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
             </TextBox>
             

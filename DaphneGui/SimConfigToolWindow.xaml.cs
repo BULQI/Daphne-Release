@@ -161,7 +161,6 @@ namespace DaphneGui
         {
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "";
-            gg.gaussian_region_visibility = false;
             // gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
@@ -1755,6 +1754,7 @@ namespace DaphneGui
                 BoxSpecification box = new BoxSpecification();
                 AddDefaultBoxSpec(box);
                 GaussianSpecification gg = new GaussianSpecification();
+                //gg.DrawAsWireframe = true;
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
@@ -2653,7 +2653,7 @@ namespace DaphneGui
                 MainWindow.SC.SimConfig.scenario.time_config.rendering_interval = time_step_slider.Value;
         }
 
-        private void molecule_combo_box3_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void memb_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
@@ -2711,7 +2711,7 @@ namespace DaphneGui
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
-        private void molecule_combo_box3_GotFocus(object sender, RoutedEventArgs e)
+        private void memb_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
             CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();

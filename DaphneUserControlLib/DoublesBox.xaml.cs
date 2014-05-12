@@ -87,7 +87,7 @@ namespace DaphneUserControlLib
 
                     _format += "e+00}";
                 }
-                else if (Number <= SNLowerThreshold)
+                else if (Number <= SNLowerThreshold && Number > 0)
                 {
                     if (DecimalPlaces == 0)
                         DecimalPlaces++;
@@ -301,6 +301,31 @@ namespace DaphneUserControlLib
             // insert your code here
             DoublesBox uc = d as DoublesBox;
             uc.Caption = (string)(e.NewValue);
+        }
+
+        //SLIDERENABLED          
+        public static DependencyProperty SliderEnabledProperty = DependencyProperty.Register("SliderEnabled", typeof(bool), typeof(DoublesBox), new FrameworkPropertyMetadata(true, SliderEnabledPropertyChanged));
+        public bool SliderEnabled
+        {
+            get { return (bool)GetValue(SliderEnabledProperty); }
+            set
+            {
+                SetValue(SliderEnabledProperty, value);
+                stpControl.Width = 220;
+                stpMainPanel.Width = 230;
+                if (value == false)
+                {
+                    stpControl.Width = 110;
+                    stpMainPanel.Width = 120;
+                }
+                OnPropertyChanged("SliderEnabled");
+            }
+        }
+        private static void SliderEnabledPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.SliderEnabled = (bool)(e.NewValue);
         }
     }
 }
