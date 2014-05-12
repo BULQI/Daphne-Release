@@ -2256,7 +2256,7 @@
         </TabItem>
         
         <!-- Extracellular Medium -->
-        <TabItem Header="Extracellular Medium">
+        <TabItem x:Name="tabECM" Header="Extracellular Medium">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
                     <!-- Environment -->
@@ -2840,7 +2840,7 @@
         </TabItem>
 
         <!-- CELL POPULATIONS -->
-        <TabItem Header="Cell Populations">
+        <TabItem x:Name="tabCellPop" Header="Cell Populations">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
 

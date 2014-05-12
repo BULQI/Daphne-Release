@@ -36,6 +36,9 @@ namespace Workbench
 
         public void ClearChart()
         {
+            if (cm == null)
+                return;
+
             cm.ClearChart();
         }
         

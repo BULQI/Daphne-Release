@@ -91,6 +91,9 @@ namespace Workbench
 
         public void ClearChart()
         {
+            if (PChart == null)
+                return;
+
             foreach (Control c in PChart.Controls)
             {
                 PChart.Controls.Remove(c);

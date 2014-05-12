@@ -1604,11 +1604,11 @@ namespace DaphneGui
 
             if (isBoxInCell == true)
             {
-                ConfigTabControl.SelectedIndex = 3;
+                ConfigTabControl.SelectedItem = tabCellPop;
             }
             else
             {
-                ConfigTabControl.SelectedIndex = 2;
+                ConfigTabControl.SelectedItem = tabECM;
             }
         }
 
