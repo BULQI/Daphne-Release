@@ -14,8 +14,8 @@ namespace Daphne
     {
         public bool TransitionOccurred { get; set; }
         public int CurrentState { get; set; }
-        public int nStates;
-        protected int nGenes;
+        public int nStates { get; set; }
+        public int nGenes { get; set; }
         public abstract void AddActivity(int _state, int _gene, double _activity);
         public abstract void AddGene(int _state, string _gene_id);
         public abstract void AddState(int _state, string stateName);

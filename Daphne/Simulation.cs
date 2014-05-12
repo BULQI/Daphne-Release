@@ -621,13 +621,13 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
 
                         // Epigenetic information
-                        for (int ii = 0; ii < cell.Differentiator.nStates; ii++)
+                        for (int ii = 0; ii < cell.Differentiator.nGenes; ii++)
                         {
                             cell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
 
                             for (int j = 0; j < cell.Differentiator.nStates; j++)
                             {
-                                cell.Differentiator.AddActivity(ii, j, config_diffScheme.activationRows[ii].activations[j]);
+                                cell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
                             }
                         }
                     }
