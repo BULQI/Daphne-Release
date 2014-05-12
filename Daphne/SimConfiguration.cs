@@ -979,11 +979,26 @@ namespace Daphne
         }
     }
 
-    public class ConfigCompartment
+    public class ConfigCompartment : EntityModelBase
     {
         // private to simConfig; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public ObservableCollection<string> reactions_guid_ref { get; set; }
+        //public ObservableCollection<string> reactions_guid_ref { get; set; }
+        private ObservableCollection<string> _reactions_guid_ref;
+        public ObservableCollection<string> reactions_guid_ref
+        {
+            get { return _reactions_guid_ref; }
+            set
+            {
+                if (_reactions_guid_ref == value)
+                    return;
+                else
+                {
+                    _reactions_guid_ref = value;
+                    OnPropertyChanged("reactions_guid_ref");
+                }
+            }
+        }
 
         public ConfigCompartment()
         {
@@ -1705,6 +1720,47 @@ namespace Daphne
     }
 
     /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class ReactionGUIDtoReactionStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string reac_string = "";
+            //string cult = culture as string;
+
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
+            if (reac_list != null)
+            {
+                foreach (ConfigReaction cr in reac_list)
+                {
+                    if (cr.reaction_guid == guid)
+                    {
+                        //This next if is a complete hack!
+                        if (culture.Name == "en-US")
+                            reac_string = cr.TotalReactionString;
+                        else
+                            reac_string = cr.rate_const.ToString();
+                        break;
+                    }
+                }
+            }
+            return reac_string;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
     /// Converter to go between reaction GUID references in ECS
     /// and reaction info kept in the repository of reactions.
     /// </summary>
@@ -1716,6 +1772,7 @@ namespace Daphne
             string guid = value as string;
             string reac_string = "";
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+
             ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
             if (reac_list != null)
             {
@@ -1723,7 +1780,6 @@ namespace Daphne
                 {
                     if (cr.reaction_guid == guid)
                     {
-                        //cr.GetTotalReactionString(
                         reac_string = cr.TotalReactionString;
                         break;
                     }

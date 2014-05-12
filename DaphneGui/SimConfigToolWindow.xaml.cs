@@ -398,13 +398,17 @@ namespace DaphneGui
         }
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
-            int nIndex = lbEcsReactions.SelectedIndex;
+            int nIndex = lvEcsReactions.SelectedIndex;
             if (nIndex >= 0)
             {
-                ConfigReaction grt = (ConfigReaction)lbEcsReactions.SelectedValue;
-                MainWindow.SC.SimConfig.entity_repository.reactions.Remove(grt);
+                string guid = (string)lvEcsReactions.SelectedValue;
+                ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
+                //ConfigReaction grt = (ConfigReaction)lvEcsReactions.SelectedValue;
                 if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
+                {
                     MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
+                }
+                
             }
         }
         private void AddReacCompButton_Click(object sender, RoutedEventArgs e)

@@ -36,7 +36,7 @@
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
             <daph:MolGUIDtoMolIndexConverter x:Key="MolGUIDtoMolIndexConv" />
-            <daph:ReacGUIDtoReacStringConverter x:Key="ReacGUIDtoReacStringConv" />
+            <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
             <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
             <daph:CellPopProbDistributionTypeToStringConverter x:Key="CellPopProbDistTypeEnumConv" />
@@ -106,9 +106,12 @@
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="moleculesListView2"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
-            <CollectionViewSource x:Key="reactionsListView"  
+            <CollectionViewSource x:Key="ecsReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="ecmReactionCollectionViewSource_Filter"/>
+            <CollectionViewSource x:Key="ecmReactionsListView"  
+                                  Source="{Binding Path=entity_repository.reactions}"
+                                  />
 
             <CollectionViewSource x:Key="membraneMolPopsListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
@@ -3151,18 +3154,16 @@
                         BorderThickness="1"
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                        
+                        <Expander.Resources>
+                            <DataTemplate x:Key="ecsReacListItemTemplate">
+                                <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                 </TextBlock>
+                            </DataTemplate>
+                        </Expander.Resources>
 
                         <StackPanel>
-                            <StackPanel.Resources>
-                                <DataTemplate x:Key="ecmReactionListItemTemplate">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding}" /> 
-                                        <TextBlock Text="    " />
-                                        <TextBlock Text="Rate: " />
-                                        <!--<TextBlock Text="{Binding Path=rate_const}" />-->
-                                    </StackPanel>
-                                </DataTemplate>
-                            </StackPanel.Resources>
                             <!-- Reactions -->
                             <StackPanel>
                                 <StackPanel.ToolTip>
@@ -3176,46 +3177,79 @@
                                 </TextBlock>
 
                             </StackPanel>
+                            
                             <!--<ListBox x:Name="lbEcsReactions" MinHeight="50" 
-                                    ItemsSource="{Binding Path=entity_repository.reactions}"
-                                    DisplayMemberPath="TotalReactionString"                                                    
-                                    SelectedIndex="-1"
-                            />-->
+                                    ItemsSource="{Binding Path=scenario.environment.ecs.reactions_guid_ref}"
+                                     ItemTemplate="{Binding Source={StaticResource ecsReacListItemTemplate}}"
+                                    SelectedIndex="-1">
+                            </ListBox>-->
 
-                            <ListBox x:Name="lbEcsReactions" MinHeight="50" 
-                                    ItemsSource="{Binding Source={StaticResource reactionsListView}}"
-                                    DisplayMemberPath="TotalReactionString"                                                    
-                                    SelectedIndex="-1"
-                            />
+                            <ListView x:Name="lvEcsReactions" 
+                                      ItemsSource="{Binding Path=scenario.environment.ecs.reactions_guid_ref}"
+                                      
+                                      SelectedIndex="-1"
+                                >
+                                
+                                <ListView.View>
+                                    <GridView>
+                                        <GridView.ColumnHeaderContainerStyle>
+                                            <Style TargetType="GridViewColumnHeader">
+                                                <Setter Property="Height" Value="Auto"></Setter>
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Offset="0.0" Color="White" />
+                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </GridView.ColumnHeaderContainerStyle>
 
-                            <!--ItemsSource="{Binding Source={StaticResource reactionsListView}}"-->
+                                        <GridViewColumn Width="80" Header="Rate constant">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView},
+                                                            ConverterCulture='de-DE'}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground" 
+                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Width="300" Header="Reaction" >
 
-                            <!--ItemTemplate="{Binding Source={StaticResource ecmReactionListItemTemplate}}"-->
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground" 
+                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+
+                                        </GridViewColumn>
+                                    </GridView>
+                                </ListView.View>
+                                
+                            </ListView>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
-                            <!--<Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Details"
-                                              x:Name="ReacDetailsExpander"
-                                              Margin="0,-15,0,0" 
-                                              Canvas.ZIndex="1"
-                                              >
-
-                                <StackPanel Orientation="Vertical">
-
-
-                                    <ContentControl Name="ReactionDetails"
-                                                Content="{Binding ElementName=lbEcsReactions, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource reactionDetailsTemplate}" 
-                                                Margin="6"/>
-
-                                    
-
-                                </StackPanel>
-
-                            </Expander>-->
+                            
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Add a reaction"

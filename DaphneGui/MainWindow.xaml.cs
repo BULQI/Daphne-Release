@@ -554,11 +554,11 @@ namespace DaphneGui
                 }
 
                 // it doesn't make sense to run a simulation if there are no cells after the reinitialization
-                if (Simulation.dataBasket.Cells.Count < 1)
-                {
-                    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                //if (Simulation.dataBasket.Cells.Count < 1)
+                //{
+                //    MessageBox.Show("Aborting simulation! Load a valid scenario or add cells into the current one.", "Empty simulation", MessageBoxButton.OK, MessageBoxImage.Error);
+                //    return;
+                //}
 
                 // next time around, force a reset
                 MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
