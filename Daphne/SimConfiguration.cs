@@ -1127,8 +1127,8 @@ namespace Daphne
         public string locomotor_mol_guid_ref { get; set; }
         public double TransductionConstant { get; set; }
 
-        public ConfigCompartment membrane;
-        public ConfigCompartment cytosol;
+        public ConfigCompartment membrane { get; set; }
+        public ConfigCompartment cytosol { get; set; }
     }
 
     public class CellPopDistType

@@ -141,15 +141,19 @@ namespace DaphneGui
                     cr.reactants_molecule_guid_ref.Add(s);
             }
 
+            //THIS IS NOT OK
+            //UNTIL WE HAVE AUTOMATIC REACTIONS, WE NEED USER TO INPUT REACTION_TYPE
+            cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.entity_repository.reaction_templates[(int)ReactionType.Association].reaction_template_guid;
+
             //increment stoichiometry
             string guid = cr.reaction_template_guid_ref;
             ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[guid];
 
             // the indices of cr and crt match
-            for(int i = 0; i < cr.reactants_molecule_guid_ref.Count; i++)
-            {
-                crt.reactants_stoichiometric_const[i] += 1;
-            }
+            ////for(int i = 0; i < cr.reactants_molecule_guid_ref.Count; i++)
+            ////{
+            ////    crt.reactants_stoichiometric_const[i] += 1;
+            ////}
 
             //----------------------------------
 
@@ -160,10 +164,14 @@ namespace DaphneGui
             }
 
             //increment stoichiometry            
-            for (int i = 0; i < cr.products_molecule_guid_ref.Count; i++)
-            {
-                crt.products_stoichiometric_const[i] += 1;
-            }
+            ////for (int i = 0; i < cr.products_molecule_guid_ref.Count; i++)
+            ////{
+            ////    crt.products_stoichiometric_const[i] += 1;
+            ////}
+
+
+            MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+
         }
     }
 }

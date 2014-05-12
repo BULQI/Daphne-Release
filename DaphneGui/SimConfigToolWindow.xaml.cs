@@ -249,6 +249,20 @@ namespace DaphneGui
             lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }
 
+        private void btnCopyMolec_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecule cm = (ConfigMolecule)lbMol.SelectedItem;
+
+            if (cm == null)
+                return;
+
+            ConfigMolecule gm = new ConfigMolecule(cm);
+            gm.ReadOnly = false;
+            gm.ForegroundColor = System.Windows.Media.Colors.Black;
+            MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
+            lbMol.SelectedIndex = lbMol.Items.Count - 1;
+        }
+
         private void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             //SolfacsDetailsExpander.IsExpanded = true;
@@ -275,7 +289,10 @@ namespace DaphneGui
         {            
             ConfigReaction selected_grt = (ConfigReaction)lbAvailableReacs.SelectedItem;
             if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(selected_grt.reaction_guid))
+            {
+                selected_grt.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
                 MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(selected_grt.reaction_guid);
+            }
 
         }
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -538,6 +555,117 @@ namespace DaphneGui
             ////{
             ////    lbEcsMolPops.Items.Add(cmp.Name);
             ////}
+        }
+
+        private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+            if (cr != null)
+            {
+                // Filter out cr if not in ecm reaction list 
+                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+                {
+                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
+        private void membReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            if (cr != null && cc != null)
+            {
+                // Filter out cr if not in ecm reaction list 
+                if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+                {
+                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
+        private void cytosolReactionsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            if (cr != null && cc != null)
+            {
+                // Filter out cr if not in ecm reaction list 
+                if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+                {
+                    cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }
+
+        private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AddCellButton_Click_1(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cc = new ConfigCell();
+            cc.CellName = "DefaultCell";
+            cc.CellRadius = 10;   
+            cc.TransductionConstant = 0;
+            MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
+            CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+        }
+
+        private void CollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+
+        }
+
+        private void membraneMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            ////ConfigMolecularPopulation cmp = e.Item as ConfigMolecularPopulation;
+            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            ////if (cm != null && cc != null)
+            ////{
+            ////    // Filter out molecule if not in membrane molecule list 
+            ////    if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+            ////    {
+            ////        cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            ////        e.Accepted = true;
+            ////    }
+            ////    else
+            ////    {
+            ////        e.Accepted = false;
+            ////    }
+            ////}
+        }
+
+        private void cytosolMoleculesCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        {
+
+        }
+
+        private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            string name = cell.membrane.molpops[0].Name;
         }
 
         

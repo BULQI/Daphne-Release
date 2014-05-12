@@ -111,7 +111,22 @@
             <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="reactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"/>
+                                  Source="{Binding Path=entity_repository.reactions}"
+                                  Filter="ecmReactionCollectionViewSource_Filter"/>
+
+            <CollectionViewSource x:Key="membraneMolPopsListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="membraneMolPopsCollectionViewSource_Filter"/>
+            <CollectionViewSource x:Key="cytosolMolPopsListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="cytosolMoleculesCollectionViewSource_Filter" />
+            
+            <CollectionViewSource x:Key="membraneReactionsListView"  
+                                  Source="{Binding Path=entity_repository.reactions}"
+                                  Filter="membReactionCollectionViewSource_Filter"/>
+            <CollectionViewSource x:Key="cytosolReactionsListView"  
+                                  Source="{Binding Path=entity_repository.reactions}"
+                                  Filter="cytosolReactionsCollectionViewSource_Filter"/>
 
             <!-- skg 5/29/12 -->
             <CollectionViewSource x:Key="baseCellTypesListView"  
@@ -1747,6 +1762,7 @@
                                     SelectionChanged="lbMol_SelectionChanged"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="btnCopyMolec"  Width="50" Content="Add" Click="btnCopyMolec_Click"></Button>
                                 <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddMolec_Click"></Button>
                                 <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolec_Click"></Button>
                             </StackPanel>
@@ -1869,7 +1885,7 @@
                                     SelectedIndex="0"
                                     />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddCellButton"  Width="50" Content="Add" />
+                                <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddCellButton_Click_1"/>
                                 <Button Name="RemoveCellButton" Width="50" Content="Remove"  />
                             </StackPanel>
 
@@ -1908,16 +1924,32 @@
                                                                                         
                                             <StackPanel Orientation="Horizontal">
                                                 <StackPanel Orientation="Vertical">
+                                                <StackPanel.Resources>
+                                                    <DataTemplate x:Key="membraneMolPopsListItemTemplate">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <!--<TextBlock Text="{Binding Path=Name}"/>-->
+                                                            <TextBlock Text="ddddd"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </StackPanel.Resources>
                                                     <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
                                                     <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="150"
-                                                             DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"
-                                                             ItemsSource="{Binding CellMolPops}" 
-                                                             ItemTemplate="{Binding Source={StaticResource molListItemTemplate}}"
-                                                             SelectedIndex="0"
-                                                    />
+                                                        ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}" 
+                                                        DisplayMemberPath="Name"
+                                                        SelectedIndex="0" />
+
+                                                <!--Binding ElementName=GlobalParameterTypesListBox, Path=SelectedItem-->
+
+                                                <!--ItemTemplate="{Binding Source={StaticResource membraneMolPopsListItemTemplate}}"-->
+
+                                                <!--ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}"
+                                                            DisplayMemberPath="molecule_guid_ref"                                                    
+                                                            SelectedIndex="-1"
+                                                    />-->
+                                                    
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" />
+                                                        <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
                                                         <Button Name="MembraneRemoveMolButton" Width="50" Content="Remove" />
                                                     </StackPanel>
                                                 </StackPanel>
@@ -1925,10 +1957,9 @@
                                                     <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
                                                     <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="150"
-                                                             DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"
-                                                             ItemsSource="{Binding CellMolPops}" 
-                                                             ItemTemplate="{Binding Source={StaticResource molListItemTemplate}}"
-                                                             SelectedIndex="0"
+                                                            ItemsSource="{Binding Source={StaticResource cytosolReactionsListView}}"
+                                                            DisplayMemberPath="TotalReactionString"                                                    
+                                                            SelectedIndex="-1"
                                                     />
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                         <Button Name="CytosolAddMolButton"  Width="50" Content="Add" />
@@ -1983,26 +2014,24 @@
                                                     <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
                                                     <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                             DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"
-                                                             ItemsSource="{Binding reactions}" 
-                                                             ItemTemplate="{Binding Source={StaticResource molListItemTemplate}}"
-                                                             SelectedIndex="0"
+                                                             ItemsSource="{Binding Source={StaticResource membraneReactionsListView}}"
+                                                            DisplayMemberPath="TotalReactionString"                                                    
+                                                            SelectedIndex="-1"
                                                     />
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" />
+                                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Vertical" >
                                                     <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-10,0,0" >
                                                     </TextBlock>
                                                     <ListBox x:Name="CytosolReacPopsListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                             DataContext="{Binding ElementName=CellsListBox, Path=SelectedItem}"
-                                                             ItemsSource="{Binding reactions}" 
-                                                             ItemTemplate="{Binding Source={StaticResource molListItemTemplate}}"
-                                                             SelectedIndex="0"
+                                                             ItemsSource="{Binding Source={StaticResource cytosolReactionsListView}}"
+                                                            DisplayMemberPath="TotalReactionString"                                                    
+                                                            SelectedIndex="-1"
                                                     />
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" />
+                                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
                                                     </StackPanel>
                                                 </StackPanel>
                                                 
@@ -2784,13 +2813,19 @@
                                 </TextBlock>
 
                             </StackPanel>
+                            <!--<ListBox x:Name="lbEcsReactions" MinHeight="50" 
+                                    ItemsSource="{Binding Path=entity_repository.reactions}"
+                                    DisplayMemberPath="TotalReactionString"                                                    
+                                    SelectedIndex="-1"
+                            />-->
+
                             <ListBox x:Name="lbEcsReactions" MinHeight="50" 
-                                    ItemsSource="{Binding Path=environment.ecs.reactions_guid_ref, 
-                                    Converter={StaticResource ReacGUIDtoReacStringConv}, 
-                                    ConverterParameter={StaticResource reactionsListView},
-                                    Mode=TwoWay}"                                                      
-                                    SelectedIndex="0"
+                                    ItemsSource="{Binding Source={StaticResource reactionsListView}}"
+                                    DisplayMemberPath="TotalReactionString"                                                    
+                                    SelectedIndex="-1"
                             />
+
+                            <!--ItemsSource="{Binding Source={StaticResource reactionsListView}}"-->
 
                             <!--ItemTemplate="{Binding Source={StaticResource ecmReactionListItemTemplate}}"-->
                             

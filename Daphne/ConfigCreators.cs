@@ -202,13 +202,7 @@ namespace Daphne
             }
 
             //ADD CELLS AND MOLECULES IN THE CELLS
-            ConfigCell gc = new ConfigCell();
-
-            gc.CellName = "BCell";
-            gc.CellRadius = 4.0;
-            gc.TransductionConstant = 1e4;
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
-
+            ConfigCell gc = findCell("BCell", sc);            
             CellPopulation cp = new CellPopulation();
             cp.cellpopulation_name = "My-B-Cell";
             cp.number = 1;
@@ -595,6 +589,19 @@ namespace Daphne
                     {
                         return cr.reaction_guid;
                     }
+                }
+            }
+            return null;
+        }
+
+        // given a cell type name like BCell, find the ConfigCell object
+        public static ConfigCell findCell(string name, SimConfiguration sc)
+        {
+            foreach (ConfigCell cc in sc.entity_repository.cells)
+            {
+                if (cc.CellName == name)
+                {
+                    return cc;
                 }
             }
             return null;
