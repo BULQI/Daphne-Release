@@ -3116,7 +3116,26 @@ namespace Daphne
         }
 
         public bool HasBoundaryMolecule(EntityRepository repos)
-        {            
+        {
+            // Check for transcription reactions
+            // NOTE: Gene transcription currently:  gene (reactant) -> molecule (bulk)
+            // Future implementation will be corrected as:   gene (modifier) -> molecule (bulk) + gene (modifier)
+            // After change, remove check on reactants_molecul_guid_ref
+            if (reactants_molecule_guid_ref.Count > 0)
+            {
+                if (repos.genes_dict.ContainsKey(reactants_molecule_guid_ref[0]) )
+                {
+                    return false;
+                }
+            }
+            if (modifiers_molecule_guid_ref.Count > 0)
+            {
+                if (repos.genes_dict.ContainsKey(modifiers_molecule_guid_ref[0]))
+                {
+                    return false;
+                }
+            }
+
             foreach (string molguid in reactants_molecule_guid_ref)
             {
                 if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
@@ -3259,6 +3278,7 @@ namespace Daphne
             }
         }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
         public bool ReadOnly { get; set; }
 
         public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
@@ -3270,6 +3290,7 @@ namespace Daphne
             Name = "NewRC";
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            genes = new ObservableCollection<ConfigGene>();
             ReadOnly = false;
         }
         public ConfigReactionComplex(string name)
@@ -3280,6 +3301,7 @@ namespace Daphne
             ReadOnly = false;
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
+            genes = new ObservableCollection<ConfigGene>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
         }
         
@@ -3311,27 +3333,51 @@ namespace Daphne
 
             return false;
         }
+        private bool HasGene(string guid)
+        {
+            foreach (ConfigGene gene in genes)
+            {
+                if (gene.gene_guid == guid)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private void AddMolsToReaction(EntityRepository er, ConfigReaction reac, ObservableCollection<string> mols)
         {
             foreach (string molguid in mols)
             {
-                ConfigMolecule configMolecule = er.molecules_dict[molguid];
-                if (configMolecule != null)
+                if (er.genes_dict.ContainsKey(molguid))
                 {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
-                    configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
-                    configMolPop.Name = configMolecule.Name;
-                    configMolPop.mpInfo.mp_dist_name = "Uniform";
-                    configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mpInfo.mp_render_blending_weight = 2.0;
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-                    hl.concentration = 1;
-                    configMolPop.mpInfo.mp_distribution = hl;
-                    if (HasMolecule(molguid) == false)
+                    if (HasGene(molguid) == false)
                     {
-                        molpops.Add(configMolPop);
+                        ConfigGene configGene = new ConfigGene(er.genes_dict[molguid].Name, er.genes_dict[molguid].CopyNumber, er.genes_dict[molguid].ActivationLevel);
+                        configGene.gene_guid = er.genes_dict[molguid].gene_guid;
+                        genes.Add(configGene);
+                    }
+                }
+                else
+                {
+                    ConfigMolecule configMolecule = er.molecules_dict[molguid];
+                    if (configMolecule != null)
+                    {
+                        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                        configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                        configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
+                        configMolPop.Name = configMolecule.Name;
+                        configMolPop.mpInfo.mp_dist_name = "Uniform";
+                        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                        MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                        hl.concentration = 1;
+                        configMolPop.mpInfo.mp_distribution = hl;
+                        if (HasMolecule(molguid) == false)
+                        {
+                            molpops.Add(configMolPop);
+                        }
                     }
                 }
             }
