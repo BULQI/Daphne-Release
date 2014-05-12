@@ -2430,6 +2430,21 @@ namespace Daphne
             driver_guid = id.ToString();
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
         }
+
+        public ConfigTransitionDriver Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+
+            ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, Settings);
+            Guid id = Guid.NewGuid();
+            new_ctd.driver_guid = id.ToString();
+            // at this point we'd insert this into the hyperlocal store with the new guid
+
+            return new_ctd;
+        }
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -2525,7 +2540,21 @@ namespace Daphne
 
             Driver.DriverElements.Add(trow);
         }
-        
+
+        public ConfigDiffScheme Clone()
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+
+            ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
+            Guid id = Guid.NewGuid();
+            new_cds.diff_scheme_guid = id.ToString();
+            // at this point we'd insert this into the hyperlocal store with the new guid
+
+            return new_cds;
+        }
     }
 
     public class ConfigActivationRow : EntityModelBase
@@ -3301,14 +3330,17 @@ namespace Daphne
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
         public string diff_scheme_guid_ref { get; set; }
+        public ConfigDiffScheme diff_scheme { get; set; }
 
         // Guid for ConfigTransitionDriver that drives cell death
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
         public string death_driver_guid_ref { get; set; }
+        public ConfigTransitionDriver death_driver { get; set; }
         // Guid for ConfigTransitionDriver that drives cell division
         public string div_driver_guid_ref { get; set; }
+        public ConfigTransitionDriver div_driver { get; set; }
 
         public int CurrentDeathState;
         public int CurrentDivState;

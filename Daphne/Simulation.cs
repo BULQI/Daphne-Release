@@ -603,14 +603,24 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
+#if GUID_REF_BASED
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
                     {
                         string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
+#else
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver != null)
+                    {
+                        ConfigTransitionDriver config_td = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver;
+
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
+                    }
+#endif
 
                     // Differentiation
+#if GUID_REF_BASED
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != "")
                     {
                         string diff_scheme_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref;
@@ -631,14 +641,44 @@ namespace Daphne
                             }
                         }
                     }
+#else
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
+                    {
+                        ConfigDiffScheme config_diffScheme = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
+                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[config_diffScheme.Driver.driver_guid];
+
+                        cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
+
+                        // Epigenetic information
+                        for (int ii = 0; ii < cell.Differentiator.nGenes; ii++)
+                        {
+                            cell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
+
+                            for (int j = 0; j < cell.Differentiator.nStates; j++)
+                            {
+                                cell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
+                            }
+                        }
+                    }
+#endif
 
                     // division behavior
+#if GUID_REF_BASED
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
                     {
                         string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
+#else
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver != null)
+                    {
+                        ConfigTransitionDriver config_td = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver;
+
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
+                    }
+#endif
 
                     AddCell(cell);
                 }

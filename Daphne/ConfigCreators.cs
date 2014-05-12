@@ -766,12 +766,24 @@ namespace Daphne
             // Add differentiatior
             // Assumes all genes and signal molecules are present
             gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell 7 state", sc);
+            if (sc.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            {
+                gc.diff_scheme = sc.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+            }
 
             // Add apoptosis
             gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", sc);
+            if (sc.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            {
+                gc.death_driver = sc.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+            }
 
             // add division
             gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", sc);
+            if (sc.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            {
+                gc.div_driver = sc.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+            }
 
             sc.entity_repository.cells.Add(gc);
 
@@ -867,12 +879,24 @@ namespace Daphne
             // Add differentiatior
             // Assumes all genes and signal molecules are present
             gc.diff_scheme_guid_ref = findDiffSchemeGuid("GC B cell", sc);
+            if (sc.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            {
+                gc.diff_scheme = sc.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+            }
 
             // Add apoptosis
             gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", sc);
+            if (sc.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            {
+                gc.death_driver = sc.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+            }
 
             // add division
             gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", sc);
+            if (sc.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            {
+                gc.div_driver = sc.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+            }
 
             sc.entity_repository.cells.Add(gc);
 
@@ -966,6 +990,7 @@ namespace Daphne
             sc.entity_repository.transition_drivers.Add(driver);
             sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
+            sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
 
             ////////////////////////////
             // GC B cell differentiatior 
@@ -1028,7 +1053,7 @@ namespace Daphne
             sc.entity_repository.transition_drivers.Add(driver);
             sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
-
+            sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
         }
 
         private static void PredefinedGenesCreator(SimConfiguration sc)
