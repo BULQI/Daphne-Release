@@ -207,9 +207,10 @@ namespace testDaphne
                    driverAConc;
             double[] driverLoc, convDriverLoc;
 
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 initial.txt");
             string output;
             string filename = "DriverDynamics.txt";
-            nSteps = (int)(100 / dt);
+            nSteps = (int)(20/ dt);
 
             using (StreamWriter writer = File.CreateText(filename))
             {
@@ -263,6 +264,9 @@ namespace testDaphne
                 value = conc.Value(inm.linearIndexToLocal(m));
                 Console.WriteLine(i + " " +  value);
             }
+
+            Simulation.dataBasket.ECS.Space.Populations["CXCL13"].Conc.WriteToFile("CXCL13 final.txt");
+
        }
           
 
@@ -399,7 +403,7 @@ namespace testDaphne
         {
             // Units: [length] = um, [time] = min, [MolWt] = kDa, [DiffCoeff] = um^2/min
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
-            string molSpec = "CXCR5\t1.0\t0.0\t0.0\nCXCL13\t\t\t6.0e3\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t1.0e3\ndriverA\t\t\t1.0\nCXCL12\t7.96\t\t6.0e3\n";
+            string molSpec = "CXCR5\t1.0\t0.0\t0.0\nCXCL13\t\t\t6.0e2\nCXCR5:CXCL13\t\t\t0.0\ngCXCR5\t\t\t\ndriver\t\t\t1.0e3\ndriverA\t\t\t1.0\nCXCL12\t7.96\t\t6.0e3\n";
             MolDict = MoleculeBuilder.Go(molSpec);
 
             config = new ReactionsConfigurator();
@@ -407,7 +411,7 @@ namespace testDaphne
             config.TemplReacType(config.content.listOfReactions);
 
             //
-            // Scenario: Ligand:Receptor dynamics without ligand diffusion and driver:complex dynamics
+            // Scenario: Cell locomotion with cytosol driver molecules
             //      extracellular fluid with CXCL13 and one cell 
             //      PlasmaMembrane CXCR5 and CXCR5:CXCL13 surface molecules 
             //      Cytosol driver and activated driver molecules
@@ -457,11 +461,21 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
-
+            // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
+            // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
+            // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
             double midConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-            double leftConc = 2 * midConc;
-            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { midConc });
+            double leftConc = 2 * midConc; 
+            double[] initArray = new double[] { extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                    extent[0] / 2.0, extent[1] / 2.0, extent[2] / 2.0,
+                                                    midConc };
+            // Add a ligand MolecularPopulation whose concentration (molecules/um^3) is a Gaussian field
+            Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "gauss", initArray);
+
+            //// Add a ligand MolecularPopulation whose concentration (molecules/um^3) is linear in x
+
+            ////Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "const", new double[] { midConc });
+            //Simulation.dataBasket.ECS.Space.AddMolecularPopulation(MolDict["CXCL13"], "linear", new double[] { leftConc, 0.0, 0.0, extent[0], 0.0 });
 
             Manifold m;
             ScalarField sf;
@@ -526,9 +540,9 @@ namespace testDaphne
             MolecularPopulation receptor, ligand, complex;
             double k1plus = 2.0, k1minus = 1;
             MolecularPopulation driver, driverA;
-            double k2plus = 2.0,
-                    k2minus = 10.0,
-                    transductionConstant = 1e6;
+            double k2plus = 10.0,
+                    k2minus = 1.0,
+                    transductionConstant = -1e6;
 
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
@@ -539,10 +553,6 @@ namespace testDaphne
                 ligand = Simulation.dataBasket.ECS.Space.Populations["CXCL13"];
                 complex = kvp.Value.PlasmaMembrane.Populations["CXCR5:CXCL13"];
 
-                // QUESTION: Does it matter to which manifold we assign the boundary reactions?
-                //kvp.Value.PlasmaMembrane.reactions.Add(new TinyBoundaryAssociation(receptor, ligand, complex, k1plus));
-                //kvp.Value.PlasmaMembrane.reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
-                // sim.ECS.reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                 Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryAssociation(receptor, ligand, complex, k1plus));
                 Simulation.dataBasket.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
@@ -557,9 +567,6 @@ namespace testDaphne
 
                 kvp.Value.Locomotor = new Locomotor(driver, transductionConstant);
             }
-
-
-
         }
 
         private void LigandReceptorScenario(double k1plus, double k1minus)

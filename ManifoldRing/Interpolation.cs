@@ -168,7 +168,6 @@ namespace ManifoldRing
         }   
     }
 
-
     /// <summary>
     /// Trilinear 3D interpolation
     /// </summary>
@@ -184,7 +183,7 @@ namespace ManifoldRing
             base.Init(m);
             for (int i = 0; i < m.Dim; i++)
             {
-                gradientOperator[i] = new LocalMatrix[2];
+                gradientOperator[i] = new LocalMatrix[8];
             }
         }
 
@@ -209,6 +208,7 @@ namespace ManifoldRing
                    dy = x[1] / m.StepSize() - idx[1],
                    dz = x[2] / m.StepSize() - idx[2],
                    dxmult, dymult, dzmult;
+
             int n = 0;
 
             for (int di = 0; di < 2; di++)
@@ -250,61 +250,37 @@ namespace ManifoldRing
                    dy = x[1] / m.StepSize() - idx[1],
                    dz = x[2] / m.StepSize() - idx[2],
                    dxmult, dymult, dzmult;
-            int[] di = new int[2], dj = new int[2], dk = new int[2];
 
-            for (int i = 0; i < 3; i++)
+            int n = 0;
+            for (int di = 0; di < 2; di++)
             {
-                for (int d = 0; d < 2; d++)
+                for (int dj = 0; dj < 2; dj++)
                 {
-                    // x-direction
-                    if (i == 0)
+                    for (int dk = 0; dk < 2; dk++)
                     {
-                        // interpolation multipliers
-                        dxmult = 1;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        dzmult = d == 0 ? (1 - dz) : dz;
-                        // index differences
-                        di[0] = 1;
-                        di[1] = 0;
-                        dj[0] = d;
-                        dj[1] = d;
-                        dk[0] = d;
-                        dk[1] = d;
+                        // 0th element:
+                        dxmult = (-1 + 2*di )/m.StepSize();
+                        dymult = dj == 0 ? (1 - dy) : dy;
+                        dzmult = dk == 0 ? (1 - dz) : dz;
+                        gradientOperator[0][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
+                        gradientOperator[0][n].Coefficient = dxmult * dymult * dzmult;
+                    
+                        // 1st element:
+                        dxmult = di == 0 ? (1 - dx) : dx;
+                        dymult = (-1 + 2*dj )/m.StepSize();
+                        dzmult = dk == 0 ? (1 - dz) : dz;
+                        gradientOperator[1][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
+                        gradientOperator[1][n].Coefficient = dxmult * dymult * dzmult;
+                        
+                        // 2nd element:
+                        dxmult = di == 0 ? (1 - dx) : dx;
+                        dymult = dj == 0 ? (1 - dy) : dy;
+                        dzmult = (-1 + 2*dk )/m.StepSize();
+                        gradientOperator[2][n].Index = (idx[0] + di) + (idx[1] + dj) * m.NodesPerSide(0) + (idx[2] + dk) * m.NodesPerSide(0) * m.NodesPerSide(1);
+                        gradientOperator[2][n].Coefficient = dxmult * dymult * dzmult;
+                        
+                        n++;
                     }
-                    else if (i == 1) // y-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = 1;
-                        dzmult = d == 0 ? (1 - dz) : dz;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = 1;
-                        dj[1] = 0;
-                        dk[0] = d;
-                        dk[1] = d;
-                    }
-                    else // z-direction
-                    {
-                        // interpolation multipliers
-                        dxmult = d == 0 ? (1 - dx) : dx;
-                        dymult = d == 0 ? (1 - dy) : dy;
-                        dzmult = 1;
-                        // index differences
-                        di[0] = d;
-                        di[1] = d;
-                        dj[0] = d;
-                        dj[1] = d;
-                        dk[0] = 1;
-                        dk[1] = 0;
-                    }
-
-                    gradientOperator[i][d].Index = (idx[0] + di[0]) + (idx[1] + dj[0]) * m.NodesPerSide(0) + (idx[2] + dk[0]) * m.NodesPerSide(0) * m.NodesPerSide(1);
-                    gradientOperator[i][d].Coefficient = dxmult * dymult * dzmult / m.StepSize();
-                    gradientOperator[i][d].Index = (idx[0] + di[1]) + (idx[1] + dj[1]) * m.NodesPerSide(0) + (idx[2] + dk[1]) * m.NodesPerSide(0) * m.NodesPerSide(1);
-                    gradientOperator[i][d].Coefficient = -dxmult * dymult * dzmult / m.StepSize();
-
                 }
             }
 

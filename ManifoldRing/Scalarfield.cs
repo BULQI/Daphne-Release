@@ -69,6 +69,66 @@ namespace ManifoldRing
     }
 
     /// <summary>
+    /// field initialization with a linear profile
+    /// </summary>
+    public class LinearFieldInitializer : IFieldInitializer
+    {
+        private double c1;
+        private double c2;
+        private double x1;
+        private double x2;
+        private int dim;
+        private double slope;
+        private double intercept;
+        private bool initialized;
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public LinearFieldInitializer()
+        {
+            initialized = false;
+        }
+
+        /// <summary>
+        /// set the constant value
+        /// </summary>
+        /// <param name="parameters">array with one constant value</param>
+        public void setParameters(double[] parameters)
+        {
+            if (parameters.Length != 5)
+            {
+                throw new Exception("ConstFieldInitializer length must be 5.");
+            }
+
+            c1 = parameters[0];
+            c2 = parameters[1];
+            x1 = parameters[2];
+            x2 = parameters[3];
+            dim = (int)parameters[4];
+            slope = (c2 - c1) / (x2 - x1);
+            intercept = c1 - x1 * slope;
+
+            initialized = true;
+        }
+
+        /// <summary>
+        /// initialization routine
+        /// </summary>
+        /// <param name="point">point parameter</param>
+        /// <returns>linear value using the dim component of point</returns>
+        public double initialize(double[] point)
+        {
+            if (initialized == false)
+            {
+                throw new Exception("Must call setParameters prior to using FieldInitializer.");
+            }
+
+            return slope * point[dim] + intercept;
+        }
+    }
+
+    /// <summary>
     /// Gaussian field initializer
     /// </summary>
     public class GaussianFieldInitializer : IFieldInitializer
