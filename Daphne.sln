@@ -5,11 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daphne", "Daphne\Daphne.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testDaphne", "testDaphne\testDaphne.csproj", "{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface", "Interface\Interface.csproj", "{858658F6-6BD4-4009-A49D-AB893B266755}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://hippocrates.bumc.bu.edu:8080/tfs/galapagos
+		SccTeamFoundationServer = http://155.41.188.166:8080/tfs/galapagos
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = Daphne\\Daphne.csproj
 		SccProjectName1 = Daphne
@@ -17,6 +19,9 @@ Global
 		SccProjectUniqueName2 = testDaphne\\testDaphne.csproj
 		SccProjectName2 = testDaphne
 		SccLocalPath2 = testDaphne
+		SccProjectUniqueName3 = Interface\\Interface.csproj
+		SccProjectName3 = Interface
+		SccLocalPath3 = Interface
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +52,16 @@ Global
 		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|Mixed Platforms.Build.0 = Release|x86
 		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.ActiveCfg = Release|x86
 		{88752CC1-CEFE-42CA-8C8D-07A913ADBC46}.Release|x86.Build.0 = Release|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.ActiveCfg = Debug|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Debug|x86.Build.0 = Debug|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Any CPU.ActiveCfg = Release|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|Mixed Platforms.Build.0 = Release|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|x86.ActiveCfg = Release|x86
+		{858658F6-6BD4-4009-A49D-AB893B266755}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
