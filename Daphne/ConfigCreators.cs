@@ -768,10 +768,10 @@ namespace Daphne
             gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell 7 state", sc);
 
             // Add apoptosis
-            gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
+            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", sc);
 
             // add division
-            gc.div_driver_guid = findTransitionDriverGuid("generic division", sc);
+            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", sc);
 
             sc.entity_repository.cells.Add(gc);
 
@@ -869,10 +869,10 @@ namespace Daphne
             gc.diff_scheme_guid_ref = findDiffSchemeGuid("GC B cell", sc);
 
             // Add apoptosis
-            gc.death_driver_guid = findTransitionDriverGuid("generic apoptosis", sc);
+            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", sc);
 
             // add division
-            gc.div_driver_guid = findTransitionDriverGuid("generic division", sc);
+            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", sc);
 
             sc.entity_repository.cells.Add(gc);
 

@@ -3242,11 +3242,15 @@ namespace Daphne
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
+
+            // behaviors
+            diff_scheme_guid_ref = "";
+            death_driver_guid_ref = "";
+            div_driver_guid_ref = "";
+
             ReadOnly = false;
 
             genes_guid_ref = new ObservableCollection<string>();
-            
-
         }
 
         public ConfigCell Clone()
@@ -3301,9 +3305,9 @@ namespace Daphne
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
-        public string death_driver_guid { get; set; }
+        public string death_driver_guid_ref { get; set; }
         // Guid for ConfigTransitionDriver that drives cell division
-        public string div_driver_guid { get; set; }
+        public string div_driver_guid_ref { get; set; }
 
         public int CurrentDeathState;
         public int CurrentDivState;

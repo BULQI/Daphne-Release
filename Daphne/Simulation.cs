@@ -603,9 +603,9 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != null)
                     {
-                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid;
+                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
@@ -633,9 +633,9 @@ namespace Daphne
                     }
 
                     // division behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != null)
                     {
-                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid;
+                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
