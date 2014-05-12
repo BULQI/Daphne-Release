@@ -22,13 +22,14 @@ namespace DaphneGui
     public enum ReactionComplexDialogType { AddComplex, EditComplex }
     public partial class AddReacComplex : Window
     {
-        protected MainWindow mw;
+        protected EntityRepository er;
         protected ReactionComplexDialogType dlgType;
+        protected ConfigReactionComplex selectedRC;
 
-        private List<ReactionTemplate> leftList = new List<ReactionTemplate>();
-        private List<ReactionTemplate> rightList = new List<ReactionTemplate>();
+        private ObservableCollection<ConfigReaction> leftList = new ObservableCollection<ConfigReaction>();
+        private ObservableCollection<ConfigReaction> rightList = new ObservableCollection<ConfigReaction>();
 
-        public List<ReactionTemplate> LeftList
+        public ObservableCollection<ConfigReaction> LeftList
         {
             get
             {
@@ -39,7 +40,7 @@ namespace DaphneGui
                 leftList = value;
             }
         }
-        public List<ReactionTemplate> RightList
+        public ObservableCollection<ConfigReaction> RightList
         {
             get
             {
@@ -51,6 +52,7 @@ namespace DaphneGui
             }
         }
 
+        //To add a new rc
         public AddReacComplex(ReactionComplexDialogType type)
         {
             InitializeComponent();
@@ -62,46 +64,118 @@ namespace DaphneGui
                 Title = "Edit Reaction Complex";
             }
 
-            //mw = m;
-
             Initialize();
+            lbAllReactions.ItemsSource = LeftList;
+            lbCxReactions.ItemsSource = RightList;
 
-            lbReactions.DataContext = MainWindow.SC.SimConfig.entity_repository;
-            lbReactions.ItemsSource = MainWindow.SC.SimConfig.entity_repository.reactions;
-            lbCxReactions.ItemsSource = MainWindow.SC.SimConfig.entity_repository.reaction_complexes;
+        }
 
+        //To edit an existing rc
+        public AddReacComplex(ReactionComplexDialogType type, ConfigReactionComplex crc)
+        {
+            InitializeComponent();
+            dlgType = type;
+            selectedRC = crc;
+            Initialize();
         }
 
         private void Initialize()
         {
+            er = MainWindow.SC.SimConfig.entity_repository;
+            LeftList.Clear();
+            RightList.Clear();
+
             //if adding a new rc
             if (dlgType == ReactionComplexDialogType.AddComplex)
             {
                 //leftList is whole reactions list initially
-                //leftList = mw.Sim.ReactionTemplateList;
-                ////////leftList = new List<ReactionTemplate>(mw.Sim.ReactionTemplateList);
+                foreach (ConfigReaction reac in er.reactions)
+                {
+                    LeftList.Add(reac);
+                }                
                 //rightList is empty initially    
               
             }
-            //else editing existing rc
+
+            //else edit existing rc
             else 
             {
-                //leftList is whole reactions list minus rc list - make a copy of it               
-                //leftList = mw.Sim.ReactionTemplateList;  //this just points to original list, don't want that
-                ////////leftList = new List<ReactionTemplate>(mw.Sim.ReactionTemplateList);
-
-                ////////ReactionComplex rc = (ReactionComplex)(mw.lbComplexes.SelectedItem);
+                //leftList is whole reactions list minus rc reactions - make a copy of it  
+                foreach (ConfigReaction reac in er.reactions)
+                {
+                    leftList.Add(reac);
+                }
                 
-                //rightList is the reaction complex list initially - make a copy of it                
-                ////////rightList = new List<ReactionTemplate>(rc.RTList);
-                ////////foreach (ReactionTemplate rt in rightList)
-                ////////{
-                ////////    leftList.Remove(rt);
-                ////////}
+                //rightList is the reaction complex' reactions 
+                foreach (string rguid in selectedRC.reactions_guid_ref)
+                {
+                    rightList.Add(er.reactions_dict[rguid]);  
+                }
+
+                //don't show in left list, reactions that are already in reac complex
+                foreach (ConfigReaction cr in rightList)
+                {
+                    leftList.Remove(cr);
+                }
                
                 //rc name
-                ////////txtRcName.Text = rc.Name;
+                txtRcName.Text = selectedRC.Name;
             }
+
+            lbCxReactions.ItemsSource = null;
+            lbCxReactions.ItemsSource = RightList;
+
+            lbAllReactions.ItemsSource = null;
+            lbAllReactions.ItemsSource = LeftList;
+        }
+        
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            List<ConfigReaction> temp = new List<ConfigReaction>();
+            foreach (ConfigReaction cr in lbAllReactions.SelectedItems)
+            {
+                RightList.Add(cr);
+                temp.Add(cr);                                
+            }
+
+            foreach (ConfigReaction cr in temp)
+            {
+                LeftList.Remove(cr);
+            }
+
+            //lbCxReactions.ItemsSource = null;
+            //lbCxReactions.ItemsSource = RightList;
+
+            //listbox does not refresh without this
+            lbAllReactions.ItemsSource = null;
+            lbAllReactions.ItemsSource = LeftList;
+                        
+        }
+
+        private void btnRemove_Click(object sender, RoutedEventArgs e)
+        {
+            List<ConfigReaction> temp = new List<ConfigReaction>();
+            foreach (ConfigReaction cr in RightList)
+            {
+                temp.Add(cr); 
+            }
+
+            foreach (ConfigReaction reac in lbCxReactions.SelectedItems)
+            {
+                LeftList.Add(reac);
+                temp.Remove(reac);
+            }
+
+            RightList.Clear();
+            foreach (ConfigReaction cr in temp)
+            {
+                RightList.Add(cr);
+            }
+
+            lbCxReactions.ItemsSource = null;
+            lbCxReactions.ItemsSource = RightList;
+            lbAllReactions.ItemsSource = null;
+            lbAllReactions.ItemsSource = LeftList;
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -110,54 +184,27 @@ namespace DaphneGui
 
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
-                //ReactionComplex rc = (ReactionComplex)(mw.lbComplexes.SelectedItem);                
-                //mw.Sim.EditReactionComplex(rc, RightList);
+                selectedRC.reactions_guid_ref.Clear();
+                foreach (ConfigReaction reac in RightList)
+                {
+                    selectedRC.reactions_guid_ref.Add(reac.reaction_guid);
+                }
             }
             else
             {
-                //ReactionComplex rc = new ReactionComplex(txtRcName.Text, new TinyBall());              
-                //mw.Sim.AddReactionComplex(rc, RightList);
+                ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
+                crc.ReadOnly = false;
+                foreach (ConfigReaction reac in RightList)
+                {
+                    crc.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+                er.reaction_complexes.Add(crc);
             }
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
-        }
-
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (ReactionTemplate rt in lbReactions.SelectedItems)
-            {
-                ReactionTemplate rtnew = new ReactionTemplate();
-                rtnew = rt;
-                RightList.Add(rtnew);
-                LeftList.Remove(rt);                
-            }
-
-            lbCxReactions.ItemsSource = null;
-            lbCxReactions.ItemsSource = RightList;
-
-            lbReactions.ItemsSource = null;
-            lbReactions.ItemsSource = LeftList;
-                        
-        }
-
-        private void btnRemove_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (ReactionTemplate rt in lbCxReactions.SelectedItems)
-            {
-                ReactionTemplate rtnew = new ReactionTemplate();
-                rtnew = rt;
-                LeftList.Add(rtnew);
-                RightList.Remove(rt);
-            }
-
-            lbCxReactions.ItemsSource = null;
-            lbCxReactions.ItemsSource = RightList;
-
-            lbReactions.ItemsSource = null;
-            lbReactions.ItemsSource = LeftList;
         }
 
         private void AddReactions_Expanded(object sender, RoutedEventArgs e)

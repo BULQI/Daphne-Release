@@ -48,6 +48,7 @@
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
             <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
             <daph:CellGuidToCellReactionsConverter x:Key="CellGuidToCellReactionsConv" />
+            <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
             
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1142,6 +1143,14 @@
 
                         <Popup Name="myPopup" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" PlacementTarget="{Binding ElementName=cell_type_combo_box}" >
                             
+                            <Popup.Resources>
+                                <DataTemplate x:Key="reacsPopupItemTemplate">
+                                    <StackPanel Orientation="Horizontal" >
+                                        <TextBlock Text="{Binding }" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Popup.Resources>
+                            
                             <Popup.Style>
                                 <Style TargetType="Popup">
                                     <Style.Triggers>
@@ -1156,9 +1165,13 @@
                                 </Style>
                             </Popup.Style>
 
-                            <ListBox x:Name="lbTTt" MaxWidth="500" 
-                                 ItemsSource="{Binding ElementName=cell_type_combo_box, Path=SelectedItem, Converter={StaticResource CellGuidToCellReactionsConv}, ConverterParameter={StaticResource ecmReactionsListView}}">
+                            <StackPanel>
+                            <TextBlock Text="Reactions in this cell" Background="White" Foreground="Green"  ></TextBlock>
+                                <ListBox x:Name="lbTTt" MaxWidth="500" BorderThickness="2" BorderBrush="DarkBlue" Background="#F0F0F0F0" 
+                                 ItemsSource="{Binding ElementName=cell_type_combo_box, Path=SelectedItem, Converter={StaticResource CellGuidToCellReactionsConv}, ConverterParameter={StaticResource ecmReactionsListView}}"
+                                 ItemTemplate="{Binding Source={StaticResource reacsPopupItemTemplate}}"    >                                    
                             </ListBox>
+                            </StackPanel>
 
                         </Popup>
 
@@ -2124,7 +2137,7 @@
                     <TextBlock Text="{Binding Path=TotalReactionString}" Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}"/>
                     <TextBlock Text="    " />
                     <TextBlock Text="Rate:  " Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}"/>
-                    <TextBlock Text="{Binding Path=rate_const}" Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}" />
+                    <TextBlock Text="{Binding Path=rate_const}" Foreground="Black" />
                 </StackPanel>
             </DataTemplate>
 
@@ -2276,7 +2289,49 @@
                                   ItemsSource="{Binding Source={StaticResource boundaryTypes}}">
                         </ComboBox>
                         <Button Click="Button_Click"></Button>-->
-                    </StackPanel>                        
+                    </StackPanel>
+
+                    <!-- Cell interaction -->
+                    <TextBlock Text="Cell interaction" FontWeight="Bold" Margin="0,10,0,0" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="penetration resistance" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />                        
+                        <editors:DoubleEditBox x:Name="phi1_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="F2"
+                                                              StepValue="100"
+                                                              Width="50" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.phi1, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="phi2" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="3"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />
+                        
+                        <editors:DoubleEditBox x:Name="phi2_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="N1"
+                                                              StepValue="0.1"
+                                                              Width="50" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.phi2, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                        <TextBlock Text="µm^2/min^2" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -2289,7 +2344,7 @@
                         <DataTemplate x:Key="libMolListItemTemplate">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Path=Name}" 
-                                                   Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}" 
+                                                   Foreground="Black" 
                                                    Margin="5,0,0,0" />
                             </StackPanel>
                         </DataTemplate>
@@ -2418,11 +2473,11 @@
                                         <GridViewColumn Width="80" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>                                                
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding rate_const}">
+                                                    <TextBlock Text="{Binding rate_const}">       
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -2438,7 +2493,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -2721,7 +2776,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -2736,7 +2791,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -2927,7 +2982,7 @@
                             <StackPanel.Resources>
                                 <DataTemplate x:Key="reacComplexListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Path=Name}" Foreground="Red" />
+                                        <TextBlock Text="{Binding Path=Name}" />
                                     </StackPanel>
                                 </DataTemplate>
 
@@ -2998,7 +3053,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3015,7 +3070,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3418,7 +3473,7 @@
                                 <DataTemplate x:Key="libMolListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Path=Name}" 
-                                                   Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}" 
+                                                   Foreground="Black" 
                                                    Margin="5,0,0,0" />
                                     </StackPanel>
                                 </DataTemplate>
@@ -3537,7 +3592,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3554,7 +3609,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3617,7 +3672,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3632,7 +3687,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3675,7 +3730,7 @@
                                             <TextBlock Text="{Binding Path=Name}" />
                                         </StackPanel>
                                     </DataTemplate>
-                                    <DataTemplate x:Key="ecsReacComplexListItemTemplate">
+                                    <DataTemplate x:Key="ecsReacComplexListItemTemplate">                                        
                                         <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
                                                             ConverterParameter={StaticResource ecmReactionComplexesListView}}">
                                         </TextBlock>
@@ -3734,16 +3789,19 @@
                                                                 ConverterParameter={StaticResource ecmReactionComplexesListView}}" 
                                                                 />
                                     </StackPanel >
-                                    <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}">
+                                    <StackPanel x:Name="spReacComp"
+                                        Tag="{Binding ElementName=ReactionComplexListBox, Path=SelectedItem, 
+                                                        Converter={StaticResource ReacComplexGUIDtoReactionComplexConv},
+                                                        ConverterParameter={StaticResource ecmReactionComplexesListView}}">
 
                                         <!--<StackPanel.Resources>
                                             <CollectionViewSource x:Key="ecmReactionComplexReactionsListView"  
                                                 Source="{Binding Path=reactions_guid_ref}"/>
                                         </StackPanel.Resources>-->
 
-                                        <StackPanel.Resources>
+                                        <StackPanel.Resources>                                            
                                             <DataTemplate x:Key="cellReacListItemTemplate">
-                                                <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
                                                 </TextBlock>
                                             </DataTemplate>
@@ -3752,11 +3810,13 @@
                                         <TextBlock Text="Reactions" Margin="6,0"  />
 
                                         <!-- *********************************** -->
-                                        <ListBox x:Name="tmpReacListBox" MinHeight="50" Height="100" MaxHeight="100" AlternationCount="2"
-                                                             ItemsSource="{Binding reactions_guid_ref}"
-                                                             ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
-                                                             >
+                                        <ListBox x:Name="ecmRCReacsListBox" MinHeight="50" Height="100" MaxHeight="100" AlternationCount="2"
+                                                ItemsSource="{Binding ElementName=spReacComp, Path=Tag.reactions_guid_ref, Mode=OneWay, UpdateSourceTrigger=PropertyChanged }"
+                                                ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
+                                                 
+                                                >
                                         </ListBox>
+                                        
                                         <!--<ListView x:Name="lvEcsCRReactions" MinHeight="50"
                                               ItemsSource="{Binding Path=reactions_guid_ref}"
                                                 SelectedIndex="-1"
@@ -3785,7 +3845,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>
@@ -3800,7 +3860,7 @@
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
-                                                                        Value="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}">
+                                                                        Value="Black">
                                                                 </Setter>
                                                             </Style>
                                                         </TextBlock.Style>

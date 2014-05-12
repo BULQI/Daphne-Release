@@ -148,6 +148,10 @@
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
     <Compile Include="Workbench\ReactionComplexProcessor.cs" />
+    <Page Include="Dictionary1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

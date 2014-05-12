@@ -460,15 +460,7 @@ namespace DaphneGui
         {
             ConfigMolecule gm = new ConfigMolecule();
             gm.ReadOnly = false;
-            gm.ForegroundColor = System.Windows.Media.Colors.Black;
-            //bool bFound = false;
-            //if (bFound == true) {
-            //    MessageBox.Show("Cannot add a duplicate molecule name");
-            //    return;
-            //}
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
-            //lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
-
             lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }
 
@@ -481,7 +473,6 @@ namespace DaphneGui
 
             ConfigMolecule gm = new ConfigMolecule(cm);
             gm.ReadOnly = false;
-            gm.ForegroundColor = System.Windows.Media.Colors.Black;
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
             lbMol.SelectedIndex = lbMol.Items.Count - 1;
         }
@@ -584,22 +575,14 @@ namespace DaphneGui
         {
             AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
             if (arc.ShowDialog() == true)
-            {
-                ////////lbComplexes.ItemsSource = null;
-                ////////lbComplexes.ItemsSource = Sim.RCList;
-                ////////lbComplexes.Focus();
-                ////////lbComplexes.SelectedItem = 0;
-            }
+                lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
 
         private void btnEditComplex_Click(object sender, RoutedEventArgs e)
         {
-            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
-            if (arc.ShowDialog() == true)
-            {
-                ////////lbComplexes.ItemsSource = null;
-                ////////lbComplexes.ItemsSource = Sim.RCList;
-            }
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
+            arc.ShowDialog();
         }
 
         private void btnRemoveComplex_Click(object sender, RoutedEventArgs e)

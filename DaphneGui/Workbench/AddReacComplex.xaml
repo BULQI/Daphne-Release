@@ -5,14 +5,24 @@
         xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
         Title="Add/Edit Reaction Complex" Height="400" Width="640"
         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="..\Dictionary1.xaml" />
+    </Window.Resources>
 
-    <StackPanel>
+    <StackPanel >
+        <!-- Reaction Complex section -->
         <Grid>
             <Grid.Resources>
                 <DataTemplate x:Key="reactionListItemTemplate">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding Path=TotalReactionString}" />
                     </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="rcReacListItemTemplate">
+                    <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                    </TextBlock>
                 </DataTemplate>
             </Grid.Resources>
 
@@ -32,9 +42,8 @@
             <TextBlock Text="Select Reactions to include in this Complex" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="4" FontWeight="Bold"  Margin="10,10,0,0" />
             <TextBlock Text="All Reactions" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" FontWeight="Bold"  Margin="10,10,0,0" />
 
-            <ListBox x:Name="lbReactions" Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"  Margin="10,10,0,0" SelectionMode="Multiple"
-                 ItemsSource="{Binding Path=obsLeftList}"
-                 ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
+            <ListBox x:Name="lbAllReactions" Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"  Margin="10,10,0,0" SelectionMode="Multiple"
+                 ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}, Mode=OneWay}"
                  SelectedIndex="-1"
                  >
             </ListBox>
@@ -43,15 +52,20 @@
             <Button x:Name="btnRemove" Content="&lt;-Remove" Grid.Column="1" Grid.Row="3" Width="70" Height="24" HorizontalAlignment="Center" VerticalAlignment="Top" Click="btnRemove_Click"></Button>
 
             <TextBlock Text="Reactions in this Complex" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="4" FontWeight="Bold"  Margin="0,10,0,0" />
-            <ListBox x:Name="lbCxReactions" Grid.Column="2" Grid.Row="2" Grid.RowSpan="2" Margin="0,10,0,0" SelectionMode="Multiple"
-                 ItemsSource="{Binding Path=ListReactions}"
-                 ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
-                 SelectedIndex="-1"
-                 >
 
-            </ListBox>
+                <ListBox x:Name="lbCxReactions" Grid.Column="2" Grid.Row="2" Grid.RowSpan="2" Margin="0,10,0,0" SelectionMode="Multiple"
+                     ItemsSource="{Binding Path=RightList}"
+                         DisplayMemberPath="TotalReactionString"
+                     
+                     SelectedIndex="-1"
+                     >
+
+                </ListBox>
+
 
         </Grid>
+        
+        <!-- Add Reactions section -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />

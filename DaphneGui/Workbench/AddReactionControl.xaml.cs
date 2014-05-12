@@ -173,7 +173,6 @@ namespace DaphneGui
 
             ConfigReaction cr = new ConfigReaction();
             cr.ReadOnly = false;
-            cr.ForegroundColor = System.Windows.Media.Colors.Black;
             cr.rate_const = inputRateConstant;
 
             //NEED TO UPDATE THIS - SKG 8/6/13

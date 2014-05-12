@@ -115,6 +115,7 @@ namespace Daphne
         public Scenario scenario { get; set; }
         public Scenario rc_scenario { get; set; }
         public EntityRepository entity_repository { get; set; }
+        public SimulationParams sim_params { get; set; }
 
         //public ChartViewToolWindow ChartWindow;
 
@@ -137,8 +138,7 @@ namespace Daphne
             scenario = new Scenario();
             rc_scenario = new Scenario();
             entity_repository = new EntityRepository();
-
-            
+            sim_params = new SimulationParams();
 
             ////LoadDefaultGlobalParameters();
             //LoadUserDefinedItems();           
@@ -642,6 +642,8 @@ namespace Daphne
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
+        
+
         public Scenario()
         {
             simInterpolate = SimStates.Linear;
@@ -653,7 +655,14 @@ namespace Daphne
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
+
         }
+    }
+
+    public class SimulationParams
+    {
+        public double phi1 { get; set; }
+        public double phi2 { get; set; }
     }
 
     public class EntityRepository 
@@ -707,7 +716,7 @@ namespace Daphne
             sampling_interval = 1;
         }
     }
-
+    
     public class ConfigEnvironment : EntityModelBase
     {
         private int _extent_x;
@@ -788,6 +797,8 @@ namespace Daphne
         public ConfigCompartment ecs { get; set; }
 
         public bool toroidal { get; set; }
+
+        
 
         public ConfigEnvironment()
         {
@@ -1193,7 +1204,6 @@ namespace Daphne
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
         public bool   ReadOnly { get; set; }
-        public Color  ForegroundColor { get; set; }
         public MoleculeLocation molecule_location { get; set; }
 
         public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
@@ -1205,7 +1215,6 @@ namespace Daphne
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
             ReadOnly = true;
-            ForegroundColor = Colors.Red;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -1219,7 +1228,6 @@ namespace Daphne
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
             ReadOnly = true;
-            ForegroundColor = Colors.Red;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -1232,7 +1240,6 @@ namespace Daphne
             EffectiveRadius = gm.EffectiveRadius;
             DiffusionCoefficient = gm.DiffusionCoefficient;
             ReadOnly = gm.ReadOnly;
-            ForegroundColor = gm.ForegroundColor;
             molecule_location = gm.molecule_location;
         }
     }
@@ -1554,7 +1561,6 @@ namespace Daphne
 
             rate_const = 0;
             ReadOnly = true;
-            ForegroundColor = Colors.Red;
 
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
@@ -1637,7 +1643,6 @@ namespace Daphne
         public string reaction_template_guid_ref { get; set; }
         public double rate_const { get; set; }
         public bool ReadOnly { get; set; }
-        public Color ForegroundColor { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
@@ -1674,9 +1679,7 @@ namespace Daphne
         public string reaction_complex_guid { get; set; }
         public ObservableCollection<string> reactions_guid_ref { get; set; }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-
         public bool ReadOnly { get; set; }
-        public Color ForegroundColor { get; set; }
 
         public ConfigReactionComplex()
         {
@@ -1686,7 +1689,6 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReadOnly = true;
-            ForegroundColor = Colors.Red;
         }
         public ConfigReactionComplex(string name)
         {
@@ -1694,7 +1696,6 @@ namespace Daphne
             reaction_complex_guid = id.ToString();
             Name = name;
             ReadOnly = true;
-            ForegroundColor = Colors.Red;
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
         }
@@ -1704,7 +1705,6 @@ namespace Daphne
             reaction_complex_guid = id.ToString();
             Name = "NewRC";
             ReadOnly = false;
-            ForegroundColor = Colors.Black;
             reactions_guid_ref = new ObservableCollection<string>();
             reactions_guid_ref = src.reactions_guid_ref;
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
@@ -2475,8 +2475,11 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             ConfigCell cc = value as ConfigCell;
-            ObservableCollection<string> reacStrings = new ObservableCollection<string>();
-            reacStrings.Add("Reactions:");
+
+            if (cc == null)
+                return null;
+
+            ObservableCollection<string> reacStrings = new ObservableCollection<string>();            
 
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
             ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
@@ -2500,7 +2503,7 @@ namespace Daphne
                 }
             }
 
-            if (reacStrings.Count == 1)
+            if (reacStrings.Count == 0)
                 reacStrings.Add("No reactions in this cell.");
 
             return reacStrings;
@@ -2584,6 +2587,46 @@ namespace Daphne
                 }
             }
             return rc_string;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    //ReacComplexGUIDtoReactionStringsConverter
+    /// <summary>
+    /// Converter to go between molecule GUID references in MolPops
+    /// and molecule names kept in the repository of molecules.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(ConfigReactionComplex))]
+    public class ReacComplexGUIDtoReactionComplexConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+
+            if (guid == null)
+                return null;
+
+            ConfigReactionComplex rcReturn = null;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigReactionComplex> rc_list = cvs.Source as ObservableCollection<ConfigReactionComplex>;
+            if (rc_list != null)
+            {
+                foreach (ConfigReactionComplex crc in rc_list)
+                {
+                    if (crc.reaction_complex_guid == guid)
+                    {
+                        rcReturn = crc; 
+                        break;
+                    }
+                }
+            }
+            return rcReturn ;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
