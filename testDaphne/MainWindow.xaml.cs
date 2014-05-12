@@ -445,7 +445,6 @@ namespace testDaphne
             // Add all molecular populations
             //
 
-
             // Set [CXCL13]max ~ f*Kd, where Kd is the CXCL13:CXCR5 binding affinity and f is a constant
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
@@ -466,8 +465,7 @@ namespace testDaphne
             }
 
             // Add Cytosol molecular populations
-            // Start with a non-zero (activated) driver concentration and global gradient
-            double[] initGrad = new double[3] { 0, 2.0, 2.0 };
+            // Start with a non-zero (activated) driver concentration
             double initConc = 250;
 
             foreach (KeyValuePair<int, Cell> kvp in sim.Cells)
@@ -572,10 +570,8 @@ namespace testDaphne
             // Kd ~ 3 nM for CXCL12:CXCR4. Estimate the same binding affinity for CXCL13:CXCR5.
             // 1 nM = (1e-6)*(1e-18)*(6.022e23) molecule/um^3
             double maxConc = 2 * 3.0 * 1e-6 * 1e-18 * 6.022e23;
-
-            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 };
-
-            double[] center = new double[sim.ECS.Space.Interior.Dim];
+            double[] sigma = { extent[0] / 5.0, extent[1] / 5.0, extent[2] / 5.0 },
+                     center = new double[sim.ECS.Space.Interior.Dim];
 
             center[0] = extent[0] / 2.0;
             center[1] = extent[1] / 2.0;
@@ -618,7 +614,6 @@ namespace testDaphne
                 sim.ECS.Space.Reactions.Add(new BoundaryDissociation(receptor, ligand, complex, k1minus));
 
                 kvp.Value.IsMotile = false;
-
             }
         }
 

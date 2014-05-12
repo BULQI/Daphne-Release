@@ -1119,13 +1119,68 @@ namespace ManifoldRing
         /// <returns>gradient vector</returns>
         public override double[] Grad(double[] x, ScalarField sf)
         {
+            double[] grad = new double[] { 0, 0, 0 };
+
             // test for out of bounds
-            //if (localIsOn(x) == false)
-            //{
-            //    // Note: is returning zero the right thing to do when x is out of bounds?
-            //    return new double[] { 0, 0, 0 };
-            //}
-            throw new NotImplementedException();
+            if (localIsOn(x) == false)
+            {
+                // Note: is returning the null vector the right thing to do when x is out of bounds?
+                return grad;
+            }
+
+            int[] idx = localToIndexArray(x);
+
+            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
+            // In this case we can decrement the origin of the interpolation voxel and get the same result
+            // When we decrement i -> i-1, then dx = 1, similarly for j
+            if (idx[0] == nNodesPerSide[0] - 1)
+            {
+                idx[0]--;
+            }
+            if (idx[1] == nNodesPerSide[1] - 1)
+            {
+                idx[1]--;
+            }
+
+            double dx = x[0] / stepSize - idx[0],
+                   dy = x[1] / stepSize - idx[1],
+                   dxmult, dymult;
+            int[] di = new int[2], dj = new int[2];
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int d = 0; d < 2; d++)
+                {
+                    // x-direction
+                    if (i == 0)
+                    {
+                        // interpolation multipliers
+                        dxmult = 1;
+                        dymult = d == 0 ? (1 - dy) : dy;
+                        // index differences
+                        di[0] = 1;
+                        di[1] = 0;
+                        dj[0] = d;
+                        dj[1] = d;
+                    }
+                    else // y-direction
+                    {
+                        // interpolation multipliers
+                        dxmult = d == 0 ? (1 - dx) : dx;
+                        dymult = 1;
+                        // index differences
+                        di[0] = d;
+                        di[1] = d;
+                        dj[0] = 1;
+                        dj[1] = 0;
+                    }
+                    grad[i] += dxmult * dymult *
+                               (sf.array[(idx[0] + di[0]) + (idx[1] + dj[0]) * nNodesPerSide[0]] - sf.array[(idx[0] + di[1]) + (idx[1] + dj[1]) * nNodesPerSide[0]]);
+                }
+                grad[i] /= stepSize;
+            }
+
+            return grad;
         }
 
         /// <summary>
@@ -1283,94 +1338,93 @@ namespace ManifoldRing
         /// <returns>gradient vector</returns>
         public override double[] Grad(double[] x, ScalarField sf)
         {
+            double[] grad = new double[] { 0, 0, 0 };
+
+            // test for out of bounds
             if (localIsOn(x) == false)
             {
-                return new double[] { 0, 0, 0 };
+                // Note: is returning the null vector the right thing to do when x is out of bounds?
+                return grad;
             }
 
-            double[] p = new double[] { 0, 0, 0 }, grad = new double[] { 0, 0, 0 };
-            double delta = 0.1 * stepSize, divisor;
+            int[] idx = localToIndexArray(x);
 
-            // x-direction
-            divisor = 0;
-            // plus
-            p[0] = x[0] + delta;
-            p[1] = x[1];
-            p[2] = x[2];
-            if (localIsOn(p) == true)
+            // When i == NumPoints[0] - 1, we can't look at the (i + 1)th grid point
+            // In this case we can decrement the origin of the interpolation voxel and get the same result
+            // When we decrement i -> i-1, then dx = 1, similarly for j and k
+            if (idx[0] == nNodesPerSide[0] - 1)
             {
-                divisor += delta;
-                grad[0] += sf.Value(p);
+                idx[0]--;
             }
-            // minus
-            p[0] = x[0] - delta;
-            if (localIsOn(p) == true)
+            if (idx[1] == nNodesPerSide[1] - 1)
             {
-                divisor += delta;
-                grad[0] -= sf.Value(p);
+                idx[1]--;
             }
-            if (divisor != 0)
+            if (idx[2] == nNodesPerSide[2] - 1)
             {
-                grad[0] /= divisor;
-            }
-            else
-            {
-                throw new Exception("No valid direction found in gradient calculation.");
+                idx[2]--;
             }
 
-            // y-direction
-            divisor = 0;
-            // plus
-            p[0] = x[0];
-            p[1] = x[1] + delta;
-            p[2] = x[2];
-            if (localIsOn(p) == true)
+            double dx = x[0] / stepSize - idx[0],
+                   dy = x[1] / stepSize - idx[1],
+                   dz = x[2] / stepSize - idx[2],
+                   dxmult, dymult, dzmult;
+            int[] di = new int[2], dj = new int[2], dk = new int[2];
+
+            for (int i = 0; i < 3; i++)
             {
-                divisor += delta;
-                grad[1] += sf.Value(p);
-            }
-            // minus
-            p[1] = x[1] - delta;
-            if (localIsOn(p) == true)
-            {
-                divisor += delta;
-                grad[1] -= sf.Value(p);
-            }
-            if (divisor != 0)
-            {
-                grad[1] /= divisor;
-            }
-            else
-            {
-                throw new Exception("No valid direction found in gradient calculation.");
+                for (int d = 0; d < 2; d++)
+                {
+                    // x-direction
+                    if (i == 0)
+                    {
+                        // interpolation multipliers
+                        dxmult = 1;
+                        dymult = d == 0 ? (1 - dy) : dy;
+                        dzmult = d == 0 ? (1 - dz) : dz;
+                        // index differences
+                        di[0] = 1;
+                        di[1] = 0;
+                        dj[0] = d;
+                        dj[1] = d;
+                        dk[0] = d;
+                        dk[1] = d;
+                    }
+                    else if (i == 1) // y-direction
+                    {
+                        // interpolation multipliers
+                        dxmult = d == 0 ? (1 - dx) : dx;
+                        dymult = 1;
+                        dzmult = d == 0 ? (1 - dz) : dz;
+                        // index differences
+                        di[0] = d;
+                        di[1] = d;
+                        dj[0] = 1;
+                        dj[1] = 0;
+                        dk[0] = d;
+                        dk[1] = d;
+                    }
+                    else // z-direction
+                    {
+                        // interpolation multipliers
+                        dxmult = d == 0 ? (1 - dx) : dx;
+                        dymult = d == 0 ? (1 - dy) : dy;
+                        dzmult = 1;
+                        // index differences
+                        di[0] = d;
+                        di[1] = d;
+                        dj[0] = d;
+                        dj[1] = d;
+                        dk[0] = 1;
+                        dk[1] = 0;
+                    }
+                    grad[i] += dxmult * dymult * dzmult *
+                               (sf.array[(idx[0] + di[0]) + (idx[1] + dj[0]) * nNodesPerSide[0] + (idx[2] + dk[0]) * nNodesPerSide[0] * nNodesPerSide[1]] -
+                                sf.array[(idx[0] + di[1]) + (idx[1] + dj[1]) * nNodesPerSide[0] + (idx[2] + dk[1]) * nNodesPerSide[0] * nNodesPerSide[1]]);
+                }
+                grad[i] /= stepSize;
             }
 
-            // z-direction
-            divisor = 0;
-            // plus
-            p[0] = x[0];
-            p[1] = x[1];
-            p[2] = x[2] + delta;
-            if (localIsOn(p) == true)
-            {
-                divisor += delta;
-                grad[2] += sf.Value(p);
-            }
-            // minus
-            p[2] = x[2] - delta;
-            if (localIsOn(p) == true)
-            {
-                divisor += delta;
-                grad[2] -= sf.Value(p);
-            }
-            if (divisor != 0)
-            {
-                grad[2] /= divisor;
-            }
-            else
-            {
-                throw new Exception("No valid direction found in gradient calculation.");
-            }
             return grad;
         }
 
