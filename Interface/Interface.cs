@@ -67,6 +67,14 @@ namespace Interface
         }
 
         public abstract double get(double[] point);
+        public abstract double get(int i);
+        public abstract void set(int i, double d);
+
+        public double this[int i]
+        {
+            get { return get(i); }
+            set { set(i, value); }
+        }
 
         // how operators are to be defined etc is not clear
         public abstract void plus(ScalarField s);
@@ -88,6 +96,16 @@ namespace Interface
         public override double get(double[] point)
         {
             return 0;
+        }
+
+        public override double get(int i)
+        {
+            return 0;
+        }
+
+        public override void set(int i, double d)
+        {
+            throw new NotImplementedException();
         }
 
         public override void plus(ScalarField s)
@@ -127,6 +145,16 @@ namespace Interface
         public override double get(double[] point)
         {
             return 0;
+        }
+
+        public override double get(int i)
+        {
+            return 0;
+        }
+
+        public override void set(int i, double d)
+        {
+            throw new NotImplementedException();
         }
 
         public override void plus(ScalarField s)
@@ -169,42 +197,20 @@ namespace Interface
     }
 
     /* MolecularPopulation */
-    public abstract class MolecularPopulation : IDynamic
+    public class MolecularPopulation : IDynamic
     {
         private readonly IMolecule molecule;
         private readonly ScalarField concentration;
         private readonly ScalarField flux;
 
-        public MolecularPopulation(IMolecule molecule, ScalarField concentraiton, ScalarField flux)
+        public MolecularPopulation(IMolecule molecule, ScalarField concentration, ScalarField flux)
         {
             this.molecule = molecule;
-            this.concentration = concentraiton;
+            this.concentration = concentration;
             this.flux = flux;
         }
 
-        public abstract void step(double dt);
-    }
-
-    public class DiscreteMolecularPopulation : MolecularPopulation
-    {
-        public DiscreteMolecularPopulation(IMolecule molecule, ScalarField concentraiton, ScalarField flux) :
-            base(molecule, concentraiton, flux)
-        {
-        }
-
-        public override void step(double dt)
-        {
-        }
-    }
-
-    public class ContinuousMolecularPopulation : MolecularPopulation
-    {
-        public ContinuousMolecularPopulation(IMolecule molecule, ScalarField concentraiton, ScalarField flux) :
-            base(molecule, concentraiton, flux)
-        {
-        }
-
-        public override void step(double dt)
+        public void step(double dt)
         {
         }
     }
@@ -285,7 +291,7 @@ namespace Interface
     }
 
 
-    /* Reaaction Complex */
+    /* Reaction Complex */
     public class ReactionComplex : IDynamic
     {
         private Reaction[] reactions;
@@ -316,24 +322,24 @@ namespace Interface
             double[,] rotation = new double[,] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
             Embedding cytosolToMembrane = new Embedding(cytosol, membrane, origin, rotation);
             ScalarField concentration = new DiscreteScalarField(cytosol, _ => 0);
-            ScalarField flux = new MomentExpansionScalarField(membrane, _ => 0);
+            ScalarField flux = new DiscreteScalarField(membrane, _ => 0);
             IMolecule a = new Molecule("molecule", 0.0);
             IMolecule b = new Molecule("molecule", 0.0);
-            IMolecule c = new Molecule("mole\tcule", 0.0);
-            MolecularPopulation molecularPopulationA = new DiscreteMolecularPopulation(a, concentration, flux);
-            MolecularPopulation molecularPopulationB = new DiscreteMolecularPopulation(b, concentration, flux);
-            MolecularPopulation molecularPopulationC = new ContinuousMolecularPopulation(c, concentration, flux);
+            IMolecule c = new Molecule("molecule", 0.0);
+            MolecularPopulation molecularPopulationA = new MolecularPopulation(a, concentration, flux);
+            MolecularPopulation molecularPopulationB = new MolecularPopulation(b, concentration, flux);
+            MolecularPopulation molecularPopulationC = new MolecularPopulation(c, concentration, flux);
             double[] sigmas = new double[] { 1, 1, 1 };
             double[] taus = new double[] { 0, 0, 0 };
             List<MolecularPopulation> reactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
             List<MolecularPopulation> products = new List<MolecularPopulation> { molecularPopulationC };
-            List<MolecularPopulation> inteiriorReactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
-            List<MolecularPopulation> interiorRroducts = new List<MolecularPopulation> { molecularPopulationC };
+            List<MolecularPopulation> interiorReactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
+            List<MolecularPopulation> interiorProducts = new List<MolecularPopulation> { molecularPopulationC };
             List<MolecularPopulation> boundaryReactants = new List<MolecularPopulation> { molecularPopulationA, molecularPopulationB };
             List<MolecularPopulation> boundaryProducts = new List<MolecularPopulation> { molecularPopulationC };
             double rate = 1.0;
             Reaction interiorReaction = new InteriorReaction(sigmas, taus, reactants, products, rate);
-            Reaction boundaryReaction = new BoundaryReaction(sigmas, taus, inteiriorReactants, interiorRroducts, boundaryReactants, boundaryProducts, rate);
+            Reaction boundaryReaction = new BoundaryReaction(sigmas, taus, interiorReactants, interiorProducts, boundaryReactants, boundaryProducts, rate);
             Reaction[] reactions = new Reaction[] { interiorReaction, boundaryReaction };
             ReactionComplex reactionComplex = new ReactionComplex(reactions);
 
