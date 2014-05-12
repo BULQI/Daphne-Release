@@ -661,6 +661,9 @@ namespace Daphne
                                 cell.Differentiator.AddState(j, config_diffScheme.Driver.states[j]);
                             }
                         }
+                        // Set cell state and corresponding gene activity levels
+                        cell.DifferentiationState = cell.Differentiator.CurrentState;
+                        cell.SetGeneActivities();
                     }
 #endif
 
@@ -742,7 +745,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (config_tde.driver_mol_guid_ref != null)
+                    if ((config_tde.driver_mol_guid_ref != null) && (config_tde.driver_mol_guid_ref != ""))
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;
