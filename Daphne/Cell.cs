@@ -186,8 +186,7 @@ namespace Daphne
             divisionBehavior.Step(dt);
             if (divisionBehavior.TransitionOccurred == true && divisionBehavior.CurrentState == 1)
             {
-                cytokinetic = false;
-                // reset transition
+                cytokinetic = true;
                 divisionBehavior.TransitionOccurred = false;
                 divisionBehavior.CurrentState = 0;
             }
@@ -223,145 +222,147 @@ namespace Daphne
             // the daughter is constructed on the same blueprint as the mother
             Cell daughter = null;
 
-            if (cytokinetic == true)
+            // set the mother's new post-division state
+            cytokinetic = false;
+            
+            // force reset
+            state.F[0] = state.F[1] = state.F[2] = 0;
+            // velocity reset
+            state.V[0] = state.V[1] = state.V[2] = 0;
+            // halve the chemistry
+            foreach (MolecularPopulation mp in Cytosol.Populations.Values)
             {
-                // set the mother's new post-division state
-                cytokinetic = false;
-                // force reset
-                state.F[0] = state.F[1] = state.F[2] = 0;
-                // velocity reset
-                state.V[0] = state.V[1] = state.V[2] = 0;
-                // half the chemistry
-                foreach (MolecularPopulation mp in Cytosol.Populations.Values)
+                mp.Conc.Multiply(0.5);
+            }
+            foreach (MolecularPopulation mp in PlasmaMembrane.Populations.Values)
+            {
+                mp.Conc.Multiply(0.5);
+            }
+
+            // create daughter
+            daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
+            // same population id
+            daughter.Population_id = Population_id;
+            // same state
+            daughter.setState(state);
+            // but offset the daughter randomly
+            double[] delta = radius * Rand.RandomDirection(daughter.state.X.Length);
+
+            for (int i = 0; i < delta.Length; i++)
+            {
+                this.state.X[i] -= delta[i];
+                daughter.state.X[i] += delta[i];
+            }
+
+            daughter.cytokinetic = false;
+
+            // the daughter's state dependent on the mother's pre-division state
+
+            // cytosol molpops
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
+            {
+                MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
+
+                newMP.Initialize("explicit", kvp.Value.CopyArray());
+                daughter.Cytosol.Populations.Add(kvp.Key, newMP);
+            }
+            // membrane molpops
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
+            {
+                MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
+
+                newMP.Initialize("explicit", kvp.Value.CopyArray());
+                daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
+            }
+            // genes
+            foreach (KeyValuePair<string, Gene> kvp in Genes)
+            {
+                Gene newGene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", kvp.Value.Name), new ConstructorArgument("copyNumber", kvp.Value.CopyNumber), new ConstructorArgument("actLevel", kvp.Value.ActivationLevel));
+                daughter.Genes.Add(kvp.Key, newGene);
+            }
+
+            // reactions
+            ConfigCompartment[] configComp = new ConfigCompartment[2];
+            List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
+            List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
+            List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
+
+            CellPopulation cp = Simulation.SimConfigHandle.GetCellPopulation(daughter.Population_id);
+
+            configComp[0] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
+            configComp[1] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+
+            bulk_reacs[0] = Simulation.SimConfigHandle.GetReactions(configComp[0], false);
+            bulk_reacs[1] = Simulation.SimConfigHandle.GetReactions(configComp[1], false);
+            boundary_reacs = Simulation.SimConfigHandle.GetReactions(configComp[0], true);
+            transcription_reacs = Simulation.SimConfigHandle.GetTranscriptionReactions(configComp[0]);
+
+            // cytosol bulk reactions
+            Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.SimConfigHandle.entity_repository, bulk_reacs[0]);
+            // membrane bulk reactions
+            Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, bulk_reacs[1]);
+            // boundary reactions
+            Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, boundary_reacs);
+            // transcription reactions
+            Simulation.AddCellTranscriptionReactions(daughter, Simulation.SimConfigHandle.entity_repository, transcription_reacs);
+
+            // behaviors
+
+            // locomotion
+            daughter.IsMotile = isMotile;
+            if (isMotile == true)
+            {
+                MolecularPopulation driver = daughter.Cytosol.Populations[Locomotor.Driver.MoleculeKey];
+
+                daughter.Locomotor = new Locomotor(driver, Locomotor.TransductionConstant);
+                daughter.DragCoefficient = DragCoefficient;
+            }
+
+            // death
+            foreach(KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DeathBehavior.Drivers)
+            {
+                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
                 {
-                    mp.Conc.Multiply(0.5);
+                    TransitionDriverElement tde = new TransitionDriverElement();
+
+                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                    tde.Alpha = kvp_inner.Value.Alpha;
+                    tde.Beta = kvp_inner.Value.Beta;
+                    // add it to the daughter
+                    daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
-                foreach (MolecularPopulation mp in PlasmaMembrane.Populations.Values)
+            }
+
+            // division
+            foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DivisionBehavior.Drivers)
+            {
+                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
                 {
-                    mp.Conc.Multiply(0.5);
+                    TransitionDriverElement tde = new TransitionDriverElement();
+                    // set both the mother's and the daughter's driver populations to zero
+                    this.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey].Conc.reset(0);
+                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                    tde.DriverPop.Conc.reset(0);
+                    tde.Alpha = kvp_inner.Value.Alpha;
+                    tde.Beta = kvp_inner.Value.Beta;
+                    // add it to the daughter
+                    daughter.DivisionBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
+            }
 
-                // create daughter
-                daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
-                // same population id
-                daughter.Population_id = Population_id;
-                // same state
-                daughter.setState(state);
-                // but offset the daughter randomly
-                double[] delta = 2 * radius * Rand.RandomDirection(daughter.state.X.Length);
-
-                for (int i = 0; i < delta.Length; i++)
+            // differentiation
+            foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
+            {
+                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
                 {
-                    daughter.state.X[i] += delta[i];
+                    TransitionDriverElement tde = new TransitionDriverElement();
+
+                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                    tde.Alpha = kvp_inner.Value.Alpha;
+                    tde.Beta = kvp_inner.Value.Beta;
+                    // add it to the daughter
+                    daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
-
-                // the daughter's state dependent on the mother's pre-division state
-
-                // cytosol molpops
-                foreach (KeyValuePair<string, MolecularPopulation> kvp in Cytosol.Populations)
-                {
-                    MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.Cytosol));
-
-                    newMP.Initialize("explicit", kvp.Value.CopyArray());
-                    daughter.Cytosol.Populations.Add(kvp.Key, newMP);
-                }
-                // membrane molpops
-                foreach (KeyValuePair<string, MolecularPopulation> kvp in PlasmaMembrane.Populations)
-                {
-                    MolecularPopulation newMP = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", kvp.Value.Molecule), new ConstructorArgument("moleculeKey", kvp.Key), new ConstructorArgument("comp", daughter.PlasmaMembrane));
-
-                    newMP.Initialize("explicit", kvp.Value.CopyArray());
-                    daughter.PlasmaMembrane.Populations.Add(kvp.Key, newMP);
-                }
-                // genes
-                foreach (KeyValuePair<string, Gene> kvp in Genes)
-                {
-                    Gene newGene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", kvp.Value.Name), new ConstructorArgument("copyNumber", kvp.Value.CopyNumber), new ConstructorArgument("actLevel", kvp.Value.ActivationLevel));
-                    daughter.Genes.Add(kvp.Key, newGene);
-                }
-
-                // reactions
-                ConfigCompartment[] configComp = new ConfigCompartment[2];
-                List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
-                List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
-                List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
-
-                CellPopulation cp = Simulation.SimConfigHandle.GetCellPopulation(daughter.Population_id);
-
-                configComp[0] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-                configComp[1] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
-
-                bulk_reacs[0] = Simulation.SimConfigHandle.GetReactions(configComp[0], false);
-                bulk_reacs[1] = Simulation.SimConfigHandle.GetReactions(configComp[1], false);
-                boundary_reacs = Simulation.SimConfigHandle.GetReactions(configComp[0], true);
-                transcription_reacs = Simulation.SimConfigHandle.GetTranscriptionReactions(configComp[0]);
-
-                // cytosol bulk reactions
-                Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.SimConfigHandle.entity_repository, bulk_reacs[0]);
-                // membrane bulk reactions
-                Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, bulk_reacs[1]);
-                // boundary reactions
-                Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, boundary_reacs);
-                // transcription reactions
-                Simulation.AddCellTranscriptionReactions(daughter, Simulation.SimConfigHandle.entity_repository, transcription_reacs);
-
-                // behaviors
-
-                // locomotion
-                daughter.IsMotile = isMotile;
-                if (isMotile == true)
-                {
-                    MolecularPopulation driver = daughter.Cytosol.Populations[Locomotor.Driver.MoleculeKey];
-
-                    daughter.Locomotor = new Locomotor(driver, Locomotor.TransductionConstant);
-                    daughter.DragCoefficient = DragCoefficient;
-                }
-
-                // death
-                foreach(KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DeathBehavior.Drivers)
-                {
-                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                        tde.Alpha = kvp_inner.Value.Alpha;
-                        tde.Beta = kvp_inner.Value.Beta;
-                        // add it to the daughter
-                        daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                    }
-                }
-
-                // division
-                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DivisionBehavior.Drivers)
-                {
-                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                        tde.Alpha = kvp_inner.Value.Alpha;
-                        tde.Beta = kvp_inner.Value.Beta;
-                        // add it to the daughter
-                        daughter.DivisionBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                    }
-                }
-
-                // differentiation
-                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
-                {
-                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-
-                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                        tde.Alpha = kvp_inner.Value.Alpha;
-                        tde.Beta = kvp_inner.Value.Beta;
-                        // add it to the daughter
-                        daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                    }
-                }
-
             }
             
             return daughter;
