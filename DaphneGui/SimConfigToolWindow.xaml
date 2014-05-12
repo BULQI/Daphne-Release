@@ -4282,12 +4282,7 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
-                            </Expander>
-                            <ListBox x:Name="lbRptCells" MinHeight="100" 
-                            ItemsSource="{Binding Path=entity_repository.cells}" 
-                             DisplayMemberPath="CellName"
-                            SelectedIndex="0"
-                            />
+                            </Expander>                            
                             <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Molecules in membrane"
@@ -4299,7 +4294,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False" 
-                                    ItemsSource="{Binding ElementName=lbRptCells, Path=SelectedItem.membrane.molpops}"                            
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.membrane.molpops}"                            
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
