@@ -75,6 +75,7 @@ namespace DaphneGui
         private static int repetition;
         private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
+        private bool mutex = false;
 
         /// <summary>
         /// uri for the scenario file
@@ -1336,6 +1337,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
+            runButton.IsEnabled = false;
+            mutex = true;
+
             if (sim.RunStatus == Simulation.RUNSTAT_RUN)
             {
                 sim.RunStatus = Simulation.RUNSTAT_ABORT;
@@ -1354,6 +1358,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void runButton_Click(object sender, RoutedEventArgs e)
         {
+            resetButton.IsEnabled = false;
+            mutex = true;
+
             runSim();
         }
 
@@ -1875,6 +1882,11 @@ namespace DaphneGui
                     //    }
                     //}
                 }
+                if (mutex == true)
+                {
+                    runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(simControlUpdate));
+                    mutex = false;
+                }
             }
         }
 
@@ -1956,6 +1968,12 @@ namespace DaphneGui
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
             gc.Rwc.Focus();
+        }
+
+        private void simControlUpdate()
+        {
+            resetButton.IsEnabled = true;
+            runButton.IsEnabled = true;
         }
 
         private bool saveTempFiles()
