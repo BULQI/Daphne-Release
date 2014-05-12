@@ -222,17 +222,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// zero all cell forces
-        /// </summary>
-        private void resetCellForces()
-        {
-            foreach (Cell c in Simulation.dataBasket.Cells.Values)
-            {
-                c.resetForce();
-            }
-        }
-
-        /// <summary>
         /// this version of the function avoids excessive loops
         /// </summary>
         private void updateGridAndPairs()
@@ -483,8 +472,6 @@ namespace Daphne
 
         private void pairInteractions(double dt)
         {
-            // zero all cell forces
-            resetCellForces();
             // compute interaction forces for all pairs and apply to the cells in the pairs (accumulate)
             foreach (KeyValuePair<int, Pair> kvp in pairs)
             {

@@ -730,6 +730,8 @@ namespace Daphne
             {
                 localStep = Math.Min(integratorStep, dt - t);
                 dataBasket.ECS.Space.Step(localStep);
+                // zero all cell forces; needs to happen first
+                cellManager.ResetCellForces();
                 // handle collisions
                 if (collisionManager != null)
                 {

@@ -38,6 +38,17 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// zero all cell forces
+        /// </summary>
+        public void ResetCellForces()
+        {
+            foreach (Cell c in Simulation.dataBasket.Cells.Values)
+            {
+                c.resetForce();
+            }
+        }
+        
         public void WriteStates(string filename)
         {
             using (StreamWriter writer = File.CreateText(filename))
