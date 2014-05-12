@@ -603,7 +603,7 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
                     {
                         string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
@@ -611,7 +611,7 @@ namespace Daphne
                     }
 
                     // Differentiation
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref != "")
                     {
                         string diff_scheme_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme_guid_ref;
                         ConfigDiffScheme config_diffScheme = sc.entity_repository.diff_schemes_dict[diff_scheme_guid];
@@ -633,7 +633,7 @@ namespace Daphne
                     }
 
                     // division behavior
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != null)
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
                     {
                         string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
                         ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];

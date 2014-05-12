@@ -243,7 +243,7 @@ namespace DaphneGui
 
             //try
             //{
-            //    CreateAndSerializeDaphneScenarios();
+                CreateAndSerializeDaphneScenarios();
             //}
             //catch (Exception e)
             //{

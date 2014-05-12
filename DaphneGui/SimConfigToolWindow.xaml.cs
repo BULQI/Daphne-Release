@@ -624,7 +624,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme ds = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -2931,7 +2931,7 @@ namespace DaphneGui
             DiffRegGrid.Columns.Clear();
 
             //if cell does not have a diff scheme, return
-            if (cell.diff_scheme_guid_ref == null || cell.diff_scheme_guid_ref.Length == 0)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             //Get the diff_scheme using the guid
@@ -3359,7 +3359,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3430,7 +3430,7 @@ namespace DaphneGui
                 return;
             }
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3465,7 +3465,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3487,7 +3487,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme diff_scheme = er.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3612,7 +3612,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
@@ -3643,7 +3643,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            if (cell.diff_scheme_guid_ref == null)
+            if (cell.diff_scheme_guid_ref == "")
                 return;
 
             ConfigDiffScheme scheme = MainWindow.SC.SimConfig.entity_repository.diff_schemes_dict[cell.diff_scheme_guid_ref];
