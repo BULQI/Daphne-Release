@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\dependencies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -68,10 +68,6 @@
     <Compile Include="Reaction.cs" />
     <Compile Include="ReactionBuilder.cs" />
     <Compile Include="ReactionTemplateBuilder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="dependencies\MathNet.Iridium.dll" />
-    <Content Include="dependencies\Troschuetz.Random.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ManifoldRing\ManifoldRing.csproj">
