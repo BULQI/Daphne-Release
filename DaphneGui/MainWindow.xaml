@@ -507,8 +507,44 @@
                                                 </Label>
                                             </Grid>
                                             <Grid>
-                                                <DataGrid x:Name="dgCellMolConcs" Height="250" Width="400" HorizontalAlignment="Left">
-                                                </DataGrid>
+                                                <!--<DataGrid x:Name="dgCellMolConcs" Height="250" Width="400" HorizontalAlignment="Left">
+                                                </DataGrid>-->
+                                                <ListView x:Name="lvCellMolConcs" Margin="0,4"
+                                                      MinHeight="100" MaxHeight="150"
+                                                    >
+                                                    <ListView.View>
+                                                        <GridView>
+                                                            <GridView.ColumnHeaderContainerStyle>
+                                                                <Style TargetType="GridViewColumnHeader">
+                                                                    <Setter Property="Height" Value="Auto"></Setter>
+                                                                    <Setter Property="Background">
+                                                                        <Setter.Value>
+                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                <GradientStop Offset="0.0" Color="White" />
+                                                                                <GradientStop Offset="1.0" Color="Beige" />
+                                                                            </LinearGradientBrush>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </GridView.ColumnHeaderContainerStyle>
+
+                                                            <GridViewColumn Width="120" Header="Molecule">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="120" Header="Concentration">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>                                                            
+                                                        </GridView>
+                                                    </ListView.View>
+                                                </ListView>
                                             </Grid>
                                         </StackPanel>
                                     </TabItem>

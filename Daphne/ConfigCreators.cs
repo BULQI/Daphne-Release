@@ -15,9 +15,15 @@ namespace Daphne
         public static void LoadDefaultGlobalParameters(SimConfigurator configurator)
         {
             SimConfiguration sc = configurator.SimConfig;
+            
+            // genes
+            PredefinedGenesCreator(sc);
 
             // molecules
             PredefinedMoleculesCreator(sc);
+
+            // differentiation schemes
+            PredefinedDiffSchemesCreator(sc);
 
             // template reactions
             PredefinedReactionTemplatesCreator(sc);
@@ -633,11 +639,122 @@ namespace Daphne
                 }
             }
 
+            //HERE ADD GENES TO CELL
+            string gene = "gCXCR5";
+            string geneGuid = findGeneGuid(gene, sc);
+            if (geneGuid != null && geneGuid.Length > 0)
+            {
+                gc.genes_guid_ref.Add(geneGuid);
+            }
+
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 1e2;
 
+            string dsname = "DiffScheme1";
+            string ds_guid = findDiffSchemeGuid(dsname, sc);
+            gc.diff_scheme_guid_ref.Add(ds_guid);
             sc.entity_repository.cells.Add(gc);
 
+        }
+
+        //Only 1 diff scheme right now with three states
+        private static void PredefinedDiffSchemesCreator(SimConfiguration sc)
+        {
+            ConfigDiffScheme ds = new ConfigDiffScheme();     
+            ds.Name = "DiffScheme1";
+
+            ConfigTransitionDriver dr = new ConfigTransitionDriver();
+            dr.StateName = "Centroblast";
+
+            ConfigTransitionDriverElement de = new ConfigTransitionDriverElement();
+            de.Alpha = 10.10;
+            de.Beta = 20.20;
+            de.driver_mol_guid_ref = "";  // findMoleculeGuid("None", MoleculeLocation.Bulk, sc);            
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 100.100;
+            de.Beta = 200.200;
+            de.driver_mol_guid_ref = findMoleculeGuid("A", MoleculeLocation.Bulk, sc);  //gsDif1
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 300.100;
+            de.Beta = 300.200;
+            de.driver_mol_guid_ref = ""; // findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc);
+            dr.DriverElements.Add(de);
+
+            ds.Drivers.Add(dr);
+
+            //----------------------------------------------------
+
+            dr = new ConfigTransitionDriver();
+            dr.StateName = "Centrocyte";
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 10.10;
+            de.Beta = 20.20;
+            de.driver_mol_guid_ref = findMoleculeGuid("gCXCR4", MoleculeLocation.Bulk, sc);    //gsDif2        
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 22.122;
+            de.Beta = 222.222;
+            de.driver_mol_guid_ref = ""; // findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc);
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 333.300;
+            de.Beta = 333.333;
+            de.driver_mol_guid_ref = findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc);  //gsDif3
+            dr.DriverElements.Add(de);
+
+            ds.Drivers.Add(dr);
+
+            //-------------------------------------------------------
+
+            dr = new ConfigTransitionDriver();
+            dr.StateName = "Plasmacyte";
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 90.10;
+            de.Beta = 219.20;
+            de.driver_mol_guid_ref = "";  
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 199.100;
+            de.Beta = 299.200;
+            de.driver_mol_guid_ref = ""; 
+            dr.DriverElements.Add(de);
+
+            de = new ConfigTransitionDriverElement();
+            de.Alpha = 39.100;
+            de.Beta = 390.200;
+            de.driver_mol_guid_ref = "";   
+            dr.DriverElements.Add(de);
+
+            ds.Drivers.Add(dr);
+
+            sc.entity_repository.diff_schemes.Add(ds);
+        }
+
+        private static void PredefinedGenesCreator(SimConfiguration sc)
+        {
+            //
+            // Copy Number int
+            // Activation Level double
+            //
+
+            ConfigGene gene;
+
+            gene = new ConfigGene("gCXCR5", 1, 1.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+
+            gene = new ConfigGene("gCXCR4", 2, 2.0);
+            sc.entity_repository.genes.Add(gene);
+            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
         }
 
         private static void PredefinedMoleculesCreator(SimConfiguration sc)
@@ -1037,6 +1154,32 @@ namespace Daphne
             sc.entity_repository.reaction_templates.Add(crt);
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
             
+        }
+        
+        // given a diff scheme name, find its guid
+        public static string findDiffSchemeGuid(string name, SimConfiguration sc)
+        {
+            foreach (ConfigDiffScheme s in sc.entity_repository.diff_schemes)
+            {
+                if (s.Name == name)
+                {
+                    return s.diff_scheme_guid;
+                }
+            }
+            return null;
+        }
+
+        // given a gene name, find its guid
+        public static string findGeneGuid(string name, SimConfiguration sc)
+        {
+            foreach (ConfigGene gene in sc.entity_repository.genes)
+            {
+                if (gene.Name == name)
+                {
+                    return gene.gene_guid;
+                }
+            }
+            return null;
         }
 
         // given a molecule name and location, find its guid

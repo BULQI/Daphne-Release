@@ -2753,6 +2753,133 @@ namespace DaphneGui
         {
 
         }
+
+        private void cyto_gene_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ComboBox combo = sender as ComboBox;
+            CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
+        }
+
+        private void cyto_gene_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)e.Source;
+            if (cb == null)
+                return;
+
+            ////ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+
+            ////if (molpop == null)
+            ////    return;
+
+            ////string curr_mol_pop_name = molpop.Name;
+            ////string curr_mol_guid = "";
+            ////curr_mol_guid = molpop.molecule_guid_ref;
+
+            ////int nIndex = cb.SelectedIndex;
+            ////if (nIndex < 0)
+            ////    return;
+
+            ////ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            ////molpop.molecule_guid_ref = mol.molecule_guid;
+
+            ////string new_mol_name = mol.Name;
+            ////if (curr_mol_guid != molpop.molecule_guid_ref)
+            ////    molpop.Name = new_mol_name;
+            
+            //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+
+        }
+
+        private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void GeneAddMolButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GeneRemoveMolButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            
+            string diffGuid = er.diff_schemes[0].diff_scheme_guid;
+            ConfigDiffScheme diff_scheme = er.diff_schemes_dict[diffGuid];
+
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            DiffRegGrid.Columns.Clear();
+
+            ObservableCollection<ConfigTransitionDriver> TheData = diff_scheme.Drivers;
+
+            if (TheData.Count > 0)
+            {
+                // Find num columns
+                int numCols = TheData[0].DriverElements.Count;
+                int i = 0;
+                foreach (ConfigTransitionDriverElement driver_element in TheData[0].DriverElements)
+                {
+                    DiffRegGrid.Columns.Add(
+                        new DataGridComboBoxColumn
+                        {
+                            Header = string.Format("{0}", TheData[i].StateName),
+                            ItemsSource = cell.cytosol.molpops,
+                            DisplayMemberPath = "Name",
+                            CanUserSort = false,
+                            //SelectedItemBinding = new Binding(string.Format("{0}", cs.MolName))                           
+                            //SelectedItemBinding = new Binding(string.Format("TheData[0].DriverElements[{0}].driver_mol_guid_ref", i))
+                            //SelectedItemBinding = new Binding("abcd")
+                            SelectedItemBinding = new Binding("Name")
+                        }
+                    );
+                    ////DiffRegGrid.Columns.Add(
+                    ////    new DataGridTemplateColumn
+                    ////    {
+                    ////        Header = string.Format("{0}", TheData[i].StateName),
+                    ////        CellTemplate = cellProductionDetailsTemplate,
+                    ////        CanUserSort = false
+                    ////    }
+                    ////);
+
+                    i++;
+                }
+            }
+
+            DiffRegGrid.ItemsSource = TheData;
+            DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(ItemContainerGenerator_StatusChanged);
+        }
+
+        private void ItemContainerGenerator_StatusChanged(object sender, EventArgs e)
+        {
+            if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
+            {
+                int nRows = DiffRegGrid.Items.Count;
+                for (int j = 0; j < nRows; j++)
+                {
+                    var currRow = DiffRegGrid.GetRow(j);
+                    int nCols = DiffRegGrid.Columns.Count;
+                    for (int i = 0; i < nCols; i++)
+                    {
+                        if (j == i)
+                        {
+                            var columnCell = DiffRegGrid.GetCell(currRow, i);
+                            if (columnCell != null)
+                            {
+                                columnCell.IsEnabled = false;
+                                columnCell.Background = Brushes.LightGray;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+       
     }      
     
      

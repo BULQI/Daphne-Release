@@ -674,6 +674,8 @@ namespace Daphne
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
             InitGaussCellPopulationUpdates();
+            InitGeneIDConfigGeneDict();
+            InitDiffSchemeIDConfigDiffSchemeDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -783,6 +785,29 @@ namespace Daphne
             }
             ecs.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(ecm_molpops_CollectionChanged);
         }
+
+        private void InitDiffSchemeIDConfigDiffSchemeDict()
+        {
+            entity_repository.diff_schemes_dict.Clear();
+            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
+            {
+                entity_repository.diff_schemes_dict.Add(ds.diff_scheme_guid, ds);
+            }
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+        }
+
+
+        private void InitGeneIDConfigGeneDict()
+        {
+            entity_repository.genes_dict.Clear();
+            foreach (ConfigGene cg in entity_repository.genes)
+            {
+                entity_repository.genes_dict.Add(cg.gene_guid, cg);
+            }
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+        }
+
+        
 
         private void InitCellIDConfigCellDict()
         {
@@ -897,6 +922,52 @@ namespace Daphne
                     CellPopulation cs = dd as CellPopulation;
 
                     cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
+                }
+            }
+        }
+
+        //genes_CollectionChanged
+        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigGene cg = nn as ConfigGene;
+                    entity_repository.genes_dict.Add(cg.gene_guid, cg);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigGene cg = dd as ConfigGene;
+
+                    //Remove gene from genes_dict
+                    entity_repository.genes_dict.Remove(cg.gene_guid);
+                }
+            }
+        }
+
+        //diff_schemes_CollectionChanged
+        private void diff_schemes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigDiffScheme cds = nn as ConfigDiffScheme;
+                    entity_repository.diff_schemes_dict.Add(cds.diff_scheme_guid, cds);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigDiffScheme cds = dd as ConfigDiffScheme;
+
+                    //Remove gene from genes_dict
+                    entity_repository.genes_dict.Remove(cds.diff_scheme_guid);
                 }
             }
         }
@@ -1348,17 +1419,22 @@ namespace Daphne
         public ObservableCollection<ConfigCell> cells { get; set; }
 
         public ObservableCollection<ConfigMolecule> molecules { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
 
         public ObservableCollection<ConfigReaction> reactions { get; set; }
 
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
 
         public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
+        public Dictionary<string, ConfigGene> genes_dict; // keyed by gene_guid
         public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
         public Dictionary<string, ConfigReaction> reactions_dict;
         public Dictionary<string, ConfigCell> cells_dict;
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
         public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
+
+        public ObservableCollection<ConfigDiffScheme> diff_schemes { get; set; }
+        public Dictionary<string, ConfigDiffScheme> diff_schemes_dict;
 
         public EntityRepository()
         {
@@ -1366,15 +1442,19 @@ namespace Daphne
             box_specifications = new ObservableCollection<BoxSpecification>();
             cells = new ObservableCollection<ConfigCell>();
             molecules = new ObservableCollection<ConfigMolecule>();
+            genes = new ObservableCollection<ConfigGene>();
             reactions = new ObservableCollection<ConfigReaction>();
             reaction_templates = new ObservableCollection<ConfigReactionTemplate>();
             molecules_dict = new Dictionary<string, ConfigMolecule>();
+            genes_dict = new Dictionary<string, ConfigGene>();
             reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reactions_dict = new Dictionary<string, ConfigReaction>();
             cells_dict = new Dictionary<string, ConfigCell>();
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
             gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
+            diff_schemes = new ObservableCollection<ConfigDiffScheme>();
+            diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
         }        
     }
 
@@ -2209,6 +2289,117 @@ namespace Daphne
 
     }
 
+
+    //  -----------------------------------------------------------------------
+    //  Differentiation Schemes
+    //
+
+    /// <summary>
+    /// Any molecule can be a gene
+    /// </summary>
+    public class ConfigGene
+    {
+        public string gene_guid { get; set; }
+        public string Name { get; set; }
+        public int CopyNumber { get; set; }
+        public double ActivationLevel { get; set; }
+
+        //public ConfigGene()
+        //{
+        ////    Guid id = Guid.NewGuid();
+        //    gene_guid = id.ToString();
+        //}
+
+        public ConfigGene(string name, int copynum, double actlevel)
+        {
+            Guid id = Guid.NewGuid();
+            gene_guid = id.ToString();
+
+            Name = name;
+            CopyNumber = copynum;
+            ActivationLevel = actlevel;
+        }
+
+    }
+    
+    public class ConfigTransitionDriverElement
+    {
+        public string driver_element_guid { get; set; }
+        public double Alpha { get; set; }
+        public double Beta { get; set; }
+        public string  driver_mol_guid_ref { get; set; }
+
+        public int CurrentState { get; set; }
+        public string CurrentStateName { get; set; }
+        public int DestState { get; set; }
+        public string DestStateName { get; set; }
+
+        public ConfigTransitionDriverElement()
+        {
+            Guid id = Guid.NewGuid();
+            driver_element_guid = id.ToString();
+        }
+    }
+
+    public class ConfigTransitionDriver
+    {
+        public string driver_guid { get; set; }
+        public int CurrentState { get; set; }
+        public string StateName { get; set; }
+        
+        public ObservableCollection<ConfigTransitionDriverElement> DriverElements { get; set; }
+        //public ObservableCollection<ObservableCollection<ConfigTransitionDriverElement>> DriverElements { get; set; }
+        //public ObservableCollection<string> states;
+
+        public ConfigTransitionDriver()
+        {
+            Guid id = Guid.NewGuid();
+            driver_guid = id.ToString();
+            DriverElements = new ObservableCollection<ConfigTransitionDriverElement>();
+        }
+    }
+
+    //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
+    //For example, one differentiation scheme's epigenetic map could look like this:
+    //
+    //    State/Gene     gCXCR5   gsDiv   gsDif1   gsDif2   gIg
+    //    ------------------------------------------------------  
+    //    Centroblast      0        1        1        0      0
+    //    Centrocyte       1        0        0        1      0
+    //    Plasmacyte       1        0        0        0      1
+    //
+    //Its regulators could look like this:
+    //
+    //    State/State     Centroblast   Centrocyte   Plasmacyte
+    //    ------------------------------------------------------  
+    //    Centroblast        none         gCXCR5       gIg       
+    //    Centrocyte        gsDiv          none       gsDif2        
+    //    Plasmacyte        gsDif1        gsDif2       none        
+
+    public class ConfigDiffScheme
+    {
+        public string diff_scheme_guid { get; set; }
+        public string Name { get; set; }
+
+        //For regulators
+        public ObservableCollection<ConfigTransitionDriver> Drivers { get; set; }
+   
+        //For epigenetic map
+        //TBD
+
+        public ConfigDiffScheme()
+        {
+            Guid id = Guid.NewGuid();
+            diff_scheme_guid = id.ToString();
+            Drivers = new ObservableCollection<ConfigTransitionDriver>();
+        }
+    }
+
+    //end of Diff Scheme classes --------------------------------------------------------------
+
+
+
+
     public enum ExtendedReport { NONE, LEAN, COMPLETE };
 
     public class ReportMP
@@ -2926,6 +3117,10 @@ namespace Daphne
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
             ReadOnly = true;
+
+            genes_guid_ref = new ObservableCollection<string>();
+
+            diff_scheme_guid_ref = new ObservableCollection<string>();
         }
 
         public ConfigCell Clone()
@@ -2972,6 +3167,10 @@ namespace Daphne
 
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
+        
+        //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
+        public ObservableCollection<string> genes_guid_ref { get; set; }
+        public ObservableCollection<string> diff_scheme_guid_ref { get; set; }
     }
 
     public class CellPopDistType
@@ -3915,6 +4114,80 @@ namespace Daphne
                 }
             }
             return molpop_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between gene GUID references in cytosol
+    /// and gene names kept in the repository of genes.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class GeneGUIDtoNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+            string gene_name = "";
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigGene> gene_list = cvs.Source as ObservableCollection<ConfigGene>;
+            if (gene_list != null)
+            {
+                foreach (ConfigGene gene in gene_list)
+                {
+                    if (gene.gene_guid == guid)
+                    {
+                        gene_name = gene.Name;
+                        break;
+                    }
+                }
+            }
+            return gene_name;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            // TODO: Should probably put something real here, but right now it never gets called,
+            // so I'm not sure what the value and parameter objects would be...
+            return "y";
+        }
+    }
+
+    /// <summary>
+    /// Converter to go between gene GUID references in cytosol
+    /// and ConfigGene kept in the repository of genes.
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(string))]
+    public class GeneGUIDtoConfigGeneConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string guid = value as string;
+
+            if (guid == null || guid.Length == 0)
+                return null;
+
+            ConfigGene thisGene = null;
+            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
+            ObservableCollection<ConfigGene> gene_list = cvs.Source as ObservableCollection<ConfigGene>;
+            if (gene_list != null)
+            {
+                foreach (ConfigGene gene in gene_list)
+                {
+                    if (gene.gene_guid == guid)
+                    {
+                        thisGene = gene;
+                        break;
+                    }
+                }
+            }
+            return thisGene;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

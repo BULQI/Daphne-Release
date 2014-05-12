@@ -179,7 +179,8 @@ namespace DaphneGui
 #endif
         }
 
-        public CellInfo SelectedCellInfo { get; set; } 
+        public CellInfo SelectedCellInfo { get; set; }
+        public ObservableCollection<CellMolecularInfo> currentConcs { get; set; }
 
         /// <summary>
         /// custom routed command for delete db
@@ -238,15 +239,16 @@ namespace DaphneGui
             this.ToolWinCellInfo.Close();
 
             SelectedCellInfo = new CellInfo();
+            currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            //try
-            //{
-            //    CreateAndSerializeDaphneScenarios();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            try
+            {
+                CreateAndSerializeDaphneScenarios();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -2299,6 +2301,7 @@ namespace DaphneGui
             tbCellConc.Text = "Cell Id: " + cellID; // +", Concentration = " + cellConc;
 
             SelectedCellInfo.ciList.Clear();
+            currentConcs.Clear();
 
             CellXVF xvf = new CellXVF();
             xvf.name = "Location (μm)";
@@ -2333,6 +2336,7 @@ namespace DaphneGui
                 cmi.Molecule = "ECM: " + name;
                 cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
+                currentConcs.Add(cmi);
             }
 
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
@@ -2344,6 +2348,7 @@ namespace DaphneGui
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
+                currentConcs.Add(cmi);
             }
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
@@ -2354,9 +2359,10 @@ namespace DaphneGui
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
+                currentConcs.Add(cmi);
             }
 
-            dgCellMolConcs.ItemsSource = currConcs;
+            lvCellMolConcs.ItemsSource = currConcs;
             ToolWinCellInfo.Open();
             TabItemMolConcs.Visibility = System.Windows.Visibility.Visible;
         }
