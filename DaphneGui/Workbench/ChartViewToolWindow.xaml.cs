@@ -267,6 +267,10 @@ namespace Workbench
 
         private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            Slider s = sender as Slider;
+            if (!s.IsLoaded)
+                return;
+
             foreach (MolConcInfo mci in RC.initConcs)
             {
                 RC.EditConc(mci.molguid, mci.conc);
@@ -278,6 +282,9 @@ namespace Workbench
 
         private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            Slider s = sender as Slider;
+            if (!s.IsLoaded)
+                return;
 
             RC.UpdateRateConstants();
             RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
