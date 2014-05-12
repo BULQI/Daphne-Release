@@ -318,7 +318,7 @@
             <docking:SplitContainer x:Name="SimConfigSplitContainer">
                 <!-- Sim Config Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
-                    <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Sim Setup" />
+                    <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Daphne Simulation Configuration" />
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
