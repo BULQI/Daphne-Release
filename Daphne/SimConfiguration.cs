@@ -3791,8 +3791,47 @@ namespace Daphne
             double scale = Math.Sqrt(transform_matrix[0][i] * transform_matrix[0][i] +
                                      transform_matrix[1][i] * transform_matrix[1][i] +
                                      transform_matrix[2][i] * transform_matrix[2][i]);
-
             return scale;
+        }
+
+        [JsonIgnore]
+        public double half_x_scale
+        {
+            get
+            {
+                return x_scale / 2;
+            }
+            set
+            {
+                x_scale = 2 * value;
+                base.OnPropertyChanged("x_scale");                
+            }
+        }
+        [JsonIgnore]
+        public double half_y_scale
+        {
+            get
+            {
+                return y_scale / 2;
+            }
+            set
+            {
+                y_scale = 2 * value;
+                base.OnPropertyChanged("y_scale");
+            }
+        }
+        [JsonIgnore]
+        public double half_z_scale
+        {
+            get
+            {
+                return z_scale / 2;
+            }
+            set
+            {
+                z_scale = 2 * value;
+                base.OnPropertyChanged("z_scale");
+            }
         }
 
         public BoxSpecification()
@@ -3866,14 +3905,17 @@ namespace Daphne
             if (x_scale_change == true)
             {
                 base.OnPropertyChanged("x_scale");
+                base.OnPropertyChanged("half_x_scale");
             }
             if (y_scale_change == true)
             {
                 base.OnPropertyChanged("y_scale");
+                base.OnPropertyChanged("half_y_scale");
             }
             if (z_scale_change == true)
             {
                 base.OnPropertyChanged("z_scale");
+                base.OnPropertyChanged("half_z_scale");
             }
         }
     }

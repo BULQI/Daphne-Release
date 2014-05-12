@@ -668,7 +668,7 @@
                             RenderTransform="1.0,0,0,0.5,0,4"
                             Minimum="{Binding Path=x_scale_min}" 
                             Maximum="{Binding Path=x_scale_max}"
-                            Value="{Binding Path=x_scale}" 
+                            Value="{Binding Path=half_x_scale}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="2"
@@ -709,7 +709,7 @@
                             RenderTransform="1.0,0,0,0.5,0,4"
                             Minimum="{Binding Path=y_scale_min}" 
                             Maximum="{Binding Path=y_scale_max}"
-                            Value="{Binding Path=y_scale}" 
+                            Value="{Binding Path=half_y_scale}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="3"
@@ -750,7 +750,7 @@
                             RenderTransform="1.0,0,0,0.5,0,4"
                             Minimum="{Binding Path=z_scale_min}" 
                             Maximum="{Binding Path=z_scale_max}"
-                            Value="{Binding Path=z_scale}" 
+                            Value="{Binding Path=half_z_scale}" 
                             KeyboardNavigation.IsTabStop="False"
                             />
                     <editors:DoubleEditBox Grid.Column="4" Grid.Row="4"
@@ -800,7 +800,7 @@
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopLinear}">
-                <!--<StackPanel>
+                <StackPanel>
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Style.Triggers>
@@ -878,7 +878,7 @@
                     <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">                        
                     </TextBox>
                 </StackPanel>
-                </StackPanel>-->
+                </StackPanel>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
@@ -1862,7 +1862,7 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1}">
+                                    <TextBox  x:Name="txtLeft" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal1, StringFormat={}{0:0.00}}">
                                         <TextBox.Style>
                                             <Style TargetType="TextBox">
                                                 <Style.Triggers>
@@ -1898,7 +1898,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
 
-                                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2}">
+                                    <TextBox  x:Name="txtRight" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" Text="{Binding Path=boundaryVal2, StringFormat={}{0:0.00}}">
                                         <TextBox.Style>
                                             <Style TargetType="TextBox">
                                                 <Style.Triggers>
