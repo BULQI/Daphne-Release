@@ -238,14 +238,21 @@ namespace DaphneGui
                         //    MessageBox.Show("Specify values for boundary conditions first.");
                         //    return;
                         //}
-                        MolPopLinear slg = new MolPopLinear();
-                        current_item.mp_distribution = slg;
-                        
-                        //slg.dim = (int)cur.boundary_face - 1;
-                        //slg.c1 = cur.boundaryCondition[0].val;
-                        //slg.c2 = cur.boundaryCondition[1].val;
-                        //current_item.mp_distribution = slg;
+                        MolPopLinear molpoplin = new MolPopLinear();                        
+                        molpoplin.boundary_face = BoundaryFace.X;
+                        molpoplin.dim = 0;
+                        molpoplin.x1 = 0;
+                        molpoplin.boundaryCondition = new List<BoundaryCondition>(); 
+                        BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 0.0);                    
+                        molpoplin.boundaryCondition.Add(bc);
+                        bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+                        molpoplin.boundaryCondition.Add(bc);
+                        current_item.mp_dist_name = "Linear";
+                        current_item.mp_distribution = molpoplin;
+                        current_item.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        current_item.mp_render_blending_weight = 2.0;
                         break;
+
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
                         ////if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count == 0)
