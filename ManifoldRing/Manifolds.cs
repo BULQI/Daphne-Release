@@ -621,11 +621,6 @@ namespace ManifoldRing
             s.array[1] = 5 * flux.array[1] / (radius * radius * radius);
             s.array[2] = 5 * flux.array[2] / (radius * radius * radius);
             s.array[3] = 5 * flux.array[3] / (radius * radius * radius);
-
-            flux.array[0] = 0.0;
-            flux.array[1] = 0.0;
-            flux.array[2] = 0.0;
-            flux.array[3] = 0.0;
             
             return s;
         }

@@ -49,6 +49,7 @@ namespace Daphne
         // Switch that allows us to turn off diffusion.
         // Diffusion is on, by default.
         public bool IsDiffusing { get; set; }
+        public Dictionary<int, MolBoundaryType> boundaryCondition;
 
         public Manifold Man
         {
@@ -82,20 +83,13 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        // NOTE: Put this here so json deserialization would work. gmk
-        // NOTE HS: we should have single constructors for Ninject to work;
-        // the other entities seem to deserialize without a default constructor, at least they have none
-        // revisit and reevealuate if needed
-        //public MolecularPopulation()
-        //{
-        //}
-
         public MolecularPopulation(Molecule mol, Compartment comp)
         {
             concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
             manifold = comp.Interior;
             Molecule = mol;
             compartment = comp;
+            boundaryCondition = new Dictionary<int, MolBoundaryType>();
 
             // true boundaries
             boundaryFluxes = new Dictionary<int, ScalarField>();
@@ -155,8 +149,6 @@ namespace Daphne
             }
         }
 
-
-
         /// <summary>
         /// At each array point in the embedded manifold, update the values of the concentration 
         /// and global gradient of the embedding manifold MolecularPopulation.
@@ -181,33 +173,28 @@ namespace Daphne
             // Update boundary concentrations and global gradients
             UpdateBoundary();
 
+            // Laplacian
             concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
 
-            // Apply boundary fluxes 
+            // Boundary fluxes
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes.ToList())
             {
                 concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
-                //kvp.Value.reset(); //reset to 0
+                kvp.Value.Initialize("explicit", new double[kvp.Value.M.ArraySize]);
             }
 
-            // Apply Neumann natural boundary conditions
-            foreach (KeyValuePair<int, ScalarField> kvp in NaturalBoundaryFluxes)
+            // Natural boundary conditions
+            foreach (KeyValuePair<int, MolBoundaryType> bc in boundaryCondition)
             {
-                if (compartment.NaturalBoundaryTransforms[kvp.Key].Neumann)
+                if (bc.Value == MolBoundaryType.Dirichlet)
                 {
-                    concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]) / Molecule.DiffusionCoefficient;
+                    concentration = concentration.DirichletBC(NaturalBoundaryConcs[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]);
                 }
-            }
-
-            // Apply Dirichlet natural boundary conditions
-            foreach (KeyValuePair<int, ScalarField> kvp in NaturalBoundaryConcs)
-            {
-                if (compartment.NaturalBoundaryTransforms[kvp.Key].Dirichlet)
+                else
                 {
-                    concentration = concentration.DirichletBC(kvp.Value, compartment.NaturalBoundaryTransforms[kvp.Key]);
+                    concentration += -dt * concentration.DiffusionFluxTerm(NaturalBoundaryFluxes[bc.Key], compartment.NaturalBoundaryTransforms[bc.Key]) / Molecule.DiffusionCoefficient;
                 }
             }
         }
     }
-
 }

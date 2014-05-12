@@ -141,7 +141,7 @@ namespace Daphne
         {
             // Experiment
             sc.experiment_name = "Cell locomotion with driver molecule.";
-            sc.experiment_description = "Cell moves toward center of simulation. Drag coefficient=2. Cytosol molecule A* drives locomotion. The CXCL13 in the ECS is diffusing, so the driving force will dissipate over time.";
+            sc.experiment_description = "Cell moves toward center of simulation. Drag coefficient=1. Cytosol molecule A* drives locomotion. The CXCL13 in the ECS is diffusing, so the driving force will dissipate over time.";
             //sc.experiment_description = "ECS with CXCL13 and one cell."
             //    + " PlasmaMembrane CXCR5 and CXCL13:CXCR5 surface molecules."
             //    + " Cytosol A molecule is activated to A* by CXCL13:CXCR5."
@@ -224,10 +224,7 @@ namespace Daphne
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 0.30f, 0.69f, 0.29f);
             cp.cell_guid_ref = gc.cell_guid;
 
-
             cp.cell_list.Add(new CellState(400, 250, 250));
-
-
 
             foreach (ConfigMolecularPopulation cmp in sc.scenario.environment.ecs.molpops)
             {
@@ -260,15 +257,15 @@ namespace Daphne
         {
             // Experiment
             sc.experiment_name = "Diffusion Scenario";
-            sc.experiment_description = "CXCL13 diffusion in the ECM. No cells.";
+            sc.experiment_description = "CXCL13 diffusion in the ECM. No cells. Gaussian initial distribution. No flux BCs.";
             sc.scenario.time_config.duration = 10;
-            sc.scenario.time_config.rendering_interval = 0.1;
+            sc.scenario.time_config.rendering_interval = 1;
             sc.scenario.time_config.sampling_interval = 5.0;
 
-            sc.scenario.environment.extent_x = 1000;
-            sc.scenario.environment.extent_y = 1000;
-            sc.scenario.environment.extent_z = 1000;
-            sc.scenario.environment.gridstep = 25;
+            sc.scenario.environment.extent_x = 500;
+            sc.scenario.environment.extent_y = 500;
+            sc.scenario.environment.extent_z = 500;
+            sc.scenario.environment.gridstep = 50;
 
             // Global Paramters
             LoadDefaultGlobalParameters(sc);
@@ -282,9 +279,9 @@ namespace Daphne
             box.x_trans = sc.scenario.environment.extent_x / 2;
             box.y_trans = sc.scenario.environment.extent_y / 2;
             box.z_trans = sc.scenario.environment.extent_z / 2;
-            box.x_scale = sc.scenario.environment.extent_x / 10;
-            box.y_scale = sc.scenario.environment.extent_y / 10;
-            box.z_scale = sc.scenario.environment.extent_z / 10;
+            box.x_scale = sc.scenario.environment.extent_x / 5;
+            box.y_scale = sc.scenario.environment.extent_y / 5;
+            box.z_scale = sc.scenario.environment.extent_z / 5;
             sc.entity_repository.box_specifications.Add(box);
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             //gg.gaussian_spec_name = "gaussian";
@@ -314,14 +311,13 @@ namespace Daphne
                 sgg.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 gmp.mpInfo.mp_distribution = sgg;
 
-                //// Reporting
-                //gmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
-                //gmp.report_mp.mean = true;
+                // Reporting
+                gmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
+                ReportECM r = gmp.report_mp as ReportECM;
+                r.mean = true;
 
                 sc.scenario.environment.ecs.molpops.Add(gmp);
             }
-
-            //sc.entity_repository.
         }
 
          /// <summary>
@@ -468,8 +464,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 2.0;
-            gc.TransductionConstant = 1e6;
+            gc.DragCoefficient = 1.0;
+            gc.TransductionConstant = 1e9;
 
             sc.entity_repository.cells.Add(gc);
 
@@ -547,8 +543,8 @@ namespace Daphne
                 }
             }
 
-            gc.DragCoefficient = 2.0;
-            gc.TransductionConstant = 1e6;
+            gc.DragCoefficient = 1.0;
+            gc.TransductionConstant = 1e9;
 
             sc.entity_repository.cells.Add(gc);
 

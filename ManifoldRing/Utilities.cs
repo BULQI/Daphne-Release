@@ -248,13 +248,5 @@ namespace ManifoldRing
                 return x - pos;
             }
         }
-
-        // Specify type of boundary condition at boundary manifold
-        // Neumann: specify flux at boundary
-        // Dirichlet: specify value at boundary
-        // Zero flux is the default boundary condition when Neumann=false and Dirichlet=false
-        public bool Neumann = false;
-        public bool Dirichlet = false;
-
     }
 }

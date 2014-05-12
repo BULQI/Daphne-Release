@@ -1264,7 +1264,7 @@ namespace Daphne
     public enum ReportType { CELL_MP, ECM_MP };
 
     // Note: Neumann option may be added later.
-    public enum MolBoundaryType { None = 0, Dirichlet }
+    public enum MolBoundaryType { None = 0, Dirichlet, Neumann }
     public enum Boundary { None = 0, left = 1, right, bottom, top, back, front };
     public class BoundaryCondition
     {

@@ -134,10 +134,6 @@ namespace ManifoldRing
                     temp.array[n] += 2 * flux.Value(flux.M.PrincipalPoints[i]) / m.StepSize();
                 }
             }
-
-            // Zero the flux
-            flux.Initialize("const", new double[1] { 0 });
-
             return temp;
         }
 
@@ -155,46 +151,17 @@ namespace ManifoldRing
         public ScalarField DirichletBC(ScalarField from, Transform t, ScalarField sf)
         {
             int n;
-
-            //double[] x_interior = new double[3];
-            //double[] x_boundary = new double[3];
-            //int[] idx = new int[3];
-            //double val;
-            //InterpolatedNodes mb = (InterpolatedNodes)from.M;
-
-            //double[] pos = t.Translation;
-            //Console.WriteLine("Translation: " + pos[0] + ", " + pos[1] + ", " + pos[2]);
-
             for (int i = 0; i < from.M.PrincipalPoints.Length; i++)
             {
-                //// The position in the boundary manifold's coordinate system?
-                //x_boundary = (double[])from.M.PrincipalPoints[i];
-                //// The position in the interior manifold's coordinate system
-                //// Takes translation into account
-                //x_interior = (double[])t.toContaining(x_boundary);
-                //// The indices of the closest interior manifold point corresponding to x
-                //idx = m.localToIndexArray(x_interior);
-                //// The corresponding linear index
-                //n = m.indexArrayToLinearIndex(idx);
-                //val = from.Value(from.M.PrincipalPoints[i]);
-                //Console.WriteLine(i + ":");
-                //Console.WriteLine("\t x_boundary " + x_boundary[0] + ", " + x_boundary[1] + ", " + x_boundary[2]);
-                //Console.WriteLine("\t x_interior " + x_interior[0] + ", " + x_interior[1] + ", " + x_interior[2]);
-                //Console.WriteLine("\t interior indices " + idx[0] + ", " + idx[1] + ", " + idx[2]);
-                //Console.WriteLine("\t" + val);
-
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(from.M.PrincipalPoints[i])));
                 if (n >= 0 && n < sf.array.Length)
                 {
                     sf.array[n] = from.Value(from.M.PrincipalPoints[i]);
                 }
-
-                //Console.WriteLine("\t" + n);
-
             }
             return sf;
-        }   
+        }
     }
 
     /// <summary>

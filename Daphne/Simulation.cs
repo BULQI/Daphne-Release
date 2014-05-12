@@ -647,13 +647,14 @@ namespace Daphne
                 foreach (BoundaryCondition bc in cmp.boundaryCondition)
                 {
                     int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
+                    dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
                     if (bc.boundaryType == MolBoundaryType.Dirichlet)
                     {
                         dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
-                    }
+                     }
                     else
                     {
-                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.val });
+                        dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.val });
                     }
                 }
             }
