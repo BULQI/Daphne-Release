@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ActiproSoftware.Windows.Controls.Docking;
 using DaphneGui;
+using System.Collections.ObjectModel;
 
 namespace Workbench
 {
@@ -26,11 +27,19 @@ namespace Workbench
         private System.Drawing.Size chartSize;
         public ReactionComplexProcessor RC;
 
+        public ObservableCollection<MolConcInfo> tester { get; set; }
+
         public ChartViewToolWindow()
         {
             InitializeComponent();
             chartSize = new System.Drawing.Size(500, 300);
             DataContext = RC;
+            //ChartMainGrid.DataContext = RC;
+            
+            //txtTestBox.DataContext = RC;
+            tester = new ObservableCollection<MolConcInfo>();
+
+            
        
         }
 
@@ -44,8 +53,11 @@ namespace Workbench
         
         public void Render()
         {
+            tester = RC.initConcs;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
+            //txtTest2.Text = RC.nTestVariable.ToString();
 
             if (lTimes.Count > 0 && dictConcs.Count > 0)
             {
@@ -62,11 +74,11 @@ namespace Workbench
 
                 System.Windows.Forms.MenuItem[] menuItems = 
                 {   
-                    new System.Windows.Forms.MenuItem("Bigger"),
-                    new System.Windows.Forms.MenuItem("Smaller"),
+                    new System.Windows.Forms.MenuItem("Zoom in"),
+                    new System.Windows.Forms.MenuItem("Zoom out"),
                     new System.Windows.Forms.MenuItem("Save Changes"),
                     new System.Windows.Forms.MenuItem("Discard Changes"),
-                    new System.Windows.Forms.MenuItem("Rate Constants...")
+                    //new System.Windows.Forms.MenuItem("Rate Constants...")
                     //new System.Windows.Forms.MenuItem("View Initial Concentrations...") 
                 };
 
@@ -76,7 +88,7 @@ namespace Workbench
                 menu.MenuItems[1].Click += new System.EventHandler(this.btnDecSize_Click);                
                 menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
                 menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
-                menu.MenuItems[4].Click += new System.EventHandler(this.btnChange_Click);
+                //menu.MenuItems[4].Click += new System.EventHandler(this.btnChange_Click);
 
                 btnIncSize.IsEnabled = true;
                 btnDecSize.IsEnabled = true;
@@ -84,6 +96,9 @@ namespace Workbench
                 btnSave.IsEnabled = true;
 
                 cm.DrawChart();
+
+                dgInitConcs.ItemsSource = RC.initConcs;
+                dgReactionRates.ItemsSource = RC.ReactionsInComplex;
 
             }
         }
@@ -241,6 +256,40 @@ namespace Workbench
             //////////if (er.ShowDialog() == true)
             //////////{
             //////////}
+        }
+
+        private void btnRedraw_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (MolConcInfo mci in RC.initConcs)
+            {
+                RC.EditConc(mci.molguid, mci.conc);
+            }
+            
+            cm.RedrawSeries();
+        }
+
+        private void dgInitConcs_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+        }
+        
+        private void dgInitConcs_KeyDown(object sender, KeyEventArgs e)
+        {
+            DataGridCellInfo cell = dgInitConcs.CurrentCell;
+            if (cell.Column.Header.ToString() == "conc") {
+                if (cell.Column.GetType() == typeof(TextBox)) {
+                    //TextBox tb = cell.Column.GetValue();
+                }
+                //double c = double.Parse(cell.ToString());
+                DataGridColumn col = dgInitConcs.CurrentColumn;
+                //string sConc = col. as string;
+                MolConcInfo mci = cell.Item as MolConcInfo;
+                //RC.EditConc(mci.molguid, c);
+                //cm.RedrawSeries();
+            }
+        }
+
+        private void windowsFormsHost1_MouseWheel(object sender, MouseWheelEventArgs e)
+        {            
         }
         
     }

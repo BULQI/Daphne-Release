@@ -130,8 +130,10 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
                     <MenuItem x:Name="menu_ActivateLPFitting" Header="Activate LP Fitting Tool"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
-                    <MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />
+                    
+                    <!-- This one is not yet functional -->
+                    <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />-->
                     <!--<MenuItem x:Name="menu_ActivateDisplayOptions" Header="Activate Display Options"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
@@ -475,7 +477,7 @@
                                                 <Label Grid.Column="0" Grid.Row="0" 
                                                         Content="Molecular Concentrations for Cell Id: " 
                                                         Height="32" HorizontalAlignment="Left" Margin="0,0,0,0" 
-                                                        Name="label01" VerticalAlignment="Center" FontSize="12" FontFamily="Verdana" FontWeight="Bold"
+                                                        Name="labelMolConcs" VerticalAlignment="Center" FontSize="12" FontFamily="Verdana" FontWeight="Bold"
                                                 />
                                                 <Label Grid.Column="1" Grid.Row="0" x:Name="txtCellId"
                                                            Height="32" HorizontalAlignment="Left" Margin="0,0,0,0"
@@ -489,7 +491,7 @@
                                             </Grid>
                                         </StackPanel>
                                     </TabItem>
-                                    <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj">
+                                    <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj" Visibility="Hidden">
                                         <Grid>
                                             <WindowsFormsHost Margin="21" x:Name="winFormsHostTimeTraj" >
                                                 <wf:Panel x:Name="pChartTimeTraj" Visible="True"/>

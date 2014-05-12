@@ -2229,7 +2229,7 @@
                                                 Maximum="50" 
                                                 Value="{Binding Path=experiment_reps}" 
                                                 IsSnapToTickEnabled="True" 
-                                                TickFrequency="1" 
+                                                TickFrequency="3" 
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                         <editors:Int32EditBox x:Name="ExpRepReadout" 

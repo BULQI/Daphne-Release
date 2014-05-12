@@ -334,7 +334,10 @@ namespace DaphneGui
             this.ExportMenu.IsEnabled = false;
             // And hide stats results chart for now
             //this.ChartViewDocWindow.Close();
+
+#if DATABASE_HOOKED_UP        
             this.menu_ActivateAnalysisChart.IsEnabled = false;
+#endif
 
             // create the simulation
             sim = new Simulation();
@@ -1944,14 +1947,37 @@ namespace DaphneGui
             Cell selectedCell = Simulation.dataBasket.Cells[cellID];
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
+            labelMolConcs.Content = labelMolConcs.Content + cellID.ToString();
+
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
             {
                 string name = MainWindow.SC.SimConfig.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
                 double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.State.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
-                cmi.Molecule = name;
-                cmi.Concentration = conc.ToString();
+                cmi.Molecule = "ECM: " + name;
+                cmi.Concentration = conc.ToString("#.000");
+                currConcs.Add(cmi);
+            }
+            
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
+            {
+                string mol_name = er.molecules_dict[kvp.Key].Name;
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                CellMolecularInfo cmi = new CellMolecularInfo();
+                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Concentration = conc.ToString("#.000");
+                currConcs.Add(cmi);
+            }
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
+            {
+                string mol_name = er.molecules_dict[kvp.Key].Name;
+                //double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(selectedCell.State.X);
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                CellMolecularInfo cmi = new CellMolecularInfo();
+                cmi.Molecule = "Cell: " + mol_name;
+                cmi.Concentration = conc.ToString("#.000");
                 currConcs.Add(cmi);
             }
 
@@ -1973,7 +1999,10 @@ namespace DaphneGui
             this.menu_ActivateLPFitting.IsEnabled = false;
             // And hide stats results chart for now
             //////////this.ChartViewDocWindow.Close();
+
+#if DATABASE_HOOKED_UP   
             this.menu_ActivateAnalysisChart.IsEnabled = false;
+#endif
 
             if (CheckMouseLeftState(MOUSE_LEFT_TRACK) == true)
             {

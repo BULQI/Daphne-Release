@@ -10,12 +10,15 @@ using System.Diagnostics;
 using Ninject;
 using Ninject.Parameters;
 using ManifoldRing;
+using System.Collections.Specialized;
+using Newtonsoft.Json;
 
 namespace Workbench
 {
-    public class ReactionComplexProcessor //: SimConfiguration
+    public class ReactionComplexProcessor : EntityModelBase
     {
         Simulation Sim { get; set; }
+        SimConfiguration SC { get; set; }
         public int nSteps { get; set; }
         public double dt { get; set; }
 
@@ -23,6 +26,8 @@ namespace Workbench
         public int MaxTime { get; set; }
         public double dMaxTime { get; set; }
         public double dInitialTime { get; set; }
+
+        public int nTestVariable { get; set; }
 
         protected List<double> listTimes = new List<double>();
         public List<double> ListTimes
@@ -52,6 +57,22 @@ namespace Workbench
 
         protected Dictionary<string, double> dictOriginalConcs = new Dictionary<string, double>();
         protected Dictionary<string, double> dictInitialConcs = new Dictionary<string, double>();
+        
+        //for wpf binding
+        private ObservableCollection<MolConcInfo> _initConcs;
+        public ObservableCollection<MolConcInfo> initConcs 
+        { 
+            get
+            {
+                return _initConcs;
+            }
+            set
+            {
+                _initConcs = value;
+            } 
+        }
+
+        public Dictionary<string, MolConcInfo> initConcsDict; 
 
         private ObservableCollection<ConfigReaction> reacs = new ObservableCollection<ConfigReaction>();
         public ObservableCollection<ConfigReaction> ReactionsInComplex
@@ -68,10 +89,42 @@ namespace Workbench
 
         public ReactionComplexProcessor() : base()
         {
+            nTestVariable = 199;
+            initConcs = new ObservableCollection<MolConcInfo>();
+            initConcsDict = new Dictionary<string, MolConcInfo>();
+
+            initConcs.CollectionChanged += new NotifyCollectionChangedEventHandler(initConcs_CollectionChanged);
+        }
+
+        private void initConcs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                }
+            }
+            //else 
+            //if (e.Action == NotifyCollectionChangedAction.Remove)
+            //{
+            //    foreach (var oo in e.OldItems)
+            //    {
+            //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
+            //        if (entity_repository.reactions_dict(reactions_guid_ref).)
+            //        {
+            //            reactions_guid_ref.Remove(cmp.molecule_guid_ref);
+            //        }
+            //    }
+            //}
+
+            OnPropertyChanged("initConcs");
         }
 
         public void Initialize(SimConfiguration mainSC, ConfigReactionComplex crc, Simulation sim )
         {
+            Sim = sim;
+            SC = mainSC;
+
             double minVal = 1e7;
 
             foreach (string guid in crc.reactions_guid_ref)
@@ -84,10 +137,12 @@ namespace Workbench
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
 
+            dInitialTime = 3.33;
+
             SaveOriginalConcs();
             SaveInitialConcs();
-
-            Sim = sim;
+            SaveReactions(crc);
+            
 
         }
 
@@ -196,6 +251,8 @@ namespace Workbench
         public void EditConc(string moleculeKey, double conc)
         {
             dictInitialConcs[moleculeKey] = conc;
+            initConcsDict[moleculeKey].conc = conc;
+            OnPropertyChanged("initConcs");
         }
 
 
@@ -235,6 +292,8 @@ namespace Workbench
         public void SaveInitialConcs()
         {
             dictInitialConcs.Clear();
+            initConcs.Clear();
+            initConcsDict.Clear();
 
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
@@ -249,8 +308,34 @@ namespace Workbench
                 //double conc = 0.0;
                 double conc = comp.Populations[molguid].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
                 dictInitialConcs[molguid] = conc;
+
+                MolConcInfo mci = new MolConcInfo(molguid, conc, SC);
+                initConcs.Add(mci);
+                initConcsDict.Add(molguid, mci);
+
             }
         }
+
+        public void SaveReactions(ConfigReactionComplex crc)
+        {
+            foreach (string rguid in crc.reactions_guid_ref) 
+            {
+                ReactionsInComplex.Add(SC.entity_repository.reactions_dict[rguid]);
+            }
+
+            //foreach (string rguid in crc.reactions_guid_ref)
+            //{
+            //    ConfigReaction r = new ConfigReaction();
+            //    r = SC.entity_repository.reactions_dict[rguid];
+            //    ReactionsInComplex.Add(r);
+            //}
+
+            //var Settings = new JsonSerializerSettings();
+            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            //Settings.TypeNameHandling = TypeNameHandling.Auto;
+            //string jsonSpec = JsonConvert.SerializeObject(, Newtonsoft.Json.Formatting.Indented, Settings);
+            //ConfigReactionComplex newcrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
+        }        
 
         private void UpdateRateConstants()
         {
@@ -261,6 +346,27 @@ namespace Workbench
             //        r.RateConstant = rt.rate_const;
             //    }
             //}
+        }
+
+        
+        
+    }
+
+    public class MolConcInfo
+    {
+        public double conc { get; set; }
+        public string molguid { get; set; }
+        public string molname { get; set; }
+
+        public MolConcInfo()
+        {
+        }
+
+        public MolConcInfo(string guid, double c, SimConfiguration sc)
+        {
+            molguid = guid;
+            conc = c;
+            molname = sc.entity_repository.molecules_dict[guid].Name ;
         }
     }
 }

@@ -113,7 +113,7 @@ namespace Workbench
             cChart = new Chart();            
             cChart.MouseDown += new MouseEventHandler(this.cChart_MouseDown);
             cChart.MouseUp += new MouseEventHandler(this.cChart_MouseUp);
-            cChart.MouseMove += new MouseEventHandler(this.cChart_MouseMove);            
+            cChart.MouseMove += new MouseEventHandler(this.cChart_MouseMove);   
             cChart.BackColor = System.Drawing.SystemColors.ControlDark;
             cChart.ContextMenu = contextMenu;
   
@@ -302,7 +302,7 @@ namespace Workbench
             return max;
         }
 
-        private string ConvertMolGuidToMolName(string guid)
+        public string ConvertMolGuidToMolName(string guid)
         {
             string ret = "";
             if (MainWindow.SC.SimConfig.entity_repository.molecules_dict.ContainsKey(guid))
@@ -489,7 +489,7 @@ namespace Workbench
             //    }
             //}
         }
-
+        
         //On mouse up, not much to do.  Just reset a couple of things.
         private void cChart_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
