@@ -98,22 +98,5 @@ namespace Daphne
                 c.resetForce();
             }
         }
-        
-        public void WriteStates(string filename)
-        {
-            using (StreamWriter writer = File.CreateText(filename))
-            {
-                int n = 0;
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
-                {
-                    writer.Write(n + "\t"
-                                 + kvp.Value.State.X[0] + "\t" + kvp.Value.State.X[1] + "\t" + kvp.Value.State.X[2] + "\t"
-                                 + kvp.Value.State.V[0] + "\t" + kvp.Value.State.V[1] + "\t" + kvp.Value.State.V[2]
-                                 + "\n");
-
-                    n++;
-                }
-            }
-        }
     }
 }
