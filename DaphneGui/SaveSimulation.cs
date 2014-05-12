@@ -21,6 +21,14 @@ namespace DaphneGui
         /// </summary>
         public void save_simulation_state()
         {
+            // remember the current button enabled states
+            bool[] buttons = new bool[3];
+            int RUN = 0, RESET = 1, ABORT = 2;
+
+            buttons[RUN] = runButton.IsEnabled;
+            buttons[RESET] = resetButton.IsEnabled;
+            buttons[ABORT] = abortButton.IsEnabled;
+
             runButton.IsEnabled = false;
             resetButton.IsEnabled = false;
             abortButton.IsEnabled = false;
@@ -57,9 +65,9 @@ namespace DaphneGui
                 // Show save file dialog box
                 if (dlg.ShowDialog() != true)
                 {
-                    runButton.IsEnabled = true;
-                    resetButton.IsEnabled = true;
-                    abortButton.IsEnabled = true;
+                    runButton.IsEnabled = buttons[RUN];
+                    resetButton.IsEnabled = buttons[RESET];
+                    abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
                 SimConfigSaver.FileName = dlg.FileName;
@@ -133,9 +141,9 @@ namespace DaphneGui
             }
 
             SimConfigSaver.SerializeSimConfigToFile();
-            runButton.IsEnabled = true;
-            resetButton.IsEnabled = true;
-            abortButton.IsEnabled = true;
+            runButton.IsEnabled = buttons[RUN];
+            resetButton.IsEnabled = buttons[RESET];
+            abortButton.IsEnabled = buttons[ABORT];
         }
 
     }
