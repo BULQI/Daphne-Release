@@ -478,7 +478,7 @@ namespace DaphneGui
 
             if (inputModifiers.Count > 9 || inputReactants.Count > 9 || inputProducts.Count > 9 || totalReacStoich > 9 || totalProdStoich > 9 || totalModStoich > 9)
             {
-                throw new Exception("Unsupported reaction with current typing algoithm.\n");
+                throw new Exception("Unsupported reaction with current typing algorithm.\n");
             }
 
             int reacNum = inputModifiers.Count * modVal

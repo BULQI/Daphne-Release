@@ -204,10 +204,13 @@ namespace Daphne
                 }
             }
 
+            // NOTE: When comp is ECS then ECS boundary reactions may not apply to some cell types. 
+            // The continue statements below catch these cases.
+
             foreach( string guid in reac_guids)
             //foreach (string guid in configComp.reactions_guid_ref)
             {
-                ConfigReaction cr = er.reactions_dict[guid];
+                ConfigReaction cr = er.reactions_dict[guid];           
 
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryAssociation)
                 {
@@ -225,7 +228,14 @@ namespace Daphne
 
                         if (er.molecules_dict[cr.reactants_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
                         {
-                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                            if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]))
+                            {
+                                receptor = boundary.Populations[cr.reactants_molecule_guid_ref[1]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                         else
                         {
@@ -238,7 +248,14 @@ namespace Daphne
 
                         if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                         {
-                            receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                            if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]))
+                            {
+                                receptor = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                         else
                         {
@@ -252,7 +269,14 @@ namespace Daphne
                     // product
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        complex = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        if (boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
+                        {
+                            complex = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
@@ -275,8 +299,15 @@ namespace Daphne
                         ligand = comp.Populations[cr.products_molecule_guid_ref[0]];
 
                         if (er.molecules_dict[cr.products_molecule_guid_ref[1]].molecule_location == MoleculeLocation.Boundary)
-                        {
-                            receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                        {                 
+                            if (boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[1]))
+                            {
+                                receptor = boundary.Populations[cr.products_molecule_guid_ref[1]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                         else
                         {
@@ -289,7 +320,14 @@ namespace Daphne
 
                         if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                         {
-                            receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                            if (boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
+                            {
+                                receptor = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
                         else
                         {
@@ -303,7 +341,14 @@ namespace Daphne
                     // reactant
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        complex = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]))
+                        {
+                            complex = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
@@ -332,7 +377,14 @@ namespace Daphne
                     // modifier
                     if (er.molecules_dict[cr.modifiers_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        receptor = boundary.Populations[cr.modifiers_molecule_guid_ref[0]];
+                        if (boundary.Populations.ContainsKey(cr.modifiers_molecule_guid_ref[0]))
+                        {
+                            receptor = boundary.Populations[cr.modifiers_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
@@ -370,7 +422,14 @@ namespace Daphne
                     // product
                     if (er.molecules_dict[cr.products_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        membrane = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        if (boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
+                        {
+                            membrane = boundary.Populations[cr.products_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else 
                     {
@@ -399,7 +458,14 @@ namespace Daphne
                     // reactant
                     if (er.molecules_dict[cr.reactants_molecule_guid_ref[0]].molecule_location == MoleculeLocation.Boundary)
                     {
-                        membrane = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        if (boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[0]))
+                        {
+                            membrane = boundary.Populations[cr.reactants_molecule_guid_ref[0]];
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
