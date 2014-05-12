@@ -397,36 +397,49 @@ namespace DaphneGui
                 //file = "daphne_blank_scenario.json";
             }
 
-            // attempt to load a default simulation file; if it doesn't exist disable the gui
-            //skg daphne Wednesday, May 08, 2013
-            scenario_path = new Uri(appPath + @"\Config\" + file);
-            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+            int repeat = 0;
+            bool file_exists;
 
-            bool file_exists = File.Exists(scenario_path.LocalPath);
-
-            if (file_exists)
+            do
             {
-                SimConfigToolWindow.IsEnabled = true;
-                saveScenario.IsEnabled = true;
-                //displayTitle();
-            }
-            else
-            {
-                SimConfigToolWindow.IsEnabled = false;
-                saveScenario.IsEnabled = false;
+                // attempt to load a default simulation file; if it doesn't exist disable the gui
+                //skg daphne Wednesday, May 08, 2013
+                scenario_path = new Uri(appPath + @"\Config\" + file);
+                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
 
-                // notify the user; loading will always fail for protocols from the UserScenarios folder
-                if (openLastScenarioMenu.IsChecked == true)
+                file_exists = File.Exists(scenario_path.LocalPath);
+
+                if (file_exists)
                 {
-                    string messageBoxText = "Opening the last protocol failed. Starting up with blank window.\nFunction only supported for files in the \\Config folder.";
-                    string caption = "Protocol load failure";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Error;
-
-                    // Display message box
-                    MessageBox.Show(messageBoxText, caption, button, icon);
+                    SimConfigToolWindow.IsEnabled = true;
+                    saveScenario.IsEnabled = true;
+                    //displayTitle();
                 }
-            }
+                else
+                {
+                    SimConfigToolWindow.IsEnabled = false;
+                    saveScenario.IsEnabled = false;
+
+                    // notify the user; loading will always fail for protocols from the UserScenarios folder
+                    if (openLastScenarioMenu.IsChecked == true)
+                    {
+                        string messageBoxText = "Opening the last protocol failed. Starting up with blank window.\nFunction only supported for files in the \\Config folder.";
+                        string caption = "Protocol load failure";
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Error;
+
+                        // Display message box
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                    }
+
+                    // allow one repetition with the blank scenario
+                    if (repeat < 1)
+                    {
+                        file = "daphne_blank_scenario.json";
+                    }
+                }
+                repeat++;
+            } while (file_exists == false && repeat < 2);
 
             SimConfigToolWindow.MW = this;
 

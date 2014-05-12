@@ -391,7 +391,7 @@ namespace Daphne
             sc.experiment_description = "Libraries only.";
             sc.scenario.time_config.duration = 100;
             sc.scenario.time_config.rendering_interval = 1.0;
-            sc.scenario.time_config.sampling_interval = 1440;
+            sc.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
             LoadDefaultGlobalParameters(configurator);

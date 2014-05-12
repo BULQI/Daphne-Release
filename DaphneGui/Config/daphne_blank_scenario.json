@@ -12,7 +12,7 @@
     "time_config": {
       "duration": 100.0,
       "rendering_interval": 0.3,
-      "sampling_interval": 1440.0
+      "sampling_interval": 100.0
     },
     "environment": {
       "extent_x": 400,
