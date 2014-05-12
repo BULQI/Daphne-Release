@@ -2086,7 +2086,7 @@ namespace DaphneGui
                     }
                 }
 
-                if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                if (sim.RunStatus == Simulation.RUNSTAT_READY)
                 {
                     if(Properties.Settings.Default.skipDataBaseWrites == false)
                     {
@@ -2095,6 +2095,7 @@ namespace DaphneGui
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";
                     statusBarMessagePanel.Content = "Running...";
+                    sim.RunStatus = Simulation.RUNSTAT_RUN;
                 }
             }
         }

@@ -19,10 +19,11 @@ namespace Daphne
         /// constants used to set the run status
         /// </summary>
         public static byte RUNSTAT_OFF = 0,
-                           RUNSTAT_RUN = 1,
-                           RUNSTAT_PAUSE = 2,
-                           RUNSTAT_ABORT = 3,
-                           RUNSTAT_FINISHED = 4;
+                           RUNSTAT_READY = 1,
+                           RUNSTAT_RUN = 2,
+                           RUNSTAT_PAUSE = 3,
+                           RUNSTAT_ABORT = 4,
+                           RUNSTAT_FINISHED = 5;
         /// <summary>
         /// simulation actions
         /// </summary>
@@ -86,7 +87,7 @@ namespace Daphne
             lock (this)
             {
                 reset();
-                RunStatus = RUNSTAT_RUN;
+                RunStatus = RUNSTAT_READY;
             }
         }
 
