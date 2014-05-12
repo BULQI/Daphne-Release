@@ -382,14 +382,14 @@
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cells color by attribute">
                                                 </ComboBox>
 
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
+                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
                                                 <ComboBox Name="CellSelectionToolCB" Width="160"
                                                           ItemsSource="{Binding Path=CellSelectionToolModes}"
                                                           SelectedValue="{Binding Path=CellSelectionToolMode}"
                                                           SelectionChanged="CellSelectionToolCB_SelectionChanged"
                                                           BorderBrush="LightGray" 
                                                           ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
-                                                          />
+                                                          />-->
 
                                                 <Slider x:Name="ColorMapScaleFactorSlider"
                                                         Visibility="{Binding ColorScaleSlider_IsEnabled}"

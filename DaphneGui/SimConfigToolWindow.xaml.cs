@@ -573,7 +573,7 @@ namespace DaphneGui
             }
             return false;
         }
-        private bool CellPopsHaveMolecule(string molguid)
+        private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SC.SimConfig.scenario.cellpopulations)
@@ -583,6 +583,19 @@ namespace DaphneGui
                     return true;
             }
             
+            return ret;
+        }
+        //CellPopsHaveMoleculeInCytosol
+        private bool CellPopsHaveMoleculeInCytosol(string molguid)
+        {
+            bool ret = false;
+            foreach (CellPopulation cell_pop in MainWindow.SC.SimConfig.scenario.cellpopulations)
+            {
+                ConfigCell cell = MainWindow.SC.SimConfig.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                if (CytosolHasMolecule(cell, molguid))
+                    return true;
+            }
+
             return ret;
         }
 
@@ -604,7 +617,7 @@ namespace DaphneGui
                 {
                     if (cm.molecule_location == MoleculeLocation.Boundary)
                     {
-                        if (CellPopsHaveMolecule(newmolguid))
+                        if (CellPopsHaveMoleculeInMemb(newmolguid))
                         {
                             bFound = true;
                         }
@@ -635,7 +648,7 @@ namespace DaphneGui
                 {
                     if (cm.molecule_location == MoleculeLocation.Boundary)
                     {
-                        if (CellPopsHaveMolecule(newmolguid))
+                        if (CellPopsHaveMoleculeInMemb(newmolguid))
                         {
                             bFound = true;
                         }
@@ -666,7 +679,7 @@ namespace DaphneGui
                 {
                     if (cm.molecule_location == MoleculeLocation.Boundary)
                     {
-                        if (CellPopsHaveMolecule(newmolguid))
+                        if (CellPopsHaveMoleculeInMemb(newmolguid))
                         {
                             bFound = true;
                         }
@@ -715,7 +728,7 @@ namespace DaphneGui
 
             bool bOK = false;
             foreach (string molguid in cr.reactants_molecule_guid_ref) {
-                if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
                 {
                     bOK = true;
                 }
@@ -729,7 +742,7 @@ namespace DaphneGui
             {
                 foreach (string molguid in cr.products_molecule_guid_ref)
                 {
-                    if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                    if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
                     {
                         bOK = true;
                     }
@@ -744,7 +757,7 @@ namespace DaphneGui
             {
                 foreach (string molguid in cr.modifiers_molecule_guid_ref)
                 {
-                    if (EcmHasMolecule(molguid) || CellPopsHaveMolecule(molguid))
+                    if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
                     {
                         bOK = true;
                     }
@@ -757,6 +770,143 @@ namespace DaphneGui
             }
 
             e.Accepted = bOK;
+        }
+
+        private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+
+            if (CellsListBox.SelectedIndex < 0)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
+
+            //This filter is called for every reaction in the repository.
+            //For current reaction, if all of its molecules are in the membrane, then the reaction should be included.
+            //Otherwise, exclude it.
+
+            //First check if all the molecules in the reactants list exist in the membrane
+            bool bOK = false;
+            bOK = cc.membrane.HasMolecules(cr.reactants_molecule_guid_ref);
+
+            //If bOK is true, that means the molecules in the reactants list all exist in the membrane
+            //Now check the products list
+            if (bOK)
+                bOK = cc.membrane.HasMolecules(cr.products_molecule_guid_ref);
+
+            //Finally, loop through modifiers list
+            if (bOK)
+                bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
+
+            e.Accepted = bOK;
+
+            #region Old Code - remove after well tested
+            //foreach (string molguid in cr.reactants_molecule_guid_ref)
+            //{
+            //    ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
+            //    if (cc.membrane.HasMolecule(mol))
+            //    {
+            //        bOK = true;
+            //    }
+            //    else
+            //    {
+            //        bOK = false;
+            //        break;
+            //    }
+            //}
+
+            //If bOK is true, that means the molecules in the reactants list all exist in the membrane
+            //Now check the products list
+
+            //if (bOK)
+            //{
+            //    foreach (string molguid in cr.products_molecule_guid_ref)
+            //    {
+            //        ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
+            //        if (cc.membrane.HasMolecule(mol))
+            //        {
+            //            bOK = true;
+            //        }
+            //        else
+            //        {
+            //            bOK = false;
+            //            break;
+            //        }
+            //    }
+            //}
+
+            //Finally, loop through modifiers list
+            //if (bOK)
+            //{
+            //    foreach (string molguid in cr.modifiers_molecule_guid_ref)
+            //    {
+            //        ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
+            //        if (cc.membrane.HasMolecule(mol))
+            //        {
+            //            bOK = true;
+            //        }
+            //        else
+            //        {
+            //            bOK = false;
+            //            break;
+            //        }
+            //    }
+            //}
+            #endregion
+           
+            e.Accepted = bOK;
+        }
+
+        private void cytosolAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReaction cr = e.Item as ConfigReaction;
+
+            if (CellsListBox.SelectedIndex < 0)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
+
+            ObservableCollection<string> membBound = new ObservableCollection<string>();
+            ObservableCollection<string> bulk = new ObservableCollection<string>();
+            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    membBound.Add(molguid);
+                else
+                    bulk.Add(molguid);
+
+            foreach (string molguid in cr.products_molecule_guid_ref)
+                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    membBound.Add(molguid);
+                else
+                    bulk.Add(molguid);
+
+            foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                if (er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    membBound.Add(molguid);
+                else
+                    bulk.Add(molguid);
+
+            bool bOK = true;
+
+            if (bulk.Count <= 0)
+                bOK = false;
+
+            if (bOK && membBound.Count > 0)
+                bOK = cc.membrane.HasMolecules(membBound);
+
+            if (bOK)
+                bOK = cc.cytosol.HasMolecules(bulk);
+
+            e.Accepted = bOK;
+
         }
 
 
@@ -1178,105 +1328,105 @@ namespace DaphneGui
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (var item in lvCellAvailableReacs.SelectedItems)
+            foreach (var item in lvCytosolAvailableReacs.SelectedItems)
             {
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
                     //Here, must check if the cell has the molecules that are needed by this reaction
                     //Reactants
-                    foreach (string newmolguid in cr.reactants_molecule_guid_ref)
-                    {
-                        bool bFound = false;
+                    //foreach (string newmolguid in cr.reactants_molecule_guid_ref)
+                    //{
+                    //    bool bFound = false;
 
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null)
-                        {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-                            else
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
+                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                    //    if (cm != null)
+                    //    {
+                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
+                    //        {
+                    //            if (MembraneHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            if (CytosolHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
 
-                            if (bFound == false)
-                            {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }
-                    }
+                    //        if (bFound == false)
+                    //        {
+                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                    //            MessageBox.Show(msg);
+                    //            return;
+                    //        }
+                    //    }
+                    //}
                     //Products
-                    foreach (string newmolguid in cr.products_molecule_guid_ref)
-                    {
-                        bool bFound = false;
+                    //foreach (string newmolguid in cr.products_molecule_guid_ref)
+                    //{
+                    //    bool bFound = false;
 
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null)
-                        {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-                            else
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
+                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                    //    if (cm != null)
+                    //    {
+                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
+                    //        {
+                    //            if (MembraneHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            if (CytosolHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
 
-                            if (bFound == false)
-                            {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }
-                    }
+                    //        if (bFound == false)
+                    //        {
+                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                    //            MessageBox.Show(msg);
+                    //            return;
+                    //        }
+                    //    }
+                    //}
                     //Modifiers 
-                    foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
-                    {
-                        bool bFound = false;
+                    //foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
+                    //{
+                    //    bool bFound = false;
 
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null)
-                        {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-                            else
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
+                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                    //    if (cm != null)
+                    //    {
+                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
+                    //        {
+                    //            if (MembraneHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            if (CytosolHasMolecule(cc, newmolguid))
+                    //            {
+                    //                bFound = true;
+                    //            }
+                    //        }
 
-                            if (bFound == false)
-                            {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }
-                    }
+                    //        if (bFound == false)
+                    //        {
+                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                    //            MessageBox.Show(msg);
+                    //            return;
+                    //        }
+                    //    }
+                    //}
                     if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
                     {
                         cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
@@ -1334,6 +1484,10 @@ namespace DaphneGui
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (lvCellAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2174,12 +2328,6 @@ namespace DaphneGui
                 }
             }
         }
-
-        //private ComboBox MolPopDistComboBox;
-        //private void MolPopDistributionTypeComboBox_Loaded(object sender, RoutedEventArgs e)
-        //{
-        //    MolPopDistComboBox = sender as ComboBox;
-        //}
     }      
     
      

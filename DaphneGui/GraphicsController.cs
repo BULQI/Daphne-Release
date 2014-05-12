@@ -1540,8 +1540,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
-            if (!HandToolButton_IsChecked)
-                return;
+            //if (!HandToolButton_IsChecked)
+            //    return;
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();

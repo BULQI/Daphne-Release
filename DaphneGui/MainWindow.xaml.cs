@@ -68,23 +68,6 @@ namespace DaphneGui
         }
 
         private Reporter reporter;
-
-        private bool blueHandToolButton_IsChecked = false;
-
-        public bool BlueHandToolButton_IsChecked
-        {
-            get { return blueHandToolButton_IsChecked; }
-            set
-            {
-                if (blueHandToolButton_IsChecked == value)
-                    return;
-                else
-                {
-                    blueHandToolButton_IsChecked = value;
-                    SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, value);
-                }
-            }
-        }
         private Process devHelpProc;
         private static SimConfigurator configurator = null;
         private static int repetition;
@@ -117,7 +100,7 @@ namespace DaphneGui
                            MOUSE_LEFT_TRACK = 1,
                            MOUSE_LEFT_CELL_MOLCONCS = 2;
 
-        public static byte mouseLeftState = MOUSE_LEFT_NONE;
+        public static byte mouseLeftState = MOUSE_LEFT_CELL_MOLCONCS; //Temporary - until Tracks are working.  //MOUSE_LEFT_NONE;
 
         /// <summary>
         /// constants used in progress bar updating
@@ -1259,23 +1242,7 @@ namespace DaphneGui
         {
             save_simulation_state();
         }
-
-        private void BlueHandToolButton_Click(object sender, RoutedEventArgs e)
-        {
-            blueHandToolButton_IsChecked = !blueHandToolButton_IsChecked;
-
-            if (blueHandToolButton_IsChecked)
-            {
-                SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, true);
-                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
-            }
-            else
-            {
-                SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, false);
-                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
-            }
-        }
-
+        
         /// <summary>
         /// set or clear a particular control flag
         /// </summary>

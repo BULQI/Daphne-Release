@@ -13,7 +13,7 @@
     <!-- xmlns:daph="clr-namespace:Daphne"-->
 
     
-    <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top">
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top">
         <TabControl.Resources>
             <!-- For changing color of alternating rows of ListBox -->
             <Style  TargetType="{x:Type ListBoxItem}">
@@ -170,17 +170,17 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="cytosolMoleculesCollectionViewSource_Filter" />
             
-            <CollectionViewSource x:Key="membraneReactionsListView"  
+            <CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="membReactionCollectionViewSource_Filter"/>
-            <CollectionViewSource x:Key="cytosolReactionsListView"  
+                                  Filter="cytosolAvailableReactionsListView_Filter"/>
+
+            <CollectionViewSource x:Key="membraneAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="cytosolReactionsCollectionViewSource_Filter"/>
+                                  Filter="membraneAvailableReactionsListView_Filter"/>
 
             <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="ecmAvailableReactionsListView_Filter"
-                                   
+                                  Filter="ecmAvailableReactionsListView_Filter"                                   
                                   />
             
             <CollectionViewSource x:Key="baseCellTypesListView"  
@@ -2158,7 +2158,7 @@
                                                 Width="100"
                                                 RenderTransform="1.0,0,0,0.5,0,7"
                                                 Minimum="0.1" 
-                                                Maximum="10" 
+                                                Maximum="{Binding ElementName=time_duration_slider, Path=Value}" 
                                                 Value="{Binding Path=scenario.time_config.rendering_interval}" 
                                                 IsSnapToTickEnabled="True" 
                                                 TickFrequency="0.1" 
@@ -2190,7 +2190,7 @@
                                                 Width="100"
                                                 RenderTransform="1.0,0,0,0.5,0,7"
                                                 Minimum="0" 
-                                                Maximum="2000" 
+                                                Maximum="{Binding ElementName=time_duration_slider, Path=Value}"
                                                 Value="{Binding Path=scenario.time_config.sampling_interval}" 
                                                 IsSnapToTickEnabled="True" 
                                                 TickFrequency="0.1" 
@@ -2258,7 +2258,7 @@
         </TabItem>
         
         <!-- Extracellular Medium -->
-        <TabItem x:Name="tabECM" Header="Extracellular Medium">
+        <TabItem x:Name="tabECM" Header="Extracellular Medium" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
                     <!-- Environment -->
@@ -2846,6 +2846,51 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
 
+                    <!-- CELL POPULATIONS -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Cell Populations"
+                            x:Name="CellPopsExpander"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                        <StackPanel>
+                            <ListBox x:Name="CellPopsListBox" MinHeight="50" 
+                                             ItemsSource="{Binding Path=scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
+                                             ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
+                                             SelectedIndex="0"
+                                             SelectionChanged="cellPopsListBoxSelChanged"
+                                     
+                                             />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
+                                <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
+                            </StackPanel>
+                            <Expander ExpandDirection="Down" Padding="6"
+                                    IsExpanded="True"
+                                    Header="Cell Population Details"
+                                    x:Name="CellPopsDetailsExpander"
+                                    Margin="0,-15,0,0" 
+                                    Canvas.ZIndex="1"
+                                    >
+
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentControl Name="CellPopDetails"
+                                                Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
+                                                Margin="6,-4"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </Expander>
+
+
                     <!-- Cell Interaction Parameters -->
                     <Expander
                             Padding="5" 
@@ -2903,50 +2948,7 @@
                         </StackPanel>
 
                     </Expander>
-                    
-                    <!-- CELL POPULATIONS -->
-                    <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="True"
-                            Header="Cell Populations"
-                            x:Name="CellPopsExpander"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
 
-                        <StackPanel>
-                            <ListBox x:Name="CellPopsListBox" MinHeight="50" 
-                                             ItemsSource="{Binding Path=scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}" 
-                                             ItemTemplate="{Binding Source={StaticResource cellPopListItemTemplate}}"
-                                             SelectedIndex="0"
-                                             SelectionChanged="cellPopsListBoxSelChanged"
-                                     
-                                             />
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
-                                <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
-                            </StackPanel>
-                            <Expander ExpandDirection="Down" Padding="6"
-                                    IsExpanded="True"
-                                    Header="Cell Population Details"
-                                    x:Name="CellPopsDetailsExpander"
-                                    Margin="0,-15,0,0" 
-                                    Canvas.ZIndex="1"
-                                    >
-
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellPopDetails"
-                                                Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
-                                                Margin="6,-4"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Expander>
-                        </StackPanel>
-                    </Expander>
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -3825,7 +3827,6 @@
                                     Canvas.ZIndex="1"
                                     >
 
-
                                 <local:DaphneStackPanel x:Name="panelCellMolPops" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
                                     <!--<StackPanel Orientation="Vertical">-->
                                     <StackPanel Orientation="Horizontal">
@@ -3929,162 +3930,213 @@
                                     <Expander
                                                 Padding="5" 
                                                 ExpandDirection="Down"
-                                                    IsExpanded="False"
-                                                    Header="Cell Reactions"                                              
-                                                    x:Name="CellReacExpander"
-                                                    Margin="0,5,0,0" 
-                                                    Canvas.ZIndex="1"
+                                                IsExpanded="False"
+                                                Header="Cell Reactions"                                              
+                                                x:Name="CellReacExpander"
+                                                Margin="0,5,0,0" 
+                                                Canvas.ZIndex="1"
                                                 BorderThickness="1"
                                                 BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                         <StackPanel>
-                                            <!-- Reactions -->
-
+                                            <!-- Reactions in cell -->
                                             <StackPanel.Resources>
                                                 <DataTemplate x:Key="cellReacListItemTemplate">
-                                                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                    </TextBlock>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Width="40" MinWidth="40" Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv}, StringFormat={}{0:#.00},
+                                                                ConverterParameter={StaticResource ecmReactionsListView}, ConverterCulture='de-DE'}">
+                                                        </TextBlock>
+                                                        <TextBlock Margin="10,0" Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},  
+                                                                ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                        </TextBlock>
+                                                    </StackPanel>
                                                 </DataTemplate>
                                             </StackPanel.Resources>
-
-                                            <StackPanel Orientation="Horizontal">
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="Membrane" FontWeight="Bold" Margin="0,-10,0,0" >
-                                                    </TextBlock>
-                                                    <!--<ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                             ItemsSource="{Binding Source={StaticResource membraneReactionsListView}}"
-                                                            DisplayMemberPath="TotalReactionString"                                                    
-                                                            SelectedIndex="-1"
-                                                    />-->
-                                                    <!--<ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                             DisplayMemberPath="TotalReactionString">
-                                                    </ListBox>-->
-                                                    <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
+                                            
+                                            <StackPanel>
+                                                <TabControl>
+                                                    <!-- Membrane -->
+                                                    <TabItem>
+                                                        <TabItem.Header>
+                                                            <TextBlock Text="Membrane" FontWeight="Bold" />
+                                                        </TabItem.Header>
+                                                        <StackPanel Orientation="Vertical">
+                                                            <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" 
                                                              ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.reactions_guid_ref}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
-                                                    </ListBox>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                                <StackPanel Orientation="Vertical" >
-                                                    <TextBlock Text="Cytosol" FontWeight="Bold" Margin="0,-10,0,0" >
-                                                    </TextBlock>
-                                                    <!--<ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                             ItemsSource="{Binding Source={StaticResource cytosolReactionsListView}}"
-                                                            DisplayMemberPath="TotalReactionString"                                                    
-                                                            SelectedIndex="-1"
-                                                    />-->
-                                                    <!--<ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
-                                                            DisplayMemberPath="TotalReactionString"                                                    
-                                                            SelectedIndex="-1"
-                                                    />-->
-                                                    <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" MaxHeight="100" Width="225"
+                                                            </ListBox>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
+                                                            </StackPanel>
+                                                            <StackPanel>
+                                                                <Expander ExpandDirection="Down"
+                                                                      IsExpanded="False"
+                                                                      Header="Add a reaction"
+                                                                      x:Name="CellAddReacExpander"
+                                                                      Margin="0,0,0,0" 
+                                                                      Canvas.ZIndex="1"
+                                                                      >
+                                                                      <StackPanel Orientation="Vertical" Margin="10,0">
+                                                                            <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
+                                                                            <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
+                                                                                ItemsSource="{Binding Source={StaticResource membraneAvailableReactionsListView}}"
+                                                                                SelectedIndex="-1"
+                                                                                MinHeight="50" MaxHeight="150"
+                                                                                >
+
+                                                                                <ListView.View>
+                                                                                <GridView>
+                                                                                    <GridView.ColumnHeaderContainerStyle>
+                                                                                        <Style TargetType="GridViewColumnHeader">
+                                                                                            <Setter Property="Height" Value="Auto"></Setter>
+                                                                                            <Setter Property="Background">
+                                                                                                <Setter.Value>
+                                                                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                                        <GradientStop Offset="0.0" Color="White" />
+                                                                                                        <GradientStop Offset="1.0" Color="Beige" />
+                                                                                                    </LinearGradientBrush>
+                                                                                                </Setter.Value>
+                                                                                            </Setter>
+                                                                                        </Style>
+                                                                                    </GridView.ColumnHeaderContainerStyle>
+
+                                                                                    <GridViewColumn Width="80" Header="Rate constant">
+                                                                                        <GridViewColumn.CellTemplate>
+                                                                                            <DataTemplate>
+                                                                                                <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
+                                                                                                <TextBlock.Style>
+                                                                                                    <Style>
+                                                                                                        <Setter Property="TextBlock.Foreground" 
+                                                                                                                Value="Black">
+                                                                                                        </Setter>
+                                                                                                    </Style>
+                                                                                                </TextBlock.Style>
+                                                                                                </TextBlock>
+                                                                                            </DataTemplate>
+                                                                                        </GridViewColumn.CellTemplate>
+                                                                                    </GridViewColumn>
+                                                                                    <GridViewColumn Width="300" Header="Reaction" >
+                                                                                        <GridViewColumn.CellTemplate>
+                                                                                            <DataTemplate>
+                                                                                                <TextBlock Text="{Binding TotalReactionString}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground" 
+                                                                        Value="Black">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                                                                </TextBlock>
+                                                                                            </DataTemplate>
+                                                                                        </GridViewColumn.CellTemplate>
+
+                                                                                    </GridViewColumn>
+                                                                                </GridView>
+                                                                            </ListView.View>
+                                                                            </ListView>
+                                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                                <Button Name="MembraneAddReacButton"  Width="120" Content="Add" Click="MembraneAddReacButton_Click"/>
+                                                                            </StackPanel>
+                                                                    </StackPanel>
+                                                                </Expander>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </TabItem>
+                                                    
+                                                    <!-- Cytosol -->
+                                                    <TabItem >
+                                                        <TabItem.Header>
+                                                            <TextBlock Text="Cytosol" FontWeight="Bold" />
+                                                        </TabItem.Header>
+                                                        <StackPanel Orientation="Vertical" >                                                            
+                                                            <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" 
                                                              ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.reactions_guid_ref}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
-                                                    </ListBox>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
-                                                    </StackPanel>
-                                                </StackPanel>
+                                                            </ListBox>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
+                                                            </StackPanel>
+                                                            <StackPanel>
+                                                                <Expander ExpandDirection="Down"
+                                                                    IsExpanded="False"
+                                                                    Header="Add a reaction"
+                                                                    x:Name="CellAddReacExpander2"
+                                                                    Margin="0,0,0,0" 
+                                                                    Canvas.ZIndex="1"
+                                                                    >
+                                                                    <StackPanel Orientation="Vertical" Margin="10,0">
+                                                                        <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />                                                    
+                                                                        <ListView x:Name="lvCytosolAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                                                                                
+                                                                            ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionsListView}}"
+                                                                            SelectedIndex="-1"
+                                                                            MinHeight="50" MaxHeight="150"
+                                                                            >
 
+                                                                            <ListView.View>
+                                                                                <GridView>
+                                                                                    <GridView.ColumnHeaderContainerStyle>
+                                                                                        <Style TargetType="GridViewColumnHeader">
+                                                                                            <Setter Property="Height" Value="Auto"></Setter>
+                                                                                            <Setter Property="Background">
+                                                                                                <Setter.Value>
+                                                                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                                        <GradientStop Offset="0.0" Color="White" />
+                                                                                                        <GradientStop Offset="1.0" Color="Beige" />
+                                                                                                    </LinearGradientBrush>
+                                                                                                </Setter.Value>
+                                                                                            </Setter>
+                                                                                        </Style>
+                                                                                    </GridView.ColumnHeaderContainerStyle>
+
+                                                                                    <GridViewColumn Width="80" Header="Rate constant">
+                                                                                        <GridViewColumn.CellTemplate>
+                                                                                            <DataTemplate>
+                                                                                                <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
+                                                                                                    <TextBlock.Style>
+                                                                                                        <Style>
+                                                                                                            <Setter Property="TextBlock.Foreground" 
+                                                                                                                    Value="Black">
+                                                                                                            </Setter>
+                                                                                                        </Style>
+                                                                                                    </TextBlock.Style>
+                                                                                                </TextBlock>
+                                                                                            </DataTemplate>
+                                                                                        </GridViewColumn.CellTemplate>
+                                                                                    </GridViewColumn>
+                                                                                    <GridViewColumn Width="300" Header="Reaction" >
+                                                                                        <GridViewColumn.CellTemplate>
+                                                                                            <DataTemplate>
+                                                                                                <TextBlock Text="{Binding TotalReactionString}">
+                                                                                                    <TextBlock.Style>
+                                                                                                        <Style>
+                                                                                                            <Setter Property="TextBlock.Foreground" 
+                                                                                                                    Value="Black">
+                                                                                                            </Setter>
+                                                                                                        </Style>
+                                                                                                    </TextBlock.Style>
+                                                                                                </TextBlock>
+                                                                                            </DataTemplate>
+                                                                                        </GridViewColumn.CellTemplate>
+
+                                                                                    </GridViewColumn>
+                                                                                </GridView>
+                                                                            </ListView.View>
+                                                                        </ListView>
+                                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                                            <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click"/>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                </Expander>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </TabItem>
+                                                    
+                                                </TabControl>
                                             </StackPanel>
 
-                                            <Expander ExpandDirection="Down"
-                                                  IsExpanded="False"
-                                                  Header="Add a reaction"
-                                                  x:Name="CellAddReacExpander"
-                                                  Margin="0,0,0,0" 
-                                                  Canvas.ZIndex="1"
-                                                  >
-                                                <StackPanel Orientation="Vertical" Margin="10,0">
-
-                                                    <TextBlock Text="Reactions Library" Grid.Column="0" Grid.Row="3"  FontWeight="Bold"  Margin="0,0,6,0" />
-                                                    <!--<ListBox x:Name="lbCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                            ItemsSource="{Binding Path=entity_repository.reactions, Mode=OneWay}"                                                      
-                                                            ItemTemplate="{Binding Source={StaticResource reactionListItemTemplate}}"
-                                                            SelectedIndex="0"
-                                                            >
-                                                    </ListBox>-->
-
-
-
-
-
-                                                    <ListView x:Name="lvCellAvailableReacs" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" AlternationCount="2"                                                        
-                                                        ItemsSource="{Binding Path=entity_repository.reactions, Mode=OneWay}"
-                                                        SelectedIndex="-1"
-                                                        MinHeight="50" MaxHeight="150"
-                                                    >
-
-                                                        <ListView.View>
-                                                            <GridView>
-                                                                <GridView.ColumnHeaderContainerStyle>
-                                                                    <Style TargetType="GridViewColumnHeader">
-                                                                        <Setter Property="Height" Value="Auto"></Setter>
-                                                                        <Setter Property="Background">
-                                                                            <Setter.Value>
-                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                                                    <GradientStop Offset="0.0" Color="White" />
-                                                                                    <GradientStop Offset="1.0" Color="Beige" />
-                                                                                </LinearGradientBrush>
-                                                                            </Setter.Value>
-                                                                        </Setter>
-                                                                    </Style>
-                                                                </GridView.ColumnHeaderContainerStyle>
-
-                                                                <GridViewColumn Width="80" Header="Rate constant">
-                                                                    <GridViewColumn.CellTemplate>
-                                                                        <DataTemplate>
-                                                                            <TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                                            </TextBlock>
-                                                                        </DataTemplate>
-                                                                    </GridViewColumn.CellTemplate>
-                                                                </GridViewColumn>
-                                                                <GridViewColumn Width="300" Header="Reaction" >
-                                                                    <GridViewColumn.CellTemplate>
-                                                                        <DataTemplate>
-                                                                            <TextBlock Text="{Binding TotalReactionString}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                                            </TextBlock>
-                                                                        </DataTemplate>
-                                                                    </GridViewColumn.CellTemplate>
-
-                                                                </GridViewColumn>
-                                                            </GridView>
-                                                        </ListView.View>
-                                                    </ListView>
-
-
-
-
-
-
-
-
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                                        <Button Name="MembraneAddReacButton"  Width="120" Content="Add to Membrane" Click="MembraneAddReacButton_Click"/>
-                                                        <Button Name="CytosolAddReacButton"  Width="120" Content="Add to Cytosol" Click="CytosolAddReacButton_Click"/>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </Expander>
                                         </StackPanel>
                                     </Expander>
                                     <!-- Reaction Complexes in this cell and their location -->
