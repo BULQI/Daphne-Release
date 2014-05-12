@@ -215,14 +215,22 @@ namespace Daphne
 
                         // Feed embedded manifold array index k to WhereIs and return a double[] point in the embedding manifold
                         // request interpolation if needed
-                        if (Man.Boundaries[m].NeedsInterpolation() == true)
+                    if (Man.Boundaries[m].NeedsInterpolation() == true)
+                    {
+                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
                         {
                             BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIs(k));
-                        }
-                        else
+                            BoundaryGlobalGrad[m].vector[k] = GlobalGradient(Man.Boundaries[m].WhereIs(k));
+                         }
+                    }
+                    else
+                    {
+                        for (int k = 0; k < BoundaryConcs[m].array.Length; k++)
                         {
                             BoundaryConcs[m].array[k] = Concentration(Man.Boundaries[m].WhereIsIndex(k));
                             BoundaryGlobalGrad[m].vector[k] = GlobalGradient(Man.Boundaries[m].WhereIsIndex(k));
+                        }
+                    }
                         }
                     }
                 }
@@ -370,35 +378,6 @@ namespace Daphne
 
                 }
             }
-
-            // Diffusion of global gradient
-            // QUESTION: Is this relevant for any manifolds other than BoundedRectangularPrism?
-
-            // TODO
-
-            //if (Man.GetType() == typeof(BoundedRectangularPrism) )
-            //{
-
-            //    double[] temparray = new double[Man.ArraySize];
-            //    LocalMatrix[][] lm;
-            //    double d=0;
-
-            //    for (int i = 0; i < Man.ArraySize; i++)
-            //    {
-            //        for (int j = 0; j < 3; j++)
-            //        {
-            //            //lm =
-            //            //temparray[i] += Man.Laplacian[i][j].Coefficient * Conc.array[Man.Laplacian[i][j].Index] * dt;
-
-            //            for (int k = 0; k < lm[j].Length; k++)
-            //            {
-                            
-            //            }
-            //            GlobalGrad[j] = GlobalGrad[j] + d;
-
-            //        }
-            //    }
-            //}
         }
 
 
