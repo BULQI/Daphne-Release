@@ -89,6 +89,14 @@ namespace Workbench
             DrawLine = line;
         }
 
+        public void ClearChart()
+        {
+            foreach (Control c in PChart.Controls)
+            {
+                PChart.Controls.Remove(c);
+            }
+        }
+
         //This function creates and draws the entire graph.  It uses ListTimes and DictConcs to draw all the series in the graph.
         //Each molecule's concentrations are drawn as a series.  It calls the DrawSeries function to draw each series. 
         //We are using only 1 chart area.  If we use more than 1, then the DrawSeries function should be made more general.

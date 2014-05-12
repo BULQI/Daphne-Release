@@ -30,12 +30,15 @@ namespace DaphneGui
     /// Interaction logic for SimConfigToolWindow.xaml
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
-    {
+    {        
+
         //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
+
+        public MainWindow MW { get; set; }
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
@@ -901,12 +904,16 @@ namespace DaphneGui
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
             MainWindow.ST_ReacComplexChartWindow.RC = rcp;
-            MainWindow.ST_ReacComplexChartWindow.Activate();
             MainWindow.ST_ReacComplexChartWindow.Render();
+            
             MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
             MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
 
             MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
+
+            MW.VTKDisplayDocWindow.Activate();
+            MainWindow.ST_ReacComplexChartWindow.Activate();
+            
         }
                
         private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)

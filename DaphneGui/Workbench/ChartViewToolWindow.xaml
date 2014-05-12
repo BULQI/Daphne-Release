@@ -26,8 +26,8 @@
             </Grid.RowDefinitions>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Bigger</Button>
-                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Smaller</Button>
+                <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
+                <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
                 <Button x:Name="btnSave"    Width="80" Height="24" HorizontalAlignment="Left"   Click="btnSave_Click" IsEnabled="False">Save Changes</Button>
                 <Button x:Name="btnDiscard" Width="100" Height="24" HorizontalAlignment="Left"  Click="btnDiscard_Click" IsEnabled="False">Discard Changes</Button>
             </StackPanel>
@@ -75,13 +75,11 @@
             <TabItem  x:Name="tb_Testing">-->
             <!--<Grid>-->
 
-            
-            <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True" Grid.Column="0" Grid.Row="3"> 
-                
-                <wf:Panel x:Name="pChartMolConcs" Visible="False" />
-                
-            </WindowsFormsHost>
-            
+            <StackPanel Grid.Column="0" Grid.Row="3">
+                <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True" > 
+                    <wf:Panel x:Name="pChartMolConcs" Visible="False" />
+                </WindowsFormsHost>
+            </StackPanel> 
 
             <!--</Grid>-->
             <!--</TabItem>

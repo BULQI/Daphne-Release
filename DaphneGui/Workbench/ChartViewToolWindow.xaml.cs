@@ -33,6 +33,11 @@ namespace Workbench
             DataContext = RC;
        
         }
+
+        public void ClearChart()
+        {
+            cm.ClearChart();
+        }
         
         public void Render()
         {
@@ -98,11 +103,13 @@ namespace Workbench
             if (sz.Width > 1200 || sz.Height > 800)
                 return;
 
-            windowsFormsHost1.Width = windowsFormsHost1.Width * 1.1;
-            windowsFormsHost1.Height = windowsFormsHost1.Height * 1.1;            
+            //resize underlying panel
+            windowsFormsHost1.Width = w;
+            windowsFormsHost1.Height = h;
             
             chartSize = sz;
             cm.ChartSize = sz;
+
             cm.DrawChart();
                        
         }

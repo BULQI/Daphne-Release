@@ -343,6 +343,8 @@ namespace DaphneGui
                 saveScenario.IsEnabled = false;
             }
 
+            SimConfigToolWindow.MW = this;
+
             // Hide fitting tab control until sim has ended
             this.LPFittingToolWindow.Close();
             this.menu_ActivateLPFitting.IsEnabled = false;
@@ -2036,6 +2038,8 @@ namespace DaphneGui
                 SimConfigToolWindow.IsEnabled = true;
                 saveScenario.IsEnabled = true;
                 displayTitle();
+                MainWindow.ST_ReacComplexChartWindow.ClearChart();
+                VTKDisplayDocWindow.Activate();
             }
         }
 
