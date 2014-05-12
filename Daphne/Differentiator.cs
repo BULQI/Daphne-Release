@@ -85,7 +85,6 @@ namespace Daphne
                 CurrentState = DiffBehavior.CurrentState;
                 TransitionOccurred = true;
             }
-            DiffBehavior.TransitionOccurred = false;
         }
     }
 
