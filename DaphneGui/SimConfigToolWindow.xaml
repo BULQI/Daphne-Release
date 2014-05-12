@@ -3702,7 +3702,7 @@
                                     </ListView.View>
                                 </ListView>
                                 
-                                <ToggleButton x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" 
+                                <ToggleButton x:Name="btnGraphReactionComplex" IsChecked="False" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" 
                                               Checked="btnGraphReactionComplex_Checked" >Run Reaction Complex</ToggleButton>
                                 
                                 <!--<Button x:Name="btnGraphReactionComplex" Grid.Column="4" Grid.Row="3" Grid.ColumnSpan="2" Width="140" HorizontalAlignment="Right" Click="btnGraphReactionComplex_Click">Run Reaction Complex</Button>-->

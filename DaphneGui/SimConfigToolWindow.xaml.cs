@@ -2547,21 +2547,23 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
             //
 
-            Simulation rcSim = new Simulation();
-            rcSim.Load(MainWindow.SC.SimConfig, true, true);
+            ////Simulation rcSim = new Simulation();
+            ////rcSim.Load(MainWindow.SC.SimConfig, true, true);
             //rcSim.LoadReactionComplex(MainWindow.SC.SimConfig, grc, true);
 
-            ReactionComplexProcessor rcp = new ReactionComplexProcessor();
-            rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
-            rcp.Go();
+            ////ReactionComplexProcessor rcp = new ReactionComplexProcessor();
+            ////rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
+            crc.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            crc.Processor.Initialize(MainWindow.SC.SimConfig, crc, crc.RCSim);
+            crc.Processor.Go();
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
-            MainWindow.ST_ReacComplexChartWindow.RC = rcp;
-            MainWindow.ST_ReacComplexChartWindow.DataContext = rcp;
+            MainWindow.ST_ReacComplexChartWindow.RC = crc.Processor;
+            MainWindow.ST_ReacComplexChartWindow.DataContext = crc.Processor;
             MainWindow.ST_ReacComplexChartWindow.Render();
 
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = rcp.dMaxTime;
-            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = rcp.dInitialTime;
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Maximum = crc.Processor.dMaxTime;
+            MainWindow.ST_ReacComplexChartWindow.slMaxTime.Value = crc.Processor.dInitialTime;
 
             //MainWindow.SC.SimConfig.entity_repository.cells.Remove(cc);
 

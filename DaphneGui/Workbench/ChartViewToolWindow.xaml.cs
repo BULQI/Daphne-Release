@@ -213,6 +213,9 @@ namespace Workbench
             RC.RestoreOriginalConcs();
             RC.RestoreOriginalRateConstants();
 
+            ////////cm.RedrawSeries();
+            ////////cm.RecalculateYMax();
+
             if (toggleButton != null)
             {
                 //This causes a redraw
@@ -274,13 +277,21 @@ namespace Workbench
         private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
 
-            Slider sl = sender as Slider;
+            RC.UpdateRateConstants();
+            RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            RC.Go();
+            cm.RedrawSeries();
+            cm.RecalculateYMax();
 
-            if (dragging == false)
-            {
-                sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
-                sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
-            }
+
+
+            ////Slider sl = sender as Slider;
+
+            ////if (dragging == false)
+            ////{
+            ////    sl.AddHandler(MouseLeftButtonDownEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonDown), true);
+            ////    sl.AddHandler(MouseLeftButtonUpEvent, new MouseButtonEventHandler(slRate_MouseLeftButtonUp), true);
+            ////}
         }
 
         private void slRate_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -300,14 +311,18 @@ namespace Workbench
 
             //Slider sl = sender as Slider;
 
-            if (toggleButton != null && dragging == true)
-            {
-                dragging = false;
-                RC.UpdateRateConstants();
+            ////////if (toggleButton != null && dragging == true)
+            ////////{
+            ////////    dragging = false;
+            ////////    RC.UpdateRateConstants();
+            ////////    RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            ////////    RC.Go();
+            ////////    cm.RedrawSeries();
+            ////////    cm.RecalculateYMax();
 
-                //This causes a redraw
-                toggleButton.IsChecked = true;
-            }
+            ////////    //This causes a redraw
+            ////////    //toggleButton.IsChecked = true;
+            ////////}
         }
 
         private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
