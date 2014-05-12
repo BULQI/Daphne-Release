@@ -591,8 +591,8 @@ namespace Daphne
         public TimeConfig()
         {
             duration = 100;
-            rendering_interval = 3;
-            sampling_interval = 1440; // maybe ask Tom for a good value; it will be in the magnitude of days, so the gui field must have a large enough upper limit
+            rendering_interval = 1;
+            sampling_interval = 1;
         }
     }
 
@@ -1082,7 +1082,9 @@ namespace Daphne
                                     "CatalyzedBoundaryActivation",
                                     "BoundaryAssociation",
                                     "BoundaryDissociation",
-                                    "Generalized"
+                                    "Generalized",
+                                    "BoundaryTransportTo",
+                                    "BoundaryTransportFrom"
                                 };
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

@@ -90,6 +90,7 @@ namespace Daphne
 
             // bindings for molecular populations
             Bind<IFieldInitializer>().To<ConstFieldInitializer>().Named("const");
+            Bind<IFieldInitializer>().To<LinearFieldInitializer>().Named("linear");
             Bind<IFieldInitializer>().To<GaussianFieldInitializer>().Named("gauss");
             Bind<ScalarField>().ToSelf();
             Bind<MolecularPopulation>().ToSelf();
