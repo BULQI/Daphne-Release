@@ -65,6 +65,7 @@ namespace Daphne
         public Manifold M { get { return m; } }
 
         protected readonly Manifold m;
+        protected double[] array;
 
         public ScalarField(Manifold m)
         {
@@ -134,8 +135,6 @@ namespace Daphne
 
     public class DiscreteScalarField : ScalarField
     {
-        protected double[] array;
-
         public DiscreteScalarField(Manifold m) : base(m)
         {
             array = new double[m.ArraySize];
@@ -315,11 +314,12 @@ namespace Daphne
     /// </summary>
     public class MomentExpansionScalarField : ScalarField
     {
-        protected double[] array;
+        private int parameterSize;
 
         public MomentExpansionScalarField(Manifold m) : base(m)
         {
-            array = new double[m.ArraySize];
+            parameterSize = 4;
+            array = new double[parameterSize];
         }
 
         // Should allow specification of the the initial 0th and 1st moments. 
@@ -331,7 +331,7 @@ namespace Daphne
         {
             MomentExpansionScalarField c = new MomentExpansionScalarField(m);
 
-            for (int i = 0; i < m.ArraySize; i++)
+            for (int i = 0; i < parameterSize; i++)
             {
                 c.array[i] = d * array[i];
             }
@@ -354,7 +354,7 @@ namespace Daphne
 
             c.array[0] = array[0] * ((MomentExpansionScalarField)f).array[0];
 
-            for (int i = 1; i < m.ArraySize; i++)
+            for (int i = 1; i < parameterSize; i++)
             {
                 c.array[i] = array[i] * ((MomentExpansionScalarField)f).array[0] + array[0] * ((MomentExpansionScalarField)f).array[i];
             }
@@ -386,14 +386,13 @@ namespace Daphne
 
             c.array[0] = array[0] / ((MomentExpansionScalarField)f).array[0];
 
-            for (int i = 1; i < m.ArraySize; i++)
+            for (int i = 1; i < parameterSize; i++)
             {
                 c.array[i] = (array[i] - array[0] * ((MomentExpansionScalarField)f).array[i] / ((MomentExpansionScalarField)f).array[0] ) 
                               / ((MomentExpansionScalarField)f).array[0];
             }
 
             return c;
-
         }
 
         public override ScalarField div(double d)
@@ -418,7 +417,7 @@ namespace Daphne
 
             MomentExpansionScalarField c = new MomentExpansionScalarField(m);
 
-            for (int i = 0; i < m.ArraySize; i++)
+            for (int i = 0; i < parameterSize; i++)
             {
                 c.array[i] = array[i] + ((MomentExpansionScalarField)f).array[i];
             }
@@ -438,7 +437,7 @@ namespace Daphne
 
             MomentExpansionScalarField c = new MomentExpansionScalarField(m);
 
-            for (int i = 0; i < m.ArraySize; i++)
+            for (int i = 0; i < parameterSize; i++)
             {
                 c.array[i] = array[i] - ((MomentExpansionScalarField)f).array[i];
             }
@@ -461,11 +460,21 @@ namespace Daphne
             return value;             
         }
 
-        // Implementation of this method only seems to be relevant for DiscreteScalarField
         public override double Get(int i)
         {
+            if (i < 0 || i >= m.ArraySize)
+            {
+                throw new Exception("Index out of range.");
+            }
+
             // return value at i-th point of the underlying manifold
-            return 0;
+            double[] point = new double[m.Dim];
+
+            for(int j = 0; j < m.Dim; j++)
+            {
+                point[i] = m.Coordinates[i, j];
+            }
+            return Get(point);
         }
 
         public override void Set(int i, double d)
