@@ -102,8 +102,12 @@ namespace Daphne
             boundaryConcs = new Dictionary<int, ScalarField>();
             foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
             {
-                boundaryFluxes.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
-                boundaryConcs.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
+                //boundaryFluxes.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
+                //boundaryConcs.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
+                ScalarField boundFlux = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
+                boundaryFluxes.Add(kvp.Key, boundFlux);
+                ScalarField boundConc = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
+                boundaryConcs.Add(kvp.Key, boundConc);
             }
 
             // natural boundaries
@@ -115,6 +119,32 @@ namespace Daphne
                 naturalBoundaryConcs.Add(kvp.Key, SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value)));
             }
         }
+
+        /// <summary>
+        /// moved some initalization from ... to here - axin
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="parameters"></param>
+        public void Initialize(string type, double[] parameters)
+        {
+
+            this.Conc.Initialize(type, parameters);
+            //for boundaryConc - only one bounary exist for cell and only cell boundary are saved
+            if (type == "explicit" && parameters.Length > concentration.M.ArraySize)
+            {
+                //reset boundary conc and flux, only for cell and only one boundary per molpop
+                int src_index = Conc.M.ArraySize;                
+                int arr_len = BoundaryConcs.First().Value.M.ArraySize;
+                double[] newvals = new double[arr_len];
+                Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                this.boundaryConcs.First().Value.Initialize(type, newvals);
+                src_index += arr_len;
+                Array.Copy(parameters, src_index, newvals, 0, arr_len);
+                BoundaryFluxes.First().Value.Initialize(type, newvals);
+            }
+        }
+
+
 
         /// <summary>
         /// At each array point in the embedded manifold, update the values of the concentration 

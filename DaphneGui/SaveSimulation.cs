@@ -33,15 +33,12 @@ namespace DaphneGui
                 string sp = configurator.FileName;
                 filepath_prefix = Path.Combine(System.IO.Path.GetDirectoryName(sp), System.IO.Path.GetFileNameWithoutExtension(sp));
             }
-            else
+ 
+            //clear the contents from last save
+            foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
             {
-                //clear the contents from last save
-                foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
-                {
-                    item.Value.cell_list.Clear();
-                }
+                item.Value.cell_list.Clear();
             }
-
 
             //get filename to save
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();

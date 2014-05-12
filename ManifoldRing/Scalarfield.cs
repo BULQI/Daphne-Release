@@ -13,11 +13,19 @@ namespace ManifoldRing
     public interface IFieldInitializer
     {
         /// <summary>
-        /// the initialization routine
+        /// initialization routine based on 3-dim coordinates
         /// </summary>
         /// <param name="point">point parameter</param>
         /// <returns>field value at point</returns>
-        double initialize(double[] point = null);
+        double initialize(double[] point);
+
+        /// <summary>
+        /// initialization based on idnex
+        /// </summary>
+        /// <param name="index">linear index</param>
+        /// <returns>field value for the index</returns>
+        double initialize(int index);
+
         void setParameters(double[] parameters);
     }
 
@@ -66,6 +74,12 @@ namespace ManifoldRing
 
             return cVal;
         }
+
+        public double initialize(int index)
+        {
+            throw new Exception("ConstFieldInitializer should not be called by index");
+        }
+
     }
 
     /// <summary>
@@ -126,6 +140,12 @@ namespace ManifoldRing
 
             return slope * point[dim] + intercept;
         }
+
+        public double initialize(int index)
+        {
+            throw new Exception("LinearFieldInitializer should not be called by index");
+        }
+
     }
 
     /// <summary>
@@ -193,6 +213,11 @@ namespace ManifoldRing
             }
             return max * Math.Exp(-f) / d;
         }
+
+        public double initialize(int index)
+        {
+            throw new Exception("GaussianFieldInitializer should not be called by index");
+        }
     }
 
     /// <summary>
@@ -228,13 +253,29 @@ namespace ManifoldRing
         /// <returns>constant value regardless of point</returns>
         public double initialize(double[] point)
         {
+            throw new Exception("ExcplictFieldInitializer should be called with index");
+        }
+
+        /// <summary>
+        /// return the field for the given index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public double initialize(int index)
+        {
 
             if (initialized == false)
             {
                 throw new Exception("Must call setParameters prior to using FieldInitializer.");
             }
-            return exp_vals[(int)point[0]];
+
+            if (index < 0 || index >= exp_vals.Length)
+            {
+                throw new Exception("ExplicitFieldInitializer: index out of range");
+            }
+            return exp_vals[index];
         }
+      
     }
 
 
@@ -290,7 +331,14 @@ namespace ManifoldRing
             init = factory.Initialize(type);
             init.setParameters(parameters);
 
-            if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
+            if (init.GetType() == typeof(ExplicitFieldInitializer))
+            {
+                for (int i = 0; i < m.ArraySize; i++)
+                {
+                    array[i] = init.initialize(i);
+                }
+            }
+            else if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
             {
                 for (int i = 0; i < m.ArraySize; i++)
                 {
@@ -303,14 +351,7 @@ namespace ManifoldRing
                 if (init.GetType() == typeof(ConstFieldInitializer))
                 {
                     // initialize the zero-th moment for ME fields; leave gradient equal to zero
-                    array[0] = init.initialize();
-                }
-                else if (init.GetType() == typeof(ExplicitFieldInitializer))
-                {
-                    for (int i = 0; i < m.ArraySize; i++)
-                    {
-                        array[i] = init.initialize(new double[] { i });
-                    }
+                    array[0] = init.initialize(new double[]{0, 0, 0});
                 }
                 else
                 {
