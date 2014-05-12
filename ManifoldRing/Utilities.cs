@@ -8,6 +8,20 @@ using MathNet.Numerics.LinearAlgebra;
 namespace ManifoldRing
 {
     /// <summary>
+    /// container for factories to keep them central
+    /// not every instance of a class should need its own factory
+    /// </summary>
+    public class FactoryContainer
+    {
+        public static IFieldInitializerFactory fieldInitFactory;
+
+        public FactoryContainer(IFieldInitializerFactory fif)
+        {
+            fieldInitFactory = fif;
+        }
+    }
+
+    /// <summary>
     /// LocalMatrix is a struct to facilitate local matrix algebra on a lattice by providing an efficient
     /// representation of a sparse matrix. 
     /// </summary>

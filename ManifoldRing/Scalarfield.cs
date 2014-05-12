@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using System.IO;
 
 namespace ManifoldRing
@@ -278,7 +277,6 @@ namespace ManifoldRing
       
     }
 
-
     /// <summary>
     /// initializer factory
     /// </summary>
@@ -296,8 +294,6 @@ namespace ManifoldRing
         private readonly Manifold m;
         private IFieldInitializer init;
 
-        private static IFieldInitializerFactory factory;
-
         /// <summary>
         /// underlying manifold
         /// </summary>
@@ -307,12 +303,8 @@ namespace ManifoldRing
         /// constructor
         /// </summary>
         /// <param name="m">manifold</param>
-        public ScalarField(Manifold m, IFieldInitializerFactory _factory = null)
+        public ScalarField(Manifold m)
         {
-            if (factory == null && _factory != null)
-            {
-                factory = _factory;
-            }
             this.m = m;
             array = new double[m.ArraySize];
         }
@@ -323,12 +315,12 @@ namespace ManifoldRing
         /// <param name="init">initializer object</param>
         public void Initialize(string type, double[] parameters)
         {
-            if (factory == null)
+            if (FactoryContainer.fieldInitFactory == null)
             {
                 throw new Exception("Calling Initialize without a valid factory.");
             }
 
-            init = factory.Initialize(type);
+            init = FactoryContainer.fieldInitFactory.Initialize(type);
             init.setParameters(parameters);
 
             if (init.GetType() == typeof(ExplicitFieldInitializer))

@@ -530,11 +530,9 @@ namespace Daphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(scenario));
 
-            // The first instantiation of ScalarField occurs during execution of the dataBasket.ECS statement in 
-            // ManifoldRing.NodeInterpolator.Init(), so instantiate ScalarField for the first time here to create
-            // the static factory.
-            ScalarField factoryBuilder = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", new TinySphere()));
-
+            // create a factory container: shared factories reside here; not all instances of a class
+            // need their own factory
+            SimulationModule.kernel.Get<FactoryContainer>();
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));

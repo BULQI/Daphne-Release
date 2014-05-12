@@ -107,6 +107,9 @@ namespace Daphne
             Bind<Cell>().ToSelf();
             Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep).WithConstructorArgument("toroidal", scenario.environment.toroidal);
             Bind<CollisionManager>().ToSelf();
+
+            // factory container
+            Bind<FactoryContainer>().ToSelf();
         }
     }
 }
