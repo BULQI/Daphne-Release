@@ -31,7 +31,7 @@ namespace Daphne
         {
             if (DriverPop == null)
             {
-                throw new Exception("DriverPop cannot be null.");
+                return 0;
             }
             return Alpha + Beta * DriverPop.Conc.MeanValue();
         }
@@ -155,7 +155,7 @@ namespace Daphne
             }
 
             double TotalRate = 0,
-                   u = Rand.TroschuetzCUD.NextDouble();// uRand.NextDouble();
+                   u = Rand.TroschuetzCUD.NextDouble();
 
             foreach (KeyValuePair<int, TransitionDriverElement> kvp in drivers[CurrentState])
             {
