@@ -2569,7 +2569,14 @@ namespace Daphne
                 daph_rate_const.Value = value;                
             } 
         }
+
+        ////////////////////////
+        // 1/15/2014 Turn on Json Ignore to flush out of scenario files. 
+        // Not used anymore.
+        // At some point in the future we can remove these.
+        [JsonIgnore]
         private DaphneDouble _daph_rate_const;
+        [JsonIgnore]
         public DaphneDouble daph_rate_const
         {
             get
@@ -2583,6 +2590,8 @@ namespace Daphne
                 OnPropertyChanged("daph_rate_const");
             }
         }
+        //////////////////////////
+        
         public bool ReadOnly { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
