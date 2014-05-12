@@ -1836,8 +1836,26 @@ namespace DaphneGui
             enableFileMenu(true);
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
-            gc.ToolsToolbar_IsEnabled = true;
-            SolfacRenderingCB.IsEnabled = true;
+
+            gc.ToolsToolbarEnableAllIcons();
+            //gc.ToolsToolbar_IsEnabled = true;
+            //SolfacRenderingCB.IsEnabled = true;
+
+            //gc.HandToolButton_IsEnabled = true;
+            //gc.WhArrowToolButton_IsEnabled = true;
+            //gc.PreviewButton_IsEnabled = true;
+            //CellRenderMethodCB.IsEnabled = true;
+            //CellsColorByCB.IsEnabled = true;
+            //ScalarBarMarkerButton.IsEnabled = true;
+            //OrientationMarkerButton.IsEnabled = true;
+            //ResetCameraButton.IsEnabled = true;
+            //save3DView.IsEnabled = true;
+
+
+
+
+
+
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.SimConfigToolWindow.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
@@ -1908,9 +1926,30 @@ namespace DaphneGui
                 //resetButton.IsEnabled = true;
                 resetButton.Content = "Abort";
                 sim.RunStatus = Simulation.RUNSTAT_PAUSE;
+
+                //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
+                //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
+
+                //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
+                gc.ToolsToolbarEnableOnlyHand();
+
+                //gc.ToolsToolbar_IsEnabled = true;
+                //gc.HandToolButton_IsEnabled = true;
+                //gc.WhArrowToolButton_IsEnabled = false;
+                //gc.PreviewButton_IsEnabled = false;
+                //CellRenderMethodCB.IsEnabled = false;
+                //CellsColorByCB.IsEnabled = false;
+                //SolfacRenderingCB.IsEnabled = false;
+                //ScalarBarMarkerButton.IsEnabled = false;
+                //OrientationMarkerButton.IsEnabled = false;
+                //ResetCameraButton.IsEnabled = false;
+                //save3DView.IsEnabled = false;
+
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
+
+                
             }
             else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
             {
@@ -1919,6 +1958,8 @@ namespace DaphneGui
                 sim.RunStatus = Simulation.RUNSTAT_RUN;
                 runButton.Content = "Pause";
                 statusBarMessagePanel.Content = "Running...";
+
+                gc.ToolsToolbar_IsEnabled = false;
             }
             else
             {
@@ -1929,6 +1970,10 @@ namespace DaphneGui
                 if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
                 {
                     sim.RunStatus = Simulation.RUNSTAT_OFF;
+                }
+                if (sim.RunStatus == Simulation.RUNSTAT_OFF && Properties.Settings.Default.skipDataBaseWrites == false)
+                {
+                    reporter.StartReporter(configurator.SimConfig);
                 }
 
                 // only check for unique names if database writing is on and the unique names option is on

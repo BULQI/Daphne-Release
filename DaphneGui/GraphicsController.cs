@@ -838,7 +838,7 @@ namespace DaphneGui
         // variables for binding to toolbar buttons
         private bool whArrowToolButton_IsEnabled = false;
         private bool whArrowToolButton_IsChecked = true;
-        private bool handToolButton_IsEnabled = false;
+        private bool handToolButton_IsEnabled = true;
         private bool handToolButton_IsChecked = false;
         private bool previewButton_IsEnabled = false;
         private bool previewButton_IsChecked = true;
@@ -1237,7 +1237,7 @@ namespace DaphneGui
                 {
                     whArrowToolButton_IsChecked = value;
                     HandToolButton_IsChecked = !value;
-                    PreviewButton_IsEnabled = !value;
+                    PreviewButton_IsEnabled = false;    // !value;  //TEMPORARILY DISABLED BECAUSE FEATURE IS NYI
                     CellController.SetCellOpacities(value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1272,7 +1272,7 @@ namespace DaphneGui
                 {
                     handToolButton_IsChecked = value;
                     WhArrowToolButton_IsChecked = !value;
-                    PreviewButton_IsEnabled = value;
+                    PreviewButton_IsEnabled = false;  // value;     //THIS IS TEMPORARILY DISABLED BECAUSE THE TRACKS FEATURE IS NOT YET DONE
                     CellController.SetCellOpacities(!value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1333,6 +1333,37 @@ namespace DaphneGui
             }
         }
 
+        public void ToolsToolbarEnableOnlyHand()
+        {
+            ToolsToolbar_IsEnabled = true;
+            HandToolButton_IsEnabled = true;
+            WhArrowToolButton_IsEnabled = false;
+            PreviewButton_IsEnabled = false;
+            MW.CellRenderMethodCB.IsEnabled = false;
+            MW.CellsColorByCB.IsEnabled = false;
+            MW.SolfacRenderingCB.IsEnabled = false;
+            MW.ScalarBarMarkerButton.IsEnabled = false;
+            MW.OrientationMarkerButton.IsEnabled = false;
+            MW.ResetCameraButton.IsEnabled = false;
+            MW.save3DView.IsEnabled = false;
+        }
+
+        public void ToolsToolbarEnableAllIcons()
+        {
+            ToolsToolbar_IsEnabled = true;
+            MW.SolfacRenderingCB.IsEnabled = true;
+            HandToolButton_IsEnabled = true;
+            WhArrowToolButton_IsEnabled = true;
+            WhArrowToolButton_IsChecked = true;
+            PreviewButton_IsEnabled = false;
+            MW.CellRenderMethodCB.IsEnabled = true;
+            MW.CellsColorByCB.IsEnabled = true;
+            MW.ScalarBarMarkerButton.IsEnabled = true;
+            MW.OrientationMarkerButton.IsEnabled = true;
+            MW.ResetCameraButton.IsEnabled = true;
+            MW.save3DView.IsEnabled = true;
+        }
+
         public System.Windows.Visibility ColorScaleSlider_IsEnabled
         {
             get { return colorScaleSlider_IsEnabled; }
@@ -1372,7 +1403,7 @@ namespace DaphneGui
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;
             HandToolButton_IsChecked = false;
-            PreviewButton_IsEnabled = true;
+            PreviewButton_IsEnabled = false;  // true;    //THIS IS TEMPORARILY DISABLED BECAUSE THE FEATURE IS NYI
             PreviewButton_IsChecked = true;
             Rwc.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
         }
@@ -1381,7 +1412,7 @@ namespace DaphneGui
         {
             WhArrowToolButton_IsEnabled = false;
             WhArrowToolButton_IsChecked = true;
-            HandToolButton_IsEnabled = false;            
+            HandToolButton_IsEnabled = true;                //false;    //TEMPORARILY ENABLED ALL THE TIME
             HandToolButton_IsChecked = false;                        
             PreviewButton_IsEnabled = false;
             PreviewButton_IsChecked = true;
@@ -1540,8 +1571,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
-            //if (!HandToolButton_IsChecked)
-            //    return;
+            if (!HandToolButton_IsChecked)
+                return;
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();
