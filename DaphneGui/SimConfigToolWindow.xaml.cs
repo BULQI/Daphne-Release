@@ -802,14 +802,126 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reaction_complexes_guid_ref.Contains(cr.reaction_guid)) {
+                    //Here, must check if the cell has the molecules that are needed by this reaction
+                    //Reactants
+                    foreach (string newmolguid in cr.reactants_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null) {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid)) {
+                                    bFound = true;
+                                }
+                            }
+                            else 
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid)) {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false) {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }                        
+                    }
+                    //Products
+                    foreach (string newmolguid in cr.products_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null)
+                        {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false)
+                            {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }
+                    }
+                    //Modifiers
+                    foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null)
+                        {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false)
+                            {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }
+                    }
+
+
+                    if (!cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid)) {
                         cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
                     }
                 }
             }
-            ////ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
-            ////if (cc != null && cr != null)
-            ////    cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+        }
+
+        private bool MembraneHasMolecule(ConfigCell cell, string molguid)
+        {
+            foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
+            {
+                if (molguid == molpop.molecule_guid_ref)
+                {
+                    return true;
+                }
+            }                   
+            return false;
+        }
+        private bool CytosolHasMolecule(ConfigCell cell, string molguid)
+        {
+            foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
+            {
+                if (molguid == molpop.molecule_guid_ref)
+                {
+                    return true;
+                }
+            }           
+            return false;
         }
 
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
@@ -821,18 +933,106 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
+                    //Here, must check if the cell has the molecules that are needed by this reaction
+                    //Reactants
+                    foreach (string newmolguid in cr.reactants_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null)
+                        {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false)
+                            {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }
+                    }
+                    //Products
+                    foreach (string newmolguid in cr.products_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null)
+                        {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false)
+                            {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }
+                    }
+                    //Modifiers 
+                    foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
+                    {
+                        bool bFound = false;
+
+                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
+                        if (cm != null)
+                        {
+                            if (cm.molecule_location == MoleculeLocation.Boundary)
+                            {
+                                if (MembraneHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (CytosolHasMolecule(cc, newmolguid))
+                                {
+                                    bFound = true;
+                                }
+                            }
+
+                            if (bFound == false)
+                            {
+                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
+                                MessageBox.Show(msg);
+                                return;
+                            }
+                        }
+                    }
                     if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
                     {
                         cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
                     }
                 }
             }
-
-            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            ////ConfigReaction cr = (ConfigReaction)lvCellAvailableReacs.SelectedItem;
-
-            ////if (cc != null && cr != null)
-            ////    cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
         }
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)

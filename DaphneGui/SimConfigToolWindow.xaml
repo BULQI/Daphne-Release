@@ -1607,7 +1607,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                 <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                <editors:ColorEditBox x:Name="solfacColorEditBox"
+                                <editors:ColorEditBox x:Name="cellColorEditBox"
                                     CheckBoxVisibility="Collapsed"
                                     SpinnerVisibility="Collapsed"
                                     Width="140"
@@ -1706,7 +1706,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                 <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                <editors:ColorEditBox x:Name="solfacColorEditBox"
+                                <editors:ColorEditBox x:Name="cellColorEditBox"
                                     CheckBoxVisibility="Collapsed"
                                     SpinnerVisibility="Collapsed"
                                     Width="140"
@@ -1810,7 +1810,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                 <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                <editors:ColorEditBox x:Name="solfacColorEditBox"
+                                <editors:ColorEditBox x:Name="cellColorEditBox"
                                     CheckBoxVisibility="Collapsed"
                                     SpinnerVisibility="Collapsed"
                                     Width="140"
