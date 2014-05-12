@@ -1,0 +1,1069 @@
+{
+  "experiment_db_id": 0,
+  "experiment_name": "Ligand Receptor Scenario",
+  "experiment_reps": 1,
+  "experiment_guid": "05d21cdf-baa5-43fb-ae62-d68efb219511",
+  "experiment_description": "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, and manifold",
+  "scenario": {
+    "description": "Scenario description",
+    "time_config": {
+      "duration": 100.0,
+      "rendering_interval": 0.5,
+      "sampling_interval": 1440.0
+    },
+    "environment": {
+      "extent_x": 400,
+      "extent_y": 400,
+      "extent_z": 400,
+      "extent_min": 5,
+      "extent_max": 1000
+    },
+    "regions": [
+      {
+        "region_name": "Ellipsoidal region",
+        "region_type": 1,
+        "region_box_spec_guid_ref": "c7c910e1-1a07-4564-a2e6-fe15e556d8b7",
+        "region_visibility": true,
+        "region_color": "sc#0.3, 0.5, 1, 0.5"
+      },
+      {
+        "region_name": "Box region",
+        "region_type": 0,
+        "region_box_spec_guid_ref": "a8df20b7-8904-4064-b4de-6e93ab945bec",
+        "region_visibility": true,
+        "region_color": "sc#0.3, 0.5, 0.7, 1"
+      }
+    ],
+    "cellpopulations": [],
+    "Reactions": [],
+    "MolPops": [],
+    "ReactionComplexes": [],
+    "NumGridPts": [
+      21,
+      21,
+      21
+    ],
+    "GridStep": 50.0,
+    "CellRadius": 0.0
+  },
+  "global_parameters": [
+    {
+      "$type": "Daphne.ForceParams, Daphne",
+      "force_delta": 15.0,
+      "force_phi1": 300.0,
+      "force_phi2": 0.44,
+      "global_parameter_type": 0
+    },
+    {
+      "$type": "Daphne.LocomotorParams, Daphne",
+      "loco_gamma": 1.0,
+      "loco_sigma": 10.0,
+      "loco_zeta": 1.0,
+      "loco_chi": 30.0,
+      "global_parameter_type": 1
+    },
+    {
+      "$type": "Daphne.SynapseParams, Daphne",
+      "Alpha": 15.0,
+      "Beta": 300.0,
+      "Kappa": 0.44,
+      "Delta": 0.44,
+      "Epsilon": 0.44,
+      "global_parameter_type": 2
+    }
+  ],
+  "entity_repository": {
+    "gaussian_specifications": [
+      {
+        "gaussian_spec_name": "Off-center gaussian",
+        "gaussian_spec_box_guid_ref": "7334e150-57da-4bf9-acb0-07bfb37833dc",
+        "gaussian_region_visibility": true,
+        "gaussian_spec_color": "sc#0.3, 1, 0.5, 0.5"
+      }
+    ],
+    "box_specifications": [
+      {
+        "box_guid": "7334e150-57da-4bf9-acb0-07bfb37833dc",
+        "transform_matrix": [
+          [
+            125.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            125.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            125.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 600.0,
+        "x_trans_min": -200.0,
+        "x_scale_max": 400.0,
+        "x_scale_min": 5.0,
+        "y_trans_max": 600.0,
+        "y_trans_min": -200.0,
+        "y_scale_max": 400.0,
+        "y_scale_min": 5.0,
+        "z_trans_max": 600.0,
+        "z_trans_min": -200.0,
+        "z_scale_max": 400.0,
+        "z_scale_min": 5.0,
+        "box_visibility": true,
+        "x_scale": 125.0,
+        "y_scale": 125.0,
+        "z_scale": 125.0,
+        "x_trans": 100.0,
+        "y_trans": 300.0,
+        "z_trans": 100.0
+      },
+      {
+        "box_guid": "c7c910e1-1a07-4564-a2e6-fe15e556d8b7",
+        "transform_matrix": [
+          [
+            100.0,
+            0.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            100.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            100.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 600.0,
+        "x_trans_min": -200.0,
+        "x_scale_max": 400.0,
+        "x_scale_min": 5.0,
+        "y_trans_max": 600.0,
+        "y_trans_min": -200.0,
+        "y_scale_max": 400.0,
+        "y_scale_min": 5.0,
+        "z_trans_max": 600.0,
+        "z_trans_min": -200.0,
+        "z_scale_max": 400.0,
+        "z_scale_min": 5.0,
+        "box_visibility": true,
+        "x_scale": 100.0,
+        "y_scale": 100.0,
+        "z_scale": 100.0,
+        "x_trans": 300.0,
+        "y_trans": 300.0,
+        "z_trans": 300.0
+      },
+      {
+        "box_guid": "a8df20b7-8904-4064-b4de-6e93ab945bec",
+        "transform_matrix": [
+          [
+            50.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            50.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            300.0,
+            200.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 600.0,
+        "x_trans_min": -200.0,
+        "x_scale_max": 400.0,
+        "x_scale_min": 5.0,
+        "y_trans_max": 600.0,
+        "y_trans_min": -200.0,
+        "y_scale_max": 400.0,
+        "y_scale_min": 5.0,
+        "z_trans_max": 600.0,
+        "z_trans_min": -200.0,
+        "z_scale_max": 400.0,
+        "z_scale_min": 5.0,
+        "box_visibility": true,
+        "x_scale": 50.0,
+        "y_scale": 50.0,
+        "z_scale": 300.0,
+        "x_trans": 100.0,
+        "y_trans": 100.0,
+        "z_trans": 200.0
+      }
+    ]
+  },
+  "PredefReactions": [
+    {
+      "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+      "ligand": {
+        "species": "CXCL13",
+        "stoichiometry": 1,
+        "Location": "ecs"
+      },
+      "receptor": {
+        "species": "CXCR5",
+        "stoichiometry": 1,
+        "Location": "membrane"
+      },
+      "complex": {
+        "species": "CXCR5:CXCL13",
+        "stoichiometry": 1,
+        "Location": "membrane"
+      },
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "ecs"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 14,
+      "ReacTypeString": "BoundaryAssociation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "2bdf8ac6-68a9-4906-aa36-98d33873a073"
+    },
+    {
+      "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+      "ligand": {
+        "species": "CXCL13",
+        "stoichiometry": 1,
+        "Location": "ecs"
+      },
+      "receptor": {
+        "species": "CXCR5",
+        "stoichiometry": 1,
+        "Location": "membrane"
+      },
+      "complex": {
+        "species": "CXCR5:CXCL13",
+        "stoichiometry": 1,
+        "Location": "membrane"
+      },
+      "listOfReactants": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "ecs"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 15,
+      "ReacTypeString": "BoundaryDissociation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "c0fab664-c2c6-4807-9eb6-8193784e15a5"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 0,
+      "ReacTypeString": "Association",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "a32e21c6-bde5-44c5-ad6c-2d530072e997"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "none"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 1,
+      "ReacTypeString": "Dissociation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "5946d331-dd19-4975-971b-8e14e27b88de"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "E",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "A",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "E",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 1,
+      "ReacTypeString": "Dissociation",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "e52aa77a-2af6-4e10-9d7d-b5b01f7ea3ea"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "E",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "A",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "E",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 1,
+      "ReacTypeString": "Dissociation",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "e52aa77a-2af6-4e10-9d7d-b5b01f7ea3ea"
+    },
+    {
+      "$type": "Daphne.GuiCatalyzedReactionTemplate, Daphne",
+      "catalyst": {
+        "species": "X",
+        "stoichiometry": 1,
+        "Location": "na"
+      },
+      "listOfReactants": [],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [
+        {
+          "species": "E",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "ReacType": 9,
+      "ReacTypeString": "CatalyzedCreation",
+      "RateConst": 0.6,
+      "gui_reaction_template_guid": "2d98302b-90e1-4ef8-bd51-02af24ae75e5"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [],
+      "listOfModifiers": [],
+      "ReacType": 2,
+      "ReacTypeString": "Annihilation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "9c7b353b-5fde-469a-8c7d-bcecb17b3695"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [],
+      "listOfModifiers": [],
+      "ReacType": 2,
+      "ReacTypeString": "Annihilation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "4029e1f1-9a61-418d-8ef7-c0e466400054"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "Y",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [],
+      "listOfModifiers": [],
+      "ReacType": 2,
+      "ReacTypeString": "Annihilation",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "2d39b82f-e72d-4862-af8a-5e4143a861c4"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [],
+      "listOfModifiers": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "ReacType": 7,
+      "ReacTypeString": "CatalyzedAnnihilation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "00b72ae4-0e3d-40a2-8fb8-c0810701bc44"
+    },
+    {
+      "$type": "Daphne.GuiCatalyzedReactionTemplate, Daphne",
+      "catalyst": null,
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [],
+      "listOfModifiers": [
+        {
+          "species": "Y",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "ReacType": 7,
+      "ReacTypeString": "CatalyzedAnnihilation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "3739a179-574e-4470-8ed7-52c52aacc493"
+    },
+    {
+      "$type": "Daphne.GuiCatalyzedReactionTemplate, Daphne",
+      "catalyst": {
+        "species": "CXCL13",
+        "stoichiometry": 1,
+        "Location": "na"
+      },
+      "listOfReactants": [
+        {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [
+        {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "ReacType": 11,
+      "ReacTypeString": "CatalyzedDimerDissociation",
+      "RateConst": 2.0,
+      "gui_reaction_template_guid": "db917fc7-d77a-4794-8a8c-cc6888c002d7"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "A",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "X",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 2,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 16,
+      "ReacTypeString": "Generalized",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "1dcdb798-0f57-4b20-a079-c17399a4382a"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "Y",
+          "stoichiometry": 1,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "Y",
+          "stoichiometry": 2,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 16,
+      "ReacTypeString": "Generalized",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "d17a43e4-bb6d-4b93-b9ee-d37868f82b85"
+    },
+    {
+      "listOfReactants": [
+        {
+          "species": "X",
+          "stoichiometry": 2,
+          "Location": "na"
+        }
+      ],
+      "listOfProducts": [
+        {
+          "species": "X",
+          "stoichiometry": 1,
+          "Location": "na"
+        },
+        {
+          "species": "Y",
+          "stoichiometry": 2,
+          "Location": "na"
+        }
+      ],
+      "listOfModifiers": [],
+      "ReacType": 16,
+      "ReacTypeString": "Generalized",
+      "RateConst": 1.0,
+      "gui_reaction_template_guid": "1693b1ce-4cec-43fa-a482-8175d6659a93"
+    }
+  ],
+  "PredefMolecules": [
+    {
+      "Name": "A",
+      "MolecularWeight": 2.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0,
+      "gui_molecule_guid": "baf8cf56-e5b0-4a99-98e0-4ae153c00fe4"
+    },
+    {
+      "Name": "B",
+      "MolecularWeight": 3.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0,
+      "gui_molecule_guid": "d9b3aecd-44b8-4bb5-bb53-a5eb5b6cf978"
+    },
+    {
+      "Name": "E",
+      "MolecularWeight": 5.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 1.0,
+      "gui_molecule_guid": "eb1bbac8-b17a-4967-b3e3-893e098bf051"
+    },
+    {
+      "Name": "X",
+      "MolecularWeight": 3.5,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0,
+      "gui_molecule_guid": "c560e789-cfed-43a8-aa13-23427b5f07c3"
+    },
+    {
+      "Name": "Y",
+      "MolecularWeight": 4.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 2.0,
+      "gui_molecule_guid": "5463703d-3c8b-4062-8116-0ae4cb7642fe"
+    },
+    {
+      "Name": "CXCR5",
+      "MolecularWeight": 1.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 1.0,
+      "gui_molecule_guid": "c35e2bf2-c375-42e7-b9ce-f20c2f227c7b"
+    },
+    {
+      "Name": "CXCL13",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 6000.0,
+      "gui_molecule_guid": "f785e4cb-1a97-4757-bb4d-67d5776e9c2e"
+    },
+    {
+      "Name": "CXCR5:CXCL13",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0,
+      "gui_molecule_guid": "de0d6215-9efe-4ac2-8a2c-1e12349e8208"
+    },
+    {
+      "Name": "gCXCR5",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0,
+      "gui_molecule_guid": "1adf44c3-dd10-4091-9eeb-5f6ed606f463"
+    },
+    {
+      "Name": "driver",
+      "MolecularWeight": 0.0,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 0.0,
+      "gui_molecule_guid": "67dd1446-6a7d-4afe-8682-777bb1720712"
+    },
+    {
+      "Name": "CXCL12",
+      "MolecularWeight": 7.96,
+      "EffectiveRadius": 0.0,
+      "DiffusionCoefficient": 6000.0,
+      "gui_molecule_guid": "ba36501e-775c-4c3d-8759-2ec29ebabc61"
+    }
+  ],
+  "PredefReactionComplexes": [
+    {
+      "Name": "Bistable",
+      "Reactions": [
+        {
+          "listOfReactants": [
+            {
+              "species": "E",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "A",
+              "stoichiometry": 1,
+              "Location": "na"
+            },
+            {
+              "species": "E",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfModifiers": [],
+          "ReacType": 1,
+          "ReacTypeString": "Dissociation",
+          "RateConst": 1.0,
+          "gui_reaction_template_guid": "e52aa77a-2af6-4e10-9d7d-b5b01f7ea3ea"
+        },
+        {
+          "$type": "Daphne.GuiCatalyzedReactionTemplate, Daphne",
+          "catalyst": {
+            "species": "X",
+            "stoichiometry": 1,
+            "Location": "na"
+          },
+          "listOfReactants": [],
+          "listOfProducts": [
+            {
+              "species": "X",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfModifiers": [
+            {
+              "species": "E",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "ReacType": 9,
+          "ReacTypeString": "CatalyzedCreation",
+          "RateConst": 0.6,
+          "gui_reaction_template_guid": "2d98302b-90e1-4ef8-bd51-02af24ae75e5"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfProducts": [],
+          "listOfModifiers": [],
+          "ReacType": 2,
+          "ReacTypeString": "Annihilation",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "9c7b353b-5fde-469a-8c7d-bcecb17b3695"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfProducts": [],
+          "listOfModifiers": [],
+          "ReacType": 2,
+          "ReacTypeString": "Annihilation",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "4029e1f1-9a61-418d-8ef7-c0e466400054"
+        }
+      ],
+      "Molecules": null,
+      "gui_reaction_complex_guid": "9d247b84-4961-429f-907e-2422518aa22e",
+      "MolDict": null
+    },
+    {
+      "Name": "Receptor/Ligand",
+      "Reactions": [
+        {
+          "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+          "ligand": {
+            "species": "CXCL13",
+            "stoichiometry": 1,
+            "Location": "ecs"
+          },
+          "receptor": {
+            "species": "CXCR5",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          "complex": {
+            "species": "CXCR5:CXCL13",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          "listOfReactants": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1,
+              "Location": "membrane"
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1,
+              "Location": "ecs"
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1,
+              "Location": "membrane"
+            }
+          ],
+          "listOfModifiers": [],
+          "ReacType": 14,
+          "ReacTypeString": "BoundaryAssociation",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "2bdf8ac6-68a9-4906-aa36-98d33873a073"
+        },
+        {
+          "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+          "ligand": {
+            "species": "CXCL13",
+            "stoichiometry": 1,
+            "Location": "ecs"
+          },
+          "receptor": {
+            "species": "CXCR5",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          "complex": {
+            "species": "CXCR5:CXCL13",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          "listOfReactants": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1,
+              "Location": "membrane"
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1,
+              "Location": "membrane"
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1,
+              "Location": "ecs"
+            }
+          ],
+          "listOfModifiers": [],
+          "ReacType": 15,
+          "ReacTypeString": "BoundaryDissociation",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "c0fab664-c2c6-4807-9eb6-8193784e15a5"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1,
+              "Location": "na"
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfModifiers": [],
+          "ReacType": 0,
+          "ReacTypeString": "Association",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "a32e21c6-bde5-44c5-ad6c-2d530072e997"
+        },
+        {
+          "listOfReactants": [
+            {
+              "species": "CXCR5:CXCL13",
+              "stoichiometry": 1,
+              "Location": "none"
+            }
+          ],
+          "listOfProducts": [
+            {
+              "species": "CXCR5",
+              "stoichiometry": 1,
+              "Location": "na"
+            },
+            {
+              "species": "CXCL13",
+              "stoichiometry": 1,
+              "Location": "na"
+            }
+          ],
+          "listOfModifiers": [],
+          "ReacType": 1,
+          "ReacTypeString": "Dissociation",
+          "RateConst": 2.0,
+          "gui_reaction_template_guid": "5946d331-dd19-4975-971b-8e14e27b88de"
+        }
+      ],
+      "Molecules": null,
+      "gui_reaction_complex_guid": "e7d613b5-f592-40ce-86cc-486e20bc49ec",
+      "MolDict": null
+    }
+  ],
+  "PredefCells": [
+    {
+      "CellName": "BCell",
+      "CellRadius": 5.0,
+      "CellMolPops": [
+        {
+          "Molecule": {
+            "Name": "CXCR5",
+            "MolecularWeight": 1.0,
+            "EffectiveRadius": 0.0,
+            "DiffusionCoefficient": 1.0,
+            "gui_molecule_guid": "3127ee89-31b9-44bf-8796-d13503df00b8"
+          },
+          "Name": "My CXCR5",
+          "mpInfo": {
+            "mp_guid": "28b8fbbf-6620-4e72-90dd-c0cbe83eea92",
+            "mp_dist_name": "Gaussian gradient",
+            "mp_type_guid_ref": "",
+            "mp_distribution": {
+              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+              "concentration": 10.0,
+              "mp_distribution_type": 0
+            },
+            "mp_is_time_varying": false,
+            "mp_amplitude_keyframes": [],
+            "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+            "mp_render_blending_weight": 2.0,
+            "mp_render_on": true
+          },
+          "gui_mol_pop_guid": "534f8075-5970-4f5c-ac71-8b3c6ab21af9",
+          "Location": 1
+        },
+        {
+          "Molecule": {
+            "Name": "CXCR5:CXCL13",
+            "MolecularWeight": 0.0,
+            "EffectiveRadius": 0.0,
+            "DiffusionCoefficient": 0.0,
+            "gui_molecule_guid": "de4ec703-874b-4dc0-a833-755d12db7941"
+          },
+          "Name": "My CXCR5:CXCL13",
+          "mpInfo": {
+            "mp_guid": "406d838b-7af4-41e7-b95b-64209dab90a8",
+            "mp_dist_name": "Gaussian gradient",
+            "mp_type_guid_ref": "",
+            "mp_distribution": {
+              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+              "concentration": 10.0,
+              "mp_distribution_type": 0
+            },
+            "mp_is_time_varying": false,
+            "mp_amplitude_keyframes": [],
+            "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+            "mp_render_blending_weight": 2.0,
+            "mp_render_on": true
+          },
+          "gui_mol_pop_guid": "949bb934-ebb9-4f7e-a782-7fceb03cf38c",
+          "Location": 1
+        },
+        {
+          "Molecule": {
+            "Name": "driver",
+            "MolecularWeight": 0.0,
+            "EffectiveRadius": 0.0,
+            "DiffusionCoefficient": 0.0,
+            "gui_molecule_guid": "679db80d-16eb-41ea-919b-cca01fb642a5"
+          },
+          "Name": "My driver",
+          "mpInfo": {
+            "mp_guid": "44bf84ea-407a-4eec-961e-abcb55b0b4c0",
+            "mp_dist_name": "Gaussian gradient",
+            "mp_type_guid_ref": "",
+            "mp_distribution": {
+              "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+              "concentration": 10.0,
+              "mp_distribution_type": 0
+            },
+            "mp_is_time_varying": false,
+            "mp_amplitude_keyframes": [],
+            "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+            "mp_render_blending_weight": 2.0,
+            "mp_render_on": true
+          },
+          "gui_mol_pop_guid": "f6ec89fe-5906-4001-afdd-c20c6a24c4b1",
+          "Location": 0
+        }
+      ],
+      "CellReactions": null,
+      "CellReactionComplexes": null
+    },
+    {
+      "CellName": "TCell",
+      "CellRadius": 5.0,
+      "CellMolPops": [],
+      "CellReactions": null,
+      "CellReactionComplexes": null
+    },
+    {
+      "CellName": "FDC",
+      "CellRadius": 5.0,
+      "CellMolPops": [],
+      "CellReactions": null,
+      "CellReactionComplexes": null
+    }
+  ]
+}

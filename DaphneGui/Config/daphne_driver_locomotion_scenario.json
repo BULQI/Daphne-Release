@@ -1,0 +1,354 @@
+{
+  "box_guid_box_dict": {},
+  "cellpopulation_id_cellpopulation_dict": {},
+  "experiment_db_id": 0,
+  "experiment_name": "Driver Locomotion Scenario",
+  "experiment_reps": 1,
+  "experiment_guid": "0d0a9551-adb0-4a27-8dbf-1d6cf3786fb0",
+  "experiment_description": "Initial scenario with predefined Molecules and Reactions, Compartment ECM with molecular populations, reactions, reaction complexes, manifold, locomotor",
+  "scenario": {
+    "description": "Scenario description",
+    "simInterpolate": 1,
+    "simCellSize": 3,
+    "time_config": {
+      "duration": 100.0,
+      "rendering_interval": 0.3,
+      "sampling_interval": 1440.0
+    },
+    "environment": {
+      "extent_x": 400,
+      "extent_y": 400,
+      "extent_z": 400,
+      "gridstep": 50,
+      "NumGridPts": [
+        9,
+        9,
+        9
+      ],
+      "extent_min": 5,
+      "extent_max": 1000,
+      "gridstep_min": 1,
+      "gridstep_max": 100
+    },
+    "cellpopulations": [
+      {
+        "cellPopDist": {
+          "$type": "Daphne.CellPopUniformDistribution, Daphne",
+          "Conc": 10.0,
+          "DistType": 0,
+          "cpDistributionType": 1
+        },
+        "cellpopulation_name": "My-B-Cell",
+        "cellpopulation_guid": "6ba3e235-8ffc-416d-8c2f-faf42b7b3e65",
+        "cellpopulation_id": 1,
+        "cell_subset_guid_ref": "",
+        "number": 1,
+        "cellpopulation_constrained_to_region": true,
+        "cellpopulation_region_guid_ref": "",
+        "wrt_region": 0,
+        "cellpopulation_render_on": true,
+        "cellpopulation_color": "sc#1, 0.3, 0.69, 0.29",
+        "CellType": null,
+        "MaxConc": 0.0,
+        "Sigma": null,
+        "Center": null,
+        "CellMolPops": [
+          {
+            "Molecule": {
+              "Name": "CXCR5",
+              "MolecularWeight": 1.0,
+              "EffectiveRadius": 0.0,
+              "DiffusionCoefficient": 1.0,
+              "gui_molecule_guid": "2c0115b2-1aa2-42ba-b9ca-ea294b74d839"
+            },
+            "Name": "My CXCR5",
+            "mpInfo": {
+              "mp_guid": "bdb039c0-6019-477f-b3fa-5159c23cd35e",
+              "mp_dist_name": "Gaussian gradient",
+              "mp_type_guid_ref": "",
+              "mp_distribution": {
+                "$type": "Daphne.MolPopGaussianGradient, Daphne",
+                "peak_concentration": 125.0,
+                "gaussgrad_gauss_spec_guid_ref": "",
+                "mp_distribution_type": 2
+              },
+              "mp_is_time_varying": false,
+              "mp_amplitude_keyframes": [],
+              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+              "mp_render_blending_weight": 2.0,
+              "mp_render_on": true
+            },
+            "gui_mol_pop_guid": "1c9b6f01-e045-4599-b91c-2945a556dc41",
+            "Location": 1
+          },
+          {
+            "Molecule": {
+              "Name": "CXCR5:CXCL13",
+              "MolecularWeight": 0.0,
+              "EffectiveRadius": 0.0,
+              "DiffusionCoefficient": 0.0,
+              "gui_molecule_guid": "7ca94d2f-3b05-458c-b8f4-df56d060f47c"
+            },
+            "Name": "My CXCR5:CXCL13",
+            "mpInfo": {
+              "mp_guid": "e944770c-4c05-46a5-9c84-abeca5b7e78c",
+              "mp_dist_name": "Gaussian gradient",
+              "mp_type_guid_ref": "",
+              "mp_distribution": {
+                "$type": "Daphne.MolPopGaussianGradient, Daphne",
+                "peak_concentration": 130.0,
+                "gaussgrad_gauss_spec_guid_ref": "",
+                "mp_distribution_type": 2
+              },
+              "mp_is_time_varying": false,
+              "mp_amplitude_keyframes": [],
+              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+              "mp_render_blending_weight": 2.0,
+              "mp_render_on": true
+            },
+            "gui_mol_pop_guid": "99b99fdd-2315-413f-b7a1-1e8a1e593483",
+            "Location": 1
+          },
+          {
+            "Molecule": {
+              "Name": "driver",
+              "MolecularWeight": 0.0,
+              "EffectiveRadius": 0.0,
+              "DiffusionCoefficient": 0.0,
+              "gui_molecule_guid": "18be8ab3-6c58-41f8-9057-1f4e3ee13d8c"
+            },
+            "Name": "My driver",
+            "mpInfo": {
+              "mp_guid": "7da3c62d-856c-4784-a00d-1177d9f6314e",
+              "mp_dist_name": "Gaussian gradient",
+              "mp_type_guid_ref": "",
+              "mp_distribution": {
+                "$type": "Daphne.MolPopGaussianGradient, Daphne",
+                "peak_concentration": 250.0,
+                "gaussgrad_gauss_spec_guid_ref": "",
+                "mp_distribution_type": 2
+              },
+              "mp_is_time_varying": false,
+              "mp_amplitude_keyframes": [],
+              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+              "mp_render_blending_weight": 2.0,
+              "mp_render_on": true
+            },
+            "gui_mol_pop_guid": "06035009-25f9-45e6-9caa-8aefb6d9dca0",
+            "Location": 0
+          }
+        ],
+        "CellReactions": null,
+        "CellReactionComplexes": null,
+        "CellPopDistTypes": [
+          {
+            "Name": "Specify cell coordinates",
+            "DistSubtypes": [
+              {
+                "Label": "Input coordinates"
+              },
+              {
+                "Label": "Specify coordinates file"
+              }
+            ]
+          },
+          {
+            "Name": "Probability distribution",
+            "DistSubtypes": [
+              {
+                "Label": "Uniform"
+              },
+              {
+                "Label": "Gaussian"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Reactions": [
+      {
+        "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+        "ligand": {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "ecs"
+        },
+        "receptor": {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        "complex": {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        "listOfReactants": [
+          {
+            "species": "CXCR5",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          {
+            "species": "CXCL13",
+            "stoichiometry": 1,
+            "Location": "ecs"
+          }
+        ],
+        "listOfProducts": [
+          {
+            "species": "CXCR5:CXCL13",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          }
+        ],
+        "listOfModifiers": [],
+        "ReacType": 14,
+        "ReacTypeString": "BoundaryAssociation",
+        "RateConst": 2.0,
+        "gui_reaction_template_guid": "fd9600a6-2e66-48c7-bdcf-eb5fee1d127c"
+      },
+      {
+        "$type": "Daphne.GuiBoundaryReactionTemplate, Daphne",
+        "ligand": {
+          "species": "CXCL13",
+          "stoichiometry": 1,
+          "Location": "ecs"
+        },
+        "receptor": {
+          "species": "CXCR5",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        "complex": {
+          "species": "CXCR5:CXCL13",
+          "stoichiometry": 1,
+          "Location": "membrane"
+        },
+        "listOfReactants": [
+          {
+            "species": "CXCR5:CXCL13",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          }
+        ],
+        "listOfProducts": [
+          {
+            "species": "CXCR5",
+            "stoichiometry": 1,
+            "Location": "membrane"
+          },
+          {
+            "species": "CXCL13",
+            "stoichiometry": 1,
+            "Location": "ecs"
+          }
+        ],
+        "listOfModifiers": [],
+        "ReacType": 15,
+        "ReacTypeString": "BoundaryDissociation",
+        "RateConst": 2.0,
+        "gui_reaction_template_guid": "e0c5b822-16e4-46ed-9268-0f39f26ad599"
+      }
+    ],
+    "MolPops": [
+      {
+        "Molecule": {
+          "Name": "CXCL13",
+          "MolecularWeight": 0.0,
+          "EffectiveRadius": 0.0,
+          "DiffusionCoefficient": 6000.0,
+          "gui_molecule_guid": "d9005967-cdd2-4370-adce-0fe4393a2c4d"
+        },
+        "Name": "My CXCL13",
+        "mpInfo": {
+          "mp_guid": "be049938-2c42-4af3-a507-6480ddd8876d",
+          "mp_dist_name": "Gaussian gradient",
+          "mp_type_guid_ref": "",
+          "mp_distribution": {
+            "$type": "Daphne.MolPopGaussianGradient, Daphne",
+            "peak_concentration": 10.0,
+            "gaussgrad_gauss_spec_guid_ref": "",
+            "mp_distribution_type": 2
+          },
+          "mp_is_time_varying": false,
+          "mp_amplitude_keyframes": [],
+          "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+          "mp_render_blending_weight": 2.0,
+          "mp_render_on": true
+        },
+        "gui_mol_pop_guid": "f6437c8e-ce48-4ad7-ae46-2e17d871e850",
+        "Location": 2
+      }
+    ],
+    "ReactionComplexes": [],
+    "NumGridPts": [
+      21,
+      21,
+      21
+    ],
+    "GridStep": 50.0,
+    "CellRadius": 0.0
+  },
+  "entity_repository": {
+    "gaussian_specifications": [
+      {
+        "gaussian_spec_name": "Off-center gaussian",
+        "gaussian_spec_box_guid_ref": "91404ca7-d309-4aea-a0fd-0b9f37ddcfbe",
+        "gaussian_region_visibility": true,
+        "gaussian_spec_color": "sc#0.3, 1, 0.5, 0.5"
+      }
+    ],
+    "box_specifications": [
+      {
+        "box_guid": "91404ca7-d309-4aea-a0fd-0b9f37ddcfbe",
+        "transform_matrix": [
+          [
+            125.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            125.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            125.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 0.0,
+        "x_trans_min": 0.0,
+        "x_scale_max": 0.0,
+        "x_scale_min": 0.0,
+        "y_trans_max": 0.0,
+        "y_trans_min": 0.0,
+        "y_scale_max": 0.0,
+        "y_scale_min": 0.0,
+        "z_trans_max": 0.0,
+        "z_trans_min": 0.0,
+        "z_scale_max": 0.0,
+        "z_scale_min": 0.0,
+        "box_visibility": true,
+        "x_scale": 125.0,
+        "y_scale": 125.0,
+        "z_scale": 125.0,
+        "x_trans": 100.0,
+        "y_trans": 300.0,
+        "z_trans": 100.0
+      }
+    ]
+  }
+}

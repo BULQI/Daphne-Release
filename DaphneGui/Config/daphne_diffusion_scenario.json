@@ -1,0 +1,130 @@
+{
+  "box_guid_box_dict": {},
+  "cellpopulation_id_cellpopulation_dict": {},
+  "experiment_db_id": 0,
+  "experiment_name": "Diffusion Scenario",
+  "experiment_reps": 1,
+  "experiment_guid": "4415d6fc-fdee-4ae0-b84b-fe169a129d95",
+  "experiment_description": "Initial scenario with 1 Compartment ECM with 1 molecular population, no cells or reactions",
+  "scenario": {
+    "description": "Scenario description",
+    "simInterpolate": 1,
+    "simCellSize": 3,
+    "time_config": {
+      "duration": 100.0,
+      "rendering_interval": 0.3,
+      "sampling_interval": 1440.0
+    },
+    "environment": {
+      "extent_x": 400,
+      "extent_y": 400,
+      "extent_z": 400,
+      "gridstep": 50,
+      "NumGridPts": [
+        9,
+        9,
+        9
+      ],
+      "extent_min": 5,
+      "extent_max": 1000,
+      "gridstep_min": 1,
+      "gridstep_max": 100
+    },
+    "cellpopulations": [],
+    "Reactions": [],
+    "MolPops": [
+      {
+        "Molecule": {
+          "Name": "CXCL13",
+          "MolecularWeight": 0.0,
+          "EffectiveRadius": 0.0,
+          "DiffusionCoefficient": 6000.0,
+          "gui_molecule_guid": "8d605fc8-b263-441d-af9c-caccc3eac91d"
+        },
+        "Name": "My CXCL13",
+        "mpInfo": {
+          "mp_guid": "a0306094-d6be-4d42-917e-dd7cb170fe12",
+          "mp_dist_name": "Gaussian gradient",
+          "mp_type_guid_ref": "",
+          "mp_distribution": {
+            "$type": "Daphne.MolPopGaussianGradient, Daphne",
+            "peak_concentration": 10.0,
+            "gaussgrad_gauss_spec_guid_ref": "",
+            "mp_distribution_type": 2
+          },
+          "mp_is_time_varying": false,
+          "mp_amplitude_keyframes": [],
+          "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+          "mp_render_blending_weight": 2.0,
+          "mp_render_on": true
+        },
+        "gui_mol_pop_guid": "1be6adff-c223-4b20-a0df-478c25fd75d0",
+        "Location": 0
+      }
+    ],
+    "ReactionComplexes": [],
+    "NumGridPts": null,
+    "GridStep": 0.0,
+    "CellRadius": 0.0
+  },
+  "entity_repository": {
+    "gaussian_specifications": [
+      {
+        "gaussian_spec_name": "Off-center gaussian",
+        "gaussian_spec_box_guid_ref": "c440b976-dc8c-4e86-b9b9-67630c7ca090",
+        "gaussian_region_visibility": true,
+        "gaussian_spec_color": "sc#0.3, 1, 0.5, 0.5"
+      }
+    ],
+    "box_specifications": [
+      {
+        "box_guid": "c440b976-dc8c-4e86-b9b9-67630c7ca090",
+        "transform_matrix": [
+          [
+            125.0,
+            0.0,
+            0.0,
+            100.0
+          ],
+          [
+            0.0,
+            125.0,
+            0.0,
+            300.0
+          ],
+          [
+            0.0,
+            0.0,
+            125.0,
+            100.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "x_trans_max": 0.0,
+        "x_trans_min": 0.0,
+        "x_scale_max": 0.0,
+        "x_scale_min": 0.0,
+        "y_trans_max": 0.0,
+        "y_trans_min": 0.0,
+        "y_scale_max": 0.0,
+        "y_scale_min": 0.0,
+        "z_trans_max": 0.0,
+        "z_trans_min": 0.0,
+        "z_scale_max": 0.0,
+        "z_scale_min": 0.0,
+        "box_visibility": true,
+        "x_scale": 125.0,
+        "y_scale": 125.0,
+        "z_scale": 125.0,
+        "x_trans": 100.0,
+        "y_trans": 300.0,
+        "z_trans": 100.0
+      }
+    ]
+  }
+}
