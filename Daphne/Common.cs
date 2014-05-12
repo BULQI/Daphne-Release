@@ -23,6 +23,7 @@ namespace Daphne
             simCellSize = SimStates.Tiny;
             gridStep = 50;
             numGridPts = new int[] { 21, 21, 21 };
+            toroidal = false;
         }
 
         // these are static for simplicity only; they more than likely should be instance members in SimConfig
@@ -30,6 +31,7 @@ namespace Daphne
         public static SimStates simCellSize { get; set; }
         public static double gridStep { get; set; }
         public static int[] numGridPts { get; set; }
+        public static bool toroidal { get; set; }
     }
 
     public class CustomInstanceProvider : StandardInstanceProvider
@@ -63,6 +65,7 @@ namespace Daphne
                 scenario.simCellSize = FakeConfig.simCellSize;
                 scenario.environment.NumGridPts = FakeConfig.numGridPts;
                 scenario.environment.gridstep = FakeConfig.gridStep;
+                scenario.environment.toroidal = FakeConfig.toroidal;
             }
             // end hack
             this.scenario = scenario;
@@ -101,7 +104,7 @@ namespace Daphne
 
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
-            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep);
+            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep).WithConstructorArgument("toroidal", scenario.environment.toroidal);
             Bind<CollisionManager>().ToSelf();
         }
     }

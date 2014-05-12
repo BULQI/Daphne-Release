@@ -389,6 +389,7 @@ namespace Daphne
 
     // Boundary reactions
     // Use the convention that positive flux reduces the concentration.
+    // Flux terms are accumulating and need to be zeroed in the diffusion step.
 
     /// <summary>
     /// Appropriate for boundary manifolds that are not zero-dimensional.

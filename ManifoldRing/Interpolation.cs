@@ -12,7 +12,7 @@ namespace ManifoldRing
     /// </summary>
     public interface Interpolator
     {
-        void Init(InterpolatedNodes m);
+        void Init(InterpolatedNodes m, bool toroidal);
         double Interpolate(double[] x, ScalarField sf);
         double[] Gradient(double[] x, ScalarField sf);
         ScalarField Laplacian(ScalarField sf);
@@ -22,11 +22,29 @@ namespace ManifoldRing
 
     public abstract class NodeInterpolator : Interpolator
     {
+        protected bool toroidal;
+        /// <summary>
+        /// Return the sparse matrix with coefficients and indices for interpolation of scalar field at arbitrary position x.
+        /// </summary>
+        /// <param name="x">Spatial point for interpolation</param>
+        /// <returns></returns>
         protected InterpolatedNodes m;
         // Used to create the value, gradient, and laplacian operators
         // We may be able to change access to 'protected' if Convert() is moved out of ScalarField
         protected abstract LocalMatrix[] interpolationMatrix(double[] x);
+        /// <summary>
+        /// Calculate sparse matrix for computing Laplacian at every grid point.
+        /// Only computed once.
+        /// Impose toroidal or zero flux BCs.
+        /// Dirichlet or Neumann BCs will be imposed later, as needed.
+        /// </summary>
+        /// <returns></returns>
         protected abstract LocalMatrix[][] laplacianMatrix();
+        /// <summary>
+        /// Calculate sparse matrix for computing the gradient at arbitrary position x.
+        /// </summary>
+        /// <param name="x">Spatial point for gradient calculation</param>
+        /// <returns></returns>
         protected abstract LocalMatrix[][] gradientMatrix(double[] x);
 
         // Used to compute value, gradient, and laplacian
@@ -43,9 +61,10 @@ namespace ManifoldRing
         {
         }
 
-        public virtual void Init(InterpolatedNodes m)
+        public virtual void Init(InterpolatedNodes m, bool _toroidal)
         {
             this.m = m;
+            toroidal = _toroidal;
             laplacian = new ScalarField(m);
             laplacianOperator = new LocalMatrix[m.ArraySize][];
             laplacianOperator = laplacianMatrix();
@@ -184,15 +203,16 @@ namespace ManifoldRing
             interpolationOperator = new LocalMatrix[8];
         }
 
-        public override void Init(InterpolatedNodes m)
+        public override void Init(InterpolatedNodes m, bool _toroidal)
         {
-            base.Init(m);
+            base.Init(m, _toroidal);
             for (int i = 0; i < m.Dim; i++)
             {
                 gradientOperator[i] = new LocalMatrix[8];
             }
         }
 
+        // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
@@ -234,7 +254,8 @@ namespace ManifoldRing
             }
             return interpolationOperator;
         }
-
+        
+        // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
@@ -324,12 +345,12 @@ namespace ManifoldRing
                         if (i == 0)
                         {
                             idxplus = (i + 1) + j * m.NodesPerSide(0) + k * N01;
-                            idxminus = idxplus;
+                            idxminus = toroidal ? (m.NodesPerSide(0) - 2) + j * m.NodesPerSide(0) + k * N01 : idxplus;
                         }
                         else if (i == m.NodesPerSide(0) - 1)
                         {
                             idxminus = (i - 1) + j * m.NodesPerSide(0) + k * N01;
-                            idxplus = idxminus;
+                            idxplus = toroidal ? 1 + j * m.NodesPerSide(0) + k * N01 : idxminus;
                         }
                         else
                         {
@@ -351,12 +372,12 @@ namespace ManifoldRing
                         if (j == 0)
                         {
                             idxplus = i + (j + 1) * m.NodesPerSide(0) + k * N01;
-                            idxminus = idxplus;
+                            idxminus = toroidal ? i + (m.NodesPerSide(1) - 2) * m.NodesPerSide(0) + k * N01 : idxplus;
                         }
                         else if (j == m.NodesPerSide(1) - 1)
                         {
                             idxminus = i + (j - 1) * m.NodesPerSide(0) + k * N01;
-                            idxplus = idxminus;
+                            idxplus = toroidal ? i + 1 * m.NodesPerSide(0) + k * N01 : idxminus;
                         }
                         else
                         {
@@ -378,12 +399,12 @@ namespace ManifoldRing
                         if (k == 0)
                         {
                             idxplus = i + k * m.NodesPerSide(0) + (k + 1) * N01;
-                            idxminus = idxplus;
+                            idxminus = toroidal ? i + j * m.NodesPerSide(0) + (m.NodesPerSide(1) - 2) * N01 : idxplus;
                         }
                         else if (k == m.NodesPerSide(2) - 1)
                         {
                             idxminus = i + j * m.NodesPerSide(0) + (k - 1) * N01;
-                            idxplus = idxminus;
+                            idxplus = toroidal ? i + j * m.NodesPerSide(0) + 1 * N01 : idxminus;
                         }
                         else
                         {
@@ -428,9 +449,9 @@ namespace ManifoldRing
             interpolationOperator = new LocalMatrix[4];
         }
 
-        public override void  Init(InterpolatedNodes m)
+        public override void  Init(InterpolatedNodes m, bool _toroidal)
         {
- 	         base.Init(m);
+ 	         base.Init(m, _toroidal);
             // laplacianOperator = laplacianMatrix();
             for (int i = 0; i < m.Dim; i++)
             {
@@ -438,6 +459,7 @@ namespace ManifoldRing
             }
         }
 
+        // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[] interpolationMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
@@ -470,6 +492,7 @@ namespace ManifoldRing
             return interpolationOperator;
         }
 
+        // Don't need to account for toroidal BCs with this low-order scheme. 
         protected override LocalMatrix[][] gradientMatrix(double[] x)
         {
             int[] idx = m.localToIndexArray(x);
@@ -569,12 +592,12 @@ namespace ManifoldRing
                     if (i == 0)
                     {
                         idxplus = (i + 1) + j * m.NodesPerSide(0);
-                        idxminus = idxplus;
+                        idxminus = toroidal ? m.NodesPerSide(0) - 2 : idxplus;
                     }
                     else if (i == m.NodesPerSide(0) - 1)
                     {
                         idxminus = (i - 1) + j * m.NodesPerSide(0);
-                        idxplus = idxminus;
+                        idxplus = toroidal ? 1 : idxminus;
                     }
                     else
                     {
@@ -596,11 +619,12 @@ namespace ManifoldRing
                     if (j == 0)
                     {
                         idxplus = i + (j + 1) * m.NodesPerSide(0);
-                        idxminus = idxplus;
+                        idxminus = toroidal ? i + (m.NodesPerSide(1) - 2) * m.NodesPerSide(0) : idxplus;
                     }
                     else if (j == m.NodesPerSide(1) - 1)
                     {
                         idxminus = i + (j - 1) * m.NodesPerSide(0);
+                        idxplus = toroidal ? i + 1 * m.NodesPerSide(0) : idxminus;
                         idxplus = idxminus;
                     }
                     else
@@ -648,9 +672,9 @@ namespace ManifoldRing
             // interpolator = new LocalMatrix[27];
         }
 
-        public override void Init(InterpolatedNodes m)
+        public override void Init(InterpolatedNodes m, bool _toroidal)
         {
-            base.Init(m);
+            base.Init(m, _toroidal);
         }
 
         public override double Integration(ScalarField sf)
@@ -692,9 +716,9 @@ namespace ManifoldRing
             // interpolator = new LocalMatrix[27];
         }
 
-        public override void Init(InterpolatedNodes m)
+        public override void Init(InterpolatedNodes m, bool _toroidal)
         {
-            base.Init(m);
+            base.Init(m, _toroidal);
         }
 
         public override double Integration(ScalarField sf)

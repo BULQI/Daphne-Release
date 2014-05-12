@@ -42,8 +42,8 @@ namespace Daphne
         private Compartment compartment;
         private readonly Manifold manifold;
         private ScalarField concentration;
-        private readonly Dictionary<int, ScalarField> boundaryFluxes,
-                                                      boundaryConcs,
+        private Dictionary<int, ScalarField> boundaryFluxes;
+        private readonly Dictionary<int, ScalarField> boundaryConcs,
                                                       naturalBoundaryFluxes,
                                                       naturalBoundaryConcs;
         // Switch that allows us to turn off diffusion.
@@ -64,6 +64,7 @@ namespace Daphne
         public Dictionary<int, ScalarField> BoundaryFluxes
         {
             get { return boundaryFluxes; }
+            set { boundaryFluxes = value; }
         }
 
         public Dictionary<int, ScalarField> BoundaryConcs
@@ -142,9 +143,18 @@ namespace Daphne
             concentration += dt * Molecule.DiffusionCoefficient * concentration.Laplacian();
 
             // Apply boundary fluxes
+            // The flux is accumulating in Reactions, so we need to zero it after updating the concentration. 
+            // Perhaps, someone can suggest a better way to do so.
+            int[] saveKeys = new int[boundaryFluxes.Count];
+            int cnt = 0;
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryFluxes)
             {
                 concentration += -dt * concentration.DiffusionFluxTerm(kvp.Value, compartment.BoundaryTransforms[kvp.Key]);
+                saveKeys[cnt++] = kvp.Key;
+            }
+            for (int i = 0; i < cnt; i++)
+            {
+                BoundaryFluxes[saveKeys[i]] *= 0.0;
             }
 
             // Apply Neumann natural boundary conditions

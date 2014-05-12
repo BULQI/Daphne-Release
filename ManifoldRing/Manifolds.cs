@@ -663,18 +663,19 @@ namespace ManifoldRing
         /// <param name="data">data array with dim + 1 entries</param>
         public override void Initialize(double[] data)
         {
-            if (data.Length != Dim + 1)
+            if (data.Length != Dim + 2)
             {
                 throw new Exception("Dimension mismatch in interpolated manifold.");
             }
 
-            nNodesPerSide = new int[data.Length - 1];
+            nNodesPerSide = new int[data.Length - 2];
             for (int i = 0; i < Dim; i++)
             {
                 nNodesPerSide[i] = (int)data[i];
             }
-            stepSize = data[data.Length - 1];
-
+            stepSize = data[data.Length - 2];
+            bool toroidal = Convert.ToBoolean(data[data.Length - 1]);
+ 
             extent = new double[Dim];
             // accumulate array size and compute extents
             ArraySize = 1;
@@ -691,7 +692,7 @@ namespace ManifoldRing
             }
 
             // initialize interpolator
-            interpolator.Init(this);
+            interpolator.Init(this, toroidal);
         }
 
         /// <summary>

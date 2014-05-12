@@ -168,10 +168,10 @@ namespace Daphne
         private Dictionary<string, int> sides;
         public double Gamma { get; set; }
 
-        public ExtraCellularSpace(int[] numGridPts, double gridStep, IKernel kernel)
+        public ExtraCellularSpace(int[] numGridPts, double gridStep, bool toroidal, IKernel kernel)
         {
             InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>();
-            double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep };
+            double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep, Convert.ToDouble(toroidal) };
 
             p.Initialize(data);
             space = new Compartment(p);
@@ -183,11 +183,13 @@ namespace Daphne
             Transform t;
             double[] axis = new double[Transform.Dim];
 
-            data = new double[space.Interior.Dim];
+            data = new double[space.Interior.Dim+1];
             // front: no rotation, translate +z
             data[0] = space.Interior.NodesPerSide(0);
             data[1] = space.Interior.NodesPerSide(1);
             data[2] = space.Interior.StepSize();
+            // Toroidal BCs are not relevant for sides
+            data[3] = Convert.ToDouble(false);
             r = kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
