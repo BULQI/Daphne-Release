@@ -1754,7 +1754,10 @@ namespace DaphneGui
                 BoxSpecification box = new BoxSpecification();
                 AddDefaultBoxSpec(box);
                 GaussianSpecification gg = new GaussianSpecification();
-                //gg.DrawAsWireframe = true;
+
+                ////Add this after 2/4/14
+                ////gg.DrawAsWireframe = true;
+
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
@@ -2482,7 +2485,7 @@ namespace DaphneGui
                     MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
                 }
             }
-            crc.RCSim.reset();
+            //crc.RCSim.reset();
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
             // end of cleanup
 
@@ -2528,8 +2531,11 @@ namespace DaphneGui
             ////ReactionComplexProcessor rcp = new ReactionComplexProcessor();
             ////rcp.Initialize(MainWindow.SC.SimConfig, crc, rcSim);
 
-            crc.RCSim.Load(MainWindow.SC.SimConfig, true, true);
-            crc.Processor.Initialize(MainWindow.SC.SimConfig, crc, crc.RCSim);
+            //crc.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            MainWindow.Sim.Load(MainWindow.SC.SimConfig, true, true);
+
+
+            crc.Processor.Initialize(MainWindow.SC.SimConfig, crc, MainWindow.Sim);
             crc.Processor.Go();
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;

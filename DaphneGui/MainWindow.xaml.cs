@@ -722,6 +722,7 @@ namespace DaphneGui
                     resetButton.Content = "Abort";
                     //runButton.IsEnabled = false;
                     enableFileMenu(false);
+                    saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
                     gc.ToolsToolbar_IsEnabled = false;
@@ -1364,11 +1365,12 @@ namespace DaphneGui
         private void runButton_Click(object sender, RoutedEventArgs e)
         {
             resetButton.IsEnabled = false;
+            saveButton.IsEnabled = false;
             mutex = true;
 
             runSim();
         }
-
+       
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -1944,12 +1946,13 @@ namespace DaphneGui
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
-            resetButton.IsEnabled = true;
+            resetButton.IsEnabled = true;            
             resetButton.Content = "Apply";
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready";
             //runButton.IsEnabled = true;
             enableFileMenu(true);
+            saveButton.IsEnabled = true;
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
@@ -2296,17 +2299,7 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                // show the inital state
-                lockAndResetSim(true, "");
-                if (loadSuccess == false)
-                {
-                    return;
-                }
-                SimConfigToolWindow.IsEnabled = true;
-                saveScenario.IsEnabled = true;
-                displayTitle();
-                MainWindow.ST_ReacComplexChartWindow.ClearChart();
-                VTKDisplayDocWindow.Activate();
+                prepareScenario();                 
             }
         }
 
@@ -2400,6 +2393,49 @@ namespace DaphneGui
             else
                 gc.HandToolButton_IsEnabled = true;
 
+        }
+
+        /// <summary>
+        /// This loads the blank scenario
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void newScenario_Click(object sender, RoutedEventArgs e)
+        {
+            if (tempFileContent == true || saveTempFiles() == true)
+            {
+                applyTempFilesAndSave(true);
+            }
+
+            //Grab the blank scenario
+            string file = "daphne_blank_scenario.json";
+            string filename = appPath + @"\Config\" + file;
+            Uri uri_path = new Uri(appPath + @"\Config\" + file);
+
+            bool file_exists = File.Exists(uri_path.LocalPath);
+            if (!file_exists)
+            {
+                MessageBox.Show("Blank scenario file not found.");
+                return;
+            }
+
+            setScenarioPaths(filename);
+            prepareScenario();            
+        }
+
+        private void prepareScenario()
+        {
+            // show the inital state
+            lockAndResetSim(true, "");
+            if (loadSuccess == false)
+            {
+                return;
+            }
+            SimConfigToolWindow.IsEnabled = true;
+            saveScenario.IsEnabled = true;
+            displayTitle();
+            MainWindow.ST_ReacComplexChartWindow.ClearChart();
+            VTKDisplayDocWindow.Activate();
         }
     }
 }

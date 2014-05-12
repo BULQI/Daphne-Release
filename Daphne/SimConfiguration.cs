@@ -888,6 +888,16 @@ namespace Daphne
 
         private void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            // Need to figure out how to signal to the collection view source that the collection has changed and it should refresh
+            // This is not currently a problem because it is handled in memb_molecule_combo_box_GotFocus and cyto_molecule_combo_box_GotFocus
+            // But this may be the better place to handle it.
+
+            // Raise a CollectionChanged event with Action set to Reset to refresh the UI. 
+            // cvsBoundaryMolListView.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            // NotifyCollectionChangedEventArgs a = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
+            // entity_repository.molecules    ///OnCollectionChanged(a);
+
+
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -2659,7 +2669,7 @@ namespace Daphne
 
         [JsonIgnore]
         private DaphneDouble originalRate2;
-        //[JsonIgnore]
+        [JsonIgnore]
         public DaphneDouble OriginalRate2
         {
             get
@@ -2725,8 +2735,8 @@ namespace Daphne
 
         [JsonIgnore]
         public ReactionComplexProcessor Processor { get; set; }
-        [JsonIgnore]
-        public Simulation RCSim { get; set; }
+        //[JsonIgnore]
+        //public Simulation RCSim { get; set; }
 
         public ConfigReactionComplex()
         {
@@ -2773,7 +2783,7 @@ namespace Daphne
         public void PrepareToRun()
         {
             Processor = new ReactionComplexProcessor();
-            RCSim = new Simulation();
+            //RCSim = new Simulation();
         }
 
     }
@@ -3643,10 +3653,10 @@ namespace Daphne
             }
         }
 
-
         public MolPopInfo()
         {            
         }
+
         public MolPopInfo(string name)
         {
             Guid id = Guid.NewGuid();
@@ -4356,6 +4366,9 @@ namespace Daphne
             }
         }
 
+        ////Add this after 2/4/14
+        ////public bool DrawAsWireframe { get; set; }
+
         public GaussianSpecification()
         {
             gaussian_spec_name = "";
@@ -4363,6 +4376,9 @@ namespace Daphne
             gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
             gaussian_spec_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+
+            ////Add this after 2/4/14
+            ////DrawAsWireframe = false;
         }
     }
 
@@ -4840,7 +4856,9 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             box_guid = id.ToString();
             box_visibility = true;
+            blob_visibility = true;
             current_box_visibility = true;
+            current_blob_visibility = true;
             transform_matrix = new double[][] {
                 new double[]{1.0, 0.0, 0.0, 0.0},
                 new double[]{0.0, 1.0, 0.0, 0.0},

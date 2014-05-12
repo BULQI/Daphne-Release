@@ -446,6 +446,7 @@ namespace Workbench
                             bDrag = true;
                             ser.Points[0].MarkerColor = Color.Red;  //  .DataPoints.Item(1).Marker.Visible = True    
                             SeriesToDrag.Points[0].IsValueShownAsLabel = true;
+                            SeriesToDrag.Points[0].LabelFormat = "F3";
                             
                         }
                     }
@@ -480,7 +481,8 @@ namespace Workbench
 
                 if (valu > 0)
                 {
-                    ToolWin.txtMouseHover.Text = valu.ToString("#.00000");
+                    //ToolWin.txtMouseHover.Text = valu.ToString("#.00000");
+                    ToolWin.dblMouseHover.Number = valu;
 
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
                     ToolWin.RC.EditConc(guid, valu);
@@ -553,7 +555,8 @@ namespace Workbench
             }
             
             SeriesToDrag = null;
-            ToolWin.txtMouseHover.Text = "";
+            //ToolWin.txtMouseHover.Text = "";
+            ToolWin.dblMouseHover.Number = 0;
             cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
             //cChart.Focus();
             //cChart.Invalidate();
@@ -646,7 +649,8 @@ namespace Workbench
                             if (s == SeriesToDrag)
                             {
                                 s.Points[0].MarkerColor = Color.Red;
-                                s.Points[0].Label = ToolWin.txtMouseHover.Text;
+                                //s.Points[0].Label = ToolWin.txtMouseHover.Text; 
+                                s.Points[0].Label = ToolWin.dblMouseHover.FNumber;  
                             }
                         }
                         s.Points[0].MarkerBorderColor = Color.Black;

@@ -34,7 +34,7 @@ namespace DaphneGui
 
         // NOTE: Static flags for transform options and dirty are in RegionControl
 
-        public RegionWidget(vtkRenderWindow rw, RegionShape shape = RegionShape.Rectangular)
+        public RegionWidget(vtkRenderWindow rw, RegionShape shape = RegionShape.Rectangular, GaussianSpecification gs = null)
         {
             boxWidget = vtkBoxWidget2.New();
             boxWidget.SetInteractor(rw.GetInteractor());
@@ -63,7 +63,12 @@ namespace DaphneGui
             }
             else if (shape == RegionShape.Ellipsoid)
             {
-                SetSphere();                
+                ////Add this after 2/4/14
+                ////bool wireframe = false;
+                ////if (gs != null)
+                ////    wireframe = gs.DrawAsWireframe;
+                ////SetSphere(wireframe);      
+                SetSphere();
             }
             else
             {
@@ -489,6 +494,8 @@ namespace DaphneGui
             shapeActor.Prop = actor;
         }
 
+        ////Add this line after 2/4/14
+        ////private void SetSphere(bool draw_as_wireframe = false)
         private void SetSphere()
         {
             vtkSphereSource sphere = vtkSphereSource.New();
@@ -509,9 +516,13 @@ namespace DaphneGui
             actor.GetProperty().SetOpacity(opacity);
             actor.GetProperty().SetColor(red, green, blue);
 
-            //////skg new - this sets the blob to a wireframe but it does so for mol pop and cell pop
-            ////actor.GetProperty().SetRepresentationToWireframe();
-            ////actor.GetProperty().SetOpacity(0);                
+            ////Add this after 2/4/14
+            ////skg new - this sets the blob to display a wireframe - it should do so only for cell populations, not mol pops
+            ////if (draw_as_wireframe)
+            ////{
+            ////    actor.GetProperty().SetRepresentationToWireframe();
+            ////    actor.GetProperty().SetOpacity(0);
+            ////}
 
             shapeActor.Prop = actor;
         }

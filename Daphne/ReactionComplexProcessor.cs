@@ -179,25 +179,32 @@ namespace Daphne
 
         public void Reinitialize()
         {
-            CRC.RCSim.Load(SC, true, true);
+            Sim.Load(SC, true, true);
 
             double minVal = 1e7;
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                //minVal = Math.Min(minVal, grp.ReactionComplexRate2.Value);
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
 
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
-
-            
-
-            //SaveOriginalConcs();
-            //SaveInitialConcs();
-            //SaveReactions(CRC);
         }
+
+        private void SetTimeValues()
+        {
+            double minVal = 1e7;
+            foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
+            {
+                minVal = Math.Min(minVal, grp.ReactionComplexRate);
+            }
+
+            dInitialTime = 5 / minVal;
+            dMaxTime = 2 * dInitialTime;
+            MaxTime = (int)dMaxTime;
+        }
+
 
         //*************************************************************************
         //This runs the simulation and calculates the concentrations with each step

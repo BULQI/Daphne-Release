@@ -156,7 +156,7 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="cytoBulkMoleculesListView_Filter"
                                   />
-            <CollectionViewSource x:Key="boundaryMoleculesListView"  
+            <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
                                   />
@@ -801,7 +801,8 @@
                         
                         <StackPanel Orientation="Horizontal" Margin="20,0">
                             
-                            <uc:DoublesBox      HorizontalAlignment="Left" 
+                            <uc:DoublesBox      HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
                                                 Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
                                                 DecimalPlaces="2" 
                                                 RangeFactor="2"

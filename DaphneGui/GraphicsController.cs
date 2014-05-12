@@ -463,7 +463,7 @@ namespace DaphneGui
 
             vtkActor actor = vtkActor.New();
             actor.SetMapper(mapper);
-            // actor.GetProperty().SetRepresentationToWireframe();
+            // actor.GetProperty().SetRepresentationToWireframe();  // Can add this line after 2/4/14
             actor.GetProperty().SetRepresentationToSurface();
             //tubeActor.GetProperty().SetColor(1.0, 1.0, 0.0);
 
@@ -683,7 +683,6 @@ namespace DaphneGui
 
             vtkActor actor = vtkActor.New();
             actor.SetMapper(cellGlyphMapper);
-            //actor.GetProperty().SetRepresentationToWireframe();
             actor.GetProperty().SetRepresentationToSurface();
             // point size should only get used with vert representation
             actor.GetProperty().SetPointSize(8);
@@ -1891,7 +1890,7 @@ namespace DaphneGui
             // Find the box spec that goes with this gaussian spec
             BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid);
+            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid, gs);
 
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,

@@ -84,6 +84,7 @@
             <Menu>
                 <!--><MenuItem Header="Edit"/>-->
                 <MenuItem Header="File" Name="fileMenu">
+                    <MenuItem Header="New Scenario" Name="newScenario" Click="newScenario_Click"></MenuItem>
                     <MenuItem Header="Load Scenario..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
                     <MenuItem Header="Save Scenario..." Name="saveScenario" Command="ApplicationCommands.Save" />
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
@@ -182,8 +183,8 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ToolBarTray.Resources>
-                <ToolBar Name="SimControlToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                </ToolBarTray.Resources>                
+                <ToolBar Name="SaveToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
                     <Button Content="Apply" HorizontalAlignment="Left" Name="resetButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
                                 Margin="0" Click="resetButton_Click">
@@ -200,7 +201,23 @@
                                 </StackPanel>
                             </ToolTip>
                         </Button.ToolTip>
+                    </Button>                    
+                    <Button Content="Save" HorizontalAlignment="Right" Name="saveButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Command="ApplicationCommands.Save">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save the simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
                     </Button>
+                </ToolBar>
+                <ToolBar Name="SimControlToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
                     <Button Content="Run" HorizontalAlignment="Right" Name="runButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
                                 Margin="0" Click="runButton_Click">
@@ -215,17 +232,6 @@
                             </ToolTip>
                         </Button.ToolTip>
                     </Button>
-                    <!-- skg experimenting 9/17/12 -->
-                    <!-- IsChecked="{Binding HandToolButton_IsChecked}" 
-                                                          IsEnabled="{Binding HandToolButton_IsEnabled}"-->
-                    <!--<ToggleButton Name="BlueHandToolButton" Width="22"
-                            IsChecked="{Binding BlueHandToolButton_IsChecked}" 
-                            IsEnabled="{Binding BlueHandToolButton_IsEnabled}"
-                                  Click="BlueHandToolButton_Click"
-                            ToolBar.OverflowMode="Never" ToolTip="Cell information tool" ToolTipService.ShowOnDisabled="True">
-                        <Image Source="Images/cursors_blue_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
-                    </ToggleButton>-->
-
                 </ToolBar>
                 <ToolBar Name="VCR_Toolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" IsEnabled="False">
                     <Button Name="VCRbutton_First" Click="VCRbutton_First_Click" ToolBar.OverflowMode="Never">

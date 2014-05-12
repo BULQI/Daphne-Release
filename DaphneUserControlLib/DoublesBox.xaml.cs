@@ -151,7 +151,18 @@ namespace DaphneUserControlLib
             TextBox tb = sender as TextBox;
             string token = tb.Text;
             token = GetNumericChars(token);
-            double d = double.Parse(token);
+            double d = 0 ;
+            try
+            {
+                d = double.Parse(token);
+            }
+            catch
+            {
+                MessageBox.Show("Please enber a valid number.");
+                //throw new Exception("Invalid number entered");
+                return;
+            }
+
             Number = d;
             SetMinMax();
         }
@@ -189,6 +200,7 @@ namespace DaphneUserControlLib
                 SetValue(NumberProperty, value);
                 Format = "";
                 FNumber = string.Format(_format, Number);
+                SetMinMax();
                 OnPropertyChanged("Number");
             }
         }
@@ -326,6 +338,29 @@ namespace DaphneUserControlLib
             // insert your code here
             DoublesBox uc = d as DoublesBox;
             uc.SliderEnabled = (bool)(e.NewValue);
+        }
+
+        //TEXTFIELDWIDTH          
+        public static DependencyProperty TextFieldWidthProperty = DependencyProperty.Register("TextFieldWidth", typeof(int), typeof(DoublesBox), new FrameworkPropertyMetadata(100, TextFieldWidthPropertyChanged));
+        public int TextFieldWidth
+        {
+            get { return (int)GetValue(TextFieldWidthProperty); }
+            set
+            {
+                SetValue(TextFieldWidthProperty, value);
+                stpControl.Width = value;
+                if (SliderEnabled) {
+                    stpControl.Width += slFNumber.Width;                
+                    stpMainPanel.Width = stpControl.Width + 10;
+                }
+                OnPropertyChanged("TextFieldWidth");
+            }
+        }
+        private static void TextFieldWidthPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.TextFieldWidth = (int)(e.NewValue);
         }
     }
 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"           
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"   
         >
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" >
@@ -36,7 +36,16 @@
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Visibility="Hidden">
                 <TextBlock >Dragging Concentration:</TextBlock>
-                <TextBox x:Name="txtMouseHover" Width="150" HorizontalAlignment="Left" >Dragging Conc</TextBox>
+                <!--<TextBox x:Name="txtMouseHover" Width="150" HorizontalAlignment="Left" >Dragging Conc</TextBox>-->
+                <uc:DoublesBox x:Name="dblMouseHover" HorizontalAlignment="Left" Margin="4,0"
+                                                Number="0.00"   
+                                                DecimalPlaces="3" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000">
+                    
+                </uc:DoublesBox>
+                                            
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >

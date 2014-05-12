@@ -18,6 +18,7 @@
                     LostMouseCapture="slFNumber_LostMouseCapture"
                     
                     >
+                
                 <Slider.Style>
                     <Style TargetType="Slider">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -31,9 +32,10 @@
                     </Style>
                 </Slider.Style>
             </Slider>
-            <TextBox x:Name="tbFNumber" Width="100" Height="24" VerticalAlignment="Top" BorderThickness="1" Margin="0,0" Text="{Binding Path=FNumber, ElementName=UC}"
+            <TextBox x:Name="tbFNumber" Width="{Binding Path=TextFieldWidth, Mode=OneWay, ElementName=UC}" Height="24" VerticalAlignment="Top" BorderThickness="1" Margin="0,0" Text="{Binding Path=FNumber, ElementName=UC}"
                 GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
             </TextBox>
+            
             
         </StackPanel>
 

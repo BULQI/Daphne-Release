@@ -311,7 +311,7 @@ namespace Workbench
                 return;
 
             RC.UpdateRateConstants();
-            RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+            //RC.Sim.Load(MainWindow.SC.SimConfig, true, true);
             //RC.Go();
             cm.RedrawSeries();
             cm.RecalculateYMax();
@@ -421,7 +421,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 RC.UpdateRateConstants();
-                RC.CRC.RCSim.Load(MainWindow.SC.SimConfig, true, true);
+                RC.Sim.Load(MainWindow.SC.SimConfig, true, true);
                 cm.RedrawSeries();
                 cm.RecalculateYMax();
             }
