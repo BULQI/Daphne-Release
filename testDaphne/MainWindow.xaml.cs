@@ -25,11 +25,10 @@ namespace testDaphne
         private ReactionsConfigurator config;
 
         private static Simulation sim;
-
         public static Simulation Sim
         {
-            get { return MainWindow.sim; }
-            set { MainWindow.sim = value; }
+            get { return sim; }
+            set { sim = value; }
         }
 
         public MainWindow()

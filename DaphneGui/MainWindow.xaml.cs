@@ -1,4 +1,16 @@
-﻿using System;
+﻿// enable ASSUME_DEBUGGER for "Start without debugging", i.e. when Debugger.IsAttached == false
+//#define ASSUME_DEBUGGER // NOTE: NEVER CHECK IN ENABLED
+
+// enable RUNNING_PROFILER when running a profiling session; this will set paths and the database connection string
+//#define RUNNING_PROFILER // NOTE: NEVER CHECK IN ENABLED
+
+// enable CONTROL_PROFILER to automatically start and stop the simulation with a profiler session for accurate timing
+// NOTE: this will only work if the scenario to be profiled is saved in the last scenario preference variable; to do so,
+// run the app in the profiler having this flag disabled (but enable RUNNING_PROFILER), open the desired scenario,
+// select the 'run last scenario' option in the menu, close the app, enable the flag, recompile, and profile
+//#define CONTROL_PROFILER // NOTE: NEVER CHECK IN ENABLED
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -50,11 +62,9 @@ namespace DaphneGui
         private static Simulation sim;
         public static Simulation Sim
         {
-            get { return MainWindow.sim; }
-            set { MainWindow.sim = value; }
+            get { return sim; }
+            set { sim = value; }
         }
-
-        
 
         private bool blueHandToolButton_IsChecked = false;
 
@@ -79,10 +89,8 @@ namespace DaphneGui
         /// <summary>
         /// uri for the scenario file
         /// </summary>
-        public static Uri xmlPath;
-        public static Uri jsonPath;
-        private string orig_content;
-        private string orig_path = @"c:\temp";
+        public static Uri scenario_path;
+        private string orig_content, orig_path;
 
         private bool exportAllFlag = false;
         private string igGeneFolderName = "";
@@ -313,17 +321,11 @@ namespace DaphneGui
             }
 
             // attempt to load a default simulation file; if it doesn't exist disable the gui
-            // and make the window show up empty
-            xmlPath = new Uri(appPath + @"\Config\" + file); // new Uri("xmlfile1.xml", UriKind.Relative);
-            //orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
-            //bool file_exists = File.Exists(xmlPath.LocalPath);
-
             //skg daphne Wednesday, May 08, 2013
-            string tempPath = appPath + @"\Config\" + file;
-            jsonPath = new Uri(tempPath);
-            orig_path = System.IO.Path.GetDirectoryName(jsonPath.LocalPath);
-            bool file_exists = File.Exists(jsonPath.LocalPath);
-            
+            scenario_path = new Uri(appPath + @"\Config\" + file);
+            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+
+            bool file_exists = File.Exists(scenario_path.LocalPath);
 
             if (file_exists)
             {
@@ -348,7 +350,6 @@ namespace DaphneGui
             // create the simulation
             sim = new Simulation();
 
-            //SKIP VTK GRAPHICS WINDOW FOR NOW            
             // vtk data basket to hold vtk data for entities with graphical representation
             vtkDataBasket = new VTKDataBasket();
             // graphics controller to manage vtk objects
@@ -469,8 +470,8 @@ namespace DaphneGui
 
         private void setScenarioPaths(string filename)
         {
-            jsonPath = new Uri(filename);
-            orig_path = System.IO.Path.GetDirectoryName(jsonPath.LocalPath);
+            scenario_path = new Uri(filename);
+            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
             displayTitle();
         }
 
@@ -531,12 +532,10 @@ namespace DaphneGui
                 configurator.FileName = filename;
                 configurator.SerializeSimConfigToFile();
 
-                //NEED TO CLARIFY WHAT THIS IS DOING!!!!
                 orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                xmlPath = new Uri(filename);
-                orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
+                scenario_path = new Uri(filename);
+                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
                 displayTitle();
-                
             }
             return result;
         }
@@ -836,7 +835,7 @@ namespace DaphneGui
 
         private string extractFileName()
         {
-            string[] segments = jsonPath.LocalPath.Split('\\');
+            string[] segments = scenario_path.LocalPath.Split('\\');
 
             return segments.Last();
         }
@@ -1439,11 +1438,10 @@ namespace DaphneGui
                 }
                 else
                 {
-                    configurator = new SimConfigurator(jsonPath.LocalPath);
+                    configurator = new SimConfigurator(scenario_path.LocalPath);
                     // catch xaml parse exception if it's not a good sim config file
                     try
                     {
-                        //SKG Tuesday, May 07, 2013 - HERE MUST REPLACE WITH JSON DESERIALIZER
                         configurator.DeserializeSimConfig();
                         //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
                     }
@@ -1457,8 +1455,7 @@ namespace DaphneGui
                     }
                 }
                 orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                //orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
-                orig_path = System.IO.Path.GetDirectoryName(jsonPath.LocalPath);
+                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
             }
 
             // (re)connect the handlers for the property changed event
@@ -1790,7 +1787,7 @@ namespace DaphneGui
                         case MessageBoxResult.Yes:
                             configurator.SerializeSimConfigToFile();
                             orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                            orig_path = System.IO.Path.GetDirectoryName(xmlPath.LocalPath);
+                            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
                             lockSaveStartSim(true);
@@ -1964,25 +1961,37 @@ namespace DaphneGui
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            dw.Close();
+            // terminate the simulation thread first
+            if (simThread != null && simThread.IsAlive)
+            {
+                simThread.Abort();
+            }
+
+            // vtk cleanup
+            gc.Cleanup();
+
+            // close the dev help
+            if (devHelpProc != null && devHelpProc.HasExited != true)
+            {
+                devHelpProc.CloseMainWindow();
+                devHelpProc.Close();
+            }
+
+            // close any open document window
+            if (dw != null)
+            {
+                dw.Close();
+            }
+
+            // if this option is selected then save the currently open scenario file name
+            if (openLastScenarioMenu.IsChecked == true)
+            {
+                Properties.Settings.Default.lastOpenScenario = extractFileName();
+            }
+            // save the preferences
+            Properties.Settings.Default.Save();
         }
 
         private void exitApp_Click(object sender, RoutedEventArgs e)
