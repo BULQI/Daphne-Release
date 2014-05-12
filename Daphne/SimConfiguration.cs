@@ -2975,48 +2975,6 @@ namespace Daphne
                 OnPropertyChanged("ReactionComplexRate");
             }
         }
-
-        //[JsonIgnore]
-        //private DaphneDouble originalRate2;
-        //[JsonIgnore]
-        //public DaphneDouble OriginalRate2
-        //{
-        //    get
-        //    {
-        //        return originalRate2;
-        //    }
-        //    set
-        //    {
-                
-        //            originalRate2 = value;
-        //            OnPropertyChanged("OriginalRate2");
-                
-        //    }
-        //}
-
-        //[JsonIgnore]
-        //private DaphneDouble reactionComplexRate2;
-        ////[JsonIgnore]
-        //public DaphneDouble ReactionComplexRate2
-        //{
-        //    get
-        //    {
-        //        return reactionComplexRate2;
-        //    }
-        //    set
-        //    {
-                
-        //            reactionComplexRate2 = value;
-        //            OnPropertyChanged("ReactionComplexRate2");
-               
-        //    }
-        //}
-
-        //public ConfigReactionGuidRatePair()
-        //{
-        //    OriginalRate2 = new DaphneDouble();
-        //    ReactionComplexRate2 = new DaphneDouble();
-        //}
     }
 
     public class ConfigReactionComplex : EntityModelBase
