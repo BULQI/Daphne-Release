@@ -228,13 +228,13 @@
                     <!-- skg experimenting 9/17/12 -->
                     <!-- IsChecked="{Binding HandToolButton_IsChecked}" 
                                                           IsEnabled="{Binding HandToolButton_IsEnabled}"-->
-                    <ToggleButton Name="BlueHandToolButton" Width="22"
+                    <!--<ToggleButton Name="BlueHandToolButton" Width="22"
                             IsChecked="{Binding BlueHandToolButton_IsChecked}" 
                             IsEnabled="{Binding BlueHandToolButton_IsEnabled}"
                                   Click="BlueHandToolButton_Click"
                             ToolBar.OverflowMode="Never" ToolTip="Cell information tool" ToolTipService.ShowOnDisabled="True">
                         <Image Source="Images/cursors_blue_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
-                    </ToggleButton>
+                    </ToggleButton>-->
 
                 </ToolBar>
                 <ToolBar Name="VCR_Toolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" IsEnabled="False">
@@ -385,8 +385,6 @@
                                                           ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
                                                 SelectedValue="{Binding Path=CellRenderMethod}"-->
                                                 <ComboBox Name="CellRenderMethodCB" Width="100"
-                                                         
-                                                          
                                                           BorderBrush="LightGray" 
                                                           ToolBar.OverflowMode="Never" ToolTip="Cells rendered as shape"
                                                           />
@@ -397,6 +395,16 @@
                                                           BorderBrush="LightGray" 
                                                           ToolBar.OverflowMode="Never" ToolTip="Cells color by attribute">
                                                 </ComboBox>
+
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cell selection tool mode</Label>
+                                                <ComboBox Name="CellSelectionToolCB" Width="160"
+                                                          ItemsSource="{Binding Path=CellSelectionToolModes}"
+                                                          SelectedValue="{Binding Path=CellSelectionToolMode}"
+                                                          SelectionChanged="CellSelectionToolCB_SelectionChanged"
+                                                          BorderBrush="LightGray" 
+                                                          ToolBar.OverflowMode="Never" ToolTip="Select the function the cell selection tool should perform"
+                                                          />
+
                                                 <Slider x:Name="ColorMapScaleFactorSlider"
                                                         Visibility="{Binding ColorScaleSlider_IsEnabled}"
                                                         Value="{Binding ColorScaleMaxFactor}"

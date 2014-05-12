@@ -2059,5 +2059,35 @@ namespace DaphneGui
         {
             CloseApp();
         }
+
+        private void CellSelectionToolCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = sender as ComboBox;
+            int index = cb.SelectedIndex;
+            if (index == -1)
+                return;
+
+            if (index == 0)
+            {
+                SetMouseLeftState(MOUSE_LEFT_NONE, true);
+                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
+                gc.HandToolButton_IsEnabled = false;
+                gc.HandToolButton_IsChecked = false;
+            }
+            else if (index == 1)
+            {
+                if (false == CheckMouseLeftState(MOUSE_LEFT_TRACK)) {
+                    SetMouseLeftState(MOUSE_LEFT_TRACK, true);
+                    gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_ARROW);
+                }
+            }
+            else if (index == 2)
+            {
+                SetMouseLeftState(MOUSE_LEFT_CELL_MOLCONCS, true);
+                gc.Rwc.RenderWindow.SetCurrentCursor(VTKGraphicsController.GET_CURSOR_HAND);
+                gc.HandToolButton_IsEnabled = false;
+                gc.HandToolButton_IsChecked = false;
+            }
+        }
     }
 }

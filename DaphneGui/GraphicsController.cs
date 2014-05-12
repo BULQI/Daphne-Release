@@ -804,7 +804,7 @@ namespace DaphneGui
             CleanupCells();
         }
     }
-
+   
     /// <summary>
     /// entity encapsulating the control of a simulation's 3D VTK graphics
     /// </summary>
@@ -856,6 +856,8 @@ namespace DaphneGui
         public ObservableCollection<string> ECSRenderingMethodNames { get; set; }
         private string ecsRenderingMethod;
         private MainWindow MW;
+        public ObservableCollection<string> CellSelectionToolModes { get; set; }
+        private string cellSelectionToolMode;
 
         public static byte GET_CURSOR_ARROW
         {
@@ -959,6 +961,13 @@ namespace DaphneGui
             ECSRenderingMethodNames.Add("Outlined Volume");
             // regions
             regions = new Dictionary<string, RegionWidget>();
+
+            //Cell tool selection modes
+            this.CellSelectionToolModes = new ObservableCollection<string>();
+            CellSelectionToolModes.Add("None");
+            CellSelectionToolModes.Add("Tracks");
+            CellSelectionToolModes.Add("Molecular Concentrations");
+            CellSelectionToolMode = CellSelectionToolModes[0];
         }
         
         /// <summary>
@@ -1099,6 +1108,24 @@ namespace DaphneGui
                         this.setColorMap();
                         // NOTE: If allow null reset of name, move this back outside the if() brackets
                         base.OnPropertyChanged("CellColorArrayName");
+                    }
+                }
+            }
+        }
+
+        public string CellSelectionToolMode
+        {
+            get { return this.cellSelectionToolMode; }
+            set
+            {
+                if (value == this.cellSelectionToolMode)
+                    return;
+                else
+                {
+                    if (value != null)
+                    {
+                        this.cellSelectionToolMode = value;
+                        base.OnPropertyChanged("CellSelectionToolMode");
                     }
                 }
             }
