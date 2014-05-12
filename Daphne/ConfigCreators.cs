@@ -31,18 +31,18 @@ namespace Daphne
             //reaction complexes
             PredefinedReactionComplexesCreator(sc);
 
-            //deserialize user defined objects
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
-            if (File.Exists(userfilename))
-            {
-                string readText = File.ReadAllText(userfilename);
+            ////deserialize user defined objects
+            //var settings = new JsonSerializerSettings();
+            //settings.TypeNameHandling = TypeNameHandling.Auto;
+            //settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            //string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            //if (File.Exists(userfilename))
+            //{
+            //    string readText = File.ReadAllText(userfilename);
 
-                configurator.userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
-                configurator.userDefGroup.CopyToConfig(sc);
-            }
+            //    configurator.userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+            //    configurator.userDefGroup.CopyToConfig(sc);
+            //}
         }
 
         public static void CreateAndSerializeLigandReceptorScenario(SimConfigurator configurator)
