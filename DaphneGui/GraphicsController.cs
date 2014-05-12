@@ -1238,7 +1238,6 @@ namespace DaphneGui
                     whArrowToolButton_IsChecked = value;
                     HandToolButton_IsChecked = !value;
                     PreviewButton_IsEnabled = !value;
-                    MainWindow.SetMouseLeftState(MainWindow.MOUSE_LEFT_TRACK, !value);
                     CellController.SetCellOpacities(value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1274,7 +1273,6 @@ namespace DaphneGui
                     handToolButton_IsChecked = value;
                     WhArrowToolButton_IsChecked = !value;
                     PreviewButton_IsEnabled = value;
-                    MainWindow.SetMouseLeftState(MainWindow.MOUSE_LEFT_TRACK, value);
                     CellController.SetCellOpacities(!value ? MainWindow.cellOpacity : 1.0);
                     Rwc.RenderWindow.SetCurrentCursor(!value ? CURSOR_ARROW : CURSOR_HAND);
                     Rwc.Invalidate();
@@ -1542,6 +1540,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
+            if (!HandToolButton_IsChecked)
+                return;
+
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
