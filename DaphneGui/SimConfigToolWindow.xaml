@@ -1355,6 +1355,7 @@
                                                                     ScrollBar.Scroll="dgLocations_Scroll"
                                                                     ScrollViewer.ScrollChanged="dgLocations_Scroll"
                                                                     SourceUpdated="dgLocations_Unloaded"
+                                                                    LostFocus="dgLocations_CheckPositions"
                                                                     >
                                                         <DataGrid.ContextMenu>
                                                             <ContextMenu >

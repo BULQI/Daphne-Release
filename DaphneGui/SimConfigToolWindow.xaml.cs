@@ -1083,9 +1083,18 @@ namespace DaphneGui
             cp.cell_guid_ref = cc.cell_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
-            // cp.cell_list.Add(new CellState());
-            cp.cellPopDist = new CellPopSpecific();
-            cp.cellPopDist.CellStates.Add(new CellState());
+
+            // Add cell population distribution information
+            double[] extents = new double[3] { MainWindow.SC.SimConfig.rc_scenario.environment.extent_x, 
+                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_y, 
+                                               MainWindow.SC.SimConfig.rc_scenario.environment.extent_z };
+            double minDisSquared = 2 * MainWindow.SC.SimConfig.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius;
+            minDisSquared *= minDisSquared;
+            cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
+            cp.cellPopDist.CellStates[0] = new CellState(   MainWindow.SC.SimConfig.rc_scenario.environment.extent_x,
+                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_y / 2,
+                                                            MainWindow.SC.SimConfig.rc_scenario.environment.extent_z / 2);
+
             cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Add(cp);
@@ -2009,6 +2018,11 @@ namespace DaphneGui
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
         }
 
+        /// <summary>
+        /// Called after each key stroke in a selected cell in the data grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgLocations_KeyDown(object sender, KeyEventArgs e)
         {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
@@ -2059,6 +2073,11 @@ namespace DaphneGui
         {
         }
 
+        /// <summary>
+        /// Called when a cell in the data grid is selected and after each key stroke.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dgLocations_Scroll(object sender, RoutedEventArgs e)
         {
             DataGrid dgData = (DataGrid)sender;
@@ -2099,18 +2118,88 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void dgLocations_Unloaded(Object sender, RoutedEventArgs e)
         {
+            // 11/10/2013 gmk: Don't think this is needed anymore.
+            // Delete?
+
+            //CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
+            //if (cp == null)
+            //    return;
+            ////cp.number = cp.cell_list.Count;
+            //cp.number = cp.cellPopDist.CellStates.Count;
+
+            //if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+            //{
+            //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
+            //    //cps.CopyLocations(cp);
+            //}
+        }        
+
+        /// <summary>
+        /// Call after focus lost from selected cell in the data grid.
+        /// Check that positions are still in bounds.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgLocations_CheckPositions(Object sender, RoutedEventArgs e)
+        {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
                 return;
-            //cp.number = cp.cell_list.Count;
-            cp.number = cp.cellPopDist.CellStates.Count;
 
-            if (cp.cellPopDist.DistType == CellPopDistributionType.Specific)
+            // Remove out-of-bounds cells
+            bool changed = false;
+            for (int i = cp.cellPopDist.CellStates.Count - 1; i >= 0; i--)
             {
-                CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
-                //cps.CopyLocations(cp);
+                double[] pos = new double[3] { cp.cellPopDist.CellStates[i].X, cp.cellPopDist.CellStates[i].Y, cp.cellPopDist.CellStates[i].Z };
+                // X
+                if (cp.cellPopDist.CellStates[i].X < 0) 
+                {
+                    // cp.cellPopDist.CellStates[i].X = 0;
+                    pos[0] = 0;
+                    changed = true;
+                }
+                if (cp.cellPopDist.CellStates[i].X > cp.cellPopDist.Extents[0]) 
+                {
+                    // cp.cellPopDist.CellStates[i].X = cp.cellPopDist.Extents[0];
+                    pos[0] = cp.cellPopDist.Extents[0];
+                    changed = true;
+                }
+                // Y
+                if (cp.cellPopDist.CellStates[i].Y < 0) 
+                {
+                    //cp.cellPopDist.CellStates[i].Y = 0;
+                    pos[1] = 0;
+                    changed = true;
+                }
+                if (cp.cellPopDist.CellStates[i].Y > cp.cellPopDist.Extents[1])
+                {
+                    //cp.cellPopDist.CellStates[i].Y = cp.cellPopDist.Extents[1];
+                    pos[1] = cp.cellPopDist.Extents[1];
+                    changed = true;
+                }
+                // Z
+                if (cp.cellPopDist.CellStates[i].Z < 0)
+                {
+                    //cp.cellPopDist.CellStates[i].Z = 0;
+                    pos[2] = 0;
+                    changed = true;
+                }
+                if (cp.cellPopDist.CellStates[i].Z > cp.cellPopDist.Extents[2])
+                {
+                    //cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];
+                    pos[2] = cp.cellPopDist.Extents[2];
+                    changed = true;
+                }
+                if (changed)
+                {
+                    // Can't update coordinates directly or the datagrid doesn't update properly
+                    // (e.g., cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];)
+                    cp.cellPopDist.CellStates.RemoveAt(i);
+                    cp.cellPopDist.AddByPosition(pos);
+                }
             }
-        }        
+
+        }
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {

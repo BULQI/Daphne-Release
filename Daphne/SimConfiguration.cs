@@ -2328,11 +2328,6 @@ namespace Daphne
             }
         }
 
-        public CellPopDistribution()
-        {
-            cellStates = new ObservableCollection<CellState>();
-        }
-
         /// <summary>
         /// Check that the new cell position is within the specified bounds.
         /// </summary>
@@ -2454,11 +2449,16 @@ namespace Daphne
         public void Resize(double[] newExtents)
         {
             extents = (double[])newExtents.Clone();
+            CheckPositions();
+        }
+
+        public void CheckPositions()
+        {
             double[] pos;
             int number = CellStates.Count;
 
             // Remove out-of-bounds cells
-            for (int i = CellStates.Count - 1; i >= 0; i-- )
+            for (int i = CellStates.Count - 1; i >= 0; i--)
             {
                 pos = new double[3] { CellStates[i].X, CellStates[i].Y, CellStates[i].Z };
                 if (!inBounds(pos))
@@ -2473,6 +2473,8 @@ namespace Daphne
             {
                 AddByDistr(cellsToAdd);
             }
+
+
         }
     }
 
@@ -2510,10 +2512,6 @@ namespace Daphne
                 AddByDistr(1);
             }
             OnPropertyChanged("CellStates");
-        }
-
-        public CellPopSpecific()
-        {
         }
 
         public override double[] nextPosition()
@@ -3543,7 +3541,7 @@ namespace Daphne
         public MolPopHomogeneousLevel()
         {
             mp_distribution_type = MolPopDistributionType.Homogeneous;
-            concentration = 10.0;
+            concentration = 1.0;
         }
     }
 
@@ -3595,7 +3593,7 @@ namespace Daphne
         public MolPopGaussian()
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
-            peak_concentration = 100.0;
+            peak_concentration = 1.0;
             gaussgrad_gauss_spec_guid_ref = "";
         }
     }
