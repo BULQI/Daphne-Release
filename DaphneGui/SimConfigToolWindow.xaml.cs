@@ -9,6 +9,9 @@ using Workbench;
 using Daphne;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
+using System.Windows.Markup;
+//using System.Windows.Forms;
+using Microsoft.Win32;
 
 
 namespace DaphneGui
@@ -427,7 +430,7 @@ namespace DaphneGui
             }
             else
             {
-                MessageBox.Show("Cannot remove a predefined molecule");
+                System.Windows.Forms.MessageBox.Show("Cannot remove a predefined molecule");
             }
         }
 
@@ -624,8 +627,8 @@ namespace DaphneGui
 
         private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Binding b = new Binding();
-            b.ElementName = "CellCytosolMolPopsListBox";
+            //Binding b = new Binding();
+            //b.ElementName = "CellCytosolMolPopsListBox";
             //PropertyPath pp = new PropertyPath(CellCytosolMolPopsListBox.SelectedItem);
             //DependencyProperty dp;
             //dp.PropertyType = CellCytosolMolPopsListBox.SelectedItem.GetType();
@@ -634,6 +637,64 @@ namespace DaphneGui
             
             //cc.SetBinding(
             //MembMolPopDetails.Content = cont
+        }
+
+        private void btnBrowseCoordFile_Click(object sender, RoutedEventArgs e)
+        {
+            // Configure open file dialog box
+            OpenFileDialog dlg = new OpenFileDialog();
+            //dlg.InitialDirectory = @"c:\datarpa\";
+            dlg.DefaultExt = ".csv"; // Default file extension
+            dlg.Filter = "csv files (.csv)|*.csv"; // Filter files by extension
+
+            // Show open file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+            
+
+            // Process open file dialog box results            
+            if (result == true)
+            {
+                // Save filename here
+                coordInputFile = dlg.FileName;
+
+                if (!File.Exists(coordInputFile))
+                {
+                    Console.WriteLine("[Error] {0} : No such file.", coordInputFile);
+                }
+            }
+        }
+
+        public string coordInputFile { get; set; }
+
+        
+    }
+
+    public class RowToIndexConverter : MarkupExtension, IValueConverter
+    {
+        static RowToIndexConverter converter;
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            DataGridRow row = value as DataGridRow;
+            if (row != null)
+                return row.GetIndex() + 1;
+            else
+                return -1;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (converter == null) converter = new RowToIndexConverter();
+            return converter;
+        }
+
+        public RowToIndexConverter()
+        {
         }
     }
 }

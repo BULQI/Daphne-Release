@@ -377,14 +377,7 @@ namespace Daphne
             sc.entity_repository.cells.Add(gc);
 
             //Reactions
-
-            //Reactions in membrane
-            string guid = findReactionGuid(ReactionType.BoundaryAssociation, sc);
-            gc.membrane.reactions_guid_ref.Add(guid);
-            guid = findReactionGuid(ReactionType.BoundaryDissociation, sc);
-            gc.membrane.reactions_guid_ref.Add(guid);
-
-            //Reactions in cytosol
+            //None
 
             //---------------------------------------------------------------------------------------
             //TCell 

@@ -1215,16 +1215,22 @@
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel>
-                                        <RadioButton IsChecked="True" Margin="8, 4">By distribution</RadioButton>
+                                        <RadioButton x:Name="rbByDistribution" IsChecked="True" Margin="8, 4">By distribution</RadioButton>
                                         <StackPanel Orientation="Horizontal" Margin="20,0">
-                                            <RadioButton IsChecked="True" Margin="4, 4">Uniform</RadioButton>
-                                            <RadioButton Margin="10,4">Gaussian</RadioButton>
+                                            <RadioButton  IsChecked="True" Margin="4, 4" IsEnabled="{Binding ElementName=rbByDistribution, Path=IsChecked}">Uniform</RadioButton>
+                                            <RadioButton Margin="10,4" IsEnabled="{Binding ElementName=rbByDistribution, Path=IsChecked}">Gaussian</RadioButton>
                                         </StackPanel>
-                                        <RadioButton Margin="8, 4">By specific location</RadioButton>
-                                        <StackPanel Orientation="Horizontal" Margin="20,0">
-                                            <RadioButton Margin="4, 4">By coordinates</RadioButton>
-                                            <RadioButton Margin="10,4">By location file</RadioButton>
+                                        
+                                        <StackPanel >
                                             
+                                        </StackPanel>
+                                        <StackPanel>
+                                            
+                                        </StackPanel>
+                                        <RadioButton x:Name="rbByLocation" Margin="8, 4">By specific location</RadioButton>
+                                        <StackPanel Orientation="Horizontal" Margin="20,0">
+                                            <RadioButton x:Name="rbByCoord" Margin="4, 4" IsEnabled="{Binding ElementName=rbByLocation, Path=IsChecked}">By coordinates</RadioButton>
+                                            <RadioButton x:Name="rbByFile" Margin="10,4" IsEnabled="{Binding ElementName=rbByLocation, Path=IsChecked}">By location file</RadioButton>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="16,0">
                                             <Expander ExpandDirection="Down" Padding="6"                                    
@@ -1233,36 +1239,48 @@
                                                 x:Name="CoordinatesExpander"
                                                 Margin="0,0,0,0" 
                                                 Canvas.ZIndex="1"
+                                                IsEnabled="{Binding ElementName=rbByCoord, Path=IsChecked}"
                                                 >
+                                                
                                                 <StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock>X  </TextBlock>
-                                                        <TextBox x:Name="txtCellX" Width="100"
-                                                                 Text="{Binding Path=cell_locations[0].X}">
+                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding Path=cell_locations}"
+                                                                Height="100" MinWidth="170" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="50" MaxColumnWidth="80" 
+                                                                CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False"
+                                                                CanUserSortColumns="False" RowHeaderWidth="0"
+                                                                VerticalContentAlignment="Center">
+                                                        <DataGrid.ColumnHeaderStyle>
+                                                            <Style TargetType="DataGridColumnHeader" >
+                                                                <Setter Property="FontSize" Value="14" />
+                                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                                            </Style>
+                                                        </DataGrid.ColumnHeaderStyle>
+                                                        <DataGrid.RowStyle>
+                                                            <Style TargetType="DataGridRow">
+                                                                <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+                                                            </Style>
                                                             
-                                                        </TextBox>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock>Y  </TextBlock>
-                                                        <TextBox x:Name="txtCellY" Width="100" Text="{Binding Path=cell_locations[0].Y}"></TextBox>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock>Z  </TextBlock>
-                                                        <TextBox x:Name="txtCellZ" Width="100" Text="{Binding Path=cell_locations[0].Z}"></TextBox>
-                                                    </StackPanel>
+                                                        </DataGrid.RowStyle>
+
+                                                        <DataGrid.Columns>
+                                                            <DataGridTextColumn Width="20" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" />
+                                                        </DataGrid.Columns>
+                                                            
+                                                    </DataGrid>
                                                 </StackPanel>
+                                                
                                             </Expander>
 
                                             <Expander ExpandDirection="Down" Padding="6"                                    
                                                 IsExpanded="False"
                                                 Header="File"
                                                 x:Name="CoordFileExpander"
-                                                Margin="40,0,0,0" 
+                                                Margin="4,0,0,0" 
                                                 Canvas.ZIndex="1"
+                                                IsEnabled="{Binding ElementName=rbByFile, Path=IsChecked}"
                                                 >
                                                 <StackPanel Orientation="Vertical">
                                                     <TextBox x:Name="txtFileName" Width="300">File Name</TextBox>
-                                                    <Button x:Name="btnBrowseCoordFile" Width="60">Browse...</Button>
+                                                    <Button x:Name="btnBrowseCoordFile" Width="60" Click="btnBrowseCoordFile_Click">Browse...</Button>
                                                 </StackPanel>
                                             </Expander>
                                         </StackPanel>
@@ -1862,8 +1880,6 @@
                                 >
 
                         <StackPanel>
-                            
-                            <TextBlock Text="Molecules"  Margin="0,5" FontWeight="Bold"  />
                             <ListBox x:Name="lbMol" Visibility="Visible" AlternationCount="2"                                                     
                                     ItemsSource="{Binding Path=entity_repository.molecules}"                                     
                                     ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"
