@@ -19,9 +19,8 @@
     <HtmlHelpName>Documentation</HtmlHelpName>
     <Language>en-US</Language>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\DaphneGui\bin\Debug\DaphneGui.exe" xmlns="" />
-      <DocumentationSource sourceFile="..\DaphneGui\bin\Debug\DaphneGui.xml" xmlns="" />
-    </DocumentationSources>
+      <DocumentationSource sourceFile="..\bin\Debug\DaphneGui.exe" />
+<DocumentationSource sourceFile="..\bin\Debug\DaphneGui.xml" /></DocumentationSources>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in
        order for Visual Studio to perform the build.  The others are optional
