@@ -785,7 +785,7 @@ namespace testDaphne
             sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;
 
             n = sim.ECS.Sides["left"];
-            cfi = new ConstFieldInitializer(-100.0);
+            cfi.SetC(-100.0);
             m = sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n].M;
             sim.ECS.Space.Populations["CXCL13"].NaturalBoundaryFluxes[n] = new ScalarField(m, cfi);
             sim.ECS.Space.NaturalBoundaryTransforms[n].IsFluxing = true;

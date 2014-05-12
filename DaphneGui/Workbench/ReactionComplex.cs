@@ -180,8 +180,9 @@ namespace DaphneGui
                 string molname = kvp.Key;
                 double conc = dictInitialConcs[molname];
                 //CONC PROBLEM
-                ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
-                Populations[molname].Conc = s;
+                //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
+                //Populations[molname].Conc = s;
+                Populations[molname].Conc.Initialize(new ConstFieldInitializer(conc));
                 //////////Populations[molname].Conc.Value = conc;  //set the mol pop conc from the dictInitialConcs dictionary since user may have dragged
                 dictGraphConcs[molname].Add(conc);
             }
@@ -264,8 +265,9 @@ namespace DaphneGui
             //MolecularPopulation mp = molpopDict[mol];
             MolecularPopulation mp = Populations[mol];
             //CONC PROBLEM
-            ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
-            mp.Conc = s;
+            //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(conc));
+            //mp.Conc = s;
+            mp.Conc.Initialize(new ConstFieldInitializer(conc));
             //////////mp.Conc.ConcArray[0] = conc;
             dictInitialConcs[mol] = conc;
         }
@@ -297,8 +299,9 @@ namespace DaphneGui
                 MolecularPopulation mp = Populations[kvp.Key];
 
                 //CONC PROBLEM
-                ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(kvp.Value));
-                mp.Conc = s;
+                //ScalarField s = new ScalarField(Interior, new ConstFieldInitializer(kvp.Value));
+                //mp.Conc = s;
+                mp.Conc.Initialize(new ConstFieldInitializer(kvp.Value));
                 ////////////mp.Conc.ConcArray[0] = kvp.Value;
                 dictInitialConcs[kvp.Key] = kvp.Value;
             }

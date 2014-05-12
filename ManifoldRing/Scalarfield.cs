@@ -37,6 +37,15 @@ namespace ManifoldRing
         }
 
         /// <summary>
+        /// set the constant value
+        /// </summary>
+        /// <param name="c">constant value</param>
+        public void SetC(double c)
+        {
+            cVal = c;
+        }
+
+        /// <summary>
         /// initialization routine
         /// </summary>
         /// <param name="point">point parameter</param>
@@ -63,6 +72,19 @@ namespace ManifoldRing
         /// <param name="sigma">sigma/decay vector</param>
         /// <param name="max">maximum value</param>
         public GaussianFieldInitializer(double[] center, double[] sigma, double max)
+        {
+            this.center = center;
+            this.sigma = sigma;
+            this.max = max;
+        }
+
+        /// <summary>
+        /// set the Gaussian parameters
+        /// </summary>
+        /// <param name="center">the Gaussian's center</param>
+        /// <param name="sigma">sigma/decay vector</param>
+        /// <param name="max">maximum value</param>
+        public void SetParams(double[] center, double[] sigma, double max)
         {
             this.center = center;
             this.sigma = sigma;
@@ -124,6 +146,15 @@ namespace ManifoldRing
         /// <param name="m">underlying manifold</param>
         /// <param name="init">initializer</param>
         public ScalarField(Manifold m, IFieldInitializer init) : this(m)
+        {
+            Initialize(init);
+        }
+
+        /// <summary>
+        /// initialize the field according to the initializer object
+        /// </summary>
+        /// <param name="init">initializer object</param>
+        public void Initialize(IFieldInitializer init)
         {
             if (m.GetType() == typeof(InterpolatedRectangle) || m.GetType() == typeof(InterpolatedRectangularPrism))
             {
