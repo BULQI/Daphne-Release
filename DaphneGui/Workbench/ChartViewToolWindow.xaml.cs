@@ -318,8 +318,11 @@ namespace Workbench
         private void txtFormattedValue_GotFocus(object sender, RoutedEventArgs e)
         {
             TextBox tb = sender as TextBox;
-            ConfigReaction reac = (ConfigReaction)tb.DataContext;
-            tb.Text = reac.daph_rate_const.Value.ToString();
+            //ConfigReaction reac = (ConfigReaction)tb.DataContext;
+            //tb.Text = reac.daph_rate_const.Value.ToString();
+
+            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
+            tb.Text = pair.ReactionComplexRate.ToString();
         }
 
         private void txtFormattedValue_LostFocus(object sender, RoutedEventArgs e)
@@ -330,8 +333,11 @@ namespace Workbench
 
             double d = double.Parse(token);
 
-            ConfigReaction reac = (ConfigReaction)tb.DataContext;
-            reac.daph_rate_const.Value = d;
+            //ConfigReaction reac = (ConfigReaction)tb.DataContext;
+            //reac.daph_rate_const.Value = d;
+
+            ConfigReactionGuidRatePair pair = (ConfigReactionGuidRatePair)tb.DataContext;
+            pair.ReactionComplexRate = d;
         }
 
         private string GetNumerics(string input)

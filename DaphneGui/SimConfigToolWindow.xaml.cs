@@ -985,9 +985,12 @@ namespace DaphneGui
             }
 
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            ConfigReactionComplex crcNew = new ConfigReactionComplex(crcCurr);
+            //ConfigReactionComplex crcNew = new ConfigReactionComplex(crcCurr);
+            ConfigReactionComplex crcNew = crcCurr.Clone();
 
             MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Add(crcNew);
+
+            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
 
             ////AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex);
             ////if (arc.ShowDialog() == true)
@@ -1051,7 +1054,7 @@ namespace DaphneGui
                 }
             }
 
-            btnGraphReactionComplex.IsChecked = true;
+            //btnGraphReactionComplex.IsChecked = true;
         }
 
         private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1453,23 +1456,46 @@ namespace DaphneGui
         private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+
+            if (cmp == null)
+                return;
+
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove membrane reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+
+            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            {
+                ConfigReaction reac = MainWindow.SC.SimConfig.entity_repository.reactions_dict[reacguid];
+                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                {
+                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                }
+            }
+
             cell.membrane.molpops.Remove(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+
+            if (lvCellAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
         }
 
         private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
-            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_render_on = true;
-            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+            
+            cmp.Name = "NewMP";
+            cmp.mpInfo = new MolPopInfo("");
+            cmp.mpInfo.mp_dist_name = "New distribution";
+            cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            cmp.mpInfo.mp_render_on = true;
+            cmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.cytosol.molpops.Add(gmp);
+            cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
 
@@ -1477,9 +1503,29 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
 
+            if (cmp == null)
+                return;
+
+            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cytosol reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+            
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+
+            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            {
+                ConfigReaction reac = MainWindow.SC.SimConfig.entity_repository.reactions_dict[reacguid];
+                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                {
+                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                }
+            }
+
             cell.cytosol.molpops.Remove(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+
+            if (lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1882,6 +1928,11 @@ namespace DaphneGui
         {
             //ConfigCell cc 
 
+            // Only want to respond to purposeful user interaction, not just population and depopulation
+            // of solfacs list
+            if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+                return;
+
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
@@ -1892,11 +1943,19 @@ namespace DaphneGui
             if (cp == null)
                 return;
 
+            string curr_cell_pop_name = cp.cellpopulation_name;
+            string curr_cell_type_guid = "";
+            curr_cell_type_guid = cp.cell_guid_ref;
+
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
             cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].cell_guid;
+
+            string new_cell_name = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].CellName;
+            if (curr_cell_type_guid != cp.cell_guid_ref) // && curr_cell_pop_name.Length == 0)
+                cp.cellpopulation_name = new_cell_name;
 
         }
 
@@ -2379,6 +2438,30 @@ namespace DaphneGui
 
         private void molecule_combo_box2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            ComboBox cb = (ComboBox)e.Source;
+            if (cb == null)
+                return;
+
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+
+            if (molpop == null)
+                return;
+
+            string curr_mol_pop_name = molpop.Name;
+            string curr_mol_guid = "";
+            curr_mol_guid = molpop.molecule_guid_ref;
+
+            int nIndex = cb.SelectedIndex;
+            if (nIndex < 0)
+                return;
+
+            ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            molpop.molecule_guid_ref = mol.molecule_guid;
+
+            string new_mol_name = mol.Name;
+            if (curr_mol_guid != molpop.molecule_guid_ref)
+                molpop.Name = new_mol_name;
+
             CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
@@ -2580,8 +2663,64 @@ namespace DaphneGui
                 MainWindow.SC.SimConfig.scenario.time_config.rendering_interval = time_step_slider.Value;
         }
 
-        
-        
+        private void molecule_combo_box3_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)e.Source;
+            if (cb == null)
+                return;
+
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+
+            if (molpop == null)
+                return;
+
+            string curr_mol_pop_name = molpop.Name;
+            string curr_mol_guid = "";
+            curr_mol_guid = molpop.molecule_guid_ref;
+
+            int nIndex = cb.SelectedIndex;
+            if (nIndex < 0)
+                return;
+
+            ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            molpop.molecule_guid_ref = mol.molecule_guid;
+
+            string new_mol_name = mol.Name;
+            if (curr_mol_guid != molpop.molecule_guid_ref)
+                molpop.Name = new_mol_name;
+
+            CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+        }
+
+        private void cyto_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = (ComboBox)e.Source;
+            if (cb == null)
+                return;
+
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+
+            if (molpop == null)
+                return;
+
+            string curr_mol_pop_name = molpop.Name;
+            string curr_mol_guid = "";
+            curr_mol_guid = molpop.molecule_guid_ref;
+
+            int nIndex = cb.SelectedIndex;
+            if (nIndex < 0)
+                return;
+
+            ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            molpop.molecule_guid_ref = mol.molecule_guid;
+
+            string new_mol_name = mol.Name;
+            if (curr_mol_guid != molpop.molecule_guid_ref)
+                molpop.Name = new_mol_name;
+
+            CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+        }
+
 
     }      
     

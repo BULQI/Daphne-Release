@@ -91,7 +91,8 @@ namespace DaphneGui
                 //leftList is whole reactions list initially
                 foreach (ConfigReaction reac in er.reactions)
                 {
-                    LeftList.Add(reac);
+                    if (!reac.HasBoundaryMolecule(er))
+                        LeftList.Add(reac);
                 }                
                 //rightList is empty initially    
               
@@ -103,7 +104,8 @@ namespace DaphneGui
                 //leftList is whole reactions list minus rc reactions - make a copy of it  
                 foreach (ConfigReaction reac in er.reactions)
                 {
-                    leftList.Add(reac);
+                    if (!reac.HasBoundaryMolecule(er))
+                        leftList.Add(reac);
                 }
                 
                 //rightList is the reaction complex' reactions 
@@ -185,9 +187,15 @@ namespace DaphneGui
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
                 selectedRC.reactions_guid_ref.Clear();
+                selectedRC.ReactionRates.Clear();
                 foreach (ConfigReaction reac in RightList)
                 {
                     selectedRC.reactions_guid_ref.Add(reac.reaction_guid);
+                    ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
+                    pair.Guid = reac.reaction_guid;
+                    pair.OriginalRate = reac.rate_const;
+                    pair.ReactionComplexRate = pair.OriginalRate;
+                    selectedRC.ReactionRates.Add(pair);
                 }
             }
             else
@@ -197,6 +205,11 @@ namespace DaphneGui
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions_guid_ref.Add(reac.reaction_guid);
+                    ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
+                    pair.Guid = reac.reaction_guid;
+                    pair.OriginalRate = reac.rate_const;
+                    pair.ReactionComplexRate = pair.OriginalRate;
+                    crc.ReactionRates.Add(pair);
                 }
                 er.reaction_complexes.Add(crc);
             }

@@ -14,6 +14,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.Windows.Data;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace Daphne
 {
@@ -404,6 +405,7 @@ namespace Daphne
 
             }
         }
+        
     }
 
     public class SimConfiguration
@@ -1598,6 +1600,48 @@ namespace Daphne
         }
     }
 
+    /// <summary>
+    /// Convert double to formatted string
+    /// </summary>
+    [ValueConversion(typeof(double), typeof(string))]
+    public class DoubleToFormattedStringConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)
+                return "";
+
+            string output = "";
+
+            try
+            {
+                double dd = (double)value;
+                System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
+                ConfigReaction reac = (ConfigReaction)(fe.DataContext);
+                
+                output = string.Format(reac.daph_rate_const.Format, dd);
+            }
+            catch
+            {
+                output = "";
+            }
+
+            return output;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            double val = double.Parse((string)value);
+            System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
+            ConfigReaction reac = (ConfigReaction)(fe.DataContext);
+            reac.daph_rate_const.Value = val;
+
+            return val;
+        }
+    }
+
+
+
    
 
     public enum MoleculeLocation { Bulk = 0, Boundary }
@@ -2274,7 +2318,7 @@ namespace Daphne
 
             daph_rate_const = new DaphneDouble();
             rate_const = reac.rate_const;
-            ReadOnly =false;
+            ReadOnly = false;
 
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
@@ -2368,6 +2412,26 @@ namespace Daphne
             return false;
         }
 
+        public bool HasBoundaryMolecule(EntityRepository repos)
+        {            
+            foreach (string molguid in reactants_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    return true;
+            }
+            foreach (string molguid in products_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    return true;
+            }
+            foreach (string molguid in modifiers_molecule_guid_ref)
+            {
+                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                    return true;
+            }
+
+            return false;
+        }
         public string reaction_guid { get; set; }
         public string reaction_template_guid_ref { get; set; }
 
@@ -2384,7 +2448,20 @@ namespace Daphne
                 daph_rate_const.Value = value;                
             } 
         }
-        public DaphneDouble daph_rate_const { get; set; }
+        private DaphneDouble _daph_rate_const;
+        public DaphneDouble daph_rate_const 
+        {
+            get
+            {
+                return _daph_rate_const;
+            }
+
+            set
+            {
+                _daph_rate_const = value;
+                OnPropertyChanged("daph_rate_const");
+            }
+        }
         public bool ReadOnly { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
@@ -2464,18 +2541,22 @@ namespace Daphne
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
         }
-        public ConfigReactionComplex(ConfigReactionComplex src)
+        
+        public ConfigReactionComplex Clone()
         {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+
+            ConfigReactionComplex newrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            reaction_complex_guid = id.ToString();
-            Name = "NewRC";
-            ReadOnly = false;
-            reactions_guid_ref = new ObservableCollection<string>();
-            reactions_guid_ref = src.reactions_guid_ref;
-            molpops = new ObservableCollection<ConfigMolecularPopulation>();
-            molpops = src.molpops;
-            ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
-        }
+            newrc.reaction_complex_guid = id.ToString();
+            newrc.ReadOnly = false;
+            newrc.Name = "NewRC";
+
+            return newrc;
+        }        
     }
 
     public class ConfigCell

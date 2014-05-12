@@ -56,6 +56,7 @@
             <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
             <daph:IsNullConverter x:Key="IsNullConv" />
             <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
+            <daph:DoubleToFormattedStringConverter x:Key="DoubleToFormattedStringConv" />
             
             
             <ObjectDataProvider x:Key="regionShapesEnum"
@@ -189,9 +190,6 @@
             
             <CollectionViewSource x:Key="baseCellTypesListView"  
                                   Source="{Binding Path=entity_repository.CellBaseTypeLabel}"/>
-            
-            
-            
             
             
             <!-- Style for visibility checkboxes in list views -->
@@ -1189,12 +1187,12 @@
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="cell_guid">
                             
                         </ComboBox>
 
-                        <Popup Name="myPopup" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" PlacementTarget="{Binding ElementName=cell_type_combo_box}" >
+                        <!--<Popup Name="myPopup" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" PlacementTarget="{Binding ElementName=cell_type_combo_box}" >
                             
                             <Popup.Resources>
                                 <DataTemplate x:Key="reacsPopupItemTemplate">
@@ -1209,7 +1207,6 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsMouseOver}" Value="True">
                                             <Setter Property="IsOpen" Value="True" />
-                                            <!--This does not work! <Setter Property="StaysOpen" Value="True"/>-->
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding ElementName=cell_type_combo_box, Path=IsDropDownOpen}" Value="True">
                                             <Setter Property="IsOpen" Value="False" />
@@ -1226,7 +1223,7 @@
                             </ListBox>
                             </StackPanel>
 
-                        </Popup>
+                        </Popup>-->
 
                         <TextBlock Text="number" Margin="6,0"
                                         Grid.Column="0" Grid.Row="3"  
@@ -1612,9 +1609,10 @@
 
                                 <ComboBox  x:Name="molecule_combo_box3" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
-                                                    DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule_guid_ref}"
+                                                    DisplayMemberPath="Name"                                                    
+                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
+                                                    SelectionChanged="molecule_combo_box3_SelectionChanged"
                                                     />
                             </StackPanel>
                         </Grid>
@@ -1701,9 +1699,10 @@
                                 
                                 <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource cytoBulkMoleculesListView}}"
-                                                    DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule_guid_ref}"
+                                                    DisplayMemberPath="Name"                                                    
+                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
+                                                    SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
                                                     />
                             </StackPanel>
                         </Grid>
@@ -1796,7 +1795,7 @@
                                 <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
                                                     ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=PropertyChanged}"
+                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"
                                                     SelectionChanged="molecule_combo_box2_SelectionChanged" >
 
@@ -2155,11 +2154,11 @@
                     <Expander
                                                 Padding="5" 
                                                 ExpandDirection="Down"
-                                                    IsExpanded="False"
-                                                    Header="Extracellular Medium Extents"                                              
-                                                    x:Name="EnvironmentExpander"
-                                                    Margin="0,5,0,0" 
-                                                    Canvas.ZIndex="1"
+                                                IsExpanded="False"
+                                                Header="Extracellular Medium Extents"                                              
+                                                x:Name="EnvironmentExpander"
+                                                Margin="0,5,0,0" 
+                                                Canvas.ZIndex="1"
                                                 BorderThickness="1"
                                                 BorderBrush="Black"
                                                 Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
@@ -2187,13 +2186,11 @@
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                             <editors:DoubleEditBox x:Name="ExtentXReadout" 
-                                                              CheckBoxVisibility="Collapsed" 
-                                                              SpinnerVisibility="Collapsed"
-                                                              HorizontalAlignment="Right"
-                                                              Format="N0"
-                                                              StepValue="1"
-                                                              Width="40" 
                                                               CenterSlotHorizontalAlignment="Right"
+                                                                  CheckBoxVisibility="Collapsed" 
+                                                                  SpinnerVisibility="Collapsed"
+                                                                  HorizontalAlignment="Right"
+                                                                  Width="60"
                                                               Value="{Binding ElementName=extent_x_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                               />
                             <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
@@ -2217,14 +2214,12 @@
                                                     TickFrequency="1" 
                                                     KeyboardNavigation.IsTabStop="False"
                                                     />
-                            <editors:DoubleEditBox x:Name="ExtentYReadout" 
+                            <editors:DoubleEditBox x:Name="ExtentYReadout"                                                    
+                                                                  CenterSlotHorizontalAlignment="Right"
                                                                   CheckBoxVisibility="Collapsed" 
                                                                   SpinnerVisibility="Collapsed"
                                                                   HorizontalAlignment="Right"
-                                                                  Format="N0"
-                                                                  StepValue="1"
-                                                                  Width="40" 
-                                                                  CenterSlotHorizontalAlignment="Right"
+                                                                  Width="60" 
                                                                   Value="{Binding ElementName=extent_y_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                                   />
                             <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
@@ -2249,13 +2244,11 @@
                                                 KeyboardNavigation.IsTabStop="False"
                                                 />
                         <editors:DoubleEditBox x:Name="ExtentZReadout" 
-                                                              CheckBoxVisibility="Collapsed" 
-                                                              SpinnerVisibility="Collapsed"
-                                                              HorizontalAlignment="Right"
-                                                              Format="N0"
-                                                              StepValue="1"
-                                                              Width="40" 
                                                               CenterSlotHorizontalAlignment="Right"
+                                                                  CheckBoxVisibility="Collapsed" 
+                                                                  SpinnerVisibility="Collapsed"
+                                                                  HorizontalAlignment="Right"
+                                                                  Width="60" 
                                                               Value="{Binding ElementName=extent_z_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                               />
                         <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
@@ -2280,13 +2273,11 @@
                                                     KeyboardNavigation.IsTabStop="False"
                                                     />
                                 <editors:DoubleEditBox x:Name="GridStepReadout" 
+                                                                  CenterSlotHorizontalAlignment="Right"
                                                                   CheckBoxVisibility="Collapsed" 
                                                                   SpinnerVisibility="Collapsed"
                                                                   HorizontalAlignment="Right"
-                                                                  Format="N0"
-                                                                  StepValue="1"
-                                                                  Width="40" 
-                                                                  CenterSlotHorizontalAlignment="Right"
+                                                                  Width="60" 
                                                                   Value="{Binding ElementName=sliderGridStep, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                                   />
                                 <TextBlock Text="µm" VerticalAlignment="Center" Margin="2,0,0,0"/>
@@ -3487,7 +3478,7 @@
                                             </Style>
                                         </GridView.ColumnHeaderContainerStyle>
 
-                                        <GridViewColumn Width="80" Header="Rate constant">
+                                        <GridViewColumn x:Name="colRate" Width="80" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <!--<TextBlock Text="{Binding rate_const, StringFormat={}{0:#.00}}"> 
@@ -3499,11 +3490,19 @@
                                                                 </Style>
                                                             </TextBlock.Style>
                                                     </TextBlock>-->
-                                                    <TextBox Text="{Binding rate_const, StringFormat={}{0:#.00}}">
+                                                    <!--<TextBox Text="{Binding rate_const, StringFormat={}{0:#.00}}">-->
+                                                    <TextBox Width="{Binding ElementName=colRate, Path=Width}">
+                                                        <TextBox.Text>
+                                                            <Binding Path="daph_rate_const.Value" Mode="TwoWay" UpdateSourceTrigger="LostFocus" Converter="{StaticResource DoubleToFormattedStringConv}">
+                                                                <Binding.ConverterParameter>
+                                                                    <FrameworkElement DataContext="{TemplateBinding DataContext}" />
+                                                                </Binding.ConverterParameter>
+                                                            </Binding>
+                                                        </TextBox.Text>
                                                         <TextBox.Style>
                                                             <Style>                                                                
                                                                 <Setter Property="TextBox.Foreground" Value="Black"> </Setter>
-                                                                <Setter Property="TextBox.Text" Value="{Binding Path=rate_const}"></Setter>
+                                                                <!--<Setter Property="TextBox.Text" Value="{Binding Path=rate_const}"></Setter>-->
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
                                                                         <Setter Property="TextBox.IsReadOnly" Value="True" />
