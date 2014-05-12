@@ -41,7 +41,7 @@ namespace testDaphne
 
 
             // Format:  Name1\tMolWt1\tEffRad1\tDiffCoeff1\nName2\tMolWt2\tEffRad2\tDiffCoeff2\n...
-            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t\nCXCR5:CXCL13\t\t\t1.0\ngCXCR5\t\t\t\n";
+            string molSpec = "CXCR5\t1.0\t0.0\t1.0\nCXCL13\t\t\t1.0\nCXCR5:CXCL13\t\t\t1.0\ngCXCR5\t\t\t\n";
             MolDict = MoleculeBuilder.Go(molSpec);
 
             // TODO: 
@@ -56,8 +56,8 @@ namespace testDaphne
 
             config.TemplReacType(config.content.listOfReactions);
 
-            // TODO: define a compartment class -   ExtracelluarSpaceTypeI,
-            // which has as it's interior manifold BoundedRectangularPrism.
+            // NOTE: created a class called ExtracelluarSpaceTypeI in Compartment.cs
+            // which has as it's interior manifold BoundedRectangularPrism, but not using it at this point.
 
             // NOTE:The order in which compartments and molecular populations are implemented matters
             // because of the BoundaryConcs and Fluxes in MolecularPopulations
@@ -67,7 +67,11 @@ namespace testDaphne
             // Create all compartments
             //
 
-            int[] numGridPts = {50, 50, 50};
+            // Create a list of all compartments. This is needed for building BoundaryReactions from the 
+            // reaction templates. 
+            List<Compartment> CompList = new List<Compartment>();
+
+            int[] numGridPts = {5, 5, 5};
             // min and max spatial extent in each dimension
             double[] XCellSpatialExtent = { 0.0, 10.0, 0.0, 10.0, 0.0, 10.0 };
 
@@ -77,6 +81,8 @@ namespace testDaphne
             //Compartment XCellSpace = new Compartment(new BoundedRectangularPrism(numGridPts, XCellSpatialExtent));
             BoundedRectangularPrism b = new BoundedRectangularPrism(numGridPts, XCellSpatialExtent);
             Compartment XCellSpace = new Compartment(b);
+
+            CompList.Add(XCellSpace);
 
             // Uniformly populate the extracellular fluid with cells 
             int numCells = 1;
@@ -90,16 +96,25 @@ namespace testDaphne
                 // Creates Cytoplasm and PlasmaMembrane compartments
                 cells[i] = new Cell(cellPos);
 
+                // Add to the list of compartments in this simulation
+                CompList.Add(cells[i].PlasmaMembrane);
+                CompList.Add(cells[i].Cytosol);
+
             }
 
             //
             // Add all embedded manifolds that aren't already assigned
+            // Add entries into Dictionary<Manifold,Compartment> that is required for adding Boundary reactions
             // 
 
+            // TODO: TranslEmbedding has a position field that should get updated as the cell moves.
+            // The Locator structure may not be needed.
+            // We need to determine how we will implement cell motion. 
             for (int i = 0; i < numCells; i++)
             {
-                // Add the cell plasma membrane as a boundary in the extracellular compartment
-                MotileTSEmbedding cellMembraneEmbed = new MotileTSEmbedding(cells[i].PlasmaMembrane.Interior, (BoundedRectangularPrism) XCellSpace.Interior, cells[i].Loc);
+                // Add the cell plasma membrane as an embedded boundary manifold in the extracellular compartment
+                //MotileTSEmbedding cellMembraneEmbed = new MotileTSEmbedding(cells[i].PlasmaMembrane.Interior, (BoundedRectangularPrism)XCellSpace.Interior, cells[i].Loc);
+                TranslEmbedding cellMembraneEmbed = new TranslEmbedding(cells[i].PlasmaMembrane.Interior, (BoundedRectangularPrism)XCellSpace.Interior, new int[1]{0}, cells[i].Loc.position);
                 XCellSpace.Interior.Boundaries.Add(cells[i].PlasmaMembrane.Interior, cellMembraneEmbed);
             }
 
@@ -118,40 +133,89 @@ namespace testDaphne
             center[0] = (XCellSpatialExtent[1] + XCellSpatialExtent[0]) / 2.0;
             center[1] = (XCellSpatialExtent[3] + XCellSpatialExtent[2]) / 2.0;
             center[2] = (XCellSpatialExtent[5] + XCellSpatialExtent[4]) / 2.0;
-            s = maxConc * b.GaussianDensity(center, sigma);
-            XCellSpace.AddMolecularPopulation("Extracellular_CXCL13", MolDict["CXCL13"], s);
+            s = maxConc * b.GaussianField(center, sigma);
+            XCellSpace.AddMolecularPopulation(MolDict["CXCL13"], s);
 
             for (int i = 0; i < numCells; i++)
             {
-                //cell[i].Cytosol.Populations = new List<MolecularPopulation>();
-                cells[i].Cytosol.AddMolecularPopulation("Cytosolic_CXCR5", MolDict["CXCR5"], 1.0);
-                cells[i].Cytosol.AddMolecularPopulation("Cytosolic_gCXCR5", MolDict["gCXCR5"], 1.0);
-                //cells[i]PlasmaMembrane.Populations = new List<MolecularPopulation>();
-                cells[i].PlasmaMembrane.AddMolecularPopulation("Membrane_CXCR5", MolDict["CXCR5"], 1.0);
+                cells[i].Cytosol.AddMolecularPopulation(MolDict["CXCR5"], 1.0);
+                cells[i].Cytosol.AddMolecularPopulation(MolDict["gCXCR5"], 1.0);
+
+                cells[i].PlasmaMembrane.AddMolecularPopulation(MolDict["CXCR5"], 1.0);
             }
 
-
             // Iterate through compartments and add reactions until there aren't any more changes
-            // TO DO: change from simple 3 iterations, to sensing when there are no more changes
-            // TO DO: add Boundary reactions 
-
             // tf = true if a reaction or product molecule was added
+
             bool tf;
 
             do
             {
                 tf = false;
+
+                // Add reactions for Compartment molecular populations on the Interior manifolds
                 tf = tf | ReactionBuilder.CompartReactions(XCellSpace, config.content.listOfReactions, MolDict);
                 for (int i = 0; i < numCells; i++)
                 {
                     tf = tf | ReactionBuilder.CompartReactions(cells[i].Cytosol, config.content.listOfReactions, MolDict);
                     tf = tf | ReactionBuilder.CompartReactions(cells[i].PlasmaMembrane, config.content.listOfReactions, MolDict);
+                }
 
-                    tf = tf | ReactionBuilder.CompartBoundaryReactions(XCellSpace, config.content.listOfReactions, MolDict);
+                // Use the list of all Compartments in the simulation -  CompList
+                // Look at the embedded manifolds associated with each Interior manifold of a given Compartment
+                // Add appropriate boundary reactions to the embedded manifold
+                // NOTE: Automatically inferring the correct boundary reactions based on molecular population only
+                // is hard to do in a general way and this implementation may not be very robust.
+                // TODO: Implement transport reactions (e.g., cytosol CXCR5 -> plasma membrane CXCR5)
+                // TODO: Tom would prefere that the boundary reactions get added to the embedding manifold, 
+                // rather than the embedded manifold, but this is problematic without some changes to the algorithm
+                // in CompartBoundaryReactions()
+                foreach (Compartment c1 in CompList)
+                {
+                    foreach (Compartment c2 in CompList)
+                    {
+                        if (c1 == c2) continue;
+                        if (c1.Interior.Boundaries == null) continue; 
+
+                        if (c1.Interior.Boundaries.ContainsKey(c2.Interior) )
+                        {
+                            // Return true if one or more reactions are added
+                            tf = tf | ReactionBuilder.CompartBoundaryReactions(c1, c2, config.content.listOfReactions, MolDict);
+                        }
+                    }
+
                 }
 
             } while (tf);
             
+            //// This code is for debugging purposes
+            //int cnt = 0;
+            //foreach (Compartment c in CompList)
+            //{
+            //    Console.WriteLine("\n");
+            //    Console.WriteLine("Compartment {0}\n", cnt);
+            //    foreach (ReactionTemplate rt in c.rtList)
+            //    {
+            //        foreach (SpeciesReference sp in rt.listOfReactants)
+            //        {
+            //            Console.WriteLine("\t{0} + ", sp.species);
+            //        }
+            //        foreach (SpeciesReference sp in rt.listOfModifiers)
+            //        {
+            //            Console.WriteLine("\t{0} + ", sp.species);
+            //        }
+            //        Console.WriteLine("\t -> ");
+            //        foreach (SpeciesReference sp in rt.listOfProducts)
+            //        {
+            //            Console.WriteLine("\t{0} + ", sp.species);
+            //        }
+            //        Console.WriteLine("\n");
+
+            //    }
+            //    cnt++;
+            //}
+
+
             // create the simulation
             sim = new Simulation();
             // this needs to go into the simulation's variable for that
@@ -171,9 +235,12 @@ namespace testDaphne
                 for (int j = 0; j < numCells; j++)
                 {
                     cells[j].Step(dt);
+
+                    // XCellSpace.Interior.Boundaries[cells[j].PlasmaMembrane.Interior].position;
                 }
             }
 
+            
         }
 
         private void go()

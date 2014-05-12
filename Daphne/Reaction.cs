@@ -55,6 +55,26 @@ namespace Daphne
         }
     }
 
+    //public class AutocatalyticTransformation : Reaction
+    //{
+    //    MolecularPopulation catalyst;
+    //    MolecularPopulation reactant1;
+
+    //    public AutocatalyticTransformation(MolecularPopulation _catalyst, MolecularPopulation _reactant1, double _RateConst)
+    //    {
+    //        catalyst = _catalyst;
+    //        reactant1 = _reactant1;
+    //        RateConstant = _RateConst;
+    //    }
+
+    //    public override void Step(double dt)
+    //    {
+    //        intensity = (RateConstant) * dt * catalyst.Conc * reactant1.Conc;
+    //        catalyst.Conc += intensity;
+    //        reactant1.Conc -= intensity;
+    //    }
+    //}
+
     public class Dimerization : Reaction
     {
         MolecularPopulation reactant;
@@ -306,7 +326,7 @@ namespace Daphne
         MolecularPopulation receptor;
         MolecularPopulation ligand;
         MolecularPopulation complex;
-        Manifold boundary;
+        DiscretizedManifold boundary;
         double fluxIntensityConstant;
 
         public BoundaryAssociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
@@ -336,7 +356,7 @@ namespace Daphne
         MolecularPopulation receptor;
         MolecularPopulation ligand;
         MolecularPopulation complex;
-        Manifold boundary;
+        DiscretizedManifold boundary;
         double fluxIntensityConstant;
 
         public BoundaryDissociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)

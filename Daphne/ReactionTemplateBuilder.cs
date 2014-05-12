@@ -114,6 +114,11 @@ namespace Daphne
                     // association  a + b	→	c
                     rt.typeOfReaction = "association";
                 }
+                //else if ((rt.listOfReactants.Count == 2) && (rt.listOfProducts.Count == 1) && (rStoichSum == 1) && (pStoichSum == 2))
+                //{
+                //    // association  e + a	→	2e
+                //    rt.typeOfReaction = "autocatalyticTransformation";
+                //}
                 else if ((rt.listOfReactants.Count == 0) && (rt.listOfProducts.Count == 1))
                 {
                     // creation (not allowed)  0 →	a
@@ -147,7 +152,7 @@ namespace Daphne
                     // not implemented yet.
                     rt.typeOfReaction = "generalized";
                 }
-                // Commenting out the code below, because every reaction has a catalyzed counterpart
+                // Every reaction has a catalyzed counterpart
                 // Keep the same basic reaction types and account for catalyzers later when the reactions are created
                 // See ReactionSwithch() in ReactionBuilder.cs
                 if (rt.listOfModifiers.Count > 0)

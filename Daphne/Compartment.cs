@@ -22,22 +22,22 @@ namespace Daphne
 
         public void AddMolecularPopulation(MolecularPopulation molpop)
         {
-            Populations.Add(molpop.Name, molpop);
-        }
-
-        // gmk
-        public void AddMolecularPopulation(string name, Molecule mol, double initConc)
-        {
-            ScalarField s = new ScalarField(Interior, initConc);
-            MolecularPopulation molpop = new MolecularPopulation(name, mol, Interior, s);
             Populations.Add(molpop.Molecule.Name, molpop);
         }
 
-        public void AddMolecularPopulation(string name, Molecule mol, ScalarField initConc)
+        // gmk
+        public void AddMolecularPopulation(Molecule mol, double initConc)
+        {
+            ScalarField s = new ScalarField(Interior, initConc);
+            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, s);
+            Populations.Add(molpop.Molecule.Name, molpop);
+        }
+
+        public void AddMolecularPopulation(Molecule mol, ScalarField initConc)
         {
             // Add the molecular population with concentration specified with initConc
 
-            MolecularPopulation molpop = new MolecularPopulation(name, mol, Interior, initConc);
+            MolecularPopulation molpop = new MolecularPopulation(mol, Interior, initConc);
             Populations.Add(molpop.Molecule.Name, molpop);
         }
 
