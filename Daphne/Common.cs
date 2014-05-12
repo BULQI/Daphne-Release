@@ -103,6 +103,9 @@ namespace Daphne
             // chemistry
             Bind<Molecule>().ToSelf();
 
+            // death, division currently use the same transition
+            Bind<ITransitionDriver>().To<TransitionDriver>().WithConstructorArgument("currentState", 0);
+
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
             Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep).WithConstructorArgument("toroidal", scenario.environment.toroidal);

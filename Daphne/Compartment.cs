@@ -38,7 +38,7 @@ namespace Daphne
             }
 
             Molecule mol = Simulation.dataBasket.Molecules[moleculeKey];
-            MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("comp", this));
+            MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("moleculeKey", moleculeKey), new ConstructorArgument("comp", this));
 
             mp.Initialize(type, parameters);
 
@@ -191,9 +191,9 @@ namespace Daphne
         public double Gamma { get; set; }
         public bool toroidal { get; private set; }
 
-        public ExtraCellularSpace(int[] numGridPts, double gridStep, bool toroidal, IKernel kernel)
+        public ExtraCellularSpace(int[] numGridPts, double gridStep, bool toroidal)
         {
-            InterpolatedRectangularPrism p = kernel.Get<InterpolatedRectangularPrism>();
+            InterpolatedRectangularPrism p = SimulationModule.kernel.Get<InterpolatedRectangularPrism>();
             double[] data = new double[] { numGridPts[0], numGridPts[1], numGridPts[2], gridStep, Convert.ToDouble(toroidal) };
 
             // boundary condition
@@ -216,7 +216,7 @@ namespace Daphne
             data[2] = space.Interior.StepSize();
             // Toroidal BCs are not relevant for sides
             data[3] = Convert.ToDouble(false);
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             t.translate(new double[] { 0, 0, space.Interior.Extent(2) });
@@ -225,7 +225,7 @@ namespace Daphne
             sides.Add("front", r.Id);
 
             // back: rotate by pi about y, translate +x
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             axis[1] = 1;
@@ -238,7 +238,7 @@ namespace Daphne
             // right: rotate by pi/2 about y, translate +x, +z
             data[0] = space.Interior.NodesPerSide(2);
             data[1] = space.Interior.NodesPerSide(1);
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
@@ -248,7 +248,7 @@ namespace Daphne
             sides.Add("right", r.Id);
 
             // left: rotate by -pi/2 about y, no translation
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             t.rotate(axis, -Math.PI / 2.0);
@@ -259,7 +259,7 @@ namespace Daphne
             // top: rotate by -pi/2 about x, translate +y, +z
             data[0] = space.Interior.NodesPerSide(0);
             data[1] = space.Interior.NodesPerSide(2);
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             axis[0] = 1;
@@ -271,7 +271,7 @@ namespace Daphne
             sides.Add("top", r.Id);
 
             // bottom: rotate by pi/2 about x, no translation
-            r = kernel.Get<InterpolatedRectangle>();
+            r = SimulationModule.kernel.Get<InterpolatedRectangle>();
             r.Initialize(data);
             t = new Transform();
             t.rotate(axis, Math.PI / 2.0);
@@ -291,6 +291,18 @@ namespace Daphne
         public Dictionary<string, int> Sides
         {
             get { return sides; }
+        }
+
+        /// <summary>
+        /// add a boundary manifold, i.e. insert it to each ecs molecular population's boundary and flux dictionary
+        /// </summary>
+        /// <param name="m">the manifold</param>
+        public void AddBoundaryManifold(Manifold m)
+        {
+            foreach (MolecularPopulation mp in space.Populations.Values)
+            {
+                mp.AddBoundaryFluxConc(m.Id, m);
+            }
         }
     }
 

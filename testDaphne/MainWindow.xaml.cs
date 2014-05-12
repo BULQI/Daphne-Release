@@ -435,7 +435,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             // Create Cells
             //
@@ -453,7 +453,7 @@ namespace testDaphne
             state[1] = extent[1] / 2.0;
             state[2] = extent[2] / 2.0;
             cell.setState(state);
-            sim.AddCell(cell);
+            Simulation.AddCell(cell);
 
             //
             // Add all molecular populations
@@ -599,7 +599,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             // Create Cells
             //
@@ -617,7 +617,7 @@ namespace testDaphne
             state[1] = extent[1] / 3.0;
             state[2] = extent[2] / 3.0;
             cell.setState(state);
-            sim.AddCell(cell);
+            Simulation.AddCell(cell);
 
             //
             // Add all molecular populations
@@ -700,7 +700,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             //
             // Add all molecular populations
@@ -729,7 +729,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             InterpolatedNodes m;
             double[] x = new double[3];
@@ -789,7 +789,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             //
             // Add all molecular populations
@@ -954,7 +954,7 @@ namespace testDaphne
             // executes the ninject bindings; call this after the config is initialized with valid values
             SimulationModule.kernel = new StandardKernel(new SimulationModule(null));
 
-            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            Simulation.dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             //
             // Add all molecular populations

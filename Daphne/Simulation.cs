@@ -32,6 +32,7 @@ namespace Daphne
                            SIMFLAG_ALL    = 0xFF;
 
         public static DataBasket dataBasket;
+        public static SimConfiguration SimConfigHandle;
 
         private byte runStatus;
         private byte simFlags;
@@ -91,14 +92,15 @@ namespace Daphne
             }
         }
 
-        public void AddCell(Cell c)
+        public static void AddCell(Cell c)
         {
-            dataBasket.AddCell(c);
-            // add the cell membrane to the ecs
+            // in order to add the cell membrane to the ecs
             if (dataBasket.ECS == null)
             {
                 throw new Exception("Need to create the ECS before adding cells.");
             }
+
+            dataBasket.AddCell(c);
 
             // no cell rotation currently
             Transform t = new Transform(false);
@@ -256,76 +258,7 @@ namespace Daphne
             }
         }
 
-        private List<ConfigReaction> getBoundaryReactions(ConfigCompartment configComp, EntityRepository er)
-        {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
-
-            foreach (string rguid in configComp.reactions_guid_ref)
-            {
-                ConfigReaction cr = er.reactions_dict[rguid];
-                if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
-                {
-                    reac_guids.Add(rguid);
-                    config_reacs.Add(cr);
-                }
-            }
-
-            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
-            {
-                ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
-                foreach (string rguid in crc.reactions_guid_ref)
-                {
-                    if (reac_guids.Contains(rguid) == false)
-                    {
-                        ConfigReaction cr = er.reactions_dict[rguid];
-                        if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
-                        {
-                            //reac_guids.Add(rguid);
-                            config_reacs.Add(cr);
-                        }
-                    }
-                }
-            }
-            return config_reacs;
-        }
-
-        private List<ConfigReaction> getBulkReactions(ConfigCompartment configComp, EntityRepository er)
-        {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
-
-            foreach (string rguid in configComp.reactions_guid_ref)
-            {
-                ConfigReaction cr = er.reactions_dict[rguid];
-                if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
-                {
-                    reac_guids.Add(rguid);
-                    config_reacs.Add(cr);
-                }
-            }
-
-            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
-            {
-                ConfigReactionComplex crc = er.reaction_complexes_dict[rcguid];
-                foreach (string rguid in crc.reactions_guid_ref)
-                {
-                    if (reac_guids.Contains(rguid) == false)
-                    {
-                        ConfigReaction cr = er.reactions_dict[rguid];
-                        if (er.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
-                        {
-                            //reac_guids.Add(rguid);
-                            config_reacs.Add(cr);
-                        }
-                    }
-                }
-            }
-            return config_reacs;
-        }
-
-
-        private void addCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
+        public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
         {
             //foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             //{
@@ -400,7 +333,7 @@ namespace Daphne
             return;
         }
 
-        private void addCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
+        public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
         {
             foreach(ConfigReaction cr in config_reacs)
             {
@@ -500,9 +433,11 @@ namespace Daphne
             }
         }
 
-        public void Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex=false)
+        public void Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex = false)
         {
             Scenario scenario = sc.scenario;
+
+            SimConfigHandle = sc;
 
             if (is_reaction_complex == true)
             {
@@ -529,7 +464,7 @@ namespace Daphne
             SimulationModule.kernel.Get<FactoryContainer>();
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
-            dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>(new ConstructorArgument("kernel", SimulationModule.kernel));
+            dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
 
             // clear the databasket dictionaries
             dataBasket.Clear();
@@ -575,9 +510,9 @@ namespace Daphne
                 configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
                 configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
 
-                bulk_reacs[0] = getBulkReactions(configComp[0], sc.entity_repository);
-                bulk_reacs[1] = getBulkReactions(configComp[1], sc.entity_repository);
-                boundary_reacs = getBoundaryReactions(configComp[0], sc.entity_repository);
+                bulk_reacs[0] = sc.GetBulkReactions(configComp[0]);
+                bulk_reacs[1] = sc.GetBulkReactions(configComp[1]);
+                boundary_reacs = sc.GetBoundaryReactions(configComp[0]);
                 
                 for (int i = 0; i < cp.number; i++)
                 {
@@ -595,7 +530,7 @@ namespace Daphne
                     {
                         foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
                         {
-                            //config_comp's distriubution changed. may need to keep 
+                            //config_comp's distribution changed. may need to keep 
                             //it for not customized cell later(?)
 
                             // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
@@ -610,11 +545,12 @@ namespace Daphne
                     }
 
                     //CELL REACTIONS
-                    addCompartmentBulkReactions(cell.Cytosol, sc.entity_repository,bulk_reacs[0]);
-                    addCompartmentBulkReactions(cell.PlasmaMembrane, sc.entity_repository, bulk_reacs[1]);
+                    AddCompartmentBulkReactions(cell.Cytosol, sc.entity_repository, bulk_reacs[0]);
+                    AddCompartmentBulkReactions(cell.PlasmaMembrane, sc.entity_repository, bulk_reacs[1]);
                     // membrane; no boundary
-                    addCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository, boundary_reacs);
+                    AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository, boundary_reacs);
 
+                    // locomotion
                     if (sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref != null)
                     {
                         MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
@@ -626,6 +562,18 @@ namespace Daphne
                     else
                     {
                         cell.IsMotile = false;
+                    }
+
+                    // death behavior
+                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != "" && sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref != null)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+
+                        tde.DriverPop = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].signaling_mol_guid_ref];
+                        tde.Alpha = 0;
+                        tde.Beta = 0.002;
+
+                        cell.DeathBehavior.AddDriverElement(0, 1, tde);
                     }
 
                     AddCell(cell);
@@ -670,12 +618,12 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = getBulkReactions(scenario.environment.ecs, sc.entity_repository);
-            addCompartmentBulkReactions(dataBasket.ECS.Space, sc.entity_repository,reacs);
-            reacs = getBoundaryReactions(scenario.environment.ecs, sc.entity_repository);
+            reacs = sc.GetBulkReactions(scenario.environment.ecs);
+            AddCompartmentBulkReactions(dataBasket.ECS.Space, sc.entity_repository,reacs);
+            reacs = sc.GetBoundaryReactions(scenario.environment.ecs);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                addCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, sc.entity_repository, reacs);
+                AddCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, sc.entity_repository, reacs);
             }
 
             // general parameters

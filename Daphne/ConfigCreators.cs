@@ -445,6 +445,42 @@ namespace Daphne
                     gc.membrane.molpops.Add(gmp);
                 }
             }
+
+            //MOLECULES IN Cytosol
+            conc = new double[2] { 0, 1 };
+            type = new string[2] { "Apop", "gApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
+                if (cm != null)
+                {
+                    gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.mpInfo = new MolPopInfo(cm.Name);
+                    gmp.Name = cm.Name;
+
+                    gmp.mpInfo.mp_dist_name = "Uniform";
+                    gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    gmp.mpInfo.mp_render_blending_weight = 2.0;
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    gmp.mpInfo.mp_distribution = hl;
+                    gc.cytosol.molpops.Add(gmp);
+                }
+            }
+            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
+
+            // Reactions in Cytosol
+            type = new string[1] { "gApop -> Apop + gApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], sc);
+                if (reac != null)
+                {
+                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                }
+            }
+
             gc.DragCoefficient = 1.0;
             sc.entity_repository.cells.Add(gc);
 
@@ -480,8 +516,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[2] { 250, 0 };
-            type = new string[2] { "A", "A*" };
+            conc = new double[4] { 250, 0, 0, 1 };
+            type = new string[4] { "A", "A*", "Apop", "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -502,10 +538,11 @@ namespace Daphne
                 }
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
+            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
 
             // Reactions in Cytosol
-            type = new string[2] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                          "A* -> A"};
+            type = new string[3] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+                                          "A* -> A", "gApop -> Apop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], sc);
@@ -552,8 +589,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[5] { 250, 0, 1, 0, 0 };
-            type = new string[5] { "A", "A*", "gCXCR5", "CXCR5", "CXCL13:CXCR5" };
+            conc = new double[7] { 250, 0, 1, 0, 0, 0, 1 };
+            type = new string[7] { "A", "A*", "gCXCR5", "CXCR5", "CXCL13:CXCR5", "Apop", "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -574,16 +611,18 @@ namespace Daphne
                 }
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
+            gc.signaling_mol_guid_ref = findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc);
 
             // Reactions in Cytosol
-            type = new string[8] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+            type = new string[9] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
                                   "A* -> A",
                                   "gCXCR5 -> CXCR5 + gCXCR5",
                                   "CXCR5 -> CXCR5|",
                                   "CXCR5| -> CXCR5",
                                   "CXCR5 ->",
                                   "CXCL13:CXCR5| -> CXCL13:CXCR5", 
-                                  "CXCL13:CXCR5 ->" 
+                                  "CXCL13:CXCR5 ->",
+                                  "gApop -> Apop + gApop"
                                 };
             for (int i = 0; i < type.Length; i++)
             {
@@ -694,6 +733,11 @@ namespace Daphne
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
+            // Apop
+            cm = new ConfigMolecule("Apop", 1.0, 1.0, 1.0);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
             //
             // Genes
             //
@@ -703,6 +747,10 @@ namespace Daphne
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             cm = new ConfigMolecule("gCXCR4", 1.0, 1.0, 1e-7);
+            sc.entity_repository.molecules.Add(cm);
+            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+
+            cm = new ConfigMolecule("gApop", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
         }
@@ -1357,6 +1405,17 @@ namespace Daphne
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             cr.rate_const = 10.0;
+            cr.GetTotalReactionString(sc.entity_repository);
+            sc.entity_repository.reactions.Add(cr);
+
+            // catalyzed creation: gApop -> gApop + Apop
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gApop", MoleculeLocation.Bulk, sc));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc));
+            cr.rate_const = 1.0;
             cr.GetTotalReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 

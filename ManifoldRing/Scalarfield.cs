@@ -376,7 +376,7 @@ namespace ManifoldRing
         /// </summary>
         /// <param name="val">destination array</param>
         /// <param name="start">destination start index</param>
-        /// <returns> number of elemnts copied</returns>
+        /// <returns> number of elements copied</returns>
         public int CopyArray(double[] valarr, int start = 0)
         {
             Array.Copy(array, 0, valarr, start, array.Length);

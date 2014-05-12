@@ -12,6 +12,8 @@ namespace Daphne
     {
         public double RateConstant;
         protected ScalarField intensity;
+        // to enable, remove all comments at line beginnings involving ReactionType
+        //public ReactionType Type { get; set; }
 
         public abstract void Step(double dt);
     }
@@ -21,12 +23,13 @@ namespace Daphne
 
     public class Annihilation : Reaction
     {
-        MolecularPopulation reactant;
+        public MolecularPopulation reactant { get; set; }
 
         public Annihilation(MolecularPopulation _reactant, double _RateConst)
         {
             reactant = _reactant;
             RateConstant = _RateConst;
+            //Type = ReactionType.Annihilation;
         }
 
         public override void Step(double dt)
@@ -38,9 +41,9 @@ namespace Daphne
 
     public class Association : Reaction
     {
-        MolecularPopulation reactant1;
-        MolecularPopulation reactant2;
-        MolecularPopulation product;
+        public MolecularPopulation reactant1 { get; set; }
+        public MolecularPopulation reactant2 { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public Association(MolecularPopulation _reactant1, MolecularPopulation _reactant2, MolecularPopulation _product, double _RateConst)
         {
@@ -48,6 +51,7 @@ namespace Daphne
             reactant2 = _reactant2;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.Association;
         }
 
         public override void Step(double dt)
@@ -61,14 +65,15 @@ namespace Daphne
 
     public class Dimerization : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public Dimerization(MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.Dimerization;
         }
 
         public override void Step(double dt)
@@ -81,14 +86,15 @@ namespace Daphne
 
     public class DimerDissociation : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public DimerDissociation(MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.DimerDissociation;
         }
 
         public override void Step(double dt)
@@ -101,8 +107,9 @@ namespace Daphne
 
     public class Dissociation : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product1, product2;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product1 { get; set; }
+        public MolecularPopulation product2 { get; set; }
 
         public Dissociation(MolecularPopulation _reactant, MolecularPopulation _product1, MolecularPopulation _product2, double _RateConst)
         {
@@ -110,6 +117,7 @@ namespace Daphne
             product1 = _product1;
             product2 = _product2;
             RateConstant = _RateConst;
+            //Type = ReactionType.Dissociation;
         }
 
         public override void Step(double dt)
@@ -123,15 +131,15 @@ namespace Daphne
 
     public class Transformation : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public Transformation(MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
-
+            //Type = ReactionType.Transformation;
         }
 
         public override void Step(double dt)
@@ -149,8 +157,8 @@ namespace Daphne
     /// </summary>
     public class AutocatalyticTransformation : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation catalyst;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation catalyst { get; set; }
 
         public AutocatalyticTransformation(MolecularPopulation _reactant1, MolecularPopulation _reactant2, MolecularPopulation _product, double _RateConst)
         {
@@ -165,6 +173,7 @@ namespace Daphne
                 catalyst = _reactant2;
             }
             RateConstant = _RateConst;
+            //Type = ReactionType.AutocatalyticTransformation;
         }
 
         public override void Step(double dt)
@@ -177,14 +186,15 @@ namespace Daphne
 
     public class CatalyzedAnnihilation : Reaction
     {
-        MolecularPopulation catalyst;
-        MolecularPopulation reactant;
+        public MolecularPopulation catalyst { get; set; }
+        public MolecularPopulation reactant { get; set; }
 
         public CatalyzedAnnihilation(MolecularPopulation _catalyst, MolecularPopulation _reactant, double _RateConst)
         {
             reactant = _reactant;
             catalyst = _catalyst;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedAnnihilation;
         }
 
         public override void Step(double dt)
@@ -196,10 +206,10 @@ namespace Daphne
 
     public class CatalyzedAssociation : Reaction
     {
-        MolecularPopulation catalyst;
-        MolecularPopulation reactant1;
-        MolecularPopulation reactant2;
-        MolecularPopulation product;
+        public MolecularPopulation catalyst { get; set; }
+        public MolecularPopulation reactant1 { get; set; }
+        public MolecularPopulation reactant2 { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public CatalyzedAssociation(MolecularPopulation _catalyst, MolecularPopulation _reactant1, MolecularPopulation _reactant2, MolecularPopulation _product, double _RateConst)
         {
@@ -208,6 +218,7 @@ namespace Daphne
             reactant2 = _reactant2;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedAssociation;
         }
 
         public override void Step(double dt)
@@ -221,8 +232,8 @@ namespace Daphne
 
     public class CatalyzedCreation : Reaction
     {
-        MolecularPopulation catalyst;
-        MolecularPopulation product;
+        public MolecularPopulation catalyst { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public CatalyzedCreation(MolecularPopulation _catalyst, MolecularPopulation _product, double _RateConst)
         {
@@ -234,6 +245,7 @@ namespace Daphne
             catalyst = _catalyst;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedCreation;
         }
 
         public override void Step(double dt)
@@ -245,9 +257,9 @@ namespace Daphne
 
     public class CatalyzedDimerization : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product;
-        MolecularPopulation catalyst;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
+        public MolecularPopulation catalyst { get; set; }
 
         public CatalyzedDimerization(MolecularPopulation _catalyst, MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
@@ -255,6 +267,7 @@ namespace Daphne
             product = _product;
             catalyst = _catalyst;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedDimerization;
         }
 
         public override void Step(double dt)
@@ -267,9 +280,9 @@ namespace Daphne
 
     public class CatalyzedDimerDissociation : Reaction
     {
-        MolecularPopulation reactant;
-        MolecularPopulation product;
-        MolecularPopulation catalyst;
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
+        public MolecularPopulation catalyst { get; set; }
 
         public CatalyzedDimerDissociation(MolecularPopulation _catalyst, MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
@@ -277,6 +290,7 @@ namespace Daphne
             product = _product;
             catalyst = _catalyst;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedDimerDissociation;
         }
 
         public override void Step(double dt)
@@ -289,9 +303,10 @@ namespace Daphne
 
     public class CatalyzedDissociation : Reaction
     {
-        MolecularPopulation catalyst;
-        MolecularPopulation reactant;
-        MolecularPopulation product1, product2;
+        public MolecularPopulation catalyst { get; set; }
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product1 { get; set; }
+        public MolecularPopulation product2 { get; set; }
 
         public CatalyzedDissociation(MolecularPopulation _catalyst, MolecularPopulation _reactant, MolecularPopulation _product1, MolecularPopulation _product2, double _RateConst)
         {
@@ -300,6 +315,7 @@ namespace Daphne
             product1 = _product1;
             product2 = _product2;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedDissociation;
         }
 
         public override void Step(double dt)
@@ -313,9 +329,9 @@ namespace Daphne
 
     public class CatalyzedTransformation : Reaction
     {
-        MolecularPopulation catalyst;
-        MolecularPopulation reactant;
-        MolecularPopulation product;
+        public MolecularPopulation catalyst { get; set; }
+        public MolecularPopulation reactant { get; set; }
+        public MolecularPopulation product { get; set; }
 
         public CatalyzedTransformation(MolecularPopulation _catalyst, MolecularPopulation _reactant, MolecularPopulation _product, double _RateConst)
         {
@@ -323,6 +339,7 @@ namespace Daphne
             reactant = _reactant;
             product = _product;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedTransformation;
         }
 
         public override void Step(double dt)
@@ -362,6 +379,7 @@ namespace Daphne
             genReac = new Dictionary<MolecularPopulation, int[]>();
             genReac = _genReac;
             RateConstant = _RateConst;
+            //Type = ReactionType.Generalized;
         }
 
         public override void Step(double dt)
@@ -413,9 +431,9 @@ namespace Daphne
     /// </summary>
     public class BoundaryAssociation : Reaction
     {
-        MolecularPopulation receptor;
-        MolecularPopulation ligand;
-        MolecularPopulation complex;
+        public MolecularPopulation receptor { get; set; }
+        public MolecularPopulation ligand { get; set; }
+        public MolecularPopulation complex { get; set; }
         Manifold boundary;
  
         public BoundaryAssociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
@@ -425,6 +443,7 @@ namespace Daphne
             complex = _complex;
             boundary = complex.Man;
             RateConstant = _RateConst;
+            //Type = ReactionType.BoundaryAssociation;
 
             if (ligand.BoundaryConcs[boundary.Id].M != receptor.Man)
             {
@@ -448,9 +467,9 @@ namespace Daphne
 
     public class BoundaryDissociation : Reaction
     {
-        MolecularPopulation receptor;
-        MolecularPopulation ligand;
-        MolecularPopulation complex;
+        public MolecularPopulation receptor { get; set; }
+        public MolecularPopulation ligand { get; set; }
+        public MolecularPopulation complex { get; set; }
         Manifold boundary;
 
         public BoundaryDissociation(MolecularPopulation _receptor, MolecularPopulation _ligand, MolecularPopulation _complex, double _RateConst)
@@ -460,6 +479,7 @@ namespace Daphne
             complex = _complex;
             boundary = complex.Man;
             RateConstant = _RateConst;
+            //Type = ReactionType.BoundaryDissociation;
         }
 
         public override void Step(double dt)
@@ -477,8 +497,8 @@ namespace Daphne
     /// </summary>
     public class BoundaryTransportFrom : Reaction
     {
-        MolecularPopulation membrane;
-        MolecularPopulation bulk;
+        public MolecularPopulation membrane { get; set; }
+        public MolecularPopulation bulk { get; set; }
         Manifold boundary;
 
         public BoundaryTransportFrom(MolecularPopulation _membrane, MolecularPopulation _bulk, double _RateConst)
@@ -487,6 +507,7 @@ namespace Daphne
             membrane = _membrane;
             boundary = membrane.Man;
             RateConstant = _RateConst;
+            //Type = ReactionType.BoundaryTransportFrom;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
             {
@@ -508,8 +529,8 @@ namespace Daphne
     /// </summary>
     public class BoundaryTransportTo : Reaction
     {
-        MolecularPopulation membrane;
-        MolecularPopulation bulk;
+        public MolecularPopulation membrane { get; set; }
+        public MolecularPopulation bulk { get; set; }
         Manifold boundary;
 
         public BoundaryTransportTo(MolecularPopulation _bulk, MolecularPopulation _membrane, double _RateConst)
@@ -518,6 +539,7 @@ namespace Daphne
             membrane = _membrane;
             boundary = membrane.Man;
             RateConstant = _RateConst;
+            //Type = ReactionType.BoundaryTransportTo;
 
             if (bulk.BoundaryConcs[boundary.Id].M != membrane.Man)
             {
@@ -536,9 +558,9 @@ namespace Daphne
 
     public class CatalyzedBoundaryActivation : Reaction
     {
-        MolecularPopulation bulk;
-        MolecularPopulation bulkActivated;
-        MolecularPopulation receptor;
+        public MolecularPopulation bulk { get; set; }
+        public MolecularPopulation bulkActivated { get; set; }
+        public MolecularPopulation receptor { get; set; }
         Manifold boundary;
 
         public CatalyzedBoundaryActivation(MolecularPopulation _bulk, MolecularPopulation _bulkActivated, MolecularPopulation _receptor, double _RateConst)
@@ -548,6 +570,7 @@ namespace Daphne
             receptor = _receptor;
             boundary = receptor.Man;
             RateConstant = _RateConst;
+            //Type = ReactionType.CatalyzedBoundaryActivation;
 
             if (bulk.BoundaryConcs[boundary.Id].M != receptor.Man)
             {

@@ -14,14 +14,16 @@ namespace Daphne
 
         public void Step(double dt)
         {
-            List<int> removalList = new List<int>();
+            List<int> removalList = null;
+            List<Cell> daughterList = null;
 
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
                 // cell takes a step
                 kvp.Value.Step(dt);
 
-                if (kvp.Value.IsMotile == true)
+                // still alive and motile
+                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true)
                 {
                     // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
                     // add the chemotactic force (accumulate it into the force variable)
@@ -38,17 +40,51 @@ namespace Daphne
 
                     // enforce boundary condition
                     kvp.Value.EnforceBC();
-                    if (kvp.Value.Alive == false)
+                }
+
+                // if the cell died (true death or it moved out of bounds) schedule its removal
+                if (kvp.Value.Alive == false)
+                {
+                    if (removalList == null)
                     {
-                        removalList.Add(kvp.Value.Cell_id);
+                        removalList = new List<int>();
                     }
+                    removalList.Add(kvp.Value.Cell_id);
+                }
+                
+                // cell division
+                if (kvp.Value.Cytokinetic == true)
+                {
+                    // divide the cell, return daughter
+                    Cell c = kvp.Value.Divide();
+
+                    if (daughterList == null)
+                    {
+                        daughterList = new List<Cell>();
+                    }
+                    daughterList.Add(c);
+                }
+           }
+
+            // process removal list
+            if (removalList != null)
+            {
+                foreach (int key in removalList)
+                {
+                    Simulation.dataBasket.RemoveCell(key);
                 }
             }
 
-            // process removal list
-            foreach (int key in removalList)
+            // process daughter list
+            if (daughterList != null)
             {
-                Simulation.dataBasket.RemoveCell(key);
+                foreach (Cell c in daughterList)
+                {
+                    // add the cell
+                    Simulation.AddCell(c);
+                    // add the cell's membrane to the ecs boundary
+                    Simulation.dataBasket.ECS.AddBoundaryManifold(c.PlasmaMembrane.Interior);
+                }
             }
         }
 

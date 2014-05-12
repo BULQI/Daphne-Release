@@ -34,7 +34,6 @@ namespace Daphne
     }
 
 
-
     public class MolecularPopulation : IDynamic
     {
         // the individuals that make up this MolecularPopulation
@@ -50,6 +49,8 @@ namespace Daphne
         // Diffusion is on, by default.
         public bool IsDiffusing { get; set; }
         public Dictionary<int, MolBoundaryType> boundaryCondition;
+        // the molecule guid reference
+        public string MoleculeKey { get; set; }
 
         public Manifold Man
         {
@@ -83,11 +84,12 @@ namespace Daphne
             get { return naturalBoundaryConcs; }
         }
 
-        public MolecularPopulation(Molecule mol, Compartment comp)
+        public MolecularPopulation(Molecule mol, string moleculeKey, Compartment comp)
         {
             concentration = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
             manifold = comp.Interior;
             Molecule = mol;
+            MoleculeKey = moleculeKey;
             compartment = comp;
             boundaryCondition = new Dictionary<int, MolBoundaryType>();
 
@@ -96,12 +98,11 @@ namespace Daphne
             boundaryConcs = new Dictionary<int, ScalarField>();
             foreach (KeyValuePair<int, Compartment> kvp in compartment.Boundaries)
             {
-                //boundaryFluxes.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
-                //boundaryConcs.Add(kvp.Key, new ScalarField(kvp.Value.Interior));
-                ScalarField boundFlux = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
-                boundaryFluxes.Add(kvp.Key, boundFlux);
-                ScalarField boundConc = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
-                boundaryConcs.Add(kvp.Key, boundConc);
+                //ScalarField boundFlux = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
+                //boundaryFluxes.Add(kvp.Key, boundFlux);
+                //ScalarField boundConc = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value.Interior));
+                //boundaryConcs.Add(kvp.Key, boundConc);
+                AddBoundaryFluxConc(kvp.Key, kvp.Value.Interior);
             }
 
             // natural boundaries
@@ -112,6 +113,20 @@ namespace Daphne
                 naturalBoundaryFluxes.Add(kvp.Key, SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value)));
                 naturalBoundaryConcs.Add(kvp.Key, SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", kvp.Value)));
             }
+        }
+
+        /// <summary>
+        /// add boundary flux and concentration for a manifold
+        /// </summary>
+        /// <param name="key">dictionary key</param>
+        /// <param name="m">boundary manifold</param>
+        public void AddBoundaryFluxConc(int key, Manifold m)
+        {
+            ScalarField boundFlux = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+            ScalarField boundConc = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", m));
+
+            boundaryFluxes.Add(key, boundFlux);
+            boundaryConcs.Add(key, boundConc);
         }
 
         /// <summary>
@@ -129,9 +144,9 @@ namespace Daphne
                 int src_index = Conc.M.ArraySize;
                 foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
                 {
-
                     int arr_len = kvp.Value.M.ArraySize;
                     double[] newvals = new double[arr_len];
+
                     Array.Copy(parameters, src_index, newvals, 0, arr_len);
                     kvp.Value.Initialize(type, newvals);
                     src_index += arr_len;
@@ -141,6 +156,7 @@ namespace Daphne
                 {
                     int arr_len = kvp.Value.M.ArraySize;
                     double[] newvals = new double[arr_len];
+
                     Array.Copy(parameters, src_index, newvals, 0, arr_len);
                     kvp.Value.Initialize(type, newvals);
                     src_index += arr_len;
@@ -186,8 +202,8 @@ namespace Daphne
         /// </summary>
         public void UpdateBoundary()
         {
-            //take the bulk at each boundary's location and write it into the boundary space, converting to the boundary scalar field type if needed
-            //translation is already the position of the boundary in the containing frame; no coordinate conversion needed
+            // take the bulk at each boundary's location and write it into the boundary space, converting to the boundary scalar field type if needed
+            // translation is already the position of the boundary in the containing frame; no coordinate conversion needed
             foreach (KeyValuePair<int, ScalarField> kvp in boundaryConcs)
             {
                 kvp.Value.Restrict(concentration, compartment.BoundaryTransforms[kvp.Key]);

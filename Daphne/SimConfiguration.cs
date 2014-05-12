@@ -1109,10 +1109,7 @@ namespace Daphne
                         }
                     }
                 }                
-                
             }
-
-            
         }
 
         private void template_reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -1168,6 +1165,86 @@ namespace Daphne
                 }
             }
             return gm;
+        }
+
+        public List<ConfigReaction> GetBoundaryReactions(ConfigCompartment configComp)
+        {
+            List<string> reac_guids = new List<string>();
+            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+
+            foreach (string rguid in configComp.reactions_guid_ref)
+            {
+                ConfigReaction cr = entity_repository.reactions_dict[rguid];
+                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                {
+                    reac_guids.Add(rguid);
+                    config_reacs.Add(cr);
+                }
+            }
+
+            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            {
+                ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+                foreach (string rguid in crc.reactions_guid_ref)
+                {
+                    if (reac_guids.Contains(rguid) == false)
+                    {
+                        ConfigReaction cr = entity_repository.reactions_dict[rguid];
+                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == true)
+                        {
+                            //reac_guids.Add(rguid);
+                            config_reacs.Add(cr);
+                        }
+                    }
+                }
+            }
+            return config_reacs;
+        }
+
+        public List<ConfigReaction> GetBulkReactions(ConfigCompartment configComp)
+        {
+            List<string> reac_guids = new List<string>();
+            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+
+            foreach (string rguid in configComp.reactions_guid_ref)
+            {
+                ConfigReaction cr = entity_repository.reactions_dict[rguid];
+                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                {
+                    reac_guids.Add(rguid);
+                    config_reacs.Add(cr);
+                }
+            }
+
+            foreach (string rcguid in configComp.reaction_complexes_guid_ref)
+            {
+                ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+                foreach (string rguid in crc.reactions_guid_ref)
+                {
+                    if (reac_guids.Contains(rguid) == false)
+                    {
+                        ConfigReaction cr = entity_repository.reactions_dict[rguid];
+                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == false)
+                        {
+                            //reac_guids.Add(rguid);
+                            config_reacs.Add(cr);
+                        }
+                    }
+                }
+            }
+            return config_reacs;
+        }
+
+        public CellPopulation GetCellPopulation(int key)
+        {
+            if (cellpopulation_id_cellpopulation_dict.ContainsKey(key) == true)
+            {
+                return cellpopulation_id_cellpopulation_dict[key];
+            }
+            else
+            {
+                throw new Exception("Population ID does not exist.");
+            }
         }
     }
 
@@ -2545,7 +2622,6 @@ namespace Daphne
             s = s.Trim(trimChars);
 
             TotalReactionString = s;
-
         }
 
         public bool HasMolecule(string molguid)
@@ -2867,7 +2943,7 @@ namespace Daphne
 
         public string CellName { get; set; }
         public double CellRadius { get; set; }
-
+        public string signaling_mol_guid_ref { get; set; }
         private string _locomotor_mol_guid_ref;
         public string locomotor_mol_guid_ref
         {
@@ -3476,11 +3552,11 @@ namespace Daphne
         }
 
 
-        //map conctration info into molpop info.
+        //map concentration info into molpop info.
         public Dictionary<string, double[]> configMolPop = new Dictionary<string, double[]>();
         public void setState(SpatialState state)
         {
-            List<double> tmp = new List<double>(9);
+            List<double> tmp = new List<double>(SpatialState.Dim);
             tmp.AddRange(state.X);
             tmp.AddRange(state.V);
             tmp.AddRange(state.F);

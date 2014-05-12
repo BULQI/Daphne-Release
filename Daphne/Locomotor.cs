@@ -11,16 +11,16 @@ namespace Daphne
     public class Locomotor
     {
         //driver is the molecular population that provide locomotor with a gradient
-        private MolecularPopulation driver;
+        public MolecularPopulation Driver { get; set; }
 
         /// <summary>
         /// The constant of proportionality that convert concentration gradient into a force.
         /// </summary>
-        public double TransductionConstant;
+        public double TransductionConstant { get; set; }
 
         public Locomotor(MolecularPopulation _driver, double constant)
         {
-            driver = _driver;
+            Driver = _driver;
             TransductionConstant = constant;
         }
 
@@ -28,7 +28,7 @@ namespace Daphne
         {
             double[] force = new double[3];
 
-            force = driver.Conc.Gradient(position);
+            force = Driver.Conc.Gradient(position);
             for (int i = 0; i < force.Length; i++)
             {
                 force[i] *= TransductionConstant;
