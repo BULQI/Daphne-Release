@@ -15,21 +15,14 @@ namespace Daphne
         public Compartment(DiscretizedManifold interior)
         {
             Interior = interior;
-            Populations = new List<MolecularPopulation>();
+            Populations = new Dictionary<string, MolecularPopulation>();
             reactions = new List<Reaction>();
             rtList = new List<ReactionTemplate>();
-            molpopDict = new Dictionary<string, MolecularPopulation>();
-        }
-
-        public void AddMolecule(Molecule molecule)
-        {
-            Populations.Add(new MolecularPopulation(molecule, Interior));
         }
 
         public void AddMolecularPopulation(MolecularPopulation molpop)
         {
-            Populations.Add(molpop);
-            molpopDict.Add(molpop.Name, molpop);
+            Populations.Add(molpop.Name, molpop);
         }
 
         // gmk
@@ -37,8 +30,7 @@ namespace Daphne
         {
             ScalarField s = new ScalarField(Interior, initConc);
             MolecularPopulation molpop = new MolecularPopulation(name, mol, Interior, s);
-            Populations.Add(molpop);
-            molpopDict.Add(molpop.Molecule.Name, molpop);
+            Populations.Add(molpop.Molecule.Name, molpop);
         }
 
         public void AddMolecularPopulation(string name, Molecule mol, ScalarField initConc)
@@ -46,8 +38,7 @@ namespace Daphne
             // Add the molecular population with concentration specified with initConc
 
             MolecularPopulation molpop = new MolecularPopulation(name, mol, Interior, initConc);
-            Populations.Add(molpop);
-            molpopDict.Add(molpop.Molecule.Name, molpop);
+            Populations.Add(molpop.Molecule.Name, molpop);
         }
 
         /// <summary>
@@ -63,19 +54,16 @@ namespace Daphne
                 r.Step(dt);
             }
 
-            foreach (MolecularPopulation molpop in Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> molpop in Populations)
             {
-                molpop.Step(dt);
+                molpop.Value.Step(dt);
             }
         }
 
-        public List<MolecularPopulation> Populations;
+        public Dictionary<string, MolecularPopulation> Populations;
         public List<Reaction> reactions;
         public DiscretizedManifold Interior;
         public List<ReactionTemplate> rtList;
-        public Dictionary<string, MolecularPopulation> molpopDict;
-
- 
     }
 
     public class ExtracellularTypeI

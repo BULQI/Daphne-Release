@@ -24,58 +24,48 @@ namespace Daphne
             return false;
         }
 
-        public static bool HasAllReactants(List<MolecularPopulation> molPops, ReactionTemplate rt)
+        public static bool HasAllReactants(Dictionary<string, MolecularPopulation> molPops, ReactionTemplate rt)
         {
             // Compare the molecules in molPops to the Reaction species in the reaction template
             // Return true if all the species in the reaction template have matches in the molecular population
 
-            if (rt.listOfReactants.Count == 0) return true;
-
-            bool tf = false;
+            if (rt.listOfReactants.Count == 0)
+            {
+                return true;
+            }
 
             foreach (SpeciesReference spRef in rt.listOfReactants)
             {
-                tf = false;
-                foreach (MolecularPopulation molpop in molPops)
+                // as soon as there is one not found we can return false
+                if (molPops.ContainsKey(spRef.species) == false)
                 {
-                    if (spRef.species == molpop.Molecule.Name)
-                    {
-                        tf = true;
-                        continue;
-                    }
+                    return false;
                 }
-
-                if (!tf) return false;
             }
 
-            return tf;
+            return true;
         }
 
-        public static bool HasAllModifiers(List<MolecularPopulation> molPops, ReactionTemplate rt)
+        public static bool HasAllModifiers(Dictionary<string, MolecularPopulation> molPops, ReactionTemplate rt)
         {
             // Compare the molecules in molPops to the Modifier species in the reaction template
             // Return true if all the species in the reaction template have matches in the molecular population
 
-            if (rt.listOfModifiers.Count == 0) return true;
-
-            bool tf = false;
+            if (rt.listOfModifiers.Count == 0)
+            {
+                return true;
+            }
 
             foreach (SpeciesReference spRef in rt.listOfModifiers)
             {
-                tf = false;
-                foreach (MolecularPopulation molpop in molPops)
+                // as soon as there is one not found we can return false
+                if (molPops.ContainsKey(spRef.species) == false)
                 {
-                    if (spRef.species == molpop.Molecule.Name)
-                    {
-                        tf = true;
-                        continue;
-                    }
+                    return false;
                 }
-
-                if (!tf) return false;
             }
 
-            return tf;
+            return true;
         }
 
         public static bool AddNeededProducts(ReactionTemplate rt, Compartment C, Dictionary<string, Molecule> MolDict)
@@ -83,21 +73,12 @@ namespace Daphne
             // Check the product molecules exist as MolecularPopulations in the Compartment
             // If not, add a molecular population to the compartment
 
-            bool tf, addedProduct = false;
+            bool addedProduct = false;
 
             foreach (SpeciesReference spRef in rt.listOfProducts)
             {
-                tf = false;
-                foreach (MolecularPopulation molpop in C.Populations)
-                {
-                    if (spRef.species == molpop.Molecule.Name)
-                    {
-                        tf = true;
-                        continue;
-                    }
-                }
-
-                if (!tf)
+                // not contained? add it
+                if (C.Populations.ContainsKey(spRef.species) == false)
                 {
                     C.AddMolecularPopulation(spRef.species, MolDict[spRef.species], 0.0);
                     addedProduct = true;
@@ -121,7 +102,7 @@ namespace Daphne
             bool tfCat = (rt.listOfModifiers.Count > 0);
             if (tfCat)
             {
-                catalyst = C.molpopDict[rt.listOfModifiers[0].species];
+                catalyst = C.Populations[rt.listOfModifiers[0].species];
             }
             else
             {
@@ -132,7 +113,7 @@ namespace Daphne
             {
                 case ("annihilation"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
 
                     if (tfCat)
                     {
@@ -150,9 +131,9 @@ namespace Daphne
 
                 case ("association"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
-                    reactant1 = C.molpopDict[rt.listOfReactants[1].species];
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
+                    reactant1 = C.Populations[rt.listOfReactants[1].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
 
                     if (tfCat)
                     {
@@ -170,7 +151,7 @@ namespace Daphne
 
                 case ("creation"):
 
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
 
                     if (tfCat)
                     {
@@ -188,8 +169,8 @@ namespace Daphne
 
                 case ("dimerization"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
 
                     if (tfCat)
                     {
@@ -207,8 +188,8 @@ namespace Daphne
 
                 case ("dimerDissociation"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
 
                     if (tfCat)
                     {
@@ -226,9 +207,9 @@ namespace Daphne
 
                 case ("dissociation"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
-                    product1 = C.molpopDict[rt.listOfProducts[1].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
+                    product1 = C.Populations[rt.listOfProducts[1].species];
 
                     if (tfCat)
                     {
@@ -246,8 +227,8 @@ namespace Daphne
 
                 case ("transformation"):
 
-                    reactant0 = C.molpopDict[rt.listOfReactants[0].species];
-                    product0 = C.molpopDict[rt.listOfProducts[0].species];
+                    reactant0 = C.Populations[rt.listOfReactants[0].species];
+                    product0 = C.Populations[rt.listOfProducts[0].species];
 
                     if (tfCat)
                     {
@@ -278,32 +259,26 @@ namespace Daphne
             // If so we will need to reevaluate all compartments again
 
             bool changed = false;
-            bool tfReactants, tfModifiers;
 
             foreach (ReactionTemplate rt in rtList)
             {
                 // Check to see if this reaction already exists in the compartment
-                if (!ReactionBuilder.CompartHasThisReaction(C.rtList, rt))
+                if (ReactionBuilder.CompartHasThisReaction(C.rtList, rt) == false)
                 {
                     // Check for all the necessary reactants and catalysts
-                    tfReactants = HasAllReactants(C.Populations, rt);
-                    tfModifiers = HasAllModifiers(C.Populations, rt);
-
-                    if (tfReactants && tfModifiers)
+                    if (HasAllReactants(C.Populations, rt) == true && HasAllModifiers(C.Populations, rt) == true)
                     {
                         // Add any missing products
-                        if (AddNeededProducts(rt, C, MolDict))
-                        {
-                            changed = true;
-                        }
+                        // NOTE/CHECK: why do we need to check for added products? we only check products because we are adding a reaction; the
+                        // latter is already a qualifying change, which is why you always set changed = true three statements down regardless of what
+                        // AddNeededProducts returns; should AddNeededProducts not return anything and be void?
+                        changed = AddNeededProducts(rt, C, MolDict);
 
                         // Add reaction and reaction template to Compartment
                         ReactionSwitch(C, rt);
                         changed = true;
-
                     }
                 }
-
             }
 
             return changed;
