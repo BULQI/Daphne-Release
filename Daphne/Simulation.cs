@@ -375,8 +375,9 @@ namespace Daphne
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.AutocatalyticTransformation)
                 {
-                    comp.Reactions.Add(new AutocatalyticTransformation(comp.Populations[cr.modifiers_molecule_guid_ref[0]],
-                                                                       comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                    comp.Reactions.Add(new AutocatalyticTransformation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
+                                                                       comp.Populations[cr.reactants_molecule_guid_ref[1]],
+                                                                       comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                        cr.rate_const));
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedAnnihilation)
@@ -592,9 +593,16 @@ namespace Daphne
             }
 
             // ADD ECS REACTIONS
-            foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
+            if (dataBasket.Cells.Count == 0)
             {
-                addCompartmentReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, scenario.environment.ecs, sc.entity_repository);
+                addCompartmentReactions(dataBasket.ECS.Space, null, scenario.environment.ecs, sc.entity_repository);
+            }
+            else
+            {
+                foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
+                {
+                    addCompartmentReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, scenario.environment.ecs, sc.entity_repository);
+                }
             }
 
             // general parameters

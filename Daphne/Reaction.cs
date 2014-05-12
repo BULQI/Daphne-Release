@@ -143,16 +143,27 @@ namespace Daphne
     }
 
     // Catalyzed reactions
-
+    /// <summary>
+    /// a + e -> 2e
+    /// NOTE: Not a catalyzed reaction in the strict sense, since the catalyst stoichiometry changes in this reaction.
+    /// </summary>
     public class AutocatalyticTransformation : Reaction
     {
-        MolecularPopulation catalyst;
         MolecularPopulation reactant;
+        MolecularPopulation catalyst;
 
-        public AutocatalyticTransformation(MolecularPopulation _catalyst, MolecularPopulation _reactant1, double _RateConst)
+        public AutocatalyticTransformation(MolecularPopulation _reactant1, MolecularPopulation _reactant2, MolecularPopulation _product, double _RateConst)
         {
-            catalyst = _catalyst;
-            reactant = _reactant1;
+            if (_reactant1.Molecule.Name == _product.Molecule.Name)
+            {
+                reactant = _reactant2;
+                catalyst = _reactant1;
+            }
+            else
+            {
+                reactant = _reactant1;
+                catalyst = _reactant2;
+            }
             RateConstant = _RateConst;
         }
 
