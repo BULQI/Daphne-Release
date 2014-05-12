@@ -24,12 +24,12 @@ namespace Daphne
         public const string TempScenarioFile = "Config\\temp_scenario.json", TempUserDefFile = "Config\\temp_userdef.json";
         public SimConfiguration SimConfig { get; set; }
 
-        public UserDefinedGroup userDefGroup { get; set; }
+        //public UserDefinedGroup userDefGroup { get; set; }
 
         public SimConfigurator()
         {
             this.SimConfig = new SimConfiguration();
-            userDefGroup = new UserDefinedGroup();
+            //userDefGroup = new UserDefinedGroup();
         }
 
         public SimConfigurator(string filename)
@@ -42,16 +42,16 @@ namespace Daphne
             this.FileName = filename;
             this.SimConfig = new SimConfiguration();
 
-            userDefGroup = new UserDefinedGroup();
-            string UserDefFileName = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            if (File.Exists(UserDefFileName))
-            {
-                string readText = File.ReadAllText(UserDefFileName);
-                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, Settings);
-            }
+            //userDefGroup = new UserDefinedGroup();
+            //string UserDefFileName = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            //var Settings = new JsonSerializerSettings();
+            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            //Settings.TypeNameHandling = TypeNameHandling.Auto;
+            //if (File.Exists(UserDefFileName))
+            //{
+            //    string readText = File.ReadAllText(UserDefFileName);
+            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, Settings);
+            //}
         }
 
         public void SerializeSimConfigToFile(bool tempFiles = false)
@@ -61,8 +61,8 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
 
-            userDefGroup.Reset();
-            userDefGroup.CopyFromConfig(SimConfig);
+            //userDefGroup.Reset();
+            //userDefGroup.CopyFromConfig(SimConfig);
             
             //serialize SimConfig
             string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
@@ -70,10 +70,10 @@ namespace Daphne
 
             File.WriteAllText(jsonFile, jsonSpec);
 
-            //serialize user defined objects
-            jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);
-            jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
-            File.WriteAllText(jsonFile, jsonSpec);
+            ////serialize user defined objects
+            //jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);
+            //jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
+            //File.WriteAllText(jsonFile, jsonSpec);
         }
 
         /// <summary>
@@ -126,17 +126,17 @@ namespace Daphne
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
             SimConfig.InitializeStorageClasses();
 
-            //I think we need to remove the user def items if any, from SimConfig and copy latest userdefgroup items into the config
-            //SimConfig.RemoveUserDefinedItems();
+            ////I think we need to remove the user def items if any, from SimConfig and copy latest userdefgroup items into the config
+            ////SimConfig.RemoveUserDefinedItems();
 
-            //deserialize user defined objects
-            jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
-            if (File.Exists(jsonFile))
-            {
-                readText = File.ReadAllText(jsonFile);
-                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
-                userDefGroup.CopyToConfig(SimConfig);
-            }
+            ////deserialize user defined objects
+            //jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
+            //if (File.Exists(jsonFile))
+            //{
+            //    readText = File.ReadAllText(jsonFile);
+            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+            //    userDefGroup.CopyToConfig(SimConfig);
+            //}
 
         }
 
@@ -147,14 +147,14 @@ namespace Daphne
             SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(simConfigJson, settings);
             SimConfig.InitializeStorageClasses();
 
-            //deserialize user defined items
-            string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
-            if (File.Exists(userfilename))
-            {
-                string readText = File.ReadAllText(userfilename);
-                userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
-                userDefGroup.CopyToConfig(SimConfig);
-            }
+            ////deserialize user defined items
+            //string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
+            //if (File.Exists(userfilename))
+            //{
+            //    string readText = File.ReadAllText(userfilename);
+            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
+            //    userDefGroup.CopyToConfig(SimConfig);
+            //}
         }
     }
 
@@ -536,8 +536,8 @@ namespace Daphne
             entity_repository = new EntityRepository();
             sim_params = new SimulationParams();
 
-            ////LoadDefaultGlobalParameters();
-            //LoadUserDefinedItems();           
+            //////LoadDefaultGlobalParameters();
+            ////LoadUserDefinedItems();           
 
             // Utility storage
             // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
