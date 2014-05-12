@@ -276,6 +276,12 @@ namespace Workbench
             }
 
             cm.RedrawSeries();
+            cm.RecalculateYMax();
+        }
+
+        private void slRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            cm.RedrawSeries();
         }
         
     }

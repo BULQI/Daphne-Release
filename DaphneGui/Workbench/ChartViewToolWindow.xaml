@@ -106,14 +106,6 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!--<DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=conc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>-->
-
                         <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -147,7 +139,7 @@
                 
                 <DataGrid x:Name="dgReactionRates" 
                                 ItemsSource="{Binding Path=ReactionsInComplex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
-                                Height="150" MinWidth="150" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                                MaxHeight="200" MinWidth="100" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
                                 HorizontalAlignment="Left"
@@ -187,10 +179,26 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="50">
+                        <DataGridTemplateColumn x:Name="colRate" Header="Rate" MinWidth="150">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Width="{Binding ElementName=rate_const, Path=Width}" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=rate_const, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                    <!--<TextBox Width="{Binding ElementName=rate_const, Path=Width}" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" 
+                                        Text="{Binding rate_const, StringFormat={}{0:#.00}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <Slider x:Name="slRate" 
+                                                Orientation="Horizontal"
+                                                Width="100"
+                                                RenderTransform="1.0,0,0,0.5,0,4"
+                                                Minimum="0.00" 
+                                                Maximum="1000.00"
+                                                Value="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                Margin="0,0,0,0" IsSnapToTickEnabled="True" 
+                                                TickFrequency="0.1"
+                                                ValueChanged="slRate_ValueChanged"
+                                                >
+                                        </Slider>
+                                        <TextBox Width="50" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding ElementName=slRate, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />
+                                    </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

@@ -509,6 +509,11 @@ namespace Workbench
             //cChart.Invalidate();
         }
 
+        public void RecalculateYMax()
+        {
+            cChart.ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
+        }
+
         //This function finds a series at the given point on the y-axis, if user clicks "near" it
         private Series FindSeriesAtPoint(double startY)
         {

@@ -2328,6 +2328,11 @@ namespace Daphne
             }
         }
 
+        public CellPopDistribution()
+        {
+            cellStates = new ObservableCollection<CellState>();
+        }
+
         /// <summary>
         /// Check that the new cell position is within the specified bounds.
         /// </summary>
@@ -2482,6 +2487,7 @@ namespace Daphne
         private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistY;
         private MathNet.Numerics.Distributions.ContinuousUniformDistribution uniProbDistZ;
 
+
         public CellPopSpecific(double[] extents, double minDisSquared, CellPopulation _cellPop)
             : base(extents, minDisSquared, _cellPop)
         {
@@ -2504,6 +2510,10 @@ namespace Daphne
                 AddByDistr(1);
             }
             OnPropertyChanged("CellStates");
+        }
+
+        public CellPopSpecific()
+        {
         }
 
         public override double[] nextPosition()
@@ -2698,21 +2708,21 @@ namespace Daphne
         [JsonIgnore]
         public double X 
         {
-            get { return ConfigState[0]; }
+            get { return Math.Round(ConfigState[0], 2) ; }
             set { ConfigState[0] = value; }
         }
 
         [JsonIgnore]
         public double Y 
         {
-            get { return ConfigState[1]; }
+            get { return Math.Round(ConfigState[1], 2); }
             set { ConfigState[1] = value; }
         }
 
         [JsonIgnore]
         public double Z 
         {
-            get { return ConfigState[2]; }
+            get { return Math.Round(ConfigState[2], 2); }
             set { ConfigState[2] = value; }
         }
 

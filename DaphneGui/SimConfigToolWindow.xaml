@@ -1384,6 +1384,36 @@
                                                                 ScrollViewer.CanContentScroll ="False"
                                                                 Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" 
                                                             />
+
+                                                            <!--<DataGridTemplateColumn x:Name="colX" Header="X"  Width="110" MinWidth="100" MaxWidth="200">
+                                                                <DataGridTemplateColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
+                                                                                Text="{Binding Path=X, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
+                                                                        </TextBox>
+                                                                    </DataTemplate>
+                                                                </DataGridTemplateColumn.CellTemplate>
+                                                            </DataGridTemplateColumn>
+                                                            <DataGridTemplateColumn x:Name="colY" Header="Y"  Width="110" MinWidth="100" MaxWidth="200">
+                                                                <DataGridTemplateColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
+                                                                                Text="{Binding Path=Y, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
+                                                                        </TextBox>
+                                                                    </DataTemplate>
+                                                                </DataGridTemplateColumn.CellTemplate>
+                                                            </DataGridTemplateColumn>
+                                                            <DataGridTemplateColumn x:Name="colZ" Header="Z"  Width="110" MinWidth="100" MaxWidth="200">
+                                                                <DataGridTemplateColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBox Width="110" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
+                                                                                Text="{Binding Path=Z, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"    >
+                                                                        </TextBox>
+                                                                    </DataTemplate>
+                                                                </DataGridTemplateColumn.CellTemplate>
+                                                            </DataGridTemplateColumn>-->
+
+                                                            
                                                         </DataGrid.Columns>
 
                                                     </DataGrid>

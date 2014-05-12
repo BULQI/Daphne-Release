@@ -339,12 +339,18 @@ namespace Workbench
 
         private void UpdateRateConstants()
         {
-            //foreach (ConfigReaction rt in GRTList)
+            //Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+
+            //comp.Reactions.Clear();
+
+            //foreach (ConfigReaction reac in ReactionsInComplex)
             //{
-            //    foreach (Reaction r in Reactions)
-            //    {
-            //        r.RateConstant = rt.rate_const;
-            //    }
+            //    double rate = reac.rate_const;                
+            //    //NEED TO UPDATE WITH THIS VALUE SOMEHOW
+
+            //    Reaction r = new Reaction();
+
+            //    //comp.Reactions.Add(
             //}
         }
 

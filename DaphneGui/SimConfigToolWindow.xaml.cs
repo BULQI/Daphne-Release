@@ -1084,6 +1084,7 @@ namespace DaphneGui
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
             // cp.cell_list.Add(new CellState());
+            cp.cellPopDist = new CellPopSpecific();
             cp.cellPopDist.CellStates.Add(new CellState());
             cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
