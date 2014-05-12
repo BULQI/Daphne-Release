@@ -2054,6 +2054,7 @@ namespace DaphneGui
                 if (p >= 0)
                 {
                     int cellID = CellController.GetCellIndex(p);
+                    Cell c = Simulation.dataBasket.Cells[cellID];
 #if ALL_GRAPHICS
                     MW.DisplayCellInfo(cellID);
 #endif

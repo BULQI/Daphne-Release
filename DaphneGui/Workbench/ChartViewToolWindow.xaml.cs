@@ -78,6 +78,9 @@ namespace Workbench
         
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
+            if (cm == null)
+                return;
+
             System.Drawing.Size sz = cm.ChartSize;
             int w = sz.Width;
             int h = sz.Height;
@@ -100,6 +103,9 @@ namespace Workbench
         }
         private void btnIncSize_Click(object sender, EventArgs e)
         {
+            if (cm == null)
+                return;
+
             System.Drawing.Size sz = cm.ChartSize;
             int w = sz.Width;
             int h = sz.Height;
@@ -123,6 +129,9 @@ namespace Workbench
 
         private void btnDecSize_Click(object sender, RoutedEventArgs e)
         {
+            if (cm == null)
+                return;
+
             System.Drawing.Size sz = cm.ChartSize;
 
             sz.Width = (int)(sz.Width * 0.9);
@@ -140,6 +149,9 @@ namespace Workbench
         }
         private void btnDecSize_Click(object sender, EventArgs e)
         {
+            if (cm == null)
+                return;
+
             System.Drawing.Size sz = cm.ChartSize;
 
             sz.Width = (int)(sz.Width * 0.9);
@@ -170,8 +182,15 @@ namespace Workbench
 
         private void btnDiscard_Click(object sender, RoutedEventArgs e)
         {
+            if (RC == null)
+                return;
+
             RC.RestoreOriginalConcs();
             RC.Go();
+
+            if (cm == null)
+                return;
+
             cm.ListTimes = RC.ListTimes;
             cm.DictConcs = RC.DictGraphConcs;
             cm.DrawChart();

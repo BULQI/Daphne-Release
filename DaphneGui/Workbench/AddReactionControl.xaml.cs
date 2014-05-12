@@ -498,7 +498,6 @@ namespace DaphneGui
                 reacNum += bulkBoundVal;
             }
 
-            string s;
             switch (reacNum)
             {
                 // Interior

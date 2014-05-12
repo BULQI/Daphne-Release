@@ -31,7 +31,7 @@ namespace DaphneGui
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
     {
-        private static bool newCellPopSelected = true;
+        //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
             InitializeComponent();
@@ -135,7 +135,7 @@ namespace DaphneGui
                 if (current_item.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
@@ -239,7 +239,7 @@ namespace DaphneGui
                 if (current_item.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
@@ -341,7 +341,7 @@ namespace DaphneGui
                 if (current_item.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type != null && current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
@@ -681,7 +681,6 @@ namespace DaphneGui
 
         private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int index = 0;  //CellPopsDetailsExpander
         }
 
         private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)
@@ -1233,7 +1232,7 @@ namespace DaphneGui
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
         {
-            newCellPopSelected = true;
+            //newCellPopSelected = true;
         }
 
         private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
