@@ -32,8 +32,7 @@ namespace DaphneGui
     /// Interaction logic for SimConfigToolWindow.xaml
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
-    {        
-        //dkfjkas
+    {                
         //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
@@ -70,6 +69,7 @@ namespace DaphneGui
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
+        //This method is called when the user clicks the Remove Cell button
         private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             int index = CellPopsListBox.SelectedIndex;
