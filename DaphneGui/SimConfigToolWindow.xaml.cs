@@ -33,7 +33,7 @@ namespace DaphneGui
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
     {        
-
+        //dkfjkas
         //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
