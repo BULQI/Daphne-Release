@@ -3095,41 +3095,36 @@ namespace Daphne
             string s = "";
             int i = 0;
 
-            // Transcription reactions have a ConfigGene object as the reactant.
-            // Other reactions have ConfigMolecule objects as the reactants.
-            if (repos.reaction_templates_dict[reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            // Reactants
+            foreach (string mol_guid_ref in reactants_molecule_guid_ref)
             {
-                ConfigGene g = repos.genes_dict[reactants_molecule_guid_ref[0]];
-                s += g.Name;
+                //stoichiometry
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
+                s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
-            else
-            {
-                foreach (string mol_guid_ref in reactants_molecule_guid_ref)
-                {
-                    ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
 
-                    //stoichiometry
-                    int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
-                    i++;
-                    if (n > 1)
-                        s += n;
-                    s += cm.Name;
-                    s += " + ";
-                }
-            }
             i = 0;
+            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                if (repos.genes_dict.ContainsKey(mol_guid_ref))
+                {
+                    s += repos.genes_dict[modifiers_molecule_guid_ref[0]].Name;
+                }
+                else
+                {
+                    s += repos.molecules_dict[mol_guid_ref].Name;
+                }
                 s += " + ";
             }
 
@@ -3139,36 +3134,40 @@ namespace Daphne
             s = s + " -> ";
 
             i = 0;
+            // Products
             foreach (string mol_guid_ref in products_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].products_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
             i = 0;
+            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                if (repos.genes_dict.ContainsKey(mol_guid_ref))
+                {
+                    s += repos.genes_dict[modifiers_molecule_guid_ref[0]].Name;
+                }
+                else
+                {
+                    s += repos.molecules_dict[mol_guid_ref].Name;
+                }
                 s += " + ";
             }
 
             s = s.Trim(trimChars);
-
             TotalReactionString = s;
         }
 
@@ -3184,25 +3183,6 @@ namespace Daphne
 
         public bool HasBoundaryMolecule(EntityRepository repos)
         {
-            // Check for transcription reactions
-            // NOTE: Gene transcription currently:  gene (reactant) -> molecule (bulk)
-            // Future implementation will be corrected as:   gene (modifier) -> molecule (bulk) + gene (modifier)
-            // After change, remove check on reactants_molecul_guid_ref
-            if (reactants_molecule_guid_ref.Count > 0)
-            {
-                if (repos.genes_dict.ContainsKey(reactants_molecule_guid_ref[0]) )
-                {
-                    return false;
-                }
-            }
-            if (modifiers_molecule_guid_ref.Count > 0)
-            {
-                if (repos.genes_dict.ContainsKey(modifiers_molecule_guid_ref[0]))
-                {
-                    return false;
-                }
-            }
-
             foreach (string molguid in reactants_molecule_guid_ref)
             {
                 if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
@@ -3215,8 +3195,11 @@ namespace Daphne
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (!repos.genes_dict.ContainsKey(molguid))
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
 
             return false;
