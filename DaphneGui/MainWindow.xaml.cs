@@ -2587,5 +2587,11 @@ namespace DaphneGui
                 updateGraphicsAndGUI();
             }
         }
+
+        private void helpAbout_Click(object sender, RoutedEventArgs e)
+        {
+            About about = new About();
+            about.ShowDialog();
+        }
     }
 }

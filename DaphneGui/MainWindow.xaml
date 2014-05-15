@@ -154,8 +154,9 @@
                     <MenuItem Header="Tech help" Name="techHelp">
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
                         <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
-                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />
+                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
                     </MenuItem>
+                    <MenuItem Header="About..." Name="helpAbout" Click="helpAbout_Click" />
                 </MenuItem>
             </Menu>
         </shared:PixelSnapper>

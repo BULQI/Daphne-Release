@@ -54,7 +54,6 @@
             <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
             <daph:IsNullConverter x:Key="IsNullConv" />
             <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
-            <daph:DoubleToFormattedStringConverter x:Key="DoubleToFormattedStringConv" />
             <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
             <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
             <daph:DeathDriverGuidToMolGuidConverter x:Key="DeathDriverGuidToMolGuidConv" />
@@ -1335,7 +1334,7 @@
                                                             </Style>
                                                         </DataGrid.ColumnHeaderStyle>                                                        
                                                         <DataGrid.Columns>
-                                                            <DataGridTextColumn  Header="Cell" Width="40" 
+                                                            <DataGridTextColumn  Header="Cell" Width="40" IsReadOnly="True"
                                                                 ScrollViewer.CanContentScroll ="False"
                                                                 Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" 
                                                             />
