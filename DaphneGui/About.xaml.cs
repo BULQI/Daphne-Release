@@ -27,7 +27,7 @@ namespace DaphneGui
             Assembly ass = Assembly.GetExecutingAssembly();
             string exename = ass.CodeBase;
             exename = new Uri(exename).LocalPath;
-            txtVersion.Text = "Version: " + File.GetCreationTime(exename).ToLongDateString() + ", " + File.GetCreationTime(exename).ToLongTimeString();
+            txtVersion.Text = "Version: " + File.GetLastWriteTime(exename).ToLongDateString() + ", " + File.GetLastWriteTime(exename).ToLongTimeString();
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)

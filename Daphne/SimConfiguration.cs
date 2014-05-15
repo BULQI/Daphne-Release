@@ -300,220 +300,6 @@ namespace Daphne
 
     }
 
-    public class DaphneDouble : INotifyPropertyChanged
-    {
-        private double min;                         //minimum value allowed
-        private double max;                         //maximum value allowed 
-
-        public double Tick { get; set; }            //slider/edit box increment if applicable
-        public int RangeMultFactor { get; set; }
-        private double rangeFactor;                 //example - 2 means (min = value - value/2), (max = value + value/2)
-
-        private string _format;                    //format string
-        private int _decimal_places;            //number of decimal places to display
-        private double _value;                     //the actual double value that the object contains
-        private string fvalue;                      //string that represents value after formatting is applied
-        private double sn_upper_threshold;                 //if value is greater than or equal to this number, then output in scientific notation        
-        private double sn_lower_threshold;                 //if value is greater than or equal to this number, then output in scientific notation        
-
-        public double Max
-        {
-            get
-            {
-                return max;
-            }
-            set
-            {
-                max = value;
-                OnPropertyChanged("Max");
-            }
-        }
-
-        public double Min
-        {
-            get
-            {
-                return min;
-            }
-            set
-            {
-                min = value;
-                OnPropertyChanged("Min");
-            }
-        }
-
-        public double RangeFactor
-        {
-            get
-            {
-                return rangeFactor;
-            }
-            set
-            {
-                rangeFactor = value;
-                if (rangeFactor <= 0)
-                    rangeFactor = 2;
-            }
-        }
-
-        public string FValue
-        {
-            get
-            {
-                return fvalue;
-            }
-            set
-            {
-                fvalue = string.Format(_format, _value);
-                OnPropertyChanged("FValue");
-            }
-        }
-
-        public double Value
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                _value = value;
-
-                Format = "";
-                FValue = string.Format(_format, _value);
-
-                OnPropertyChanged("Value");
-            }
-        }
-
-        public int DecimalPlaces
-        {
-            get
-            {
-                return _decimal_places;
-            }
-            set
-            {
-                _decimal_places = value;
-
-                Format = "0";
-                FValue = string.Format(_format, Value);
-
-                OnPropertyChanged("DecimalPlaces");
-            }
-        }
-
-        public double SnUpperThreshold
-        {
-            get
-            {
-                return sn_upper_threshold;
-            }
-            set
-            {
-                sn_upper_threshold = value;
-                OnPropertyChanged("SnUpperThreshold");
-                Format = "0";
-                FValue = string.Format(_format, Value);
-            }
-        }
-
-        public double SnLowerThreshold
-        {
-            get
-            {
-                return sn_lower_threshold;
-            }
-            set
-            {
-                sn_lower_threshold = value;
-                OnPropertyChanged("SnLowerThreshold");
-                Format = "0";
-                FValue = string.Format(_format, Value);
-            }
-        }
-
-        public string Format
-        {
-            get
-            {
-                return _format;
-            }
-            set
-            {
-                _format = "{0:N" + DecimalPlaces.ToString() + "}";
-                if (Value >= SnUpperThreshold)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "#";
-                    }
-
-                    _format += "e+00}";
-                }
-                else if (Value <= SnLowerThreshold)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "#";
-                    }
-
-                    _format += "e-00}";
-                }
-                OnPropertyChanged("Format");
-            }
-        }
-
-        public void SetMinMax()
-        {
-            Max = _value + _value / RangeFactor;
-            Min = _value - _value / RangeFactor;
-        }
-
-        public void SetMinMax(double d)
-        {
-            Max = d + d / RangeFactor;
-            Min = d - d / RangeFactor;
-        }
-
-        //Constructor
-        public DaphneDouble()
-        {
-            ////_value = 20;
-            _decimal_places = 3;
-            SnUpperThreshold = 100;
-            SnLowerThreshold = 0.01;
-            RangeMultFactor = 10;
-            RangeFactor = 2;
-            Format = "-";
-            ////fvalue = string.Format(_format, _value);
-            ////Max = _value + _value / RangeFactor;
-            ////Min = _value - _value / RangeFactor;
-        }
-
-        //Notification handling
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChangedEventHandler handler = this.PropertyChanged;
-            if (handler != null)
-            {
-                var e = new PropertyChangedEventArgs(propertyName);
-                handler(this, e);
-
-            }
-        }
-        
-    }
-
     public class SimConfiguration
     {
         public static int SafeCellPopulationID = 0;
@@ -1953,51 +1739,6 @@ namespace Daphne
         }
     }
 
-    /// <summary>
-    /// Convert double to formatted string
-    /// </summary>
-    [ValueConversion(typeof(double), typeof(string))]
-    public class DoubleToFormattedStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value == null)
-                return "";
-
-            string output = "";
-
-            try
-            {
-                double dd = (double)value;
-                System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
-                ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-                
-                output = string.Format(reac.daph_rate_const.Format, dd);
-            }
-            catch
-            {
-                output = "";
-            }
-
-            return output;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            double val = double.Parse((string)value);
-            System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
-            ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-            reac.daph_rate_const.Value = val;
-            //reac.rate_const = val;
-
-            return val;
-        }
-    }
-
-
-
-   
-
     public enum MoleculeLocation { Bulk = 0, Boundary }
 
     /// <summary>
@@ -3062,7 +2803,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             reaction_guid = id.ToString();
 
-            daph_rate_const = new DaphneDouble();
             rate_const = 0;
             ReadOnly = false;
 
@@ -3077,7 +2817,6 @@ namespace Daphne
             reaction_guid = id.ToString();
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
-            daph_rate_const = new DaphneDouble();
             rate_const = reac.rate_const;
             ReadOnly = false;
 
@@ -3234,32 +2973,9 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
-                daph_rate_const.Value = value;                
             } 
         }
 
-        ////////////////////////
-        // 1/15/2014 Turn on Json Ignore to flush out of scenario files. 
-        // Not used anymore.
-        // At some point in the future we can remove these.
-        [JsonIgnore]
-        private DaphneDouble _daph_rate_const;
-        [JsonIgnore]
-        public DaphneDouble daph_rate_const
-        {
-            get
-            {
-                return _daph_rate_const;
-            }
-
-            set
-            {
-                _daph_rate_const = value;
-                OnPropertyChanged("daph_rate_const");
-            }
-        }
-        //////////////////////////
-        
         public bool ReadOnly { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
