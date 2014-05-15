@@ -170,6 +170,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddDiffState.xaml.cs">
       <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
@@ -212,6 +215,10 @@
     </Compile>
     <Compile Include="TextSearchFilter.cs" />
     <Compile Include="VCRControl.cs" />
+    <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AddDiffState.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
