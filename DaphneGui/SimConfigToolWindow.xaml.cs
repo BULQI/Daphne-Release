@@ -1775,10 +1775,6 @@ namespace DaphneGui
         private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
-            cc.ReadOnly = false;
-            cc.CellName = "DefaultCell";
-            cc.CellRadius = 10;
-            cc.TransductionConstant = 0;
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
         }
