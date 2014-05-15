@@ -3454,6 +3454,8 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
+            TransductionConstant = 0.0;
+            DragCoefficient = 1.0;
 
             Guid id = Guid.NewGuid();
             cell_guid = id.ToString();
