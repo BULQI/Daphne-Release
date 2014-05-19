@@ -564,23 +564,7 @@ namespace DaphneGui
                 }
             }
         }
-        private void cytoBulkMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule mol = e.Item as ConfigMolecule;
-            if (mol != null)
-            {
-                // Filter out mol if membrane bound 
-                if (mol.molecule_location == MoleculeLocation.Bulk)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
-
+        
         private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
@@ -3043,6 +3027,8 @@ namespace DaphneGui
             EpigeneticMapGrid.Columns.Add(editor_col);
             EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
 
+            //EpigeneticMapGrid.Visibility = Visibility.Hidden;
+
 
             //----------------------------------
             //DIFFERENTIATION REGULATORS SECTION
@@ -4055,43 +4041,35 @@ namespace DaphneGui
             return driver;
         }
 
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        private void btnNewDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            CheckBox cb = sender as CheckBox;
+            AddDifferentiationState("State1");
+            AddDifferentiationState("State2");
+        }
 
-            if (cb.IsChecked == false)
-            {
-                MessageBoxResult res;
-                res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
-                if (res == MessageBoxResult.No)
-                    return;
+        private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
 
-                ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-                if (cell == null)
-                    return;
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
 
-                cell.diff_scheme = null;
+            cell.diff_scheme = null;
 
-                //Clear the grids
-                EpigeneticMapGrid.ItemsSource = null;
-                EpigeneticMapGrid.Columns.Clear();
-                DiffRegGrid.ItemsSource = null;
-                DiffRegGrid.Columns.Clear();
+            //Clear the grids
+            EpigeneticMapGrid.ItemsSource = null;
+            EpigeneticMapGrid.Columns.Clear();
+            DiffRegGrid.ItemsSource = null;
+            DiffRegGrid.Columns.Clear();
 
-                //Still want 'Add Genes' combo box
-                DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
-                EpigeneticMapGrid.Columns.Add(combo_col);
-                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
-
-            }
-            else
-            {
-                //Here Add two new states
-                AddDifferentiationState("State1");
-                AddDifferentiationState("State2");
-                //menuAddState_Click(null, null);
-                //menuAddState_Click(null, null);
-            }
+            //Still want 'Add Genes' combo box
+            DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
+            EpigeneticMapGrid.Columns.Add(combo_col);
+            EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
         }
     }    
 
