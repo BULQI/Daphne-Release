@@ -154,10 +154,6 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="bulkMoleculesListView_Filter"
                                   />
-            <CollectionViewSource x:Key="cytoBulkMoleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"
-                                  Filter="cytoBulkMoleculesListView_Filter"
-                                  />
             <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
@@ -1658,7 +1654,7 @@
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                 <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                        ItemsSource="{Binding Source={StaticResource cytoBulkMoleculesListView}}"
+                                        ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
                                         DisplayMemberPath="Name"                                                    
                                         SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="molecule_guid"
@@ -4300,20 +4296,75 @@
 
                                                 <!-- DIFFERENTIATION SCHEME -->
                                                     <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                                        <CheckBox Width="180" 
-                                                                  IsChecked="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Mode=TwoWay, Converter={StaticResource DiffSchemeToBoolConv}, UpdateSourceTrigger=Explicit}"
-                                                                  Click="CheckBox_Click">Has Differentiation Scheme</CheckBox>
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+                                                        
+                                                        <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click">Delete Differentiation Scheme</Button>                                                        
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+
+                                                        <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click">New Differentiation Scheme</Button>
                                                     </StackPanel>
 
                                                     <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
+
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+                                                        
                                                         <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
                                                         <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
                                                                 Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.diff_scheme.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                                         </TextBox>
-                                                        
                                                     </StackPanel>
 
-                                                <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+                                                    <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
+                                                        <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                        
+                                                    </TextBlock>
 
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
                                                     
@@ -4325,7 +4376,10 @@
                                             <!--<docking:ToolWindowContainer x:Name="DiffWindow">
                                                     <docking:ToolWindow x:Name="DiffWinInfo" Title="Diff Reg">-->
                                                         <!--<TextBlock Text="Differentiation Regulators" Grid.Column="0" Grid.Row="5" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />-->
-                                            <StackPanel Orientation="Vertical" x:Name="spDiffRegPanel">
+                                            <!--<StackPanel Orientation="Vertical" x:Name="spDiffRegPanel" >-->
+                                            <StackPanel Orientation="Vertical" x:Name="spDiffRegPanel" 
+                                                                    Visibility="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}">
+
                                                 <!-- This datagrid is for Epigenetic Map and is the best one so far -->
                                                 <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
                                                             AutoGenerateColumns="False"
@@ -4338,7 +4392,6 @@
                                                             SelectionUnit="FullRow"
                                                             PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
                                                             PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-                                                            
                                                             >
 
                                                     <DataGrid.ContextMenu>
@@ -4348,7 +4401,20 @@
                                                             <MenuItem Header="Add a State" Name="menuAddState" Click="menuAddState_Click"></MenuItem>
                                                         </ContextMenu>
                                                     </DataGrid.ContextMenu>
-                                                    
+
+                                                    <DataGrid.Style>
+                                                        <Style TargetType="DataGrid">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </DataGrid.Style>
+
                                                     <DataGrid.Resources>
                                                         <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
                                                             <Setter Property="Background" Value="Transparent" />
@@ -4369,7 +4435,7 @@
                                                                 <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
                                                                     <Setter Property="Background" Value="LightGray"/>
                                                                 </Trigger>
-                                                                
+
                                                                 <!-- This trigger highlights a grid cell if user hovers over it -->
                                                                 <Trigger Property="IsMouseOver" Value="True">
                                                                     <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
@@ -4382,6 +4448,9 @@
                                                                     <Setter Property="Foreground" Value="Black" />
                                                                     <Setter Property="BorderBrush" Value="Black" />
                                                                 </Trigger>
+
+
+                                                                
 
                                                                 <!-- This trigger highlights a grid cell if user hovers over it -->
                                                                 <!--<Trigger Property="IsKeyboardFocusWithin" Value="true">
@@ -4448,7 +4517,20 @@
                                                             <Setter Property="Visibility" Value="Visible" />
                                                         </Style>
                                                     </DataGrid.Resources>
-                                                    
+
+                                                    <DataGrid.Style>
+                                                        <Style TargetType="DataGrid">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </DataGrid.Style>
+
                                                     <!--<DataGrid.RowHeaderTemplate>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
@@ -4456,10 +4538,11 @@
                                                                                     Path=Item.elements[0].CurrentStateName, Mode=TwoWay}"/>
                                                         </DataTemplate>
                                                     </DataGrid.RowHeaderTemplate>-->
-                                                        
+
                                                 </DataGrid>
-                                                    
+
                                             </StackPanel>
+                                            <!--</StackPanel>-->
                                             
                                             <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                 <StackPanel>
