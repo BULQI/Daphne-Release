@@ -282,7 +282,7 @@ namespace Workbench
             s.Color = colorTable[_color % colorTable.Count];          
 
             //------------------------
-            if (s.Points[0].XValue == 0)
+            if (s.Points.Count > 0 && s.Points[0].XValue == 0)
             {
                 s.Points[0].MarkerColor = Color.Gold;
                 s.Points[0].MarkerBorderColor = Color.Black;

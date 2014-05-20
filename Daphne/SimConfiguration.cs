@@ -3219,7 +3219,20 @@ namespace Daphne
             }
         }
 
-        public double CellRadius { get; set; }
+        private double cellRadius;
+        public double CellRadius 
+        { 
+            get
+            {
+                return cellRadius;
+            }
+            set
+            {
+                cellRadius = value ;
+                OnPropertyChanged("CellRadius");
+            }
+        }
+
         private string _locomotor_mol_guid_ref;
         public string locomotor_mol_guid_ref
         {
@@ -3241,8 +3254,34 @@ namespace Daphne
         }
 
 
-        public double TransductionConstant { get; set; }
-        public double DragCoefficient { get; set; }
+        private double transductionConstant;
+        public double TransductionConstant
+        {
+            get
+            {
+                return transductionConstant;
+            }
+            set
+            {
+                transductionConstant = value;
+                OnPropertyChanged("TransductionConstant");
+            }
+        }
+
+        private double dragCoefficient;
+        public double DragCoefficient
+        {
+            get
+            {
+                return dragCoefficient;
+            }
+            set
+            {
+                dragCoefficient = value;
+                OnPropertyChanged("DragCoefficient");
+            }
+        }
+
         public string cell_guid { get; set; }
         public bool ReadOnly { get; set; }
 
