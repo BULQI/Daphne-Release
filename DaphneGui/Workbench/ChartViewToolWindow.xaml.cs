@@ -248,7 +248,7 @@ namespace Workbench
 
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "Number")
+            if (e.PropertyName == "FNumber")
             {
                 foreach (MolConcInfo mci in RC.initConcs)
                 {
