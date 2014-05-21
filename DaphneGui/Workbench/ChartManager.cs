@@ -129,7 +129,7 @@ namespace Workbench
                        
             cChart.ChartAreas.Add(chartArear1);
             double[] x; double[] y; x = ListTimes.ToArray();
-            int count = 0;
+            int count = 0;            
             
             //For each molecule, call a function to create and draw the series 
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
@@ -157,8 +157,6 @@ namespace Workbench
             }
             //if (chartArear1.AxisY.Minimum ==0 && chartArear1.AxisY.IsLogarithmic)
             //    chartArear1.AxisY.Minimum = Y_MIN;
-
-
 
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -301,7 +299,7 @@ namespace Workbench
             {
                 if (IsYLogarithmic) //(cChart.ChartAreas[0].AxisY.IsLogarithmic)
                 {
-                    if (min > e.Value.Where(a => a > 0).Min())
+                    if (e.Value.Where(a => a > 0).Count() > 0 &&  min > e.Value.Where(a => a > 0).Min())
                     {
                         min = e.Value.Min();
                     }

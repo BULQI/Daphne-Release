@@ -594,5 +594,26 @@ namespace DaphneGui
                     return reaction_template_guid_ref;
             }
         }
+
+        private void txtSearch_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            string searchText = tb.Text;
+            searchText = searchText.Trim();
+            searchText = searchText.ToLower();
+
+            foreach (var item in lbMol.Items)
+            {
+                ConfigMolecule mol = (ConfigMolecule)item;
+                string name = mol.Name;
+                name = name.ToLower();
+                if (name.Contains(searchText))
+                {
+                    lbMol.SelectedItem = item;
+                    lbMol.ScrollIntoView(lbMol.SelectedItem);
+                    break;
+                }
+            }
+        }
     }
 }

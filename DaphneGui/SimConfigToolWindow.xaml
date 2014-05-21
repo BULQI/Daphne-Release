@@ -2343,7 +2343,7 @@
                             />
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddEcmMolButton"  Width="50" Content="Add" Click="AddEcmMolButton_Click"/>
+                                <Button Name="AddEcmMolButton"  Width="50" Content="New" Click="AddEcmMolButton_Click"/>
                                 <Button Name="RemoveEcmMolButton" Width="50" Content="Remove" Click="RemoveEcmMolButton_Click" />
                             </StackPanel>
                             <Expander ExpandDirection="Down"
@@ -2735,7 +2735,7 @@
                                      
                                              />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="AddCellPopButton"  Width="50" Content="Add" Click="AddCellPopButton_Click"/>
+                                <Button Name="AddCellPopButton"  Width="50" Content="New" Click="AddCellPopButton_Click"/>
                                 <Button Name="RemoveCellPopButton" Width="50" Content="Remove" Click="RemoveCellPopButton_Click" />
                             </StackPanel>
                             <Expander ExpandDirection="Down" Padding="6"
@@ -3373,7 +3373,7 @@
                             </DataGrid>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="btnCopyGene"  Width="50" Content="Copy" Click="btnCopyGene_Click"></Button>
-                                <Button Name="btnAddGene"  Width="50" Content="Add" Click="btnAddGene_Click"></Button>
+                                <Button Name="btnAddGene"  Width="50" Content="New" Click="btnAddGene_Click"></Button>
                                 <Button Name="btnRemoveGene" Width="50" Content="Remove"  Click="btnRemoveGene_Click"></Button>
                             </StackPanel>
                         </StackPanel>
@@ -3515,7 +3515,7 @@
                             </DataGrid>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="btnCopyMolec"  Width="50" Content="Copy" Click="btnCopyMolecule_Click"></Button>
-                                <Button Name="btnAddMolec"  Width="50" Content="Add" Click="btnAddLibMolecule_Click"></Button>
+                                <Button Name="btnAddMolec"  Width="50" Content="New" Click="btnAddLibMolecule_Click"></Button>
                                 <Button Name="btnRemoveMolec" Width="50" Content="Remove"  Click="btnRemoveMolecule_Click"></Button>
                             </StackPanel>
                         </StackPanel>
@@ -3615,7 +3615,7 @@
                             <Expander 
                                     Padding="10" ExpandDirection="Down"
                                     IsExpanded="False"
-                                    Header="Add Reaction"                                                  
+                                    Header="New Reaction"                                                  
                                     x:Name="AddReaction"
                                     Margin="0,4,0,0" 
                                     Canvas.ZIndex="1"
@@ -3786,7 +3786,7 @@
                                     />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="CopyCellButton"  Width="50" Content="Copy" Click="CopyCellButton_Click" />
-                                <Button Name="AddCellButton"  Width="50" Content="Add" Click="AddLibCellButton_Click"/>
+                                <Button Name="AddCellButton"  Width="50" Content="New" Click="AddLibCellButton_Click"/>
                                 <Button Name="RemoveCellButton" Width="50" Content="Remove" Click="RemoveCellButton_Click" />
                             </StackPanel>
 
