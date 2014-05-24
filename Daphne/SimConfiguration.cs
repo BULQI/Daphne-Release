@@ -1845,6 +1845,28 @@ namespace Daphne
         }
     }
 
+    public class DivDeathDriverToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bResult = true;
+            ConfigTransitionDriver dr = value as ConfigTransitionDriver;
+
+            if (dr == null)
+            {
+                bResult = false;
+            }
+
+            return bResult;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigTransitionDriver dr = null;
+
+            return dr;
+        }
+    }
+
     public class DiffSchemeToDiffNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

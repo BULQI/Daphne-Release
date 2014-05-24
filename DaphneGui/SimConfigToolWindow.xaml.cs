@@ -1254,6 +1254,9 @@ namespace DaphneGui
 
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+
+            //cytosolMolPopDetailsTemplate
+            //cyto_molecule_combo_box.SelectedIndex = 0;
         }
 
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -2490,7 +2493,7 @@ namespace DaphneGui
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
                 molpop.Name = new_mol_name;
-
+            
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
@@ -3626,38 +3629,7 @@ namespace DaphneGui
             CellsListBox.SelectedIndex = -1;
             CellsListBox.SelectedIndex = nIndex;
         }
-
-        private void chkHasDeathDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            if (cell == null)
-                return;
-
-            CheckBox ch = sender as CheckBox;
-            if (ch.IsChecked == false)
-            {
-                cell.death_driver = null;
-            }
-            else
-            {
-                if (cell.death_driver == null)
-                {
-                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                    //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                    cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
-                    if (cell.death_driver_guid_ref == "")
-                    {
-                        MessageBox.Show("No death drivers are defined");
-                        return;
-                    }
-                    if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
-                    {
-                        cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
-                    }
-                }
-            }
-        }
-
+        
         private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
@@ -3751,6 +3723,86 @@ namespace DaphneGui
             DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
             EpigeneticMapGrid.Columns.Add(combo_col);
             EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
+        }
+
+        private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+            
+            if (cell.death_driver == null)
+            {
+                EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
+                cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
+                if (cell.death_driver_guid_ref == "")
+                {
+                    MessageBox.Show("No death drivers are defined");
+                    return;
+                }
+                if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
+                {
+                    cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
+                }
+            }
+        }
+
+        private void btnDelDeathDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            //confirm deletion of driver
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's death driver?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            //delete driver
+            cell.death_driver = null;
+            
+        }
+
+        private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            
+            if (cell.div_driver == null)
+            {
+                EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                if (cell.div_driver_guid_ref == "")
+                {
+                    MessageBox.Show("No division drivers are defined");
+                    return;
+                }
+
+                if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                {
+                    cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                }
+            }
+        }
+
+        private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            //confirm deletion of driver
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            //delete driver
+            cell.div_driver = null;
         }
     }    
 
