@@ -66,7 +66,7 @@
             <daph:TransitionDriverToBoolConverter x:Key="TransitionDriverToBoolConv" />
             <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
             <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
-            <!-- <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" /> -->
+            <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
