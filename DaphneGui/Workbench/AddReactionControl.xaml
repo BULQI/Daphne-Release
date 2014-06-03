@@ -115,7 +115,7 @@
 
                 <StackPanel Orientation="Horizontal"  Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
                     <TextBlock Margin="10,4,4,0" Text="Find:" VerticalAlignment="Center"  HorizontalAlignment="Right" />
-                    <TextBox x:Name="txtSearch" Width="340" HorizontalAlignment="Left" Margin="20,4,4,0"/>
+                    <TextBox x:Name="txtSearch" Width="340" HorizontalAlignment="Left" Margin="20,4,4,0" SelectionChanged="txtSearch_SelectionChanged" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="0" Grid.Row="1">

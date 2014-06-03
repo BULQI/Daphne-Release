@@ -300,220 +300,6 @@ namespace Daphne
 
     }
 
-    public class DaphneDouble : INotifyPropertyChanged
-    {
-        private double min;                         //minimum value allowed
-        private double max;                         //maximum value allowed 
-
-        public double Tick { get; set; }            //slider/edit box increment if applicable
-        public int RangeMultFactor { get; set; }
-        private double rangeFactor;                 //example - 2 means (min = value - value/2), (max = value + value/2)
-
-        private string _format;                    //format string
-        private int _decimal_places;            //number of decimal places to display
-        private double _value;                     //the actual double value that the object contains
-        private string fvalue;                      //string that represents value after formatting is applied
-        private double sn_upper_threshold;                 //if value is greater than or equal to this number, then output in scientific notation        
-        private double sn_lower_threshold;                 //if value is greater than or equal to this number, then output in scientific notation        
-
-        public double Max
-        {
-            get
-            {
-                return max;
-            }
-            set
-            {
-                max = value;
-                OnPropertyChanged("Max");
-            }
-        }
-
-        public double Min
-        {
-            get
-            {
-                return min;
-            }
-            set
-            {
-                min = value;
-                OnPropertyChanged("Min");
-            }
-        }
-
-        public double RangeFactor
-        {
-            get
-            {
-                return rangeFactor;
-            }
-            set
-            {
-                rangeFactor = value;
-                if (rangeFactor <= 0)
-                    rangeFactor = 2;
-            }
-        }
-
-        public string FValue
-        {
-            get
-            {
-                return fvalue;
-            }
-            set
-            {
-                fvalue = string.Format(_format, _value);
-                OnPropertyChanged("FValue");
-            }
-        }
-
-        public double Value
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                _value = value;
-
-                Format = "";
-                FValue = string.Format(_format, _value);
-
-                OnPropertyChanged("Value");
-            }
-        }
-
-        public int DecimalPlaces
-        {
-            get
-            {
-                return _decimal_places;
-            }
-            set
-            {
-                _decimal_places = value;
-
-                Format = "0";
-                FValue = string.Format(_format, Value);
-
-                OnPropertyChanged("DecimalPlaces");
-            }
-        }
-
-        public double SnUpperThreshold
-        {
-            get
-            {
-                return sn_upper_threshold;
-            }
-            set
-            {
-                sn_upper_threshold = value;
-                OnPropertyChanged("SnUpperThreshold");
-                Format = "0";
-                FValue = string.Format(_format, Value);
-            }
-        }
-
-        public double SnLowerThreshold
-        {
-            get
-            {
-                return sn_lower_threshold;
-            }
-            set
-            {
-                sn_lower_threshold = value;
-                OnPropertyChanged("SnLowerThreshold");
-                Format = "0";
-                FValue = string.Format(_format, Value);
-            }
-        }
-
-        public string Format
-        {
-            get
-            {
-                return _format;
-            }
-            set
-            {
-                _format = "{0:N" + DecimalPlaces.ToString() + "}";
-                if (Value >= SnUpperThreshold)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "#";
-                    }
-
-                    _format += "e+00}";
-                }
-                else if (Value <= SnLowerThreshold)
-                {
-                    if (DecimalPlaces == 0)
-                        DecimalPlaces++;
-
-                    _format = "{0:#.";
-                    for (int i = 0; i < DecimalPlaces; i++)
-                    {
-                        _format += "#";
-                    }
-
-                    _format += "e-00}";
-                }
-                OnPropertyChanged("Format");
-            }
-        }
-
-        public void SetMinMax()
-        {
-            Max = _value + _value / RangeFactor;
-            Min = _value - _value / RangeFactor;
-        }
-
-        public void SetMinMax(double d)
-        {
-            Max = d + d / RangeFactor;
-            Min = d - d / RangeFactor;
-        }
-
-        //Constructor
-        public DaphneDouble()
-        {
-            ////_value = 20;
-            _decimal_places = 3;
-            SnUpperThreshold = 100;
-            SnLowerThreshold = 0.01;
-            RangeMultFactor = 10;
-            RangeFactor = 2;
-            Format = "-";
-            ////fvalue = string.Format(_format, _value);
-            ////Max = _value + _value / RangeFactor;
-            ////Min = _value - _value / RangeFactor;
-        }
-
-        //Notification handling
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChangedEventHandler handler = this.PropertyChanged;
-            if (handler != null)
-            {
-                var e = new PropertyChangedEventArgs(propertyName);
-                handler(this, e);
-
-            }
-        }
-        
-    }
-
     public class SimConfiguration
     {
         public static int SafeCellPopulationID = 0;
@@ -1953,51 +1739,6 @@ namespace Daphne
         }
     }
 
-    /// <summary>
-    /// Convert double to formatted string
-    /// </summary>
-    [ValueConversion(typeof(double), typeof(string))]
-    public class DoubleToFormattedStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value == null)
-                return "";
-
-            string output = "";
-
-            try
-            {
-                double dd = (double)value;
-                System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
-                ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-                
-                output = string.Format(reac.daph_rate_const.Format, dd);
-            }
-            catch
-            {
-                output = "";
-            }
-
-            return output;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            double val = double.Parse((string)value);
-            System.Windows.FrameworkElement fe = (System.Windows.FrameworkElement)parameter;
-            ConfigReaction reac = (ConfigReaction)(fe.DataContext);
-            reac.daph_rate_const.Value = val;
-            //reac.rate_const = val;
-
-            return val;
-        }
-    }
-
-
-
-   
-
     public enum MoleculeLocation { Bulk = 0, Boundary }
 
     /// <summary>
@@ -2101,6 +1842,28 @@ namespace Daphne
             ConfigDiffScheme ds = null;
 
             return ds;
+        }
+    }
+
+    public class DivDeathDriverToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            bool bResult = true;
+            ConfigTransitionDriver dr = value as ConfigTransitionDriver;
+
+            if (dr == null)
+            {
+                bResult = false;
+            }
+
+            return bResult;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            ConfigTransitionDriver dr = null;
+
+            return dr;
         }
     }
 
@@ -3062,7 +2825,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
             reaction_guid = id.ToString();
 
-            daph_rate_const = new DaphneDouble();
             rate_const = 0;
             ReadOnly = false;
 
@@ -3077,7 +2839,6 @@ namespace Daphne
             reaction_guid = id.ToString();
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
-            daph_rate_const = new DaphneDouble();
             rate_const = reac.rate_const;
             ReadOnly = false;
 
@@ -3095,41 +2856,36 @@ namespace Daphne
             string s = "";
             int i = 0;
 
-            // Transcription reactions have a ConfigGene object as the reactant.
-            // Other reactions have ConfigMolecule objects as the reactants.
-            if (repos.reaction_templates_dict[reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+            // Reactants
+            foreach (string mol_guid_ref in reactants_molecule_guid_ref)
             {
-                ConfigGene g = repos.genes_dict[reactants_molecule_guid_ref[0]];
-                s += g.Name;
+                //stoichiometry
+                int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
+                i++;
+                if (n > 1)
+                    s += n;
+                s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
-            else
-            {
-                foreach (string mol_guid_ref in reactants_molecule_guid_ref)
-                {
-                    ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
 
-                    //stoichiometry
-                    int n = repos.reaction_templates_dict[reaction_template_guid_ref].reactants_stoichiometric_const[i];
-                    i++;
-                    if (n > 1)
-                        s += n;
-                    s += cm.Name;
-                    s += " + ";
-                }
-            }
             i = 0;
+            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                if (repos.genes_dict.ContainsKey(mol_guid_ref))
+                {
+                    s += repos.genes_dict[modifiers_molecule_guid_ref[0]].Name;
+                }
+                else
+                {
+                    s += repos.molecules_dict[mol_guid_ref].Name;
+                }
                 s += " + ";
             }
 
@@ -3139,36 +2895,40 @@ namespace Daphne
             s = s + " -> ";
 
             i = 0;
+            // Products
             foreach (string mol_guid_ref in products_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].products_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                s += repos.molecules_dict[mol_guid_ref].Name;
                 s += " + ";
             }
             i = 0;
+            // Modifiers
             foreach (string mol_guid_ref in modifiers_molecule_guid_ref)
             {
-                ConfigMolecule cm = repos.molecules_dict[mol_guid_ref];
-
-                //stoichiometry??
+                //stoichiometry
                 int n = repos.reaction_templates_dict[reaction_template_guid_ref].modifiers_stoichiometric_const[i];
                 i++;
                 if (n > 1)
                     s += n;
 
-                s += cm.Name;
+                if (repos.genes_dict.ContainsKey(mol_guid_ref))
+                {
+                    s += repos.genes_dict[modifiers_molecule_guid_ref[0]].Name;
+                }
+                else
+                {
+                    s += repos.molecules_dict[mol_guid_ref].Name;
+                }
                 s += " + ";
             }
 
             s = s.Trim(trimChars);
-
             TotalReactionString = s;
         }
 
@@ -3184,25 +2944,6 @@ namespace Daphne
 
         public bool HasBoundaryMolecule(EntityRepository repos)
         {
-            // Check for transcription reactions
-            // NOTE: Gene transcription currently:  gene (reactant) -> molecule (bulk)
-            // Future implementation will be corrected as:   gene (modifier) -> molecule (bulk) + gene (modifier)
-            // After change, remove check on reactants_molecul_guid_ref
-            if (reactants_molecule_guid_ref.Count > 0)
-            {
-                if (repos.genes_dict.ContainsKey(reactants_molecule_guid_ref[0]) )
-                {
-                    return false;
-                }
-            }
-            if (modifiers_molecule_guid_ref.Count > 0)
-            {
-                if (repos.genes_dict.ContainsKey(modifiers_molecule_guid_ref[0]))
-                {
-                    return false;
-                }
-            }
-
             foreach (string molguid in reactants_molecule_guid_ref)
             {
                 if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
@@ -3215,8 +2956,11 @@ namespace Daphne
             }
             foreach (string molguid in modifiers_molecule_guid_ref)
             {
-                if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    return true;
+                if (!repos.genes_dict.ContainsKey(molguid))
+                {
+                    if (repos.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+                        return true;
+                }
             }
 
             return false;
@@ -3234,32 +2978,9 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
-                daph_rate_const.Value = value;                
             } 
         }
 
-        ////////////////////////
-        // 1/15/2014 Turn on Json Ignore to flush out of scenario files. 
-        // Not used anymore.
-        // At some point in the future we can remove these.
-        [JsonIgnore]
-        private DaphneDouble _daph_rate_const;
-        [JsonIgnore]
-        public DaphneDouble daph_rate_const
-        {
-            get
-            {
-                return _daph_rate_const;
-            }
-
-            set
-            {
-                _daph_rate_const = value;
-                OnPropertyChanged("daph_rate_const");
-            }
-        }
-        //////////////////////////
-        
         public bool ReadOnly { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
@@ -3471,6 +3192,8 @@ namespace Daphne
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
+            TransductionConstant = 0.0;
+            DragCoefficient = 1.0;
 
             Guid id = Guid.NewGuid();
             cell_guid = id.ToString();
@@ -3518,7 +3241,20 @@ namespace Daphne
             }
         }
 
-        public double CellRadius { get; set; }
+        private double cellRadius;
+        public double CellRadius 
+        { 
+            get
+            {
+                return cellRadius;
+            }
+            set
+            {
+                cellRadius = value ;
+                OnPropertyChanged("CellRadius");
+            }
+        }
+
         private string _locomotor_mol_guid_ref;
         public string locomotor_mol_guid_ref
         {
@@ -3540,8 +3276,34 @@ namespace Daphne
         }
 
 
-        public double TransductionConstant { get; set; }
-        public double DragCoefficient { get; set; }
+        private double transductionConstant;
+        public double TransductionConstant
+        {
+            get
+            {
+                return transductionConstant;
+            }
+            set
+            {
+                transductionConstant = value;
+                OnPropertyChanged("TransductionConstant");
+            }
+        }
+
+        private double dragCoefficient;
+        public double DragCoefficient
+        {
+            get
+            {
+                return dragCoefficient;
+            }
+            set
+            {
+                dragCoefficient = value;
+                OnPropertyChanged("DragCoefficient");
+            }
+        }
+
         public string cell_guid { get; set; }
         public bool ReadOnly { get; set; }
 

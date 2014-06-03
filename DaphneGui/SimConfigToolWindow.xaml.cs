@@ -32,8 +32,7 @@ namespace DaphneGui
     /// Interaction logic for SimConfigToolWindow.xaml
     /// </summary>
     public partial class SimConfigToolWindow : ToolWindow
-    {        
-
+    {                
         //private static bool newCellPopSelected = true;
         public SimConfigToolWindow()
         {
@@ -70,6 +69,7 @@ namespace DaphneGui
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
+        //This method is called when the user clicks the Remove Cell button
         private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             int index = CellPopsListBox.SelectedIndex;
@@ -564,23 +564,7 @@ namespace DaphneGui
                 }
             }
         }
-        private void cytoBulkMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule mol = e.Item as ConfigMolecule;
-            if (mol != null)
-            {
-                // Filter out mol if membrane bound 
-                if (mol.molecule_location == MoleculeLocation.Bulk)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
-
+        
         private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
@@ -656,8 +640,6 @@ namespace DaphneGui
 
         }
 
-        
-
         private bool EcmHasMolecule(string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
@@ -679,7 +661,6 @@ namespace DaphneGui
             
             return ret;
         }
-        //CellPopsHaveMoleculeInCytosol
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
             bool ret = false;
@@ -695,124 +676,35 @@ namespace DaphneGui
 
         private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
-            if (lvAvailableReacs.SelectedIndex == -1)
-                return;
+            bool needRefresh = false;
 
-            ConfigReaction reac = (ConfigReaction)lvAvailableReacs.SelectedItem;
-
-            //HERE MUST CHECK IF THE ECM HAS THE MOLECULES NEEDED BY THIS REACTION
-            //Reactants
-            foreach (string newmolguid in reac.reactants_molecule_guid_ref)
+            foreach (var item in lvAvailableReacs.SelectedItems)
             {
-                bool bFound = false;
+                ConfigReaction reac = (ConfigReaction)item;
 
-                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                if (cm != null)
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.reaction_guid))
                 {
-                    if (cm.molecule_location == MoleculeLocation.Boundary)
-                    {
-                        if (CellPopsHaveMoleculeInMemb(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-                    else
-                    {
-                        if (EcmHasMolecule(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-
-                    if (bFound == false)
-                    {
-                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
-                        MessageBox.Show(msg);
-                        return;
-                    }
-                }
-            }
-            //Products
-            foreach (string newmolguid in reac.products_molecule_guid_ref)
-            {
-                bool bFound = false;
-
-                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                if (cm != null)
-                {
-                    if (cm.molecule_location == MoleculeLocation.Boundary)
-                    {
-                        if (CellPopsHaveMoleculeInMemb(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-                    else
-                    {
-                        if (EcmHasMolecule(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-
-                    if (bFound == false)
-                    {
-                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
-                        MessageBox.Show(msg);
-                        return;
-                    }
-                }
-            }
-            //Modifiers
-            foreach (string newmolguid in reac.modifiers_molecule_guid_ref)
-            {
-                bool bFound = false;
-
-                ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                if (cm != null)
-                {
-                    if (cm.molecule_location == MoleculeLocation.Boundary)
-                    {
-                        if (CellPopsHaveMoleculeInMemb(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-                    else
-                    {
-                        if (EcmHasMolecule(newmolguid))
-                        {
-                            bFound = true;
-                        }
-                    }
-
-                    if (bFound == false)
-                    {
-                        string msg = string.Format("Molecule {0} not found in ECM or cell membranes.  Please add molecule before adding this reaction.", cm.Name);
-                        MessageBox.Show(msg);
-                        return;
-                    }
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                    needRefresh = true;
                 }
             }
 
-
-            if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.reaction_guid))
-            {
-                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
-            }
+            //Refresh the filter
+            if (needRefresh && lvAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
 
         }
+
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
-            int nIndex = lvEcsReactions.SelectedIndex;
-            if (nIndex >= 0)
+            if (lvEcsReactions.SelectedIndex < 0)
+                return;
+
+            string guid = (string)lvEcsReactions.SelectedValue;
+            ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
             {
-                string guid = (string)lvEcsReactions.SelectedValue;
-                ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
-                {
-                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
-                }
+                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
             }
         }
 
@@ -863,6 +755,10 @@ namespace DaphneGui
                 }
             }
 
+            //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+                bOK = false;
+
             e.Accepted = bOK;
         }
 
@@ -891,66 +787,14 @@ namespace DaphneGui
             if (bOK)
                 bOK = cc.membrane.HasMolecules(cr.products_molecule_guid_ref);
 
-            //Finally, loop through modifiers list
+            //Loop through modifiers list
             if (bOK)
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
-            e.Accepted = bOK;
+            //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
+            if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+                bOK = false;
 
-            #region Old Code - remove after well tested
-            //foreach (string molguid in cr.reactants_molecule_guid_ref)
-            //{
-            //    ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
-            //    if (cc.membrane.HasMolecule(mol))
-            //    {
-            //        bOK = true;
-            //    }
-            //    else
-            //    {
-            //        bOK = false;
-            //        break;
-            //    }
-            //}
-
-            //If bOK is true, that means the molecules in the reactants list all exist in the membrane
-            //Now check the products list
-
-            //if (bOK)
-            //{
-            //    foreach (string molguid in cr.products_molecule_guid_ref)
-            //    {
-            //        ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
-            //        if (cc.membrane.HasMolecule(mol))
-            //        {
-            //            bOK = true;
-            //        }
-            //        else
-            //        {
-            //            bOK = false;
-            //            break;
-            //        }
-            //    }
-            //}
-
-            //Finally, loop through modifiers list
-            //if (bOK)
-            //{
-            //    foreach (string molguid in cr.modifiers_molecule_guid_ref)
-            //    {
-            //        ConfigMolecule mol = MainWindow.SC.SimConfig.entity_repository.molecules_dict[molguid];
-            //        if (cc.membrane.HasMolecule(mol))
-            //        {
-            //            bOK = true;
-            //        }
-            //        else
-            //        {
-            //            bOK = false;
-            //            break;
-            //        }
-            //    }
-            //}
-            #endregion
-           
             e.Accepted = bOK;
         }
 
@@ -970,13 +814,6 @@ namespace DaphneGui
             ObservableCollection<string> gene_guids = new ObservableCollection<string>();
             ObservableCollection<string> bulk = new ObservableCollection<string>();
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-
-            //if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
-            //{
-            //    e.Accepted = true;
-
-            //    return;
-            //}
 
             foreach (string molguid in cr.reactants_molecule_guid_ref)
                 if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
@@ -1010,11 +847,11 @@ namespace DaphneGui
                 bTranscription = bulk.Count > 0 && gene_guids.Count > 0 && cc.HasGenes(gene_guids) && cc.cytosol.HasMolecules(bulk);
                 if (bTranscription == true)
                 {
-                    e.Accepted = true;
+                    bOK = true;
                 }
                 else
                 {
-                    e.Accepted = false;
+                    bOK = false;
                 }
             }
             else
@@ -1028,9 +865,13 @@ namespace DaphneGui
                 if (bOK)
                     bOK = cc.cytosol.HasMolecules(bulk);
 
-                e.Accepted = bOK;
             }
 
+            //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
+            if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+                bOK = false;
+
+            e.Accepted = bOK;
         }
 
 
@@ -1270,109 +1111,25 @@ namespace DaphneGui
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            bool needRefresh = false;
 
             foreach (var item in lvCellAvailableReacs.SelectedItems)
             {
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    //Here, must check if the cell has the molecules that are needed by this reaction
-                    //Reactants
-                    foreach (string newmolguid in cr.reactants_molecule_guid_ref)
-                    {
-                        bool bFound = false;
-
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null) {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid)) {
-                                    bFound = true;
-                                }
-                            }
-                            else 
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid)) {
-                                    bFound = true;
-                                }
-                            }
-
-                            if (bFound == false) {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }                        
-                    }
-                    //Products
-                    foreach (string newmolguid in cr.products_molecule_guid_ref)
-                    {
-                        bool bFound = false;
-
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null)
-                        {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-                            else
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-
-                            if (bFound == false)
-                            {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }
-                    }
-                    //Modifiers
-                    foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
-                    {
-                        bool bFound = false;
-
-                        ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                        if (cm != null)
-                        {
-                            if (cm.molecule_location == MoleculeLocation.Boundary)
-                            {
-                                if (MembraneHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-                            else
-                            {
-                                if (CytosolHasMolecule(cc, newmolguid))
-                                {
-                                    bFound = true;
-                                }
-                            }
-
-                            if (bFound == false)
-                            {
-                                string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                                MessageBox.Show(msg);
-                                return;
-                            }
-                        }
-                    }
-
-
                     if (!cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid)) {
                         cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+
+                        needRefresh = true;
                     }
                 }
             }
+
+            //Refresh filter
+            if (needRefresh && lvCellAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+
         }
 
         private bool MembraneHasMolecule(ConfigCell cell, string molguid)
@@ -1401,112 +1158,26 @@ namespace DaphneGui
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+            bool needRefresh = false;
 
             foreach (var item in lvCytosolAvailableReacs.SelectedItems)
             {
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    //Here, must check if the cell has the molecules that are needed by this reaction
-                    //Reactants
-                    //foreach (string newmolguid in cr.reactants_molecule_guid_ref)
-                    //{
-                    //    bool bFound = false;
-
-                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                    //    if (cm != null)
-                    //    {
-                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
-                    //        {
-                    //            if (MembraneHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-                    //        else
-                    //        {
-                    //            if (CytosolHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-
-                    //        if (bFound == false)
-                    //        {
-                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                    //            MessageBox.Show(msg);
-                    //            return;
-                    //        }
-                    //    }
-                    //}
-                    //Products
-                    //foreach (string newmolguid in cr.products_molecule_guid_ref)
-                    //{
-                    //    bool bFound = false;
-
-                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                    //    if (cm != null)
-                    //    {
-                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
-                    //        {
-                    //            if (MembraneHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-                    //        else
-                    //        {
-                    //            if (CytosolHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-
-                    //        if (bFound == false)
-                    //        {
-                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                    //            MessageBox.Show(msg);
-                    //            return;
-                    //        }
-                    //    }
-                    //}
-                    //Modifiers 
-                    //foreach (string newmolguid in cr.modifiers_molecule_guid_ref)
-                    //{
-                    //    bool bFound = false;
-
-                    //    ConfigMolecule cm = MainWindow.SC.SimConfig.entity_repository.molecules_dict[newmolguid];
-                    //    if (cm != null)
-                    //    {
-                    //        if (cm.molecule_location == MoleculeLocation.Boundary)
-                    //        {
-                    //            if (MembraneHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-                    //        else
-                    //        {
-                    //            if (CytosolHasMolecule(cc, newmolguid))
-                    //            {
-                    //                bFound = true;
-                    //            }
-                    //        }
-
-                    //        if (bFound == false)
-                    //        {
-                    //            string msg = string.Format("Molecule {0} not found in cell.  Please add molecule to cell before adding this reaction.", cm.Name);
-                    //            MessageBox.Show(msg);
-                    //            return;
-                    //        }
-                    //    }
-                    //}
+                    //Add to reactions list only if the cell does not already contain this reaction
                     if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
                     {
                         cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+
+                        needRefresh = true;
                     }
                 }
             }
+
+            //Refresh the filter
+            if (needRefresh && lvCytosolAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
@@ -1583,6 +1254,9 @@ namespace DaphneGui
 
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
+
+            //cytosolMolPopDetailsTemplate
+            //cyto_molecule_combo_box.SelectedIndex = 0;
         }
 
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -1775,10 +1449,6 @@ namespace DaphneGui
         private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cc = new ConfigCell();
-            cc.ReadOnly = false;
-            cc.CellName = "DefaultCell";
-            cc.CellRadius = 10;
-            cc.TransductionConstant = 0;
             MainWindow.SC.SimConfig.entity_repository.cells.Add(cc);
             CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
         }
@@ -2823,7 +2493,7 @@ namespace DaphneGui
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
                 molpop.Name = new_mol_name;
-
+            
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
@@ -3959,38 +3629,7 @@ namespace DaphneGui
             CellsListBox.SelectedIndex = -1;
             CellsListBox.SelectedIndex = nIndex;
         }
-
-        private void chkHasDeathDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            if (cell == null)
-                return;
-
-            CheckBox ch = sender as CheckBox;
-            if (ch.IsChecked == false)
-            {
-                cell.death_driver = null;
-            }
-            else
-            {
-                if (cell.death_driver == null)
-                {
-                    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                    //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                    cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
-                    if (cell.death_driver_guid_ref == "")
-                    {
-                        MessageBox.Show("No death drivers are defined");
-                        return;
-                    }
-                    if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
-                    {
-                        cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
-                    }
-                }
-            }
-        }
-
+        
         private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
@@ -4055,43 +3694,115 @@ namespace DaphneGui
             return driver;
         }
 
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        private void btnNewDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            CheckBox cb = sender as CheckBox;
+            AddDifferentiationState("State1");
+            AddDifferentiationState("State2");
+        }
 
-            if (cb.IsChecked == false)
+        private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+            if (cell == null)
+                return;
+
+            cell.diff_scheme = null;
+
+            //Clear the grids
+            EpigeneticMapGrid.ItemsSource = null;
+            EpigeneticMapGrid.Columns.Clear();
+            DiffRegGrid.ItemsSource = null;
+            DiffRegGrid.Columns.Clear();
+
+            //Still want 'Add Genes' combo box
+            DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
+            EpigeneticMapGrid.Columns.Add(combo_col);
+            EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
+        }
+
+        private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+            
+            if (cell.death_driver == null)
             {
-                MessageBoxResult res;
-                res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
-                if (res == MessageBoxResult.No)
+                EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
+                cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
+                if (cell.death_driver_guid_ref == "")
+                {
+                    MessageBox.Show("No death drivers are defined");
                     return;
-
-                ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-                if (cell == null)
-                    return;
-
-                cell.diff_scheme = null;
-
-                //Clear the grids
-                EpigeneticMapGrid.ItemsSource = null;
-                EpigeneticMapGrid.Columns.Clear();
-                DiffRegGrid.ItemsSource = null;
-                DiffRegGrid.Columns.Clear();
-
-                //Still want 'Add Genes' combo box
-                DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SC.SimConfig.entity_repository);
-                EpigeneticMapGrid.Columns.Add(combo_col);
-                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
-
+                }
+                if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
+                {
+                    cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
+                }
             }
-            else
+        }
+
+        private void btnDelDeathDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            //confirm deletion of driver
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's death driver?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            //delete driver
+            cell.death_driver = null;
+            
+        }
+
+        private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            
+            if (cell.div_driver == null)
             {
-                //Here Add two new states
-                AddDifferentiationState("State1");
-                AddDifferentiationState("State2");
-                //menuAddState_Click(null, null);
-                //menuAddState_Click(null, null);
+                EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+                cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                if (cell.div_driver_guid_ref == "")
+                {
+                    MessageBox.Show("No division drivers are defined");
+                    return;
+                }
+
+                if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                {
+                    cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                }
             }
+        }
+
+        private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+            if (cell == null)
+                return;
+
+            //confirm deletion of driver
+            MessageBoxResult res;
+            res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
+            if (res == MessageBoxResult.No)
+                return;
+
+            //delete driver
+            cell.div_driver = null;
         }
     }    
 
