@@ -248,7 +248,7 @@ namespace Workbench
 
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "FNumber")
+            if (e.PropertyName == "Number")
             {
                 foreach (MolConcInfo mci in RC.initConcs)
                 {
@@ -261,10 +261,13 @@ namespace Workbench
 
         private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (RC != null && cm != null)
+            if (e.PropertyName == "Number")
             {
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                if (RC != null && cm != null)
+                {
+                    cm.RedrawSeries();
+                    cm.RecalculateYMax();
+                }
             }
         }
 

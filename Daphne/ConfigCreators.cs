@@ -553,8 +553,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[4] { 250, 0, 0, 1 };
-            type = new string[4] { "A", "A*", "Apop", "gApop" };
+            conc = new double[3] { 250, 0, 0 };
+            type = new string[3] { "A", "A*", "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -576,9 +576,16 @@ namespace Daphne
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
 
+            // Add genes
+            type = new string[1] { "gApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+            }
+
             // Reactions in Cytosol
             type = new string[3] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                          "A* -> A", "gApop -> Apop + gApop" };
+                                          "A* -> A", "gApop -> sApop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], sc);
@@ -625,8 +632,8 @@ namespace Daphne
             }
 
             //MOLECULES IN Cytosol
-            conc = new double[7] { 250, 0, 1, 0, 0, 0, 1 };
-            type = new string[7] { "A", "A*", "gCXCR5", "CXCR5", "CXCL13:CXCR5", "Apop", "gApop" };
+            conc = new double[5] { 250, 0, 0, 0, 0 };
+            type = new string[5] { "A", "A*", "CXCR5", "CXCL13:CXCR5", "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
                 cm = sc.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, sc)];
@@ -648,6 +655,13 @@ namespace Daphne
             }
             gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, sc);
 
+            // Add genes
+            type = new string[2] { "gApop", "gCXCR5" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+            }
+
             // Reactions in Cytosol
             type = new string[9] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
                                   "A* -> A",
@@ -657,7 +671,7 @@ namespace Daphne
                                   "CXCR5 ->",
                                   "CXCL13:CXCR5| -> CXCL13:CXCR5", 
                                   "CXCL13:CXCR5 ->",
-                                  "gApop -> Apop + gApop"
+                                  "gApop -> sApop + gApop"
                                 };
             for (int i = 0; i < type.Length; i++)
             {
@@ -744,10 +758,10 @@ namespace Daphne
             // Reactions in Cytosol
             type = new string[35] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
                                     "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
-                                    "gIgH -> IgH", "gIgL -> IgL", "gIgH -> IgH", "gIgS -> IgS", 
-                                    "gAID -> AID", "gBL1 -> BL1", "gMHCII -> MHCII", "gApop -> sApop",
-                                    "gDif1 -> sDif1", "gDif2 -> sDif2", "gDif3 -> sDif3", "gDif4 -> sDif4",
-                                    "gDif5 -> sDif5", "gDif6 -> sDif6", "gDif7 -> sDif7", "gDiv -> sDiv", "sApop ->",
+                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgH -> IgH + gIgH", "gIgS -> IgS + gIgS", 
+                                    "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
+                                    "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
+                                    "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
                                     "sDif1 ->", "sDif2 ->", "sDif3 ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->",
                                     "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->", "sDiv ->"
                                   };
@@ -858,9 +872,9 @@ namespace Daphne
             // Reactions in Cytosol
             type = new string[29] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
                                     "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
-                                    "gIgH -> IgH", "gIgL -> IgL", "gIgH -> IgH", "gIgS -> IgS", 
-                                    "gAID -> AID", "gBL1 -> BL1", "gMHCII -> MHCII", "gApop -> sApop",
-                                    "gDif4 -> sDif4", "gDif5 -> sDif5", "gDif6 -> sDif6", "gDif7 -> sDif7", "gDiv -> sDiv",
+                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgH -> IgH + gIgH", "gIgS -> IgS + gIgS", 
+                                    "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
+                                    "gDif4 -> sDif4 + gDif4", "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv",
                                     "sApop ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->", "sDiv ->",
                                     "IgH ->", "IgL ->", "IgS ->", "AID ->", "BL1 ->", "MHCII ->"
                                   };
@@ -964,7 +978,7 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[2] {"gCXCL12 -> CXCL12", "CXCL12 -> CXCL12|" };
+            type = new string[2] {"gCXCL12 -> CXCL12 + gCXCL12", "CXCL12 -> CXCL12|" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], sc);
@@ -1042,7 +1056,7 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[2] { "gCXCL13 -> CXCL13", "CXCL13 -> CXCL13|" };
+            type = new string[2] { "gCXCL13 -> CXCL13 + gCXCL13", "CXCL13 -> CXCL13|" };
             for (int i = 0; i < type.Length; i++)
             {
                 reac = findReaction(type[i], sc);
@@ -1400,12 +1414,6 @@ namespace Daphne
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
-            // Apop
-            cm = new ConfigMolecule("Apop", 1.0, 1.0, 1.0);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-
             // Signaling (pseudo) molecules
 
             // generic cell division
@@ -1456,22 +1464,6 @@ namespace Daphne
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
             cm = new ConfigMolecule("MHCII", 1.0, 1.0, 1.0);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-            
-            //
-            // Genes - these are molecular population versions that should be phased out (3-12-2014)
-            //
-
-            cm = new ConfigMolecule("gCXCR5", 1.0, 1.0, 1e-7);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            cm = new ConfigMolecule("gCXCR4", 1.0, 1.0, 1e-7);
-            sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
-
-            cm = new ConfigMolecule("gApop", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
             sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
 
@@ -1760,10 +1752,10 @@ namespace Daphne
             sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
 
             // Transcription
-            // gA -> A
+            // gA -> A + gA
             crt = new ConfigReactionTemplate();
-            // reactants
-            crt.reactants_stoichiometric_const.Add(1);
+            // modifiers
+            crt.modifiers_stoichiometric_const.Add(1);
             //products
             crt.products_stoichiometric_const.Add(1);
             // type
@@ -1839,25 +1831,6 @@ namespace Daphne
             }
             return "";
         }
-
-        // The assumption below is no longer valid.
-        //// this only works if we have only one reaction per type of reaction
-        //public static string findReactionGuid(ReactionType rt, SimConfiguration sc)
-        //{
-        //    string template_guid = findReactionTemplateGuid(rt, sc);
-
-        //    if (template_guid != null)
-        //    {
-        //        foreach (ConfigReaction cr in sc.entity_repository.reactions)
-        //        {
-        //            if (cr.reaction_template_guid_ref == template_guid)
-        //            {
-        //                return cr.reaction_guid;
-        //            }
-        //        }
-        //    }
-        //    return null;
-        //}
 
         // given a cell type name like BCell, find the ConfigCell object
         public static ConfigCell findCell(string name, SimConfiguration sc)
@@ -2164,7 +2137,7 @@ namespace Daphne
             string[] mol_name =        { "CXCL12", "CXCL13" };
             double[] k_cytosol_to_pm =  {   1.0,      1.0 };
             double[] k_pm_to_ecs =      {   1.0,      1.0 };
-            // BoundaryTransportTo: cytosol to ECS
+            // BoundaryTransportTo: cytosol to plasma membrane
             for (int i = 0; i < mol_name.Length; i++ )
             {
                 cr = new ConfigReaction();
@@ -2186,7 +2159,7 @@ namespace Daphne
                 cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, sc));
                 // products
                 cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, sc));
-                cr.rate_const = k_cytosol_to_pm[i];
+                cr.rate_const = k_pm_to_ecs[i];
                 cr.GetTotalReactionString(sc.entity_repository);
                 sc.entity_repository.reactions.Add(cr);
             }
@@ -2194,39 +2167,6 @@ namespace Daphne
             //
             // These next reactions are in need of more informed reaction rates
             //
-
-            // Catalyzed Creation: gCXCR5 -> gCXCR5 + CXCR5
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gCXCR5", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 10.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // Catalyzed Creation: gCXCR4 -> gCXCR4 + CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gCXCR4", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 10.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            // catalyzed creation: gApop -> gApop + Apop
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedCreation, sc);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("gApop", MoleculeLocation.Bulk, sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("Apop", MoleculeLocation.Bulk, sc));
-            cr.rate_const = 1.0;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
 
             // BoundaryTransportTo: CXCR5 -> CXCR5|
             cr = new ConfigReaction();
@@ -2260,19 +2200,18 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gCXCR4", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
             cr.GetTotalReactionString(sc.entity_repository);
-            //cr.GetTrancriptionReactionString(sc.entity_repository);
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gCXCR5", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2281,18 +2220,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gCXCR4", sc));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(sc.entity_repository);
-            sc.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gCXCL12", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2301,8 +2230,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gCXCL13", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2311,8 +2240,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gIgH", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2321,8 +2250,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gIgL", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2331,8 +2260,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gIgS", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2341,8 +2270,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gAID", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2351,8 +2280,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gBL1", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2361,8 +2290,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gMHCII", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2371,8 +2300,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gApop", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2381,8 +2310,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gDiv", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2391,8 +2320,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gResc1", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2401,8 +2330,8 @@ namespace Daphne
 
             cr = new ConfigReaction();
             cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findGeneGuid("gResc2", sc));
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", sc));
             // products
             cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, sc));
             cr.rate_const = kf;
@@ -2414,8 +2343,8 @@ namespace Daphne
             {
                 cr = new ConfigReaction();
                 cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
-                // reactants
-                cr.reactants_molecule_guid_ref.Add(findGeneGuid("gDif" + i, sc));
+                // modifiers
+                cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, sc));
                 // products
                 cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, sc));
                 cr.rate_const = kf;

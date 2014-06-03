@@ -437,7 +437,7 @@ namespace Daphne
         {
             foreach (ConfigReaction cr in config_reacs)
             {
-                cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.reactants_molecule_guid_ref[0]],
+                cell.Cytosol.BulkReactions.Add(new Transcription(cell.Genes[cr.modifiers_molecule_guid_ref[0]],
                                                                 cell.Cytosol.Populations[cr.products_molecule_guid_ref[0]],
                                                                 cr.rate_const));
             }

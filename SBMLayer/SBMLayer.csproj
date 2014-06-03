@@ -67,9 +67,6 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Daphne">
-      <HintPath>..\dependencies\Daphne.dll</HintPath>
-    </Reference>
     <Reference Include="libsbmlcsP, Version=5.8.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\libsbmlcsP.dll</HintPath>
@@ -91,6 +88,12 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

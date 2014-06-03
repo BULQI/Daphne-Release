@@ -431,26 +431,33 @@ namespace DaphneUserControlLib
             get { return (double)GetValue(NumberProperty); }
             set
             {
-                ////double currval = (double)GetValue(NumberProperty);
-                ////double newval = value;
-                ////double reldiff = 0;
+                double currval = (double)GetValue(NumberProperty);
+                double newval = value;
+                //double reldiff = 0;
+                //bool changed = false;
 
-                ////if (currval != 0)
-                ////{
-                ////    reldiff = Math.Abs((value - currval) / currval);
-                ////}
+                //if (currval != 0)
+                //{
+                //    reldiff = Math.Abs((value - currval) / currval);
+                //}
 
-                ////if (currval == 0 || reldiff > 0.01)
-                ////{
-                    ////SetValue(NumberProperty, newval);
-                SetValue(NumberProperty, value);
+                //if (currval == 0 || reldiff > 0.01)
+                //{
+                //    //SetValue(NumberProperty, newval);
+                //    changed = true;
+                //}
+
+                SetValue(NumberProperty, newval);
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
                 {
                     SetMinMax();
                     SliderInitialized = true;
                 }
-                OnPropertyChanged("Number");
+                else
+                {
+                    OnPropertyChanged("Number");
+                }
                 ////}
             }
         }
