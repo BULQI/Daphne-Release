@@ -506,8 +506,8 @@ namespace DaphneGui
             }
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-            
-            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].molecule_guid;
+
+            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].entity_guid;
             gmp.Name = MainWindow.SC.SimConfig.entity_repository.molecules[0].Name;
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -1041,7 +1041,7 @@ namespace DaphneGui
                     return;
 
                 int index = dgLibMolecules.SelectedIndex;
-                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
+                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
                 MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
                 dgLibMolecules.SelectedIndex = index;
 
@@ -2210,7 +2210,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -2459,7 +2459,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -2488,7 +2488,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -3495,7 +3495,7 @@ namespace DaphneGui
             {
                 if (cm.Name == name && cm.molecule_location == ml)
                 {
-                    return cm.molecule_guid;
+                    return cm.entity_guid;
                 }
             }
             return "";

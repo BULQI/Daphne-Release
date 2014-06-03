@@ -83,7 +83,7 @@ namespace DaphneGui
                 reac = " + ";
             foreach (ConfigMolecule cm in lbMol.SelectedItems)
             {
-                reacmolguids.Add(cm.molecule_guid);
+                reacmolguids.Add(cm.entity_guid);
                 reac += cm.Name;
                 reac += " + ";
             }
@@ -103,7 +103,7 @@ namespace DaphneGui
                 prod = " + ";
             foreach (ConfigMolecule cm in lbMol.SelectedItems)
             {
-                prodmolguids.Add(cm.molecule_guid);
+                prodmolguids.Add(cm.entity_guid);
                 prod += cm.Name;
                 prod += " + ";
             }
@@ -151,7 +151,7 @@ namespace DaphneGui
             {
                 if (cm.Name == inputMolName)
                 {
-                    guid = cm.molecule_guid;
+                    guid = cm.entity_guid;
                     break;
                 }
             }

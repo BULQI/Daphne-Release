@@ -488,7 +488,7 @@ namespace Daphne
                                                                      new ConstructorArgument("effRad", cm.EffectiveRadius),
                                                                      new ConstructorArgument("diffCoeff", cm.DiffusionCoefficient));
 
-                dataBasket.Molecules.Add(cm.molecule_guid, mol);
+                dataBasket.Molecules.Add(cm.entity_guid, mol);
             }
 
             // genes

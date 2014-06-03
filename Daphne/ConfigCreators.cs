@@ -93,7 +93,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
                     configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mpInfo.mp_dist_name = "Uniform";
@@ -212,7 +212,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
                     configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                     configMolPop.Name = configMolecule.Name;
 
@@ -362,7 +362,7 @@ namespace Daphne
             foreach (ConfigMolecule cm in query)
             {
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                configMolPop.molecule_guid_ref = cm.molecule_guid;
+                configMolPop.molecule_guid_ref = cm.entity_guid;
                 configMolPop.mpInfo = new MolPopInfo(cm.Name);
                 configMolPop.Name = cm.Name;
                 configMolPop.mpInfo.mp_dist_name = "Gaussian";
@@ -464,7 +464,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -538,7 +538,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -561,7 +561,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -617,7 +617,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -640,7 +640,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -706,7 +706,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -732,7 +732,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -820,7 +820,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -846,7 +846,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -932,7 +932,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -956,7 +956,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -1010,7 +1010,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -1034,7 +1034,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.molecule_guid;
+                    gmp.molecule_guid_ref = cm.entity_guid;
                     gmp.mpInfo = new MolPopInfo(cm.Name);
                     gmp.Name = cm.Name;
 
@@ -1324,12 +1324,12 @@ namespace Daphne
             double MWt_CXCL12 = 7.96;
             cm = new ConfigMolecule("CXCL12", MWt_CXCL12, 1.0, 4.5e3);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Use CXCL13 values for CXCL13, for now
             cm = new ConfigMolecule("CXCL13", MWt_CXCL12, 1.0, 4.5e3);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             //
             // Membrane bound
@@ -1343,36 +1343,36 @@ namespace Daphne
             cm = new ConfigMolecule("CXCR4|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Use CXCR4 value for CXCR5
             cm = new ConfigMolecule("CXCR5|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Add values for CXCL12 and CXCR4
             cm = new ConfigMolecule("CXCL12:CXCR4|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             
             // Use CXCL12:CXCR4 values, for now
             cm = new ConfigMolecule("CXCL13:CXCR5|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Molecules for secretion
             cm = new ConfigMolecule("CXCL12|", MWt_CXCL12, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL13|", MWt_CXCL12, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
 
             //
@@ -1386,86 +1386,86 @@ namespace Daphne
 
             cm = new ConfigMolecule("CXCR5", MWt_CXCR4, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCR4", MWt_CXCR4, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL13:CXCR5", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL12:CXCR4", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // These are pseudo cytoplasmic molecules
             //
             // Set diffusion coefficient for A to same as other cytoplasmic proteins
             cm = new ConfigMolecule("A", 1.0, 1.0, cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             // Make the diffusion coefficient for A* much less than A
             // A* encompasses the tubulin structure and polarity of the cell 
             // If the diffusion coefficient is too large, the polarity will not be maintained and the cell will not move
             double f = 1e-2;
             cm = new ConfigMolecule("A*", 1.0, 1.0, f * cytoDiffCoeff);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Signaling (pseudo) molecules
 
             // generic cell division
             cm = new ConfigMolecule("sDiv", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // generic cell differentiation
             for (int i = 1; i < 8; i++)
             {
                 cm = new ConfigMolecule("sDif" + i, 1.0, 1.0, 1.0);
                 sc.entity_repository.molecules.Add(cm);
-                sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+                sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             }
 
             // generic cell apoptosis
             cm = new ConfigMolecule("sApop", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // generic t cell rescue
             cm = new ConfigMolecule("sResc1", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("sResc2", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgL", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgS", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgH", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("AID", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("BL1", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("MHCII", 1.0, 1.0, 1.0);
             sc.entity_repository.molecules.Add(cm);
-            sc.entity_repository.molecules_dict.Add(cm.molecule_guid, cm);
+            sc.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
         }
 
@@ -1813,7 +1813,7 @@ namespace Daphne
             {
                 if (cm.Name == name && cm.molecule_location == ml)
                 {
-                    return cm.molecule_guid;
+                    return cm.entity_guid;
                 }
             }
             return "";
@@ -2492,7 +2492,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
                     configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mpInfo.mp_dist_name = "Uniform";
