@@ -113,12 +113,12 @@ namespace Daphne
 
             // Add cell type
             ConfigCell configCell = findCell("Leukocyte_staticReceptor", sc);
-            sc.entity_repository.cells_dict.Add(configCell.cell_guid, configCell);
+            sc.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.cell_guid;
+            cellPop.cell_guid_ref = configCell.entity_guid;
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { sc.scenario.environment.extent_x, 
@@ -243,11 +243,11 @@ namespace Daphne
             // Add cell
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
             ConfigCell configCell = findCell("Leukocyte_staticReceptor_motile", sc);
-            sc.entity_repository.cells_dict.Add(configCell.cell_guid, configCell);
+            sc.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.cell_guid;
+            cellPop.cell_guid_ref = configCell.entity_guid;
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { sc.scenario.environment.extent_x, 

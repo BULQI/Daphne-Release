@@ -51,7 +51,7 @@ namespace DaphneGui
             CellPopulation cs = new CellPopulation();
 
             // Default cell type and name to first entry in the cell repository
-            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
+            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].entity_guid;
             cs.cellpopulation_name = MainWindow.SC.SimConfig.entity_repository.cells[0].CellName;
 
             double[] extents = new double[3] { MainWindow.SC.SimConfig.scenario.environment.extent_x, 
@@ -1712,7 +1712,7 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].cell_guid;
+            cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].entity_guid;
 
             string new_cell_name = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].CellName;
             if (curr_cell_type_guid != cp.cell_guid_ref) // && curr_cell_pop_name.Length == 0)
@@ -2303,7 +2303,7 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
-            cp.cell_guid_ref = cc.cell_guid;
+            cp.cell_guid_ref = cc.entity_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 

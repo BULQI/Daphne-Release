@@ -202,7 +202,7 @@ namespace Daphne
             }
             foreach (ConfigCell cell in user_cells)
             {
-                if (!sc.entity_repository.cells_dict.ContainsKey(cell.cell_guid))
+                if (!sc.entity_repository.cells_dict.ContainsKey(cell.entity_guid))
                     sc.entity_repository.cells.Add(cell);
             }
             foreach (ConfigReaction reac in user_reactions)
@@ -275,7 +275,7 @@ namespace Daphne
                 ConfigCell inputcell = (ConfigCell)userdefitem;
                 foreach (ConfigCell cell in user_cells)
                 {
-                    if (cell.cell_guid == inputcell.cell_guid)
+                    if (cell.entity_guid == inputcell.entity_guid)
                     {
                         ret = true;
                         break;
@@ -406,7 +406,7 @@ namespace Daphne
             {
                 if (cell.ReadOnly == false)
                 {
-                    entity_repository.cells_dict.Remove(cell.cell_guid);
+                    entity_repository.cells_dict.Remove(cell.entity_guid);
                     entity_repository.cells.Remove(cell);
                 }
             }
@@ -579,7 +579,7 @@ namespace Daphne
             entity_repository.cells_dict.Clear();
             foreach (ConfigCell cc in entity_repository.cells)
             {
-                entity_repository.cells_dict.Add(cc.cell_guid, cc);
+                entity_repository.cells_dict.Add(cc.entity_guid, cc);
             }
             entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
 
@@ -872,7 +872,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigCell cc = nn as ConfigCell;
-                    entity_repository.cells_dict.Add(cc.cell_guid, cc);
+                    entity_repository.cells_dict.Add(cc.entity_guid, cc);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -882,12 +882,12 @@ namespace Daphne
                     ConfigCell cc = dd as ConfigCell;
 
                     //Remove this guid from ER cells_dict
-                    entity_repository.cells_dict.Remove(cc.cell_guid);
+                    entity_repository.cells_dict.Remove(cc.entity_guid);
 
                     //Remove all ECM cell populations with this cell guid
                     foreach (var cell_pop in scenario.cellpopulations.ToList())
                     {
-                        if (cc.cell_guid == cell_pop.cell_guid_ref)
+                        if (cc.entity_guid == cell_pop.cell_guid_ref)
                             scenario.cellpopulations.Remove(cell_pop);
                     }
 
@@ -1183,7 +1183,7 @@ namespace Daphne
             bool res = false;
             foreach (CellPopulation cell_pop in cellpopulations)
             {
-                if (cell_pop.cell_guid_ref == cell.cell_guid)
+                if (cell_pop.cell_guid_ref == cell.entity_guid)
                 {
                     return true;
                 }
@@ -3189,18 +3189,15 @@ namespace Daphne
         }
     }
 
-    public class ConfigCell : EntityModelBase
+    public class ConfigCell : ConfigEntity
 
     {
-        public ConfigCell()
+        public ConfigCell() : base()
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
             TransductionConstant = 0.0;
             DragCoefficient = 1.0;
-
-            Guid id = Guid.NewGuid();
-            cell_guid = id.ToString();
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -3225,7 +3222,8 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            newcell.cell_guid = id.ToString();
+
+            newcell.entity_guid = id.ToString();
             newcell.ReadOnly = false;
             return newcell;
         }
@@ -3308,7 +3306,6 @@ namespace Daphne
             }
         }
 
-        public string cell_guid { get; set; }
         public bool ReadOnly { get; set; }
 
         public ConfigCompartment membrane { get; set; }
@@ -4878,7 +4875,7 @@ namespace Daphne
             {
                 foreach (ConfigCell cel in cell_list)
                 {
-                    if (cel.cell_guid == guid)
+                    if (cel.entity_guid == guid)
                     {
                         cell_name = cel.CellName;
                         break;
@@ -4912,7 +4909,7 @@ namespace Daphne
             {
                 foreach (ConfigCell cel in cell_list)
                 {
-                    if (cel.cell_guid == guid)
+                    if (cel.entity_guid == guid)
                     {
                         return cel.membrane.molpops;                        
                     }
@@ -4945,7 +4942,7 @@ namespace Daphne
             {
                 foreach (ConfigCell cel in cell_list)
                 {
-                    if (cel.cell_guid == guid)
+                    if (cel.entity_guid == guid)
                     {
                         return cel.cytosol.molpops;
                     }
