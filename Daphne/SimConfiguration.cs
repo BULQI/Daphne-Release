@@ -1016,6 +1016,19 @@ namespace Daphne
             return "";
         }
 
+        // given a total reaction string, find the ConfigCell object
+        public bool findReactionByTotalString(string total, SimConfiguration sc)
+        {
+            foreach (ConfigReaction reac in sc.entity_repository.reactions)
+            {
+                if (reac.TotalReactionString == total)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 
         /// <summary>
         /// Select transcription reactions in the compartment.

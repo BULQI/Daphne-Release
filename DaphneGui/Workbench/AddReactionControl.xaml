@@ -132,12 +132,7 @@
                             </Style.Resources>
                         </Style>
                     </StackPanel.Resources>
-                    <ListBox x:Name="lbMol" Visibility="Visible" AlternationCount="2" Margin="10, 2" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1"                                                   
-                                    ItemsSource="{Binding Path=entity_repository.molecules}"                                     
-                                    ItemTemplate="{Binding Source={StaticResource libMolListItemTemplate}}"
-                                    SelectedIndex="-1"
-                                    SelectionMode="Multiple"
-                                    MaxHeight="150" Width="250" />
+                    
                     <ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2" Margin="10, 2" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1"                                                                                       
                                     SelectedIndex="-1"
                                     SelectionMode="Multiple"

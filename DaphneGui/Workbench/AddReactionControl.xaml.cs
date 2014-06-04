@@ -47,6 +47,7 @@ namespace DaphneGui
             new TextSearchFilter(view, this.txtSearch);
         }
 
+        ///This is just some sample code
         ////private void InitializeWordList()
         ////{
         ////    //string[] wordList;
@@ -59,7 +60,6 @@ namespace DaphneGui
 
         ////    string[] wordList = molnames.ToArray();
 
-
         ////    //    this.FindResource("WordList") as string[];
 
         ////    ICollectionView view = CollectionViewSource.GetDefaultView(wordList);
@@ -69,7 +69,6 @@ namespace DaphneGui
 
         private void btnReac_Click(object sender, RoutedEventArgs e)
         {
-            //NEW CODE
             if (lbMol2.SelectedItems.Count == 0)
                 return;
 
@@ -99,26 +98,6 @@ namespace DaphneGui
             txtReac.Text = txtReac.Text + reac;
             lbMol2.UnselectAll();
 
-
-            //END NEW CODE
-
-
-            ////if (lbMol.SelectedItems.Count == 0)
-            ////    return;
-
-            ////string reac = "";
-            ////if (txtReac.Text.Length > 0)
-            ////    reac = " + ";
-            ////foreach (ConfigMolecule cm in lbMol.SelectedItems)
-            ////{
-            ////    reacmolguids.Add(cm.molecule_guid);
-            ////    reac += cm.Name;
-            ////    reac += " + ";
-            ////}
-            ////reac = reac.Substring(0, reac.Length - 3);
-
-            ////txtReac.Text = txtReac.Text + reac;
-            ////lbMol.UnselectAll();
         }
 
         private void btnProd_Click(object sender, RoutedEventArgs e)
@@ -153,27 +132,11 @@ namespace DaphneGui
             txtProd.Text = txtProd.Text + prod;
             lbMol2.UnselectAll();
 
-            //if (lbMol.SelectedItems.Count == 0)
-            //    return;
-
-            //string prod = "";
-            //if (txtProd.Text.Length > 0)
-            //    prod = " + ";
-            //foreach (ConfigMolecule cm in lbMol.SelectedItems)
-            //{
-            //    prodmolguids.Add(cm.molecule_guid);
-            //    prod += cm.Name;
-            //    prod += " + ";
-            //}
-            //prod = prod.Substring(0, prod.Length - 3);
-
-            //txtProd.Text = txtProd.Text + prod;
-            //lbMol.UnselectAll();
         }
 
         private void btnUnselectAll_Click(object sender, RoutedEventArgs e)
         {
-            lbMol.UnselectAll();
+            lbMol2.UnselectAll();
         }
         
         private void btnRClear_Click(object sender, RoutedEventArgs e)
@@ -347,6 +310,7 @@ namespace DaphneGui
                         cr.modifiers_molecule_guid_ref.Add(geneGuid);
                     }
                 }
+                cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
             }
             // Boundary modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
@@ -362,7 +326,16 @@ namespace DaphneGui
             }
 
             //Add the reaction to repository collection
-            MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+            if (!MainWindow.SC.SimConfig.findReactionByTotalString(cr.TotalReactionString, MainWindow.SC.SimConfig))
+            {
+                MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+            }
+            else
+            {
+                string msg = string.Format("Reaction '{0}' already exists in reactions library.", cr.TotalReactionString);
+                MessageBox.Show(msg);
+                return;
+            }
 
             txtReac.Text = "";
             reacmolguids.Clear();
