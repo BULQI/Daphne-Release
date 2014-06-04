@@ -37,6 +37,11 @@ namespace DaphneGui
         public SimConfigToolWindow()
         {
             InitializeComponent();
+
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
+            cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
+            //ButtonEdit.Click += EventFactory.Button_Edit_Click;
+
         }
 
         public MainWindow MW { get; set; }
@@ -678,7 +683,7 @@ namespace DaphneGui
         {
             bool needRefresh = false;
 
-            foreach (var item in lvAvailableReacs.SelectedItems)
+                  foreach (var item in lvAvailableReacs.SelectedItems)
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
@@ -2713,6 +2718,8 @@ namespace DaphneGui
             EpigeneticMapGrid.Columns.Add(editor_col);
             EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
 
+            //EpigeneticMapGrid.Visibility = Visibility.Hidden;
+
 
             //----------------------------------
             //DIFFERENTIATION REGULATORS SECTION
@@ -3771,7 +3778,7 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            
+
             if (cell.div_driver == null)
             {
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
@@ -4056,6 +4063,73 @@ namespace DaphneGui
         {
         }
     }
+
+    public class FilterFactory
+    {
+        private object Context { get; set; }
+
+        //public static EventHandler CreateShowHandlerFor(object context)
+    //    {
+    //        CommonFilter handler = new CommonEventHandler();
+
+    //        handler.Context = context;
+
+    //        return new EventHandler(handler.HandleGenericShow);
+    //    }
+
+        public static void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol != null)
+            {
+                // Filter out mol if membrane bound 
+                if (mol.molecule_location == MoleculeLocation.Bulk)
+                {
+                    e.Accepted = true;
+                }
+                else
+                {
+                    e.Accepted = false;
+                }
+            }
+        }        
+    }
+
+
+    ///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER
+    //public class CommonEventHandler
+    //{
+    //    private CommonEventHandler() { }
+
+    //    private object Context { get; set; }
+
+    //    public static EventHandler CreateShowHandlerFor(object context)
+    //    {
+    //        CommonEventHandler handler = new CommonEventHandler();
+
+    //        handler.Context = context;
+
+    //        return new EventHandler(handler.HandleGenericShow);
+    //    }
+
+    //    private void HandleGenericShow(object sender, EventArgs e)
+    //    {
+    //        Console.WriteLine(this.Context);
+    //    }
+    //}
+
+    //class Program
+    //{
+    //    static void Main(string[] args)
+    //    {
+    //        EventHandler show5 = CommonEventHandler.CreateShowHandlerFor(5);
+    //        EventHandler show7 = CommonEventHandler.CreateShowHandlerFor(7);
+
+    //        show5(null, EventArgs.Empty);
+    //        Console.WriteLine("===");
+    //        show7(null, EventArgs.Empty);
+    //    }
+    //}
 }
 
 

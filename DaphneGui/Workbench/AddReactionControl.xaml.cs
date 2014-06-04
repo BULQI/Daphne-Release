@@ -40,19 +40,14 @@ namespace DaphneGui
             inputModifiers = new Dictionary<string, int>();
             inputRateConstant = 2.0;
 
-            //InitializeWordList();
+            string[] wordList = this.FindResource("WordList") as string[];
 
-
-
-            string[] wordList =
-                this.FindResource("WordList") as string[];
-
-            ICollectionView view =
-                CollectionViewSource.GetDefaultView(wordList);
+            ICollectionView view = CollectionViewSource.GetDefaultView(wordList);
 
             new TextSearchFilter(view, this.txtSearch);
         }
 
+        ///This is just some sample code
         ////private void InitializeWordList()
         ////{
         ////    //string[] wordList;
@@ -65,7 +60,6 @@ namespace DaphneGui
 
         ////    string[] wordList = molnames.ToArray();
 
-
         ////    //    this.FindResource("WordList") as string[];
 
         ////    ICollectionView view = CollectionViewSource.GetDefaultView(wordList);
@@ -75,47 +69,74 @@ namespace DaphneGui
 
         private void btnReac_Click(object sender, RoutedEventArgs e)
         {
-            if (lbMol.SelectedItems.Count == 0)
+            if (lbMol2.SelectedItems.Count == 0)
                 return;
 
             string reac = "";
             if (txtReac.Text.Length > 0)
                 reac = " + ";
-            foreach (ConfigMolecule cm in lbMol.SelectedItems)
+
+            foreach (var obj in lbMol2.SelectedItems)
             {
-                reacmolguids.Add(cm.molecule_guid);
-                reac += cm.Name;
-                reac += " + ";
+                if (obj.GetType() == typeof(ConfigMolecule))
+                {
+                    ConfigMolecule cm = obj as ConfigMolecule;
+                    reacmolguids.Add(cm.molecule_guid);
+                    reac += cm.Name;
+                    reac += " + ";
+                }
+                else if (obj.GetType() == typeof(ConfigGene))
+                {
+                    ConfigGene cg = obj as ConfigGene;
+                    reacmolguids.Add(cg.gene_guid);
+                    reac += cg.Name;
+                    reac += " + ";
+                }
             }
             reac = reac.Substring(0, reac.Length - 3);
 
             txtReac.Text = txtReac.Text + reac;
-            lbMol.UnselectAll();
+            lbMol2.UnselectAll();
+
         }
 
         private void btnProd_Click(object sender, RoutedEventArgs e)
         {
-            if (lbMol.SelectedItems.Count == 0)
+            if (lbMol2.SelectedItems.Count == 0)
                 return;
 
             string prod = "";
             if (txtProd.Text.Length > 0)
                 prod = " + ";
-            foreach (ConfigMolecule cm in lbMol.SelectedItems)
+
+            foreach (var obj in lbMol2.SelectedItems)
             {
-                prodmolguids.Add(cm.molecule_guid);
-                prod += cm.Name;
-                prod += " + ";
+                if (obj.GetType() == typeof(ConfigMolecule))
+                {
+                    ConfigMolecule cm = obj as ConfigMolecule;
+                    prodmolguids.Add(cm.molecule_guid);
+                    prod += cm.Name;
+                    prod += " + ";
+                }
+                else if (obj.GetType() == typeof(ConfigGene))
+                {
+                    ConfigGene cg = obj as ConfigGene;
+                    reacmolguids.Add(cg.gene_guid);
+                    prod += cg.Name;
+                    prod += " + ";
+                }
             }
+
             prod = prod.Substring(0, prod.Length - 3);
 
             txtProd.Text = txtProd.Text + prod;
-            lbMol.UnselectAll();
+            lbMol2.UnselectAll();
+
         }
 
         private void btnUnselectAll_Click(object sender, RoutedEventArgs e)
         {
-            lbMol.UnselectAll();
+            lbMol2.UnselectAll();
         }
         
         private void btnRClear_Click(object sender, RoutedEventArgs e)
@@ -143,7 +164,12 @@ namespace DaphneGui
             return null;
         }
 
-        // given a molecule name, check if it exists in repository - return
+        /// <summary>
+        /// Given a molecule name, check if it exists in repository - return guid
+        /// </summary>
+        /// <param name="inputMolName"></param>
+        /// <returns></returns>
+ 
         private static string findMoleculeGuidByName(string inputMolName)
         {
             string guid = "";
@@ -158,6 +184,31 @@ namespace DaphneGui
             return guid;
         }
 
+        /// <summary>
+        /// Given a gene name, check if it exists in repository - return guid
+        /// </summary>
+        /// <param name="inputGeneName"></param>
+        /// <returns></returns>
+
+        private static string findGeneGuidByName(string inputGeneName)
+        {
+            string guid = "";
+            foreach (ConfigGene cg in MainWindow.SC.SimConfig.entity_repository.genes)
+            {
+                if (cg.Name == inputGeneName)
+                {
+                    guid = cg.gene_guid;
+                    break;
+                }
+            }
+            return guid;
+        }
+
+        /// <summary>
+        /// This is called when the user clicks Save in create reaction dialog
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool bValid = ParseUserInput();
@@ -166,6 +217,7 @@ namespace DaphneGui
             if (!bValid)
                 return;
 
+            string geneGuid = "";
             ConfigReaction cr = new ConfigReaction();
             cr.ReadOnly = false;
             cr.rate_const = inputRateConstant;
@@ -181,6 +233,7 @@ namespace DaphneGui
 
             // Don't have to add stoichiometry information since the reaction template knows it based on reaction type
             // For each list of reactants, products, and modifiers, add bulk then boundary molecules.
+            // Transcription is the only reaction involving a gene. In that case the gene is a modifier.
 
             // Bulk Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
@@ -200,10 +253,10 @@ namespace DaphneGui
             // Boundary Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid = findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string molGuid = findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
                 {
-                    cr.reactants_molecule_guid_ref.Add(guid);
+                    cr.reactants_molecule_guid_ref.Add(molGuid);
                 }
             }
 
@@ -225,40 +278,67 @@ namespace DaphneGui
             // Boundary Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid = findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string molGuid = findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
                 {
-                    cr.products_molecule_guid_ref.Add(guid);
+                    cr.products_molecule_guid_ref.Add(molGuid);
                 }
             }
 
             // Bulk modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
-                string guid = findMoleculeGuidByName(kvp.Key);
-                if (guid == "")  //this should never happen
+                string molGuid = findMoleculeGuidByName(kvp.Key);
+                geneGuid = findGeneGuidByName(kvp.Key);
+                if (molGuid == "" && geneGuid == "")  //this should never happen
                 {
-                    string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
+                    string msg = string.Format("Molecule/gene '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
                     return;
                 }
-                if (!cr.modifiers_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                if (molGuid != "")
                 {
-                    cr.modifiers_molecule_guid_ref.Add(guid);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Bulk)
+                    {
+                        cr.modifiers_molecule_guid_ref.Add(molGuid);
+                    }
                 }
+                else if (geneGuid != "")
+                {
+                    if (!cr.modifiers_molecule_guid_ref.Contains(geneGuid))
+                    {
+                        cr.modifiers_molecule_guid_ref.Add(geneGuid);
+                    }
+                }
+                
             }
             // Boundary modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
-                string guid = findMoleculeGuidByName(kvp.Key);
-                if (!cr.modifiers_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string molGuid = findMoleculeGuidByName(kvp.Key);
+                if (molGuid != "")
                 {
-                    cr.modifiers_molecule_guid_ref.Add(guid);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
+                    {
+                        cr.modifiers_molecule_guid_ref.Add(molGuid);
+                    }
                 }
             }
 
+            //Generate the total string
+            cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+
             //Add the reaction to repository collection
-            MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+            if (!MainWindow.SC.SimConfig.findReactionByTotalString(cr.TotalReactionString, MainWindow.SC.SimConfig))
+            {
+                MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+            }
+            else
+            {
+                string msg = string.Format("Reaction '{0}' already exists in reactions library.", cr.TotalReactionString);
+                MessageBox.Show(msg);
+                return;
+            }
 
             txtReac.Text = "";
             reacmolguids.Clear();
@@ -417,9 +497,11 @@ namespace DaphneGui
         private bool ValidateMoleculeName(string sMol)
         {
             string molGuid = findMoleculeGuidByName(sMol);
-            if (molGuid == "")
+            string geneGuid = findGeneGuidByName(sMol);
+
+            if (molGuid == "" && geneGuid == "")
             {
-                string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", sMol);
+                string msg = string.Format("Molecule or gene '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", sMol);
                 MessageBox.Show(msg);
                 return false;
             }
@@ -455,7 +537,24 @@ namespace DaphneGui
             foreach (KeyValuePair<string, int> kvp in inputList)
             {
                 string guid = findMoleculeGuidByName(kvp.Key);
-                if (MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == molLoc)
+                // genes return guid = ""
+                if (guid != "")
+                {
+                    if (MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == molLoc)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool HasGene(Dictionary<string, int> inputList)
+        {
+            foreach (KeyValuePair<string, int> kvp in inputList)
+            {
+                string guid = findGeneGuidByName(kvp.Key);
+                if (guid != "")
                 {
                     return true;
                 }
@@ -467,32 +566,52 @@ namespace DaphneGui
         {
             string reaction_template_guid_ref = "";
 
-            bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
-            bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
-            int totalReacStoich = 0;
-            foreach (KeyValuePair<string, int> kvp in inputReactants)
-            {
-                totalReacStoich += kvp.Value;
-            }
-
-            bool boundProd = HasMoleculeType(inputProducts, MoleculeLocation.Boundary);
-            bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
             int totalProdStoich = 0;
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
                 totalProdStoich += kvp.Value;
             }
-
-            bool boundMod = HasMoleculeType(inputModifiers, MoleculeLocation.Boundary);
-            bool bulkMod = HasMoleculeType(inputModifiers, MoleculeLocation.Bulk);
+            int totalReacStoich = 0;
+            foreach (KeyValuePair<string, int> kvp in inputReactants)
+            {
+                totalReacStoich += kvp.Value;
+            }
             int totalModStoich = 0;
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
                 totalModStoich += kvp.Value;
             }
 
-            int     bulkBoundVal = 1,
-                    modVal = 10,            
+            if (HasGene(inputReactants) || HasGene(inputProducts))
+            {
+                // No reactions supported for genes as reactant or product
+                return reaction_template_guid_ref;
+            }
+
+            bool geneModifier = HasGene(inputModifiers);
+            bool boundProd = HasMoleculeType(inputProducts, MoleculeLocation.Boundary);
+
+            if (geneModifier)
+            {
+                if ((inputModifiers.Count > 1) || (inputProducts.Count != 1) || (inputReactants.Count != 0) || (totalModStoich > 1) || (totalProdStoich > 1) || (boundProd))
+                {
+                    // Gene transcription reaction does not support these possibilities
+                    return reaction_template_guid_ref;
+                }
+                else
+                {
+                    return findReactionTemplateGuid(ReactionType.Transcription, MainWindow.SC.SimConfig);
+                }
+            }
+
+            bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
+            bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
+            bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
+            bool boundMod = HasMoleculeType(inputModifiers, MoleculeLocation.Boundary);
+            bool bulkMod = HasMoleculeType(inputModifiers, MoleculeLocation.Bulk);
+
+            int bulkBoundVal = 1,
+                    modVal = 10,
                     reacVal = 100,
                     prodVal = 1000,
                     reacStoichVal = 10000,
@@ -595,6 +714,26 @@ namespace DaphneGui
             }
         }
 
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            //New test code
+            //FrameworkElementFactory lbMolsGenes = new FrameworkElementFactory(typeof(ListBox));
+            //lbMolsGenes.Name = "MolsGenesListBox";
+
+            CompositeCollection coll = new CompositeCollection();
+
+            CollectionContainer cc = new CollectionContainer();
+            cc.Collection = MainWindow.SC.SimConfig.entity_repository.molecules;
+            coll.Add(cc);
+
+            cc = new CollectionContainer();
+            cc.Collection = MainWindow.SC.SimConfig.entity_repository.genes;
+            coll.Add(cc);
+            lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
+            lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
+            //End test code
+        }
+
         private void txtSearch_SelectionChanged(object sender, RoutedEventArgs e)
         {
             TextBox tb = sender as TextBox;
@@ -602,15 +741,28 @@ namespace DaphneGui
             searchText = searchText.Trim();
             searchText = searchText.ToLower();
 
-            foreach (var item in lbMol.Items)
+            if (searchText.Length == 0)
+                return;
+
+            foreach (var item in lbMol2.Items)
             {
-                ConfigMolecule mol = (ConfigMolecule)item;
-                string name = mol.Name;
+                string name = "";
+                if (item.GetType() == typeof(ConfigMolecule))
+                {
+                    ConfigMolecule mol = (ConfigMolecule)item;
+                    name = mol.Name;
+                }
+                else if (item.GetType() == typeof(ConfigGene))
+                {
+                    ConfigGene gene = (ConfigGene)item;
+                    name = gene.Name;
+                }
+                
                 name = name.ToLower();
                 if (name.Contains(searchText))
                 {
-                    lbMol.SelectedItem = item;
-                    lbMol.ScrollIntoView(lbMol.SelectedItem);
+                    lbMol2.SelectedItem = item;
+                    lbMol2.ScrollIntoView(lbMol2.SelectedItem);
                     break;
                 }
             }

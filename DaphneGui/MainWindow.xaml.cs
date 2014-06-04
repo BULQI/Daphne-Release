@@ -657,6 +657,8 @@ namespace DaphneGui
         {
             // Configure save file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            dlg.OverwritePrompt = true;
             dlg.InitialDirectory = orig_path;
             dlg.FileName = "scenario"; // Default file name
             dlg.DefaultExt = ".json"; // Default file extension
