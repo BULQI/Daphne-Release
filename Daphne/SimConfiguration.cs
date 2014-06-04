@@ -567,7 +567,7 @@ namespace Daphne
             entity_repository.genes_dict.Clear();
             foreach (ConfigGene cg in entity_repository.genes)
             {
-                entity_repository.genes_dict.Add(cg.gene_guid, cg);
+                entity_repository.genes_dict.Add(cg.entity_guid, cg);
             }
             entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
@@ -699,7 +699,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigGene cg = nn as ConfigGene;
-                    entity_repository.genes_dict.Add(cg.gene_guid, cg);
+                    entity_repository.genes_dict.Add(cg.entity_guid, cg);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -709,7 +709,7 @@ namespace Daphne
                     ConfigGene cg = dd as ConfigGene;
 
                     //Remove gene from genes_dict
-                    entity_repository.genes_dict.Remove(cg.gene_guid);
+                    entity_repository.genes_dict.Remove(cg.entity_guid);
                 }
             }
         }
@@ -1010,7 +1010,7 @@ namespace Daphne
             {
                 if (gene.Name == name)
                 {
-                    return gene.gene_guid;
+                    return gene.entity_guid;
                 }
             }
             return "";
@@ -2216,9 +2216,8 @@ namespace Daphne
     /// <summary>
     /// Any molecule can be a gene
     /// </summary>
-    public class ConfigGene
+    public class ConfigGene : ConfigEntity
     {
-        public string gene_guid { get; set; }
         public string Name { get; set; }
         public int CopyNumber { get; set; }
         public double ActivationLevel { get; set; }
@@ -2229,11 +2228,8 @@ namespace Daphne
         //    gene_guid = id.ToString();
         //}
 
-        public ConfigGene(string name, int copynum, double actlevel)
+        public ConfigGene(string name, int copynum, double actlevel) : base()
         {
-            Guid id = Guid.NewGuid();
-            gene_guid = id.ToString();
-
             Name = name;
             CopyNumber = copynum;
             ActivationLevel = actlevel;
@@ -2247,7 +2243,8 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            newgene.gene_guid = id.ToString();
+
+            newgene.entity_guid = id.ToString();
             newgene.Name = newgene.GenerateNewName(sc, "_Copy");
 
             return newgene;
@@ -3138,7 +3135,7 @@ namespace Daphne
         {
             foreach (ConfigGene gene in genes)
             {
-                if (gene.gene_guid == guid)
+                if (gene.entity_guid == guid)
                 {
                     return true;
                 }
@@ -3156,7 +3153,7 @@ namespace Daphne
                     if (HasGene(molguid) == false)
                     {
                         ConfigGene configGene = new ConfigGene(er.genes_dict[molguid].Name, er.genes_dict[molguid].CopyNumber, er.genes_dict[molguid].ActivationLevel);
-                        configGene.gene_guid = er.genes_dict[molguid].gene_guid;
+                        configGene.entity_guid = er.genes_dict[molguid].entity_guid;
                         genes.Add(configGene);
                     }
                 }
@@ -4384,7 +4381,7 @@ namespace Daphne
             {
                 foreach (ConfigGene gene in gene_list)
                 {
-                    if (gene.gene_guid == guid)
+                    if (gene.entity_guid == guid)
                     {
                         gene_name = gene.Name;
                         break;
@@ -4423,7 +4420,7 @@ namespace Daphne
             {
                 foreach (ConfigGene gene in gene_list)
                 {
-                    if (gene.gene_guid == guid)
+                    if (gene.entity_guid == guid)
                     {
                         thisGene = gene;
                         break;

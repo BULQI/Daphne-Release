@@ -617,14 +617,14 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.gene_guid))
+            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
                 return;
 
 
             if (ds != null)
             {
                 //if scheme already contains this gene, exclude it from the available gene pool
-                if (ds.genes.Contains(gene.gene_guid))
+                if (ds.genes.Contains(gene.entity_guid))
                 {
                     e.Accepted = false;
                 }
@@ -2292,7 +2292,7 @@ namespace DaphneGui
             }
             foreach (ConfigGene configGene in crc.genes)
             {
-                cc.genes_guid_ref.Add(configGene.gene_guid);
+                cc.genes_guid_ref.Add(configGene.entity_guid);
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
@@ -2635,8 +2635,8 @@ namespace DaphneGui
                 ConfigGene geneToAdd = ads.SelectedGene;
                 if (geneToAdd == null)
                     return;
-                
-                cell.genes_guid_ref.Add(geneToAdd.gene_guid);
+
+                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
             }
         }
 
@@ -3020,7 +3020,7 @@ namespace DaphneGui
                     if (gene == null)
                         return;
 
-                    if (!scheme.genes.Contains(gene.gene_guid))
+                    if (!scheme.genes.Contains(gene.entity_guid))
                     {
                         //If no states exist, then create at least 2 new ones
                         if (scheme.Driver.states.Count == 0)
@@ -3031,7 +3031,7 @@ namespace DaphneGui
                             //menuAddState_Click(null, null);
                         }
 
-                        scheme.genes.Add(gene.gene_guid);
+                        scheme.genes.Add(gene.entity_guid);
                         foreach (ConfigActivationRow row in scheme.activationRows)
                         {
                             row.activations.Add(1.0);

@@ -1245,66 +1245,66 @@ namespace Daphne
 
             gene = new ConfigGene("gCXCR5", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCR4", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCL12", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCL13", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gIgH", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
            
             gene = new ConfigGene("gIgL", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gIgS", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gAID", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gBL1", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gMHCII", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gApop", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gDiv", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gResc1", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gResc2", 2, 1.0);
             sc.entity_repository.genes.Add(gene);
-            sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+            sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             // generic genes for differentiation signal molecules
             for (int i = 1; i < 8; i++)
             {
                 gene = new ConfigGene("gDif" + i, 2, 1.0);
                 sc.entity_repository.genes.Add(gene);
-                sc.entity_repository.genes_dict.Add(gene.gene_guid, gene);
+                sc.entity_repository.genes_dict.Add(gene.entity_guid, gene);
             }
 
         }
@@ -1800,7 +1800,7 @@ namespace Daphne
             {
                 if (gene.Name == name)
                 {
-                    return gene.gene_guid;
+                    return gene.entity_guid;
                 }
             }
             return "";
