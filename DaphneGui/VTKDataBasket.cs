@@ -284,6 +284,11 @@ namespace DaphneGui
         /// <param name="region">pointer to the region controlling this gradient, if any</param>
         public void addGradient3D(ConfigMolecularPopulation molpop, RegionControl region)
         {
+            if (!molpop.mpInfo.mp_render_on)
+            {
+                return;
+            }
+
             if (molpopTypeControllers.ContainsKey(molpop.mpInfo.mp_guid) == true)
             {
                 MessageBox.Show("Duplicate molpop guid! Aborting insertion.");
@@ -392,7 +397,7 @@ namespace DaphneGui
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Linear)
                 {
-                    div = ((MolpopTypeLinearController)kvp.Value).c2;
+                    div = Math.Max(((MolpopTypeLinearController)kvp.Value).c1,((MolpopTypeLinearController)kvp.Value).c2);
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Gaussian)
                 {
