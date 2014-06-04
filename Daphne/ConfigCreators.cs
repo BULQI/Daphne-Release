@@ -1488,7 +1488,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Annihilation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
             
             //Association
             // a + b -> c
@@ -1502,7 +1502,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Association;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Dimerization
             // 2a -> b
@@ -1515,7 +1515,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Dimerization;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Dimer Dissociation
             // b -> 2a
@@ -1528,7 +1528,7 @@ namespace Daphne
             crt.reac_type = ReactionType.DimerDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //Dissociation
             // c -> a + b
@@ -1542,7 +1542,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Dissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Transformation
             // a -> b
@@ -1555,7 +1555,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Transformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // CatalyzedBoundaryActivation
             // a + E -> E + b
@@ -1571,7 +1571,7 @@ namespace Daphne
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //BoundaryAssociation
             // a + B -> C
@@ -1586,7 +1586,7 @@ namespace Daphne
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //BoundaryDissociation
             // C -> a + B
@@ -1601,7 +1601,7 @@ namespace Daphne
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // BoundaryTransportFrom
             // A -> a
@@ -1615,7 +1615,7 @@ namespace Daphne
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // BoundaryTransportTo
             // a -> A
@@ -1629,7 +1629,7 @@ namespace Daphne
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Autocatalytic Transformation
             // Not a catalyzed reaction in the strict sense needed in the Config class
@@ -1644,7 +1644,7 @@ namespace Daphne
             crt.reac_type = ReactionType.AutocatalyticTransformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Annihilation
             // a + e -> e
@@ -1658,7 +1658,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedAnnihilation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Association
             // a + b + e -> c + e
@@ -1674,7 +1674,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedAssociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Creation
             // e -> e + a
@@ -1688,7 +1688,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedCreation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dimerization
             // e + 2a -> b + e
@@ -1703,7 +1703,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedDimerization;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dimer Dissociation
             // e + b -> 2a + e
@@ -1718,7 +1718,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedDimerDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dissociation
             // c + e -> a + b + e
@@ -1734,7 +1734,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Transformation
             // a + e -> b + e
@@ -1749,7 +1749,7 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedTransformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Transcription
             // gA -> A + gA
@@ -1762,7 +1762,7 @@ namespace Daphne
             crt.reac_type = ReactionType.Transcription;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
             sc.entity_repository.reaction_templates.Add(crt);
-            sc.entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+            sc.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
         
         }
@@ -1826,7 +1826,7 @@ namespace Daphne
             {
                 if (crt.reac_type == rt)
                 {
-                    return crt.reaction_template_guid;
+                    return crt.entity_guid;
                 }
             }
             return "";

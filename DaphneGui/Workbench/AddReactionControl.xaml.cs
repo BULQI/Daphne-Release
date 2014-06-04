@@ -137,7 +137,7 @@ namespace DaphneGui
             {
                 if (crt.reac_type == rt)
                 {
-                    return crt.reaction_template_guid;
+                    return crt.entity_guid;
                 }
             }
             return null;

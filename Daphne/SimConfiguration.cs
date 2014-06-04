@@ -613,7 +613,7 @@ namespace Daphne
             entity_repository.reaction_templates_dict.Clear();
             foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
             {
-                entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
             }
             entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
         }
@@ -955,7 +955,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigReactionTemplate crt = nn as ConfigReactionTemplate;
-                    entity_repository.reaction_templates_dict.Add(crt.reaction_template_guid, crt);
+                    entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -963,7 +963,7 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigReactionTemplate crt = dd as ConfigReactionTemplate;
-                    entity_repository.reaction_templates_dict.Remove(crt.reaction_template_guid);
+                    entity_repository.reaction_templates_dict.Remove(crt.entity_guid);
                 }
             }
         }
@@ -2990,9 +2990,8 @@ namespace Daphne
 
     }
 
-    public class ConfigReactionTemplate
+    public class ConfigReactionTemplate : ConfigEntity
     {
-        public string reaction_template_guid;
         public string name;
         // stoichiometric constants
         public ObservableCollection<int> reactants_stoichiometric_const;
@@ -3003,10 +3002,8 @@ namespace Daphne
         // True if the reaction involves bulk and boundary molecules. Default is false.
         public bool isBoundary;
 
-        public ConfigReactionTemplate()
+        public ConfigReactionTemplate() : base()
         {
-            Guid id = Guid.NewGuid();
-            reaction_template_guid = id.ToString();
             reactants_stoichiometric_const = new ObservableCollection<int>();
             products_stoichiometric_const = new ObservableCollection<int>();
             modifiers_stoichiometric_const = new ObservableCollection<int>();
