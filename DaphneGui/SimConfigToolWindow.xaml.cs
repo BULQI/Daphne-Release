@@ -682,9 +682,9 @@ namespace DaphneGui
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.reaction_guid))
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.entity_guid))
                 {
-                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
                     needRefresh = true;
                 }
             }
@@ -702,9 +702,9 @@ namespace DaphneGui
 
             string guid = (string)lvEcsReactions.SelectedValue;
             ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.entity_guid))
             {
-                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
+                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.entity_guid);
             }
         }
 
@@ -756,7 +756,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -792,7 +792,7 @@ namespace DaphneGui
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
             //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -868,7 +868,7 @@ namespace DaphneGui
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -1118,8 +1118,9 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid)) {
-                        cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+                    if (!cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                    {
+                        cc.membrane.reactions_guid_ref.Add(cr.entity_guid);
 
                         needRefresh = true;
                     }
@@ -1166,9 +1167,9 @@ namespace DaphneGui
                 if (cc != null && cr != null)
                 {
                     //Add to reactions list only if the cell does not already contain this reaction
-                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
+                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid))
                     {
-                        cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+                        cc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
 
                         needRefresh = true;
                     }
@@ -1355,7 +1356,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1374,7 +1375,7 @@ namespace DaphneGui
             {
                 e.Accepted = false;
                 // Filter out cr if not in membrane reaction list 
-                if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1397,7 +1398,7 @@ namespace DaphneGui
                 ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
                 e.Accepted = false;
                 // Filter out cr if not in ecm reaction list 
-                if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (crc.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1411,7 +1412,7 @@ namespace DaphneGui
             if (cr != null && cc != null)
             {
                 // Filter out cr if not in cytosol reaction list 
-                if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }

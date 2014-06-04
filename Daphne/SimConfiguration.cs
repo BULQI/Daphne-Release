@@ -207,7 +207,7 @@ namespace Daphne
             }
             foreach (ConfigReaction reac in user_reactions)
             {
-                if (!sc.entity_repository.reactions_dict.ContainsKey(reac.reaction_guid))
+                if (!sc.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
                     sc.entity_repository.reactions.Add(reac);
             }
         }
@@ -287,7 +287,7 @@ namespace Daphne
                 ConfigReaction inputreac = (ConfigReaction)userdefitem;
                 foreach (ConfigReaction reac in user_reactions)
                 {
-                    if (reac.reaction_guid == inputreac.reaction_guid)
+                    if (reac.entity_guid == inputreac.entity_guid)
                     {
                         ret = true;
                         break;
@@ -414,7 +414,7 @@ namespace Daphne
             {
                 if (reac.ReadOnly == false)
                 {
-                    entity_repository.reactions_dict.Remove(reac.reaction_guid);
+                    entity_repository.reactions_dict.Remove(reac.entity_guid);
                     entity_repository.reactions.Remove(reac);
                 }
             }
@@ -590,7 +590,7 @@ namespace Daphne
             entity_repository.reactions_dict.Clear();
             foreach (ConfigReaction cr in entity_repository.reactions)
             {
-                entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
                 cr.GetTotalReactionString(entity_repository);
             }
             entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
@@ -902,7 +902,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigReaction cr = nn as ConfigReaction;
-                    entity_repository.reactions_dict.Add(cr.reaction_guid, cr);
+                    entity_repository.reactions_dict.Add(cr.entity_guid, cr);
                     cr.GetTotalReactionString(entity_repository);
                 }
             }
@@ -913,35 +913,35 @@ namespace Daphne
                     ConfigReaction cr = dd as ConfigReaction;
 
                     //Remove entry from ER reactions_dict
-                    entity_repository.reactions_dict.Remove(cr.reaction_guid);
+                    entity_repository.reactions_dict.Remove(cr.entity_guid);
 
                     //Remove all the ER reaction complex reactions that have this guid
                     foreach (ConfigReactionComplex comp in entity_repository.reaction_complexes)
                     {
-                        if (comp.reactions_guid_ref.Contains(cr.reaction_guid) )
-                            comp.reactions_guid_ref.Remove(cr.reaction_guid);
+                        if (comp.reactions_guid_ref.Contains(cr.entity_guid) )
+                            comp.reactions_guid_ref.Remove(cr.entity_guid);
                     }                    
 
                     //Remove all the ECM reaction complex reactions that have this guid
-                    if (scenario.environment.ecs.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
+                    if (scenario.environment.ecs.reaction_complexes_guid_ref.Contains(cr.entity_guid))
                     {
-                        scenario.environment.ecs.reaction_complexes_guid_ref.Remove(cr.reaction_guid);
+                        scenario.environment.ecs.reaction_complexes_guid_ref.Remove(cr.entity_guid);
                     }
 
                     //Remove all the ECM reactions that have this guid
-                    if (scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
-                        scenario.environment.ecs.reactions_guid_ref.Remove(cr.reaction_guid);
+                    if (scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+                        scenario.environment.ecs.reactions_guid_ref.Remove(cr.entity_guid);
 
                     //Remove all the cell membrane/cytosol reactions that have this guid
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
                         if (cell.ReadOnly == false)
                         {
-                            if (cell.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
-                                cell.membrane.reactions_guid_ref.Remove(cr.reaction_guid);
+                            if (cell.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                                cell.membrane.reactions_guid_ref.Remove(cr.entity_guid);
 
-                            if (cell.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
-                                cell.cytosol.reactions_guid_ref.Remove(cr.reaction_guid);
+                            if (cell.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+                                cell.cytosol.reactions_guid_ref.Remove(cr.entity_guid);
                         }
                     }
                 }                
@@ -2072,7 +2072,7 @@ namespace Daphne
     /// <summary>
     /// base class for applicable config entities
     /// </summary>
-    public abstract class ConfigEntity
+    public abstract class ConfigEntity : EntityModelBase
     {
         public ConfigEntity()
         {
@@ -2828,13 +2828,10 @@ namespace Daphne
         }
     }
 
-    public class ConfigReaction : EntityModelBase
+    public class ConfigReaction : ConfigEntity
     {
-        public ConfigReaction()
+        public ConfigReaction() : base()
         {
-            Guid id = Guid.NewGuid();
-            reaction_guid = id.ToString();
-
             rate_const = 0;
             ReadOnly = false;
 
@@ -2843,10 +2840,8 @@ namespace Daphne
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
         }
 
-        public ConfigReaction(ConfigReaction reac)
+        public ConfigReaction(ConfigReaction reac) : base()
         {
-            Guid id = Guid.NewGuid();
-            reaction_guid = id.ToString();
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
             rate_const = reac.rate_const;
@@ -2975,7 +2970,6 @@ namespace Daphne
 
             return false;
         }
-        public string reaction_guid { get; set; }
         public string reaction_template_guid_ref { get; set; }
 
         private double _rate_const;
@@ -4991,13 +4985,13 @@ namespace Daphne
                 {
                     foreach (string rguid in cc.membrane.reactions_guid_ref) 
                     {
-                        if (reac.reaction_guid == rguid) {
+                        if (reac.entity_guid == rguid) {
                             reacStrings.Add("membrane: " + reac.TotalReactionString);
                         }
                     }
                     foreach (string rguid in cc.cytosol.reactions_guid_ref)
                     {
-                        if (reac.reaction_guid == rguid)
+                        if (reac.entity_guid == rguid)
                         {
                             reacStrings.Add("cytosol: " + reac.TotalReactionString);
                         }
@@ -5040,7 +5034,7 @@ namespace Daphne
             {
                 foreach (ConfigReaction cr in reac_list)
                 {
-                    if (cr.reaction_guid == guid)
+                    if (cr.entity_guid == guid)
                     {
                         //This next if is a complete hack!
                         if (culture.Name == "en-US")

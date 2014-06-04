@@ -163,7 +163,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    sc.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                    sc.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
         }
@@ -297,7 +297,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    sc.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                    sc.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
         }
@@ -591,7 +591,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
 
@@ -678,7 +678,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
 
@@ -770,7 +770,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
 
@@ -883,7 +883,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
 
@@ -984,7 +984,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             }
 
@@ -1062,7 +1062,7 @@ namespace Daphne
                 reac = findReaction(type[i], sc);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.reaction_guid);
+                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
                 }
             } 
             
@@ -2519,11 +2519,11 @@ namespace Daphne
                 if (reac != null)
                 {
                     ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                    grp.Guid = reac.reaction_guid;
+                    grp.Guid = reac.entity_guid;
                     grp.OriginalRate = reac.rate_const;
                     grp.ReactionComplexRate = reac.rate_const;
 
-                    crc.reactions_guid_ref.Add(reac.reaction_guid);
+                    crc.reactions_guid_ref.Add(reac.entity_guid);
                     crc.ReactionRates.Add(grp);
                 }
             }
@@ -2550,7 +2550,7 @@ namespace Daphne
         {
             foreach (ConfigReaction cr in sc.entity_repository.reactions)
             {
-                if (cr.reaction_guid == guid) 
+                if (cr.entity_guid == guid) 
                 {
                     return cr;
                 }
