@@ -2316,7 +2316,7 @@ namespace DaphneGui
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
-            xvf.name = "Force (/\u03bc\u33a1)";
+            xvf.name = "Force (μm/min2)";
             xvf.x = selectedCell.SpatialState.F[0];
             xvf.y = selectedCell.SpatialState.F[1];
             xvf.z = selectedCell.SpatialState.F[2];
@@ -2326,6 +2326,9 @@ namespace DaphneGui
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
             
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            // Plasma membrane (TinySphere) gradient depends on the orientation of the normalized vector of the position.
+            // Arbitrarily choose a positive vector with equal spatial components.
+            double[] pos = new double[3] { 1, 1, 1 };
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
@@ -2333,22 +2336,22 @@ namespace DaphneGui
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
+                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
-            double[] pos = selectedCell.SpatialState.X;
+            // cytosol (TinyBall) returns first moment of moment-expansion scalar field as long as the position is anywhere in the cytosol.
+            pos = new double[3] { 0, 0, 0 };
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                //double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(selectedCell.State.X);
                 double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
+                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
-
-                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
             }
 
             //need the ecm probe concentrations for this purpose
@@ -2359,6 +2362,7 @@ namespace DaphneGui
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
                 cmi.Concentration = conc.ToString("#.000");
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(pos);
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
