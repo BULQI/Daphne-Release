@@ -1160,7 +1160,7 @@ namespace Daphne
             sc.entity_repository.transition_drivers.Add(driver);
             sc.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
-            sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
+            sc.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
 
             ////////////////////////////
             // GC B cell differentiatior 
@@ -1228,7 +1228,7 @@ namespace Daphne
             sc.entity_repository.transition_drivers.Add(driver);
             sc.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
-            sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
+            sc.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
 
 
 
@@ -1787,7 +1787,7 @@ namespace Daphne
             {
                 if (s.Name == name)
                 {
-                    return s.diff_scheme_guid;
+                    return s.entity_guid;
                 }
             }
             return "";

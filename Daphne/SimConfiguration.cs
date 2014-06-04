@@ -556,7 +556,7 @@ namespace Daphne
             entity_repository.diff_schemes_dict.Clear();
             foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
             {
-                entity_repository.diff_schemes_dict.Add(ds.diff_scheme_guid, ds);
+                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
             }
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
         }
@@ -722,7 +722,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigDiffScheme cds = nn as ConfigDiffScheme;
-                    entity_repository.diff_schemes_dict.Add(cds.diff_scheme_guid, cds);
+                    entity_repository.diff_schemes_dict.Add(cds.entity_guid, cds);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -732,7 +732,7 @@ namespace Daphne
                     ConfigDiffScheme cds = dd as ConfigDiffScheme;
 
                     //Remove gene from genes_dict
-                    entity_repository.diff_schemes_dict.Remove(cds.diff_scheme_guid);
+                    entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
                 }
             }
         }
@@ -2369,9 +2369,8 @@ namespace Daphne
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
     
-    public class ConfigDiffScheme : EntityModelBase
+    public class ConfigDiffScheme : ConfigEntity
     {
-        public string diff_scheme_guid { get; set; }
         public string Name { get; set; }
 
         //For regulators
@@ -2397,10 +2396,8 @@ namespace Daphne
         //  The order of states (rows) should match the order in Drive.states
         public ObservableCollection<ConfigActivationRow> activationRows { get; set; }
 
-        public ConfigDiffScheme()
+        public ConfigDiffScheme() : base()
         {
-            Guid id = Guid.NewGuid();
-            diff_scheme_guid = id.ToString();
             //genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
         }
 
@@ -2481,7 +2478,7 @@ namespace Daphne
 
             ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            new_cds.diff_scheme_guid = id.ToString();
+            new_cds.entity_guid = id.ToString();
             // at this point we'd insert this into the hyperlocal store with the new guid
 
             return new_cds;

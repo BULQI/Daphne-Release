@@ -3616,14 +3616,14 @@ namespace DaphneGui
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
+                if (diffNew.entity_guid == cell.diff_scheme_guid_ref)
                     return;
 
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
+                if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme_guid_ref = diffNew.diff_scheme_guid;
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.diff_scheme_guid].Clone();
+                    cell.diff_scheme_guid_ref = diffNew.entity_guid;
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone();
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
