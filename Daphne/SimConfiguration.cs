@@ -2077,6 +2077,7 @@ namespace Daphne
         public ConfigEntity()
         {
             Guid id = Guid.NewGuid();
+
             entity_guid = id.ToString();
             // initialize time_stamp
         }
@@ -2221,12 +2222,6 @@ namespace Daphne
         public string Name { get; set; }
         public int CopyNumber { get; set; }
         public double ActivationLevel { get; set; }
-
-        //public ConfigGene()
-        //{
-        ////    Guid id = Guid.NewGuid();
-        //    gene_guid = id.ToString();
-        //}
 
         public ConfigGene(string name, int copynum, double actlevel) : base()
         {
@@ -2478,6 +2473,7 @@ namespace Daphne
 
             ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
+
             new_cds.entity_guid = id.ToString();
             // at this point we'd insert this into the hyperlocal store with the new guid
 
@@ -4124,6 +4120,7 @@ namespace Daphne
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
+
             cellpopulation_guid = id.ToString();
             cellpopulation_name = "";
             cell_subset_guid_ref = "";
@@ -4215,6 +4212,7 @@ namespace Daphne
         public MolPopInfo(string name)
         {
             Guid id = Guid.NewGuid();
+
             mp_guid = id.ToString();
             mp_dist_name = name;
             // Default is static homogeneous level
@@ -5916,6 +5914,7 @@ namespace Daphne
         public BoxSpecification()
         {
             Guid id = Guid.NewGuid();
+
             box_guid = id.ToString();
             box_visibility = true;
             blob_visibility = true;
