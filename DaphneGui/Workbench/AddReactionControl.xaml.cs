@@ -310,7 +310,7 @@ namespace DaphneGui
                         cr.modifiers_molecule_guid_ref.Add(geneGuid);
                     }
                 }
-                cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+                
             }
             // Boundary modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
@@ -324,6 +324,9 @@ namespace DaphneGui
                     }
                 }
             }
+
+            //Generate the total string
+            cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
 
             //Add the reaction to repository collection
             if (!MainWindow.SC.SimConfig.findReactionByTotalString(cr.TotalReactionString, MainWindow.SC.SimConfig))
