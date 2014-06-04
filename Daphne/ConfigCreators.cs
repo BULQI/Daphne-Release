@@ -418,7 +418,7 @@ namespace Daphne
             config_td.CurrentState = 0;
             config_td.StateName = config_td.states[config_td.CurrentState];
             sc.entity_repository.transition_drivers.Add(config_td);
-            sc.entity_repository.transition_drivers_dict.Add(config_td.driver_guid, config_td);
+            sc.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
             // generic division driver
             config_td = new ConfigTransitionDriver();
@@ -431,7 +431,7 @@ namespace Daphne
             config_td.CurrentState = 0;
             config_td.StateName = config_td.states[config_td.CurrentState];
             sc.entity_repository.transition_drivers.Add(config_td);
-            sc.entity_repository.transition_drivers_dict.Add(config_td.driver_guid, config_td);
+            sc.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
             ConfigCell gc;
             double[] conc;
@@ -1158,7 +1158,7 @@ namespace Daphne
 
             // Add to Entity Repository
             sc.entity_repository.transition_drivers.Add(driver);
-            sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
+            sc.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
             sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
 
@@ -1226,7 +1226,7 @@ namespace Daphne
 
             // Add to Entity Repository
             sc.entity_repository.transition_drivers.Add(driver);
-            sc.entity_repository.transition_drivers_dict.Add(driver.driver_guid, driver);
+            sc.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             sc.entity_repository.diff_schemes.Add(diffScheme);
             sc.entity_repository.diff_schemes_dict.Add(diffScheme.diff_scheme_guid, diffScheme);
 
@@ -1774,7 +1774,7 @@ namespace Daphne
             {
                 if (s.Name == name)
                 {
-                    return s.driver_guid;
+                    return s.entity_guid;
                 }
             }
             return "";

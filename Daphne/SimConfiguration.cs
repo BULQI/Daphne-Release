@@ -2320,20 +2320,17 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriver 
+    public class ConfigTransitionDriver : ConfigEntity
     {
         public string Name { get; set; }
-        public string driver_guid { get; set; }
         public int CurrentState { get; set; }
         public string StateName { get; set; }
         
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
 
-        public ConfigTransitionDriver()
+        public ConfigTransitionDriver() : base()
         {
-            Guid id = Guid.NewGuid();
-            driver_guid = id.ToString();
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
         }
@@ -2347,7 +2344,8 @@ namespace Daphne
 
             ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            new_ctd.driver_guid = id.ToString();
+
+            new_ctd.entity_guid = id.ToString();
             // at this point we'd insert this into the hyperlocal store with the new guid
 
             return new_ctd;
@@ -3190,7 +3188,6 @@ namespace Daphne
     }
 
     public class ConfigCell : ConfigEntity
-
     {
         public ConfigCell() : base()
         {
@@ -4446,7 +4443,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         mol_guid = row.elements[1].driver_mol_guid_ref;
@@ -4481,7 +4478,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         retval = row.elements[1].Alpha;
@@ -4531,7 +4528,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         retval = row.elements[1].Beta;
@@ -4553,7 +4550,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         row.elements[1].Beta = newval;
@@ -4582,7 +4579,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         elem = row.elements[1];
@@ -4618,7 +4615,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == guid)
+                    if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         mol_guid = row.elements[1].driver_mol_guid_ref;
@@ -4690,7 +4687,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriver driver in drivers)
                 {
-                    if (driver.driver_guid == death_guid)
+                    if (driver.entity_guid == death_guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
                         mol_guid = row.elements[1].driver_mol_guid_ref;

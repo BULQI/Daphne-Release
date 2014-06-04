@@ -572,7 +572,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.driver_guid == cell.death_driver_guid_ref)
+                if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
                 {
                     e.Accepted = true;
                 }
@@ -590,7 +590,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.driver_guid == cell.div_driver_guid_ref)
+                if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
                 {
                     e.Accepted = true;
                 }
@@ -3648,7 +3648,7 @@ namespace DaphneGui
                 {
                     EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                     //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
-                    cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                    cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
                     if (cell.div_driver_guid_ref == "")
                     {
                         MessageBox.Show("No division drivers are defined");
@@ -3736,7 +3736,7 @@ namespace DaphneGui
             {
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                 //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
+                cell.death_driver_guid_ref = FindFirstDeathDriver().entity_guid;
                 if (cell.death_driver_guid_ref == "")
                 {
                     MessageBox.Show("No death drivers are defined");
@@ -3776,7 +3776,7 @@ namespace DaphneGui
             if (cell.div_driver == null)
             {
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
                 if (cell.div_driver_guid_ref == "")
                 {
                     MessageBox.Show("No division drivers are defined");
