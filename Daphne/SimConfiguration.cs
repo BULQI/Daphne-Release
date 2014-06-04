@@ -602,7 +602,7 @@ namespace Daphne
             entity_repository.reaction_complexes_dict.Clear();
             foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
             {
-                entity_repository.reaction_complexes_dict.Add(crc.reaction_complex_guid, crc);
+                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
             }
             entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
 
@@ -975,7 +975,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigReactionComplex crc = nn as ConfigReactionComplex;
-                    entity_repository.reaction_complexes_dict.Add(crc.reaction_complex_guid, crc);
+                    entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -983,7 +983,7 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigReactionComplex crt = dd as ConfigReactionComplex;
-                    entity_repository.reaction_complexes_dict.Remove(crt.reaction_complex_guid);
+                    entity_repository.reaction_complexes_dict.Remove(crt.entity_guid);
                 }
             }
         }
@@ -3046,10 +3046,9 @@ namespace Daphne
         }
     }
 
-    public class ConfigReactionComplex : EntityModelBase
+    public class ConfigReactionComplex : ConfigEntity
     {
         public string Name { get; set; }
-        public string reaction_complex_guid { get; set; }
 
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref 
@@ -3070,20 +3069,17 @@ namespace Daphne
 
         public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
 
-        public ConfigReactionComplex()
+        public ConfigReactionComplex() : base()
         {
-            Guid id = Guid.NewGuid();
-            reaction_complex_guid = id.ToString();
             Name = "NewRC";
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             genes = new ObservableCollection<ConfigGene>();
             ReadOnly = false;
         }
-        public ConfigReactionComplex(string name)
+
+        public ConfigReactionComplex(string name) : base()
         {
-            Guid id = Guid.NewGuid();
-            reaction_complex_guid = id.ToString();
             Name = name;
             ReadOnly = false;
             reactions_guid_ref = new ObservableCollection<string>();
@@ -3101,7 +3097,8 @@ namespace Daphne
 
             ConfigReactionComplex newrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
             Guid id = Guid.NewGuid();
-            newrc.reaction_complex_guid = id.ToString();
+
+            newrc.entity_guid = id.ToString();
             newrc.ReadOnly = false;
             newrc.Name = "NewRC";
 
@@ -5065,7 +5062,7 @@ namespace Daphne
             {
                 foreach (ConfigReactionComplex crc in rc_list)
                 {
-                    if (crc.reaction_complex_guid == guid)
+                    if (crc.entity_guid == guid)
                     {
                         //This next if is a complete hack!
                         rc_string = crc.Name;
@@ -5106,7 +5103,7 @@ namespace Daphne
             {
                 foreach (ConfigReactionComplex crc in rc_list)
                 {
-                    if (crc.reaction_complex_guid == guid)
+                    if (crc.entity_guid == guid)
                     {
                         rcReturn = crc; 
                         break;

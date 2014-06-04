@@ -880,9 +880,9 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
             if (crc != null)
             {
-                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.reaction_complex_guid))
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.entity_guid))
                 {
-                    MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.reaction_complex_guid);
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.entity_guid);
                 }
             }
         }
