@@ -3014,9 +3014,11 @@ namespace Daphne
         }
     }
 
-    public class ConfigReactionGuidRatePair : EntityModelBase
+    public class ConfigReactionGuidRatePair : ConfigEntity
     {
-        public string Guid { get; set; }
+        public ConfigReactionGuidRatePair() : base()
+        {
+        }
 
         private double originalRate;
         public double OriginalRate 

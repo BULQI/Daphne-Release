@@ -2519,7 +2519,7 @@ namespace Daphne
                 if (reac != null)
                 {
                     ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                    grp.Guid = reac.entity_guid;
+                    grp.entity_guid = reac.entity_guid;
                     grp.OriginalRate = reac.rate_const;
                     grp.ReactionComplexRate = reac.rate_const;
 

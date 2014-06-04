@@ -192,7 +192,7 @@ namespace DaphneGui
                 {
                     selectedRC.reactions_guid_ref.Add(reac.entity_guid);
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.Guid = reac.entity_guid;
+                    pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
                     selectedRC.ReactionRates.Add(pair);                    
@@ -207,7 +207,7 @@ namespace DaphneGui
                 {
                     crc.reactions_guid_ref.Add(reac.entity_guid);
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.Guid = reac.entity_guid;
+                    pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
                     crc.ReactionRates.Add(pair);
