@@ -531,8 +531,17 @@ namespace DaphneGui
 
             foreach (var item in lbMol2.Items)
             {
-                ConfigMolecule mol = (ConfigMolecule)item;
-                string name = mol.Name;
+                string name = "";
+                if (item.GetType() == typeof(ConfigMolecule))
+                {
+                    ConfigMolecule mol = (ConfigMolecule)item;
+                    name = mol.Name;
+                }
+                else if (item.GetType() == typeof(ConfigGene))
+                {
+                    ConfigGene gene = (ConfigGene)item;
+                    name = gene.Name;
+                }
                 name = name.ToLower();
                 if (name.Contains(searchText))
                 {
