@@ -2369,6 +2369,16 @@ namespace DaphneGui
             DrawSelectedReactionComplex();
         }
 
+        public ConfigReactionComplex GetConfigReactionComplex()
+        {
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to process.");
+                return null;
+            }
+            return (ConfigReactionComplex)(lbComplexes.SelectedItem);
+        }
+
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lvCellAvailableReacs.ItemsSource != null)
