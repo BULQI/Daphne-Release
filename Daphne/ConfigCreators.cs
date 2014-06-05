@@ -756,9 +756,9 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[35] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
-                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgH -> IgH + gIgH", "gIgS -> IgS + gIgS", 
+            type = new string[34] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
+                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
+                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
                                     "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
                                     "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
                                     "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
@@ -871,7 +871,7 @@ namespace Daphne
 
             // Reactions in Cytosol
             type = new string[28] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
+                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
                                     "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
                                     "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
                                     "gDif4 -> sDif4 + gDif4", "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv",
