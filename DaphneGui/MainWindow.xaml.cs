@@ -2326,32 +2326,31 @@ namespace DaphneGui
 
             //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
-            
+
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-            // Plasma membrane (TinySphere) gradient depends on the orientation of the normalized vector of the position.
-            // Arbitrarily choose a positive vector with equal spatial components.
-            double[] pos = new double[3] { 1, 1, 1 };
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
-                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
+                // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
+                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
+                cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
                 currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                currentConcs.Add(cmi); 
             }
-            // cytosol (TinyBall) returns first moment of moment-expansion scalar field as long as the position is anywhere in the cytosol.
-            pos = new double[3] { 0, 0, 0 };
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc.ToString("#.000");
-                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
+                // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
+                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
+                cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
@@ -2364,7 +2363,8 @@ namespace DaphneGui
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
                 cmi.Concentration = conc.ToString("#.000");
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(pos);
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
