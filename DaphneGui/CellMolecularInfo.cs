@@ -39,6 +39,10 @@ namespace DaphneGui
         public string Concentration { get; set; }
         public double[] Gradient { get; set; }
         //public bool Show { get; set; }
+        public void AddMoleculaInfo_gradient(double[] gradient)
+        {
+            Gradient = new double[3] {gradient[0], gradient[1], gradient[2]}; 
+        }
     }
 
     public class CellGeneInfo
