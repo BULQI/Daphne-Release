@@ -36,7 +36,7 @@ namespace DaphneGui
             //Show = true;
         }
         public string Molecule { get; set; }        
-        public string Concentration { get; set; }
+        public double Concentration { get; set; }
         public double[] Gradient { get; set; }
         //public bool Show { get; set; }
         public void AddMoleculaInfo_gradient(double[] gradient)
