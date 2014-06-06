@@ -216,6 +216,11 @@ namespace Daphne
             // Update boundary concentrations and global gradients
             UpdateBoundary();
 
+            if (Molecule.DiffusionCoefficient == 0)
+            {
+                return;
+            }
+
             // Laplacian
             concentration.Add(concentration.Laplacian().Multiply(dt * Molecule.DiffusionCoefficient));
 
