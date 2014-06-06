@@ -1,0 +1,738 @@
+﻿<Window x:Class="DaphneGui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:DaphneGui"
+        xmlns:work="clr-namespace:Workbench"
+        xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+        xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        Title="Daphne"
+        Width="900" Height="770" Closing="Window_Closing"
+        Icon="Daphne.ico"
+        >
+
+    <Window.Resources>
+        <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
+
+        <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:CellRenderMethod" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>-->
+
+        <!-- Tab header text layout for LP fitting tab -->
+        <DataTemplate x:Key="TabItemHeaderTemplate">
+            <Grid>
+                <ContentPresenter Content="{TemplateBinding Property=ContentControl.Content}" 
+                                  RenderTransformOrigin="0.5,0.5" >
+                    <ContentPresenter.LayoutTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="-90"/>
+                        </TransformGroup>
+                    </ContentPresenter.LayoutTransform>
+                </ContentPresenter>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="cellRenderMethodTemplate">
+            <StackPanel Orientation="Horizontal">
+                <!--<TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>-->
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Open" 
+                        CanExecute="CommandBindingOpen_CanExecute" 
+                        Executed="CommandBindingOpen_Executed" />
+        
+        <CommandBinding Command="ApplicationCommands.Save" 
+                        CanExecute="CommandBindingSave_CanExecute" 
+                        Executed="CommandBindingSave_Executed" />
+
+        <!--<CommandBinding Command="{x:Static custom:MainWindow.DeleteDBCommand}" 
+                        CanExecute="CommandBindingDeleteDB_CanExecute"
+                        Executed="CommandBindingDeleteDB_Executed" />-->
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Key="O"
+                    Modifiers="Control" 
+                    Command="ApplicationCommands.Open" />
+
+        <!--<KeyBinding Key="J"
+                    Modifiers="Control" 
+                    Command="ApplicationCommands.Open" />-->
+
+        <KeyBinding Key="S"
+                    Modifiers="Control" 
+                    Command="ApplicationCommands.Save" />
+
+        <!--<KeyBinding Key="D"
+                    Modifiers="Control" 
+                    Command="{x:Static custom:MainWindow.DeleteDBCommand}" />-->
+    </Window.InputBindings>
+
+    
+    <!-- Begin GUI layout definitions -->
+    <DockPanel LastChildFill="True">
+        <shared:PixelSnapper DockPanel.Dock="Top">
+            <Menu>
+                <!--><MenuItem Header="Edit"/>-->
+                <MenuItem Header="File" Name="fileMenu">
+                    <MenuItem Header="New Scenario" Name="newScenario" Click="newScenario_Click"></MenuItem>
+                    <MenuItem Header="Load Scenario..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
+                    <MenuItem Header="Save Scenario..." Name="saveScenario" Command="ApplicationCommands.Save" />
+                    <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
+                    <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
+                    <Separator />
+                    <MenuItem Header="Export in SBML">
+                        <MenuItem Header="Simulation Model" Name="ExportSBML" Click="ExportSBML_Click" />
+                        <MenuItem Header="Reaction Complex" Name="ExportComplexSBML" Click="ExportReactionComplexSBML_Click" />
+                    </MenuItem>
+                    <MenuItem Header="Import from SBML" Name="ImportSBML" Click="ImportSBML_Click" />
+
+                    <!--><Separator />
+                    <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
+                    <Separator />
+                    <MenuItem Header="Load past experiment" Name="loadExp" IsEnabled="False" Click="OpenExpSelectWindow" />
+                    <local:RecentFileList x:Name="recentFileList" />
+                    <MenuItem Header="Exit..." Name="exitApp" Click="exitApp_Click" />
+                </MenuItem>
+                <MenuItem Header="Analysis" Name="analysisMenu">
+                    <MenuItem Header="Fit Tracks" Name="fitMenu" IsEnabled="False" Click="OpenLPFittingWindow" />
+                    <MenuItem Header="Cell Division" Name="cellDivMenu" IsEnabled="False" Click="OpenCellDivisionWindow" />
+                </MenuItem>
+                <MenuItem Header="Options" Name="optionsMenu">
+                    <MenuItem Header="User preferences">
+                        <MenuItem Header="Fit autozoom" Name="autoZoomFitMenu" IsCheckable="True" IsChecked="True" Click="autoZoomFit_click" />
+                        <MenuItem Header="Restart opens last scenario" Name="openLastScenarioMenu" IsCheckable="True" IsChecked="False" Click="openLastScenario_click" />
+                        <MenuItem Header="Cell summaries" Name="writeCellSummariesMenu" IsCheckable="True" IsChecked="False" Click="runCellSummaries_click" />
+                        <MenuItem Header="Run statistical summary" Name="runStatisticalSummaryMenu" IsCheckable="True" IsChecked="True" Click="runStatisticalSummary_click" />
+                        <MenuItem Header="Unique name reminders" Name="uniqueNamesMenu" IsCheckable="True" IsChecked="False" Click="uniqueNames_click" />
+                    </MenuItem>
+                    <MenuItem Header="DataBase" Name = "DataBaseMenu">
+                        <MenuItem Header="Clear DataBase" Name="deleteDataBase" InputGestureText="Ctrl+D" Command="{x:Static local:MainWindow.DeleteDBCommand}" />
+                        <MenuItem Header="Skip Writing Data" Name="skipDataWriteMenu" IsCheckable="True" IsChecked="False" Click="skipDataBase_Click" />
+                        <MenuItem Header="Buffer Database Writing" Name="bufferDatabaseWriteMenu" IsCheckable="True" IsChecked="False" Click="bufferDatabaseWriteMenu_Click"  />
+                        <Separator />
+                        <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
+                    </MenuItem>
+                    <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
+                        <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
+                        <MenuItem Header="Skip Inter Cell Distance" Name="skipInterCell" IsCheckable="True" IsChecked="False"        />
+                        <MenuItem Header="Skip Mean Speed" Name="skipMeanSpeed" IsCheckable="True" IsChecked="False"                 />
+                        <MenuItem Header="Skip Chemotactic Index" Name="skipChemotactic" IsCheckable="True" IsChecked="False"        />
+                        <MenuItem Header="Skip Time Values" Name="skipTimeVal" IsCheckable="True" IsChecked="False"                  />
+                    </MenuItem>-->
+                </MenuItem>
+
+                <MenuItem Header="_Activate">
+                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Activate Simulation Setup"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=SimConfigToolWindow}" />
+                    <MenuItem x:Name="menu_ActivateVTKView" Header="Activate 3D View"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
+                    <MenuItem x:Name="menu_ActivateLPFitting" Header="Activate LP Fitting Tool"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
+                    
+                    <!-- This one is not yet functional -->
+                    <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />-->
+                    <!--<MenuItem x:Name="menu_ActivateDisplayOptions" Header="Activate Display Options"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
+                </MenuItem>
+                <MenuItem Header="Data Export" Name = "ExportMenu">
+                    <MenuItem Header="B Cell Summary" Name="bCellSummaryExport" Click="bCellSummaryExport_Click" />
+                    <MenuItem Header="B Cell Pedigree" Name="bCellPedigreeExport" Click="bCellPedigreeExport_Click" />
+                    <MenuItem Header="B Cell FDC Summary" Name="bCellFDCSummaryExport" Click="bCellFDCSummaryExport_Click" />
+                    <Separator />
+                    <MenuItem Header="Export All" Name="allExport" Click="allExport_Click" />
+                </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
+                    <MenuItem Header="Tech help" Name="techHelp">
+                        <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
+                        <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
+                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
+                    </MenuItem>
+                    <MenuItem Header="About..." Name="helpAbout" Click="helpAbout_Click" />
+                </MenuItem>
+            </Menu>
+        </shared:PixelSnapper>
+
+        <shared:PixelSnapper DockPanel.Dock="Top">
+            <ToolBarTray>
+                <ToolBarTray.Resources>
+                    <!-- Gray out button images when toolbar is disabled -->
+                    <Style TargetType="{x:Type Image}" x:Key="toolbarImageStyle">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                <Setter Property="Opacity" Value="0.25"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style TargetType="{x:Type Image}" x:Key="toolbarTBImageStyle">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                <Setter Property="Opacity" Value="0.25"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style TargetType="{x:Type Image}" x:Key="toolbarPlayButtonImageStyle">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                <Setter Property="Opacity" Value="0.25"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToolBarTray.Resources>                
+                <ToolBar Name="SaveToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <Button Content="Apply" HorizontalAlignment="Left" Name="resetButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Click="resetButton_Click">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Refresh the 3D visualization with the current scenario options while setting up the simulated experiment (before hitting run).
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>                    
+                    <Button Content="Save" HorizontalAlignment="Right" Name="saveButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Command="ApplicationCommands.Save">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                        Save the simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
+                </ToolBar>
+                <ToolBar Name="SimControlToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                    <Button Content="Run" HorizontalAlignment="Right" Name="runButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Click="runButton_Click">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                        Start the simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
+                    <Button Content="Abort" HorizontalAlignment="Left" Name="abortButton" 
+                                Width="60" ToolTipService.InitialShowDelay="1500"
+                                Margin="0" Click="abortButton_Click">
+                        <Button.ToolTip>
+                            <ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Top" Padding="5" Width="200">
+                                            Abort the simulation.
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </Button.ToolTip>
+                    </Button>
+                </ToolBar>
+                <ToolBar Name="VCR_Toolbar" RenderOptions.BitmapScalingMode="NearestNeighbor" IsEnabled="False">
+                    <Button Name="VCRbutton_First" Click="VCRbutton_First_Click" ToolBar.OverflowMode="Never">
+                        <Image Source="Images/pqVcrFirst24.png" Width="24" Style="{StaticResource toolbarImageStyle}"/>
+                    </Button>
+                    <Button Name="VCRbutton_Back" Click="VCRbutton_Back_Click" ToolBar.OverflowMode="Never">
+                        <Image Source="Images/pqVcrBack24.png" Width="24" Style="{StaticResource toolbarImageStyle}"/>
+                    </Button>
+                    <ToggleButton Name="VCRbutton_Play" Checked="VCRbutton_Play_Checked" Unchecked="VCRbutton_Play_Unchecked" ToolBar.OverflowMode="Never">
+                        <ToggleButton.Resources>
+                            <Image x:Key="PlayImage" Source="Images/pqVcrPlay24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}"/>
+                            <Image x:Key="PauseImage" Source="Images/pqVcrPause24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}"/>
+                        </ToggleButton.Resources>
+                        <!-- This works for toggling image along with checked state, but I don't know how to get a xaml preview to show up properly -->
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content" Value="{StaticResource PauseImage}" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Content" Value="{StaticResource PlayImage}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <Button Name="VCRbutton_Forward" Click="VCRbutton_Forward_Click" ToolBar.OverflowMode="Never">
+                        <Image Source="Images/pqVcrForward24.png" Width="24" Style="{StaticResource toolbarImageStyle}"/>
+                    </Button>
+                    <Button Name="VCRbutton_Last" Click="VCRbutton_Last_Click" ToolBar.OverflowMode="Never">
+                        <Image Source="Images/pqVcrLast24.png" Width="24" Style="{StaticResource toolbarImageStyle}"/>
+                    </Button>
+                    <Slider Name="VCRslider"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="5,0,0,0"
+                                    ToolBar.OverflowMode="Never"
+                                    Width="80"
+                                    RenderTransform="1.0,0,0,0.8,0,2"
+                                    Minimum="0" 
+                                    Maximum="100" 
+                                    Value="{Binding Path=CurrentFrame, Mode=TwoWay}"
+                                    IsSnapToTickEnabled="True" 
+                                    TickFrequency="1"
+                                    PreviewMouseLeftButtonDown="VCRSlider_LeftMouse_Down"
+                                    PreviewMouseLeftButtonUp="VCRSlider_LeftMouse_Up" />
+                    <editors:DoubleEditBox ToolBar.OverflowMode="Never"
+                                                CheckBoxVisibility="Collapsed" 
+                                                SpinnerVisibility="Collapsed"
+                                                VerticalAlignment="Center"
+                                                Format="F1"
+                                                Margin="5,0,1,0" 
+                                                Width="50" 
+                                                CenterSlotHorizontalAlignment="Right"
+                                                Value="{Binding Path=CurrentTime, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                
+                                                />
+                    <TextBlock VerticalAlignment="Center" Text="min" />
+                </ToolBar>
+            </ToolBarTray>
+        </shared:PixelSnapper>
+
+        <!-- StatusBar -->
+        <shared:PixelSnapper DockPanel.Dock="Bottom">
+            <StatusBar x:Name="statusBar" Padding="0,2,0,0">
+                <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready" />
+            </StatusBar>
+        </shared:PixelSnapper>
+
+        <!-- Main Window panels layout grid -->
+
+        <!-- DockSite -->
+        <docking:DockSite x:Name="dockSite" 
+                          CanDocumentWindowsRaft="True"
+                          AreDocumentWindowsDestroyedOnClose="False"
+                          UseHostedAutoHidePopups="False"
+                          >            
+
+            <docking:SplitContainer x:Name="SimConfigSplitContainer">
+                <!-- Sim Config Tab control -->
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
+                    <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Daphne Simulation Configuration" />
+                </docking:ToolWindowContainer>
+
+                <!-- Right-hand content containers -->
+                <docking:SplitContainer Orientation="Vertical">
+
+                    <!-- VTK Windows Forms Host panel -->
+                    <!-- Workspace -->
+                    <docking:Workspace>
+                        <docking:TabbedMdiHost x:Name="tabbedMdiHost">
+                            <docking:TabbedMdiContainer>
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" >
+                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
+                                        <DockPanel.Resources>
+                                            <!-- Gray out button images when toolbar is disabled -->
+                                            <Style TargetType="{x:Type Image}" x:Key="toolbarImageStyle">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                                        <Setter Property="Opacity" Value="0.25"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                            <Style TargetType="{x:Type Image}" x:Key="toolbarTBImageStyle">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                                        <Setter Property="Opacity" Value="0.25"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                            <Style TargetType="{x:Type Image}" x:Key="toolbarPlayButtonImageStyle">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
+                                                        <Setter Property="Opacity" Value="0.25"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </DockPanel.Resources>
+
+                                        <ToolBarTray DockPanel.Dock="Top">
+                                            <ToolBar Name="Tools_Toolbar" 
+                                 IsEnabled="{Binding ToolsToolbar_IsEnabled}"
+                                 RenderOptions.BitmapScalingMode="NearestNeighbor">
+                                                <ToggleButton Name="WhArrowToolButton" 
+                                          IsChecked="{Binding WhArrowToolButton_IsChecked}" 
+                                          IsEnabled="{Binding WhArrowToolButton_IsEnabled}"
+                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Navigation tool" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/cursors_wh_arrow.png" Style="{StaticResource toolbarTBImageStyle}"/>
+                                                </ToggleButton>
+                                                <ToggleButton Name="HandToolButton" 
+                                                          IsChecked="{Binding HandToolButton_IsChecked}" 
+                                                          IsEnabled="{Binding HandToolButton_IsEnabled}"
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
+                                                </ToggleButton>
+                                                <ToggleButton Name="PreviewButton" 
+                                                          IsChecked="{Binding PreviewButton_IsChecked}" 
+                                                          IsEnabled="{Binding PreviewButton_IsEnabled}"
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
+                                                </ToggleButton>
+                                                <Separator ToolBar.OverflowMode="AsNeeded"/>
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cells</Label>
+
+                                                <!--ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
+                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
+                                                SelectedValue="{Binding Path=CellRenderMethod}"-->
+                                                <ComboBox Name="CellRenderMethodCB" Width="100"
+                                                          BorderBrush="LightGray" 
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
+                                                          />
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
+                                                <ComboBox x:Name="CellsColorByCB" Width="100" 
+                                                          ItemsSource="{Binding Path=CellAttributeArrayNames}" 
+                                                          SelectedValue="{Binding Path=CellColorArrayName}"
+                                                          BorderBrush="LightGray" 
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells color by attribute">
+                                                </ComboBox>
+
+                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
+                                                <ComboBox Name="CellSelectionToolCB" Width="160"
+                                                          ItemsSource="{Binding Path=CellSelectionToolModes}"
+                                                          SelectedValue="{Binding Path=CellSelectionToolMode}"
+                                                          SelectionChanged="CellSelectionToolCB_SelectionChanged"
+                                                          BorderBrush="LightGray" 
+                                                          ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
+                                                          />-->
+
+                                                <Slider x:Name="ColorMapScaleFactorSlider"
+                                                        Visibility="{Binding ColorScaleSlider_IsEnabled}"
+                                                        Value="{Binding ColorScaleMaxFactor}"
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center"
+                                                        ToolBar.OverflowMode="AsNeeded"
+                                                        Width="50"
+                                                        RenderTransform="1.0,0,0,0.5,0,6"
+                                                        Minimum="0.01" 
+                                                        Maximum="1"
+                                                        KeyboardNavigation.IsTabStop="False"
+                                                        >
+                                                </Slider>
+                                                <TextBlock ToolBar.OverflowMode="AsNeeded" 
+                                                            VerticalAlignment="Center"
+                                                            Margin="2,0,5,0"
+                                                            Visibility="{Binding ColorScaleSlider_IsEnabled}"
+                                                            Text="{Binding ColorScaleMaxFactor, StringFormat={}{0:F2}, Mode=OneWay}"
+                                                            />
+                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Extracellular medium</Label>
+                                                <ComboBox x:Name="SolfacRenderingCB" Width="120" 
+                                                            ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
+                                                            SelectedValue="{Binding Path=ECSRenderingMethod}"
+                                                            BorderBrush="LightGray" 
+                                                            ToolBar.OverflowMode="AsNeeded" ToolTip="Extracellular medium rendering style">
+                                                </ComboBox>
+                                                <ToggleButton x:Name="ScalarBarMarkerButton" 
+                                                        IsChecked="{Binding ScalarBarMarker_IsChecked}" 
+                                                        ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                </ToggleButton>
+                                                <ToggleButton Name="OrientationMarkerButton" 
+                                                        IsChecked="{Binding OrientationMarker_IsChecked}" 
+                                                        ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                </ToggleButton>
+                                                <ToggleButton Name="ResetCameraButton" 
+                                                        IsChecked="{Binding ResetCamera_IsChecked}" 
+                                                        ToolTip="Reset camera" ToolTipService.ShowOnDisabled="True">
+                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                </ToggleButton>
+                                                <Separator ToolBar.OverflowMode="Never"/>
+                                                <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>
+                                            </ToolBar>
+                                        </ToolBarTray>
+
+                                        <!-- VTK render window -->
+                                        <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
+                                    </DockPanel>
+                                </docking:DocumentWindow>
+
+                                <!-- skg This window contains the reaction complex graph -->
+                                <!--<local:ChartViewDocumentWindow x:Name="ChartViewDocWindow" Title="Run Statistics Results" >
+                                </local:ChartViewDocumentWindow>-->
+
+                                <!-- This is the window that contains the reaction complex graph-->
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" >
+                                </work:ChartViewToolWindow>
+
+                            </docking:TabbedMdiContainer>
+
+                        </docking:TabbedMdiHost>
+                    </docking:Workspace>
+
+                    <!-- skg 8/12/12 Cell Molecular Info -->
+                    <docking:ToolWindowContainer x:Name="Tool1">
+                        <docking:ToolWindow x:Name="ToolWinCellInfo" Title="Cell Data">
+                            <Grid x:Name="CellInfoGrid">
+                                <TabControl x:Name="CellInfoTabControl" Grid.Column="0" TabStripPlacement="Bottom">
+                                    <TabItem Header="Molecular Concentrations" x:Name="TabItemMolConcs">
+                                        <!--<TextBlock x:Name="testText" Height="200" Width="400" VerticalAlignment="Top">TextBlock</TextBlock>-->
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="32*"/>
+                                                    <RowDefinition Height="32*" />
+                                                </Grid.RowDefinitions>
+                                                <Label Grid.Column="0" Grid.Row="0" 
+                                                        Content="Molecular Concentrations for Cell Id: " 
+                                                        Height="32" HorizontalAlignment="Left" Margin="0,0,0,0" 
+                                                        Name="labelMolConcs" VerticalAlignment="Center" FontSize="12" FontFamily="Verdana" FontWeight="Bold"
+                                                />
+                                                <Label Grid.Column="1" Grid.Row="0" x:Name="txtCellId"
+                                                           Height="32" HorizontalAlignment="Left" Margin="0,0,0,0"
+                                                           VerticalAlignment="Center" FontSize="12" FontFamily="Verdana" FontWeight="Bold"
+                                                           >
+                                                </Label>
+                                            </Grid>
+                                            <Grid>
+                                                <!--<DataGrid x:Name="dgCellMolConcs" Height="250" Width="400" HorizontalAlignment="Left">
+                                                </DataGrid>-->
+                                                <ListView x:Name="lvCellMolConcs" Margin="0,4"
+                                                      MinHeight="100" MaxHeight="150"
+                                                    >
+                                                    <ListView.View>
+                                                        <GridView>
+                                                            <GridView.ColumnHeaderContainerStyle>
+                                                                <Style TargetType="GridViewColumnHeader">
+                                                                    <Setter Property="Height" Value="Auto"></Setter>
+                                                                    <Setter Property="Background">
+                                                                        <Setter.Value>
+                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                <GradientStop Offset="0.0" Color="White" />
+                                                                                <GradientStop Offset="1.0" Color="Beige" />
+                                                                            </LinearGradientBrush>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </GridView.ColumnHeaderContainerStyle>
+
+                                                            <GridViewColumn Width="120" Header="Molecule">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <TextBlock Text="{Binding Path=Molecule}"></TextBlock>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="120" Header="Concentration">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" Number="{Binding Path=Concentration}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+
+                                                            <GridViewColumn Width="100" Header="Gradient X">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[0]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="Gradient Y" >
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[1]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            <GridViewColumn Width="100" Header="Gradient Z">
+                                                                <GridViewColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Gradient[2]}"></uc:DoublesBox>
+                                                                    </DataTemplate>
+                                                                </GridViewColumn.CellTemplate>
+                                                            </GridViewColumn>
+                                                            
+                                                        </GridView>
+                                                    </ListView.View>
+                                                </ListView>
+                                            </Grid>
+                                        </StackPanel>
+                                    </TabItem>
+                                    <TabItem Header="Cell information" x:Name="TabItemCellInfo" DataContext="MainWindow">
+                                        <!--<Grid>
+                                            <TextBlock x:Name="testText" Height="200" Width="400" VerticalAlignment="Top">TextBlock</TextBlock>
+                                            <DataGrid x:Name="dgCellXVF" Height="250" Width="600" HorizontalAlignment="Left">
+                                            </DataGrid>
+                                        </Grid>-->
+                                        <StackPanel>
+                                            <TextBlock x:Name="tbCellConc" FontWeight="Bold" TextAlignment="Left"></TextBlock>
+                                            <ListView x:Name="lvCellXVF" Margin="0,4"
+                                                      MinHeight="100" MaxHeight="150"
+                                                    >
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridView.ColumnHeaderContainerStyle>
+                                                            <Style TargetType="GridViewColumnHeader">
+                                                                <Setter Property="Height" Value="Auto"></Setter>
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                            <GradientStop Offset="0.0" Color="White" />
+                                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </GridView.ColumnHeaderContainerStyle>
+
+                                                        <GridViewColumn Width="120" Header="Property">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Path=name}"></TextBlock>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Width="100" Header="X">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=x}"></uc:DoublesBox>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Width="100" Header="Y" >
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=y}"></uc:DoublesBox>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Width="100" Header="Z">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=z}"></uc:DoublesBox>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+                                        </StackPanel>
+                                        
+                                    </TabItem>
+                                    <TabItem Header="Cell Differentiation" x:Name="TabItemCellDiff" >
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Margin="0,4">Current State:  </TextBlock>
+                                                <TextBox x:Name="txtCellState" Width="200" Margin="10,0" IsEnabled="False"></TextBox>
+                                            </StackPanel>
+                                            <ListView x:Name="lvCellDiff" Margin="0,4"
+                                                      MinHeight="100" MaxHeight="150"
+                                                    >
+                                                <ListView.View>
+                                                    <GridView>
+                                                        <GridView.ColumnHeaderContainerStyle>
+                                                            <Style TargetType="GridViewColumnHeader">
+                                                                <Setter Property="Height" Value="Auto"></Setter>
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                            <GradientStop Offset="0.0" Color="White" />
+                                                                            <GradientStop Offset="1.0" Color="Beige" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </GridView.ColumnHeaderContainerStyle>
+
+                                                        <GridViewColumn Width="120" Header="Gene">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Path=Name}"></TextBlock>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        
+                                                        <GridViewColumn Width="150" Header="Gene Activation Levels">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="True" SNUpperThreshold="1000"  Number="{Binding Path=Activation}"></uc:DoublesBox>
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+                                        </StackPanel>
+                                    </TabItem>
+                                    <TabItem Header="Time Trajectory" x:Name="TabItemTimeTraj" Visibility="Hidden">
+                                        <Grid>
+                                            <WindowsFormsHost Margin="21" x:Name="winFormsHostTimeTraj" >
+                                                <wf:Panel x:Name="pChartTimeTraj" Visible="True"/>
+                                            </WindowsFormsHost>
+                                        </Grid>
+                                    </TabItem>
+                                </TabControl>
+                            </Grid>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+
+                    <!-- Bottom right panel -->
+                    <docking:ToolWindowContainer x:Name="bottomTWContainer">
+                        <docking:ToolWindow x:Name="LPFittingToolWindow" Title="LP Fitting" Description="Langevin Process fitting tools">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <DockPanel Grid.Column="0">
+                                    <CheckBox Name="fitZeroForceCheckBox" Content="zero force" 
+                                          DockPanel.Dock="Top" HorizontalAlignment="Left"
+                                          Margin="10" 
+                                          Click="fitZeroForceCheckBox_Click"
+                                          />
+                                    <TextBlock DockPanel.Dock="Top" Margin="5,0" HorizontalAlignment="Center">Cell opacity</TextBlock>
+                                    <Slider Name="fitCellOpacitySlider"
+                                        Orientation="Horizontal"
+                                        RenderTransform="1.0,0,0,0.5,0,4"
+                                        Width="70"
+                                        Minimum="0.0" 
+                                        Maximum="1.0" 
+                                        Value="1.0" 
+                                        ValueChanged="fitCellOpacitySlider_ValueChanged"
+                                        DockPanel.Dock="Top"
+                                        />
+                                    <ProgressBar Name="fitProgressBar" DockPanel.Dock="Bottom" Margin="10" Height="15"/>
+                                    <ContentControl />
+                                </DockPanel>
+                                <TextBox Grid.Column="1" Name="fitMessageBox" 
+                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5"
+                                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsReadOnly="True" />
+                            </Grid>
+                        </docking:ToolWindow>
+                    </docking:ToolWindowContainer>
+
+                </docking:SplitContainer>
+            </docking:SplitContainer>
+        </docking:DockSite>
+    </DockPanel>
+</Window>
