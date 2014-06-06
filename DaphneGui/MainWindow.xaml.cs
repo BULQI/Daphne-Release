@@ -717,7 +717,7 @@ namespace DaphneGui
 
             foreach (ConfigGene configGenePop in crc.genes)
             {
-                ConfigGene configGen = customSimConfig.SimConfig.entity_repository.genes_dict[configGenePop.gene_guid];
+                ConfigGene configGen = customSimConfig.SimConfig.entity_repository.genes_dict[configGenePop.entity_guid];
                 configurator.SimConfig.entity_repository.genes.Add(configGen);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
@@ -728,7 +728,7 @@ namespace DaphneGui
             {
                 cr = customSimConfig.SimConfig.entity_repository.reactions_dict[rguid];
                 int index = customSimConfig.SimConfig.entity_repository.reaction_templates.IndexOf(customSimConfig.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
-                cr.reaction_template_guid_ref = configurator.SimConfig.entity_repository.reaction_templates[index].reaction_template_guid;
+                cr.reaction_template_guid_ref = configurator.SimConfig.entity_repository.reaction_templates[index].entity_guid;
 
                 configurator.SimConfig.entity_repository.reactions.Add(cr);
             }

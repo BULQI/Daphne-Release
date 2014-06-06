@@ -81,14 +81,16 @@ namespace DaphneGui
                 if (obj.GetType() == typeof(ConfigMolecule))
                 {
                     ConfigMolecule cm = obj as ConfigMolecule;
-                    reacmolguids.Add(cm.molecule_guid);
+
+                    reacmolguids.Add(cm.entity_guid);
                     reac += cm.Name;
                     reac += " + ";
                 }
                 else if (obj.GetType() == typeof(ConfigGene))
                 {
                     ConfigGene cg = obj as ConfigGene;
-                    reacmolguids.Add(cg.gene_guid);
+
+                    reacmolguids.Add(cg.entity_guid);
                     reac += cg.Name;
                     reac += " + ";
                 }
@@ -114,14 +116,16 @@ namespace DaphneGui
                 if (obj.GetType() == typeof(ConfigMolecule))
                 {
                     ConfigMolecule cm = obj as ConfigMolecule;
-                    prodmolguids.Add(cm.molecule_guid);
+
+                    prodmolguids.Add(cm.entity_guid);
                     prod += cm.Name;
                     prod += " + ";
                 }
                 else if (obj.GetType() == typeof(ConfigGene))
                 {
                     ConfigGene cg = obj as ConfigGene;
-                    reacmolguids.Add(cg.gene_guid);
+
+                    reacmolguids.Add(cg.entity_guid);
                     prod += cg.Name;
                     prod += " + ";
                 }

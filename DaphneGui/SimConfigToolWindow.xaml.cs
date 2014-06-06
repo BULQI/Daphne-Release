@@ -56,7 +56,7 @@ namespace DaphneGui
             CellPopulation cs = new CellPopulation();
 
             // Default cell type and name to first entry in the cell repository
-            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].cell_guid;
+            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].entity_guid;
             cs.cellpopulation_name = MainWindow.SC.SimConfig.entity_repository.cells[0].CellName;
 
             double[] extents = new double[3] { MainWindow.SC.SimConfig.scenario.environment.extent_x, 
@@ -511,8 +511,8 @@ namespace DaphneGui
             }
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-            
-            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].molecule_guid;
+
+            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].entity_guid;
             gmp.Name = MainWindow.SC.SimConfig.entity_repository.molecules[0].Name;
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
@@ -577,7 +577,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.driver_guid == cell.death_driver_guid_ref)
+                if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
                 {
                     e.Accepted = true;
                 }
@@ -595,7 +595,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.driver_guid == cell.div_driver_guid_ref)
+                if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
                 {
                     e.Accepted = true;
                 }
@@ -622,14 +622,14 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.gene_guid))
+            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
                 return;
 
 
             if (ds != null)
             {
                 //if scheme already contains this gene, exclude it from the available gene pool
-                if (ds.genes.Contains(gene.gene_guid))
+                if (ds.genes.Contains(gene.entity_guid))
                 {
                     e.Accepted = false;
                 }
@@ -687,9 +687,9 @@ namespace DaphneGui
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.reaction_guid))
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(reac.entity_guid))
                 {
-                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.reaction_guid);
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
                     needRefresh = true;
                 }
             }
@@ -707,9 +707,9 @@ namespace DaphneGui
 
             string guid = (string)lvEcsReactions.SelectedValue;
             ConfigReaction grt = MainWindow.SC.SimConfig.entity_repository.reactions_dict[guid];
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.reaction_guid))
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(grt.entity_guid))
             {
-                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.reaction_guid);
+                MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(grt.entity_guid);
             }
         }
 
@@ -761,7 +761,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -797,7 +797,7 @@ namespace DaphneGui
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
             //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -873,7 +873,7 @@ namespace DaphneGui
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+            if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -885,9 +885,9 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
             if (crc != null)
             {
-                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.reaction_complex_guid))
+                if (!MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.entity_guid))
                 {
-                    MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.reaction_complex_guid);
+                    MainWindow.SC.SimConfig.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.entity_guid);
                 }
             }
         }
@@ -1046,7 +1046,7 @@ namespace DaphneGui
                     return;
 
                 int index = dgLibMolecules.SelectedIndex;
-                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
+                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
                 MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
                 dgLibMolecules.SelectedIndex = index;
 
@@ -1123,8 +1123,9 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid)) {
-                        cc.membrane.reactions_guid_ref.Add(cr.reaction_guid);
+                    if (!cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                    {
+                        cc.membrane.reactions_guid_ref.Add(cr.entity_guid);
 
                         needRefresh = true;
                     }
@@ -1171,9 +1172,9 @@ namespace DaphneGui
                 if (cc != null && cr != null)
                 {
                     //Add to reactions list only if the cell does not already contain this reaction
-                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.reaction_guid))
+                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid))
                     {
-                        cc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+                        cc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
 
                         needRefresh = true;
                     }
@@ -1360,7 +1361,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1379,7 +1380,7 @@ namespace DaphneGui
             {
                 e.Accepted = false;
                 // Filter out cr if not in membrane reaction list 
-                if (cc.membrane.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1402,7 +1403,7 @@ namespace DaphneGui
                 ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
                 e.Accepted = false;
                 // Filter out cr if not in ecm reaction list 
-                if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (crc.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1416,7 +1417,7 @@ namespace DaphneGui
             if (cr != null && cc != null)
             {
                 // Filter out cr if not in cytosol reaction list 
-                if (cc.cytosol.reactions_guid_ref.Contains(cr.reaction_guid))
+                if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -1716,7 +1717,7 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].cell_guid;
+            cp.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].entity_guid;
 
             string new_cell_name = MainWindow.SC.SimConfig.entity_repository.cells[nIndex].CellName;
             if (curr_cell_type_guid != cp.cell_guid_ref) // && curr_cell_pop_name.Length == 0)
@@ -2215,7 +2216,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -2297,7 +2298,7 @@ namespace DaphneGui
             }
             foreach (ConfigGene configGene in crc.genes)
             {
-                cc.genes_guid_ref.Add(configGene.gene_guid);
+                cc.genes_guid_ref.Add(configGene.entity_guid);
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
@@ -2307,7 +2308,7 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
-            cp.cell_guid_ref = cc.cell_guid;
+            cp.cell_guid_ref = cc.entity_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
@@ -2474,7 +2475,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -2503,7 +2504,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.molecule_guid;
+            molpop.molecule_guid_ref = mol.entity_guid;
 
             string new_mol_name = mol.Name;
             if (curr_mol_guid != molpop.molecule_guid_ref)
@@ -2650,8 +2651,8 @@ namespace DaphneGui
                 ConfigGene geneToAdd = ads.SelectedGene;
                 if (geneToAdd == null)
                     return;
-                
-                cell.genes_guid_ref.Add(geneToAdd.gene_guid);
+
+                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
             }
         }
 
@@ -3037,7 +3038,7 @@ namespace DaphneGui
                     if (gene == null)
                         return;
 
-                    if (!scheme.genes.Contains(gene.gene_guid))
+                    if (!scheme.genes.Contains(gene.entity_guid))
                     {
                         //If no states exist, then create at least 2 new ones
                         if (scheme.Driver.states.Count == 0)
@@ -3048,7 +3049,7 @@ namespace DaphneGui
                             //menuAddState_Click(null, null);
                         }
 
-                        scheme.genes.Add(gene.gene_guid);
+                        scheme.genes.Add(gene.entity_guid);
                         foreach (ConfigActivationRow row in scheme.activationRows)
                         {
                             row.activations.Add(1.0);
@@ -3512,7 +3513,7 @@ namespace DaphneGui
             {
                 if (cm.Name == name && cm.molecule_location == ml)
                 {
-                    return cm.molecule_guid;
+                    return cm.entity_guid;
                 }
             }
             return "";
@@ -3632,14 +3633,14 @@ namespace DaphneGui
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.diff_scheme_guid == cell.diff_scheme_guid_ref)
+                if (diffNew.entity_guid == cell.diff_scheme_guid_ref)
                     return;
 
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                if (er.diff_schemes_dict.ContainsKey(diffNew.diff_scheme_guid) == true)
+                if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme_guid_ref = diffNew.diff_scheme_guid;
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.diff_scheme_guid].Clone();
+                    cell.diff_scheme_guid_ref = diffNew.entity_guid;
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone();
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
@@ -3664,7 +3665,7 @@ namespace DaphneGui
                 {
                     EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                     //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
-                    cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                    cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
                     if (cell.div_driver_guid_ref == "")
                     {
                         MessageBox.Show("No division drivers are defined");
@@ -3752,7 +3753,7 @@ namespace DaphneGui
             {
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
                 //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                cell.death_driver_guid_ref = FindFirstDeathDriver().driver_guid;
+                cell.death_driver_guid_ref = FindFirstDeathDriver().entity_guid;
                 if (cell.death_driver_guid_ref == "")
                 {
                     MessageBox.Show("No death drivers are defined");
@@ -3792,7 +3793,7 @@ namespace DaphneGui
             if (cell.div_driver == null)
             {
                 EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
-                cell.div_driver_guid_ref = FindFirstDivDriver().driver_guid;
+                cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
                 if (cell.div_driver_guid_ref == "")
                 {
                     MessageBox.Show("No division drivers are defined");

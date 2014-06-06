@@ -1759,7 +1759,7 @@ namespace SBMLayer
             int copy_num = GetCopyNum(specGene);
             ConfigGene cg= new ConfigGene(specGene.getId(), copy_num, specGene.getInitialConcentration());
             configurator.SimConfig.entity_repository.genes.Add(cg);
-            configurator.SimConfig.entity_repository.genes_dict.Add(cg.gene_guid, cg);
+            configurator.SimConfig.entity_repository.genes_dict.Add(cg.entity_guid, cg);
             return cg;
         }
 
@@ -1836,16 +1836,17 @@ namespace SBMLayer
 
                         buildConfigReaction(sbmlReaction, ref complexConfigReaction);
                         configurator.SimConfig.entity_repository.reactions.Add(complexConfigReaction);
-                        configurator.SimConfig.entity_repository.reactions_dict.Add(complexConfigReaction.reaction_guid, complexConfigReaction);
+                        configurator.SimConfig.entity_repository.reactions_dict.Add(complexConfigReaction.entity_guid, complexConfigReaction);
 
                         if (complexConfigReaction != null)
                         {
                             ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                            grp.Guid = complexConfigReaction.reaction_guid;
+
+                            grp.entity_guid = complexConfigReaction.entity_guid;
                             grp.OriginalRate = complexConfigReaction.rate_const;
                             grp.ReactionComplexRate = complexConfigReaction.rate_const;
 
-                            crc.reactions_guid_ref.Add(complexConfigReaction.reaction_guid);
+                            crc.reactions_guid_ref.Add(complexConfigReaction.entity_guid);
                             crc.ReactionRates.Add(grp);
                         }
                     }
@@ -1950,7 +1951,7 @@ namespace SBMLayer
                                         }
                                     }
                                     else {
-                                        gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).gene_guid);
+                                        gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).entity_guid);
                                     }
                                 }
                             }
@@ -1987,13 +1988,13 @@ namespace SBMLayer
 
                             //Add the reaction to repository collection
                             configurator.SimConfig.entity_repository.reactions.Add(cr);
-                            gc.cytosol.reactions_guid_ref.Add(cr.reaction_guid);
+                            gc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
                         }
                     }
 
                     //Add cell population
                     CellPopulation cellPop = new CellPopulation();
-                    cellPop.cell_guid_ref = gc.cell_guid;
+                    cellPop.cell_guid_ref = gc.entity_guid;
                     cellPop.cellpopulation_name = gc.CellName;
                     cellPop.number = (int)compartAttributes[2];
 
@@ -2053,7 +2054,7 @@ namespace SBMLayer
 
                         //Add the reaction to repository collection
                         configurator.SimConfig.entity_repository.reactions.Add(cr);
-                        configurator.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(cr.reaction_guid);
+                        configurator.SimConfig.scenario.environment.ecs.reactions_guid_ref.Add(cr.entity_guid);
                     }
                 }
             }
@@ -2453,7 +2454,7 @@ namespace SBMLayer
             }
 
             configurator.SimConfig.entity_repository.molecules.Add(configMolecule);
-            configurator.SimConfig.entity_repository.molecules_dict.Add(configMolecule.molecule_guid, configMolecule);
+            configurator.SimConfig.entity_repository.molecules_dict.Add(configMolecule.entity_guid, configMolecule);
 
             ConfigMolecularPopulation configMolPop;
 
@@ -2466,7 +2467,7 @@ namespace SBMLayer
                 configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
             }
 
-            configMolPop.molecule_guid_ref = configMolecule.molecule_guid;
+            configMolPop.molecule_guid_ref = configMolecule.entity_guid;
             configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
             configMolPop.Name = configMolecule.Name;
 

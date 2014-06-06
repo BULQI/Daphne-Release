@@ -488,7 +488,7 @@ namespace Daphne
                                                                      new ConstructorArgument("effRad", cm.EffectiveRadius),
                                                                      new ConstructorArgument("diffCoeff", cm.DiffusionCoefficient));
 
-                dataBasket.Molecules.Add(cm.molecule_guid, mol);
+                dataBasket.Molecules.Add(cm.entity_guid, mol);
             }
 
             // genes
@@ -499,7 +499,7 @@ namespace Daphne
                                              new ConstructorArgument("actLevel", cg.ActivationLevel));
 
 
-                dataBasket.Genes.Add(cg.gene_guid, gene);
+                dataBasket.Genes.Add(cg.entity_guid, gene);
             }
 
             // set up the collision manager
@@ -576,7 +576,7 @@ namespace Daphne
                         Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
                                                      new ConstructorArgument("copyNumber", cg.CopyNumber),
                                                      new ConstructorArgument("actLevel", cg.ActivationLevel));
-                        cell.AddGene(cg.gene_guid, gene);
+                        cell.AddGene(cg.entity_guid, gene);
                     }
 
                     //CELL REACTIONS
