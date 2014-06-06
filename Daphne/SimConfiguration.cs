@@ -1145,7 +1145,7 @@ namespace Daphne
 
         public string findMoleculeGuidByName(string inputMolName)
         {
-            string guid = null;
+            string guid = "";
             foreach (ConfigMolecule cm in entity_repository.molecules)
             {
                 if (cm.Name == inputMolName)
