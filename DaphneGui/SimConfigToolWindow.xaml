@@ -11,6 +11,12 @@
                     ImageSource="Images/Properties16.png"
                     x:Name="MyToolWindow"
                     >
+
+
+    <docking:ToolWindow.Resources>
+        <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+    </docking:ToolWindow.Resources>
+    
     
     <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged">
         <TabControl.Resources >
@@ -153,7 +159,7 @@
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
-                                  Filter="bulkMoleculesListView_Filter"
+                                  
                                   />
             <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
@@ -1655,7 +1661,7 @@
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                 <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                        ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
+                                        ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                         DisplayMemberPath="Name"            
                                         SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="molecule_guid"
@@ -1800,7 +1806,7 @@
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                 <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    ItemsSource="{Binding Source={StaticResource bulkMoleculesListView}}"
+                                                    ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="molecule_guid"

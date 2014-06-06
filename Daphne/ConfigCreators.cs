@@ -756,9 +756,9 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[35] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
-                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgH -> IgH + gIgH", "gIgS -> IgS + gIgS", 
+            type = new string[34] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
+                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
+                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
                                     "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
                                     "gDif1 -> sDif1 + gDif1", "gDif2 -> sDif2 + gDif2", "gDif3 -> sDif3 + gDif3", "gDif4 -> sDif4 + gDif4",
                                     "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv", "sApop ->",
@@ -870,9 +870,9 @@ namespace Daphne
             }
 
             // Reactions in Cytosol
-            type = new string[29] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
-                                    "gCXCR4 -> CXCR4", "gCXCR5 -> CXCR5", 
-                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgH -> IgH + gIgH", "gIgS -> IgS + gIgS", 
+            type = new string[28] {"A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|", "A* -> A",
+                                    "gCXCR4 -> CXCR4 + gCXCR4", "gCXCR5 -> CXCR5 + gCXCR5", 
+                                    "gIgH -> IgH + gIgH", "gIgL -> IgL + gIgL", "gIgS -> IgS + gIgS", 
                                     "gAID -> AID + gAID", "gBL1 -> BL1 + gBL1", "gMHCII -> MHCII + gMHCII", "gApop -> sApop + gApop",
                                     "gDif4 -> sDif4 + gDif4", "gDif5 -> sDif5 + gDif5", "gDif6 -> sDif6 + gDif6", "gDif7 -> sDif7 + gDif7", "gDiv -> sDiv + gDiv",
                                     "sApop ->", "sDif4 ->", "sDif5 ->", "sDif6 ->", "sDif7 ->", "sDiv ->",
@@ -1819,19 +1819,6 @@ namespace Daphne
             return "";
         }
 
-        // given a reaction template type, find its guid
-        public static string findReactionTemplateGuid(ReactionType rt, SimConfiguration sc)
-        {
-            foreach (ConfigReactionTemplate crt in sc.entity_repository.reaction_templates)
-            {
-                if (crt.reac_type == rt)
-                {
-                    return crt.entity_guid;
-                }
-            }
-            return "";
-        }
-
         // given a cell type name like BCell, find the ConfigCell object
         public static ConfigCell findCell(string name, SimConfiguration sc)
         {
@@ -1867,7 +1854,7 @@ namespace Daphne
 
             // Annihiliation: CXCR5 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -1876,7 +1863,7 @@ namespace Daphne
 
             // Annihiliation: CXCL13:CXCR5 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -1885,7 +1872,7 @@ namespace Daphne
 
             // Annihiliation: CXCR4 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -1894,7 +1881,7 @@ namespace Daphne
 
             // Annihiliation: CXCL12:CXCR4 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants 
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -1903,7 +1890,7 @@ namespace Daphne
 
             // Annihiliation: CXCL12 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
             cr.rate_const = ecsDefaultDegradRate;
@@ -1912,7 +1899,7 @@ namespace Daphne
 
             // Annihiliation: CXCL13 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.rate_const = ecsDefaultDegradRate;
@@ -1939,7 +1926,7 @@ namespace Daphne
             //
             // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, sc));
@@ -1951,7 +1938,7 @@ namespace Daphne
             //
             // BoundaryDissociation:  CXCL13:CXCR5| ->  CXCR5| + CXCL13
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
             // products
@@ -1986,7 +1973,7 @@ namespace Daphne
             //
             // CatalyzedBoundaryActivation: CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
             // reactants
@@ -1999,7 +1986,7 @@ namespace Daphne
             //
             // Transformation: A* -> A
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transformation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, sc));
             // products
@@ -2010,7 +1997,7 @@ namespace Daphne
             //
             // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
             // reactants
@@ -2047,7 +2034,7 @@ namespace Daphne
             //
             // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryAssociation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, sc));
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
@@ -2059,7 +2046,7 @@ namespace Daphne
             //
             // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryDissociation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
             // products
@@ -2080,7 +2067,7 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, sc));
             // products
@@ -2096,7 +2083,7 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, sc));
             // products
@@ -2111,7 +2098,7 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCR5| -> CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, sc));
             // products
@@ -2122,7 +2109,7 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCR4| -> CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, sc));
             // products
@@ -2141,7 +2128,7 @@ namespace Daphne
             for (int i = 0; i < mol_name.Length; i++ )
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
+                cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
                 // reactants
                 cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, sc));
                 // products
@@ -2154,7 +2141,7 @@ namespace Daphne
             for (int i = 0; i < mol_name.Length; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportFrom, sc);
+                cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
                 // reactants
                 cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, sc));
                 // products
@@ -2170,7 +2157,7 @@ namespace Daphne
 
             // BoundaryTransportTo: CXCR5 -> CXCR5|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
             // products
@@ -2181,7 +2168,7 @@ namespace Daphne
 
             // BoundaryTransportTo: CXCR4 -> CXCR4|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.BoundaryTransportTo, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, sc));
             // products
@@ -2199,7 +2186,7 @@ namespace Daphne
             kf = 2 * 100.0 / (2*60);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", sc));
             // products
@@ -2209,7 +2196,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", sc));
             // products
@@ -2219,7 +2206,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", sc));
             // products
@@ -2229,7 +2216,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", sc));
             // products
@@ -2239,7 +2226,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", sc));
             // products
@@ -2249,7 +2236,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", sc));
             // products
@@ -2259,7 +2246,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", sc));
             // products
@@ -2269,7 +2256,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", sc));
             // products
@@ -2279,7 +2266,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", sc));
             // products
@@ -2289,7 +2276,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", sc));
             // products
@@ -2299,7 +2286,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", sc));
             // products
@@ -2309,7 +2296,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", sc));
             // products
@@ -2319,7 +2306,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", sc));
             // products
@@ -2329,7 +2316,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
             cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", sc));
             // products
@@ -2342,7 +2329,7 @@ namespace Daphne
             for (int i = 1; i < 8; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Transcription, sc);
+                cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Transcription);
                 // modifiers
                 cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, sc));
                 // products
@@ -2357,7 +2344,7 @@ namespace Daphne
             for (int i = 1; i < 8; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+                cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
                 // reactants
                 cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, sc));
                 cr.rate_const = cytoDefaultDegradRate;
@@ -2366,7 +2353,7 @@ namespace Daphne
             }
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2374,7 +2361,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2382,7 +2369,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2390,7 +2377,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2398,7 +2385,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2406,7 +2393,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2414,7 +2401,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2422,7 +2409,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2430,7 +2417,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2438,7 +2425,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Annihilation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, sc));
             cr.rate_const = cytoDefaultDegradRate;
@@ -2454,7 +2441,7 @@ namespace Daphne
             kf = 16.25;
             //
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Association, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Association);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, sc));
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, sc));
@@ -2465,7 +2452,7 @@ namespace Daphne
             sc.entity_repository.reactions.Add(cr);
             // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = findReactionTemplateGuid(ReactionType.Dissociation, sc);
+            cr.reaction_template_guid_ref = sc.findReactionTemplateGuid(ReactionType.Dissociation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, sc));
             // products
