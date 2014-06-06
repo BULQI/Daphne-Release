@@ -2577,7 +2577,7 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.genes.Add(newgene);
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
-            gene = (ConfigGene)dgLibMolecules.SelectedItem;
+            gene = (ConfigGene)dgLibGenes.SelectedItem;
             dgLibGenes.ScrollIntoView(newgene);
         }
 
