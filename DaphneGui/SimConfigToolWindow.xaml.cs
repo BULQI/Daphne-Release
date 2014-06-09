@@ -1558,17 +1558,7 @@ namespace DaphneGui
             ToolBarTray tr = new ToolBarTray();
 
         }
-#if CELL_REGIONS
-        public void SelectRegionInGUI(int index, string guid)
-        {
-            // Regions are in the second (entities) tab panel
-            ConfigTabControl.SelectedIndex = 1;
-            // Because each region will have a unique box guid, can use data-binding-y way of setting selection
-            //RegionsListBox.SelectedIndex = index;
-            //RegionsListBox.SelectedValuePath = "region_box_spec_guid_ref";
-            //RegionsListBox.SelectedValue = guid;
-        }
-#endif
+
         public void SelectGaussSpecInGUI(int index, string guid)
         {
             bool isBoxInCell = false;
@@ -1620,18 +1610,7 @@ namespace DaphneGui
                 {
                     // Select the correct region/solfac/gauss_spec in the GUI's lists
                     bool gui_spot_found = false;
-#if CELL_REGIONS
-                    for (int r = 0; r < MainWindow.SC.SimConfig.scenario.regions.Count; r++)
-                    {
-                        // See whether the current widget is for a Region
-                        if (MainWindow.SC.SimConfig.scenario.regions[r].region_box_spec_guid_ref == key)
-                        {
-                            SelectRegionInGUI(r, key);
-                            gui_spot_found = true;
-                            break;
-                        }
-                    }
-#endif
+
                     if (!gui_spot_found)
                     {
                         // Next check whether any Solfacs use this right gaussian_spec for this box

@@ -1908,32 +1908,7 @@ namespace DaphneGui
 
             Regions.Add(box_guid, rw);
         }
-#if CELL_REGIONS
-        public void AddRegionRegionWidget(Region rr)
-        {
-            string box_guid = rr.region_box_spec_guid_ref;
-            // Find the box spec that goes with this region
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, rr.region_type);
-
-            // color
-            rw.SetColor(rr.region_color.ScR,
-                        rr.region_color.ScG,
-                        rr.region_color.ScB);
-            // alpha channel/opacity
-            rw.SetOpacity(rr.region_color.ScA);
-            // box transform
-            rw.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
-            // box visibility
-            rw.ShowWidget(bs.box_visibility);
-            // contained shape visibility
-            rw.ShowActor(Rwc.RenderWindow, rr.region_visibility);
-            // NOTE: Callback being added afterwards in MainWindow for now...
-
-            Regions.Add(box_guid, rw);
-        }
-#endif
         public void RemoveRegionWidget(string current_guid)
         {
             Regions[current_guid].ShowWidget(false);
@@ -1949,14 +1924,6 @@ namespace DaphneGui
             {
                 AddGaussSpecRegionWidget(gs);
             }
-
-#if CELL_REGIONS
-            // Regions
-            foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
-            {
-                AddRegionRegionWidget(rr);
-            }
-#endif
         }
 
         /// <summary>

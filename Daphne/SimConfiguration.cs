@@ -1163,9 +1163,6 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
-#if CELL_REGIONS
-        public ObservableCollection<Region> regions { get; set; }
-#endif
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
@@ -1188,9 +1185,6 @@ namespace Daphne
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
-#if CELL_REGIONS
-            regions = new ObservableCollection<Region>();
-#endif
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
