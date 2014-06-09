@@ -171,7 +171,6 @@ namespace DaphneGui
 
             string geneGuid = "";
             ConfigReaction cr = new ConfigReaction();
-            cr.ReadOnly = false;
             cr.rate_const = inputRateConstant;
 
             cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);

@@ -190,6 +190,7 @@
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SimConfigToolWinFilters.cs" />
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>

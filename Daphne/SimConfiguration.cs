@@ -192,68 +192,7 @@ namespace Daphne
             user_cells.Clear();
             user_reactions.Clear();
         }
-
-        public void CopyToConfig(SimConfiguration sc)
-        {
-            foreach (ConfigMolecule mol in user_molecules)
-            {
-                if (!sc.entity_repository.molecules_dict.ContainsKey(mol.entity_guid))
-                    sc.entity_repository.molecules.Add(mol);
-            }
-            foreach (ConfigCell cell in user_cells)
-            {
-                if (!sc.entity_repository.cells_dict.ContainsKey(cell.entity_guid))
-                    sc.entity_repository.cells.Add(cell);
-            }
-            foreach (ConfigReaction reac in user_reactions)
-            {
-                if (!sc.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-                    sc.entity_repository.reactions.Add(reac);
-            }
-        }
-
-        public void CopyFromConfig(SimConfiguration sc)
-        {
-            //First copy all user defined from entity_repos
-            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
-            {
-                if (mol.ReadOnly == false)
-                {
-                    if (Contains(mol))
-                    {
-                        user_molecules.Remove(mol);
-                    }
-
-                    user_molecules.Add(mol);                    
-                }
-            }
-            foreach (ConfigCell cell in sc.entity_repository.cells)
-            {
-                if (cell.ReadOnly == false)
-                {
-                    if (Contains(cell))
-                    {
-                        user_cells.Remove(cell);
-                    }
-
-                    user_cells.Add(cell);
-                }
-            }
-            foreach (ConfigReaction reac in sc.entity_repository.reactions)
-            {
-                if (reac.ReadOnly == false && !Contains(reac))
-                {
-                    if (Contains(reac))
-                    {
-                        user_reactions.Remove(reac);
-                    }
-
-                    user_reactions.Add(reac);
-                }
-            }
-
-        }
-
+        
         public bool Contains(object userdefitem)
         {
             bool ret = false;
@@ -396,27 +335,18 @@ namespace Daphne
         {
             foreach (ConfigMolecule mol in entity_repository.molecules.ToList())
             {
-                if (mol.ReadOnly == false)
-                {
-                    entity_repository.molecules_dict.Remove(mol.entity_guid);
-                    entity_repository.molecules.Remove(mol);
-                }
+                entity_repository.molecules_dict.Remove(mol.entity_guid);
+                entity_repository.molecules.Remove(mol);
             }
             foreach (ConfigCell cell in entity_repository.cells.ToList())
             {
-                if (cell.ReadOnly == false)
-                {
-                    entity_repository.cells_dict.Remove(cell.entity_guid);
-                    entity_repository.cells.Remove(cell);
-                }
+                entity_repository.cells_dict.Remove(cell.entity_guid);
+                entity_repository.cells.Remove(cell);
             }
             foreach (ConfigReaction reac in entity_repository.reactions.ToList())
             {
-                if (reac.ReadOnly == false)
-                {
-                    entity_repository.reactions_dict.Remove(reac.entity_guid);
-                    entity_repository.reactions.Remove(reac);
-                }
+                entity_repository.reactions_dict.Remove(reac.entity_guid);
+                entity_repository.reactions.Remove(reac);
             }
         }
 
@@ -787,15 +717,12 @@ namespace Daphne
                     //Remove all the cell membrane molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        if (cell.ReadOnly == false)
+                        foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
                         {
-                            foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
+                            if (kvp.Value.molecule_guid_ref == cm.entity_guid)
                             {
-                                if (kvp.Value.molecule_guid_ref == cm.entity_guid)
-                                {
-                                    cell.membrane.molpops_dict.Remove(kvp.Key);
-                                    cell.membrane.molpops.Remove(kvp.Value);
-                                }
+                                cell.membrane.molpops_dict.Remove(kvp.Key);
+                                cell.membrane.molpops.Remove(kvp.Value);
                             }
                         }
                     }
@@ -803,15 +730,12 @@ namespace Daphne
                     //Remove all the cell cytosol molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        if (cell.ReadOnly == false)
+                        foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
                         {
-                            foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
+                            if (cmp.molecule_guid_ref == cm.entity_guid)
                             {
-                                if (cmp.molecule_guid_ref == cm.entity_guid)
-                                {
-                                    //cell.cytosol.molpops_dict.Remove(kvp.Key);
-                                    cell.cytosol.molpops.Remove(cmp);
-                                }
+                                //cell.cytosol.molpops_dict.Remove(kvp.Key);
+                                cell.cytosol.molpops.Remove(cmp);
                             }
                         }
                     }
@@ -943,14 +867,11 @@ namespace Daphne
                     //Remove all the cell membrane/cytosol reactions that have this guid
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        if (cell.ReadOnly == false)
-                        {
-                            if (cell.membrane.reactions_guid_ref.Contains(cr.entity_guid))
-                                cell.membrane.reactions_guid_ref.Remove(cr.entity_guid);
+                        if (cell.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                            cell.membrane.reactions_guid_ref.Remove(cr.entity_guid);
 
-                            if (cell.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
-                                cell.cytosol.reactions_guid_ref.Remove(cr.entity_guid);
-                        }
+                        if (cell.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+                            cell.cytosol.reactions_guid_ref.Remove(cr.entity_guid);
                     }
                 }                
             }
@@ -2361,7 +2282,7 @@ namespace Daphne
         public double MolecularWeight { get; set; }
         public double EffectiveRadius { get; set; }
         public double DiffusionCoefficient { get; set; }
-        public bool   ReadOnly { get; set; }
+        
         public MoleculeLocation molecule_location { get; set; }
 
         public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff) : base()
@@ -2370,7 +2291,6 @@ namespace Daphne
             MolecularWeight = thisMW;
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
-            ReadOnly = false;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -2380,7 +2300,6 @@ namespace Daphne
             MolecularWeight = 1.0;
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
-            ReadOnly = false;
             molecule_location = MoleculeLocation.Bulk;
         }
 
@@ -2417,7 +2336,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             newmol.entity_guid = id.ToString();
-            newmol.ReadOnly = false;
             newmol.Name = newmol.GenerateNewName(sc, "_Copy");
             
             return newmol;
@@ -3074,8 +2992,7 @@ namespace Daphne
         public ConfigReaction() : base()
         {
             rate_const = 0;
-            ReadOnly = false;
-
+            
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
@@ -3086,7 +3003,6 @@ namespace Daphne
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
             rate_const = reac.rate_const;
-            ReadOnly = false;
 
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
@@ -3226,7 +3142,6 @@ namespace Daphne
             } 
         }
 
-        public bool ReadOnly { get; set; }
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
         public ObservableCollection<string> reactants_molecule_guid_ref;
         public ObservableCollection<string> products_molecule_guid_ref;
@@ -3309,8 +3224,7 @@ namespace Daphne
             }
         }
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public ObservableCollection<ConfigGene> genes { get; set; }
-        public bool ReadOnly { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }        
 
         public ObservableCollection<ConfigReactionGuidRatePair> ReactionRates { get; set; } 
 
@@ -3320,13 +3234,11 @@ namespace Daphne
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             genes = new ObservableCollection<ConfigGene>();
-            ReadOnly = false;
         }
 
         public ConfigReactionComplex(string name) : base()
         {
             Name = name;
-            ReadOnly = false;
             reactions_guid_ref = new ObservableCollection<string>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             genes = new ObservableCollection<ConfigGene>();
@@ -3344,7 +3256,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             newrc.entity_guid = id.ToString();
-            newrc.ReadOnly = false;
             newrc.Name = "NewRC";
 
             return newrc;
@@ -3438,14 +3349,11 @@ namespace Daphne
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
             locomotor_mol_guid_ref = "";
-            ReadOnly = false;
 
             // behaviors
             diff_scheme_guid_ref = "";
             death_driver_guid_ref = "";
             div_driver_guid_ref = "";
-
-            ReadOnly = false;
 
             genes_guid_ref = new ObservableCollection<string>();
         }
@@ -3460,7 +3368,6 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             newcell.entity_guid = id.ToString();
-            newcell.ReadOnly = false;
             return newcell;
         }
 
@@ -3541,8 +3448,6 @@ namespace Daphne
                 OnPropertyChanged("DragCoefficient");
             }
         }
-
-        public bool ReadOnly { get; set; }
 
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
