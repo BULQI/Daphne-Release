@@ -637,10 +637,10 @@ namespace SBMLayer
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
                 attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mpInfo.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
-                foreach (BoxSpecification box in configurator.SimConfig.entity_repository.box_specifications)
+                foreach (BoxSpecification box in configurator.SimConfig.scenario.box_specifications)
                 {
                     //Only select appropriate box
-                    if ((configurator.SimConfig.entity_repository.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
+                    if ((configurator.SimConfig.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
                     {
                         attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
                         attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
@@ -763,7 +763,7 @@ namespace SBMLayer
                 confMolPopName = configurator.SimConfig.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
                 if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    spec = configurator.SimConfig.box_guid_box_dict[(configurator.SimConfig.entity_repository.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
+                    spec = configurator.SimConfig.scenario.box_guid_box_dict[(configurator.SimConfig.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
                     species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, CalculateGaussianConcentration(spec, confMolPop), "");
                 }
                 else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
@@ -2350,7 +2350,7 @@ namespace SBMLayer
                     box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
                     box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
 
-                    configurator.SimConfig.entity_repository.box_specifications.Add(box);
+                    configurator.SimConfig.scenario.box_specifications.Add(box);
                     gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
                     //gg.gaussian_spec_name = "gaussian";
                     gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
@@ -2364,7 +2364,7 @@ namespace SBMLayer
                     trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
-                    configurator.SimConfig.entity_repository.gaussian_specifications.Add(gaussSpec);
+                    configurator.SimConfig.scenario.gaussian_specifications.Add(gaussSpec);
 
                     configMolPop.mpInfo.mp_dist_name = "Gaussian";
                     configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);

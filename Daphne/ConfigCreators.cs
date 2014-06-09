@@ -336,7 +336,7 @@ namespace Daphne
             box.x_scale = sc.scenario.environment.extent_x / 2;
             box.y_scale = sc.scenario.environment.extent_y / 4;
             box.z_scale = sc.scenario.environment.extent_z / 5;
-            sc.entity_repository.box_specifications.Add(box);
+            sc.scenario.box_specifications.Add(box);
             gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
             //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
@@ -350,7 +350,7 @@ namespace Daphne
             trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
             trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
             box.SetMatrix(trans_matrix);
-            sc.entity_repository.gaussian_specifications.Add(gaussSpec);
+            sc.scenario.gaussian_specifications.Add(gaussSpec);
 
             var query =
                 from mol in sc.entity_repository.molecules
@@ -371,7 +371,7 @@ namespace Daphne
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
-                molPopGaussian.gaussgrad_gauss_spec_guid_ref = sc.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                molPopGaussian.gaussgrad_gauss_spec_guid_ref = sc.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                 configMolPop.mpInfo.mp_distribution = molPopGaussian;
 
                 // Reporting

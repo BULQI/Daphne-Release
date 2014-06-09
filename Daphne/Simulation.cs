@@ -142,9 +142,9 @@ namespace Daphne
                     // find the box associated with this gaussian
                     int box_id = -1;
 
-                    for (int j = 0; j < sc.entity_repository.box_specifications.Count; j++)
+                    for (int j = 0; j < sc.scenario.box_specifications.Count; j++)
                     {
-                        if (sc.entity_repository.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
+                        if (sc.scenario.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
                         {
                             box_id = j;
                             break;
@@ -157,7 +157,7 @@ namespace Daphne
                         return;
                     }
 
-                    BoxSpecification box = sc.entity_repository.box_specifications[box_id];
+                    BoxSpecification box = sc.scenario.box_specifications[box_id];
 
                     double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
 

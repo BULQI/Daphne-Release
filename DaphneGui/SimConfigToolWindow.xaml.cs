@@ -108,7 +108,7 @@ namespace DaphneGui
             box.z_scale = 100;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+            MainWindow.SC.SimConfig.scenario.box_specifications.Add(box);
 
             GaussianSpecification gg = new GaussianSpecification();
             gg.gaussian_spec_box_guid_ref = box.box_guid;
@@ -116,7 +116,7 @@ namespace DaphneGui
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+            MainWindow.SC.SimConfig.scenario.gaussian_specifications.Add(gg);
             mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
@@ -135,11 +135,11 @@ namespace DaphneGui
             MolPopGaussian mpg = dist as MolPopGaussian;
             string guid = mpg.gaussgrad_gauss_spec_guid_ref;
 
-            if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+            if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
-                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
-                MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(gs);
-                MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.Remove(guid);
+                GaussianSpecification gs = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[guid];
+                MainWindow.SC.SimConfig.scenario.gaussian_specifications.Remove(gs);
+                MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.Remove(guid);
                 MainWindow.GC.RemoveRegionWidget(guid);
             }
 
@@ -160,7 +160,7 @@ namespace DaphneGui
             box.z_scale = MainWindow.SC.SimConfig.scenario.environment.extent_x / 4; ;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+            MainWindow.SC.SimConfig.scenario.box_specifications.Add(box);
         }
 
         // Used to specify Gaussian distibution for cell positions
@@ -171,7 +171,7 @@ namespace DaphneGui
             gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+            MainWindow.SC.SimConfig.scenario.gaussian_specifications.Add(gg);
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -189,11 +189,11 @@ namespace DaphneGui
             CellPopGaussian cpg = dist as CellPopGaussian;
             string guid = cpg.gauss_spec_guid_ref;
 
-            if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+            if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
-                GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
-                MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Remove(gs);
-                MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.Remove(guid);
+                GaussianSpecification gs = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[guid];
+                MainWindow.SC.SimConfig.scenario.gaussian_specifications.Remove(gs);
+                MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.Remove(guid);
                 MainWindow.GC.RemoveRegionWidget(guid);
 
                 //// Remove box
@@ -340,11 +340,11 @@ namespace DaphneGui
                         box.x_trans = 500;
                         box.y_trans = 500;
                         box.z_trans = 500;
-                        MainWindow.SC.SimConfig.entity_repository.box_specifications.Add(box);
+                        MainWindow.SC.SimConfig.scenario.box_specifications.Add(box);
                         gg.gaussian_spec_box_guid_ref = box.box_guid;
                         gg.gaussian_spec_name = "Off-center gaussian";
                         gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-                        MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Add(gg);
+                        MainWindow.SC.SimConfig.scenario.gaussian_specifications.Add(gg);
                         sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;                    
@@ -402,7 +402,7 @@ namespace DaphneGui
                         ////    this.AddGaussianSpecification();
                         ////}
                         MolPopGaussian sgg = new MolPopGaussian();
-                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SC.SimConfig.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
                         current_item.mp_distribution = sgg;
                         break;
 
@@ -1650,10 +1650,10 @@ namespace DaphneGui
                     if (!gui_spot_found)
                     {
                         // Last check the gaussian_specs for this box guid
-                        for (int r = 0; r < MainWindow.SC.SimConfig.entity_repository.gaussian_specifications.Count; r++)
+                        for (int r = 0; r < MainWindow.SC.SimConfig.scenario.gaussian_specifications.Count; r++)
                         {
                             // We'll just be picking the first one that uses 
-                            if (MainWindow.SC.SimConfig.entity_repository.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
+                            if (MainWindow.SC.SimConfig.scenario.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
                             {
                                 SelectGaussSpecInGUI(r, key);
                                 //gui_spot_found = true;
@@ -1938,9 +1938,9 @@ namespace DaphneGui
             string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
-                if (MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict.ContainsKey(guid))
+                if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
                 {
-                    GaussianSpecification gs = MainWindow.SC.SimConfig.entity_repository.gauss_guid_gauss_dict[guid];
+                    GaussianSpecification gs = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[guid];
                     gs.gaussian_region_visibility = (bool)(cb.IsChecked);
                 }
             }
