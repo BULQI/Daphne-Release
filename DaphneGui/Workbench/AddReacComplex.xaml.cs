@@ -202,7 +202,6 @@ namespace DaphneGui
             else
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
-                crc.ReadOnly = false;
                 foreach (ConfigReaction reac in RightList)
                 {
                     crc.reactions_guid_ref.Add(reac.entity_guid);

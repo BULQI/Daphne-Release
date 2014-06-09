@@ -74,14 +74,18 @@
                     </Style.Triggers>
                 </Style>
             </StackPanel.Resources>
+            <StackPanel>
+                <TextBlock Margin="0,0,0,0" Text="Examples:  2sDif1 -> sDif2, gIgH -> IgH + gIgH, CXCR5 + CXCL13 -> CXCL13:CXCR5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="460" />
+                <!--<TextBlock Text="2sDif1 -> sDif2" Width="320" />-->
+            </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,4,0" Text="Reactants:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtReac" Width="320" />
+                <TextBox x:Name="txtReac" Width="320"  />
                 <Button x:Name="btnRClear" Content="Clear" Width="40" Click="btnRClear_Click" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Margin="0,0,4,0" Text="Products:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtProd" Width="320"/>
+                <TextBox x:Name="txtProd" Width="320" />
                 <Button x:Name="btnPClear" Content="Clear" Width="40" Click="btnPClear_Click"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" >

@@ -553,97 +553,97 @@ namespace DaphneGui
                 lbEcsMolPops.SelectedIndex = -1;
         }
 
-        private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule mol = e.Item as ConfigMolecule;
-            if (mol != null )
-            {
-                // Filter out mol if membrane bound 
-                if (mol.molecule_location == MoleculeLocation.Bulk)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigMolecule mol = e.Item as ConfigMolecule;
+        ////    if (mol != null )
+        ////    {
+        ////        // Filter out mol if membrane bound 
+        ////        if (mol.molecule_location == MoleculeLocation.Bulk)
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
         
-        private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
-            if (driver != null)
-            {
-                // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        ////    ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
+        ////    if (driver != null)
+        ////    {
+        ////        // Filter out driver if its guid does not match selected cell's driver guid
+        ////        if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
 
-        private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
-            if (driver != null)
-            {
-                // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        ////    ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
+        ////    if (driver != null)
+        ////    {
+        ////        // Filter out driver if its guid does not match selected cell's driver guid
+        ////        if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
 
-        private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        ////private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            e.Accepted = false;
+        ////    e.Accepted = false;
 
-            if (cell == null)
-                return;
+        ////    if (cell == null)
+        ////        return;
 
-            //if (cell.diff_scheme_guid_ref == "")
-            //    return;
+        ////    //if (cell.diff_scheme_guid_ref == "")
+        ////    //    return;
 
-            ConfigDiffScheme ds = cell.diff_scheme;
-            ConfigGene gene = e.Item as ConfigGene;
+        ////    ConfigDiffScheme ds = cell.diff_scheme;
+        ////    ConfigGene gene = e.Item as ConfigGene;
 
-            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
-                return;
+        ////    //if gene is not in the cell's nucleus, then exclude it from the available gene pool
+        ////    if (!cell.genes_guid_ref.Contains(gene.entity_guid))
+        ////        return;
 
 
-            if (ds != null)
-            {
-                //if scheme already contains this gene, exclude it from the available gene pool
-                if (ds.genes.Contains(gene.entity_guid))
-                {
-                    e.Accepted = false;
-                }
-                else
-                {
-                    e.Accepted = true;
-                }
-            }
-            else
-            {
-                e.Accepted = true;
-            }
+        ////    if (ds != null)
+        ////    {
+        ////        //if scheme already contains this gene, exclude it from the available gene pool
+        ////        if (ds.genes.Contains(gene.entity_guid))
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////    }
+        ////    else
+        ////    {
+        ////        e.Accepted = true;
+        ////    }
 
-        }
+        ////}
 
         private bool EcmHasMolecule(string molguid)
         {
@@ -713,171 +713,171 @@ namespace DaphneGui
             }
         }
 
-        private void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
+        ////private void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
 
-            bool bOK = false;
-            foreach (string molguid in cr.reactants_molecule_guid_ref) {
-                if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                {
-                    bOK = true;
-                }
-                else
-                {
-                    bOK = false;
-                    break;
-                }
-            }
-            if (bOK)
-            {
-                foreach (string molguid in cr.products_molecule_guid_ref)
-                {
-                    if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
-                        break;
-                    }
-                }
-            }
-            if (bOK)
-            {
-                foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                {
-                    if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
-                        break;
-                    }
-                }
-            }
+        ////    bool bOK = false;
+        ////    foreach (string molguid in cr.reactants_molecule_guid_ref) {
+        ////        if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        ////        {
+        ////            bOK = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            bOK = false;
+        ////            break;
+        ////        }
+        ////    }
+        ////    if (bOK)
+        ////    {
+        ////        foreach (string molguid in cr.products_molecule_guid_ref)
+        ////        {
+        ////            if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        ////            {
+        ////                bOK = true;
+        ////            }
+        ////            else
+        ////            {
+        ////                bOK = false;
+        ////                break;
+        ////            }
+        ////        }
+        ////    }
+        ////    if (bOK)
+        ////    {
+        ////        foreach (string molguid in cr.modifiers_molecule_guid_ref)
+        ////        {
+        ////            if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        ////            {
+        ////                bOK = true;
+        ////            }
+        ////            else
+        ////            {
+        ////                bOK = false;
+        ////                break;
+        ////            }
+        ////        }
+        ////    }
 
-            //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
-                bOK = false;
+        ////    //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
+        ////    if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        bOK = false;
 
-            e.Accepted = bOK;
-        }
+        ////    e.Accepted = bOK;
+        ////}
 
-        private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
+        ////private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
 
-            if (CellsListBox.SelectedIndex < 0)
-            {
-                e.Accepted = false;
-                return;
-            }
+        ////    if (CellsListBox.SelectedIndex < 0)
+        ////    {
+        ////        e.Accepted = false;
+        ////        return;
+        ////    }
 
-            ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
+        ////    ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
 
-            //This filter is called for every reaction in the repository.
-            //For current reaction, if all of its molecules are in the membrane, then the reaction should be included.
-            //Otherwise, exclude it.
+        ////    //This filter is called for every reaction in the repository.
+        ////    //For current reaction, if all of its molecules are in the membrane, then the reaction should be included.
+        ////    //Otherwise, exclude it.
 
-            //First check if all the molecules in the reactants list exist in the membrane
-            bool bOK = false;
-            bOK = cc.membrane.HasMolecules(cr.reactants_molecule_guid_ref);
+        ////    //First check if all the molecules in the reactants list exist in the membrane
+        ////    bool bOK = false;
+        ////    bOK = cc.membrane.HasMolecules(cr.reactants_molecule_guid_ref);
 
-            //If bOK is true, that means the molecules in the reactants list all exist in the membrane
-            //Now check the products list
-            if (bOK)
-                bOK = cc.membrane.HasMolecules(cr.products_molecule_guid_ref);
+        ////    //If bOK is true, that means the molecules in the reactants list all exist in the membrane
+        ////    //Now check the products list
+        ////    if (bOK)
+        ////        bOK = cc.membrane.HasMolecules(cr.products_molecule_guid_ref);
 
-            //Loop through modifiers list
-            if (bOK)
-                bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
+        ////    //Loop through modifiers list
+        ////    if (bOK)
+        ////        bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
-            //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
-                bOK = false;
+        ////    //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
+        ////    if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        bOK = false;
 
-            e.Accepted = bOK;
-        }
+        ////    e.Accepted = bOK;
+        ////}
 
-        private void cytosolAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
+        ////private void cytosolAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
 
-            if (CellsListBox.SelectedIndex < 0)
-            {
-                e.Accepted = false;
-                return;
-            }
+        ////    if (CellsListBox.SelectedIndex < 0)
+        ////    {
+        ////        e.Accepted = false;
+        ////        return;
+        ////    }
 
-            ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
+        ////    ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
 
-            ObservableCollection<string> membBound = new ObservableCollection<string>();
-            ObservableCollection<string> gene_guids = new ObservableCollection<string>();
-            ObservableCollection<string> bulk = new ObservableCollection<string>();
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+        ////    ObservableCollection<string> membBound = new ObservableCollection<string>();
+        ////    ObservableCollection<string> gene_guids = new ObservableCollection<string>();
+        ////    ObservableCollection<string> bulk = new ObservableCollection<string>();
+        ////    EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
 
-            foreach (string molguid in cr.reactants_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
+        ////    foreach (string molguid in cr.reactants_molecule_guid_ref)
+        ////        if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+        ////            membBound.Add(molguid);
+        ////        else if (er.genes_dict.ContainsKey(molguid))
+        ////            gene_guids.Add(molguid);
+        ////        else
+        ////            bulk.Add(molguid);
 
-            foreach (string molguid in cr.products_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
+        ////    foreach (string molguid in cr.products_molecule_guid_ref)
+        ////        if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+        ////            membBound.Add(molguid);
+        ////        else if (er.genes_dict.ContainsKey(molguid))
+        ////            gene_guids.Add(molguid);
+        ////        else
+        ////            bulk.Add(molguid);
 
-            foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
-                    membBound.Add(molguid);
-                else if (er.genes_dict.ContainsKey(molguid))
-                    gene_guids.Add(molguid);
-                else
-                    bulk.Add(molguid);
+        ////    foreach (string molguid in cr.modifiers_molecule_guid_ref)
+        ////        if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
+        ////            membBound.Add(molguid);
+        ////        else if (er.genes_dict.ContainsKey(molguid))
+        ////            gene_guids.Add(molguid);
+        ////        else
+        ////            bulk.Add(molguid);
 
-            bool bOK = true;
-            bool bTranscription = false;
+        ////    bool bOK = true;
+        ////    bool bTranscription = false;
 
-            if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
-            {
-                bTranscription = bulk.Count > 0 && gene_guids.Count > 0 && cc.HasGenes(gene_guids) && cc.cytosol.HasMolecules(bulk);
-                if (bTranscription == true)
-                {
-                    bOK = true;
-                }
-                else
-                {
-                    bOK = false;
-                }
-            }
-            else
-            {
-                if (bulk.Count <= 0)
-                    bOK = false;
+        ////    if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+        ////    {
+        ////        bTranscription = bulk.Count > 0 && gene_guids.Count > 0 && cc.HasGenes(gene_guids) && cc.cytosol.HasMolecules(bulk);
+        ////        if (bTranscription == true)
+        ////        {
+        ////            bOK = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            bOK = false;
+        ////        }
+        ////    }
+        ////    else
+        ////    {
+        ////        if (bulk.Count <= 0)
+        ////            bOK = false;
 
-                if (bOK && membBound.Count > 0)
-                    bOK = cc.membrane.HasMolecules(membBound);
+        ////        if (bOK && membBound.Count > 0)
+        ////            bOK = cc.membrane.HasMolecules(membBound);
 
-                if (bOK)
-                    bOK = cc.cytosol.HasMolecules(bulk);
+        ////        if (bOK)
+        ////            bOK = cc.cytosol.HasMolecules(bulk);
 
-            }
+        ////    }
 
-            //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
-                bOK = false;
+        ////    //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
+        ////    if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        bOK = false;
 
-            e.Accepted = bOK;
-        }
+        ////    e.Accepted = bOK;
+        ////}
 
 
         private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
@@ -933,15 +933,9 @@ namespace DaphneGui
             if (crc == null)
                 return;
 
-            if (crc.ReadOnly == false)
-            {
-                AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
-                arc.ShowDialog();
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("Cannot edit a predefined reaction complex.");
-            }
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
+            arc.ShowDialog();
+            
         }
 
         private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
@@ -949,28 +943,22 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
             if (crc != null)
             {
-                if (crc.ReadOnly == false)
-                {
-                    MessageBoxResult res;
-                    res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
-                    if (res == MessageBoxResult.No)
-                        return;
+                MessageBoxResult res;
+                res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                    return;
 
-                    int index = lbComplexes.SelectedIndex;
-                    MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Remove(crc);
+                int index = lbComplexes.SelectedIndex;
+                MainWindow.SC.SimConfig.entity_repository.reaction_complexes.Remove(crc);
 
-                    lbComplexes.SelectedIndex = index;
+                lbComplexes.SelectedIndex = index;
 
-                    if (index >= lbComplexes.Items.Count)
-                        lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+                if (index >= lbComplexes.Items.Count)
+                    lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
 
-                    if (lbComplexes.Items.Count == 0)
-                        lbComplexes.SelectedIndex = -1;
-                }
-                else
-                {
-                    MessageBox.Show("Cannot remove a predefined reaction complex.");
-                }
+                if (lbComplexes.Items.Count == 0)
+                    lbComplexes.SelectedIndex = -1;
+                
             }
 
             //btnGraphReactionComplex.IsChecked = true;
@@ -1003,7 +991,6 @@ namespace DaphneGui
         {
             ConfigMolecule gm = new ConfigMolecule();
             gm.Name = gm.GenerateNewName(MainWindow.SC.SimConfig, "_New");
-            gm.ReadOnly = false;
             MainWindow.SC.SimConfig.entity_repository.molecules.Add(gm);
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
@@ -1030,55 +1017,49 @@ namespace DaphneGui
         private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
-            if (gm.ReadOnly == false)
+            
+            MessageBoxResult res;
+            if (MainWindow.SC.SimConfig.scenario.environment.ecs.HasMolecule(gm))
             {
-                MessageBoxResult res;
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.HasMolecule(gm))
-                {
-                    res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
-                }
-                else
-                {
-                    res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
-                }
-
-                if (res == MessageBoxResult.No)
-                    return;
-
-                int index = dgLibMolecules.SelectedIndex;
-                MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
-                MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
-                dgLibMolecules.SelectedIndex = index;
-
-                if (index >= dgLibMolecules.Items.Count)
-                    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-                if (dgLibMolecules.Items.Count == 0)
-                    dgLibMolecules.SelectedIndex = -1;
-
+                res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
             }
             else
             {
-                System.Windows.Forms.MessageBox.Show("Cannot remove a predefined molecule.");
+                res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
             }
+
+            if (res == MessageBoxResult.No)
+                return;
+
+            int index = dgLibMolecules.SelectedIndex;
+            MainWindow.SC.SimConfig.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
+            MainWindow.SC.SimConfig.entity_repository.molecules.Remove(gm);
+            dgLibMolecules.SelectedIndex = index;
+
+            if (index >= dgLibMolecules.Items.Count)
+                dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+
+            if (dgLibMolecules.Items.Count == 0)
+                dgLibMolecules.SelectedIndex = -1;
+
         }
 
-        private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigMolecule mol = e.Item as ConfigMolecule;
-            if (mol != null)
-            {
-                // Filter out mol if membrane bound 
-                if (mol.molecule_location == MoleculeLocation.Boundary)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigMolecule mol = e.Item as ConfigMolecule;
+        ////    if (mol != null)
+        ////    {
+        ////        // Filter out mol if membrane bound 
+        ////        if (mol.molecule_location == MoleculeLocation.Boundary)
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
 
         //REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
@@ -1088,14 +1069,8 @@ namespace DaphneGui
             {
                 return;
             }
-            if (cr.ReadOnly == true)
-            {
-                MessageBox.Show("Cannot remove a predefined reaction.");
-            }
-            else
-            {
-                MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
-            }
+            
+            MainWindow.SC.SimConfig.entity_repository.reactions.Remove(cr);
         }
 
         private void btnCopyReaction_Click(object sender, RoutedEventArgs e)
@@ -1355,100 +1330,100 @@ namespace DaphneGui
 
 
 
-        private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
-            if (cr != null)
-            {
-                // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    if (cr != null)
+        ////    {
+        ////        // Filter out cr if not in ecm reaction list 
+        ////        if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
 
-        private void membReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
-            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            if (cr != null && cc != null)
-            {
-                e.Accepted = false;
-                // Filter out cr if not in membrane reaction list 
-                if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
-                {
-                    e.Accepted = true;
-                }
+        ////private void membReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+        ////    if (cr != null && cc != null)
+        ////    {
+        ////        e.Accepted = false;
+        ////        // Filter out cr if not in membrane reaction list 
+        ////        if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
 
-            }
-        }
+        ////    }
+        ////}
 
-        private void ecmReactionComplexReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            if (ReactionComplexListBox.SelectedIndex < 0)
-                return;
+        ////private void ecmReactionComplexReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    if (ReactionComplexListBox.SelectedIndex < 0)
+        ////        return;
 
-            ConfigReaction cr = e.Item as ConfigReaction;
-            string guidRC = (string)ReactionComplexListBox.SelectedItem;
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    string guidRC = (string)ReactionComplexListBox.SelectedItem;
 
-            e.Accepted = true;
+        ////    e.Accepted = true;
 
-            if (guidRC != null && cr != null)
-            {
-                ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
-                e.Accepted = false;
-                // Filter out cr if not in ecm reaction list 
-                if (crc.reactions_guid_ref.Contains(cr.entity_guid))
-                {
-                    e.Accepted = true;
-                }
-            }
-        }
+        ////    if (guidRC != null && cr != null)
+        ////    {
+        ////        ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
+        ////        e.Accepted = false;
+        ////        // Filter out cr if not in ecm reaction list 
+        ////        if (crc.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////    }
+        ////}
 
-        private void cytosolReactionsCollectionViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
-            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            if (cr != null && cc != null)
-            {
-                // Filter out cr if not in cytosol reaction list 
-                if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        ////private void cytosolReactionsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+        ////    if (cr != null && cc != null)
+        ////    {
+        ////        // Filter out cr if not in cytosol reaction list 
+        ////        if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
 
-        private void cellMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            //if (treeCellPops.SelectedItem != null)
-            //    return;
+        ////private void cellMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    //if (treeCellPops.SelectedItem != null)
+        ////    //    return;
 
-            //ConfigCell cc = e.Item as ConfigCell;
-            //string guidCell = cc.cell_guid;
+        ////    //ConfigCell cc = e.Item as ConfigCell;
+        ////    //string guidCell = cc.cell_guid;
 
-            //e.Accepted = true;
+        ////    //e.Accepted = true;
 
-            //if (guidRC != null && cr != null)
-            //{
-            //    ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
-            //    e.Accepted = false;
-            //    // Filter out cr if not in ecm reaction list 
-            //    if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
-            //    {
-            //        e.Accepted = true;
-            //    }
-            //}
-        }
+        ////    //if (guidRC != null && cr != null)
+        ////    //{
+        ////    //    ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
+        ////    //    e.Accepted = false;
+        ////    //    // Filter out cr if not in ecm reaction list 
+        ////    //    if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+        ////    //    {
+        ////    //        e.Accepted = true;
+        ////    //    }
+        ////    //}
+        ////}
 
 
 
@@ -2091,38 +2066,30 @@ namespace DaphneGui
             if (nIndex >= 0)
             {
                 ConfigCell cell = (ConfigCell)CellsListBox.SelectedValue;
-
-                if (cell.ReadOnly == false)
+                MessageBoxResult res;
+                if (MainWindow.SC.SimConfig.scenario.HasCell(cell))
                 {
-                    MessageBoxResult res;
-                    if (MainWindow.SC.SimConfig.scenario.HasCell(cell))
-                    {
-                        res = MessageBox.Show("If you delete this cell, corresponding cell populations will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
-                    }
-                    else
-                    {
-                        res = MessageBox.Show("Are you sure you would like to remove this cell?", "Warning", MessageBoxButton.YesNo);
-                    }
-
-                    if (res == MessageBoxResult.Yes)
-                    {
-                        //MainWindow.SC.SimConfig.scenario.RemoveCellPopulation(cell);
-                        MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
-
-                        CellsListBox.SelectedIndex = nIndex;
-
-                        if (nIndex >= CellsListBox.Items.Count)
-                            CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
-
-                        if (CellsListBox.Items.Count == 0)
-                            CellsListBox.SelectedIndex = -1;
-                    }
+                    res = MessageBox.Show("If you delete this cell, corresponding cell populations will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Cannot remove a predefined cell.");
+                    res = MessageBox.Show("Are you sure you would like to remove this cell?", "Warning", MessageBoxButton.YesNo);
                 }
 
+                if (res == MessageBoxResult.Yes)
+                {
+                    //MainWindow.SC.SimConfig.scenario.RemoveCellPopulation(cell);
+                    MainWindow.SC.SimConfig.entity_repository.cells.Remove(cell);
+
+                    CellsListBox.SelectedIndex = nIndex;
+
+                    if (nIndex >= CellsListBox.Items.Count)
+                        CellsListBox.SelectedIndex = CellsListBox.Items.Count - 1;
+
+                    if (CellsListBox.Items.Count == 0)
+                        CellsListBox.SelectedIndex = -1;
+                }
+                
             }            
         }
 
@@ -2577,7 +2544,7 @@ namespace DaphneGui
             MainWindow.SC.SimConfig.entity_repository.genes.Add(newgene);
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
-            gene = (ConfigGene)dgLibMolecules.SelectedItem;
+            gene = (ConfigGene)dgLibGenes.SelectedItem;
             dgLibGenes.ScrollIntoView(newgene);
         }
 
@@ -4080,13 +4047,13 @@ namespace DaphneGui
         private object Context { get; set; }
 
         //public static EventHandler CreateShowHandlerFor(object context)
-    //    {
-    //        CommonFilter handler = new CommonEventHandler();
+        //    {
+        //        CommonFilter handler = new CommonEventHandler();
 
-    //        handler.Context = context;
+        //        handler.Context = context;
 
-    //        return new EventHandler(handler.HandleGenericShow);
-    //    }
+        //        return new EventHandler(handler.HandleGenericShow);
+        //    }
 
         public static void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
@@ -4103,7 +4070,7 @@ namespace DaphneGui
                     e.Accepted = false;
                 }
             }
-        }        
+        }
     }
 
 
