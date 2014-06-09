@@ -255,14 +255,6 @@ namespace Daphne
 
         //public ChartViewToolWindow ChartWindow;
 
-        // Convenience utility storage (not serialized)
-        // NOTE: These could be moved to entity_repository...
-        [XmlIgnore]
-        public Dictionary<string, BoxSpecification> box_guid_box_dict;
-        
-        [XmlIgnore]
-        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
-
         public SimConfiguration()
         {
             Guid id = Guid.NewGuid();
@@ -278,11 +270,6 @@ namespace Daphne
 
             //////LoadDefaultGlobalParameters();
             ////LoadUserDefinedItems();           
-
-            // Utility storage
-            // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            box_guid_box_dict = new Dictionary<string, BoxSpecification>();            
-            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
 
             reporter_file_name = "";
         }
@@ -313,24 +300,6 @@ namespace Daphne
             /////MainWindow.GC.Rwc.Invalidate();
         }
 
-        private void SetBoxSpecExtents(BoxSpecification bs)
-        {
-            bs.x_scale_max = scenario.environment.extent_x;
-            bs.x_scale_min = scenario.environment.extent_min;
-            bs.x_trans_max = 1.5 * scenario.environment.extent_x;
-            bs.x_trans_min = -scenario.environment.extent_x / 2.0;
-
-            bs.y_scale_max = scenario.environment.extent_y;
-            bs.y_scale_min = scenario.environment.extent_min;
-            bs.y_trans_max = 1.5 * scenario.environment.extent_y;
-            bs.y_trans_min = -scenario.environment.extent_y / 2.0;
-
-            bs.z_scale_max = scenario.environment.extent_z;
-            bs.z_scale_min = scenario.environment.extent_min;
-            bs.z_trans_max = 1.5 * scenario.environment.extent_z;
-            bs.z_trans_min = -scenario.environment.extent_z / 2.0;
-        }
-
         public void RemoveUserDefinedItems()
         {
             foreach (ConfigMolecule mol in entity_repository.molecules.ToList())
@@ -359,16 +328,16 @@ namespace Daphne
         {
             // GenerateNewExperimentGUID();
             FindNextSafeCellPopulationID();
-            InitBoxExtentsAndGuidBoxDict();
-            InitGaussSpecsAndGuidGaussDict();
-            InitCellPopulationIDCellPopulationDict();
+            scenario.InitBoxExtentsAndGuidBoxDict();
+            scenario.InitGaussSpecsAndGuidGaussDict();
+            scenario.InitCellPopulationIDCellPopulationDict();
+            scenario.InitGaussCellPopulationUpdates();
             InitMoleculeIDConfigMoleculeDict();
             InitMolPopIDConfigMolecularPopDict_ECMProbeDict();
             InitCellIDConfigCellDict();
             InitReactionTemplateIDConfigReactionTempalteDict();
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
-            InitGaussCellPopulationUpdates();
             InitGeneIDConfigGeneDict();
             InitDiffSchemeIDConfigDiffSchemeDict();
             // Set callback to update box specification extents when environment extents change
@@ -397,56 +366,6 @@ namespace Daphne
                     max_id = cs.cellpopulation_id;
             }
             SafeCellPopulationID = max_id + 1;
-        }
-
-        private void InitBoxExtentsAndGuidBoxDict()
-        {
-            box_guid_box_dict.Clear();
-            foreach (BoxSpecification bs in entity_repository.box_specifications)
-            {
-                box_guid_box_dict.Add(bs.box_guid, bs);
-
-                // Piggyback on this routine to set initial extents from environment values
-                SetBoxSpecExtents(bs);
-            }
-            entity_repository.box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
-        }
-        private void InitGaussSpecsAndGuidGaussDict()
-        {
-            entity_repository.gauss_guid_gauss_dict.Clear();
-            foreach (GaussianSpecification gs in entity_repository.gaussian_specifications)
-            {
-                entity_repository.gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
-            }
-            entity_repository.gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
-        }
-
-        private void InitCellPopulationIDCellPopulationDict()
-        {
-            cellpopulation_id_cellpopulation_dict.Clear();  
-            foreach (CellPopulation cs in scenario.cellpopulations)
-            {
-                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
-
-                if (cs.cellPopDist != null)
-                {
-                    cs.cellPopDist.cellPop = cs;
-                }
-            }
-            scenario.cellpopulations.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsets_CollectionChanged);
-        }
-
-        private void InitGaussCellPopulationUpdates()
-        {
-            foreach (CellPopulation cs in scenario.cellpopulations)
-            {
-                if (cs.cellPopDist.DistType == CellPopDistributionType.Gaussian)
-                {
-                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).box_guid];
-                    ((CellPopGaussian)cs.cellPopDist).ParamReset(box);
-                    box.PropertyChanged += new PropertyChangedEventHandler(((CellPopGaussian)cs.cellPopDist).CellPopGaussChanged);
-                }
-            }
         }
 
         private void InitMoleculeIDConfigMoleculeDict()
@@ -546,79 +465,6 @@ namespace Daphne
                 entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
             }
             entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
-        }
-
-        private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    BoxSpecification bs = nn as BoxSpecification;
-                    box_guid_box_dict.Add(bs.box_guid, bs);
-
-                    // Piggyback on this callback to set extents from environment for new box specifications
-                    SetBoxSpecExtents(bs);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    BoxSpecification bs = dd as BoxSpecification;
-                    box_guid_box_dict.Remove(bs.box_guid);
-                }
-            }
-        }
-
-        private void gaussian_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    GaussianSpecification gs = nn as GaussianSpecification;
-                    entity_repository.gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    GaussianSpecification gs = dd as GaussianSpecification;
-                    entity_repository.gauss_guid_gauss_dict.Remove(gs.gaussian_spec_box_guid_ref);
-                }
-            }
-        }
-
-        private void cellsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    CellPopulation cs = nn as CellPopulation;
-
-                    foreach (ConfigMolecularPopulation mp in scenario.environment.ecs.molpops)
-                    {
-                        ReportECM er = new ReportECM();
-
-                        er.molpop_guid_ref = mp.molpop_guid;
-                        cs.ecm_probe.Add(er);
-                        cs.ecm_probe_dict.Add(mp.molpop_guid, er);
-                    }
-                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    CellPopulation cs = dd as CellPopulation;
-
-                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
-                }
-            }
         }
 
         //genes_CollectionChanged
@@ -1042,17 +888,6 @@ namespace Daphne
             return config_reacs;
         }
 
-        public CellPopulation GetCellPopulation(int key)
-        {
-            if (cellpopulation_id_cellpopulation_dict.ContainsKey(key) == true)
-            {
-                return cellpopulation_id_cellpopulation_dict[key];
-            }
-            else
-            {
-                throw new Exception("Population ID does not exist.");
-            }
-        }
         // given a reaction template type, find its guid
         public string findReactionTemplateGuid(ReactionType rt)
         {
@@ -1328,12 +1163,21 @@ namespace Daphne
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public TimeConfig time_config { get; set; }
-#if CELL_REGIONS
-        public ObservableCollection<Region> regions { get; set; }
-#endif
         public ConfigEnvironment environment { get; set; }
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
+        public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
+        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
+
+        // Convenience utility storage (not serialized)
+        [XmlIgnore]
+        public Dictionary<string, BoxSpecification> box_guid_box_dict;
+
+        [XmlIgnore]
+        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
+
+        [XmlIgnore]
+        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
         
 
         public Scenario()
@@ -1341,12 +1185,171 @@ namespace Daphne
             simInterpolate = SimStates.Linear;
             simCellSize = SimStates.Tiny;
             time_config = new TimeConfig();
-#if CELL_REGIONS
-            regions = new ObservableCollection<Region>();
-#endif
             environment = new ConfigEnvironment();
             cellpopulations = new ObservableCollection<CellPopulation>();
 
+            gaussian_specifications = new ObservableCollection<GaussianSpecification>();
+            box_specifications = new ObservableCollection<BoxSpecification>();
+
+            // Utility storage
+            // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
+            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
+            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
+            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
+        }
+
+        private void SetBoxSpecExtents(BoxSpecification bs)
+        {
+            bs.x_scale_max = environment.extent_x;
+            bs.x_scale_min = environment.extent_min;
+            bs.x_trans_max = 1.5 * environment.extent_x;
+            bs.x_trans_min = -environment.extent_x / 2.0;
+
+            bs.y_scale_max = environment.extent_y;
+            bs.y_scale_min = environment.extent_min;
+            bs.y_trans_max = 1.5 * environment.extent_y;
+            bs.y_trans_min = -environment.extent_y / 2.0;
+
+            bs.z_scale_max = environment.extent_z;
+            bs.z_scale_min = environment.extent_min;
+            bs.z_trans_max = 1.5 * environment.extent_z;
+            bs.z_trans_min = -environment.extent_z / 2.0;
+        }
+
+        private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    BoxSpecification bs = nn as BoxSpecification;
+                    box_guid_box_dict.Add(bs.box_guid, bs);
+
+                    // Piggyback on this callback to set extents from environment for new box specifications
+                    SetBoxSpecExtents(bs);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    BoxSpecification bs = dd as BoxSpecification;
+                    box_guid_box_dict.Remove(bs.box_guid);
+                }
+            }
+        }
+
+        private void gaussian_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    GaussianSpecification gs = nn as GaussianSpecification;
+                    gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    GaussianSpecification gs = dd as GaussianSpecification;
+                    gauss_guid_gauss_dict.Remove(gs.gaussian_spec_box_guid_ref);
+                }
+            }
+        }
+
+        private void cellsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    CellPopulation cs = nn as CellPopulation;
+
+                    foreach (ConfigMolecularPopulation mp in environment.ecs.molpops)
+                    {
+                        ReportECM er = new ReportECM();
+
+                        er.molpop_guid_ref = mp.molpop_guid;
+                        cs.ecm_probe.Add(er);
+                        cs.ecm_probe_dict.Add(mp.molpop_guid, er);
+                    }
+                    cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    CellPopulation cs = dd as CellPopulation;
+
+                    cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
+                }
+            }
+        }
+
+        public void InitBoxExtentsAndGuidBoxDict()
+        {
+            box_guid_box_dict.Clear();
+            foreach (BoxSpecification bs in box_specifications)
+            {
+                box_guid_box_dict.Add(bs.box_guid, bs);
+
+                // Piggyback on this routine to set initial extents from environment values
+                SetBoxSpecExtents(bs);
+            }
+            box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
+        }
+
+        public void InitGaussSpecsAndGuidGaussDict()
+        {
+            gauss_guid_gauss_dict.Clear();
+            foreach (GaussianSpecification gs in gaussian_specifications)
+            {
+                gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
+            }
+            gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
+        }
+
+        public void InitCellPopulationIDCellPopulationDict()
+        {
+            cellpopulation_id_cellpopulation_dict.Clear();
+            foreach (CellPopulation cs in cellpopulations)
+            {
+                cellpopulation_id_cellpopulation_dict.Add(cs.cellpopulation_id, cs);
+
+                if (cs.cellPopDist != null)
+                {
+                    cs.cellPopDist.cellPop = cs;
+                }
+            }
+            cellpopulations.CollectionChanged += new NotifyCollectionChangedEventHandler(cellsets_CollectionChanged);
+        }
+
+        public void InitGaussCellPopulationUpdates()
+        {
+            foreach (CellPopulation cs in cellpopulations)
+            {
+                if (cs.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+                {
+                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).box_guid];
+                    ((CellPopGaussian)cs.cellPopDist).ParamReset(box);
+                    box.PropertyChanged += new PropertyChangedEventHandler(((CellPopGaussian)cs.cellPopDist).CellPopGaussChanged);
+                }
+            }
+        }
+
+        public CellPopulation GetCellPopulation(int key)
+        {
+            if (cellpopulation_id_cellpopulation_dict.ContainsKey(key) == true)
+            {
+                return cellpopulation_id_cellpopulation_dict[key];
+            }
+            else
+            {
+                throw new Exception("Population ID does not exist.");
+            }
         }
 
         public bool HasCell(ConfigCell cell)
@@ -1376,8 +1379,6 @@ namespace Daphne
 
     public class EntityRepository 
     {
-        public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
-        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
         public ObservableCollection<ConfigReactionComplex> reaction_complexes { get; set; }
 
         //All molecules, reactions, cells - Combined Predefined and User defined
@@ -1393,7 +1394,6 @@ namespace Daphne
         public Dictionary<string, ConfigReaction> reactions_dict;
         public Dictionary<string, ConfigCell> cells_dict;
         public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
-        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
 
 
         public ObservableCollection<ConfigDiffScheme> diff_schemes { get; set; }
@@ -1404,8 +1404,6 @@ namespace Daphne
 
         public EntityRepository()
         {
-            gaussian_specifications = new ObservableCollection<GaussianSpecification>();
-            box_specifications = new ObservableCollection<BoxSpecification>();
             cells = new ObservableCollection<ConfigCell>();
             molecules = new ObservableCollection<ConfigMolecule>();
             genes = new ObservableCollection<ConfigGene>();
@@ -1418,7 +1416,6 @@ namespace Daphne
             cells_dict = new Dictionary<string, ConfigCell>();
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
-            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
             diff_schemes = new ObservableCollection<ConfigDiffScheme>();
             diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();

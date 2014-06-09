@@ -293,7 +293,7 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            CellPopulation cp = Simulation.SimConfigHandle.GetCellPopulation(daughter.Population_id);
+            CellPopulation cp = Simulation.SimConfigHandle.scenario.GetCellPopulation(daughter.Population_id);
 
             configComp[0] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
             configComp[1] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;

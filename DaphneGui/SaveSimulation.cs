@@ -42,7 +42,7 @@ namespace DaphneGui
             SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
  
             //clear the contents from last save
-            foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
+            foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
                 item.Value.cellPopDist.CellStates.Clear();
@@ -104,7 +104,7 @@ namespace DaphneGui
                 cmp.mpInfo.mp_distribution = mpex;
             }
 
-            foreach (var kvp in SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict)
+            foreach (var kvp in SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict)
             {
                 CellPopulation cp = kvp.Value;
                 cp.number = 0;
@@ -117,7 +117,7 @@ namespace DaphneGui
 
                 int cell_set_id = cell.Population_id;
 
-                CellPopulation target_cp = SimConfigSaver.SimConfig.cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                CellPopulation target_cp = SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict[cell.Population_id];
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
