@@ -2576,6 +2576,79 @@ namespace Daphne
             states = new ObservableCollection<string>();
         }
 
+        public void DeleteState(int index)
+        {
+            // remove the state row from the division driver
+            DriverElements.Remove(DriverElements[index]);
+
+            // remove the column corresponding to the state from transition driver elements
+            foreach (ConfigTransitionDriverRow row in DriverElements)
+            {
+                row.elements.Remove(row.elements[index]);
+            }
+
+            // update current and destination indices
+            // CurrentStateName and DestStateName are okay
+            for (int i = 0; i < DriverElements.Count; i++)
+            {
+                ConfigTransitionDriverRow row = DriverElements[i];
+                for (int j = 0; j < row.elements.Count; j++)
+                {
+                    row.elements[j].CurrentState = i;
+                    row.elements[j].DestState = j;
+                }
+            }
+
+            //this removes the state
+            states.Remove(states[index]);
+
+            if (index == CurrentState)
+            {
+                CurrentState = 0;
+                StateName = states[CurrentState];
+            }
+        }
+
+        public void AddState(string sname)
+        {
+            states.Add(sname);
+
+            //Add a row AND a column in Differentiation Table
+            ConfigTransitionDriverRow trow;
+
+            //Add a column to existing rows
+            for (int k = 0; k < states.Count - 1; k++)
+            {
+                trow = DriverElements[k];
+                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                e.Alpha = 0;
+                e.Beta = 0;
+                e.driver_mol_guid_ref = "";
+                e.CurrentStateName = states[k];
+                e.CurrentState = k;
+                e.DestState = states.Count - 1;
+                e.DestStateName = states[states.Count - 1];
+                trow.elements.Add(e);
+            }
+
+            //Add a row
+            trow = new ConfigTransitionDriverRow();
+            for (int j = 0; j < states.Count; j++)
+            {
+                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
+                e.Alpha = 0;
+                e.Beta = 0;
+                e.driver_mol_guid_ref = "";
+                e.CurrentStateName = sname;
+                e.CurrentState = states.Count - 1;
+                e.DestState = j;
+                e.DestStateName = states[j];
+                trow.elements.Add(e);
+            }
+
+            DriverElements.Add(trow);
+        }
+
         public ConfigTransitionDriver Clone()
         {
             var Settings = new JsonSerializerSettings();
@@ -2655,8 +2728,7 @@ namespace Daphne
             if (index > -1 && index < activationRows.Count)
             {
                 activationRows.Remove(row);
-                Driver.states.RemoveAt(index);
-                Driver.DriverElements.RemoveAt(index);
+                Driver.DeleteState(index);
             }
         }
 
@@ -2669,46 +2741,9 @@ namespace Daphne
                 row.activations.Add(1);
             }
 
-            Driver.states.Add(sname);
+            Driver.AddState(sname);
             activationRows.Add(row);
-
             OnPropertyChanged("activationRows");
-
-            //Add a row AND a column in Differentiation Table
-            ConfigTransitionDriverRow trow; 
-
-            //Add a column to existing rows
-            for (int k = 0; k < Driver.states.Count-1; k++)
-            {
-                trow = Driver.DriverElements[k];
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = Driver.states[k];
-                e.CurrentState = k;
-                e.DestState = Driver.states.Count - 1;
-                e.DestStateName = Driver.states[Driver.states.Count - 1];
-                trow.elements.Add(e);
-            }
-            
-            //Add a row
-            trow = new ConfigTransitionDriverRow();
-            for (int j = 0; j < Driver.states.Count; j++ )
-            {
-                ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
-                e.Alpha = 0;
-                e.Beta = 0;
-                e.driver_mol_guid_ref = "";
-                e.CurrentStateName = sname;
-                e.CurrentState = Driver.states.Count - 1;
-                e.DestState = j;
-                e.DestStateName = Driver.states[j];
-                trow.elements.Add(e);
-            }
-
-            Driver.DriverElements.Add(trow);
-
             OnPropertyChanged("Driver");
         }
 
