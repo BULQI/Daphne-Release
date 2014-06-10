@@ -84,7 +84,14 @@ namespace DaphneGui
             res = MessageBox.Show("Are you sure you would like to remove this cell population?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
-                       
+
+            //Remove gaussian spec if any
+            DeleteGaussianSpecification(current_item.cellPopDist);
+            CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
+            cpg.gauss_spec_guid_ref = "";
+            MainWindow.GC.Rwc.Invalidate();
+
+            //Remove the cell population
             MainWindow.SC.SimConfig.scenario.cellpopulations.Remove(current_item);
 
             CellPopsListBox.SelectedIndex = index;
@@ -134,6 +141,9 @@ namespace DaphneGui
         {
             MolPopGaussian mpg = dist as MolPopGaussian;
             string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+
+            if (guid == "")
+                return;
 
             if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
@@ -188,6 +198,9 @@ namespace DaphneGui
         {
             CellPopGaussian cpg = dist as CellPopGaussian;
             string guid = cpg.gauss_spec_guid_ref;
+
+            if (guid == "")
+                return;
 
             if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
@@ -538,6 +551,17 @@ namespace DaphneGui
                         MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
                     }
                 }
+
+                //Delete the gaussian box if any
+                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    DeleteGaussianSpecification(cmp.mpInfo.mp_distribution);
+                    MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
+                    mpg.gaussgrad_gauss_spec_guid_ref = "";
+                    MainWindow.GC.Rwc.Invalidate();
+                }
+
+                //Delete the molecular population
                 MainWindow.SC.SimConfig.scenario.environment.ecs.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();

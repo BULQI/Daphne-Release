@@ -134,16 +134,16 @@
                                   Source="{Binding Path=scenario.regions}"/>
 
             <CollectionViewSource x:Key="boxSpecsListView"  
-                                  Source="{Binding Path=entity_repository.box_specifications}"/>
+                                  Source="{Binding Path=scenario.box_specifications}"/>
 
             <CollectionViewSource x:Key="ggBoxSpecsListView"  
-                                  Source="{Binding Path=entity_repository.box_specifications}"/>
+                                  Source="{Binding Path=scenario.box_specifications}"/>
 
             <CollectionViewSource x:Key="molpopGaussianSpecsListView"  
-                                  Source="{Binding Path=entity_repository.gaussian_specifications}"/>
+                                  Source="{Binding Path=scenario.gaussian_specifications}"/>
 
-            <CollectionViewSource x:Key="solfacSolfacTypesListView"  
-                                  Source="{Binding Path=entity_repository.solfac_types}"/>
+            <!--<CollectionViewSource x:Key="solfacSolfacTypesListView"  
+                                  Source="{Binding Path=entity_repository.solfac_types}"/>-->
 
             <CollectionViewSource x:Key="cellTypesListView"  
                                   Source="{Binding Path=entity_repository.cells}"
