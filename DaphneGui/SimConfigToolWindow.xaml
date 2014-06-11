@@ -1776,8 +1776,9 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=mpInfo.mp_color}"
+                                    Value="{Binding Path=mpInfo.mp_color, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="4,2"
+                                    ValueChanged="molPopColorEditBox_ValueChanged"
                                     />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
@@ -2299,7 +2300,7 @@
                         </StackPanel>
                         
                     </Expander>
-                    <!-- Mol Pops -->
+                    <!-- Library Molecular Populations -->
                     <Expander
                             Padding="5" 
                             ExpandDirection="Down"

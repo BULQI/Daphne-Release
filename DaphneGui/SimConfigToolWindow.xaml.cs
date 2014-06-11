@@ -104,7 +104,7 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification(MolPopGaussian mpg)
+        private void AddGaussianSpecification(MolPopGaussian mpg, MolPopInfo mp_info)
         {
             BoxSpecification box = new BoxSpecification();
             box.x_trans = 100;
@@ -120,7 +120,7 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            gg.gaussian_spec_color = mp_info.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.scenario.gaussian_specifications.Add(gg);
@@ -285,7 +285,7 @@ namespace DaphneGui
                     case MolPopDistributionType.Gaussian:
                         MolPopGaussian mpg = new MolPopGaussian();
 
-                        AddGaussianSpecification(mpg);
+                        AddGaussianSpecification(mpg, current_item);
                         current_item.mp_distribution = mpg;
 
                         break;
@@ -3829,6 +3829,24 @@ namespace DaphneGui
 
             cell.ValidateName(MainWindow.SC.SimConfig);
         }
+
+        private void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            if (mol_pop.mpInfo.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
+                return;
+
+            MolPopGaussian mpg = mol_pop.mpInfo.mp_distribution as MolPopGaussian;
+
+            string gauss_guid = mpg.gaussgrad_gauss_spec_guid_ref;
+
+            if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
+            {
+                GaussianSpecification gs = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[gauss_guid];
+                gs.gaussian_spec_color = mol_pop.mpInfo.mp_color;
+            }
+        }
+
     }    
 
     public class DataGridBehavior
