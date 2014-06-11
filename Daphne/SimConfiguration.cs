@@ -793,15 +793,65 @@ namespace Daphne
 
         // given a total reaction string, find the ConfigCell object
         public bool findReactionByTotalString(string total, SimConfiguration sc)
-        {
+        {            
+            //Get left and right side molecules of new reaction
+            List<string> newReactants = getReacLeftSide(total);   
+            List<string> newProducts = getReacRightSide(total);
+
+            //Loop through all existing reactions
             foreach (ConfigReaction reac in sc.entity_repository.reactions)
             {
-                if (reac.TotalReactionString == total)
+                //Get left and right side molecules of each reaction in er
+                List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
+                List<string> currProducts = getReacRightSide(reac.TotalReactionString);
+
+                //Key step! 
+                //Check if the list of reactants and products in new reaction equals 
+                //the list of reactants and products in this current reaction
+                if (newReactants.SequenceEqual(currReactants) && newProducts.SequenceEqual(currProducts))
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the left side, i.e. the reactants.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        private List<string> getReacLeftSide(string total) 
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string left = total.Substring(0, index);
+            left = left.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] reactants = left.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listLeft = new List<string>(reactants);
+            listLeft.Sort();
+            return listLeft;
+        }
+
+        /// <summary>
+        /// This method takes the ConfigReaction's TotalReactionString and returns a sorted 
+        /// list of molecule strings on the right side, i.e. the products.
+        /// </summary>
+        /// <param name="total"></param>
+        /// <returns></returns>
+        private List<string> getReacRightSide(string total)
+        {
+            int len = total.Length;
+            int index = total.IndexOf("->");
+            string right = total.Substring(index + 2);
+            right = right.Replace(" ", "");
+            char[] separator = { '+' };
+            string[] products = right.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+            List<string> listRight = new List<string>(products);
+            listRight.Sort();
+            return listRight;
         }
 
 
@@ -2368,7 +2418,7 @@ namespace Daphne
 
             if (found)
             {
-                Name = GenerateNewName(sc, "_Ch");
+                Name = GenerateNewName(sc, "_Copy");
             }
         }
 
@@ -2446,6 +2496,25 @@ namespace Daphne
             }
 
             return ret;
+        }
+
+        public void ValidateName(SimConfiguration sc)
+        {
+            bool found = false;
+            string tempGeneName = Name;
+            foreach (ConfigGene gene in sc.entity_repository.genes)
+            {
+                if (gene.Name == tempGeneName && gene.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                Name = GenerateNewName(sc, "_Copy");
+            }
         }
 
     }
@@ -3528,6 +3597,68 @@ namespace Daphne
                 }
             }
             return res;
+        }
+
+        /// <summary>
+        /// This method looks for duplicate names with newly created (or copied) cell
+        /// If it is a duplicate, a suffix like "_Copy" is added
+        /// </summary>
+        /// <param name="sc"></param>
+        public void ValidateName(SimConfiguration sc)
+        {
+            bool found = false;
+            string newCellName = CellName;
+            foreach (ConfigCell cell in sc.entity_repository.cells)
+            {
+                if (cell.CellName == newCellName && cell.entity_guid != entity_guid)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+                CellName = GenerateNewName(sc, "_Copy");
+            }
+        }
+
+        public string GenerateNewName(SimConfiguration sc, string ending)
+        {
+            string OriginalName = CellName;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string NewCellName = OriginalName + suffix;
+            while (FindCellByName(sc, NewCellName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                NewCellName = OriginalName + suffix;
+            }
+
+            return NewCellName;
+        }
+
+        public static bool FindCellByName(SimConfiguration sc, string cellName)
+        {
+            bool ret = false;
+            foreach (ConfigCell cell in sc.entity_repository.cells)
+            {
+                if (cell.CellName == cellName)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
         }
     }
 

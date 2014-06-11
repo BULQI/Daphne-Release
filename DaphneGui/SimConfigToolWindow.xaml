@@ -1158,7 +1158,7 @@
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
                                         SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="cell_guid">
+                                        SelectedValuePath="entity_guid">
                             
                         </ComboBox>
 
@@ -1363,7 +1363,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120"  />
+                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120" LostFocus="CellTextBox_LostFocus" />
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
@@ -2849,7 +2849,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Path=CellName}" Margin="5,0,0,0"/>
                                 <TextBlock Text="    " Margin="5,0,0,0"/>
-                                <TextBlock Text="{Binding Path=cell_guid}" Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=entity_guid}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate x:Key="reactionGuidsListItemTemplate">
@@ -3340,19 +3340,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Width="200"  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="TextBox_LostFocus">
-                                                    <!--<TextBox.Style>
-                                                        <Style TargetType="{x:Type TextBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                    <Setter Property="IsEnabled" Value="False" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                    <Setter Property="IsEnabled" Value="True" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>-->
+                                                          LostFocus="GeneTextBox_LostFocus">                                                    
                                                 </TextBox>
 
 
@@ -3438,7 +3426,7 @@
                                                 <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
 
                                                 <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="TextBox_LostFocus">
+                                                          LostFocus="MolTextBox_LostFocus">
                                                     <TextBox.Style>
                                                         <Style TargetType="{x:Type TextBox}">
                                                             <Style.Triggers>

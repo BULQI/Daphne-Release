@@ -2205,7 +2205,7 @@ namespace DaphneGui
             }
         }
 
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
 
@@ -2213,6 +2213,13 @@ namespace DaphneGui
                 return;
 
             cm.ValidateName(MainWindow.SC.SimConfig);
+
+            int index = dgLibMolecules.SelectedIndex;
+            dgLibMolecules.InvalidateVisual();
+            dgLibMolecules.Items.Refresh();
+            dgLibMolecules.SelectedIndex = index;
+            cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+            dgLibMolecules.ScrollIntoView(cm);
         }
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3791,6 +3798,36 @@ namespace DaphneGui
 
             //delete driver
             cell.div_driver = null;
+        }
+
+        private void GeneTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigGene gene = dgLibGenes.SelectedItem as ConfigGene;
+
+            if (gene == null)
+                return;
+
+            int index = dgLibGenes.SelectedIndex;
+
+            gene.ValidateName(MainWindow.SC.SimConfig);
+
+            dgLibGenes.InvalidateVisual();
+            
+            dgLibGenes.Items.Refresh();
+            dgLibGenes.SelectedIndex = index;
+            gene = (ConfigGene)dgLibGenes.SelectedItem;
+            dgLibGenes.ScrollIntoView(gene);
+
+        }
+
+        private void CellTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            cell.ValidateName(MainWindow.SC.SimConfig);
         }
     }    
 
