@@ -3841,6 +3841,10 @@ namespace DaphneGui
         private void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+
+            if (mol_pop == null)
+                return;
+
             if (mol_pop.mpInfo.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
                 return;
 
