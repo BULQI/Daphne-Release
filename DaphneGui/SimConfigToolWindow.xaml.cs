@@ -86,9 +86,12 @@ namespace DaphneGui
                 return;
 
             //Remove gaussian spec if any
-            DeleteGaussianSpecification(current_item.cellPopDist);
-            CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
-            cpg.gauss_spec_guid_ref = "";
+            if (current_item.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+            {
+                DeleteGaussianSpecification(current_item.cellPopDist);
+                CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
+                cpg.gauss_spec_guid_ref = "";
+            }
             MainWindow.GC.Rwc.Invalidate();
 
             //Remove the cell population
@@ -178,7 +181,7 @@ namespace DaphneGui
         {
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SC.SimConfig.scenario.gaussian_specifications.Add(gg);
@@ -196,6 +199,9 @@ namespace DaphneGui
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
         {
+            if (dist.DistType != CellPopDistributionType.Gaussian)
+                return;
+
             CellPopGaussian cpg = dist as CellPopGaussian;
             string guid = cpg.gauss_spec_guid_ref;
 
@@ -1545,6 +1551,8 @@ namespace DaphneGui
                 ////Add this after 2/4/14
                 ////gg.DrawAsWireframe = true;
 
+                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
@@ -3845,6 +3853,28 @@ namespace DaphneGui
                 GaussianSpecification gs = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[gauss_guid];
                 gs.gaussian_spec_color = mol_pop.mpInfo.mp_color;
             }
+        }
+
+        private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellPop == null)
+                return;
+
+            CellPopDistribution current_dist = cellPop.cellPopDist;
+
+            if (current_dist.DistType != CellPopDistributionType.Gaussian)
+                return;
+
+            string gauss_guid = ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec_guid_ref;
+
+            if (MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
+            {
+                GaussianSpecification gg = MainWindow.SC.SimConfig.scenario.gauss_guid_gauss_dict[gauss_guid];
+                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+            }
+
         }
 
     }    

@@ -1200,6 +1200,7 @@
                                         ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
                                         SelectedIndex="{Binding Path=cellpopulation_predef_color, Converter={StaticResource ColorListToIntConv}, 
                                         Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectionChanged="cellPopColor_SelectionChanged"
                                         >                            
                         </ComboBox>
 
@@ -2717,7 +2718,7 @@
             </ScrollViewer>
         </TabItem>
 
-        <!-- CELL POPULATIONS -->
+        <!-- Library CELL POPULATIONS -->
         <TabItem x:Name="tabCellPop" Header="Cell Populations">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
