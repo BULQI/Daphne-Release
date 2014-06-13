@@ -56,8 +56,16 @@ namespace DaphneGui
             CellPopulation cs = new CellPopulation();
 
             // Default cell type and name to first entry in the cell repository
-            cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells[0].entity_guid;
-            cs.cellpopulation_name = MainWindow.SC.SimConfig.entity_repository.cells[0].CellName;
+            if (MainWindow.SC.SimConfig.entity_repository.cells.Count > 0)
+            {
+                cs.cell_guid_ref = MainWindow.SC.SimConfig.entity_repository.cells.First().entity_guid;
+                cs.cellpopulation_name = MainWindow.SC.SimConfig.entity_repository.cells.First().CellName;
+            }
+            else
+            {
+                MessageBox.Show("Please create a cell type first.");
+                return;
+            }
 
             double[] extents = new double[3] { MainWindow.SC.SimConfig.scenario.environment.extent_x, 
                                                MainWindow.SC.SimConfig.scenario.environment.extent_y, 
@@ -531,8 +539,8 @@ namespace DaphneGui
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
 
-            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules[0].entity_guid;
-            gmp.Name = MainWindow.SC.SimConfig.entity_repository.molecules[0].Name;
+            gmp.molecule_guid_ref = MainWindow.SC.SimConfig.entity_repository.molecules.First().entity_guid;
+            gmp.Name = MainWindow.SC.SimConfig.entity_repository.molecules.First().Name;
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
@@ -3487,7 +3495,7 @@ namespace DaphneGui
 
             int row = DiffRegGrid.SelectedIndex;
 
-            DataGridCellInfo selected = DiffRegGrid.SelectedCells[0];
+            DataGridCellInfo selected = DiffRegGrid.SelectedCells.First();
             DataGridColumn col = selected.Column;
         }
 

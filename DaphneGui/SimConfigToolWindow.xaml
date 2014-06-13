@@ -2858,7 +2858,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Path=TotalReactionString}" Margin="5,0,0,0"/>
                                 <TextBlock Text="    " Margin="5,0,0,0"/>
-                                <TextBlock Text="{Binding Path=reaction_guid}" Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=entity_guid}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                         <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
@@ -3292,7 +3292,7 @@
                         </DataTemplate>
 
                     </StackPanel.Resources>
-                    <!-- GENES -->
+                    <!-- LIBRARY GENES -->
                     <Expander                                            
                             Padding="5" ExpandDirection="Down"
                             IsExpanded="False"
@@ -3376,7 +3376,7 @@
                         </StackPanel>
 
                     </Expander>
-                    <!-- MOLECULES -->
+                    <!-- LIBRARY MOLECULES -->
                     <Expander                                            
                             Padding="5" ExpandDirection="Down"
                             IsExpanded="False"
@@ -3518,7 +3518,7 @@
                         </StackPanel>
 
                     </Expander>
-                    <!-- REACTIONS -->
+                    <!-- LIBRARY REACTIONS -->
                     <Expander
                                 Padding="5" 
                                 ExpandDirection="Down"
@@ -3629,7 +3629,7 @@
                         </StackPanel>
                     </Expander>
 
-                    <!-- REACTION COMPLEXES -->
+                    <!--LIBRARY REACTION COMPLEXES -->
                     <Expander
                         Padding="5" 
                         ExpandDirection="Down"
@@ -3737,7 +3737,7 @@
 
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                        <TextBlock Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
                                                         
                                                         <TextBlock.Style>
