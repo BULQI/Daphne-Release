@@ -223,7 +223,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                              Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDToStringConv},
+                                              Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDToStringConv},
                                                             ConverterParameter={StaticResource ecmReacsListView}}">
                                     </TextBox>
                                 </DataTemplate>

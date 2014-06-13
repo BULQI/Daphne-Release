@@ -202,7 +202,10 @@ namespace Daphne
             dictGraphConcs.Clear();
             listTimes.Clear();
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            if (Simulation.dataBasket.Cells.Count == 0)
+                return;
+                
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
@@ -311,8 +314,8 @@ namespace Daphne
 
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
-            
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
 
             if (comp == null)
                 return;
@@ -342,7 +345,7 @@ namespace Daphne
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -372,7 +375,7 @@ namespace Daphne
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
