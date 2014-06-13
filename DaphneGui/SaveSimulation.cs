@@ -12,7 +12,7 @@ namespace DaphneGui
 {
     public partial class MainWindow
     {
-        internal static SimConfigurator SimConfigSaver = null;
+        internal static Protocol ProtocolSaver = null;
         internal static string filepath_prefix = null;
         internal static int save_counter = 1;
 
@@ -32,23 +32,21 @@ namespace DaphneGui
             runButton.IsEnabled = false;
             resetButton.IsEnabled = false;
             abortButton.IsEnabled = false;
-            if (SimConfigSaver == null)
+            if (ProtocolSaver == null)
             {
                 //copy initial settings, only done once
-                SimConfigSaver = new SimConfigurator();
-                SimConfigSaver.TempScenarioFile = orig_path + @"\temp_scenario.json";
-                SimConfigSaver.TempUserDefFile = orig_path + @"\temp_userdef.json";
+                ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json");
             }
-            SimConfigSaver.DeserializeSimConfigFromString(configurator.SerializeSimConfigToString());
+            sop.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
-            foreach (KeyValuePair<int, CellPopulation> item in SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict)
+            foreach (KeyValuePair<int, CellPopulation> item in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
                 item.Value.cellPopDist.CellStates.Clear();
             }
 
-            string sp = configurator.FileName;
+            string sp = sop.Protocol.FileName;
 
             filepath_prefix = System.IO.Path.GetDirectoryName(sp);
             if (argSave == false)
@@ -70,7 +68,7 @@ namespace DaphneGui
                     abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
-                SimConfigSaver.FileName = dlg.FileName;
+                ProtocolSaver.FileName = dlg.FileName;
             }
             else
             {
@@ -82,16 +80,13 @@ namespace DaphneGui
                 {
                     filepath_prefix = Path.Combine(filepath_prefix, System.IO.Path.GetFileNameWithoutExtension(sp)) + "-" + save_counter;
                 }
-                SimConfigSaver.FileName = filepath_prefix + ".json";
+                ProtocolSaver.FileName = filepath_prefix + ".json";
             }
 
             save_counter++;
 
-            SimConfiguration save_config = SimConfigSaver.SimConfig;
-            Scenario save_scenario = save_config.scenario;
-
             //same Simulation.dataBasket.ECS.Space.Population inot scenario.environmnet.ecs.molpop
-            foreach (ConfigMolecularPopulation cmp in save_scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.ecs.molpops)
             {
                 //loop through molecular population
                 MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref];
@@ -104,7 +99,7 @@ namespace DaphneGui
                 cmp.mpInfo.mp_distribution = mpex;
             }
 
-            foreach (var kvp in SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict)
+            foreach (var kvp in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
             {
                 CellPopulation cp = kvp.Value;
                 cp.number = 0;
@@ -117,7 +112,7 @@ namespace DaphneGui
 
                 int cell_set_id = cell.Population_id;
 
-                CellPopulation target_cp = SimConfigSaver.SimConfig.scenario.cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                CellPopulation target_cp = ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict[cell.Population_id];
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
@@ -140,7 +135,7 @@ namespace DaphneGui
                 //target_cp.cell_list.Add(cell_state);
             }
 
-            SimConfigSaver.SerializeSimConfigToFile();
+            ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
             resetButton.IsEnabled = buttons[RESET];
             abortButton.IsEnabled = buttons[ABORT];

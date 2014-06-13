@@ -32,7 +32,7 @@ namespace Daphne
                            SIMFLAG_ALL    = 0xFF;
 
         public static DataBasket dataBasket;
-        public static SimConfiguration SimConfigHandle;
+        public static Protocol ProtocolHandle;
 
         private byte runStatus;
         private byte simFlags;
@@ -131,7 +131,7 @@ namespace Daphne
             dataBasket.Cells.Remove(c.Cell_id);
         }
 
-        private void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp, SimConfiguration sc)
+        private void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp, Protocol protocol)
         {
             foreach (ConfigMolecularPopulation cmp in configComp.molpops)
             {
@@ -142,9 +142,9 @@ namespace Daphne
                     // find the box associated with this gaussian
                     int box_id = -1;
 
-                    for (int j = 0; j < sc.scenario.box_specifications.Count; j++)
+                    for (int j = 0; j < protocol.scenario.box_specifications.Count; j++)
                     {
-                        if (sc.scenario.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
+                        if (protocol.scenario.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
                         {
                             box_id = j;
                             break;
@@ -157,7 +157,7 @@ namespace Daphne
                         return;
                     }
 
-                    BoxSpecification box = sc.scenario.box_specifications[box_id];
+                    BoxSpecification box = protocol.scenario.box_specifications[box_id];
 
                     double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
 
@@ -231,16 +231,16 @@ namespace Daphne
                     switch (mpl.dim)
                     {
                         case 0:
-                            x2 = sc.scenario.environment.extent_x;
+                            x2 = protocol.scenario.environment.extent_x;
                             break;
                         case 1:
-                            x2 = sc.scenario.environment.extent_y;
+                            x2 = protocol.scenario.environment.extent_y;
                             break;
                         case 2:
-                            x2 = sc.scenario.environment.extent_z;
+                            x2 = protocol.scenario.environment.extent_z;
                             break;
                         default:
-                            x2 = sc.scenario.environment.extent_x; 
+                            x2 = protocol.scenario.environment.extent_x; 
                             break;
                     }
                          
@@ -273,7 +273,7 @@ namespace Daphne
             //}
 
             // NOTES: 
-            // ConfigCreator.PredefinedReactionsCreator() and SimConfigToolWindow.btnSave_Click() 
+            // ConfigCreator.PredefinedReactionsCreator() and ProtocolToolWindow.btnSave_Click() 
             // add bulk molecules then boundary molecules to the reactant, product, and modifier lists.
             // 
             // When comp is ECS then ECS boundary reactions may not apply to some cell types. 
@@ -444,15 +444,15 @@ namespace Daphne
 
         }
 
-        public void Load(SimConfiguration sc, bool completeReset, bool is_reaction_complex = false)
+        public void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
         {
-            Scenario scenario = sc.scenario;
+            Scenario scenario = protocol.scenario;
 
-            SimConfigHandle = sc;
+            ProtocolHandle = protocol;
 
             if (is_reaction_complex == true)
             {
-                scenario = sc.rc_scenario;
+                scenario = protocol.rc_scenario;
             }
 
             duration = scenario.time_config.duration;
@@ -481,7 +481,7 @@ namespace Daphne
             dataBasket.Clear();
 
             // molecules
-            foreach (ConfigMolecule cm in sc.entity_repository.molecules)
+            foreach (ConfigMolecule cm in protocol.entity_repository.molecules)
             {
                 Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cm.Name),
                                                                      new ConstructorArgument("mw", cm.MolecularWeight),
@@ -492,7 +492,7 @@ namespace Daphne
             }
 
             // genes
-            foreach (ConfigGene cg in sc.entity_repository.genes)
+            foreach (ConfigGene cg in protocol.entity_repository.genes)
             {
                 Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
                                              new ConstructorArgument("copyNumber", cg.CopyNumber),
@@ -505,9 +505,9 @@ namespace Daphne
             // set up the collision manager
             MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
             
-            box[0] = sc.scenario.environment.extent_x;
-            box[1] = sc.scenario.environment.extent_y;
-            box[2] = sc.scenario.environment.extent_z;
+            box[0] = protocol.scenario.environment.extent_x;
+            box[1] = protocol.scenario.environment.extent_y;
+            box[2] = protocol.scenario.environment.extent_z;
             collisionManager = SimulationModule.kernel.Get<CollisionManager>(new ConstructorArgument("gridSize", box), new ConstructorArgument("gridStep", 2 * Cell.defaultRadius));
 
             // cells
@@ -530,17 +530,17 @@ namespace Daphne
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
 
-                configComp[0] = sc.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-                configComp[1] = sc.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+                configComp[0] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
+                configComp[1] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
 
-                bulk_reacs[0] = sc.GetReactions(configComp[0], false);
-                bulk_reacs[1] = sc.GetReactions(configComp[1], false);
-                boundary_reacs = sc.GetReactions(configComp[0], true);
-                transcription_reacs = sc.GetTranscriptionReactions(configComp[0]);
+                bulk_reacs[0] = protocol.GetReactions(configComp[0], false);
+                bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
+                boundary_reacs = protocol.GetReactions(configComp[0], true);
+                transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", sc.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
 
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
@@ -565,13 +565,13 @@ namespace Daphne
                             mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
                             cmp.mpInfo.mp_distribution = mp_explicit;            
                         }
-                        addCompartmentMolpops(simComp[comp], configComp[comp], sc);
+                        addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
                     }
 
                     // cell genes
-                    foreach (string s in sc.entity_repository.cells_dict[cp.cell_guid_ref].genes_guid_ref)
+                    foreach (string s in protocol.entity_repository.cells_dict[cp.cell_guid_ref].genes_guid_ref)
                     {
-                        ConfigGene cg = sc.entity_repository.genes_dict[s];
+                        ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
                         Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
                                                      new ConstructorArgument("copyNumber", cg.CopyNumber),
@@ -580,20 +580,20 @@ namespace Daphne
                     }
 
                     //CELL REACTIONS
-                    AddCompartmentBulkReactions(cell.Cytosol, sc.entity_repository, bulk_reacs[0]);
-                    AddCompartmentBulkReactions(cell.PlasmaMembrane, sc.entity_repository, bulk_reacs[1]);
+                    AddCompartmentBulkReactions(cell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
+                    AddCompartmentBulkReactions(cell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
                     // membrane; no boundary
-                    AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, sc.entity_repository, boundary_reacs);
-                    AddCellTranscriptionReactions(cell, sc.entity_repository, transcription_reacs);
+                    AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
+                    AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
                     
                     // locomotion
-                    if (cell.Cytosol.Populations.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref) == true)
+                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref) == true)
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[sc.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
+                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
 
-                        cell.Locomotor = new Locomotor(driver, sc.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
+                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
                         cell.IsMotile = true;
-                        cell.DragCoefficient = sc.entity_repository.cells_dict[cp.cell_guid_ref].DragCoefficient;
+                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.cell_guid_ref].DragCoefficient;
                     }
                     else
                     {
@@ -612,9 +612,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 #else
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver != null)
                     {
-                        ConfigTransitionDriver config_td = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
@@ -644,9 +644,9 @@ namespace Daphne
                         }
                     }
 #else
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
+                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
                     {
-                        ConfigDiffScheme config_diffScheme = sc.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
+                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
@@ -679,9 +679,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 #else
-                    if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver != null)
                     {
-                        ConfigTransitionDriver config_td = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
@@ -692,7 +692,7 @@ namespace Daphne
             }
 
             // ADD ECS MOLECULAR POPULATIONS
-            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, sc);
+            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, protocol);
             // NOTE: This boolean isn't used anywhere. Do we envision a need for it?
             // Default: set diffusing
             foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
@@ -729,17 +729,17 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = sc.GetReactions(scenario.environment.ecs, false);
-            AddCompartmentBulkReactions(dataBasket.ECS.Space, sc.entity_repository,reacs);
-            reacs = sc.GetReactions(scenario.environment.ecs, true);
+            reacs = protocol.GetReactions(scenario.environment.ecs, false);
+            AddCompartmentBulkReactions(dataBasket.ECS.Space, protocol.entity_repository,reacs);
+            reacs = protocol.GetReactions(scenario.environment.ecs, true);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                AddCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, sc.entity_repository, reacs);
+                AddCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs);
             }
 
             // general parameters
-            Pair.Phi1 = sc.sim_params.phi1;
-            Pair.Phi2 = sc.sim_params.phi2;
+            Pair.Phi1 = protocol.sim_params.phi1;
+            Pair.Phi2 = protocol.sim_params.phi2;
         }
 
         public void LoadTransitionDriverElements(ConfigTransitionDriver config_td, Dictionary<string,MolecularPopulation> population, ITransitionDriver behavior)

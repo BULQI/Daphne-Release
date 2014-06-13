@@ -293,24 +293,24 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            CellPopulation cp = Simulation.SimConfigHandle.scenario.GetCellPopulation(daughter.Population_id);
+            CellPopulation cp = Simulation.ProtocolHandle.scenario.GetCellPopulation(daughter.Population_id);
 
-            configComp[0] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-            configComp[1] = Simulation.SimConfigHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+            configComp[0] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
+            configComp[1] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
 
-            bulk_reacs[0] = Simulation.SimConfigHandle.GetReactions(configComp[0], false);
-            bulk_reacs[1] = Simulation.SimConfigHandle.GetReactions(configComp[1], false);
-            boundary_reacs = Simulation.SimConfigHandle.GetReactions(configComp[0], true);
-            transcription_reacs = Simulation.SimConfigHandle.GetTranscriptionReactions(configComp[0]);
+            bulk_reacs[0] = Simulation.ProtocolHandle.GetReactions(configComp[0], false);
+            bulk_reacs[1] = Simulation.ProtocolHandle.GetReactions(configComp[1], false);
+            boundary_reacs = Simulation.ProtocolHandle.GetReactions(configComp[0], true);
+            transcription_reacs = Simulation.ProtocolHandle.GetTranscriptionReactions(configComp[0]);
 
             // cytosol bulk reactions
-            Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.SimConfigHandle.entity_repository, bulk_reacs[0]);
+            Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.ProtocolHandle.entity_repository, bulk_reacs[0]);
             // membrane bulk reactions
-            Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, bulk_reacs[1]);
+            Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.ProtocolHandle.entity_repository, bulk_reacs[1]);
             // boundary reactions
-            Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.SimConfigHandle.entity_repository, boundary_reacs);
+            Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.ProtocolHandle.entity_repository, boundary_reacs);
             // transcription reactions
-            Simulation.AddCellTranscriptionReactions(daughter, Simulation.SimConfigHandle.entity_repository, transcription_reacs);
+            Simulation.AddCellTranscriptionReactions(daughter, Simulation.ProtocolHandle.entity_repository, transcription_reacs);
 
             // behaviors
 

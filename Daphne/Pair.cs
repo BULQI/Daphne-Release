@@ -442,7 +442,7 @@ namespace Daphne
                             if(Properties.Settings.Default.writeCellsummaries==true)
                                 Simulation.synapseSummary.WriteLine("Synapse formation, BCell {0} FDC {1}", B().CellIndex, FDC().CellIndex);
 #endif
-                            MainWindow.Sim.Dw.addSynapse(MainWindow.SC.SimConfig.experiment_db_id, B().CellIndex, -1, FDC().CellIndex,-0.1);
+                            MainWindow.Sim.Dw.addSynapse(MainWindow.SOP.Protocol.experiment_db_id, B().CellIndex, -1, FDC().CellIndex,-0.1);
                         }
                     }
                 }
@@ -464,7 +464,7 @@ namespace Daphne
                         if(Properties.Settings.Default.writeCellsummaries==true)
                             Simulation.synapseSummary.WriteLine("Synapse end, BCell {0} FDC {1}, age {2}", B().CellIndex, FDC().CellIndex, synapse.Age);
 #endif
-                        MainWindow.Sim.Dw.addSynapse(MainWindow.SC.SimConfig.experiment_db_id, B().CellIndex, -1, FDC().CellIndex, synapse.Age );
+                        MainWindow.Sim.Dw.addSynapse(MainWindow.SOP.Protocol.experiment_db_id, B().CellIndex, -1, FDC().CellIndex, synapse.Age );
                     }
                     synapse = null;
                     FDC().AvailableArea += FDC().SynapseArea;
@@ -568,7 +568,7 @@ namespace Daphne
                         if(Properties.Settings.Default.writeCellsummaries==true)
                             Simulation.synapseSummary.WriteLine("TCentrocyte Synapse formation, BCell {0} TCell {1}", B().CellIndex, T().CellIndex);
 #endif
-                        MainWindow.Sim.Dw.addSynapse(MainWindow.SC.SimConfig.experiment_db_id, B().CellIndex, T().CellIndex , -1, -0.1);
+                        MainWindow.Sim.Dw.addSynapse(MainWindow.SOP.Protocol.experiment_db_id, B().CellIndex, T().CellIndex , -1, -0.1);
                     }
                 }
 
@@ -612,7 +612,7 @@ namespace Daphne
                         if(Properties.Settings.Default.writeCellsummaries==true)
                             Simulation.synapseSummary.WriteLine("TB Synapse end, BCell {0} TCell {1}, age {2}", B().CellIndex, T().CellIndex, synapse.Age);
 #endif
-                        MainWindow.Sim.Dw.addSynapse(MainWindow.SC.SimConfig.experiment_db_id, B().CellIndex, T().CellIndex,-1,  synapse.Age);
+                        MainWindow.Sim.Dw.addSynapse(MainWindow.SOP.Protocol.experiment_db_id, B().CellIndex, T().CellIndex,-1,  synapse.Age);
                     }
                     synapse = null;
                 }
