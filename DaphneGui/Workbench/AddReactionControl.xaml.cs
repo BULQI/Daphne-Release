@@ -307,6 +307,7 @@ namespace DaphneGui
             //THIS CODE PARSES REACTION INPUT BY USER
             //LEFT SIDE
             string phrase = txtReac.Text;
+            phrase = phrase.Replace(" ", "");
 
             if (phrase.Contains("-"))
             {
@@ -329,6 +330,7 @@ namespace DaphneGui
 
             //RIGHT SIDE
             phrase = txtProd.Text;
+            phrase = phrase.Replace(" ", "");
 
             if (phrase.Contains("-"))
             {

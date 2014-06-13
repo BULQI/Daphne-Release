@@ -56,8 +56,16 @@ namespace DaphneGui
             CellPopulation cs = new CellPopulation();
 
             // Default cell type and name to first entry in the cell repository
-            cs.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells[0].entity_guid;
-            cs.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells[0].CellName;
+            if (MainWindow.SOP.Protocol.entity_repository.cells.Count > 0)
+            {
+                cs.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
+                cs.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
+            }
+            else
+            {
+                MessageBox.Show("Please create a cell type first.");
+                return;
+            }
 
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
@@ -84,7 +92,17 @@ namespace DaphneGui
             res = MessageBox.Show("Are you sure you would like to remove this cell population?", "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
-                       
+
+            //Remove gaussian spec if any
+            if (current_item.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+            {
+                DeleteGaussianSpecification(current_item.cellPopDist);
+                CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
+                cpg.gauss_spec_guid_ref = "";
+            }
+            MainWindow.GC.Rwc.Invalidate();
+
+            //Remove the cell population
             MainWindow.SOP.Protocol.scenario.cellpopulations.Remove(current_item);
 
             CellPopsListBox.SelectedIndex = index;
@@ -97,7 +115,7 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification(MolPopGaussian mpg)
+        private void AddGaussianSpecification(MolPopGaussian mpg, MolPopInfo mp_info)
         {
             BoxSpecification box = new BoxSpecification();
             box.x_trans = 100;
@@ -113,7 +131,7 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            gg.gaussian_spec_color = mp_info.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
@@ -134,6 +152,9 @@ namespace DaphneGui
         {
             MolPopGaussian mpg = dist as MolPopGaussian;
             string guid = mpg.gaussgrad_gauss_spec_guid_ref;
+
+            if (guid == "")
+                return;
 
             if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
@@ -168,7 +189,7 @@ namespace DaphneGui
         {
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "";
-            gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
@@ -186,8 +207,14 @@ namespace DaphneGui
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
         {
+            if (dist.DistType != CellPopDistributionType.Gaussian)
+                return;
+
             CellPopGaussian cpg = dist as CellPopGaussian;
             string guid = cpg.gauss_spec_guid_ref;
+
+            if (guid == "")
+                return;
 
             if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
             {
@@ -272,7 +299,7 @@ namespace DaphneGui
                     case MolPopDistributionType.Gaussian:
                         MolPopGaussian mpg = new MolPopGaussian();
 
-                        AddGaussianSpecification(mpg);
+                        AddGaussianSpecification(mpg, current_item);
                         current_item.mp_distribution = mpg;
 
                         break;
@@ -512,8 +539,8 @@ namespace DaphneGui
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
 
-            gmp.molecule_guid_ref = MainWindow.SOP.Protocol.entity_repository.molecules[0].entity_guid;
-            gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules[0].Name;
+            gmp.molecule_guid_ref = MainWindow.SOP.Protocol.entity_repository.molecules.First().entity_guid;
+            gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
             gmp.mpInfo = new MolPopInfo("");
             gmp.mpInfo.mp_dist_name = "New distribution";
             gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
@@ -538,6 +565,17 @@ namespace DaphneGui
                         MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
                     }
                 }
+
+                //Delete the gaussian box if any
+                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    DeleteGaussianSpecification(cmp.mpInfo.mp_distribution);
+                    MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
+                    mpg.gaussgrad_gauss_spec_guid_ref = "";
+                    MainWindow.GC.Rwc.Invalidate();
+                }
+
+                //Delete the molecular population
                 MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
@@ -1521,6 +1559,8 @@ namespace DaphneGui
                 ////Add this after 2/4/14
                 ////gg.DrawAsWireframe = true;
 
+                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
@@ -2181,7 +2221,7 @@ namespace DaphneGui
             }
         }
 
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
 
@@ -2189,6 +2229,13 @@ namespace DaphneGui
                 return;
 
             cm.ValidateName(MainWindow.SOP.Protocol);
+
+            int index = dgLibMolecules.SelectedIndex;
+            dgLibMolecules.InvalidateVisual();
+            dgLibMolecules.Items.Refresh();
+            dgLibMolecules.SelectedIndex = index;
+            cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+            dgLibMolecules.ScrollIntoView(cm);
         }
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3448,7 +3495,7 @@ namespace DaphneGui
 
             int row = DiffRegGrid.SelectedIndex;
 
-            DataGridCellInfo selected = DiffRegGrid.SelectedCells[0];
+            DataGridCellInfo selected = DiffRegGrid.SelectedCells.First();
             DataGridColumn col = selected.Column;
         }
 
@@ -3768,6 +3815,80 @@ namespace DaphneGui
             //delete driver
             cell.div_driver = null;
         }
+
+        private void GeneTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigGene gene = dgLibGenes.SelectedItem as ConfigGene;
+
+            if (gene == null)
+                return;
+
+            int index = dgLibGenes.SelectedIndex;
+
+            gene.ValidateName(MainWindow.SOP.Protocol);
+
+            dgLibGenes.InvalidateVisual();
+            
+            dgLibGenes.Items.Refresh();
+            dgLibGenes.SelectedIndex = index;
+            gene = (ConfigGene)dgLibGenes.SelectedItem;
+            dgLibGenes.ScrollIntoView(gene);
+
+        }
+
+        private void CellTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
+
+            if (cell == null)
+                return;
+
+            cell.ValidateName(MainWindow.SOP.Protocol);
+        }
+
+        private void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+
+            if (mol_pop == null)
+                return;
+
+            if (mol_pop.mpInfo.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
+                return;
+
+            MolPopGaussian mpg = mol_pop.mpInfo.mp_distribution as MolPopGaussian;
+
+            string gauss_guid = mpg.gaussgrad_gauss_spec_guid_ref;
+
+            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
+            {
+                GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[gauss_guid];
+                gs.gaussian_spec_color = mol_pop.mpInfo.mp_color;
+            }
+        }
+
+        private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellPop == null)
+                return;
+
+            CellPopDistribution current_dist = cellPop.cellPopDist;
+
+            if (current_dist.DistType != CellPopDistributionType.Gaussian)
+                return;
+
+            string gauss_guid = ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec_guid_ref;
+
+            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
+            {
+                GaussianSpecification gg = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[gauss_guid];
+                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+            }
+
+        }
+
     }    
 
     public class DataGridBehavior
