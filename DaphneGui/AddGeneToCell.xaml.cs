@@ -26,8 +26,8 @@ namespace DaphneGui
         public AddGeneToCell(ConfigCell cell)
         {
             InitializeComponent();
-            er = MainWindow.SC.SimConfig.entity_repository;
-            //SimConfig = sc;
+            er = MainWindow.SOP.Protocol.entity_repository;
+            //Protocol = sc;
             SelectedCell = cell;
             DataContext = this;
 

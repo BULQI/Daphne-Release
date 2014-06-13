@@ -222,7 +222,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 RC.UpdateRateConstants();
-                RC.Sim.Load(MainWindow.SC.SimConfig, true, true);
+                RC.Sim.Load(MainWindow.SOP.Protocol, true, true);
                 cm.RedrawSeries();
                 cm.RecalculateYMax();
             }

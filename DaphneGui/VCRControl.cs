@@ -73,7 +73,7 @@ namespace DaphneGui
         public bool OpenVCR(bool lastFrame, int expID = -1)
         {
 #if ALL_VCR
-            reader = new DataReader(expID < 0 ? MainWindow.SC.SimConfig.experiment_db_id : expID);
+            reader = new DataReader(expID < 0 ? MainWindow.SOP.Protocol.experiment_db_id : expID);
 
             if (reader.TimeVals.Count == 0)
             {

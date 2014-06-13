@@ -7,9 +7,9 @@ namespace DaphneGui
 {
 
     /// <summary>
-    /// Interaction logic for SimConfigToolWindow.xaml
+    /// Interaction logic for ProtocolToolWindow.xaml
     /// </summary>
-    public partial class SimConfigToolWindow : ToolWindow
+    public partial class ProtocolToolWindow : ToolWindow
     {
         private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
@@ -148,7 +148,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -205,7 +205,7 @@ namespace DaphneGui
             ObservableCollection<string> membBound = new ObservableCollection<string>();
             ObservableCollection<string> gene_guids = new ObservableCollection<string>();
             ObservableCollection<string> bulk = new ObservableCollection<string>();
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             foreach (string molguid in cr.reactants_molecule_guid_ref)
                 if (er.molecules_dict.ContainsKey(molguid) && er.molecules_dict[molguid].molecule_location == MoleculeLocation.Boundary)
@@ -289,7 +289,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SC.SimConfig.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
                 {
                     e.Accepted = true;
                 }
@@ -328,7 +328,7 @@ namespace DaphneGui
 
             if (guidRC != null && cr != null)
             {
-                ConfigReactionComplex crc = MainWindow.SC.SimConfig.entity_repository.reaction_complexes_dict[guidRC];
+                ConfigReactionComplex crc = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[guidRC];
                 e.Accepted = false;
                 // Filter out cr if not in ecm reaction list 
                 if (crc.reactions_guid_ref.Contains(cr.entity_guid))

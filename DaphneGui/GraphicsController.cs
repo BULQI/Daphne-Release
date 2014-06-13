@@ -1481,72 +1481,72 @@ namespace DaphneGui
                         if (s[0] < 0 && s[1] < 0 && s[2] < 0)
                         {
                             // restore the box matrix; the latter is known to be good
-                            rw.SetTransform(MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].transform_matrix, RegionControl.PARAM_SCALE);
+                            rw.SetTransform(MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].transform_matrix, RegionControl.PARAM_SCALE);
                             // transfer transform to VTKDataBasket
                             MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
 
                         // translation
-                        if (t[0] < MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_trans_min)
+                        if (t[0] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_min)
                         {
-                            t[0] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_trans_min;
+                            t[0] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_min;
                             changed = true;
                         }
-                        if (t[0] > MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_trans_max)
+                        if (t[0] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_max)
                         {
-                            t[0] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_trans_max;
+                            t[0] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_max;
                             changed = true;
                         }
-                        if (t[1] < MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_trans_min)
+                        if (t[1] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_min)
                         {
-                            t[1] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_trans_min;
+                            t[1] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_min;
                             changed = true;
                         }
-                        if (t[1] > MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_trans_max)
+                        if (t[1] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_max)
                         {
-                            t[1] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_trans_max;
+                            t[1] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_max;
                             changed = true;
                         }
-                        if (t[2] < MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_trans_min)
+                        if (t[2] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_min)
                         {
-                            t[2] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_trans_min;
+                            t[2] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_min;
                             changed = true;
                         }
-                        if (t[2] > MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_trans_max)
+                        if (t[2] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_max)
                         {
-                            t[2] = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_trans_max;
+                            t[2] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_max;
                             changed = true;
                         }
                         // scale
-                        if (s[0] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_scale_min)
+                        if (s[0] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_min)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_scale_min;
+                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_min;
                             changed = true;
                         }
-                        if (s[0] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_scale_max)
+                        if (s[0] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_max)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].x_scale_max;
+                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_max;
                             changed = true;
                         }
-                        if (s[1] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_scale_min)
+                        if (s[1] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_min)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_scale_min;
+                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_min;
                             changed = true;
                         }
-                        if (s[1] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_scale_max)
+                        if (s[1] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_max)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].y_scale_max;
+                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_max;
                             changed = true;
                         }
-                        if (s[2] < RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_scale_min)
+                        if (s[2] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_min)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_scale_min;
+                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_min;
                             changed = true;
                         }
-                        if (s[2] > RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_scale_max)
+                        if (s[2] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_max)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key].z_scale_max;
+                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_max;
                             changed = true;
                         }
 
@@ -1555,7 +1555,7 @@ namespace DaphneGui
                         {
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
-                        WidgetTransformToBoxMatrix(rw, MainWindow.SC.SimConfig.scenario.box_guid_box_dict[key]);
+                        WidgetTransformToBoxMatrix(rw, MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key]);
                         // Transfer transform to VTKDataBasket
                         MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
                     }
@@ -1617,7 +1617,7 @@ namespace DaphneGui
                                     if (MainWindow.CheckControlFlag(MainWindow.CONTROL_NEW_RUN) == true)
                                     {
                                         MainWindow.SetControlFlag(MainWindow.CONTROL_NEW_RUN, false);
-                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SC.SimConfig.experiment_db_id);
+                                        MainWindow.Basket.ConnectToExperiment(MainWindow.SOP.Protocol.experiment_db_id);
                                     }
 
                                     // allow for the quick preview
@@ -1888,7 +1888,7 @@ namespace DaphneGui
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[box_guid];
 
             RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid, gs);
 
@@ -1920,7 +1920,7 @@ namespace DaphneGui
         public void CreateRegionWidgets()
         {
             // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.scenario.gaussian_specifications)
+            foreach (GaussianSpecification gs in MainWindow.SOP.Protocol.scenario.gaussian_specifications)
             {
                 AddGaussSpecRegionWidget(gs);
             }
@@ -2006,10 +2006,10 @@ namespace DaphneGui
             // progress string bottom left
             if (cornerAnnotation != null && cornerAnnotation.Prop != null)
             {
-                if (MainWindow.SC.SimConfig.experiment_reps > 1)
+                if (MainWindow.SOP.Protocol.experiment_reps > 1)
                 {
                     int rep = MainWindow.Repetition;
-                    int reps = MainWindow.SC.SimConfig.experiment_reps;
+                    int reps = MainWindow.SOP.Protocol.experiment_reps;
                     ((vtkCornerAnnotation)cornerAnnotation.Prop).SetText(0, "Rep: " + rep + "/" + reps + " Progress: " + progress + "%");
                 }
                 else

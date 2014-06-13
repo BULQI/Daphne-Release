@@ -300,17 +300,17 @@ namespace DaphneGui
             }
             else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                double x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
+                double x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
                 switch (((MolPopLinear)(molpop.mpInfo.mp_distribution)).dim)
                 {
                     case 0:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
                         break;
                     case 1:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_y;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_y;
                         break;
                     case 2:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_z;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_z;
                         break;
                     default:
                         break;
@@ -1114,7 +1114,7 @@ namespace DaphneGui
 #endif
         }
 
-        public void SetupVTKData(SimConfiguration sc)
+        public void SetupVTKData(Protocol protocol)
         {
             double useThisZValue,
                    gridStep = Cell.defaultRadius * 2;
@@ -1125,29 +1125,29 @@ namespace DaphneGui
             MainWindow.Basket.ResetTrackData();
 #endif
 
-            if (sc.scenario.environment.extent_z < gridStep)
+            if (protocol.scenario.environment.extent_z < gridStep)
             {
                 useThisZValue = gridStep;
             }
             else
             {
-                useThisZValue = sc.scenario.environment.extent_z;
+                useThisZValue = protocol.scenario.environment.extent_z;
             }
-            environmentDataController.setupBox(sc.scenario.environment.extent_x, sc.scenario.environment.extent_y, useThisZValue);
+            environmentDataController.setupBox(protocol.scenario.environment.extent_x, protocol.scenario.environment.extent_y, useThisZValue);
 
-            cellDataController.CreateCellColorTable(sc.scenario.cellpopulations.Count);
-            for (int i = 0; i < sc.scenario.cellpopulations.Count; i++)
+            cellDataController.CreateCellColorTable(protocol.scenario.cellpopulations.Count);
+            for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
             {
                 // add the cell set's color to the color table
                 cellDataController.AddCellSetColor(i,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScR,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScG,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScB,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScA);
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScR,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScG,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScB,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScA);
                 // create the color map entry
-                if (cellDataController.ColorMap.ContainsKey(sc.scenario.cellpopulations[i].cellpopulation_id) == false)
+                if (cellDataController.ColorMap.ContainsKey(protocol.scenario.cellpopulations[i].cellpopulation_id) == false)
                 {
-                    cellDataController.ColorMap.Add(sc.scenario.cellpopulations[i].cellpopulation_id, i);
+                    cellDataController.ColorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, i);
                 }
             }
             CreateAllocatedCells();
@@ -1159,20 +1159,20 @@ namespace DaphneGui
             // set up the 3d image grid for the ecs
             ecsDataController.setupGradient3D();
 
-            for (int i = 0; i < sc.scenario.environment.ecs.molpops.Count; i++)
+            for (int i = 0; i < protocol.scenario.environment.ecs.molpops.Count; i++)
             {
                 RegionControl region = null;
 
-                if (sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (protocol.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    region = regions[((MolPopGaussian)sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref];
+                    region = regions[((MolPopGaussian)protocol.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref];
                 }
 
                 // 3D gradient
-                ecsDataController.addGradient3D(sc.scenario.environment.ecs.molpops[i], region);
+                ecsDataController.addGradient3D(protocol.scenario.environment.ecs.molpops[i], region);
 
                 // finish 3d gradient-related graphics after processing the last molpop
-                if (i == sc.scenario.environment.ecs.molpops.Count - 1)
+                if (i == protocol.scenario.environment.ecs.molpops.Count - 1)
                 {
                     // update all gradients; do not cause a redraw
                     ecsDataController.updateGradients3D(true, false);
@@ -1219,16 +1219,16 @@ namespace DaphneGui
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[box_guid];
 
             RegionControl rc = new RegionControl(RegionShape.Ellipsoid);
 
             // box transform
             rc.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
             // outer bounds of environment (not really needed for gauss_spec)
-            rc.SetExteriorBounds(new double[] { 0, MainWindow.SC.SimConfig.scenario.environment.extent_x,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_y,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_z });
+            rc.SetExteriorBounds(new double[] { 0, MainWindow.SOP.Protocol.scenario.environment.extent_x,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_y,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_z });
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
@@ -1239,16 +1239,16 @@ namespace DaphneGui
         {
             string box_guid = rr.region_box_spec_guid_ref;
             // Find the box spec that goes with this region
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SOP.Protocol.box_guid_box_dict[box_guid];
 
             RegionControl rc = new RegionControl(rr.region_type);
 
             // box transform
             rc.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
             // outer bounds of environment
-            rc.SetExteriorBounds(new double[] { 0, MainWindow.SC.SimConfig.scenario.environment.extent_x,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_y,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_z });
+            rc.SetExteriorBounds(new double[] { 0, MainWindow.SOP.Protocol.scenario.environment.extent_x,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_y,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_z });
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
@@ -1258,13 +1258,13 @@ namespace DaphneGui
         public void CreateRegionControls()
         {
             // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.scenario.gaussian_specifications)
+            foreach (GaussianSpecification gs in MainWindow.SOP.Protocol.scenario.gaussian_specifications)
             {
                 AddGaussSpecRegionControl(gs);
             }
 #if ALL_VTK
             // Regions
-            foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
+            foreach (Region rr in MainWindow.SOP.Protocol.scenario.regions)
             {
                 AddRegionRegionControl(rr);
             }
@@ -1288,7 +1288,7 @@ namespace DaphneGui
                 {
 #if ALL_VTK
                     // NOTE: For now take the receptor info from an example cell. Should probably use the Chemokine
-                    // or, like in the chemokine construction, go through the simconfig molpops to see which solfac types are
+                    // or, like in the chemokine construction, go through the Protocol molpops to see which solfac types are
                     // actually used, and then get receptor guid/name pairs from molpop types...
                     MotileCell example_cell = null;
                     int jj = 0;
@@ -1310,7 +1310,7 @@ namespace DaphneGui
                     foreach (KeyValuePair<string, ChemokineReceptor> kvp in example_cell.ChemokineReceptors)
                     {
                         string receptor_name = "xx";
-                        foreach (SolfacType st in MainWindow.SC.SimConfig.entity_repository.solfac_types)
+                        foreach (SolfacType st in MainWindow.SOP.Protocol.entity_repository.solfac_types)
                         {
                             if (st.solfac_type_guid == kvp.Key)
                             {
@@ -1329,7 +1329,7 @@ namespace DaphneGui
                         jj += 1;
                     }
                     // Loop through cell types, and then through receptor params for each type to find max receptor conc over all cell types
-                    foreach (CellSubset ct in MainWindow.SC.SimConfig.entity_repository.cell_subsets)
+                    foreach (CellSubset ct in MainWindow.SOP.Protocol.entity_repository.cell_subsets)
                     {
                         //skg 6/1/12
                         if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.BCell)

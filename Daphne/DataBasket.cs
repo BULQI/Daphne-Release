@@ -201,7 +201,7 @@ namespace Daphne
         /// <param name="expID">experiment id</param>
         public bool ConnectToExperiment(int expID = -1)
         {
-            int ID = expID < 0 ? MainWindow.SC.SimConfig.experiment_db_id : expID;
+            int ID = expID < 0 ? MainWindow.SOP.Protocol.experiment_db_id : expID;
 
             // First, check whether already connected to correct experiment
             if (dr != null)
@@ -545,11 +545,11 @@ namespace Daphne
                             int cellSetID = MainWindow.VTKBasket.CellController.ColorMap[(int)dr.Cells[kvpc.Value.cell_id]["CellSetId"]];
 
                             // find cell type
-                            for (int j = 0; j < MainWindow.SC.SimConfig.entity_repository.cell_subsets.Count; j++)
+                            for (int j = 0; j < MainWindow.SOP.Protocol.entity_repository.cell_subsets.Count; j++)
                             {
-                                if (MainWindow.SC.SimConfig.entity_repository.cell_subsets[j].cell_subset_guid.CompareTo(MainWindow.SC.SimConfig.scenario.cellpopulations[cellSetID].cell_subset_guid_ref) == 0)
+                                if (MainWindow.SOP.Protocol.entity_repository.cell_subsets[j].cell_subset_guid.CompareTo(MainWindow.SOP.Protocol.scenario.cellpopulations[cellSetID].cell_subset_guid_ref) == 0)
                                 {
-                                    ct = MainWindow.SC.SimConfig.entity_repository.cell_subsets[j];
+                                    ct = MainWindow.SOP.Protocol.entity_repository.cell_subsets[j];
                                     break;
                                 }
                             }
@@ -557,16 +557,16 @@ namespace Daphne
                             // cell type not found, don't create this cell
                             if (ct == null)
                             {
-                                System.Windows.MessageBox.Show("Cell set '" + MainWindow.SC.SimConfig.scenario.cellpopulations[kvpc.Value.cell_id].cellpopulation_name +
+                                System.Windows.MessageBox.Show("Cell set '" + MainWindow.SOP.Protocol.scenario.cellpopulations[kvpc.Value.cell_id].cellpopulation_name +
                                                                "' could not be extracted from the repository!");
                                 continue;
                             }
 
                             int loco_idx = -1;
 
-                            for (int j = 0; j < MainWindow.SC.SimConfig.global_parameters.Count && loco_idx == -1; j++)
+                            for (int j = 0; j < MainWindow.SOP.Protocol.global_parameters.Count && loco_idx == -1; j++)
                             {
-                                if (MainWindow.SC.SimConfig.global_parameters[j].global_parameter_type == GlobalParameterType.LocomotorParams)
+                                if (MainWindow.SOP.Protocol.global_parameters[j].global_parameter_type == GlobalParameterType.LocomotorParams)
                                 {
                                     loco_idx = j;
                                 }
@@ -596,7 +596,7 @@ namespace Daphne
                             }
                             //end skg
 
-                            cell.LM.SetParametersFromConfigFile((LocomotorParams)MainWindow.SC.SimConfig.global_parameters[loco_idx]);
+                            cell.LM.SetParametersFromConfigFile((LocomotorParams)MainWindow.SOP.Protocol.global_parameters[loco_idx]);
 
                             ObjectLoader.LoadValues(cell, kvpc.Value.state);
                             ObjectLoader.LoadValues(cell, dr.Cells[kvpc.Value.cell_id]);

@@ -81,7 +81,7 @@ namespace DaphneGui
 
         private void Initialize()
         {
-            er = MainWindow.SC.SimConfig.entity_repository;
+            er = MainWindow.SOP.Protocol.entity_repository;
             LeftList.Clear();
             RightList.Clear();
 
