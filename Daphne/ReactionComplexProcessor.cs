@@ -402,7 +402,7 @@ namespace Daphne
         {
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                string guid = grp.Guid;
+                string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.ReactionComplexRate;
             }
@@ -412,7 +412,7 @@ namespace Daphne
         {
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                string guid = grp.Guid;
+                string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.OriginalRate;
                 grp.ReactionComplexRate = grp.OriginalRate;

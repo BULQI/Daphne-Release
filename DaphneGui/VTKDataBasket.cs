@@ -1219,7 +1219,7 @@ namespace DaphneGui
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SC.SimConfig.scenario.box_guid_box_dict[box_guid];
 
             RegionControl rc = new RegionControl(RegionShape.Ellipsoid);
 
@@ -1258,7 +1258,7 @@ namespace DaphneGui
         public void CreateRegionControls()
         {
             // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.entity_repository.gaussian_specifications)
+            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.scenario.gaussian_specifications)
             {
                 AddGaussSpecRegionControl(gs);
             }

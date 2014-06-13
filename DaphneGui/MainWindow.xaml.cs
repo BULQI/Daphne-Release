@@ -55,6 +55,11 @@ namespace DaphneGui
         /// </summary>
         public static string appPath;
 
+        /// <summary>
+        /// Path of the executable file in installation folder
+        /// </summary>
+        public string execPath = string.Empty;
+   
         private DocWindow dw;
         private Thread simThread;
         private VCRControl vcrControl = null;
@@ -358,10 +363,13 @@ namespace DaphneGui
             if (AssumeIDE() == true)
             {
                 appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+
             }
             else
             {
                 appPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + @"\DaphneGui";
+                execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
             }
 
             // handle the application properties
@@ -629,16 +637,290 @@ namespace DaphneGui
             tempFileContent = false;
         }
 
+
         /// <summary>
-        /// Exports a model specification into SBML
+        /// Imports a model specification in SBML
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void exportSBML_Click(object sender, RoutedEventArgs e)
+        private void ImportSBML_Click(object sender, RoutedEventArgs e)
+        {
+            //Check that previous changes are saved before loading new SimConfig
+            if (tempFileContent == true || saveTempFiles() == true)
+            {
+                applyTempFilesAndSave(true);
+            }
+
+            AddlibSBMLEnv();
+            SimConfigurator customSimConfig = new SimConfigurator();
+
+            //Configure open file dialog box
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
+            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
+            else { dlg.InitialDirectory = appPath; }
+
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
+            {
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, customSimConfig);
+                //Extract directory path and file name of the file to be imported
+                customSimConfig = encodedSBML.ReadSBMLFile();
+                if (customSimConfig != null)
+                {
+                    if (customSimConfig.SimConfig.experiment_name.Equals("Experiment1"))
+                    {
+                        LoadCustomReactionComplex(customSimConfig);
+                    }
+                    else
+                    {
+                        LoadCustomSimConfig(customSimConfig);
+                    }
+                }
+                //Obtain filled out configurator and store in tempConfigurator
+                //SBMLToSimConfig();
+            }
+        }
+
+
+        /// <summary>
+        /// Loads the imported reaction complex into the GUI
+        /// </summary>
+        /// <param name="customSimConfig"></param>
+        private void LoadCustomReactionComplex(SimConfigurator customSimConfig)
+        {
+
+            //ReactionComplex that was added
+            ConfigReactionComplex crc = customSimConfig.SimConfig.entity_repository.reaction_complexes.Last();
+
+            //Add reaction complex
+            // prevent when a fit is in progress
+            lock (cellFitLock)
+            {
+                configurator.SimConfig.entity_repository.reaction_complexes.Add(crc);
+            }
+
+            foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
+            {
+                ConfigMolecule configMol = customSimConfig.SimConfig.entity_repository.molecules_dict[configMolPop.molecule_guid_ref];
+                configurator.SimConfig.entity_repository.molecules.Add(configMol);
+                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
+            }
+
+            foreach (ConfigGene configGenePop in crc.genes)
+            {
+                ConfigGene configGen = customSimConfig.SimConfig.entity_repository.genes_dict[configGenePop.entity_guid];
+                configurator.SimConfig.entity_repository.genes.Add(configGen);
+                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
+            }
+
+            //Reactions in the reaction complex
+            ConfigReaction cr;
+            foreach (string rguid in crc.reactions_guid_ref)
+            {
+                cr = customSimConfig.SimConfig.entity_repository.reactions_dict[rguid];
+                int index = customSimConfig.SimConfig.entity_repository.reaction_templates.IndexOf(customSimConfig.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
+                cr.reaction_template_guid_ref = configurator.SimConfig.entity_repository.reaction_templates[index].entity_guid;
+
+                configurator.SimConfig.entity_repository.reactions.Add(cr);
+            }
+
+            SimConfigToolWindow.ConfigTabControl.SelectedItem = SimConfigToolWindow.tabLibraries;
+
+            SimConfigToolWindow.ReacComplexExpander.IsExpanded = true;
+        }
+
+        /// <summary>
+        /// Loads a custom SimConfig object into Daphne
+        /// </summary>
+        /// <param name="tempSimConfig"></param>
+        private void LoadCustomSimConfig(SimConfigurator customSimConfig)
+        {
+            //Use same routines in loading a scenario to populate GUI and simulation
+
+            //Save populatedSimConfig into a temporary json           
+            orig_content = customSimConfig.SerializeSimConfigToStringSkipDeco();
+            //tempFileContent = false;
+
+            //SetPaths
+            customSimConfig.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
+            customSimConfig.TempScenarioFile = orig_path + @"\temp_scenario.json";
+            customSimConfig.TempUserDefFile = orig_path + @"\temp_userdef.json";
+            scenario_path = new Uri(customSimConfig.FileName);
+            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+
+            // prevent when a fit is in progress
+            lock (cellFitLock)
+            {
+                if (vcrControl != null)
+                {
+                    vcrControl.SetInactive();
+                }
+                //initialState   
+                ResetSimConfig(customSimConfig);
+                enableCritical(loadSuccess);
+                if (loadSuccess == false)
+                {
+                    return;
+                }
+
+                // after doing a full reset, don't require one immediately unless we did a db load
+                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
+
+                sim.reset();
+                // reset cell tracks and free memory
+                //////////gc.CleanupTracks();
+                gc.CellController.SetCellOpacities(1.0);
+                fitCellOpacitySlider.Value = 1.0;
+                UpdateGraphics();
+
+                // prevent all fit/analysis-related things
+                hideFit();
+                ExportMenu.IsEnabled = false;
+            }
+
+            if (loadSuccess == false)
+            {
+                return;
+            }
+            SimConfigToolWindow.IsEnabled = true;
+            saveScenario.IsEnabled = true;
+            displayTitle();
+            MainWindow.ST_ReacComplexChartWindow.ClearChart();
+            VTKDisplayDocWindow.Activate();
+            configurator.SerializeSimConfigToFile(false);
+            ////Delete temporary file
+            //File.Delete(customSimConfig.FileName);
+        }
+
+        /// <summary>
+        /// Loads the customSimConfig as the current scenario
+        /// </summary>
+        /// <param name="customSimConfig"></param>
+        private void ResetSimConfig(SimConfigurator customSimConfig)
+        {
+            //Load Custom SimConfig
+            configurator = customSimConfig;
+
+            configurator.SimConfig.InitializeStorageClasses();
+
+            // if we configured a simulation prior to this call, remove all property changed event handlers
+            for (int i = 0; i < configurator.SimConfig.scenario.box_specifications.Count; i++)
+            {
+                configurator.SimConfig.scenario.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
+                configurator.SimConfig.scenario.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
+            }
+            for (int i = 0; i < configurator.SimConfig.scenario.gaussian_specifications.Count; i++)
+            {
+                configurator.SimConfig.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
+                configurator.SimConfig.scenario.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
+            }
+
+            // GUI Resources
+            // Set the data context for the main tab control config GUI
+            this.SimConfigToolWindow.DataContext = configurator.SimConfig;
+
+            // set up the simulation
+            if (postConstruction == true && AssumeIDE() == true)
+            {
+                sim.Load(configurator.SimConfig, true);
+            }
+            else
+            {
+                try
+                {
+                    sim.Load(configurator.SimConfig, true);
+                }
+                catch (Exception e)
+                {
+                    handleLoadFailure(exceptionMessage(e));
+                    return;
+                }
+            }
+
+            // reporter file name
+            reporter.FileName = configurator.SimConfig.reporter_file_name;
+
+            // temporary solution to avoid popup resaving states -axin
+            if (true)
+            {
+                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+            }
+
+            vtkDataBasket.SetupVTKData(configurator.SimConfig);
+            // Create all VTK visualization pipelines and elements
+            gc.CreatePipelines();
+
+            // clear the vcr cache
+            if (vcrControl != null)
+            {
+                vcrControl.ReleaseVCR();
+            }
+
+            if (true)
+            {
+                gc.recenterCamera();
+            }
+            gc.Rwc.Invalidate();
+
+            // TODO: Need to do this for all GCs eventually...
+            // Add the RegionControl interaction event handlers here for easier reference to callback method
+            foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
+            {
+                // NOTE: For now not doing any callbacks on property change for RegionControls...
+                kvp.Value.ClearCallbacks();
+                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
+                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
+            }
+
+            //////////VCR_Toolbar.IsEnabled = false;
+            //////////gc.ToolsToolbar_IsEnabled = true;
+            //////////gc.DisablePickingButtons();
+
+#if LANGEVIN_TIMING
+            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
+#endif
+
+            loadSuccess = true;
+        }
+
+        /// <summary>
+        /// Exports a model specification in SBML
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExportSBML_Click(object sender, RoutedEventArgs e)
         {
             AddlibSBMLEnv();
             SBMLModel encodedSBML = new SBMLModel(appPath, configurator);
-            encodedSBML.ConvertToSBML();
+            encodedSBML.ConvertDaphneToSBML();
+        }
+
+        /// <summary>
+        /// Exports a reaction complex specification in SBML
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void ExportReactionComplexSBML_Click(object sender, RoutedEventArgs e)
+        {
+            AddlibSBMLEnv();
+            SBMLModel encodedSBML = new SBMLModel(appPath, configurator);
+            SimConfigToolWindow.ConfigTabControl.SelectedItem = SimConfigToolWindow.tabLibraries;
+            SimConfigToolWindow.ReacComplexExpander.IsExpanded = true;
+            ConfigReactionComplex crc = SimConfigToolWindow.GetConfigReactionComplex();
+
+            if (crc != null)
+            {
+                encodedSBML.ConvertReactionComplexToSBML(crc);
+            }
         }
 
         /// <summary>
@@ -647,7 +929,17 @@ namespace DaphneGui
         private void AddlibSBMLEnv()
         {
             //Path of the dependencies folder
-            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
+            string dependencies;
+
+            //True means that we are in IDE, false that we have installed Daphne
+            if (execPath.Equals(string.Empty))
+            {
+                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
+            }
+            else
+            {
+                dependencies = new Uri(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).LocalPath;
+            }
             //Adds the dependecies folder to the environment variable PATH stored in the current process
             string newPathEnv = System.Environment.GetEnvironmentVariable("PATH") + ";" + dependencies.Replace(@"/", @"\");
             System.Environment.SetEnvironmentVariable("PATH", newPathEnv);
@@ -708,24 +1000,13 @@ namespace DaphneGui
 
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
-#if CELL_REGIONS
-                // hide the cell regions
-                foreach (Region rr in configurator.SimConfig.scenario.regions)
-                {
-                    // Use the utility dict to find the box associated with this region
-                    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[rr.region_box_spec_guid_ref];
 
-                    // Property changed notifications will take care of turning off the Widgets and Actors
-                    bb.box_visibility = false;
-                    rr.region_visibility = false;
-                }
-#endif
                     // hide the regions used to control Gaussians
-                    foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
+                    foreach (GaussianSpecification gg in configurator.SimConfig.scenario.gaussian_specifications)
                     {
                         // Use the utility dict to find the box associated with this region
-                        BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
-                        
+                        BoxSpecification bb = configurator.SimConfig.scenario.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+
                         // Save current visibility statuses
                         bb.current_box_visibility = bb.box_visibility;
                         bb.current_blob_visibility = gg.gaussian_region_visibility;
@@ -733,7 +1014,7 @@ namespace DaphneGui
                         // Property changed notifications will take care of turning off the Widgets and Actors
                         bb.box_visibility = false;
                         gg.gaussian_region_visibility = false;
-                        
+
                     }
 
                     //// always reset the simulation for now to start at the beginning
@@ -762,7 +1043,7 @@ namespace DaphneGui
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
                     SimConfigToolWindow.Close();
-
+                    ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
                     ExportMenu.IsEnabled = false;
@@ -782,6 +1063,8 @@ namespace DaphneGui
             loadExp.IsEnabled = enable;
             recentFileList.IsEnabled = enable;
             newScenario.IsEnabled = enable;
+            ImportSBML.IsEnabled = enable;
+
         }
 
         /// <summary>
@@ -794,9 +1077,9 @@ namespace DaphneGui
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
+            ImportSBML.IsEnabled = enable;
             abortButton.IsEnabled = false;
         }
-
         /// <summary>
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
@@ -1622,36 +1905,7 @@ namespace DaphneGui
                 MainWindow.GC.Rwc.Invalidate();
             }
         }
-#if CELL_REGIONS
-        public static void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
-        {
-            Region region = (Region)sender;
 
-            if (region == null)
-            {
-                return;
-            }
-
-            if (e.PropertyName == "region_visibility")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, region.region_visibility);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_type")
-            {
-                MainWindow.VTKBasket.Regions[region.region_box_spec_guid_ref].SetShape(region.region_type);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetShape(MainWindow.GC.Rwc.RenderWindow, region.region_type);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_color")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetColor(region.region_color.ScR, region.region_color.ScG, region.region_color.ScB);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetOpacity(region.region_color.ScA);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            return;
-        }
-#endif
         public static void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
         {
             GaussianSpecification gauss = (GaussianSpecification)sender;
@@ -1685,19 +1939,13 @@ namespace DaphneGui
                 {
                     // if we configured a simulation prior to this call, remove all property changed event handlers
 
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+                    for (int i = 0; i < configurator.SimConfig.scenario.box_specifications.Count; i++)
                     {
-                        configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
+                        configurator.SimConfig.scenario.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
                     }
-#if CELL_REGIONS
-                    for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+                    for (int i = 0; i < configurator.SimConfig.scenario.gaussian_specifications.Count; i++)
                     {
-                        configurator.SimConfig.scenario.regions[i].PropertyChanged -= GUIRegionSurfacePropertyChange;
-                    }
-#endif
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-                    {
-                        configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
+                        configurator.SimConfig.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
                     }
                 }
                 // load past experiment
@@ -1740,19 +1988,13 @@ namespace DaphneGui
             }
 
             // (re)connect the handlers for the property changed event
-            for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+            for (int i = 0; i < configurator.SimConfig.scenario.box_specifications.Count; i++)
             {
-                configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
+                configurator.SimConfig.scenario.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
             }
-#if CELL_REGIONS
-            for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+            for (int i = 0; i < configurator.SimConfig.scenario.gaussian_specifications.Count; i++)
             {
-                configurator.SimConfig.scenario.regions[i].PropertyChanged += GUIRegionSurfacePropertyChange;
-            }
-#endif
-            for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-            {
-                configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
+                configurator.SimConfig.scenario.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
             }
 
             // GUI Resources
@@ -2046,8 +2288,8 @@ namespace DaphneGui
                 if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussian mpg = molpop.mpInfo.mp_distribution as MolPopGaussian;
-                    SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
-                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
+                    SC.SimConfig.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SC.SimConfig.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
+                    SC.SimConfig.scenario.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
                 }
             }
             foreach (CellPopulation cellpop in SC.SimConfig.scenario.cellpopulations)
@@ -2055,8 +2297,8 @@ namespace DaphneGui
                 if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
                 {
                     CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
-                    SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
-                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
+                    SC.SimConfig.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SC.SimConfig.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
+                    SC.SimConfig.scenario.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
                 }
             }
 
@@ -2318,7 +2560,7 @@ namespace DaphneGui
             SelectedCellInfo.ciList.Add(xvf);
 
             xvf = new CellXVF();
-            xvf.name = "Force (/\u03bc\u33a1)";
+            xvf.name = "Force (μm/min2)";
             xvf.x = selectedCell.SpatialState.F[0];
             xvf.y = selectedCell.SpatialState.F[1];
             xvf.z = selectedCell.SpatialState.F[2];
@@ -2326,31 +2568,33 @@ namespace DaphneGui
 
             //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
-            
+
             EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
+                cmi.Concentration = conc;  
+                // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
+                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
+                cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
                 currConcs.Add(cmi);
-                currentConcs.Add(cmi);
+                currentConcs.Add(cmi); 
             }
-            double[] pos = selectedCell.SpatialState.X;
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                //double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(selectedCell.State.X);
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
+                cmi.Concentration = conc; 
+                // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
+                //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
+                cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
-
-                cmi.Gradient = kvp.Value.Conc.Gradient(pos);
             }
 
             //need the ecm probe concentrations for this purpose
@@ -2360,7 +2604,9 @@ namespace DaphneGui
                 double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
-                cmi.Concentration = conc.ToString("#.000");
+                cmi.Concentration = conc; 
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
@@ -2449,7 +2695,7 @@ namespace DaphneGui
         {
             FileInfo fi = new FileInfo(configurator.FileName);
 
-            if (fi.IsReadOnly == false)
+            if (fi.IsReadOnly == false || !fi.Exists)
             {
                 configurator.SerializeSimConfigToFile();
                 orig_content = configurator.SerializeSimConfigToStringSkipDeco();

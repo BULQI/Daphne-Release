@@ -190,9 +190,9 @@ namespace DaphneGui
                 selectedRC.ReactionRates.Clear();
                 foreach (ConfigReaction reac in RightList)
                 {
-                    selectedRC.reactions_guid_ref.Add(reac.reaction_guid);
+                    selectedRC.reactions_guid_ref.Add(reac.entity_guid);
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.Guid = reac.reaction_guid;
+                    pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
                     selectedRC.ReactionRates.Add(pair);                    
@@ -202,12 +202,11 @@ namespace DaphneGui
             else
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
-                crc.ReadOnly = false;
                 foreach (ConfigReaction reac in RightList)
                 {
-                    crc.reactions_guid_ref.Add(reac.reaction_guid);
+                    crc.reactions_guid_ref.Add(reac.entity_guid);
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
-                    pair.Guid = reac.reaction_guid;
+                    pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
                     crc.ReactionRates.Add(pair);

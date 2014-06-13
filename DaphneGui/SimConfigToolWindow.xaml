@@ -134,16 +134,16 @@
                                   Source="{Binding Path=scenario.regions}"/>
 
             <CollectionViewSource x:Key="boxSpecsListView"  
-                                  Source="{Binding Path=entity_repository.box_specifications}"/>
+                                  Source="{Binding Path=scenario.box_specifications}"/>
 
             <CollectionViewSource x:Key="ggBoxSpecsListView"  
-                                  Source="{Binding Path=entity_repository.box_specifications}"/>
+                                  Source="{Binding Path=scenario.box_specifications}"/>
 
             <CollectionViewSource x:Key="molpopGaussianSpecsListView"  
-                                  Source="{Binding Path=entity_repository.gaussian_specifications}"/>
+                                  Source="{Binding Path=scenario.gaussian_specifications}"/>
 
-            <CollectionViewSource x:Key="solfacSolfacTypesListView"  
-                                  Source="{Binding Path=entity_repository.solfac_types}"/>
+            <!--<CollectionViewSource x:Key="solfacSolfacTypesListView"  
+                                  Source="{Binding Path=entity_repository.solfac_types}"/>-->
 
             <CollectionViewSource x:Key="cellTypesListView"  
                                   Source="{Binding Path=entity_repository.cells}"
@@ -1158,7 +1158,7 @@
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
                                         SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="cell_guid">
+                                        SelectedValuePath="entity_guid">
                             
                         </ComboBox>
 
@@ -1200,6 +1200,7 @@
                                         ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
                                         SelectedIndex="{Binding Path=cellpopulation_predef_color, Converter={StaticResource ColorListToIntConv}, 
                                         Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SelectionChanged="cellPopColor_SelectionChanged"
                                         >                            
                         </ComboBox>
 
@@ -1363,7 +1364,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120"  />
+                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120" LostFocus="CellTextBox_LostFocus" />
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
@@ -1440,7 +1441,7 @@
                                     <ComboBox  MinWidth="100"
                                                 DisplayMemberPath="Name"
                                                 SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
-                                                SelectedValuePath="molecule_guid">
+                                                SelectedValuePath="entity_guid">
 
                                         <ComboBox.ItemsSource>
                                             <CompositeCollection>
@@ -1581,7 +1582,7 @@
                                                     ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
                                                     DisplayMemberPath="Name"                                                    
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="molecule_guid"
+                                                    SelectedValuePath="entity_guid"
                                                     SelectionChanged="memb_molecule_combo_box_SelectionChanged"
                                                     GotFocus="memb_molecule_combo_box_GotFocus"
                                                     />
@@ -1664,7 +1665,7 @@
                                         ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                         DisplayMemberPath="Name"            
                                         SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="molecule_guid"
+                                        SelectedValuePath="entity_guid"
                                         SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
                                         GotFocus="cyto_molecule_combo_box_GotFocus"
                                         />
@@ -1776,8 +1777,9 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=mpInfo.mp_color}"
+                                    Value="{Binding Path=mpInfo.mp_color, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="4,2"
+                                    ValueChanged="molPopColorEditBox_ValueChanged"
                                     />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
@@ -1809,7 +1811,7 @@
                                                     ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="molecule_guid"
+                                                    SelectedValuePath="entity_guid"
                                                     SelectionChanged="molecule_combo_box2_SelectionChanged" >
 
                                 </ComboBox>
@@ -2299,7 +2301,7 @@
                         </StackPanel>
                         
                     </Expander>
-                    <!-- Mol Pops -->
+                    <!-- Library Molecular Populations -->
                     <Expander
                             Padding="5" 
                             ExpandDirection="Down"
@@ -2716,7 +2718,7 @@
             </ScrollViewer>
         </TabItem>
 
-        <!-- CELL POPULATIONS -->
+        <!-- Library CELL POPULATIONS -->
         <TabItem x:Name="tabCellPop" Header="Cell Populations">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
@@ -2842,14 +2844,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Path=Name}" Margin="5,0,0,0" Width="100"/>
                                 <TextBlock Text="    " Margin="5,0,0,0"/>
-                                <TextBlock Text="{Binding Path=molecule_guid}" Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=entity_guid}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate x:Key="cellGuidsListItemTemplate">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Path=CellName}" Margin="5,0,0,0"/>
                                 <TextBlock Text="    " Margin="5,0,0,0"/>
-                                <TextBlock Text="{Binding Path=cell_guid}" Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding Path=entity_guid}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate x:Key="reactionGuidsListItemTemplate">
@@ -3340,19 +3342,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Width="200"  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="TextBox_LostFocus">
-                                                    <!--<TextBox.Style>
-                                                        <Style TargetType="{x:Type TextBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                    <Setter Property="IsEnabled" Value="False" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                    <Setter Property="IsEnabled" Value="True" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>-->
+                                                          LostFocus="GeneTextBox_LostFocus">                                                    
                                                 </TextBox>
 
 
@@ -3438,7 +3428,7 @@
                                                 <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
 
                                                 <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                                                          LostFocus="TextBox_LostFocus">
+                                                          LostFocus="MolTextBox_LostFocus">
                                                     <TextBox.Style>
                                                         <Style TargetType="{x:Type TextBox}">
                                                             <Style.Triggers>
