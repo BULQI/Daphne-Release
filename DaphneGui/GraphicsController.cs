@@ -858,6 +858,10 @@ namespace DaphneGui
         public ObservableCollection<string> CellSelectionToolModes { get; set; }
         private string cellSelectionToolMode;
 
+        private bool leftButtonPressed = false;
+        private uint leftButtonPressTimeStamp = 0;
+        private int[] leftButtonPressPostion = new int[2];
+
         public static byte GET_CURSOR_ARROW
         {
             get
@@ -903,6 +907,7 @@ namespace DaphneGui
 
             // add events to the iren instead of Observers
             rw.GetInteractor().LeftButtonPressEvt += new vtkObject.vtkObjectEventHandler(leftMouseDown);
+            rw.GetInteractor().EndInteractionEvt += new vtkObject.vtkObjectEventHandler(leftMouseClick);
 
             // progress
             cornerAnnotation = new GraphicsProp();
@@ -1563,11 +1568,6 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// handler for left mouse button down
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void leftMouseDown(vtkObject sender, vtkObjectEventArgs e)
         {
             if (!HandToolButton_IsChecked)
@@ -1575,6 +1575,29 @@ namespace DaphneGui
 
             vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
             int[] x = interactor.GetEventPosition();
+            leftButtonPressPostion[0] = x[0];
+            leftButtonPressPostion[1] = x[1];
+            leftButtonPressed = true;
+            leftButtonPressTimeStamp = interactor.GetMTime();
+        }
+            
+        /// <summary>
+        /// handler for left mouse click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void leftMouseClick(vtkObject sender, vtkObjectEventArgs e)
+        {
+            if (!HandToolButton_IsChecked || !leftButtonPressed)
+                return;
+
+            vtkRenderWindowInteractor interactor = rwc.RenderWindow.GetInteractor();
+            leftButtonPressed = false;
+            if (interactor.GetMTime() - leftButtonPressTimeStamp > 100) return;
+
+            //int[] x = interactor.GetEventPosition();
+            int[] x = leftButtonPressPostion;
+
             int p = ((vtkCellPicker)rwc.RenderWindow.GetInteractor().GetPicker()).Pick(x[0], x[1], 0, rwc.RenderWindow.GetRenderers().GetFirstRenderer());
 
             if (p > 0)
@@ -1670,7 +1693,7 @@ namespace DaphneGui
                     }
                     else if (MainWindow.CheckMouseLeftState(MainWindow.MOUSE_LEFT_CELL_MOLCONCS) == true)
                     {
-                        Cell c = Simulation.dataBasket.Cells[cellID];
+                        //Cell c = Simulation.dataBasket.Cells[cellID];
 
                         MW.DisplayCellInfo(cellID);
                     }
