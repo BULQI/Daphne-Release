@@ -18,63 +18,154 @@ using System.Windows.Markup;
 
 namespace Daphne
 {
-    public class SimConfigurator
+    /// <summary>
+    /// ties together all levels of storage
+    /// </summary>
+    public class SystemOfPersistence
     {
-        public string FileName { get; set; }
-       // public const string TempScenarioFile; // = "Config\\temp_scenario.json", TempUserDefFile = "Config\\temp_userdef.json";
-        public SimConfiguration SimConfig { get; set; }
+        /// <summary>
+        /// Protocol level, contains Entity level
+        /// </summary>
+        public Protocol Protocol { get; set; }
+        /// <summary>
+        /// Daphne level
+        /// </summary>
+        public Level DaphneStore { get; set; }
+        /// <summary>
+        /// User level
+        /// </summary>
+        public Level UserStore { get; set; }
 
-        public string TempScenarioFile { get; set; }
-        public string TempUserDefFile { get; set; }
-
-        //public UserDefinedGroup userDefGroup { get; set; }
-
-        public SimConfigurator()
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public SystemOfPersistence()
         {
-            this.SimConfig = new SimConfiguration();
-            //userDefGroup = new UserDefinedGroup();
-            TempScenarioFile = "Config\\temp_scenario.json";
-            TempUserDefFile = "Config\\temp_userdef.json";
+            Protocol = new Protocol("", "Config\\temp_protocol.json");
+            //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
+            //UserStore = new Level("", "Config\\temp_userstore.json");
         }
 
-        public SimConfigurator(string filename)
+        /// <summary>
+        /// deserialize the daphne store
+        /// </summary>
+        /// <param name="tempFiles">true for handling temporary files</param>
+        public void DeserializeDaphneStore(bool tempFiles = false)
         {
-            if (filename == null)
+            DaphneStore = DaphneStore.Deserialize(tempFiles);
+        }
+
+        /// <summary>
+        /// deserialize the daphne store; the latter given as a string
+        /// </summary>
+        /// <param name="jsonFile">json file content as string</param>
+        public void DeserializeDaphneStoreFromString(string jsonFile)
+        {
+            DaphneStore = DaphneStore.DeserializeFromString(jsonFile);
+        }
+
+        /// <summary>
+        /// deserialize the user store
+        /// </summary>
+        /// <param name="tempFiles">true for handling temporary files</param>
+        public void DeserializeUserStore(bool tempFiles = false)
+        {
+            UserStore = UserStore.Deserialize(tempFiles);
+        }
+
+        /// <summary>
+        /// deserialize the user store; the latter given as a string
+        /// </summary>
+        /// <param name="jsonFile">json file content as string</param>
+        public void DeserializeUserStoreFromString(string jsonFile)
+        {
+            UserStore = UserStore.DeserializeFromString(jsonFile);
+        }
+
+        /// <summary>
+        /// deserialize the protocol
+        /// </summary>
+        /// <param name="tempFiles">true for handling temporary files</param>
+        public void DeserializeProtocol(bool tempFiles = false)
+        {
+            Protocol = (Protocol)Protocol.Deserialize(tempFiles);
+            Protocol.InitializeStorageClasses();
+        }
+
+        /// <summary>
+        /// deserialize an external protocol (not the one part of this class)
+        /// </summary>
+        /// <param name="tempFiles">true for handling temporary files</param>
+        public void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
+        {
+            protocol = (Protocol)protocol.Deserialize(tempFiles);
+            protocol.InitializeStorageClasses();
+        }
+
+        /// <summary>
+        /// deserialize the protocol from a string
+        /// </summary>
+        /// <param name="jsonFile">json file content as string</param>
+        public void DeserializeProtocolFromString(string jsonFile)
+        {
+            Protocol = (Protocol)Protocol.DeserializeFromString(jsonFile);
+            Protocol.InitializeStorageClasses();
+        }
+
+        /// <summary>
+        /// deserialize an external protocol from a string
+        /// </summary>
+        /// <param name="jsonFile">json file content as string</param>
+        public void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
+        {
+            protocol = (Protocol)protocol.DeserializeFromString(jsonFile);
+            protocol.InitializeStorageClasses();
+        }
+    }
+
+    /// <summary>
+    /// base for all levels
+    /// </summary>
+    public class Level
+    {
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public Level() : this("", "")
+        {
+        }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="fileName">name of the storage file</param>
+        /// <param name="tempFile">name of the temporary file</param>
+        public Level(string fileName, string tempFile)
+        {
+            if (tempFile == null)
             {
                 throw new ArgumentNullException("filename");
             }
 
-            TempScenarioFile = "Config\\temp_scenario.json";
-            TempUserDefFile = "Config\\temp_userdef.json";
-
-            this.FileName = filename;
-            this.SimConfig = new SimConfiguration();
-
-            //userDefGroup = new UserDefinedGroup();
-            //string UserDefFileName = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
-            //var Settings = new JsonSerializerSettings();
-            //Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //Settings.TypeNameHandling = TypeNameHandling.Auto;
-            //if (File.Exists(UserDefFileName))
-            //{
-            //    string readText = File.ReadAllText(UserDefFileName);
-            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, Settings);
-            //}
+            FileName = fileName;
+            TempFile = tempFile;
+            entity_repository = new EntityRepository();
         }
 
-        public void SerializeSimConfigToFile(bool tempFiles = false)
+        /// <summary>
+        /// serialize the level to file
+        /// </summary>
+        /// <param name="tempFiles">true when wanting to serialize temporary file(s)</param>
+        public void SerializeToFile(bool tempFiles = false)
         {
             //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
 
-            //userDefGroup.Reset();
-            //userDefGroup.CopyFromConfig(SimConfig);
-            
-            //serialize SimConfig
-            string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
-            string jsonFile = tempFiles == true ? TempScenarioFile : FileName;
+            //serialize Protocol
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonFile = tempFiles == true ? TempFile : FileName;
 
             try
             {
@@ -82,164 +173,79 @@ namespace Daphne
             }
             catch
             {
-                MessageBox.Show("File.WriteAllText failed in SerializeSimConfigToFile. Filename and TempScenarioFile = " + FileName + ", " + TempScenarioFile);
+                MessageBox.Show("File.WriteAllText failed in SerializeToFile. Filename and TempFile = " + FileName + ", " + TempFile);
             }
-
-            ////serialize user defined objects
-            //jsonSpec = JsonConvert.SerializeObject(userDefGroup, Newtonsoft.Json.Formatting.Indented, Settings);
-            //jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
-            //File.WriteAllText(jsonFile, jsonSpec);
         }
 
         /// <summary>
-        /// brief version of serialize config to string
+        /// serialize to string
         /// </summary>
-        /// <returns></returns>
-        public string SerializeSimConfigToString()
+        /// <returns>level content as string</returns>
+        public string SerializeToString()
         {
             //skg daphne serialize to json string Wednesday, May 08, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(SimConfig, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             return jsonSpec;
         }
 
         /// <summary>
-        /// serialize the config to a string, skip the 'decorations', i.e. experiment name and description
+        /// deserialize this level
         /// </summary>
-        /// <returns></returns>
-        public string SerializeSimConfigToStringSkipDeco()
-        {
-            // remember name and description
-            string exp_name = SimConfig.experiment_name,
-                   exp_desc = SimConfig.experiment_description,
-                   ret;
-
-            // temporarily set name and description to empty strings
-            SimConfig.experiment_name = "";
-            SimConfig.experiment_description = "";
-            // serialize to string
-            ret = SerializeSimConfigToString();
-            // reset to the remembered string values
-            SimConfig.experiment_name = exp_name;
-            SimConfig.experiment_description = exp_desc;
-            // return serialized string
-            return ret;
-        }
-
-        public void DeserializeSimConfig(bool tempFiles = false)
+        /// <param name="tempFiles">true when wanting to deserialize temporary file(s)</param>
+        /// <returns>deserialized level as object for further assignment</returns>
+        public virtual Level Deserialize(bool tempFiles = false)
         {
             //Deserialize JSON
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
-            //deserialize SimConfig
-            string jsonFile = tempFiles == true ? TempScenarioFile : FileName;
+            //deserialize
+            string jsonFile = tempFiles == true ? TempFile : FileName;
             string readText = File.ReadAllText(jsonFile);
-            SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(readText, settings);
-            SimConfig.InitializeStorageClasses();
+            Level local = JsonConvert.DeserializeObject<Level>(readText, settings);
 
-            ////I think we need to remove the user def items if any, from SimConfig and copy latest userdefgroup items into the config
-            ////SimConfig.RemoveUserDefinedItems();
-
-            ////deserialize user defined objects
-            //jsonFile = tempFiles == true ? TempUserDefFile : "Config\\UserDefinedGroup.json";
-            //if (File.Exists(jsonFile))
-            //{
-            //    readText = File.ReadAllText(jsonFile);
-            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
-            //    userDefGroup.CopyToConfig(SimConfig);
-            //}
-
+            // after deserialization the names are blank, restore them
+            local.FileName = FileName;
+            local.TempFile = TempFile;
+            return local;
         }
 
-        public void DeserializeSimConfigFromString(string simConfigJson)
+        /// <summary>
+        /// deserialize this level from string format
+        /// </summary>
+        /// <param name="jsonFile">file content in string</param>
+        /// <returns>deserialized level as object for further assignment</returns>
+        public virtual Level DeserializeFromString(string jsonFile)
         {
             var settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
-            SimConfig = JsonConvert.DeserializeObject<SimConfiguration>(simConfigJson, settings);
-            SimConfig.InitializeStorageClasses();
+            Level local = JsonConvert.DeserializeObject<Level>(jsonFile, settings);
 
-            ////deserialize user defined items
-            //string userfilename = Directory.GetCurrentDirectory() + "\\config\\UserDefinedGroup.json";
-            //if (File.Exists(userfilename))
-            //{
-            //    string readText = File.ReadAllText(userfilename);
-            //    userDefGroup = JsonConvert.DeserializeObject<UserDefinedGroup>(readText, settings);
-            //    userDefGroup.CopyToConfig(SimConfig);
-            //}
+            // after deserialization the names are blank, restore them
+            local.FileName = FileName;
+            local.TempFile = TempFile;
+            return local;
         }
+
+        [JsonIgnore]
+        public string FileName { get; set; }
+        [JsonIgnore]
+        public string TempFile { get; set; }
+
+        /// <summary>
+        /// entity repository storing all available entities in this level
+        /// </summary>
+        public EntityRepository entity_repository { get; set; }
     }
 
-    public class UserDefinedGroup
-    {
-        public ObservableCollection<ConfigMolecule> user_molecules { get; set; }
-        public ObservableCollection<ConfigCell> user_cells { get; set; }
-        public ObservableCollection<ConfigReaction> user_reactions { get; set; }
-
-        public UserDefinedGroup()
-        {
-            user_molecules = new ObservableCollection<ConfigMolecule>();
-            user_reactions = new ObservableCollection<ConfigReaction>();
-            user_cells = new ObservableCollection<ConfigCell>();
-        }
-
-        public void Reset()
-        {
-            user_molecules.Clear();
-            user_cells.Clear();
-            user_reactions.Clear();
-        }
-        
-        public bool Contains(object userdefitem)
-        {
-            bool ret = false;
-
-            if (userdefitem.GetType() == typeof(ConfigMolecule))
-            {
-                ConfigMolecule inputmol = (ConfigMolecule)userdefitem;
-                foreach (ConfigMolecule mol in user_molecules)
-                {
-                    if (mol.entity_guid == inputmol.entity_guid)
-                    {
-                        ret = true;
-                        break;
-                    }
-                }
-            }
-            if (userdefitem.GetType() == typeof(ConfigCell))
-            {
-                ConfigCell inputcell = (ConfigCell)userdefitem;
-                foreach (ConfigCell cell in user_cells)
-                {
-                    if (cell.entity_guid == inputcell.entity_guid)
-                    {
-                        ret = true;
-                        break;
-                    }
-                }
-            }
-            if (userdefitem.GetType() == typeof(ConfigReaction))
-            {
-                ConfigReaction inputreac = (ConfigReaction)userdefitem;
-                foreach (ConfigReaction reac in user_reactions)
-                {
-                    if (reac.entity_guid == inputreac.entity_guid)
-                    {
-                        ret = true;
-                        break;
-                    }
-                }
-            }
-
-            return ret;
-        }
-
-    }
-
-    public class SimConfiguration
+    /// <summary>
+    /// the protocol is a special type of level; it has extra information that set up an experiment with the entities of the entity repository
+    /// </summary>
+    public class Protocol : Level
     {
         public static int SafeCellPopulationID = 0;
         public int experiment_db_id { get; set; }
@@ -249,15 +255,27 @@ namespace Daphne
         public string experiment_description { get; set; }
         public Scenario scenario { get; set; }
         public Scenario rc_scenario { get; set; }
-        public EntityRepository entity_repository { get; set; }
         public SimulationParams sim_params { get; set; }
         public string reporter_file_name { get; set; }
 
         //public ChartViewToolWindow ChartWindow;
 
-        public SimConfiguration()
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public Protocol() : this("", "")
+        {
+        }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="fileName">protocol file</param>
+        /// <param name="tempFile">temporary file</param>
+        public Protocol(string fileName, string tempFile) : base(fileName, tempFile)
         {
             Guid id = Guid.NewGuid();
+
             experiment_guid = id.ToString();
             experiment_db_id = 0;
             experiment_name = "Experiment1";
@@ -265,13 +283,74 @@ namespace Daphne
             experiment_description = "Whole sim config description";
             scenario = new Scenario();
             rc_scenario = new Scenario();
-            entity_repository = new EntityRepository();
             sim_params = new SimulationParams();
 
             //////LoadDefaultGlobalParameters();
-            ////LoadUserDefinedItems();           
 
             reporter_file_name = "";
+        }
+
+        /// <summary>
+        /// serialize the protocol to a string, skip the 'decorations', i.e. experiment name and description
+        /// </summary>
+        /// <returns>the protocol serialized to a string</returns>
+        public string SerializeToStringSkipDeco()
+        {
+            // remember name and description
+            string exp_name = experiment_name,
+                   exp_desc = experiment_description,
+                   ret;
+
+            // temporarily set name and description to empty strings
+            experiment_name = "";
+            experiment_description = "";
+            // serialize to string
+            ret = SerializeToString();
+            // reset to the remembered string values
+            experiment_name = exp_name;
+            experiment_description = exp_desc;
+            // return serialized string
+            return ret;
+        }
+
+        /// <summary>
+        /// override deserialization for the protocol; needs to handle extra data only contained in the protocol level
+        /// </summary>
+        /// <param name="tempFiles">true to indicate deserialization of the temporary file(s)</param>
+        /// <returns>deserialized protocol as Level object</returns>
+        public override Level Deserialize(bool tempFiles = false)
+        {
+            //Deserialize JSON
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+            //deserialize
+            string jsonFile = tempFiles == true ? TempFile : FileName;
+            string readText = File.ReadAllText(jsonFile);
+            Protocol local = JsonConvert.DeserializeObject<Protocol>(readText, settings);
+
+            // after deserialization, the names are blank, restore them
+            local.FileName = FileName;
+            local.TempFile = TempFile;
+            return local;
+        }
+
+        /// <summary>
+        /// override deserialization from string for the protocol; needs to handle extra data only contained in the protocol level
+        /// </summary>
+        /// <param name="jsonFile">the protocol file in string format</param>
+        /// <returns>deserialized protocol as Level object</returns>
+        public override Level DeserializeFromString(string jsonFile)
+        {
+            var settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            Protocol local = JsonConvert.DeserializeObject<Protocol>(jsonFile, settings);
+
+            // after deserialization the names are blank, restore them
+            local.FileName = FileName;
+            local.TempFile = TempFile;
+            return local;
         }
 
         /// <summary>
@@ -300,26 +379,6 @@ namespace Daphne
             /////MainWindow.GC.Rwc.Invalidate();
         }
 
-        public void RemoveUserDefinedItems()
-        {
-            foreach (ConfigMolecule mol in entity_repository.molecules.ToList())
-            {
-                entity_repository.molecules_dict.Remove(mol.entity_guid);
-                entity_repository.molecules.Remove(mol);
-            }
-            foreach (ConfigCell cell in entity_repository.cells.ToList())
-            {
-                entity_repository.cells_dict.Remove(cell.entity_guid);
-                entity_repository.cells.Remove(cell);
-            }
-            foreach (ConfigReaction reac in entity_repository.reactions.ToList())
-            {
-                entity_repository.reactions_dict.Remove(reac.entity_guid);
-                entity_repository.reactions.Remove(reac);
-            }
-        }
-
-
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
@@ -335,10 +394,10 @@ namespace Daphne
             InitMoleculeIDConfigMoleculeDict();
             InitMolPopIDConfigMolecularPopDict_ECMProbeDict();
             InitCellIDConfigCellDict();
-            InitReactionTemplateIDConfigReactionTempalteDict();
+            InitReactionTemplateIDConfigReactionTemplateDict();
+            InitGeneIDConfigGeneDict();
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
-            InitGeneIDConfigGeneDict();
             InitDiffSchemeIDConfigDiffSchemeDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
@@ -457,7 +516,7 @@ namespace Daphne
 
         }
 
-        private void InitReactionTemplateIDConfigReactionTempalteDict()
+        private void InitReactionTemplateIDConfigReactionTemplateDict()
         {
             entity_repository.reaction_templates_dict.Clear();
             foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
@@ -779,9 +838,9 @@ namespace Daphne
         }
 
         // given a gene name, find its guid
-        public string findGeneGuid(string name, SimConfiguration sc)
+        public string findGeneGuid(string name, Protocol protocol)
         {
-            foreach (ConfigGene gene in sc.entity_repository.genes)
+            foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
                 if (gene.Name == name)
                 {
@@ -792,14 +851,14 @@ namespace Daphne
         }
 
         // given a total reaction string, find the ConfigCell object
-        public bool findReactionByTotalString(string total, SimConfiguration sc)
+        public bool findReactionByTotalString(string total, Protocol protocol)
         {            
             //Get left and right side molecules of new reaction
             List<string> newReactants = getReacLeftSide(total);   
             List<string> newProducts = getReacRightSide(total);
 
             //Loop through all existing reactions
-            foreach (ConfigReaction reac in sc.entity_repository.reactions)
+            foreach (ConfigReaction reac in protocol.entity_repository.reactions)
             {
                 //Get left and right side molecules of each reaction in er
                 List<string> currReactants = getReacLeftSide(reac.TotalReactionString);
@@ -1437,18 +1496,24 @@ namespace Daphne
         public ObservableCollection<ConfigGene> genes { get; set; }
         public ObservableCollection<ConfigReaction> reactions { get; set; }
         public ObservableCollection<ConfigReactionTemplate> reaction_templates { get; set; }
-
-        public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
-        public Dictionary<string, ConfigGene> genes_dict; // keyed by gene_guid
-        public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
-        public Dictionary<string, ConfigReaction> reactions_dict;
-        public Dictionary<string, ConfigCell> cells_dict;
-        public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
-
-
         public ObservableCollection<ConfigDiffScheme> diff_schemes { get; set; }
-        public Dictionary<string, ConfigDiffScheme> diff_schemes_dict;
         public ObservableCollection<ConfigTransitionDriver> transition_drivers { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<string, ConfigMolecule> molecules_dict; // keyed by molecule_guid
+        [JsonIgnore]
+        public Dictionary<string, ConfigGene> genes_dict; // keyed by gene_guid
+        [JsonIgnore]
+        public Dictionary<string, ConfigReactionTemplate> reaction_templates_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigReaction> reactions_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigCell> cells_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigReactionComplex> reaction_complexes_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigDiffScheme> diff_schemes_dict;
+        [JsonIgnore]
         public Dictionary<string, ConfigTransitionDriver> transition_drivers_dict;
 
 
@@ -2350,7 +2415,7 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public string GenerateNewName(SimConfiguration sc, string ending)
+        public string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = Name;
 
@@ -2363,7 +2428,7 @@ namespace Daphne
             int nSuffix = 1;
             string suffix = ending + string.Format("{0:000}", nSuffix);
             string TempMolName = OriginalName + suffix;
-            while (FindMoleculeByName(sc, TempMolName) == true)
+            while (FindMoleculeByName(protocol, TempMolName) == true)
             {
                 nSuffix++;
                 suffix = ending + string.Format("{0:000}", nSuffix);
@@ -2373,7 +2438,7 @@ namespace Daphne
             return TempMolName;
         }
        
-        public ConfigMolecule Clone(SimConfiguration sc)
+        public ConfigMolecule Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2383,15 +2448,15 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             newmol.entity_guid = id.ToString();
-            newmol.Name = newmol.GenerateNewName(sc, "_Copy");
+            newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
             
             return newmol;
         }        
 
-        public static bool FindMoleculeByName(SimConfiguration sc, string tempMolName)
+        public static bool FindMoleculeByName(Protocol protocol, string tempMolName)
         {
             bool ret = false;
-            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
+            foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
                 if (mol.Name == tempMolName)
                 {
@@ -2403,11 +2468,11 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(SimConfiguration sc)
+        public void ValidateName(Protocol protocol)
         {
             bool found = false;
             string tempMolName = Name;
-            foreach (ConfigMolecule mol in sc.entity_repository.molecules)
+            foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
                 if (mol.Name == tempMolName && mol.entity_guid != entity_guid)
                 {
@@ -2418,7 +2483,7 @@ namespace Daphne
 
             if (found)
             {
-                Name = GenerateNewName(sc, "_Copy");
+                Name = GenerateNewName(protocol, "_Copy");
             }
         }
 
@@ -2445,7 +2510,7 @@ namespace Daphne
             ActivationLevel = actlevel;
         }
 
-        public ConfigGene Clone(SimConfiguration sc)
+        public ConfigGene Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2455,12 +2520,12 @@ namespace Daphne
             Guid id = Guid.NewGuid();
 
             newgene.entity_guid = id.ToString();
-            newgene.Name = newgene.GenerateNewName(sc, "_Copy");
+            newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
 
             return newgene;
         }
 
-        public string GenerateNewName(SimConfiguration sc, string ending)
+        public string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = Name;
 
@@ -2473,7 +2538,7 @@ namespace Daphne
             int nSuffix = 1;
             string suffix = ending + string.Format("{0:000}", nSuffix);
             string TempMolName = OriginalName + suffix;
-            while (FindGeneByName(sc, TempMolName) == true)
+            while (FindGeneByName(protocol, TempMolName) == true)
             {
                 nSuffix++;
                 suffix = ending + string.Format("{0:000}", nSuffix);
@@ -2483,10 +2548,10 @@ namespace Daphne
             return TempMolName;
         }
 
-        public static bool FindGeneByName(SimConfiguration sc, string geneName)
+        public static bool FindGeneByName(Protocol protocol, string geneName)
         {
             bool ret = false;
-            foreach (ConfigGene gene in sc.entity_repository.genes)
+            foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
                 if (gene.Name == geneName)
                 {
@@ -2498,11 +2563,11 @@ namespace Daphne
             return ret;
         }
 
-        public void ValidateName(SimConfiguration sc)
+        public void ValidateName(Protocol protocol)
         {
             bool found = false;
             string tempGeneName = Name;
-            foreach (ConfigGene gene in sc.entity_repository.genes)
+            foreach (ConfigGene gene in protocol.entity_repository.genes)
             {
                 if (gene.Name == tempGeneName && gene.entity_guid != entity_guid)
                 {
@@ -2513,7 +2578,7 @@ namespace Daphne
 
             if (found)
             {
-                Name = GenerateNewName(sc, "_Copy");
+                Name = GenerateNewName(protocol, "_Copy");
             }
         }
 
@@ -2858,12 +2923,11 @@ namespace Daphne
             }
             reportMP.molpop_guid_ref = molpop_guid;
         }
-
     }
 
     public class ConfigCompartment : EntityModelBase
     {
-        // private to simConfig; see comment in EntityRepository
+        // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
         public Dictionary<string, ConfigMolecularPopulation> molpops_dict;      //IS THIS NEEDED??
         private ObservableCollection<string> _reactions_guid_ref;
@@ -3604,11 +3668,11 @@ namespace Daphne
         /// If it is a duplicate, a suffix like "_Copy" is added
         /// </summary>
         /// <param name="sc"></param>
-        public void ValidateName(SimConfiguration sc)
+        public void ValidateName(Protocol protocol)
         {
             bool found = false;
             string newCellName = CellName;
-            foreach (ConfigCell cell in sc.entity_repository.cells)
+            foreach (ConfigCell cell in protocol.entity_repository.cells)
             {
                 if (cell.CellName == newCellName && cell.entity_guid != entity_guid)
                 {
@@ -3619,11 +3683,11 @@ namespace Daphne
 
             if (found)
             {
-                CellName = GenerateNewName(sc, "_Copy");
+                CellName = GenerateNewName(protocol, "_Copy");
             }
         }
 
-        public string GenerateNewName(SimConfiguration sc, string ending)
+        public string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = CellName;
 
@@ -3636,7 +3700,7 @@ namespace Daphne
             int nSuffix = 1;
             string suffix = ending + string.Format("{0:000}", nSuffix);
             string NewCellName = OriginalName + suffix;
-            while (FindCellByName(sc, NewCellName) == true)
+            while (FindCellByName(protocol, NewCellName) == true)
             {
                 nSuffix++;
                 suffix = ending + string.Format("{0:000}", nSuffix);
@@ -3646,10 +3710,10 @@ namespace Daphne
             return NewCellName;
         }
 
-        public static bool FindCellByName(SimConfiguration sc, string cellName)
+        public static bool FindCellByName(Protocol protocol, string cellName)
         {
             bool ret = false;
-            foreach (ConfigCell cell in sc.entity_repository.cells)
+            foreach (ConfigCell cell in protocol.entity_repository.cells)
             {
                 if (cell.CellName == cellName)
                 {
@@ -3832,7 +3896,7 @@ namespace Daphne
             MinDisSquared = _minDisSquared;
 
             // null case when deserializing Json
-            // correct CellPopulation pointer added in SimConfiguration.InitCellPopulationIDCellPopulationDict
+            // correct CellPopulation pointer added in Protocoluration.InitCellPopulationIDCellPopulationDict
             if (_cellPop != null)
             {
                 cellPop = _cellPop;
@@ -4415,7 +4479,7 @@ namespace Daphne
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             cellpopulation_predef_color = ColorList.Orange;
-            cellpopulation_id = SimConfiguration.SafeCellPopulationID++;
+            cellpopulation_id = Protocol.SafeCellPopulationID++;
             // reporting
             reportXVF = new ReportXVF();
             ecmProbe = new ObservableCollection<ReportECM>();
@@ -4764,7 +4828,7 @@ namespace Daphne
         }
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            // TODO: To go back from gui to simconfig
+            // TODO: To go back from gui to Protocol
             string token = value as string;
             double newval = double.Parse(token);
             //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
@@ -4815,7 +4879,7 @@ namespace Daphne
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            // TODO: To go bafrom gui to simconfig
+            // TODO: To go bafrom gui to Protocol
             string guid = value as string;
             double newval = double.Parse(guid);
             System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;

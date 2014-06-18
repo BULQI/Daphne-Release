@@ -19,7 +19,7 @@ namespace SBMLayer
         private double ymax;
         private double zmax;
 
-        private SimConfigurator configurator;
+        private Protocol protocol;
         private Model model;
 
         //Unit definition declaration
@@ -30,9 +30,9 @@ namespace SBMLayer
         //Equivalent geometries may be supported (analytic/SF)
         private CSGeometry csGeometry;
 
-        public SpatialComponents(Daphne.SimConfigurator configurator, ref libsbmlcs.Model model)
+        public SpatialComponents(Protocol protocol, ref libsbmlcs.Model model)
         {
-            this.configurator = configurator;
+            this.protocol = protocol;
             this.model = model;
 
             InitializeCoordinateSystem();
@@ -47,9 +47,9 @@ namespace SBMLayer
             xmin = 0;
             ymin = 0;
             zmin = 0;
-            xmax = configurator.SimConfig.scenario.environment.extent_x;
-            ymax = configurator.SimConfig.scenario.environment.extent_y;
-            zmax = configurator.SimConfig.scenario.environment.extent_z;
+            xmax = protocol.scenario.environment.extent_x;
+            ymax = protocol.scenario.environment.extent_y;
+            zmax = protocol.scenario.environment.extent_z;
 
             //Defining a coordinate system
             SpatialModelPlugin plugin = (SpatialModelPlugin)model.getPlugin("spatial");

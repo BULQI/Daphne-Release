@@ -173,14 +173,14 @@ namespace DaphneGui
             ConfigReaction cr = new ConfigReaction();
             cr.rate_const = inputRateConstant;
 
-            cr.reaction_template_guid_ref = MainWindow.SC.SimConfig.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
+            cr.reaction_template_guid_ref = MainWindow.SOP.Protocol.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
             if (cr.reaction_template_guid_ref == "")
             {
                 string msg = string.Format("Unsupported reaction.");
                 MessageBox.Show(msg);
                 return;
             }
-            ConfigReactionTemplate crt = MainWindow.SC.SimConfig.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
+            ConfigReactionTemplate crt = MainWindow.SOP.Protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
 
             // Don't have to add stoichiometry information since the reaction template knows it based on reaction type
             // For each list of reactants, products, and modifiers, add bulk then boundary molecules.
@@ -189,14 +189,14 @@ namespace DaphneGui
             // Bulk Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
+                string guid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
                 if (guid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
                     return;
                 }
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.reactants_molecule_guid_ref.Add(guid);
                 }
@@ -204,8 +204,8 @@ namespace DaphneGui
             // Boundary Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string molGuid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
+                string molGuid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(molGuid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.reactants_molecule_guid_ref.Add(molGuid);
                 }
@@ -214,14 +214,14 @@ namespace DaphneGui
             // Bulk Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
+                string guid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
                 if (guid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
                     MessageBox.Show(msg);
                     return;
                 }
-                if (!cr.products_molecule_guid_ref.Contains(guid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                if (!cr.products_molecule_guid_ref.Contains(guid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.products_molecule_guid_ref.Add(guid);
                 }
@@ -229,8 +229,8 @@ namespace DaphneGui
             // Boundary Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string molGuid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
+                string molGuid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(molGuid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.products_molecule_guid_ref.Add(molGuid);
                 }
@@ -239,8 +239,8 @@ namespace DaphneGui
             // Bulk modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
-                string molGuid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
-                geneGuid = MainWindow.SC.SimConfig.findGeneGuidByName(kvp.Key);
+                string molGuid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
+                geneGuid = MainWindow.SOP.Protocol.findGeneGuidByName(kvp.Key);
                 if (molGuid == "" && geneGuid == "")  //this should never happen
                 {
                     string msg = string.Format("Molecule/gene '{0}' does not exist in molecules library.  \nPlease first add the molecule to the molecules library and re-try.", kvp.Key);
@@ -249,7 +249,7 @@ namespace DaphneGui
                 }
                 if (molGuid != "")
                 {
-                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Bulk)
+                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Bulk)
                     {
                         cr.modifiers_molecule_guid_ref.Add(molGuid);
                     }
@@ -265,10 +265,10 @@ namespace DaphneGui
             // Boundary modifiers
             foreach (KeyValuePair<string, int> kvp in inputModifiers)
             {
-                string molGuid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
+                string molGuid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
                 if (molGuid != "")
                 {
-                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SC.SimConfig.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
+                    if (!cr.modifiers_molecule_guid_ref.Contains(molGuid) && MainWindow.SOP.Protocol.entity_repository.molecules_dict[molGuid].molecule_location == MoleculeLocation.Boundary)
                     {
                         cr.modifiers_molecule_guid_ref.Add(molGuid);
                     }
@@ -276,12 +276,12 @@ namespace DaphneGui
             }
 
             //Generate the total string
-            cr.GetTotalReactionString(MainWindow.SC.SimConfig.entity_repository);
+            cr.GetTotalReactionString(MainWindow.SOP.Protocol.entity_repository);
 
             //Add the reaction to repository collection
-            if (!MainWindow.SC.SimConfig.findReactionByTotalString(cr.TotalReactionString, MainWindow.SC.SimConfig))
+            if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol))
             {
-                MainWindow.SC.SimConfig.entity_repository.reactions.Add(cr);
+                MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
             }
             else
             {
@@ -450,8 +450,8 @@ namespace DaphneGui
 
         private bool ValidateMoleculeName(string sMol)
         {
-            string molGuid = MainWindow.SC.SimConfig.findMoleculeGuidByName(sMol);
-            string geneGuid = MainWindow.SC.SimConfig.findGeneGuidByName(sMol);
+            string molGuid = MainWindow.SOP.Protocol.findMoleculeGuidByName(sMol);
+            string geneGuid = MainWindow.SOP.Protocol.findGeneGuidByName(sMol);
 
             if (molGuid == "" && geneGuid == "")
             {
@@ -490,11 +490,11 @@ namespace DaphneGui
         {
             foreach (KeyValuePair<string, int> kvp in inputList)
             {
-                string guid = MainWindow.SC.SimConfig.findMoleculeGuidByName(kvp.Key);
+                string guid = MainWindow.SOP.Protocol.findMoleculeGuidByName(kvp.Key);
                 // genes return guid = ""
                 if (guid != "")
                 {
-                    if (MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].molecule_location == molLoc)
+                    if (MainWindow.SOP.Protocol.entity_repository.molecules_dict[guid].molecule_location == molLoc)
                     {
                         return true;
                     }
@@ -513,11 +513,11 @@ namespace DaphneGui
             CompositeCollection coll = new CompositeCollection();
 
             CollectionContainer cc = new CollectionContainer();
-            cc.Collection = MainWindow.SC.SimConfig.entity_repository.molecules;
+            cc.Collection = MainWindow.SOP.Protocol.entity_repository.molecules;
             coll.Add(cc);
 
             cc = new CollectionContainer();
-            cc.Collection = MainWindow.SC.SimConfig.entity_repository.genes;
+            cc.Collection = MainWindow.SOP.Protocol.entity_repository.genes;
             coll.Add(cc);
             lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
             lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");

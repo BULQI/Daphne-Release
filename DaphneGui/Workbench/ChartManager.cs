@@ -135,7 +135,7 @@ namespace Workbench
             foreach (KeyValuePair<String, List<Double>> entry in DictConcs)
             {
                 y = entry.Value.ToArray();
-                string molname = ConvertMolGuidToMolName(entry.Key);  // MainWindow.SC.SimConfig.entity_repository.molecules_dict[entry.Key].Name;
+                string molname = ConvertMolGuidToMolName(entry.Key);  // MainWindow.SOP.Protocol.entity_repository.molecules_dict[entry.Key].Name;
                 drawSeries(x, y, chartArear1, TitleXY, /*entry.Key*/molname, count, DrawLine);
                 count++;
             }
@@ -372,15 +372,15 @@ namespace Workbench
         public string ConvertMolGuidToMolName(string guid)
         {
             string ret = "";
-            if (MainWindow.SC.SimConfig.entity_repository.molecules_dict.ContainsKey(guid))
-                ret = MainWindow.SC.SimConfig.entity_repository.molecules_dict[guid].Name;
+            if (MainWindow.SOP.Protocol.entity_repository.molecules_dict.ContainsKey(guid))
+                ret = MainWindow.SOP.Protocol.entity_repository.molecules_dict[guid].Name;
             return ret;
         }
 
         private string ConvertMolNameToMolGuid(string name)
         {
             string ret = "";
-            foreach (KeyValuePair<string, ConfigMolecule> kvp in MainWindow.SC.SimConfig.entity_repository.molecules_dict)
+            foreach (KeyValuePair<string, ConfigMolecule> kvp in MainWindow.SOP.Protocol.entity_repository.molecules_dict)
             {
                 if (kvp.Value.Name == name)
                     return kvp.Key;

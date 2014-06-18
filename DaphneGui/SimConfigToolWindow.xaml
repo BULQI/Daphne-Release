@@ -1,4 +1,4 @@
-﻿<docking:ToolWindow x:Class="DaphneGui.SimConfigToolWindow"
+﻿<docking:ToolWindow x:Class="DaphneGui.ProtocolToolWindow"
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -1360,7 +1360,7 @@
 
             <DataTemplate x:Key="cellDetailsTemplate">
 
-                <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Horizontal" IsReadOnly="{Binding Path=ReadOnly}">
+                <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Horizontal">
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
@@ -1396,8 +1396,8 @@
                                                                 
                                 <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
                                         DisplayMemberPath="Name"
-                                        SelectedValue="{Binding Path=diff_scheme_guid_ref}"
-                                        SelectedValuePath="diff_scheme_guid"
+                                        SelectedValue="{Binding Path=diff_scheme}"
+                                        
                                         SelectionChanged="cbCellDiffSchemes_SelectionChanged"
                                         >
                                         <ComboBox.ItemsSource>
@@ -1438,7 +1438,7 @@
                                 </StackPanel.Resources>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
-                                    <ComboBox  MinWidth="100"
+                                    <ComboBox x:Name="cbLocomotorDriver" MinWidth="100"
                                                 DisplayMemberPath="Name"
                                                 SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
                                                 SelectedValuePath="entity_guid">
@@ -1523,7 +1523,7 @@
             </DataTemplate>            
 
             <DataTemplate x:Key="membraneMolPopDetailsTemplate">
-                <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
+                <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" >
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -1621,7 +1621,7 @@
             </DataTemplate>
 
             <DataTemplate x:Key="geneDetailsTemplate">
-                <local:DaphneStackPanel x:Name="geneDetails" Margin="0,-8" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
+                <local:DaphneStackPanel x:Name="geneDetails" Margin="0,-8" Orientation="Horizontal" >
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="10,4">
                             <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
@@ -1645,7 +1645,7 @@
             </DataTemplate>
 
             <DataTemplate x:Key="cytosolMolPopDetailsTemplate">
-                <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
+                <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" >
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -3429,7 +3429,7 @@
 
                                                 <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                           LostFocus="MolTextBox_LostFocus">
-                                                    <TextBox.Style>
+                                                    <!--<TextBox.Style>
                                                         <Style TargetType="{x:Type TextBox}">
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
@@ -3440,7 +3440,7 @@
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBox.Style>
+                                                    </TextBox.Style>-->
                                                 </TextBox>
 
 
@@ -3453,7 +3453,7 @@
                                             <DataTemplate>
                                                 <TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
 
-                                                    <TextBox.Style>
+                                                    <!--<TextBox.Style>
                                                         <Style TargetType="{x:Type TextBox}">
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
@@ -3464,7 +3464,7 @@
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </TextBox.Style>
+                                                    </TextBox.Style>-->
 
                                                 </TextBox>
                                             </DataTemplate>
@@ -3474,7 +3474,7 @@
                                     <DataGridTemplateColumn Header="Weight">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -3482,7 +3482,7 @@
                                     <DataGridTemplateColumn Header="Radius">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=EffectiveRadius, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                <TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -3490,7 +3490,7 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
-                                                    <CheckBox.Style>
+                                                    <!--<CheckBox.Style>
                                                         <Style TargetType="{x:Type CheckBox}">
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
@@ -3501,7 +3501,7 @@
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </CheckBox.Style>
+                                                    </CheckBox.Style>-->
 
                                                 </CheckBox>
                                             </DataTemplate>
@@ -3564,7 +3564,7 @@
                                                                     SliderEnabled="False" 
                                                                    >
 
-                                                        <uc:DoublesBox.Style>
+                                                        <!--<uc:DoublesBox.Style>
                                                             <Style>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
@@ -3575,7 +3575,7 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </uc:DoublesBox.Style>
+                                                        </uc:DoublesBox.Style>-->
 
 
                                                     </uc:DoublesBox>
@@ -3795,7 +3795,7 @@
                                     Canvas.ZIndex="1"
                                     >
 
-                                <local:DaphneStackPanel x:Name="panelCellMolPops" IsReadOnly="{Binding ElementName=CellsListBox, Path=SelectedItem.ReadOnly}">
+                                <local:DaphneStackPanel x:Name="panelCellMolPops" >
                                     <!--<StackPanel Orientation="Vertical">-->
                                     <StackPanel Orientation="Horizontal">
                                         <ContentControl Name="CellDetails" 
@@ -4168,18 +4168,18 @@
                                                               DisplayMemberPath="Name" 
                                                               SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                               SelectedValuePath="molecule_guid_ref"
-                                                              IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"
+                                                              
                                                               >
                                                     </ComboBox>
                                                     <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
                                                     <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
                                                             Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                                             IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"/>
+                                                             />
 
                                                     <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
                                                     <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
                                                             Text="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
-                                                             IsEnabled="{Binding ElementName=chkHasDeathDriver, Path=IsChecked}"/>
+                                                             />
                                                     
                                                 </StackPanel>
 

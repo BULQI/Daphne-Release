@@ -135,7 +135,7 @@
 
                 <MenuItem Header="_Activate">
                     <MenuItem x:Name="menu_ActivateSimSetup" Header="Activate Simulation Setup"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=SimConfigToolWindow}" />
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ProtocolToolWindow}" />
                     <MenuItem x:Name="menu_ActivateVTKView" Header="Activate 3D View"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
                     <MenuItem x:Name="menu_ActivateLPFitting" Header="Activate LP Fitting Tool"  
@@ -330,10 +330,10 @@
                           UseHostedAutoHidePopups="False"
                           >            
 
-            <docking:SplitContainer x:Name="SimConfigSplitContainer">
+            <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 <!-- Sim Config Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
-                    <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Daphne Simulation Configuration" />
+                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Simulation Configuration" />
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->

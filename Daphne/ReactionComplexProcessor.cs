@@ -16,7 +16,7 @@ namespace Daphne
     public class ReactionComplexProcessor : EntityModelBase
     {
         public Simulation Sim { get; set; }
-        public SimConfiguration SC { get; set; }
+        public Protocol SC { get; set; }
         public ConfigReactionComplex CRC { get; set; }
 
         public int nSteps { get; set; }
@@ -146,7 +146,7 @@ namespace Daphne
             OnPropertyChanged("initConcs");
         }
 
-        public void Initialize(SimConfiguration mainSC, ConfigReactionComplex crc, Simulation sim )
+        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, Simulation sim )
         {
             Sim = sim;
             SC = mainSC;
@@ -358,7 +358,7 @@ namespace Daphne
             {
                 dictOriginalConcs[kvp.Key] = kvp.Value;
 
-                //Now overwrite the concs in SimConfiguration
+                //Now overwrite the concs in Protocoluration
                 ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
                 MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mpInfo.mp_distribution;
                 homo.concentration = kvp.Value;                
@@ -433,11 +433,11 @@ namespace Daphne
         {
         }
 
-        public MolConcInfo(string guid, double c, SimConfiguration sc)
+        public MolConcInfo(string guid, double c, Protocol protocol)
         {
             molguid = guid;
             conc = c;
-            molname = sc.entity_repository.molecules_dict[guid].Name ;
+            molname = protocol.entity_repository.molecules_dict[guid].Name ;
         }
     }
 }
