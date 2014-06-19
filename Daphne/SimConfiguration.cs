@@ -399,6 +399,7 @@ namespace Daphne
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
             InitDiffSchemeIDConfigDiffSchemeDict();
+            InitTransitionDriversDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -469,6 +470,15 @@ namespace Daphne
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
         }
 
+        private void InitTransitionDriversDict()
+        {
+            entity_repository.transition_drivers_dict.Clear();
+            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
+            {
+                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+            }
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
+        }
 
         private void InitGeneIDConfigGeneDict()
         {
@@ -576,6 +586,32 @@ namespace Daphne
 
                     //Remove gene from genes_dict
                     entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
+                }
+            }
+        }
+
+        private void transition_drivers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigTransitionDriver tran = nn as ConfigTransitionDriver;
+
+                    if (tran != null)
+                    {
+                        entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigTransitionDriver tran = dd as ConfigTransitionDriver;
+
+                    //Remove gene from transition_drivers_dict
+                    entity_repository.transition_drivers_dict.Remove(tran.entity_guid);
                 }
             }
         }
