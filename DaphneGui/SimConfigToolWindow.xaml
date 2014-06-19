@@ -1445,8 +1445,7 @@
 
                                         <ComboBox.ItemsSource>
                                             <CompositeCollection>
-                                                <daph:ConfigMolecule Name="None" entity_guid=""/>
-                                                <!--<ComboBoxItem>None</ComboBoxItem>-->
+                                                <ComboBoxItem>None</ComboBoxItem>
                                                 <CollectionContainer
                                                     Collection="{Binding Source={StaticResource moleculesListView}}" />
                                             </CompositeCollection>
