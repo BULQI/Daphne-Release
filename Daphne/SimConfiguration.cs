@@ -617,32 +617,6 @@ namespace Daphne
             }
         }
 
-        private void transition_drivers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigTransitionDriver tran = nn as ConfigTransitionDriver;
-
-                    if (tran != null)
-                    {
-                        entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
-                    }
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigTransitionDriver tran = dd as ConfigTransitionDriver;
-
-                    //Remove gene from transition_drivers_dict
-                    entity_repository.transition_drivers_dict.Remove(tran.entity_guid);
-                }
-            }
-        }
-
         private void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             // Need to figure out how to signal to the collection view source that the collection has changed and it should refresh
