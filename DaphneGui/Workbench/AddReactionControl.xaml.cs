@@ -513,11 +513,11 @@ namespace DaphneGui
             CompositeCollection coll = new CompositeCollection();
 
             CollectionContainer cc = new CollectionContainer();
-            cc.Collection = MainWindow.SOP.Protocol.entity_repository.molecules;
+            cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.molecules : null;
             coll.Add(cc);
 
             cc = new CollectionContainer();
-            cc.Collection = MainWindow.SOP.Protocol.entity_repository.genes;
+            cc.Collection = MainWindow.SOP != null ? MainWindow.SOP.Protocol.entity_repository.genes : null;
             coll.Add(cc);
             lbMol2.SetValue(ListBox.ItemsSourceProperty, coll);
             lbMol2.SetValue(ListBox.DisplayMemberPathProperty, "Name");
