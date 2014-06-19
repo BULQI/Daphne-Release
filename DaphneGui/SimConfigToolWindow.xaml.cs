@@ -1002,14 +1002,6 @@ namespace DaphneGui
             //btnGraphReactionComplex.IsChecked = true;
         }
 
-        private void cbCellPopDistributionType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-        }
-
-        private void lbCellPopDistSubType_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-        }
-
         private void CellAddReacCxButton_Click(object sender, RoutedEventArgs e)
         {
 

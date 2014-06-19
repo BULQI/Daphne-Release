@@ -3762,26 +3762,6 @@ namespace Daphne
         }
     }
 
-    public class CellPopDistType
-    {
-        public string Name { get; set; }
-        public ObservableCollection<CellPopDistSubtype> DistSubtypes { get; set; }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
-    public class CellPopDistSubtype
-    {
-        public string Label { get; set; }
-        public override string ToString()
-        {
-            return Label;
-        }
-    }
-
     public enum CellPopDistributionType { Specific, Uniform, Gaussian }
 
     /// <summary>
