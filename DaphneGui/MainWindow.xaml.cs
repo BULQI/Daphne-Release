@@ -2206,9 +2206,9 @@ namespace DaphneGui
             //Set the box and blob visibilities to how they were pre-run
             foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    MolPopGaussian mpg = molpop.mpInfo.mp_distribution as MolPopGaussian;
+                    MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
                     SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
                     SOP.Protocol.scenario.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
                 }

@@ -563,7 +563,7 @@ namespace SBMLayer
         private double CalculateGaussianConcentration(BoxSpecification spec, ConfigMolecularPopulation confMolPop)
         {
 
-            return ((Math.Pow(2 * Math.PI, 3 / 2)) * (((MolPopGaussian)confMolPop.mpInfo.mp_distribution).peak_concentration)) / (spec.x_scale * spec.y_scale * spec.z_scale);
+            return ((Math.Pow(2 * Math.PI, 3 / 2)) * (((MolPopGaussian)confMolPop.mp_distribution).peak_concentration)) / (spec.x_scale * spec.y_scale * spec.z_scale);
         }
 
         /// <summary>
@@ -644,15 +644,15 @@ namespace SBMLayer
             attr.add("complex", Convert.ToString(tempConfMol.Name.Contains(":") ? true : false), annotNamespace, annotprefix); //If name of species has a :, it is stored as a complex
 
             //Distribution of species
-            if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
-                attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mpInfo.mp_distribution).peak_concentration), annotNamespace, annotprefix);
+                attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
                 foreach (BoxSpecification box in  protocol.scenario.box_specifications)
                 {
                     //Only select appropriate box
-                    if (( protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
+                    if (( protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
                     {
                         attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
                         attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
@@ -663,11 +663,11 @@ namespace SBMLayer
                     }
                 }
             }
-            else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+            else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
                 attr.add("distribution", "Linear", annotNamespace, annotprefix);
 
-                List<Daphne.BoundaryCondition> boundary = ((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition;
+                List<Daphne.BoundaryCondition> boundary = ((MolPopLinear)confMolPop.mp_distribution).boundaryCondition;
                 attr.add("boundary_type", Convert.ToString((int)boundary[0].boundaryType), annotNamespace, annotprefix);
                 attr.add("boundary_start", Convert.ToString((int)boundary[0].boundary), annotNamespace, annotprefix);
                 attr.add("boundary_start_conc", Convert.ToString(boundary[0].concVal), annotNamespace, annotprefix);
@@ -791,24 +791,24 @@ namespace SBMLayer
                 //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
                 //confMolPopName =  protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
                 confMolPopName = confMolPop.Name;
-                if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    spec = protocol.scenario.box_guid_box_dict[(protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
+                    spec = protocol.scenario.box_guid_box_dict[(protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
                     species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, CalculateGaussianConcentration(spec, confMolPop), "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
-                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopHomogeneousLevel)confMolPop.mpInfo.mp_distribution).concentration, "");
+                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
-                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopExplicit)confMolPop.mpInfo.mp_distribution).conc.Average(), "");
+                    species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((MolPopExplicit)confMolPop.mp_distribution).conc.Average(), "");
                 }
-                else if (confMolPop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
-                    if ((((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition != null) && (((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition.Count == 2))
+                    if ((((MolPopLinear)confMolPop.mp_distribution).boundaryCondition != null) && (((MolPopLinear)confMolPop.mp_distribution).boundaryCondition.Count == 2))
                     {
-                        species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition[0].concVal) + (((MolPopLinear)confMolPop.mpInfo.mp_distribution).boundaryCondition[1].concVal)) / 2, "");
+                        species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, ((((MolPopLinear)confMolPop.mp_distribution).boundaryCondition[0].concVal) + (((MolPopLinear)confMolPop.mp_distribution).boundaryCondition[1].concVal)) / 2, "");
                     }
                     else
                     {
@@ -915,7 +915,7 @@ namespace SBMLayer
                         if (comp == 0)
                         {
                             //Add cytosol molecular species
-                            species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution).concentration, "");
+                            species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
                             SetSpeciesAnnotation(cmp, species);
                             
                             //SetRequiredElements(species);
@@ -925,7 +925,7 @@ namespace SBMLayer
                         else
                         {
                             //Add membrane molecular species
-                            species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution).concentration, "");
+                            species = AddSpecies(confMolPopName.TrimEnd('|') + "_" + cellMembraneId, confMolPopName, cellMembraneId, false, false, false, ((MolPopHomogeneousLevel)cmp.mp_distribution).concentration, "");
                             SetSpeciesAnnotation(cmp, species);
 
                         }
@@ -1002,7 +1002,7 @@ namespace SBMLayer
             Species specAnnot;
             foreach (ConfigMolecularPopulation confMolPop in crc.molpops)
             {
-                AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mpInfo.mp_distribution).concentration, "");
+                AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
             }
 
             foreach (ConfigGene confGenPop in crc.genes)
@@ -2446,16 +2446,16 @@ namespace SBMLayer
                     box.SetMatrix(trans_matrix);
                      protocol.scenario.gaussian_specifications.Add(gaussSpec);
 
-                    configMolPop.mpInfo.mp_dist_name = "Gaussian";
-                    configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                    configMolPop.mp_dist_name = "Gaussian";
+                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopGaussian molPopGaussian = new MolPopGaussian();
                     molPopGaussian.peak_concentration = peakConc;
 
                     //double check this is the correct GUIid for this box
                     molPopGaussian.gaussgrad_gauss_spec_guid_ref = gaussSpec.gaussian_spec_box_guid_ref;
-                    configMolPop.mpInfo.mp_distribution = molPopGaussian;
+                    configMolPop.mp_distribution = molPopGaussian;
 
                     isDistributionSet = true;
                 }
@@ -2469,7 +2469,7 @@ namespace SBMLayer
                     double boundaryEndConc = Convert.ToDouble(attributes.getValue(attributes.getIndex("boundary_end_conc")));
 
                     MolPopLinear molpoplin = new MolPopLinear();
-                    configMolPop.mpInfo.mp_dist_name = "Linear";
+                    configMolPop.mp_dist_name = "Linear";
 
                     if (boundaryStart == Daphne.Boundary.left)
                     {
@@ -2491,7 +2491,7 @@ namespace SBMLayer
                     molpoplin.boundaryCondition.Add(bc);
                     bc = new Daphne.BoundaryCondition(boundaryType, boundaryEnd, boundaryEndConc);
                     molpoplin.boundaryCondition.Add(bc);
-                    configMolPop.mpInfo.mp_distribution = molpoplin;
+                    configMolPop.mp_distribution = molpoplin;
 
                     isDistributionSet = true;
                 }
@@ -2500,12 +2500,12 @@ namespace SBMLayer
             if (!isDistributionSet)
             {
                 MolPopHomogeneousLevel uniformDistribution;
-                configMolPop.mpInfo.mp_dist_name = "Uniform";
-                configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                configMolPop.mp_dist_name = "Uniform";
+                configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                configMolPop.mp_render_blending_weight = 2.0;
                 uniformDistribution = new MolPopHomogeneousLevel();
                 uniformDistribution.concentration = species.getInitialConcentration();
-                configMolPop.mpInfo.mp_distribution = uniformDistribution;
+                configMolPop.mp_distribution = uniformDistribution;
             }
         }
 
@@ -2548,7 +2548,7 @@ namespace SBMLayer
             }
 
             configMolPop.molecule_guid_ref = configMolecule.entity_guid;
-            configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
+            //configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
             configMolPop.Name = configMolecule.Name;
 
             //Retrieve distribution of ECS molecules from custom annotation
