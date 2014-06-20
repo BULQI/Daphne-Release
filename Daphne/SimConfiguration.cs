@@ -2940,7 +2940,7 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        //MOVING MolPopInfo stuff to here - MolPopInfo not really needed
+        //Moved MolPopInfo stuff to here - MolPopInfo class was not really needed
         private string _mp_dist_name = "";
         public string mp_dist_name
         {
@@ -3002,9 +3002,6 @@ namespace Daphne
                 OnPropertyChanged("mp_render_on");
             }
         }
-        //End MOVE
-
-
                     
         public ConfigMolecularPopulation(ReportType rt)
         {
@@ -4569,91 +4566,6 @@ namespace Daphne
             ecm_probe_dict = new Dictionary<string, ReportECM>();
         }  
     }
-
-    ////// MolPopInfo ==================================
-    ////public class MolPopInfo : EntityModelBase
-    ////{
-    ////    public string mp_guid { get; set; }
-    ////    private string _mp_dist_name = "";
-    ////    public string mp_dist_name
-    ////    {
-    ////        get { return _mp_dist_name; }
-    ////        set
-    ////        {
-    ////            if (_mp_dist_name == value)
-    ////                return;
-    ////            else
-    ////            {
-    ////                _mp_dist_name = value;
-    ////                OnPropertyChanged("mp_dist_name");
-    ////            }
-    ////        }
-    ////    }
-
-    ////    private MolPopDistribution _mp_distribution;
-    ////    public MolPopDistribution mp_distribution
-    ////    {
-    ////        get { return _mp_distribution; }
-    ////        set
-    ////        {
-    ////            if (_mp_distribution == value)
-    ////                return;
-    ////            else
-    ////            {
-    ////                _mp_distribution = value;
-    ////                OnPropertyChanged("mp_distribution");
-    ////            }
-    ////        }
-    ////    }
-    ////    public ObservableCollection<TimeAmpPair> mp_amplitude_keyframes { get; set; }
-    ////    private System.Windows.Media.Color _mp_color;
-    ////    public System.Windows.Media.Color mp_color
-    ////    {
-    ////        get { return _mp_color; }
-    ////        set
-    ////        {
-    ////            if (_mp_color == value)
-    ////                return;
-    ////            else
-    ////            {
-    ////                _mp_color = value;
-    ////                OnPropertyChanged("mp_color");
-    ////            }
-    ////        }
-    ////    }
-    ////    public double mp_render_blending_weight { get; set; }
-    ////    private bool _mp_render_on;
-    ////    public bool mp_render_on 
-    ////    { 
-    ////        get
-    ////        {
-    ////            return _mp_render_on;
-    ////        }
-    ////        set {
-    ////            _mp_render_on = value;                
-    ////            OnPropertyChanged("mp_render_on");
-    ////        }
-    ////    }
-
-    ////    public MolPopInfo()
-    ////    {            
-    ////    }
-
-    ////    public MolPopInfo(string name)
-    ////    {
-    ////        Guid id = Guid.NewGuid();
-
-    ////        mp_guid = id.ToString();
-    ////        mp_dist_name = name;
-    ////        // Default is static homogeneous level
-    ////        mp_distribution = new MolPopHomogeneousLevel();
-    ////        mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
-    ////        mp_color = new System.Windows.Media.Color();
-    ////        mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-    ////        mp_render_blending_weight = 1.0;
-    ////        mp_render_on = true;
-    ////    }
-    ////}
 
     /// <summary>
     /// Converter to go between molecule GUID references in MolPops
