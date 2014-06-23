@@ -115,7 +115,7 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        private void AddGaussianSpecification(MolPopGaussian mpg, MolPopInfo mp_info)
+        private void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
         {
             BoxSpecification box = new BoxSpecification();
             box.x_trans = 100;
@@ -131,7 +131,7 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.gaussian_spec_box_guid_ref = box.box_guid;
             gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = mp_info.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
@@ -247,7 +247,7 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                MolPopInfo current_item = current_mol.mpInfo;
+                ////MolPopInfo current_item = current_mol.mpInfo;
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Homogeneous; // = MolPopDistributionType.Gaussian;
 
                 if (e.AddedItems.Count > 0)
@@ -259,20 +259,20 @@ namespace DaphneGui
                 // Only want to change distribution type if the combo box isn't just selecting 
                 // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
-                if (current_item.mp_distribution == null)
+                if (current_mol.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
 
-                if (current_item.mp_distribution != null)
+                if (current_mol.mp_distribution != null)
                 {
-                    if (new_dist_type != MolPopDistributionType.Gaussian && current_item.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                    if (new_dist_type != MolPopDistributionType.Gaussian && current_mol.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                     {
-                        DeleteGaussianSpecification(current_item.mp_distribution);
-                        MolPopGaussian mpg = current_item.mp_distribution as MolPopGaussian;
+                        DeleteGaussianSpecification(current_mol.mp_distribution);
+                        MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
                         mpg.gaussgrad_gauss_spec_guid_ref = "";
                         MainWindow.GC.Rwc.Invalidate();
                     }
@@ -281,7 +281,7 @@ namespace DaphneGui
                 {
                     case MolPopDistributionType.Homogeneous:
                         MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_item.mp_distribution = shl;
+                        current_mol.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
                         MolPopLinear molpoplin = new MolPopLinear();
@@ -290,17 +290,17 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        current_item.mp_dist_name = "Linear";
-                        current_item.mp_distribution = molpoplin;
-                        current_item.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        current_item.mp_render_blending_weight = 2.0;
+                        current_mol.mp_dist_name = "Linear";
+                        current_mol.mp_distribution = molpoplin;
+                        current_mol.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        current_mol.mp_render_blending_weight = 2.0;
                         break;
 
                     case MolPopDistributionType.Gaussian:
                         MolPopGaussian mpg = new MolPopGaussian();
 
-                        AddGaussianSpecification(mpg, current_item);
-                        current_item.mp_distribution = mpg;
+                        AddGaussianSpecification(mpg, current_mol);
+                        current_mol.mp_distribution = mpg;
 
                         break;
                     
@@ -325,7 +325,7 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                MolPopInfo current_item = current_mol.mpInfo;
+                ////MolPopInfo current_item = current_mol.mpInfo;
 
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
                 if (e.AddedItems.Count > 0)
@@ -335,10 +335,10 @@ namespace DaphneGui
                 // Only want to change distribution type if the combo box isn't just selecting 
                 // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
-                if (current_item.mp_distribution == null)
+                if (current_mol.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
@@ -346,11 +346,11 @@ namespace DaphneGui
                 {
                     case MolPopDistributionType.Homogeneous:
                         MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_item.mp_distribution = shl;
+                        current_mol.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
                         MolPopLinear slg = new MolPopLinear();
-                        current_item.mp_distribution = slg;
+                        current_mol.mp_distribution = slg;
                         break;
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
@@ -373,7 +373,7 @@ namespace DaphneGui
                         gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
                         MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
                         sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
-                        current_item.mp_distribution = sgg;
+                        current_mol.mp_distribution = sgg;
                         break;                    
                     default:
                         throw new ArgumentException("MolPopInfo distribution type out of range");
@@ -393,7 +393,7 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                MolPopInfo current_item = current_mol.mpInfo;
+                ////MolPopInfo current_item = current_mol.mpInfo;
 
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
                 if (e.AddedItems.Count > 0)
@@ -403,10 +403,10 @@ namespace DaphneGui
                 // Only want to change distribution type if the combo box isn't just selecting 
                 // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
-                if (current_item.mp_distribution == null)
+                if (current_mol.mp_distribution == null)
                 {
                 }
-                else if (current_item.mp_distribution.mp_distribution_type == new_dist_type)
+                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
                 {
                     return;
                 }
@@ -416,11 +416,11 @@ namespace DaphneGui
                 {
                     case MolPopDistributionType.Homogeneous:
                         MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_item.mp_distribution = shl;
+                        current_mol.mp_distribution = shl;
                         break;
                     case MolPopDistributionType.Linear:
                         MolPopLinear slg = new MolPopLinear();
-                        current_item.mp_distribution = slg;
+                        current_mol.mp_distribution = slg;
                         break;
                     case MolPopDistributionType.Gaussian:
                         // Make sure there is at least one gauss_spec in repository
@@ -430,15 +430,15 @@ namespace DaphneGui
                         ////}
                         MolPopGaussian sgg = new MolPopGaussian();
                         sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SOP.Protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                        current_item.mp_distribution = sgg;
+                        current_mol.mp_distribution = sgg;
                         break;
 
 #if allow_dist_from_file
                     //case MolPopDistributionType.Custom:
 
-                    //    var prev_distribution = current_item.mp_distribution;
+                    //    var prev_distribution = current_mol.mp_distribution;
                     //    MolPopCustom scg = new MolPopCustom();
-                    //    current_item.mp_distribution = scg;
+                    //    current_mol.mp_distribution = scg;
 
                     //    // Configure open file dialog box
                     //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -458,7 +458,7 @@ namespace DaphneGui
                     //    }
                     //    else
                     //    {
-                    //        current_item.mp_distribution = prev_distribution;
+                    //        current_mol.mp_distribution = prev_distribution;
                     //    }
                     //    break;  
 #endif
@@ -541,9 +541,9 @@ namespace DaphneGui
 
             gmp.molecule_guid_ref = MainWindow.SOP.Protocol.entity_repository.molecules.First().entity_guid;
             gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
-            gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
-            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            //gmp.mpInfo = new MolPopInfo("");
+            gmp.mp_dist_name = "New distribution";
+            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
@@ -567,10 +567,10 @@ namespace DaphneGui
                 }
 
                 //Delete the gaussian box if any
-                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    DeleteGaussianSpecification(cmp.mpInfo.mp_distribution);
-                    MolPopGaussian mpg = cmp.mpInfo.mp_distribution as MolPopGaussian;
+                    DeleteGaussianSpecification(cmp.mp_distribution);
+                    MolPopGaussian mpg = cmp.mp_distribution as MolPopGaussian;
                     mpg.gaussgrad_gauss_spec_guid_ref = "";
                     MainWindow.GC.Rwc.Invalidate();
                 }
@@ -1195,11 +1195,11 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             gmp.Name = "NewMP";
-            gmp.mpInfo = new MolPopInfo("");
-            gmp.mpInfo.mp_dist_name = "New distribution";
-            gmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mpInfo.mp_render_on = true;
-            gmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+            //gmp.mpInfo = new MolPopInfo("");
+            gmp.mp_dist_name = "New distribution";
+            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            gmp.mp_render_on = true;
+            gmp.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             if (cell == null)
@@ -1253,11 +1253,11 @@ namespace DaphneGui
 
             
             cmp.Name = "NewMP";
-            cmp.mpInfo = new MolPopInfo("");
-            cmp.mpInfo.mp_dist_name = "New distribution";
-            cmp.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            cmp.mpInfo.mp_render_on = true;
-            cmp.mpInfo.mp_distribution = new MolPopHomogeneousLevel();
+            //cmp.mpInfo = new MolPopInfo("");
+            cmp.mp_dist_name = "New distribution";
+            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            cmp.mp_render_on = true;
+            cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             if (cell == null)
@@ -1649,8 +1649,8 @@ namespace DaphneGui
                         for (int r = 0; r < MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Count; r++)
                         {
                             // We'll just be picking the first one that uses 
-                            if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
-                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
+                            if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
+                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
                             {
                                 SelectSolfacInGUI(r);
                                 //gui_spot_found = true;
@@ -2023,9 +2023,9 @@ namespace DaphneGui
                 ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
                 if (cmp == null)
                     return;
-                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
-                    ((MolPopLinear) cmp.mpInfo.mp_distribution).Initalize((BoundaryFace) cb.SelectedItem);
+                    ((MolPopLinear) cmp.mp_distribution).Initalize((BoundaryFace) cb.SelectedItem);
                 }
             }
         }
@@ -2056,9 +2056,9 @@ namespace DaphneGui
             {
                 cbi.IsEnabled = false;
             }
-            else if (cmp.mpInfo.mp_distribution.GetType() == typeof(MolPopLinear))
+            else if (cmp.mp_distribution.GetType() == typeof(MolPopLinear))
             {
-                MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
                 if (mpl.boundary_face == BoundaryFace.None)
                 {
                     cbi.IsEnabled = false;
@@ -2249,10 +2249,10 @@ namespace DaphneGui
 
                 foreach (ConfigMolecularPopulation cmp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
                 {
-                    if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                     {
                         MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        cmp.mpInfo.mp_distribution = shl;
+                        cmp.mp_distribution = shl;
                     }
                 }
             }
@@ -3845,17 +3845,17 @@ namespace DaphneGui
             if (mol_pop == null)
                 return;
 
-            if (mol_pop.mpInfo.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
+            if (mol_pop.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
                 return;
 
-            MolPopGaussian mpg = mol_pop.mpInfo.mp_distribution as MolPopGaussian;
+            MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
             string gauss_guid = mpg.gaussgrad_gauss_spec_guid_ref;
 
             if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
             {
                 GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[gauss_guid];
-                gs.gaussian_spec_color = mol_pop.mpInfo.mp_color;
+                gs.gaussian_spec_color = mol_pop.mp_color;
             }
         }
 

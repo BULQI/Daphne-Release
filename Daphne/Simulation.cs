@@ -135,9 +135,9 @@ namespace Daphne
         {
             foreach (ConfigMolecularPopulation cmp in configComp.molpops)
             {
-                if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mpInfo.mp_distribution;
+                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
 
                     // find the box associated with this gaussian
                     int box_id = -1;
@@ -210,20 +210,20 @@ namespace Daphne
 
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "gauss", initArray);
                 }
-                else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
-                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mpInfo.mp_distribution;
+                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
 
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
                 }
-                else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
-                	MolPopExplicit mpc = (MolPopExplicit)cmp.mpInfo.mp_distribution;
+                    MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
                     simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "explicit", mpc.conc);
                 }
-                else if (cmp.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
-                    MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
 
                     double c1 = mpl.boundaryCondition[0].concVal;
                     double c2 = mpl.boundaryCondition[1].concVal;
@@ -563,7 +563,7 @@ namespace Daphne
                             MolPopExplicit mp_explicit = new MolPopExplicit();
                             // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
                             mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
-                            cmp.mpInfo.mp_distribution = mp_explicit;            
+                            cmp.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
                     }
@@ -703,8 +703,8 @@ namespace Daphne
             // ECS molpops boundary conditions
             foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops)
             {
-                if (cmp.mpInfo.mp_distribution.GetType() == typeof(MolPopLinear)) {
-                    MolPopLinear mpl = cmp.mpInfo.mp_distribution as MolPopLinear;
+                if (cmp.mp_distribution.GetType() == typeof(MolPopLinear)) {
+                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
                     foreach (BoundaryCondition bc in mpl.boundaryCondition)
                     //foreach (BoundaryCondition bc in cmp.boundaryCondition)
                     {

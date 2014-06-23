@@ -987,7 +987,7 @@
                                     Grid.ColumnSpan="2" Grid.Row="0"
                                     Margin="0,6"
                                     BorderBrush="DarkGray" BorderThickness="1"
-                                    Content="{Binding Path=mpInfo.mp_distribution}"  />
+                                    Content="{Binding Path=mp_distribution}"  />
                 </Grid>
             </DataTemplate>           
             
@@ -1550,11 +1550,11 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=mpInfo.mp_color}"
+                                    Value="{Binding Path=mp_color}"
                                     Margin="4,2"
                                     />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
                                 <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                 <Slider x:Name="solfac_weight_slider"
                                 Orientation="Horizontal"
@@ -1565,7 +1565,7 @@
                                 RenderTransform="1.0,0,0,0.5,0,7"
                                 Minimum="0" 
                                 Maximum="5" 
-                                Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
+                                Value="{Binding Path=mp_render_blending_weight}" 
                                 IsSnapToTickEnabled="True" 
                                 TickFrequency="0.1" 
                                 />
@@ -1679,11 +1679,11 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=mpInfo.mp_color}"
+                                    Value="{Binding Path=mp_color}"
                                     Margin="4,2"
                                     />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
                                 <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                 <Slider x:Name="solfac_weight_slider"
                                         Orientation="Horizontal"
@@ -1694,7 +1694,7 @@
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Minimum="0" 
                                         Maximum="5" 
-                                        Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
+                                        Value="{Binding Path=mp_render_blending_weight}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="0.1" 
                                 />
@@ -1778,12 +1778,12 @@
                                     Width="140"
                                     HorizontalAlignment="Left" 
                                     Format="a r g b"
-                                    Value="{Binding Path=mpInfo.mp_color, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
                                     Margin="4,2"
                                     ValueChanged="molPopColorEditBox_ValueChanged"
                                     />
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mpInfo.mp_render_on}">
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
                                 <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                 <Slider x:Name="solfac_weight_slider"
                                 Orientation="Horizontal"
@@ -1794,7 +1794,7 @@
                                 RenderTransform="1.0,0,0,0.5,0,7"
                                 Minimum="0" 
                                 Maximum="5" 
-                                Value="{Binding Path=mpInfo.mp_render_blending_weight}" 
+                                Value="{Binding Path=mp_render_blending_weight}" 
                                 IsSnapToTickEnabled="True" 
                                 TickFrequency="0.1" 
                                 />
@@ -1838,7 +1838,7 @@
                                         Name="MolPopDistributionTypeComboBox"
                                         ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mpInfo.mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                                        SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
                                         GotFocus="MolPopDistributionTypeComboBox_GotFocus"
                                         MinWidth="120">
