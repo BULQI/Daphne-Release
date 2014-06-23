@@ -626,8 +626,10 @@ namespace DaphneGui
         private vtkIntArray cellID, cellSet, cellGeneration;
 #if ALL_DATA
         private Dictionary<string, vtkDoubleArray> cellReceptorArrays;
-#endif
         private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable, bivariateColorTable;
+#else
+        private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable;
+#endif
 
         // colormap
         private Dictionary<int, int> colorMap;
@@ -700,7 +702,7 @@ namespace DaphneGui
                 cv = ctf.GetColor(vv);
                 cellGenericColorTable.SetTableValue(jj, cv[0], cv[1], cv[2], 1.0f);
             }
-
+#if ALL_DATA
             // Red-Cyan 4 x 4 bivariate colormap
             List<uint[]> bvColors = new List<uint[]>();
             bvColors.Add(new uint[3] { 220, 220, 220 });
@@ -733,6 +735,7 @@ namespace DaphneGui
             // Range is 0-4, and position is calculated as (i + 4*j) with i,j in range 0-1
             bivariateColorTable.SetRange(0, 4);
             bivariateColorTable.Build();
+#endif
 
 #if WRITE_VTK_DATA
             writer = vtkPolyDataWriter.New();
@@ -762,7 +765,7 @@ namespace DaphneGui
         {
             get { return cellGenericColorTable; }
         }
-
+#if ALL_DATA
         /// <summary>
         /// accessor for the bivariate color table
         /// </summary>
@@ -770,7 +773,7 @@ namespace DaphneGui
         {
             get { return bivariateColorTable; }
         }
-
+#endif
         /// <summary>
         /// Retrieve the color map
         /// This is a dictionary mapping the cell set ID to the index in the CellSetColorTable

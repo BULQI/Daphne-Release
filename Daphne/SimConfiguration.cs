@@ -469,7 +469,7 @@ namespace Daphne
             }
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
         }
-
+        
         private void InitTransitionDriversDict()
         {
             entity_repository.transition_drivers_dict.Clear();
@@ -479,6 +479,7 @@ namespace Daphne
             }
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
         }
+
 
         private void InitGeneIDConfigGeneDict()
         {
@@ -2925,13 +2926,7 @@ namespace Daphne
                 _Name = value;
                 OnPropertyChanged("Name");
             }
-        }
-        ////private MolPopInfo _mp_Info;
-        ////public MolPopInfo mpInfo
-        ////{
-        ////    get { return _mp_Info; }
-        ////    set { _mp_Info = value; }
-        ////}
+        }       
 
         private ReportMP reportMP;
         public ReportMP report_mp
@@ -3535,7 +3530,6 @@ namespace Daphne
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
                         configMolPop.molecule_guid_ref = configMolecule.entity_guid;
-                        ////configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                         configMolPop.Name = configMolecule.Name;
                         configMolPop.mp_dist_name = "Uniform";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
