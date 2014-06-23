@@ -247,7 +247,6 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                ////MolPopInfo current_item = current_mol.mpInfo;
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Homogeneous; // = MolPopDistributionType.Gaussian;
 
                 if (e.AddedItems.Count > 0)
@@ -308,7 +307,7 @@ namespace DaphneGui
                         break;
 
                     default:
-                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                        throw new ArgumentException("MolPop distribution type out of range");
                 }
             }
         }
@@ -325,8 +324,6 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                ////MolPopInfo current_item = current_mol.mpInfo;
-
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
                 if (e.AddedItems.Count > 0)
                     new_dist_type = (MolPopDistributionType)e.AddedItems[0];
@@ -376,7 +373,7 @@ namespace DaphneGui
                         current_mol.mp_distribution = sgg;
                         break;                    
                     default:
-                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                        throw new ArgumentException("MolPop distribution type out of range");
                 }
             }
         }
@@ -393,7 +390,6 @@ namespace DaphneGui
 
             if (current_mol != null)
             {
-                ////MolPopInfo current_item = current_mol.mpInfo;
 
                 MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
                 if (e.AddedItems.Count > 0)
@@ -464,38 +460,11 @@ namespace DaphneGui
 #endif
 
                     default:
-                        throw new ArgumentException("MolPopInfo distribution type out of range");
+                        throw new ArgumentException("MolPop distribution type out of range");
                 }
                 //}
             }
         }
-
-        ///// <summary>
-        ///// Event handler for button press for changing custom chemokine distribution input file
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //private void SolfacCustomGradientFile_Click(object sender, RoutedEventArgs e)
-        //{
-        //    MolPopInfo current_item = (MolPopInfo)lbEcsMolPops.SelectedItem;
-
-        //    // Configure open file dialog box
-        //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-        //    dlg.InitialDirectory = Path.GetDirectoryName(((MolPopCustom)current_item.mp_distribution).custom_gradient_file_uri.LocalPath);
-        //    dlg.DefaultExt = ".txt"; // Default file extension
-        //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
-
-        //    // Show open file dialog box
-        //    Nullable<bool> result = dlg.ShowDialog();
-
-        //    // Process open file dialog box results
-        //    if (result == true)
-        //    {
-        //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-        //        string filename = dlg.FileName;
-        //        ((MolPopCustom)current_item.mp_distribution).custom_gradient_file_string = filename;
-        //    }
-        //}
 
         /// <summary>
         /// switch to the sim setup panel
@@ -541,7 +510,6 @@ namespace DaphneGui
 
             gmp.molecule_guid_ref = MainWindow.SOP.Protocol.entity_repository.molecules.First().entity_guid;
             gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
-            //gmp.mpInfo = new MolPopInfo("");
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
@@ -1195,7 +1163,6 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             gmp.Name = "NewMP";
-            //gmp.mpInfo = new MolPopInfo("");
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             gmp.mp_render_on = true;
@@ -1253,7 +1220,6 @@ namespace DaphneGui
 
             
             cmp.Name = "NewMP";
-            //cmp.mpInfo = new MolPopInfo("");
             cmp.mp_dist_name = "New distribution";
             cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             cmp.mp_render_on = true;
