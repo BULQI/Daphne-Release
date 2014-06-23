@@ -360,7 +360,7 @@ namespace Daphne
 
                 //Now overwrite the concs in Protocoluration
                 ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
-                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mpInfo.mp_distribution;
+                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
                 homo.concentration = kvp.Value;                
             }           
         }

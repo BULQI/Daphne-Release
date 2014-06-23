@@ -284,7 +284,7 @@ namespace DaphneGui
         /// <param name="region">pointer to the region controlling this gradient, if any</param>
         public void addGradient3D(ConfigMolecularPopulation molpop, RegionControl region)
         {
-            if (molpopTypeControllers.ContainsKey(molpop.mpInfo.mp_guid) == true)
+            if (molpopTypeControllers.ContainsKey(molpop.molpop_guid) == true)
             {
                 MessageBox.Show("Duplicate molpop guid! Aborting insertion.");
                 return;
@@ -293,15 +293,15 @@ namespace DaphneGui
             MolPopTypeController molpopControl;
 
             // check here for linear, Gaussian, homogeneous...
-            if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
-                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mpInfo.mp_distribution).peak_concentration,
-                                                                 ((MolPopGaussian)molpop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref);
+                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
+                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
             }
-            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
                 double x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
-                switch (((MolPopLinear)(molpop.mpInfo.mp_distribution)).dim)
+                switch (((MolPopLinear)(molpop.mp_distribution)).dim)
                 {
                     case 0:
                         x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
@@ -316,20 +316,20 @@ namespace DaphneGui
                         break;
                 }
 
-                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[0].concVal,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[1].concVal,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).x1,
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).boundaryCondition[0].concVal,
+                                                               ((MolPopLinear)molpop.mp_distribution).boundaryCondition[1].concVal,
+                                                               ((MolPopLinear)molpop.mp_distribution).x1,
                                                                x2,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).dim);
+                                                               ((MolPopLinear)molpop.mp_distribution).dim);
 
             }
-            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {
-                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mpInfo.mp_distribution).concentration);
+                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mp_distribution).concentration);
             }
-            //else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
+            //else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
             //{
-            //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mpInfo.mp_distribution).custom_gradient_file_uri.LocalPath);
+            //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mp_distribution).custom_gradient_file_uri.LocalPath);
             //    //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
             //    //{
             //    //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
@@ -349,18 +349,18 @@ namespace DaphneGui
             }
 
             // set the remaining molpop controller fields
-            molpopControl.RenderGradient = molpop.mpInfo.mp_render_on;
+            molpopControl.RenderGradient = molpop.mp_render_on;
             // assign color and weight
-            molpopControl.Color[0] = molpop.mpInfo.mp_color.R;
-            molpopControl.Color[1] = molpop.mpInfo.mp_color.G;
-            molpopControl.Color[2] = molpop.mpInfo.mp_color.B;
+            molpopControl.Color[0] = molpop.mp_color.R;
+            molpopControl.Color[1] = molpop.mp_color.G;
+            molpopControl.Color[2] = molpop.mp_color.B;
             // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = molpop.mpInfo.mp_color.A;
-            molpopControl.BlendingWeight = molpop.mpInfo.mp_render_blending_weight;
+            molpopControl.Color[3] = molpop.mp_color.A;
+            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
             molpopControl.TypeGUID = molpop.molecule_guid_ref;
 
             // add the controller to the dictionary
-            molpopTypeControllers.Add(molpop.mpInfo.mp_guid, molpopControl);
+            molpopTypeControllers.Add(molpop.molpop_guid, molpopControl);
         }
 
         /// <summary>
@@ -626,8 +626,10 @@ namespace DaphneGui
         private vtkIntArray cellID, cellSet, cellGeneration;
 #if ALL_DATA
         private Dictionary<string, vtkDoubleArray> cellReceptorArrays;
-#endif
         private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable, bivariateColorTable;
+#else
+        private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable;
+#endif
 
         // colormap
         private Dictionary<int, int> colorMap;
@@ -700,7 +702,7 @@ namespace DaphneGui
                 cv = ctf.GetColor(vv);
                 cellGenericColorTable.SetTableValue(jj, cv[0], cv[1], cv[2], 1.0f);
             }
-
+#if ALL_DATA
             // Red-Cyan 4 x 4 bivariate colormap
             List<uint[]> bvColors = new List<uint[]>();
             bvColors.Add(new uint[3] { 220, 220, 220 });
@@ -733,6 +735,7 @@ namespace DaphneGui
             // Range is 0-4, and position is calculated as (i + 4*j) with i,j in range 0-1
             bivariateColorTable.SetRange(0, 4);
             bivariateColorTable.Build();
+#endif
 
 #if WRITE_VTK_DATA
             writer = vtkPolyDataWriter.New();
@@ -762,7 +765,7 @@ namespace DaphneGui
         {
             get { return cellGenericColorTable; }
         }
-
+#if ALL_DATA
         /// <summary>
         /// accessor for the bivariate color table
         /// </summary>
@@ -770,7 +773,7 @@ namespace DaphneGui
         {
             get { return bivariateColorTable; }
         }
-
+#endif
         /// <summary>
         /// Retrieve the color map
         /// This is a dictionary mapping the cell set ID to the index in the CellSetColorTable
@@ -1163,9 +1166,9 @@ namespace DaphneGui
             {
                 RegionControl region = null;
 
-                if (protocol.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (protocol.scenario.environment.ecs.molpops[i].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    region = regions[((MolPopGaussian)protocol.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref];
+                    region = regions[((MolPopGaussian)protocol.scenario.environment.ecs.molpops[i].mp_distribution).gaussgrad_gauss_spec_guid_ref];
                 }
 
                 // 3D gradient

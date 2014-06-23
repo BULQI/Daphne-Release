@@ -747,152 +747,11 @@ namespace DaphneGui
         /// <param name="tempProtocol"></param>
         private void LoadCustomProtocol(Protocol protocol)
         {
-            //Use same routines in loading a scenario to populate GUI and simulation
-
-            //Save populatedProtocol into a temporary json           
-            orig_content = protocol.SerializeToStringSkipDeco();
-            //tempFileContent = false;
-
-            //SetPaths
-            protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
-            protocol.TempFile = orig_path + @"\temp_protocol.json";
-            protocol_path = new Uri(protocol.FileName);
-            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-
-            // prevent when a fit is in progress
-            lock (cellFitLock)
-            {
-                if (vcrControl != null)
-                {
-                    vcrControl.SetInactive();
-                }
-                //initialState   
-                ResetProtocol(protocol);
-                enableCritical(loadSuccess);
-                if (loadSuccess == false)
-                {
-                    return;
-                }
-
-                // after doing a full reset, don't require one immediately unless we did a db load
-                MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, MainWindow.CheckControlFlag(MainWindow.CONTROL_DB_LOAD));
-
-                sim.reset();
-                // reset cell tracks and free memory
-                //////////gc.CleanupTracks();
-                gc.CellController.SetCellOpacities(1.0);
-                fitCellOpacitySlider.Value = 1.0;
-                UpdateGraphics();
-
-                // prevent all fit/analysis-related things
-                hideFit();
-                ExportMenu.IsEnabled = false;
-            }
-
-            if (loadSuccess == false)
-            {
-                return;
-            }
-            ProtocolToolWindow.IsEnabled = true;
-            saveScenario.IsEnabled = true;
-            displayTitle();
-            MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            VTKDisplayDocWindow.Activate();
-            sop.Protocol.SerializeToFile(false);
-            ////Delete temporary file
-            //File.Delete(customProtocol.FileName);
+            //Use already existing routines in loading a scenario to populate GUI and simulation
+            prepareScenario(protocol);
+            protocol.SerializeToFile(false);
         }
 
-        /// <summary>
-        /// Loads the customProtocol as the current scenario
-        /// </summary>
-        /// <param name="protocol"></param>
-        private void ResetProtocol(Protocol protocol)
-        {
-            //Load Custom Protocol
-            sop.Protocol = protocol;
-
-            sop.Protocol.InitializeStorageClasses();
-
-            // if we configured a simulation prior to this call, remove all property changed event handlers
-            for (int i = 0; i < sop.Protocol.scenario.box_specifications.Count; i++)
-            {
-                sop.Protocol.scenario.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
-                sop.Protocol.scenario.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
-            }
-            for (int i = 0; i < sop.Protocol.scenario.gaussian_specifications.Count; i++)
-            {
-                sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
-                sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
-            }
-
-            // GUI Resources
-            // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.DataContext = sop.Protocol;
-
-            // set up the simulation
-            if (postConstruction == true && AssumeIDE() == true)
-            {
-                sim.Load(sop.Protocol, true);
-            }
-            else
-            {
-                try
-                {
-                    sim.Load(sop.Protocol, true);
-                }
-                catch (Exception e)
-                {
-                    handleLoadFailure(exceptionMessage(e));
-                    return;
-                }
-            }
-
-            // reporter file name
-            reporter.FileName = sop.Protocol.reporter_file_name;
-
-            // temporary solution to avoid popup resaving states -axin
-            if (true)
-            {
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
-            }
-
-            vtkDataBasket.SetupVTKData(sop.Protocol);
-            // Create all VTK visualization pipelines and elements
-            gc.CreatePipelines();
-
-            // clear the vcr cache
-            if (vcrControl != null)
-            {
-                vcrControl.ReleaseVCR();
-            }
-
-            if (true)
-            {
-                gc.recenterCamera();
-            }
-            gc.Rwc.Invalidate();
-
-            // TODO: Need to do this for all GCs eventually...
-            // Add the RegionControl interaction event handlers here for easier reference to callback method
-            foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
-            {
-                // NOTE: For now not doing any callbacks on property change for RegionControls...
-                kvp.Value.ClearCallbacks();
-                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
-                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWindow.RegionFocusToGUISection));
-            }
-
-            //////////VCR_Toolbar.IsEnabled = false;
-            //////////gc.ToolsToolbar_IsEnabled = true;
-            //////////gc.DisablePickingButtons();
-
-#if LANGEVIN_TIMING
-            gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
-#endif
-
-            loadSuccess = true;
-        }
 
         /// <summary>
         /// Exports a model specification in SBML
@@ -902,8 +761,30 @@ namespace DaphneGui
         private void ExportSBML_Click(object sender, RoutedEventArgs e)
         {
             AddlibSBMLEnv();
-            SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
-            encodedSBML.ConvertDaphneToSBML();
+            //
+            //Configure open file dialog box
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
+            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
+            else { dlg.InitialDirectory = appPath; }
+
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
+            //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
+            dlg.FileName = "SBMLModel";
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
+            {
+                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
+                encodedSBML.ConvertDaphneToSBML(dlg.SafeFileName.Replace(".xml", ""), dlg.FilterIndex);
+            }
+            
         }
 
         /// <summary>
@@ -914,15 +795,38 @@ namespace DaphneGui
         public void ExportReactionComplexSBML_Click(object sender, RoutedEventArgs e)
         {
             AddlibSBMLEnv();
-            SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
-            ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
-            ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
-            ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
+            //
+            //Configure open file dialog box
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
-            if (crc != null)
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
+            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
+            else { dlg.InitialDirectory = appPath; }
+
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
+            dlg.FileName = "SBMLReactionComplex";
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
             {
-                encodedSBML.ConvertReactionComplexToSBML(crc);
+                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
+                ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
+                ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
+                ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
+
+                if (crc != null)
+                {
+                    encodedSBML.ConvertReactionComplexToSBML(crc, dlg.SafeFileName.Replace(".xml", ""));
+                }
             }
+
+            //
+           
         }
 
         /// <summary>
@@ -1087,7 +991,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
         /// <param name="xmlConfigString">scenario as a string</param>
-        private void lockAndResetSim(bool newFile, string xmlConfigString)
+        private void lockAndResetSim(bool newFile, string xmlConfigString, Protocol customProtocol = null)
         {
             // prevent when a fit is in progress
             lock (cellFitLock)
@@ -1096,7 +1000,7 @@ namespace DaphneGui
                 {
                     vcrControl.SetInactive();
                 }
-                initialState(newFile || tempFileContent, true, xmlConfigString);
+                initialState(newFile || tempFileContent, true, xmlConfigString, customProtocol);
                 enableCritical(loadSuccess);
                 if (loadSuccess == false)
                 {
@@ -1931,7 +1835,7 @@ namespace DaphneGui
             return;
         }
 
-        private void initialState(bool newFile, bool completeReset, string jsonScenarioString)
+        private void initialState(bool newFile, bool completeReset, string jsonScenarioString, Protocol customProtocol=null)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
             // we always must deserialize the file
@@ -1950,8 +1854,24 @@ namespace DaphneGui
                         sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
                     }
                 }
+                if (customProtocol !=null)
+                {
+                    sop = new SystemOfPersistence();
+
+                    //Load Custom SimConfig
+                    sop.Protocol = customProtocol;
+                    sop.Protocol.InitializeStorageClasses();
+
+                    //SetPaths
+                    sop.Protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
+                    sop.Protocol.TempFile = orig_path + @"\temp_scenario.json";
+                    
+                    protocol_path = new Uri(sop.Protocol.FileName);
+            
+                }
+                
                 // load past experiment
-                if (jsonScenarioString != "")
+                else if (jsonScenarioString != "")
                 {
                     // reinitialize the configurator
                     sop = new SystemOfPersistence();
@@ -2286,9 +2206,9 @@ namespace DaphneGui
             //Set the box and blob visibilities to how they were pre-run
             foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    MolPopGaussian mpg = molpop.mpInfo.mp_distribution as MolPopGaussian;
+                    MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
                     SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
                     SOP.Protocol.scenario.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
                 }
@@ -2807,10 +2727,10 @@ namespace DaphneGui
             prepareScenario();            
         }
 
-        private void prepareScenario()
+        private void prepareScenario(Protocol customProtocol=null)
         {
             // show the inital state
-            lockAndResetSim(true, "");
+            lockAndResetSim(true, "", customProtocol);
             if (loadSuccess == false)
             {
                 return;

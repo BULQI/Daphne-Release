@@ -399,6 +399,7 @@ namespace Daphne
             InitReactionIDConfigReactionDict();
             InitReactionComplexIDConfigReactionComplexDict();
             InitDiffSchemeIDConfigDiffSchemeDict();
+            InitTransitionDriversDict();
             // Set callback to update box specification extents when environment extents change
             scenario.environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
         }
@@ -467,6 +468,16 @@ namespace Daphne
                 entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
             }
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+        }
+        
+        private void InitTransitionDriversDict()
+        {
+            entity_repository.transition_drivers_dict.Clear();
+            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
+            {
+                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+            }
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
         }
 
 
@@ -576,6 +587,32 @@ namespace Daphne
 
                     //Remove gene from genes_dict
                     entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
+                }
+            }
+        }
+
+        private void transition_drivers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigTransitionDriver tran = nn as ConfigTransitionDriver;
+
+                    if (tran != null)
+                    {
+                        entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigTransitionDriver tran = dd as ConfigTransitionDriver;
+
+                    //Remove gene from transition_drivers_dict
+                    entity_repository.transition_drivers_dict.Remove(tran.entity_guid);
                 }
             }
         }
@@ -2889,19 +2926,76 @@ namespace Daphne
                 _Name = value;
                 OnPropertyChanged("Name");
             }
-        }
-        private MolPopInfo _mp_Info;
-        public MolPopInfo mpInfo
-        {
-            get { return _mp_Info; }
-            set { _mp_Info = value; }
-        }
+        }       
 
         private ReportMP reportMP;
         public ReportMP report_mp
         {
             get { return reportMP; }
             set { reportMP = value; }
+        }
+
+        //Moved MolPopInfo stuff to here - MolPopInfo class was not really needed
+        private string _mp_dist_name = "";
+        public string mp_dist_name
+        {
+            get { return _mp_dist_name; }
+            set
+            {
+                if (_mp_dist_name == value)
+                    return;
+                else
+                {
+                    _mp_dist_name = value;
+                    OnPropertyChanged("mp_dist_name");
+                }
+            }
+        }
+
+        private MolPopDistribution _mp_distribution;
+        public MolPopDistribution mp_distribution
+        {
+            get { return _mp_distribution; }
+            set
+            {
+                if (_mp_distribution == value)
+                    return;
+                else
+                {
+                    _mp_distribution = value;
+                    OnPropertyChanged("mp_distribution");
+                }
+            }
+        }
+        public ObservableCollection<TimeAmpPair> mp_amplitude_keyframes { get; set; }
+        private System.Windows.Media.Color _mp_color;
+        public System.Windows.Media.Color mp_color
+        {
+            get { return _mp_color; }
+            set
+            {
+                if (_mp_color == value)
+                    return;
+                else
+                {
+                    _mp_color = value;
+                    OnPropertyChanged("mp_color");
+                }
+            }
+        }
+        public double mp_render_blending_weight { get; set; }
+        private bool _mp_render_on;
+        public bool mp_render_on
+        {
+            get
+            {
+                return _mp_render_on;
+            }
+            set
+            {
+                _mp_render_on = value;
+                OnPropertyChanged("mp_render_on");
+            }
         }
                     
         public ConfigMolecularPopulation(ReportType rt)
@@ -3436,14 +3530,14 @@ namespace Daphne
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
                         configMolPop.molecule_guid_ref = configMolecule.entity_guid;
-                        configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mpInfo.mp_dist_name = "Uniform";
-                        configMolPop.mpInfo.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        configMolPop.mpInfo.mp_render_blending_weight = 2.0;
+                        configMolPop.mp_dist_name = "Uniform";
+                        configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        configMolPop.mp_render_blending_weight = 2.0;
+                        configMolPop.mp_render_on = true;
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                         hl.concentration = 1;
-                        configMolPop.mpInfo.mp_distribution = hl;
+                        configMolPop.mp_distribution = hl;
                         if (HasMolecule(molguid) == false)
                         {
                             molpops.Add(configMolPop);
@@ -3723,26 +3817,6 @@ namespace Daphne
             }
 
             return ret;
-        }
-    }
-
-    public class CellPopDistType
-    {
-        public string Name { get; set; }
-        public ObservableCollection<CellPopDistSubtype> DistSubtypes { get; set; }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
-    public class CellPopDistSubtype
-    {
-        public string Label { get; set; }
-        public override string ToString()
-        {
-            return Label;
         }
     }
 
@@ -4485,91 +4559,6 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
         }  
-    }
-
-    // MolPopInfo ==================================
-    public class MolPopInfo : EntityModelBase
-    {
-        public string mp_guid { get; set; }
-        private string _mp_dist_name = "";
-        public string mp_dist_name
-        {
-            get { return _mp_dist_name; }
-            set
-            {
-                if (_mp_dist_name == value)
-                    return;
-                else
-                {
-                    _mp_dist_name = value;
-                    OnPropertyChanged("mp_dist_name");
-                }
-            }
-        }
-
-        private MolPopDistribution _mp_distribution;
-        public MolPopDistribution mp_distribution
-        {
-            get { return _mp_distribution; }
-            set
-            {
-                if (_mp_distribution == value)
-                    return;
-                else
-                {
-                    _mp_distribution = value;
-                    OnPropertyChanged("mp_distribution");
-                }
-            }
-        }
-        public ObservableCollection<TimeAmpPair> mp_amplitude_keyframes { get; set; }
-        private System.Windows.Media.Color _mp_color;
-        public System.Windows.Media.Color mp_color
-        {
-            get { return _mp_color; }
-            set
-            {
-                if (_mp_color == value)
-                    return;
-                else
-                {
-                    _mp_color = value;
-                    OnPropertyChanged("mp_color");
-                }
-            }
-        }
-        public double mp_render_blending_weight { get; set; }
-        private bool _mp_render_on;
-        public bool mp_render_on 
-        { 
-            get
-            {
-                return _mp_render_on;
-            }
-            set {
-                _mp_render_on = value;                
-                OnPropertyChanged("mp_render_on");
-            }
-        }
-
-        public MolPopInfo()
-        {            
-        }
-
-        public MolPopInfo(string name)
-        {
-            Guid id = Guid.NewGuid();
-
-            mp_guid = id.ToString();
-            mp_dist_name = name;
-            // Default is static homogeneous level
-            mp_distribution = new MolPopHomogeneousLevel();
-            mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
-            mp_color = new System.Windows.Media.Color();
-            mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-            mp_render_blending_weight = 1.0;
-            mp_render_on = true;
-        }
     }
 
     /// <summary>

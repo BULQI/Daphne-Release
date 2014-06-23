@@ -96,7 +96,7 @@ namespace DaphneGui
                 cur_mp.Conc.CopyArray(cur_conc_values);
                 mpex.conc = cur_conc_values;
 
-                cmp.mpInfo.mp_distribution = mpex;
+                cmp.mp_distribution = mpex;
             }
 
             foreach (var kvp in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
