@@ -41,35 +41,23 @@
             <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
-            <daph:MolGUIDtoMolIndexConverter x:Key="MolGUIDtoMolIndexConv" />
             <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
             
             <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />
             <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
-            <daph:CellPopDistributionTypeToBoolConverter x:Key="CellPopDistTypeBoolConv" />
             <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
             <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
             <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
             <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
             <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
-            <daph:CellGuidToCellReactionsConverter x:Key="CellGuidToCellReactionsConv" />
             <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
             <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
             <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
             <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
             <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
-            <daph:IsNullConverter x:Key="IsNullConv" />
             <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
             <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
             <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
-            <daph:DeathDriverGuidToMolGuidConverter x:Key="DeathDriverGuidToMolGuidConv" />
-            <daph:MolGuidToMolPopMultiConverter x:Key="MolGuidToMolPopMultiConv" />
-            <daph:DeathDriverGuidToAlphaConverter x:Key="DeathDriverGuidToAlphaConv" />
-            <daph:DeathDriverGuidToBetaConverter x:Key="DeathDriverGuidToBetaConv" />
-            <daph:DeathDriverGuidToDriverElementConverter x:Key="DeathDriverGuidToDriverElementConv" />
-
-            <daph:GuidToBoolConverter x:Key="GuidToBoolConv" />
-            <daph:TransitionDriverToBoolConverter x:Key="TransitionDriverToBoolConv" />
             <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
             <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
             <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
