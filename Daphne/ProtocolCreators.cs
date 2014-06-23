@@ -2535,7 +2535,13 @@ namespace Daphne
                     {
                         driverElement.Alpha = alpha[i, j];
                         driverElement.Beta = beta[i, j];
-                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
+
+                        string molecule_guid = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
+
+                        if(protocol.entity_repository.molecules_dict.ContainsKey(molecule_guid) == true)
+                        {
+                            driverElement.Driver_Mol = protocol.entity_repository.molecules_dict[molecule_guid].Clone();
+                        }
                     }
                     row.elements.Add(driverElement);
                 }
