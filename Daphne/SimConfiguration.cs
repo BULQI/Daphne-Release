@@ -2942,7 +2942,6 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        //Moved MolPopInfo stuff to here - MolPopInfo class was not really needed
         private string _mp_dist_name = "";
         public string mp_dist_name
         {

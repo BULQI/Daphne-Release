@@ -2548,7 +2548,6 @@ namespace SBMLayer
             }
 
             configMolPop.molecule_guid_ref = configMolecule.entity_guid;
-            //configMolPop.mpInfo = new MolPopInfo(configMolecule.Name);
             configMolPop.Name = configMolecule.Name;
 
             //Retrieve distribution of ECS molecules from custom annotation
