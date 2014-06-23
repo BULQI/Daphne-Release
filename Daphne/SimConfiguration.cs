@@ -2475,17 +2475,26 @@ namespace Daphne
             return TempMolName;
         }
        
-        public ConfigMolecule Clone(Protocol protocol)
+        /// <summary>
+        /// create a clone of a molecule
+        /// </summary>
+        /// <param name="protocol">null (default) to create a literal copy</param>
+        /// <returns></returns>
+        public ConfigMolecule Clone(Protocol protocol = null)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newmol.entity_guid = id.ToString();
-            newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
+
+                newmol.entity_guid = id.ToString();
+                newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
+            }
             
             return newmol;
         }        
@@ -2626,7 +2635,7 @@ namespace Daphne
         //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
         public double Beta { get; set; }
-        public string  driver_mol_guid_ref { get; set; }
+        public ConfigMolecule Driver_Mol { get; set; }
 
         public int CurrentState { get; set; }
         public string CurrentStateName { get; set; }
@@ -2637,7 +2646,7 @@ namespace Daphne
         {
             //Guid id = Guid.NewGuid();
             //driver_element_guid = id.ToString();
-            driver_mol_guid_ref = "";
+            Driver_Mol = null;
         }
     }
 
@@ -2772,7 +2781,6 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
-                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = Driver.states[k];
                 e.CurrentState = k;
                 e.DestState = Driver.states.Count - 1;
@@ -2787,7 +2795,6 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
-                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = sname;
                 e.CurrentState = Driver.states.Count - 1;
                 e.DestState = j;
@@ -4773,7 +4780,7 @@ namespace Daphne
                     if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        mol_guid = row.elements[1].Driver_Mol.entity_guid;
                         break;
                     }
                 }
@@ -4945,7 +4952,7 @@ namespace Daphne
                     if (driver.entity_guid == guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        mol_guid = row.elements[1].Driver_Mol.entity_guid;
                         break;
                     }
                 }
@@ -5017,7 +5024,7 @@ namespace Daphne
                     if (driver.entity_guid == death_guid)
                     {
                         ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
+                        mol_guid = row.elements[1].Driver_Mol.entity_guid;
                         break;
                     }
                 }
