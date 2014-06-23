@@ -2733,7 +2733,7 @@ namespace DaphneGui
             DataTemplate cellTemplate = new DataTemplate();
 
             //SET UP A TEXTBLOCK ONLY
-            Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            Binding bn = new Binding(string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count));
             bn.Mode = BindingMode.TwoWay;
             bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
@@ -2776,9 +2776,9 @@ namespace DaphneGui
             comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
             comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
 
-            //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
+            //NEED TO SOMEHOW CONVERT Driver_Mol.entity_grid to mol_pop!  Set up a converter and pass it the cytosol.
             MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
-            string sText = string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count);
+            string sText = string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count);
             Binding b3 = new Binding(sText);
             b3.Mode = BindingMode.TwoWay;
             b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -2795,7 +2795,7 @@ namespace DaphneGui
 
             //This disables the expander if no driver molecule is selected
             DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
-            Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
+            Binding bEnabled = new Binding(string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count));
             bEnabled.Mode = BindingMode.OneWay;
             bEnabled.Converter = enabledConv;
 
@@ -3277,7 +3277,7 @@ namespace DaphneGui
 
             //    ConfigMolecularPopulation selMolPop = ((ConfigMolecularPopulation)(combo.SelectedItem));
 
-            //    driverRow.elements[ncol].driver_mol_guid_ref = selMolPop.molecule_guid_ref;
+            //    driverRow.elements[ncol].Driver_Mol.entity_guid = selMolPop.molecule_guid_ref;
             //}
 #endif
 
