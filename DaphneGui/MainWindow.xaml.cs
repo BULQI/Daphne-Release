@@ -747,14 +747,6 @@ namespace DaphneGui
         /// <param name="tempProtocol"></param>
         private void LoadProtocolFromSBML(Protocol protocol)
         {
-            //Use already existing routines in loading a scenario to populate GUI and simulation
-
-            //These lines are supposed to happen inside initialState
-            //sop = new SystemOfPersistence();
-
-            ////Load new Protocol
-            //sop.Protocol = protocol;
-
             protocol.InitializeStorageClasses();
 
             //SetPaths
@@ -763,7 +755,7 @@ namespace DaphneGui
 
             protocol_path = new Uri(protocol.FileName);   
 
-            prepareScenario(protocol);
+            prepareProtocol(protocol);
             protocol.SerializeToFile(false);
         }
 
@@ -1856,45 +1848,45 @@ namespace DaphneGui
         /// <param name="jsonScenarioString"></param>
         /// <returns></returns>
         private Protocol ReadJson(string jsonScenarioString) 
-        { 
-           // load past experiment
-                if (jsonScenarioString != "")
-                {
-                    // reinitialize the configurator
-                    //sop = new SystemOfPersistence();
-                    sop.Protocol.TempFile = orig_path + @"\temp_protocol.json";
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        sop.DeserializeProtocolFromString(jsonScenarioString);
-                        return sop.Protocol;
-                    }
-                    catch
-                    {
-                        handleLoadFailure("That configuration has problems. Please select another experiment.");
-                        return null;
-                    }
-                }
-                else
-                {
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        if (sop == null) { sop = new SystemOfPersistence(); }
-                        sop.Protocol.FileName = protocol_path.LocalPath;
-                        sop.Protocol.TempFile = orig_path + @"\temp_protocol.json";
-                        sop.DeserializeProtocol(tempFileContent);
-                        return sop.Protocol;
-                        //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
-                    }
-                    catch
-                    {
-                        handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
-                        return null;
-                    }
-                }
-        }
+        {
+            Protocol protocol;
 
+            // load past experiment
+            if (jsonScenarioString != "")
+            {
+                protocol = new Protocol();
+                protocol.TempFile = orig_path + @"\temp_protocol.json";
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    protocol.DeserializeFromString(jsonScenarioString);
+                    return protocol;
+                }
+                catch
+                {
+                    handleLoadFailure("That configuration has problems. Please select another experiment.");
+                    return null;
+                }
+            }
+            else
+            {
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    protocol = new Protocol();
+                    protocol.FileName = protocol_path.LocalPath;
+                    protocol.TempFile = orig_path + @"\temp_protocol.json";
+                    protocol.Deserialize(tempFileContent);
+                    return protocol;
+                    //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
+                }
+                catch
+                {
+                    handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
+                    return null;
+                }
+            }
+        }
 
         private void initialState(bool newFile, bool completeReset, Protocol protocol)
         {
@@ -2620,7 +2612,7 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                prepareScenario(ReadJson(""));                 
+                prepareProtocol(ReadJson(""));                 
             }
         }
 
@@ -2742,10 +2734,10 @@ namespace DaphneGui
             }
 
             setScenarioPaths(filename);
-            prepareScenario(ReadJson(""));            
+            prepareProtocol(ReadJson(""));            
         }
 
-        private void prepareScenario(Protocol protocol)
+        private void prepareProtocol(Protocol protocol)
         {
             // show the inital state
             lockAndResetSim(true, protocol);
