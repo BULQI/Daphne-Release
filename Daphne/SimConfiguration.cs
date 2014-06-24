@@ -89,7 +89,6 @@ namespace Daphne
         public void DeserializeProtocol(bool tempFiles = false)
         {
             Protocol = (Protocol)Protocol.Deserialize(tempFiles);
-            Protocol.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -99,7 +98,6 @@ namespace Daphne
         public void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
         {
             protocol = (Protocol)protocol.Deserialize(tempFiles);
-            protocol.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -109,7 +107,6 @@ namespace Daphne
         public void DeserializeProtocolFromString(string jsonFile)
         {
             Protocol = (Protocol)Protocol.DeserializeFromString(jsonFile);
-            Protocol.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -119,7 +116,6 @@ namespace Daphne
         public void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
         {
             protocol = (Protocol)protocol.DeserializeFromString(jsonFile);
-            protocol.InitializeStorageClasses();
         }
     }
 
@@ -333,6 +329,9 @@ namespace Daphne
             // after deserialization, the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            InitializeStorageClasses();
+
             return local;
         }
 
@@ -350,6 +349,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            InitializeStorageClasses();
+
             return local;
         }
 
