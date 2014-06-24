@@ -76,7 +76,6 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cs.cellPopDist = new CellPopUniform(extents, minDisSquared, cs);
 
-            cs.cellpopulation_constrained_to_region = false;
             cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cs);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
@@ -2274,7 +2273,6 @@ namespace DaphneGui
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
 
-            cp.cellpopulation_constrained_to_region = false;
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
 

@@ -34,7 +34,6 @@
                 </Style.Triggers>
             </Style>
 
-            <daph:RelativePositionToShortStringConverter x:Key="RelativePosEnumConv" />            
             <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />

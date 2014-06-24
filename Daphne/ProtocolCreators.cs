@@ -112,7 +112,6 @@ namespace Daphne
             cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
                                                                 protocol.scenario.environment.extent_y / 2,
                                                                 protocol.scenario.environment.extent_z / 2);
-            cellPop.cellpopulation_constrained_to_region = false;
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             protocol.scenario.cellpopulations.Add(cellPop);
 
@@ -239,7 +238,6 @@ namespace Daphne
             cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * configCell.CellRadius - protocol.scenario.environment.gridstep / 2,
                                                                 protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
                                                                 protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
-            cellPop.cellpopulation_constrained_to_region = false;
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             protocol.scenario.cellpopulations.Add(cellPop);
             cellPop.report_xvf.position = true;
