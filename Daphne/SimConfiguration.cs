@@ -1812,43 +1812,7 @@ namespace Daphne
             region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
         }
     }
- 
-    public enum RelativePosition { Inside, Surface, Outside }
 
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(RelativePosition), typeof(string))]
-    public class RelativePositionToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _relative_position_strings = new List<string>()
-                                {
-                                    "in",
-                                    "on",
-                                    "outside"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _relative_position_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _relative_position_strings.FindIndex(item => item == str);
-            return (RelativePosition)Enum.ToObject(typeof(RelativePosition), (int)idx);
-        }
-    }
     public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
 
     /// <summary>
@@ -4255,7 +4219,6 @@ namespace Daphne
         }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
-        public string cell_subset_guid_ref { get; set; }
 
         private ReportXVF reportXVF;
         public ReportXVF report_xvf
@@ -4290,28 +4253,6 @@ namespace Daphne
             }
         }
 
-        // TODO: Need to abstract out positioning to include pos specification for single cell...
-        private bool _cellpopulation_constrained_to_region = false;
-        public bool cellpopulation_constrained_to_region 
-        {
-            get { return _cellpopulation_constrained_to_region; }
-            set
-            {
-                if (_cellpopulation_constrained_to_region == value)
-                    return;
-                else
-                {
-                    _cellpopulation_constrained_to_region = value;
-                    // NOTE: For now, manually blanking out guid_ref if false selected
-                    //   so cell population will be correct and searching for "used" regions
-                    //   will not turn up unwanted references...
-                    if (_cellpopulation_constrained_to_region == false)
-                        cellpopulation_region_guid_ref = "";
-                }
-            }
-        }
-        public string cellpopulation_region_guid_ref { get; set; }
-        public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         private Color _cellpopulation_color;   //this is used if cellpopulation_predef_color is set to ColorList.Custom
         public Color cellpopulation_color
@@ -4365,11 +4306,7 @@ namespace Daphne
 
             cellpopulation_guid = id.ToString();
             cellpopulation_name = "";
-            cell_subset_guid_ref = "";
             number = 1;
-            cellpopulation_constrained_to_region = false;
-            cellpopulation_region_guid_ref = "";
-            wrt_region = RelativePosition.Inside;
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
