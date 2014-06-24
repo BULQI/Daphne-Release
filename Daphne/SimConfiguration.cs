@@ -95,7 +95,7 @@ namespace Daphne
         /// deserialize an external protocol (not the one part of this class)
         /// </summary>
         /// <param name="tempFiles">true for handling temporary files</param>
-        public void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
+        public static void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
         {
             protocol = (Protocol)protocol.Deserialize(tempFiles);
         }
@@ -113,7 +113,7 @@ namespace Daphne
         /// deserialize an external protocol from a string
         /// </summary>
         /// <param name="jsonFile">json file content as string</param>
-        public void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
+        public static void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
         {
             protocol = (Protocol)protocol.DeserializeFromString(jsonFile);
         }

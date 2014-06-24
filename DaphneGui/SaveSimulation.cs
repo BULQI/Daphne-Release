@@ -37,7 +37,7 @@ namespace DaphneGui
                 //copy initial settings, only done once
                 ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json");
             }
-            sop.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
+            SystemOfPersistence.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
             foreach (KeyValuePair<int, CellPopulation> item in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)

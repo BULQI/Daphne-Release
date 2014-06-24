@@ -1859,7 +1859,7 @@ namespace DaphneGui
                 // catch xaml parse exception if it's not a good sim config file
                 try
                 {
-                    protocol = (Protocol)protocol.DeserializeFromString(jsonScenarioString);
+                    SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
                     return protocol;
                 }
                 catch
@@ -1876,7 +1876,7 @@ namespace DaphneGui
                     protocol = new Protocol();
                     protocol.FileName = protocol_path.LocalPath;
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
-                    protocol = (Protocol)protocol.Deserialize(tempFileContent);
+                    SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
