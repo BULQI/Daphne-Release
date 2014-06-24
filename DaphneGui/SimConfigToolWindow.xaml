@@ -1039,55 +1039,6 @@
                 </StackPanel>
             </DataTemplate>
 
-            <DataTemplate x:Key="cellListItemTemplate">
-                <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="10" Height="10"
-                                               Margin="5,0,0,0"
-                                               VerticalAlignment="Center"
-                                               Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
-                                               Stroke="Black" StrokeThickness="0.5"/>
-                    <TextBlock Text="{Binding Path=number}" Margin="5,0,0,0"/>
-                    <TextBlock Text=" " />                    
-                    <StackPanel Orientation="Horizontal">
-                        <!-- Only want an "s" to show up if more than one cell -->
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=number, Converter={StaticResource ManyConv}}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=number, Converter={StaticResource ManyConv}}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="s" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <!-- Only want a region name to show up if cells are constrained to region -->
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Path=cellpopulation_constrained_to_region}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Path=cellpopulation_constrained_to_region}" Value="False">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text=" " />
-                        <TextBlock Text="{Binding Path=wrt_region, Converter={StaticResource RelativePosEnumConv}}" />
-                        <TextBlock Text=" " />
-                        <TextBlock Text="{Binding Path=cellpopulation_region_guid_ref, 
-                                                                Converter={StaticResource RegionGUIDtoNameConv}, 
-                                                                ConverterParameter={StaticResource cellsetRegionsListView}}" />
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-
             <!-- Color field template -->
             <!-- CellPopsListBox -->
             <DataTemplate x:Key="colorItemTemplate">
