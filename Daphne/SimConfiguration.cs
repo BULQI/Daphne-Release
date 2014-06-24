@@ -330,7 +330,7 @@ namespace Daphne
             local.FileName = FileName;
             local.TempFile = TempFile;
 
-            InitializeStorageClasses();
+            local.InitializeStorageClasses();
 
             return local;
         }
@@ -350,7 +350,7 @@ namespace Daphne
             local.FileName = FileName;
             local.TempFile = TempFile;
 
-            InitializeStorageClasses();
+            local.InitializeStorageClasses();
 
             return local;
         }
