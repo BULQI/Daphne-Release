@@ -86,7 +86,7 @@ namespace DaphneGui
         /// uri for the scenario file
         /// </summary>
         public static Uri protocol_path;
-        private string orig_content, orig_path;
+        private string orig_content, orig_path, SBMLFolderPath;
         private bool tempFileContent = false, postConstruction = false;
 
         private bool exportAllFlag = false;
@@ -371,6 +371,12 @@ namespace DaphneGui
                 execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
             }
+
+            //Defines default location of SBML folder within Daphne's directory structure
+            SBMLFolderPath = appPath + @"\Config\SBML\";
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
 
             // handle the application properties
             string file;
@@ -660,12 +666,7 @@ namespace DaphneGui
 
             //Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
-
-            dlg.InitialDirectory = appPath + @"\Config\SBML\";
+            dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
 
@@ -771,12 +772,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
-            if (!Directory.Exists(SBML_folder)) {Directory.CreateDirectory(SBML_folder);}
-
-            dlg.InitialDirectory = appPath + @"\Config\SBML\";
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
@@ -805,12 +801,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
-            dlg.InitialDirectory = appPath + @"\Config\SBML\";
-
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             dlg.FileName = "SBMLReactionComplex";

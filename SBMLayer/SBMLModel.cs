@@ -2049,8 +2049,10 @@ namespace SBMLayer
                         }
                     }
 
+          
                     //Add cell population
                     CellPopulation cellPop = new CellPopulation();
+                    cellPop.Cell = gc.Clone(true);
                     cellPop.Cell.entity_guid = gc.entity_guid;
                     cellPop.cellpopulation_name = gc.CellName;
                     cellPop.number = (int)compartAttributes[2];
