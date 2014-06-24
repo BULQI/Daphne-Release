@@ -72,9 +72,7 @@ namespace SBMLayer
         /// <param name=" protocol"></param>
         public SBMLModel(string appPath, Protocol protocol)
         {
-
-            // Creates a template SBML model and creates the respective folder if nonexistent
-
+            // Creates a template SBML model
             this.appPath = appPath;
             this.protocol =  protocol;
         }
@@ -519,17 +517,6 @@ namespace SBMLayer
         }
 
         /// <summary>
-        /// Structures user output directory for SBML and log files to be saved
-        /// </summary>
-        /// <param name="path"></param>
-        private string SetUpDirectory(string path)
-        {
-            string SBML_folder = new Uri(path).LocalPath;
-            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
-            return path;
-        }
-
-        /// <summary>
         /// Copies directory file and output paths 
         /// </summary>
         /// <param name="dirPath"></param>
@@ -727,7 +714,7 @@ namespace SBMLayer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void ConvertDaphneToSBML(string fileName, int isSpatial)
+        public void ConvertDaphneToSBML(int isSpatial)
         {
             //Sets flag to know which type of SBML we are building
             if (isSpatial == 1)
@@ -750,7 +737,7 @@ namespace SBMLayer
                 world = new SpatialComponents( protocol, ref model);
             }
           
-            SetPaths(Uri.UnescapeDataString(new Uri(SetUpDirectory(appPath + @"\SBML\")).LocalPath), fileName);
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
 
             //Populates model ids in SBML template
             SetModelIds( protocol.experiment_name, "Daphne");
@@ -947,10 +934,8 @@ namespace SBMLayer
 
             }
 
-
             //Check for model consistency and serialize to file (provide output stream for log)
             CheckModelConsistency(true, outputLogFile);
-
 
             WriteSBMLModel();
         }
@@ -961,7 +946,7 @@ namespace SBMLayer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void ConvertReactionComplexToSBML(ConfigReactionComplex crc, string fileName)
+        public void ConvertReactionComplexToSBML(ConfigReactionComplex crc)
         {
             //Initializes SBMLDoc and adda spatial package namespaces to model if necessary
             SetSBMLNameSpaces();
@@ -969,7 +954,7 @@ namespace SBMLayer
             model = sbmlDoc.createModel();
 
             string experimentName = CleanIds(crc.Name);
-            SetPaths(Uri.UnescapeDataString(new Uri(SetUpDirectory(appPath + @"\SBML\")).LocalPath), fileName);
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
 
             //Populates model ids in SBML template
             SetModelIds(experimentName, "Daphne");
@@ -1638,7 +1623,7 @@ namespace SBMLayer
         public Protocol ReadSBMLFile()
         {
             //Stores directory path and file name into appropriate variables
-            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
+            SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath)+ @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
             //Reads and performs basic consistency checks upon reading the content
             sbmlDoc = libsbml.readSBML(dirPath + fileName + ".xml");
 
@@ -1648,7 +1633,7 @@ namespace SBMLayer
             //Attempt to convert upwards imported SBMLdocument to supported Level and Version of SBML
             if (sbmlDoc.getNumErrors() > 0)
             {
-                MessageBox.Show("Model could not be read into SBML", "Error reading SBML file");
+                MessageBox.Show("File could not be read into Daphne. Please select another one", "Error reading SBML file");
                 return null;
             }
             if (!ConvertToL3V1(ref sbmlDoc))

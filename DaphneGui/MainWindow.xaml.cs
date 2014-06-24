@@ -662,10 +662,10 @@ namespace DaphneGui
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
             //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
+            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
 
+            dlg.InitialDirectory = appPath + @"\Config\SBML\";
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
 
@@ -773,10 +773,10 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
+            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
+            if (!Directory.Exists(SBML_folder)) {Directory.CreateDirectory(SBML_folder);}
 
+            dlg.InitialDirectory = appPath + @"\Config\SBML\";
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
@@ -784,12 +784,12 @@ namespace DaphneGui
 
             // Show open  file dialog box
             Nullable<bool> result = dlg.ShowDialog();
-
+            SBMLModel encodedSBML;
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
-                encodedSBML.ConvertDaphneToSBML(dlg.SafeFileName.Replace(".xml", ""), dlg.FilterIndex);
+                encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
+                encodedSBML.ConvertDaphneToSBML(dlg.FilterIndex);
             }
             
         }
@@ -807,9 +807,9 @@ namespace DaphneGui
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
+            string SBML_folder = new Uri(appPath + @"\Config\SBML\").LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
+            dlg.InitialDirectory = appPath + @"\Config\SBML\";
 
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
@@ -821,19 +821,16 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
                 ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
                 ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
                 ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
 
                 if (crc != null)
                 {
-                    encodedSBML.ConvertReactionComplexToSBML(crc, dlg.SafeFileName.Replace(".xml", ""));
+                    encodedSBML.ConvertReactionComplexToSBML(crc);
                 }
             }
-
-            //
-           
         }
 
         /// <summary>
