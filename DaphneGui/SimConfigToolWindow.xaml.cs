@@ -2705,15 +2705,15 @@ namespace DaphneGui
         {
             DataGridTemplateColumn col = new DataGridTemplateColumn();
 
-            string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", DiffRegGrid.Columns.Count);
+            string sbind = string.Format("states[{0}]", DiffRegGrid.Columns.Count);
             Binding bcol = new Binding(sbind);
-            bcol.ElementName = "CellsListBox";
             bcol.Path = new PropertyPath(sbind);
             bcol.Mode = BindingMode.OneWay;
 
             //Create a TextBox so the state name is editable
             FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
             txtStateName.SetValue(TextBlock.StyleProperty, null);
+            txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
             txtStateName.SetBinding(TextBlock.TextProperty, bcol);
 
             //DataGridRowHeader header = new DataGridRowHeader();
@@ -3346,9 +3346,8 @@ namespace DaphneGui
                 DataGridRow row = DiffRegGrid.GetRow(ii);
                 if (row != null)
                 {
-                    string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", ii);
+                    string sbind = string.Format("states[{0}]", ii);
                     Binding b = new Binding(sbind);
-                    b.ElementName = "CellsListBox";
                     b.Path = new PropertyPath(sbind);
                     b.Mode = BindingMode.OneWay;
 
@@ -3356,6 +3355,7 @@ namespace DaphneGui
                     FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
                     txtStateName.SetValue(TextBlock.StyleProperty, null);
                     txtStateName.SetValue(TextBlock.WidthProperty, 120D);
+                    txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
                     txtStateName.SetBinding(TextBlock.TextProperty, b);
 
                     DataGridRowHeader header = new DataGridRowHeader();
@@ -3410,9 +3410,8 @@ namespace DaphneGui
                 DataGridRow row = EpigeneticMapGrid.GetRow(ii);
                 if (row != null)
                 {
-                    string sbind = string.Format("SelectedItem.diff_scheme.Driver.states[{0}]", ii);
+                    string sbind = string.Format("states[{0}]", ii);
                     Binding b = new Binding(sbind);
-                    b.ElementName = "CellsListBox";
                     b.Path = new PropertyPath(sbind);
                     b.Mode = BindingMode.TwoWay;
                     b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -3424,6 +3423,7 @@ namespace DaphneGui
                     txtStateName.SetValue(TextBox.WidthProperty, 120D);
                     Thickness th = new Thickness(0D);
                     txtStateName.SetValue(TextBox.BorderThicknessProperty, th);
+                    txtStateName.SetValue(TextBox.DataContextProperty, cell.diff_scheme.Driver);
                     txtStateName.SetBinding(TextBox.TextProperty, b);
 
                     DataGridRowHeader header = new DataGridRowHeader();

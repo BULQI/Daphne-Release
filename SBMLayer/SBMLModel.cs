@@ -54,10 +54,13 @@ namespace SBMLayer
         //Unit definition declaration
         private UnitDefinition udef;
 
+        //Indicates whether Protocol file contains a ReactionComplex vs. Spatial simulation
+        private Boolean reactionComplexFlag;
+
         //String used for creating output directory
         private string appPath = string.Empty;
 
-        //SimConfig object where model info is extracted from
+        //Protocol object where model info is extracted from
         private Protocol protocol;
 
         private Boolean isSpatialModel;
@@ -110,16 +113,6 @@ namespace SBMLayer
             second.setScale(0);
             second.setMultiplier(60);
             udef.setId("minute");
-
-
-
-
-
-
-
-
-
-
 
             //build micro meter cubed unit and make it the default unit of volume used by compartments with spatialDims=3
             Unit mmetre;
@@ -470,12 +463,6 @@ namespace SBMLayer
                 }
             }
         }
-
-
-
-
-
-
 
 
         /// <summary>
@@ -1858,6 +1845,10 @@ namespace SBMLayer
             return Convert.ToInt32(attributes.getValue("copy_num"));
         }
 
+        public Boolean ContainsReactionComplex() {
+            return reactionComplexFlag;
+        }
+
         /// <summary>
         /// Populates Protocol object with SBML model 
         /// </summary>
@@ -1933,6 +1924,7 @@ namespace SBMLayer
                 }
                 //Add the reaction to repository collection
                  protocol.entity_repository.reaction_complexes.Add(crc);
+                 reactionComplexFlag = true;
             }
             else
             {
@@ -1943,10 +1935,10 @@ namespace SBMLayer
                 //Parse additional simulation elem these params as a custom annotation
                 GetModelAnnotation();
 
-                /****Populate SimConfig with ECS molPops****/
+                /****Populate Protocol with ECS molPops****/
                 double CompSize = 0;
                 string largestCompID = string.Empty;
-                //Populate SimConfig
+                //Populate Protocol
 
                 //WHAT IF SIZE DOESN'T EXIST
                 //Obtain the ID of the 3D compartment with largest size (ECS)
@@ -1970,7 +1962,7 @@ namespace SBMLayer
                     }
                 }
 
-                /****Populate SimConfig with CellPops****/
+                /****Populate Protocol with CellPops****/
 
                 //Excludes ECS compartment from collection          
                 compartments.remove(largestCompID);
