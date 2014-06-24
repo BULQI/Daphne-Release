@@ -1095,7 +1095,7 @@
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=cell_guid_ref, UpdateSourceTrigger=Explicit}"
+                                        SelectedValue="{Binding Path=Cell.entity_guid, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="entity_guid">
                             
                         </ComboBox>
@@ -3081,7 +3081,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
-                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -3151,7 +3151,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.cell_guid_ref, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                                                                                 
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                                                                                 
                                         Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"
