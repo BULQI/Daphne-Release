@@ -530,8 +530,8 @@ namespace Daphne
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
 
-                configComp[0] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-                configComp[1] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+                configComp[0] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
+                configComp[1] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
 
                 bulk_reacs[0] = protocol.GetReactions(configComp[0], false);
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
@@ -540,7 +540,7 @@ namespace Daphne
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius));
 
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
@@ -569,7 +569,7 @@ namespace Daphne
                     }
 
                     // cell genes
-                    foreach (string s in protocol.entity_repository.cells_dict[cp.cell_guid_ref].genes_guid_ref)
+                    foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
                     {
                         ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
@@ -587,13 +587,13 @@ namespace Daphne
                     AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
                     
                     // locomotion
-                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref) == true)
+                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
+                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
 
-                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
+                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.Cell.entity_guid].TransductionConstant);
                         cell.IsMotile = true;
-                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.cell_guid_ref].DragCoefficient;
+                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].DragCoefficient;
                     }
                     else
                     {
@@ -612,9 +612,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver != null)
                     {
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
@@ -644,9 +644,9 @@ namespace Daphne
                         }
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme != null)
                     {
-                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
+                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme;
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
@@ -679,9 +679,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver != null)
                     {
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }

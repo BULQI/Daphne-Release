@@ -763,10 +763,9 @@ namespace Daphne
                     //Remove all ECM cell populations with this cell guid
                     foreach (var cell_pop in scenario.cellpopulations.ToList())
                     {
-                        if (cc.entity_guid == cell_pop.cell_guid_ref)
+                        if (cc.entity_guid == cell_pop.Cell.entity_guid)
                             scenario.cellpopulations.Remove(cell_pop);
                     }
-
                 }
             }
         }
@@ -1468,7 +1467,7 @@ namespace Daphne
             bool res = false;
             foreach (CellPopulation cell_pop in cellpopulations)
             {
-                if (cell_pop.cell_guid_ref == cell.entity_guid)
+                if (cell_pop.Cell.entity_guid == cell.entity_guid)
                 {
                     return true;
                 }
@@ -2291,9 +2290,9 @@ namespace Daphne
         /// <summary>
         /// create a clone of a molecule
         /// </summary>
-        /// <param name="protocol">null (default) to create a literal copy</param>
+        /// <param name="protocol">null to create a literal copy</param>
         /// <returns></returns>
-        public ConfigMolecule Clone(Protocol protocol = null)
+        public ConfigMolecule Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -3401,16 +3400,20 @@ namespace Daphne
             genes_guid_ref = new ObservableCollection<string>();
         }
 
-        public ConfigCell Clone()
+        public ConfigCell Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newcell.entity_guid = id.ToString();
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                newcell.entity_guid = id.ToString();
+            }
             return newcell;
         }
 
@@ -4205,7 +4208,8 @@ namespace Daphne
 
     public class CellPopulation : EntityModelBase
     {
-        public string cell_guid_ref { get; set; }
+        //public string cell_guid_ref { get; set; }
+        public ConfigCell Cell { get; set; }
         private string _Name;
         public string cellpopulation_name
         {

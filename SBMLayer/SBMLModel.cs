@@ -69,12 +69,12 @@ namespace SBMLayer
         /// Sets Paths for SBMLDocument - Level 3 Version 1 format
         /// </summary>
         /// <param name="appPath"></param>
-        /// <param name=" protocol"></param>
+        /// <param name="protocol"></param>
         public SBMLModel(string appPath, Protocol protocol)
         {
             // Creates a template SBML model
             this.appPath = appPath;
-            this.protocol =  protocol;
+            this.protocol = protocol;
         }
 
         /// <summary>
@@ -549,18 +549,18 @@ namespace SBMLayer
             if (!isReactionComplex)
             {
                 //Simulation setup params
-                attr.add("description",  protocol.experiment_description, annotNamespace, annotprefix);
-                attr.add("duration", Convert.ToString( protocol.scenario.time_config.duration), annotNamespace, annotprefix);
-                attr.add("rendering_interval", Convert.ToString( protocol.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
-                attr.add("sampling_interval", Convert.ToString( protocol.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
-                attr.add("gridstep", Convert.ToString( protocol.scenario.environment.gridstep), annotNamespace, annotprefix);
+                attr.add("description", protocol.experiment_description, annotNamespace, annotprefix);
+                attr.add("duration", Convert.ToString(protocol.scenario.time_config.duration), annotNamespace, annotprefix);
+                attr.add("rendering_interval", Convert.ToString(protocol.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
+                attr.add("sampling_interval", Convert.ToString(protocol.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
+                attr.add("gridstep", Convert.ToString(protocol.scenario.environment.gridstep), annotNamespace, annotprefix);
 
                 //Spatial Geometry params
 
-                attr.add("toroidal", Convert.ToString( protocol.scenario.environment.toroidal), annotNamespace, annotprefix);
-                attr.add("extent_x", Convert.ToString( protocol.scenario.environment.extent_x), annotNamespace, annotprefix);
-                attr.add("extent_y", Convert.ToString( protocol.scenario.environment.extent_y), annotNamespace, annotprefix);
-                attr.add("extent_z", Convert.ToString( protocol.scenario.environment.extent_z), annotNamespace, annotprefix);
+                attr.add("toroidal", Convert.ToString(protocol.scenario.environment.toroidal), annotNamespace, annotprefix);
+                attr.add("extent_x", Convert.ToString(protocol.scenario.environment.extent_x), annotNamespace, annotprefix);
+                attr.add("extent_y", Convert.ToString(protocol.scenario.environment.extent_y), annotNamespace, annotprefix);
+                attr.add("extent_z", Convert.ToString(protocol.scenario.environment.extent_z), annotNamespace, annotprefix);
             }
             else
             {
@@ -594,7 +594,7 @@ namespace SBMLayer
 
                 if (!configCell.locomotor_mol_guid_ref.Equals(string.Empty))
                 {
-                    attr.add("locomotor", CleanIds( protocol.entity_repository.molecules_dict[configCell.locomotor_mol_guid_ref].Name) + "_" + compartment.getId(), annotNamespace, annotprefix);
+                    attr.add("locomotor", CleanIds(protocol.entity_repository.molecules_dict[configCell.locomotor_mol_guid_ref].Name) + "_" + compartment.getId(), annotNamespace, annotprefix);
                 }
             }
             XMLNamespaces names = new XMLNamespaces();
@@ -611,7 +611,7 @@ namespace SBMLayer
         private void SetSpeciesAnnotation(ConfigMolecularPopulation confMolPop, Species species)
         {
             //Species specific params
-            ConfigMolecule tempConfMol =  protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref];
+            ConfigMolecule tempConfMol = protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref];
             XMLAttributes attr = new XMLAttributes();
             attr.add("diff_coeff", Convert.ToString(tempConfMol.DiffusionCoefficient), annotNamespace, annotprefix);
             attr.add("mol_weight", Convert.ToString(tempConfMol.MolecularWeight), annotNamespace, annotprefix);
@@ -623,10 +623,10 @@ namespace SBMLayer
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
                 attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
-                foreach (BoxSpecification box in  protocol.scenario.box_specifications)
+                foreach (BoxSpecification box in protocol.scenario.box_specifications)
                 {
                     //Only select appropriate box
-                    if (( protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
+                    if ((protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
                     {
                         attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
                         attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
@@ -710,7 +710,7 @@ namespace SBMLayer
         }
 
         /// <summary>
-        /// Exports the current simulation model in the  protocol in SBML format
+        /// Exports the current simulation model in the protocol in SBML format
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -734,13 +734,13 @@ namespace SBMLayer
             //Configure spatial model constraints
             if (isSpatialModel)
             {
-                world = new SpatialComponents( protocol, ref model);
+                world = new SpatialComponents(protocol, ref model);
             }
           
             SetPaths(Uri.UnescapeDataString(new Uri(System.IO.Path.GetDirectoryName(appPath) + @"\").LocalPath), System.IO.Path.GetFileNameWithoutExtension(appPath));
 
             //Populates model ids in SBML template
-            SetModelIds( protocol.experiment_name, "Daphne");
+            SetModelIds(protocol.experiment_name, "Daphne");
 
             //adds simulation specific parameters as annotations
             SetModelAnnotation(false);
@@ -749,21 +749,21 @@ namespace SBMLayer
             AddModelUnits();
 
             //adds ECS compartment
-            double ecsVol = ( protocol.scenario.environment.extent_x) * ( protocol.scenario.environment.extent_y) * ( protocol.scenario.environment.extent_z);
-            libsbmlcs.Compartment backgComp= AddCompartment("ECS", "ECS", true, ecsVol,  protocol.scenario.environment.NumGridPts.Length, "");
+            double ecsVol = (protocol.scenario.environment.extent_x) * (protocol.scenario.environment.extent_y) * (protocol.scenario.environment.extent_z);
+            libsbmlcs.Compartment backgComp= AddCompartment("ECS", "ECS", true, ecsVol, protocol.scenario.environment.NumGridPts.Length, "");
             Domain backgDomain=null;
             if (isSpatialModel)
             {
-                backgDomain= world.AddBackground(backgComp,  protocol.scenario.cellpopulations.Count);
+                backgDomain= world.AddBackground(backgComp, protocol.scenario.cellpopulations.Count);
             }
             //adds species in the ECS
             BoxSpecification spec;
             string confMolPopName = string.Empty;
             Species species = null;
-            foreach (ConfigMolecularPopulation confMolPop in  protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation confMolPop in protocol.scenario.environment.ecs.molpops)
             {
                 //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                //confMolPopName =  protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
+                //confMolPopName = protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
                 confMolPopName = confMolPop.Name;
                 if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
@@ -795,7 +795,7 @@ namespace SBMLayer
 
                 if (isSpatialModel)
                 {
-                    world.AddDiffusionCoefficient(species,  protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].DiffusionCoefficient);
+                    world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].DiffusionCoefficient);
                     //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
                     world.SetBoxBoundaryCondition(species);
                 } 
@@ -803,13 +803,13 @@ namespace SBMLayer
 
             //adds reactions in the ECS
             ConfigReaction cr;
-            foreach (string rguid in  protocol.scenario.environment.ecs.reactions_guid_ref)
+            foreach (string rguid in protocol.scenario.environment.ecs.reactions_guid_ref)
             {
-                cr =  protocol.entity_repository.reactions_dict[rguid];
-                AddSBMLReactions(cr, cr.rate_const,  protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
+                cr = protocol.entity_repository.reactions_dict[rguid];
+                AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
 
                 //Add reaction annotation
-                SetReactionAnnotation( protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type);
+                SetReactionAnnotation(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type);
             }
 
             //Add a membrane compartment and a cytosol compartment for each cell type
@@ -822,11 +822,11 @@ namespace SBMLayer
             int ordinal = 0;
             Domain membraneDomain=null, cytoDomain=null;
             DomainType membraneDomainType=null, cytoDomainType=null;
-            foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+            foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
             {
                 //Name added to compartment includes cell type
                 //Membrane
-                configCell =  protocol.entity_repository.cells_dict[cellPop.cell_guid_ref];
+                configCell = protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid];
                 cellMembraneId = string.Concat("Membrane_", configCell.CellName);
                 double radius = configCell.CellRadius;
                 sphere = new TinySphere();
@@ -885,7 +885,7 @@ namespace SBMLayer
                     foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
                     {
                         //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                        confMolPopName =  protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
+                        confMolPopName = protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
                         if (comp == 0)
                         {
                             //Add cytosol molecular species
@@ -906,7 +906,7 @@ namespace SBMLayer
 
                         if (isSpatialModel)
 	                    {
-                            world.AddDiffusionCoefficient(species,  protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].DiffusionCoefficient);
+                            world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].DiffusionCoefficient);
                             //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
                             world.SetDomainTypeBoundaryCondition(species,comp==0?cytoDomainType:membraneDomainType); 
 	                    }
@@ -916,7 +916,7 @@ namespace SBMLayer
                 //add genes
                 for (int i = 0; i < configCell.genes_guid_ref.Count; i++)
                 {
-                    configGene=  protocol.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
+                    configGene= protocol.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
                     confMolPopName = configGene.Name;
                     species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false,configGene.ActivationLevel, "");
                     SetGeneAnnotation(configGene, species);
@@ -927,9 +927,9 @@ namespace SBMLayer
                 //Add reactions belonging to current cellPopulation and specify which compartment they take place in
                 foreach (string reaction in configCell.cytosol.reactions_guid_ref)
                 {
-                    cr =  protocol.entity_repository.reactions_dict[reaction];
+                    cr = protocol.entity_repository.reactions_dict[reaction];
                     cytosolId = string.Concat("Cytosol_", configCell.CellName);
-                    AddSBMLReactions(cr, cr.rate_const,  protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, cytosolId, cellPop.cell_guid_ref);
+                    AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, cytosolId, cellPop.Cell.entity_guid);
                 }
 
             }
@@ -967,8 +967,8 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
-            double volume = ( protocol.rc_scenario.environment.extent_x) * ( protocol.rc_scenario.environment.extent_y) * ( protocol.rc_scenario.environment.extent_z);
-            AddCompartment(compName, compName, true, volume,  protocol.scenario.environment.NumGridPts.Length, "");
+            double volume = (protocol.rc_scenario.environment.extent_x) * (protocol.rc_scenario.environment.extent_y) * (protocol.rc_scenario.environment.extent_z);
+            AddCompartment(compName, compName, true, volume, protocol.scenario.environment.NumGridPts.Length, "");
 
             //Adds molecular populations
             Species specAnnot;
@@ -987,8 +987,8 @@ namespace SBMLayer
             ConfigReaction cr;
             foreach (string rguid in crc.reactions_guid_ref)
             {
-                cr =  protocol.entity_repository.reactions_dict[rguid];
-                AddSBMLReactions(cr, cr.rate_const,  protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, compName, string.Empty);
+                cr = protocol.entity_repository.reactions_dict[rguid];
+                AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, compName, string.Empty);
             }
 
             //Check for model consistency and serialize to file (provide output stream for log)
@@ -1010,30 +1010,30 @@ namespace SBMLayer
 
             if (!compartment.ToLower().Contains("complex") && isGene)
             {
-                configGenes =  protocol.entity_repository.cells_dict[cellId].genes_guid_ref;
+                configGenes = protocol.entity_repository.cells_dict[cellId].genes_guid_ref;
             }
             else if (compartment.ToLower().Contains("membrane"))
             {
-                configComp =  protocol.entity_repository.cells_dict[cellId].membrane.molpops;
+                configComp = protocol.entity_repository.cells_dict[cellId].membrane.molpops;
             }
             else if (compartment.ToLower().Contains("cytosol"))
             {
-                configComp =  protocol.entity_repository.cells_dict[cellId].cytosol.molpops;
+                configComp = protocol.entity_repository.cells_dict[cellId].cytosol.molpops;
             }
             else if (compartment.Equals("ECS"))
             {
-                configComp =  protocol.scenario.environment.ecs.molpops;
+                configComp = protocol.scenario.environment.ecs.molpops;
             }
             else if (compartment.ToLower().Contains("complex"))//Reaction Complex
             {
-                foreach (ConfigMolecule mol in  protocol.entity_repository.molecules)
+                foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
                 {
                     if (mol.Name.Equals(molecule))
                     {
                         return true;
                     }
                 }
-                foreach (ConfigGene gen in  protocol.entity_repository.genes)
+                foreach (ConfigGene gen in protocol.entity_repository.genes)
                 {
                     if (gen.Name.Equals(molecule))
                     {
@@ -1046,7 +1046,7 @@ namespace SBMLayer
             {
                 foreach (ConfigMolecularPopulation cmp in configComp)
                 {
-                    if ( protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name.Equals(molecule))
+                    if (protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name.Equals(molecule))
                     {
                         return true;
                     }
@@ -1056,7 +1056,7 @@ namespace SBMLayer
             {
                 foreach (string cng in configGenes)
                 {
-                    if ( protocol.entity_repository.genes_dict[cng].Name.Equals(molecule))
+                    if (protocol.entity_repository.genes_dict[cng].Name.Equals(molecule))
                     {
                         return true;
                     }
@@ -1081,15 +1081,15 @@ namespace SBMLayer
 
             if (type == ReactionType.BoundaryAssociation)
             {
-                receptor =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                ligand =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                complex =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                receptor = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                ligand = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                complex = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
                     {
-                        AddBoundaryAssociation(cellPop.cell_guid_ref, receptor, ligand, complex, compartment, rateConstant);
+                        AddBoundaryAssociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
                 }
                 else
@@ -1099,15 +1099,15 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryDissociation)
             {
-                receptor =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
-                ligand =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                complex =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                receptor = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                ligand = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                complex = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
                     {
-                        AddBoundaryDissociation(cellPop.cell_guid_ref, receptor, ligand, complex, compartment, rateConstant);
+                        AddBoundaryDissociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
                 }
                 else
@@ -1118,14 +1118,14 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryTransportFrom)
             {
-                membrane =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                membrane = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
                     {
-                        AddBoundaryTransportFromReaction(cellPop.cell_guid_ref, bulk, membrane, compartment, rateConstant);
+                        AddBoundaryTransportFromReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
                 }
                 else
@@ -1136,14 +1136,14 @@ namespace SBMLayer
             }
             else if (type == ReactionType.BoundaryTransportTo)
             {
-                bulk =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                membrane =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                membrane = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
                     {
-                        AddBoundaryTransportToReaction(cellPop.cell_guid_ref, bulk, membrane, compartment, rateConstant);
+                        AddBoundaryTransportToReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
                 }
                 else
@@ -1154,15 +1154,15 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedBoundaryActivation)
             {
-                bulk =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulkActivated =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulkActivated = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in  protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
                     {
-                        AddCatalyzedBoundaryActivation(cellPop.cell_guid_ref, bulk, bulkActivated, modifier, compartment, rateConstant);
+                        AddCatalyzedBoundaryActivation(cellPop.Cell.entity_guid, bulk, bulkActivated, modifier, compartment, rateConstant);
                     }
                 }
                 else
@@ -1172,7 +1172,7 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Annihilation)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1190,9 +1190,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Association)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1210,9 +1210,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Dissociation)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                bulk =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1230,8 +1230,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.DimerDissociation)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1248,8 +1248,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.AutocatalyticTransformation)
             {
-                bulk =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment))
                 {
@@ -1267,8 +1267,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedAnnihilation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, modifier, compartment))
                 {
@@ -1285,10 +1285,10 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedAssociation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                bulk =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[1]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, bulk, compartment) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1307,8 +1307,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedCreation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment))
                 {
@@ -1325,9 +1325,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDimerDissociation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1345,9 +1345,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedTransformation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1365,9 +1365,9 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDimerization)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1385,10 +1385,10 @@ namespace SBMLayer
             }
             else if (type == ReactionType.CatalyzedDissociation)
             {
-                modifier =  protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
-                bulk =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
+                modifier = protocol.entity_repository.molecules_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                bulk = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[1]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, modifier, compartment) & ExistMolecule(cellId, reactant, compartment) & ExistMolecule(cellId, bulk, compartment))
                 {
@@ -1407,8 +1407,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Dimerization)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1425,8 +1425,8 @@ namespace SBMLayer
             }
             else if (type == ReactionType.Transformation)
             {
-                reactant =  protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                reactant = protocol.entity_repository.molecules_dict[cr.reactants_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
 
                 if (ExistMolecule(cellId, product, compartment) & ExistMolecule(cellId, reactant, compartment))
                 {
@@ -1443,8 +1443,8 @@ namespace SBMLayer
             }
             else if (type==ReactionType.Transcription)
             {
-                gene =  protocol.entity_repository.genes_dict[cr.modifiers_molecule_guid_ref[0]].Name;
-                product =  protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
+                gene = protocol.entity_repository.genes_dict[cr.modifiers_molecule_guid_ref[0]].Name;
+                product = protocol.entity_repository.molecules_dict[cr.products_molecule_guid_ref[0]].Name;
                
                 if (ExistMolecule(cellId, gene, compartment,true) & ExistMolecule(cellId, product, compartment))
                 {
@@ -1472,7 +1472,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryTransportFromReaction(string cellIdentifier, string bulk, string membrane, string compartment, double rateConstant)
         {
-            string cellName =  protocol.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
             ////need to check whether reactant is on membrane (associate with proper reactant on each cell) 
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, membrane, "membrane"))
             {
@@ -1501,7 +1501,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryTransportToReaction(string cellIdentifier, string bulk, string membrane, string compartment, double rateConstant)
         {
-            string cellName =  protocol.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether product is on the membrane
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, membrane, "membrane"))
@@ -1531,7 +1531,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddCatalyzedBoundaryActivation(string cellIdentifier, string bulk, string bulkActivated, string modifier, string compartment, double rateConstant)
         {
-            string cellName =  protocol.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether modifier(receptor) is on the membrane
             if (ExistMolecule(cellIdentifier, bulk, compartment) & ExistMolecule(cellIdentifier, bulkActivated, compartment) & ExistMolecule(cellIdentifier, modifier, "membrane"))
@@ -1563,7 +1563,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryDissociation(string cellIdentifier, string receptor, string ligand, string complex, string compartment, double rateConstant)
         {
-            string cellName =  protocol.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether reactant 1 and product 1 are on the membrane (associate with proper reactant on each cell) 
             if (ExistMolecule(cellIdentifier, ligand, compartment) & ExistMolecule(cellIdentifier, receptor, "membrane") & ExistMolecule(cellIdentifier, complex, "membrane"))
@@ -1595,7 +1595,7 @@ namespace SBMLayer
         /// <param name="rateConstant"></param>
         private void AddBoundaryAssociation(string cellIdentifier, string receptor, string ligand, string complex, string compartment, double rateConstant)
         {
-            string cellName =  protocol.entity_repository.cells_dict[cellIdentifier].CellName;
+            string cellName = protocol.entity_repository.cells_dict[cellIdentifier].CellName;
 
             ////need to check whether reactant 1 and product 1 are on the membrane (associate with proper reactant on each cell) and whether ligand is on compartment
             if (ExistMolecule(cellIdentifier, ligand, compartment) & ExistMolecule(cellIdentifier, receptor, "membrane") & ExistMolecule(cellIdentifier, complex, "membrane"))
@@ -1650,7 +1650,7 @@ namespace SBMLayer
             //Extracts all model components from the read SBML model and populates the Sim Configuration object
             PopulateProtocol();
 
-            return  protocol;
+            return protocol;
         }
 
         /// <summary>
@@ -1665,29 +1665,29 @@ namespace SBMLayer
                 annotation = annotation.getChild("daphnemodel");
                 //Model description
                 XMLAttributes attributes = annotation.getAttributes();
-                 protocol.experiment_description = attributes.getValue(attributes.getIndex("description"));
-                 protocol.scenario.time_config.duration = Convert.ToDouble(attributes.getValue(attributes.getIndex("duration")));
-                 protocol.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
-                 protocol.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
+                protocol.experiment_description = attributes.getValue(attributes.getIndex("description"));
+                protocol.scenario.time_config.duration = Convert.ToDouble(attributes.getValue(attributes.getIndex("duration")));
+                protocol.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
+                protocol.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
 
-                 protocol.scenario.environment.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
-                 protocol.scenario.environment.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
-                 protocol.scenario.environment.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
-                 protocol.scenario.environment.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
-                 protocol.scenario.environment.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+                protocol.scenario.environment.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
+                protocol.scenario.environment.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
+                protocol.scenario.environment.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
+                protocol.scenario.environment.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
+                protocol.scenario.environment.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
             }
             else
             {
                 //Defaults in case a model doesn't have additional annotations (i.e., a model that isn't ours)
-                 protocol.experiment_description = "Simulation Model";
-                 protocol.scenario.time_config.duration = 100;
-                 protocol.scenario.time_config.rendering_interval = 1;
-                 protocol.scenario.time_config.sampling_interval = 1;
-                 protocol.scenario.environment.gridstep = 50;
+                protocol.experiment_description = "Simulation Model";
+                protocol.scenario.time_config.duration = 100;
+                protocol.scenario.time_config.rendering_interval = 1;
+                protocol.scenario.time_config.sampling_interval = 1;
+                protocol.scenario.environment.gridstep = 50;
                 //Replace with spatial package constructs at some point
-                 protocol.scenario.environment.extent_x = 200;
-                 protocol.scenario.environment.extent_y = 200;
-                 protocol.scenario.environment.extent_z = 200;
+                protocol.scenario.environment.extent_x = 200;
+                protocol.scenario.environment.extent_y = 200;
+                protocol.scenario.environment.extent_z = 200;
             }
         }
 
@@ -1811,8 +1811,8 @@ namespace SBMLayer
         {
             int copy_num = GetCopyNum(specGene);
             ConfigGene cg= new ConfigGene(specGene.getId(), copy_num, specGene.getInitialConcentration());
-             protocol.entity_repository.genes.Add(cg);
-             protocol.entity_repository.genes_dict.Add(cg.entity_guid, cg);
+            protocol.entity_repository.genes.Add(cg);
+            protocol.entity_repository.genes_dict.Add(cg.entity_guid, cg);
             return cg;
         }
 
@@ -1859,9 +1859,9 @@ namespace SBMLayer
                 libsbmlcs.Compartment reactionComplexCompartment = compartments.get(0);
                 if (reactionComplexCompartment.isSetSize())
                 {
-                     protocol.rc_scenario.environment.extent_x = (int)reactionComplexCompartment.getSize() / 3;
-                     protocol.rc_scenario.environment.extent_y = (int)reactionComplexCompartment.getSize() / 3;
-                     protocol.rc_scenario.environment.extent_z = (int)reactionComplexCompartment.getSize() / 3;
+                    protocol.rc_scenario.environment.extent_x = (int)reactionComplexCompartment.getSize() / 3;
+                    protocol.rc_scenario.environment.extent_y = (int)reactionComplexCompartment.getSize() / 3;
+                    protocol.rc_scenario.environment.extent_z = (int)reactionComplexCompartment.getSize() / 3;
                 }
                 //Add all molecular populations
                 Species crcSpec;
@@ -1892,8 +1892,8 @@ namespace SBMLayer
                         complexConfigReaction = new ConfigReaction();
 
                         buildConfigReaction(sbmlReaction, ref complexConfigReaction);
-                         protocol.entity_repository.reactions.Add(complexConfigReaction);
-                         protocol.entity_repository.reactions_dict.Add(complexConfigReaction.entity_guid, complexConfigReaction);
+                        protocol.entity_repository.reactions.Add(complexConfigReaction);
+                        protocol.entity_repository.reactions_dict.Add(complexConfigReaction.entity_guid, complexConfigReaction);
 
                         if (complexConfigReaction != null)
                         {
@@ -1908,14 +1908,14 @@ namespace SBMLayer
                     }
                 }
                 //Add the reaction to repository collection
-                 protocol.entity_repository.reaction_complexes.Add(crc);
-                 reactionComplexFlag = true;
+                protocol.entity_repository.reaction_complexes.Add(crc);
+                reactionComplexFlag = true;
             }
             else
             {
                 //Populate experiment
-                 protocol.experiment_name = model.getId();
-                 protocol.reporter_file_name =  protocol.experiment_name;
+                protocol.experiment_name = model.getId();
+                protocol.reporter_file_name = protocol.experiment_name;
 
                 //Parse additional simulation elem these params as a custom annotation
                 GetModelAnnotation();
@@ -1943,7 +1943,7 @@ namespace SBMLayer
                     tempSpecies = speciesList.get(i);
                     if (tempSpecies.getCompartment().Equals(largestCompID))
                     {
-                         protocol.scenario.environment.ecs.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
+                        protocol.scenario.environment.ecs.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
                     }
                 }
 
@@ -2029,7 +2029,7 @@ namespace SBMLayer
                     }
 
                     //Add cell to entity repository
-                     protocol.entity_repository.cells.Add(gc);
+                    protocol.entity_repository.cells.Add(gc);
 
                     /****Add cytosol-specific reactions - between membrane and cytosol and cytosol-cytosol or cytosol-nucleus****/
                     for (int i = 0; i < model.getListOfReactions().size(); i++)
@@ -2044,31 +2044,31 @@ namespace SBMLayer
                             buildConfigReaction(cellReaction, ref cr);
 
                             //Add the reaction to repository collection
-                             protocol.entity_repository.reactions.Add(cr);
+                            protocol.entity_repository.reactions.Add(cr);
                             gc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
                         }
                     }
 
                     //Add cell population
                     CellPopulation cellPop = new CellPopulation();
-                    cellPop.cell_guid_ref = gc.entity_guid;
+                    cellPop.Cell.entity_guid = gc.entity_guid;
                     cellPop.cellpopulation_name = gc.CellName;
                     cellPop.number = (int)compartAttributes[2];
 
-                    double[] extents = new double[3] {  protocol.scenario.environment.extent_x, 
+                    double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
                                                 protocol.scenario.environment.extent_y, 
                                                 protocol.scenario.environment.extent_z };
                     double minDisSquared = 2 * gc.CellRadius;
                     minDisSquared *= minDisSquared;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
-                    cellPop.cellPopDist.CellStates[0] = new CellState( protocol.scenario.environment.extent_x - 2 * gc.CellRadius -  protocol.scenario.environment.gridstep / 2,
-                                                                         protocol.scenario.environment.extent_y / 2 -  protocol.scenario.environment.gridstep / 2,
-                                                                         protocol.scenario.environment.extent_z / 2 -  protocol.scenario.environment.gridstep / 2);
+                    cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * gc.CellRadius - protocol.scenario.environment.gridstep / 2,
+                                                                        protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
+                                                                        protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
                     cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
 
                     //Add cell population to scenario
-                     protocol.scenario.cellpopulations.Add(cellPop);
+                    protocol.scenario.cellpopulations.Add(cellPop);
                     cellPop.report_xvf.position = true;
                     cellPop.report_xvf.velocity = true;
                     cellPop.report_xvf.force = true;
@@ -2084,7 +2084,7 @@ namespace SBMLayer
                         // Mean only
                         cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
                     }
-                    foreach (ConfigMolecularPopulation mpECM in  protocol.scenario.environment.ecs.molpops)
+                    foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
                     {
                         ReportECM reportECM = new ReportECM();
                         reportECM.molpop_guid_ref = mpECM.molpop_guid;
@@ -2109,8 +2109,8 @@ namespace SBMLayer
                         buildConfigReaction(ecsReaction, ref cr);
 
                         //Add the reaction to repository collection
-                         protocol.entity_repository.reactions.Add(cr);
-                         protocol.scenario.environment.ecs.reactions_guid_ref.Add(cr.entity_guid);
+                        protocol.entity_repository.reactions.Add(cr);
+                        protocol.scenario.environment.ecs.reactions_guid_ref.Add(cr.entity_guid);
                     }
                 }
             }
@@ -2154,14 +2154,14 @@ namespace SBMLayer
                 inputModifiers.Add(modRef.getSpecies(), 1);
             }
 
-            cr.reaction_template_guid_ref =  protocol.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
+            cr.reaction_template_guid_ref = protocol.IdentifyReactionType(inputReactants, inputProducts, inputModifiers);
             if (cr.reaction_template_guid_ref == null)
             {
                 string msg = string.Format("Unsupported reaction");
                 MessageBox.Show(msg);
                 return;
             }
-            crt =  protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
+            crt = protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref];
 
             // Don't have to add stoichiometry information since the reaction template knows it based on reaction type
             // For each list of reactants, products, and modifiers, add bulk then boundary molecules.
@@ -2169,8 +2169,8 @@ namespace SBMLayer
             // Bulk Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.reactants_molecule_guid_ref.Add(guid);
                 }
@@ -2178,8 +2178,8 @@ namespace SBMLayer
             // Boundary Reactants
             foreach (KeyValuePair<string, int> kvp in inputReactants)
             {
-                string guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                if (!cr.reactants_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.reactants_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.reactants_molecule_guid_ref.Add(guid);
                 }
@@ -2188,8 +2188,8 @@ namespace SBMLayer
             // Bulk Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                 {
                     cr.products_molecule_guid_ref.Add(guid);
                 }
@@ -2197,8 +2197,8 @@ namespace SBMLayer
             // Boundary Products
             foreach (KeyValuePair<string, int> kvp in inputProducts)
             {
-                string guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                if (!cr.products_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                string guid = protocol.findMoleculeGuidByName(kvp.Key);
+                if (!cr.products_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                 {
                     cr.products_molecule_guid_ref.Add(guid);
                 }
@@ -2210,7 +2210,7 @@ namespace SBMLayer
                 string guid;
                 if (crt.reac_type==ReactionType.Transcription)
                 {
-                    guid =  protocol.findGeneGuidByName(kvp.Key);
+                    guid = protocol.findGeneGuidByName(kvp.Key);
                     if (!cr.modifiers_molecule_guid_ref.Contains(guid))
                     {
                          cr.modifiers_molecule_guid_ref.Add(guid);
@@ -2218,8 +2218,8 @@ namespace SBMLayer
                 }
                 else
                 {
-                    guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
+                    guid = protocol.findMoleculeGuidByName(kvp.Key);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Bulk)
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
                     }
@@ -2231,7 +2231,7 @@ namespace SBMLayer
                 string guid;
                 if (crt.reac_type == ReactionType.Transcription)
                 {
-                    guid =  protocol.findGeneGuidByName(kvp.Key);
+                    guid = protocol.findGeneGuidByName(kvp.Key);
                     if (!cr.modifiers_molecule_guid_ref.Contains(guid))
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
@@ -2239,8 +2239,8 @@ namespace SBMLayer
                 }
                 else
                 {
-                    guid =  protocol.findMoleculeGuidByName(kvp.Key);
-                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) &&  protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
+                    guid = protocol.findMoleculeGuidByName(kvp.Key);
+                    if (!cr.modifiers_molecule_guid_ref.Contains(guid) && protocol.entity_repository.molecules_dict[guid].molecule_location == MoleculeLocation.Boundary)
                     {
                         cr.modifiers_molecule_guid_ref.Add(guid);
                     }
@@ -2406,7 +2406,7 @@ namespace SBMLayer
                     box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
                     box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
 
-                     protocol.scenario.box_specifications.Add(box);
+                    protocol.scenario.box_specifications.Add(box);
                     gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
                     //gg.gaussian_spec_name = "gaussian";
                     gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
@@ -2420,7 +2420,7 @@ namespace SBMLayer
                     trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
-                     protocol.scenario.gaussian_specifications.Add(gaussSpec);
+                    protocol.scenario.gaussian_specifications.Add(gaussSpec);
 
                     configMolPop.mp_dist_name = "Gaussian";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2509,8 +2509,8 @@ namespace SBMLayer
                 configMolecule.molecule_location = MoleculeLocation.Boundary;
             }
 
-             protocol.entity_repository.molecules.Add(configMolecule);
-             protocol.entity_repository.molecules_dict.Add(configMolecule.entity_guid, configMolecule);
+            protocol.entity_repository.molecules.Add(configMolecule);
+            protocol.entity_repository.molecules_dict.Add(configMolecule.entity_guid, configMolecule);
 
             ConfigMolecularPopulation configMolPop;
 

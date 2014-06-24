@@ -100,13 +100,13 @@ namespace Daphne
             // Add cell population
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.entity_guid;
+            cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
                                                protocol.scenario.environment.extent_y, 
                                                protocol.scenario.environment.extent_z };
-            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
@@ -225,13 +225,13 @@ namespace Daphne
 
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.entity_guid;
+            cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
                                                protocol.scenario.environment.extent_y, 
                                                protocol.scenario.environment.extent_z };
-            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
@@ -2538,7 +2538,7 @@ namespace Daphne
 
                         if(protocol.entity_repository.molecules_dict.ContainsKey(molecule_guid) == true)
                         {
-                            driverElement.Driver_Mol = protocol.entity_repository.molecules_dict[molecule_guid].Clone();
+                            driverElement.Driver_Mol = protocol.entity_repository.molecules_dict[molecule_guid].Clone(null);
                         }
                     }
                     row.elements.Add(driverElement);

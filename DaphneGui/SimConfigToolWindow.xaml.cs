@@ -58,7 +58,7 @@ namespace DaphneGui
             // Default cell type and name to first entry in the cell repository
             if (MainWindow.SOP.Protocol.entity_repository.cells.Count > 0)
             {
-                cs.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
+                cs.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
                 cs.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
             }
             else
@@ -70,7 +70,7 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_z };
-            double minDisSquared = 2*MainWindow.SOP.Protocol.entity_repository.cells_dict[cs.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cs.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
 
             // Default is uniform probability distribution
@@ -664,7 +664,7 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (MembraneHasMolecule(cell, molguid))
                     return true;
             }
@@ -676,7 +676,7 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (CytosolHasMolecule(cell, molguid))
                     return true;
             }
@@ -1477,7 +1477,7 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_z };
-            double minDisSquared = 2*MainWindow.SOP.Protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
 
             MessageBoxResult res;
@@ -1662,16 +1662,16 @@ namespace DaphneGui
 
             string curr_cell_pop_name = cp.cellpopulation_name;
             string curr_cell_type_guid = "";
-            curr_cell_type_guid = cp.cell_guid_ref;
+            curr_cell_type_guid = cp.Cell.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
-            cp.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
+            cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
 
             string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
-            if (curr_cell_type_guid != cp.cell_guid_ref) // && curr_cell_pop_name.Length == 0)
+            if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
                 cp.cellpopulation_name = new_cell_name;
 
         }
@@ -2077,7 +2077,7 @@ namespace DaphneGui
                 return;
             }
 
-            ConfigCell cellNew = cell.Clone();
+            ConfigCell cellNew = cell.Clone(false);
             
             //Generate a new cell name
             cellNew.CellName = GenerateNewCellName(cell, "_Copy");
@@ -2258,7 +2258,7 @@ namespace DaphneGui
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
-            cp.cell_guid_ref = cc.entity_guid;
+            cp.Cell.entity_guid = cc.entity_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
@@ -2266,7 +2266,7 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.rc_scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.rc_scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.rc_scenario.environment.extent_z };
-            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
             cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
