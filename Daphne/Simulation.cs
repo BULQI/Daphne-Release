@@ -748,7 +748,7 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (population.ContainsKey(config_tde.Driver_Mol.entity_guid) == true)
+                    if (config_tde.Driver_Mol != null && population.ContainsKey(config_tde.Driver_Mol.entity_guid) == true)
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;
