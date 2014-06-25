@@ -53,13 +53,19 @@ namespace DaphneGui
             // Some relevant CellPopulation constructor defaults: 
             //      number = 1
             //      no instantiation of cellPopDist
-            CellPopulation cs = new CellPopulation();
+            CellPopulation cp = new CellPopulation();
+
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             // Default cell type and name to first entry in the cell repository
             if (MainWindow.SOP.Protocol.entity_repository.cells.Count > 0)
             {
-                cs.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
-                cs.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
+                //guid to object changes
+                ConfigCell cell_to_clone = er.cells.First();
+                cp.Cell = cell_to_clone.Clone(true);
+                cp.cellpopulation_name = cp.Cell.CellName;
+                //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
+                //cp.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
             }
             else
             {
@@ -70,14 +76,16 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_z };
-            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cs.Cell.entity_guid].CellRadius;
+            //guid to object changes
+            //double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
+            double minDisSquared = 2 * cp.Cell.CellRadius;
             minDisSquared *= minDisSquared;
 
             // Default is uniform probability distribution
-            cs.cellPopDist = new CellPopUniform(extents, minDisSquared, cs);
+            cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
-            cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cs);
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
@@ -1668,11 +1676,18 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
+            //guid to object changes
+            //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
+            ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
 
-            string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
-            if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
-                cp.cellpopulation_name = new_cell_name;
+            if (cell_to_clone.entity_guid != curr_cell_type_guid)
+            {
+                cp.Cell = cell_to_clone.Clone(true);
+
+                string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
+                if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                    cp.cellpopulation_name = new_cell_name;
+            }
 
         }
 
@@ -2258,7 +2273,8 @@ namespace DaphneGui
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
-            cp.Cell.entity_guid = cc.entity_guid;
+            cp.Cell = cc;
+            //cp.Cell.entity_guid = cc.entity_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 

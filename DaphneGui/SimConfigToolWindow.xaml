@@ -4106,7 +4106,7 @@
                                                               ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"
                                                               DisplayMemberPath="Name" 
                                                               SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Driver_Mol.entity_guid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                              SelectedValuePath="molecule_guid_ref"
+                                                              SelectedValuePath="entity_guid"
                                                               
                                                               >
                                                     </ComboBox>
@@ -4177,7 +4177,7 @@
                                                           ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
                                                           DisplayMemberPath="Name" 
                                                           SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Driver_Mol.entity_guid}"
-                                                          SelectedValuePath="molecule_guid_ref"
+                                                          SelectedValuePath="entity_guid"
                                                           >
                                                     </ComboBox>
                                                     <Label Content="Background Division Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
