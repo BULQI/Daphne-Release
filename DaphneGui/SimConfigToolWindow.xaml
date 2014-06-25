@@ -4105,8 +4105,8 @@
                                                     <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
                                                               ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}"
                                                               DisplayMemberPath="Name" 
-                                                              SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].Driver_Mol.entity_guid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                              SelectedValuePath="entity_guid"
+                                                              SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectedValuePath="driver_mol_guid_ref"
                                                               
                                                               >
                                                     </ComboBox>
@@ -4176,8 +4176,8 @@
                                                     <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDivisionMolPops" VerticalAlignment="Top" Width="196"
                                                           ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
                                                           DisplayMemberPath="Name" 
-                                                          SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].Driver_Mol.entity_guid}"
-                                                          SelectedValuePath="entity_guid"
+                                                          SelectedValue="{Binding ElementName=CellsListBox, Path=SelectedItem.div_driver.DriverElements[0].elements[1].driver_mol_guid_ref}"
+                                                          SelectedValuePath="driver_mol_guid_ref"
                                                           >
                                                     </ComboBox>
                                                     <Label Content="Background Division Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
