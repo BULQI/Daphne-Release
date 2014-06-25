@@ -2447,7 +2447,7 @@ namespace Daphne
         //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
         public double Beta { get; set; }
-        public ConfigMolecule Driver_Mol { get; set; }
+        public string driver_mol_guid_ref { get; set; }
 
         public int CurrentState { get; set; }
         public string CurrentStateName { get; set; }
@@ -2458,7 +2458,7 @@ namespace Daphne
         {
             //Guid id = Guid.NewGuid();
             //driver_element_guid = id.ToString();
-            Driver_Mol = null;
+            driver_mol_guid_ref = "";
         }
     }
 
@@ -2593,6 +2593,7 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
+                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = Driver.states[k];
                 e.CurrentState = k;
                 e.DestState = Driver.states.Count - 1;
@@ -2607,6 +2608,7 @@ namespace Daphne
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
                 e.Beta = 0;
+                e.driver_mol_guid_ref = "";
                 e.CurrentStateName = sname;
                 e.CurrentState = Driver.states.Count - 1;
                 e.DestState = j;

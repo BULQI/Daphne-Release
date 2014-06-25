@@ -748,12 +748,12 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (config_tde.Driver_Mol != null && population.ContainsKey(config_tde.Driver_Mol.entity_guid) == true)
+                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;
                         tde.Beta = config_tde.Beta;
-                        tde.DriverPop = population[config_tde.Driver_Mol.entity_guid];
+                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
                 }                        
