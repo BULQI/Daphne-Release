@@ -2759,11 +2759,14 @@ namespace DaphneGui
 
             //------ Use a composite collection to insert "None" item
             CompositeCollection coll = new CompositeCollection();
-            ComboBoxItem nullItem = new ComboBoxItem();
-            nullItem.IsEnabled = true;
-            nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            nullItem.Content = "None";
-            coll.Add(nullItem);
+            ConfigMolecularPopulation nullcmp = new ConfigMolecularPopulation(new ReportType());
+            nullcmp.Name = "None";
+            coll.Add(nullcmp);
+            //ComboBoxItem nullItem = new ComboBoxItem();
+            //nullItem.IsEnabled = true;
+            //nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            //nullItem.Content = "None";
+            //coll.Add(nullItem);
             CollectionContainer cc = new CollectionContainer();
             cc.Collection = cell.cytosol.molpops;
             coll.Add(cc);

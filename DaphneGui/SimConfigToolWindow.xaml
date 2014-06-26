@@ -15,6 +15,16 @@
 
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+        <Style TargetType="ComboBox">
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </docking:ToolWindow.Resources>
     
     
