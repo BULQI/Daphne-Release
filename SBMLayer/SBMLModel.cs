@@ -611,7 +611,7 @@ namespace SBMLayer
         private void SetSpeciesAnnotation(ConfigMolecularPopulation confMolPop, Species species)
         {
             //Species specific params
-            ConfigMolecule tempConfMol = protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref];
+            ConfigMolecule tempConfMol = protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid];
             XMLAttributes attr = new XMLAttributes();
             attr.add("diff_coeff", Convert.ToString(tempConfMol.DiffusionCoefficient), annotNamespace, annotprefix);
             attr.add("mol_weight", Convert.ToString(tempConfMol.MolecularWeight), annotNamespace, annotprefix);
@@ -795,7 +795,7 @@ namespace SBMLayer
 
                 if (isSpatialModel)
                 {
-                    world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].DiffusionCoefficient);
+                    world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[confMolPop.molecule.entity_guid].DiffusionCoefficient);
                     //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
                     world.SetBoxBoundaryCondition(species);
                 } 
@@ -885,7 +885,7 @@ namespace SBMLayer
                     foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
                     {
                         //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
-                        confMolPopName = protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name;
+                        confMolPopName = protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].Name;
                         if (comp == 0)
                         {
                             //Add cytosol molecular species
@@ -906,7 +906,7 @@ namespace SBMLayer
 
                         if (isSpatialModel)
 	                    {
-                            world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].DiffusionCoefficient);
+                            world.AddDiffusionCoefficient(species, protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].DiffusionCoefficient);
                             //All boundary conditions are no flux as this is the only one that SBML spatial allows us to indicate 
                             world.SetDomainTypeBoundaryCondition(species,comp==0?cytoDomainType:membraneDomainType); 
 	                    }
@@ -1046,7 +1046,7 @@ namespace SBMLayer
             {
                 foreach (ConfigMolecularPopulation cmp in configComp)
                 {
-                    if (protocol.entity_repository.molecules_dict[cmp.molecule_guid_ref].Name.Equals(molecule))
+                    if (protocol.entity_repository.molecules_dict[cmp.molecule.entity_guid].Name.Equals(molecule))
                     {
                         return true;
                     }
@@ -2525,7 +2525,7 @@ namespace SBMLayer
                 configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
             }
 
-            configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+            configMolPop.molecule = configMolecule.Clone(null);
             configMolPop.Name = configMolecule.Name;
 
             //Retrieve distribution of ECS molecules from custom annotation

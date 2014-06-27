@@ -107,7 +107,7 @@ namespace Daphne
             {
                 if (((ReportECM)c.report_mp).mean == true)
                 {
-                    header += "\t" + protocol.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
+                    header += "\t" + protocol.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
                     create = true;
                 }
             }
@@ -132,7 +132,7 @@ namespace Daphne
                     if (((ReportECM)c.report_mp).mean == true)
                     {
                         // mean concentration of this ecm molecular population
-                        ecm_mean_file.Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref].Conc.MeanValue());
+                        ecm_mean_file.Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[c.molecule.entity_guid].Conc.MeanValue());
                     }
                 }
                 // terminate line
@@ -144,7 +144,7 @@ namespace Daphne
             {
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
-                    string name = protocol.entity_repository.molecules_dict[c.molecule_guid_ref].Name;
+                    string name = protocol.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
                     StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + sim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
@@ -152,7 +152,7 @@ namespace Daphne
                     writer.WriteLine(header);
 
                     InterpolatedRectangularPrism prism = (InterpolatedRectangularPrism)Simulation.dataBasket.ECS.Space.Interior;
-                    MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations[c.molecule_guid_ref];
+                    MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations[c.molecule.entity_guid];
 
                     for (int i = 0; i < prism.ArraySize; i++)
                     {
@@ -215,7 +215,7 @@ namespace Daphne
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
-                        string name = protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                        string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (mp.report_mp.mp_extended > ExtendedReport.NONE)
                         {
@@ -234,7 +234,7 @@ namespace Daphne
                 // ecm probe concentrations
                 foreach (ConfigMolecularPopulation mp in protocol.scenario.environment.ecs.molpops)
                 {
-                    string name = protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                    string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                     if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
@@ -299,7 +299,7 @@ namespace Daphne
 
                         foreach (ConfigMolecularPopulation cmp in configComp.molpops)
                         {
-                            MolecularPopulation mp = comp.Populations[cmp.molecule_guid_ref];
+                            MolecularPopulation mp = comp.Populations[cmp.molecule.entity_guid];
 
                             // concentration
                             if (cmp.report_mp.mp_extended > ExtendedReport.NONE)
@@ -320,16 +320,16 @@ namespace Daphne
                     // ecm probe concentrations
                     foreach (ConfigMolecularPopulation mp in protocol.scenario.environment.ecs.molpops)
                     {
-                        string name = protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
+                        string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
-                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(c.SpatialState.X));
+                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
 
                             // gradient
                             if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
-                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(c.SpatialState.X);
+                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(c.SpatialState.X);
 
                                 cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                             }

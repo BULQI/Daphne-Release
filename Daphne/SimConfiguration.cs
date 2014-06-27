@@ -651,7 +651,7 @@ namespace Daphne
                     //Remove all the ECM molpops that have this molecule type
                     foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
                     {
-                        if (kvp.Value.molecule_guid_ref == cm.entity_guid)
+                        if (kvp.Value.molecule.entity_guid == cm.entity_guid)
                         {
                             scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
                             scenario.environment.ecs.molpops.Remove(kvp.Value);
@@ -663,7 +663,7 @@ namespace Daphne
                     {
                         foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
                         {
-                            if (kvp.Value.molecule_guid_ref == cm.entity_guid)
+                            if (kvp.Value.molecule.entity_guid == cm.entity_guid)
                             {
                                 cell.membrane.molpops_dict.Remove(kvp.Key);
                                 cell.membrane.molpops.Remove(kvp.Value);
@@ -676,7 +676,7 @@ namespace Daphne
                     {
                         foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
                         {
-                            if (cmp.molecule_guid_ref == cm.entity_guid)
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
                                 //cell.cytosol.molpops_dict.Remove(kvp.Key);
                                 cell.cytosol.molpops.Remove(cmp);
@@ -2722,19 +2722,7 @@ namespace Daphne
     public class ConfigMolecularPopulation : EntityModelBase
     {
         public string molpop_guid { get; set; }
-        private string _molecule_guid_ref;
-        public string molecule_guid_ref 
-        {
-            get
-            {
-                return _molecule_guid_ref;
-            }
-            set
-            {
-                _molecule_guid_ref = value;
-            }
-
-        }  // the molecule_guid of the molecule this mp contains
+        public ConfigMolecule molecule { get; set; }
         private string _Name;
         public string Name
         {
@@ -2908,7 +2896,7 @@ namespace Daphne
             bool res = false;
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == mol.entity_guid)
+                if (molpop.molecule.entity_guid == mol.entity_guid)
                 {
                     return true;
                 }
@@ -2922,7 +2910,7 @@ namespace Daphne
             bool res = false;
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == molguid)
+                if (molpop.molecule.entity_guid == molguid)
                 {
                     return true;
                 }
@@ -2953,7 +2941,7 @@ namespace Daphne
             ConfigMolecularPopulation delMolPop = null;
             foreach (ConfigMolecularPopulation cmp in molpops)
             {
-                if (molecule_guid == cmp.molecule_guid_ref)
+                if (molecule_guid == cmp.molecule.entity_guid)
                 {
                     molpop_guid = cmp.molpop_guid;
                     delMolPop = cmp;
@@ -3309,7 +3297,7 @@ namespace Daphne
         {
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == guid)
+                if (molpop.molecule.entity_guid == guid)
                 {
                     return true;
                 }
@@ -3349,13 +3337,16 @@ namespace Daphne
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+
+                        configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
                         configMolPop.mp_dist_name = "Uniform";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                         configMolPop.mp_render_blending_weight = 2.0;
                         configMolPop.mp_render_on = true;
+
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
                         hl.concentration = 1;
                         configMolPop.mp_distribution = hl;
                         if (HasMolecule(molguid) == false)
@@ -4491,7 +4482,7 @@ namespace Daphne
 
             foreach (ConfigMolecularPopulation molpop in cc.molpops)
             {
-                if (molpop.molecule_guid_ref == driver_mol_guid)
+                if (molpop.molecule.entity_guid == driver_mol_guid)
                 {
                     MyMolPop = molpop;
                     break;
@@ -4505,11 +4496,13 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
-            string guid = "";
-            if (molpop != null)
-                guid = molpop.molecule_guid_ref;
 
-            return guid;
+            if (molpop != null)
+            {
+                return molpop.molecule.entity_guid;
+            }
+
+            return "";
         }
 
     }

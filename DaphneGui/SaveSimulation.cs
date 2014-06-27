@@ -89,7 +89,7 @@ namespace DaphneGui
             foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.ecs.molpops)
             {
                 //loop through molecular population
-                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref];
+                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid];
 
                 MolPopExplicit mpex = new MolPopExplicit();
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
