@@ -24,6 +24,7 @@ using Workbench;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -3848,7 +3849,47 @@ namespace DaphneGui
 
         }
 
-    }    
+        //[ValueConversion(typeof(ConfigDiffScheme), typeof(ConfigDiffScheme))]
+        //public class diffSchemeValueConverter : IValueConverter
+        //{
+        //    public object Convert(object value, Type targetType,
+        //        object parameter, CultureInfo culture)
+        //    {
+        //        if (value == null)
+        //        {
+        //            return new ConfigDiffScheme() { Name = "None" };
+        //        }
+        //        return value;
+        //    }
+
+        //    public object ConvertBack(object value, Type targetType,
+        //        object parameter, CultureInfo culture)
+        //    {
+        //        ConfigDiffScheme val = value as ConfigDiffScheme;
+        //        if (val != null && val.Name == "None") return null;
+        //        return value;
+        //    }
+        //}
+    }
+
+    public class diffSchemeValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ConfigDiffScheme val = value as ConfigDiffScheme;
+            if (val != null && val.Name == "None") return null;
+            return value;
+        }
+    }
+
+
 
     public class DataGridBehavior
     {

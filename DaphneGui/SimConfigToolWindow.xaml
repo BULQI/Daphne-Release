@@ -1328,6 +1328,11 @@
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
+
+                            <StackPanel.Resources>
+                                <local:diffSchemeValueConverter x:Key="diffSchemeValueConverter" />
+                            </StackPanel.Resources>
+                            
                             <Expander 
                                 Header="select another differentiator"   
                                 ExpandDirection="Down" 
@@ -1344,7 +1349,7 @@
                                                                 
                                 <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
                                         DisplayMemberPath="Name"
-                                        SelectedValue="{Binding Path=diff_scheme}"
+                                        SelectedValue="{Binding Path=diff_scheme, Converter={StaticResource diffSchemeValueConverter}}"
                                         
                                         SelectionChanged="cbCellDiffSchemes_SelectionChanged"
                                         >
