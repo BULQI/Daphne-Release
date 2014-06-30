@@ -1926,6 +1926,10 @@ namespace DaphneGui
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             CheckBox cb = e.OriginalSource as CheckBox;
+
+            if (cb.CommandParameter == null)
+                return;
+
             string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
