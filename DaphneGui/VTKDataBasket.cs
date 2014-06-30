@@ -357,7 +357,7 @@ namespace DaphneGui
             // NOTE: keep an eye on this; we may have to clamp this to zero
             molpopControl.Color[3] = molpop.mp_color.A;
             molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
-            molpopControl.TypeGUID = molpop.molecule_guid_ref;
+            molpopControl.TypeGUID = molpop.molecule.entity_guid;
 
             // add the controller to the dictionary
             molpopTypeControllers.Add(molpop.molpop_guid, molpopControl);

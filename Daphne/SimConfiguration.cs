@@ -89,17 +89,15 @@ namespace Daphne
         public void DeserializeProtocol(bool tempFiles = false)
         {
             Protocol = (Protocol)Protocol.Deserialize(tempFiles);
-            Protocol.InitializeStorageClasses();
         }
 
         /// <summary>
         /// deserialize an external protocol (not the one part of this class)
         /// </summary>
         /// <param name="tempFiles">true for handling temporary files</param>
-        public void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
+        public static void DeserializeExternalProtocol(ref Protocol protocol, bool tempFiles = false)
         {
             protocol = (Protocol)protocol.Deserialize(tempFiles);
-            protocol.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -109,17 +107,15 @@ namespace Daphne
         public void DeserializeProtocolFromString(string jsonFile)
         {
             Protocol = (Protocol)Protocol.DeserializeFromString(jsonFile);
-            Protocol.InitializeStorageClasses();
         }
 
         /// <summary>
         /// deserialize an external protocol from a string
         /// </summary>
         /// <param name="jsonFile">json file content as string</param>
-        public void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
+        public static void DeserializeExternalProtocolFromString(ref Protocol protocol, string jsonFile)
         {
             protocol = (Protocol)protocol.DeserializeFromString(jsonFile);
-            protocol.InitializeStorageClasses();
         }
     }
 
@@ -333,6 +329,9 @@ namespace Daphne
             // after deserialization, the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -350,6 +349,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -649,7 +651,7 @@ namespace Daphne
                     //Remove all the ECM molpops that have this molecule type
                     foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
                     {
-                        if (kvp.Value.molecule_guid_ref == cm.entity_guid)
+                        if (kvp.Value.molecule.entity_guid == cm.entity_guid)
                         {
                             scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
                             scenario.environment.ecs.molpops.Remove(kvp.Value);
@@ -661,7 +663,7 @@ namespace Daphne
                     {
                         foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
                         {
-                            if (kvp.Value.molecule_guid_ref == cm.entity_guid)
+                            if (kvp.Value.molecule.entity_guid == cm.entity_guid)
                             {
                                 cell.membrane.molpops_dict.Remove(kvp.Key);
                                 cell.membrane.molpops.Remove(kvp.Value);
@@ -674,7 +676,7 @@ namespace Daphne
                     {
                         foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
                         {
-                            if (cmp.molecule_guid_ref == cm.entity_guid)
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
                                 //cell.cytosol.molpops_dict.Remove(kvp.Key);
                                 cell.cytosol.molpops.Remove(cmp);
@@ -761,10 +763,9 @@ namespace Daphne
                     //Remove all ECM cell populations with this cell guid
                     foreach (var cell_pop in scenario.cellpopulations.ToList())
                     {
-                        if (cc.entity_guid == cell_pop.cell_guid_ref)
+                        if (cc.entity_guid == cell_pop.Cell.entity_guid)
                             scenario.cellpopulations.Remove(cell_pop);
                     }
-
                 }
             }
         }
@@ -1266,44 +1267,7 @@ namespace Daphne
 
     // start at > 0 as zero seems to be the default for metadata when a property is not present
     public enum SimStates { Linear = 1, Cubic, Tiny, Large };
-
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(SimStates), typeof(string))]
-    public class SimStatesToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the SimStates enum...
-        private List<string> _sim_states_strings = new List<string>()
-                                {
-                                    "linear",
-                                    "cubic",
-                                    "tiny",
-                                    "large"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _sim_states_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _sim_states_strings.FindIndex(item => item == str);
-            return (SimStates)Enum.ToObject(typeof(SimStates), (int)idx);
-        }
-    }
-
-
+    
     public class Scenario
     {
         public SimStates simInterpolate { get; set; }
@@ -1503,7 +1467,7 @@ namespace Daphne
             bool res = false;
             foreach (CellPopulation cell_pop in cellpopulations)
             {
-                if (cell_pop.cell_guid_ref == cell.entity_guid)
+                if (cell_pop.Cell.entity_guid == cell.entity_guid)
                 {
                     return true;
                 }
@@ -1849,43 +1813,7 @@ namespace Daphne
             region_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
         }
     }
- 
-    public enum RelativePosition { Inside, Surface, Outside }
 
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(RelativePosition), typeof(string))]
-    public class RelativePositionToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        private List<string> _relative_position_strings = new List<string>()
-                                {
-                                    "in",
-                                    "on",
-                                    "outside"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _relative_position_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _relative_position_strings.FindIndex(item => item == str);
-            return (RelativePosition)Enum.ToObject(typeof(RelativePosition), (int)idx);
-        }
-    }
     public enum ColorList { Red, Orange, Yellow, Green, Blue, Indigo, Violet, Custom }
 
     /// <summary>
@@ -2061,88 +1989,6 @@ namespace Daphne
 
     public enum MoleculeLocation { Bulk = 0, Boundary }
 
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(MoleculeLocation), typeof(string))]
-    public class MoleculeLocationToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the MoleculeLocation enum...
-        private List<string> _molecule_location_strings = new List<string>()
-                                {
-                                    "bulk",
-                                    "boundary"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _molecule_location_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _molecule_location_strings.FindIndex(item => item == str);
-            return (MoleculeLocation)Enum.ToObject(typeof(MoleculeLocation), (int)idx);
-        }
-    }
-
-    public class GuidToBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            bool bResult = true;
-            string guid = value as string;
-
-            if (guid == "")
-            {
-                bResult = false;
-            }
-
-            return bResult;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = "";
-
-            //bool bval = value as bool;
-
-            //if (bval 
-
-            return guid;
-        }
-    }
-
-    public class TransitionDriverToBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            bool bResult = true;
-            ConfigTransitionDriver td = value as ConfigTransitionDriver;
-
-            if (td == null)
-            {
-                bResult = false;
-            }
-
-            return bResult;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            ConfigTransitionDriver ds = null;
-
-            return ds;
-        }
-    }
-
     public class DiffSchemeToBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2267,40 +2113,6 @@ namespace Daphne
 
 
     public enum BoundaryType { Zero_Flux = 0, Toroidal }
-
-    /// <summary>
-    /// Converter to go between enum values and "human readable" strings for GUI
-    /// </summary>
-    [ValueConversion(typeof(BoundaryType), typeof(string))]
-    public class BoundaryTypeToShortStringConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the BoundaryType enum...
-        private List<string> _boundary_type_strings = new List<string>()
-                                {
-                                    "zero flux",
-                                    "toroidal"
-                                };
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            try
-            {
-                return _boundary_type_strings[(int)value];
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            int idx = _boundary_type_strings.FindIndex(item => item == str);
-            return (BoundaryType)Enum.ToObject(typeof(BoundaryType), (int)idx);
-        }
-    }
     
     [ValueConversion(typeof(bool), typeof(int))]
     public class BoolToIndexConverter : IValueConverter
@@ -2475,6 +2287,11 @@ namespace Daphne
             return TempMolName;
         }
        
+        /// <summary>
+        /// create a clone of a molecule
+        /// </summary>
+        /// <param name="protocol">null to create a literal copy</param>
+        /// <returns></returns>
         public ConfigMolecule Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
@@ -2482,10 +2299,14 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newmol.entity_guid = id.ToString();
-            newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
+
+                newmol.entity_guid = id.ToString();
+                newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
+            }
             
             return newmol;
         }        
@@ -2626,7 +2447,7 @@ namespace Daphne
         //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
         public double Beta { get; set; }
-        public string  driver_mol_guid_ref { get; set; }
+        public string driver_mol_guid_ref { get; set; }
 
         public int CurrentState { get; set; }
         public string CurrentStateName { get; set; }
@@ -2901,19 +2722,7 @@ namespace Daphne
     public class ConfigMolecularPopulation : EntityModelBase
     {
         public string molpop_guid { get; set; }
-        private string _molecule_guid_ref;
-        public string molecule_guid_ref 
-        {
-            get
-            {
-                return _molecule_guid_ref;
-            }
-            set
-            {
-                _molecule_guid_ref = value;
-            }
-
-        }  // the molecule_guid of the molecule this mp contains
+        public ConfigMolecule molecule { get; set; }
         private string _Name;
         public string Name
         {
@@ -2935,7 +2744,6 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        //Moved MolPopInfo stuff to here - MolPopInfo class was not really needed
         private string _mp_dist_name = "";
         public string mp_dist_name
         {
@@ -3088,7 +2896,7 @@ namespace Daphne
             bool res = false;
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == mol.entity_guid)
+                if (molpop.molecule.entity_guid == mol.entity_guid)
                 {
                     return true;
                 }
@@ -3102,7 +2910,7 @@ namespace Daphne
             bool res = false;
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == molguid)
+                if (molpop.molecule.entity_guid == molguid)
                 {
                     return true;
                 }
@@ -3133,7 +2941,7 @@ namespace Daphne
             ConfigMolecularPopulation delMolPop = null;
             foreach (ConfigMolecularPopulation cmp in molpops)
             {
-                if (molecule_guid == cmp.molecule_guid_ref)
+                if (molecule_guid == cmp.molecule.entity_guid)
                 {
                     molpop_guid = cmp.molpop_guid;
                     delMolPop = cmp;
@@ -3489,7 +3297,7 @@ namespace Daphne
         {
             foreach (ConfigMolecularPopulation molpop in molpops)
             {
-                if (molpop.molecule_guid_ref == guid)
+                if (molpop.molecule.entity_guid == guid)
                 {
                     return true;
                 }
@@ -3529,13 +3337,16 @@ namespace Daphne
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                        configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+
+                        configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
                         configMolPop.mp_dist_name = "Uniform";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                         configMolPop.mp_render_blending_weight = 2.0;
                         configMolPop.mp_render_on = true;
+
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
                         hl.concentration = 1;
                         configMolPop.mp_distribution = hl;
                         if (HasMolecule(molguid) == false)
@@ -3582,16 +3393,20 @@ namespace Daphne
             genes_guid_ref = new ObservableCollection<string>();
         }
 
-        public ConfigCell Clone()
+        public ConfigCell Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newcell.entity_guid = id.ToString();
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                newcell.entity_guid = id.ToString();
+            }
             return newcell;
         }
 
@@ -3855,38 +3670,6 @@ namespace Daphne
             string str = (string)value;
             int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
             return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
-        }
-    }
-
-    [ValueConversion(typeof(CellPopDistributionType), typeof(bool))]
-    public class CellPopDistributionTypeToBoolConverter : IValueConverter
-    {
-        // NOTE: This method is a bit fragile since the list of strings needs to 
-        // correspond in length and index with the GlobalParameterType enum...
-        
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            bool retval = true;
-            try
-            {
-                if ((int)value == 0)
-                    retval = true;
-                else
-                    retval = false;
-            }
-            catch
-            {
-                return true;
-            }
-            return retval;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string str = (string)value;
-            return str;
-            //int idx = _cell_pop_dist_type_strings.FindIndex(item => item == str);
-            //return (CellPopDistributionType)Enum.ToObject(typeof(CellPopDistributionType), (int)idx);
         }
     }
 
@@ -4418,7 +4201,8 @@ namespace Daphne
 
     public class CellPopulation : EntityModelBase
     {
-        public string cell_guid_ref { get; set; }
+        //public string cell_guid_ref { get; set; }
+        public ConfigCell Cell { get; set; }
         private string _Name;
         public string cellpopulation_name
         {
@@ -4434,7 +4218,6 @@ namespace Daphne
         }
         public string cellpopulation_guid { get; set; }
         public int cellpopulation_id { get; set; }
-        public string cell_subset_guid_ref { get; set; }
 
         private ReportXVF reportXVF;
         public ReportXVF report_xvf
@@ -4469,28 +4252,6 @@ namespace Daphne
             }
         }
 
-        // TODO: Need to abstract out positioning to include pos specification for single cell...
-        private bool _cellpopulation_constrained_to_region = false;
-        public bool cellpopulation_constrained_to_region 
-        {
-            get { return _cellpopulation_constrained_to_region; }
-            set
-            {
-                if (_cellpopulation_constrained_to_region == value)
-                    return;
-                else
-                {
-                    _cellpopulation_constrained_to_region = value;
-                    // NOTE: For now, manually blanking out guid_ref if false selected
-                    //   so cell population will be correct and searching for "used" regions
-                    //   will not turn up unwanted references...
-                    if (_cellpopulation_constrained_to_region == false)
-                        cellpopulation_region_guid_ref = "";
-                }
-            }
-        }
-        public string cellpopulation_region_guid_ref { get; set; }
-        public RelativePosition wrt_region { get; set; }
         public bool cellpopulation_render_on { get; set; }
         private Color _cellpopulation_color;   //this is used if cellpopulation_predef_color is set to ColorList.Custom
         public Color cellpopulation_color
@@ -4544,11 +4305,7 @@ namespace Daphne
 
             cellpopulation_guid = id.ToString();
             cellpopulation_name = "";
-            cell_subset_guid_ref = "";
             number = 1;
-            cellpopulation_constrained_to_region = false;
-            cellpopulation_region_guid_ref = "";
-            wrt_region = RelativePosition.Inside;
             cellpopulation_color = new System.Windows.Media.Color();
             cellpopulation_render_on = true;
             cellpopulation_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
@@ -4597,47 +4354,6 @@ namespace Daphne
             // TODO: Should probably put something real here, but right now it never gets called,
             // so I'm not sure what the value and parameter objects would be...
             return "y";
-        }
-    }
-
-    /// <summary>
-    /// Converter to go between molecule GUID references in MolPops
-    /// and molecule names kept in the repository of molecules.
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(int))]
-    public class MolGUIDtoMolIndexConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            int nIndex = -1;
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            if (mol_list != null)
-            {
-                int i = 0;
-                foreach (ConfigMolecule mol in mol_list)
-                {
-                    
-                    if (mol.entity_guid == guid)
-                    {
-                        nIndex = i;
-                        break;
-                    }
-                    i++;
-                }
-            }
-            return nIndex;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            int index = (int)value;
-            string ret = "not found";
-            
-            return ret;
         }
     }
 
@@ -4753,309 +4469,6 @@ namespace Daphne
         }
     }
 
-    /// <summary>
-    /// Convert death driver guid to its driver_molecule_guid_ref
-    ///
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class DeathDriverGuidToMolGuidConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string mol_guid = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
-                        break;
-                    }
-                }
-            }
-            return mol_guid;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
-    /// <summary>
-    /// Convert death driver guid to its alpha value
-    ///
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(double))]
-    public class DeathDriverGuidToAlphaConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            double retval = 0;
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        retval = row.elements[1].Alpha;
-                        break;
-                    }
-                }
-            }
-            return retval;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: To go back from gui to Protocol
-            string token = value as string;
-            double newval = double.Parse(token);
-            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            //if (drivers != null)
-            //{
-            //    foreach (ConfigTransitionDriver driver in drivers)
-            //    {
-            //        if (driver.driver_guid == guid)
-            //        {
-            //            ConfigTransitionDriverRow row = driver.DriverElements[0];
-            //            row.elements[1].Alpha = newval;
-            //            break;
-            //        }
-            //    }
-            //}
-            return newval;
-        }
-    }
-
-    /// <summary>
-    /// Convert death driver guid to its beta value
-    ///
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(double))]
-    public class DeathDriverGuidToBetaConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            double retval = 0;
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        retval = row.elements[1].Beta;
-                        break;
-                    }
-                }
-            }
-            return retval;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: To go bafrom gui to Protocol
-            string guid = value as string;
-            double newval = double.Parse(guid);
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        row.elements[1].Beta = newval;
-                        break;
-                    }
-                }
-            }
-            return newval;
-        }
-    }
-
-    /// <summary>
-    /// Convert death driver guid to its driver element (note only alive to dead)!
-    ///
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(ConfigTransitionDriverElement))]
-    public class DeathDriverGuidToDriverElementConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            ConfigTransitionDriverElement elem = null;
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        elem = row.elements[1];
-                        break;
-                    }
-                }
-            }
-            return elem;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
-    /// <summary>
-    /// Convert death driver guid to its driver_molecule_guid_ref
-    ///
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class DeathDriverGuidToMolNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string mol_guid = "";
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
-                        break;
-                    }
-                }
-            }
-            return mol_guid;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
-    //MolGuidToMolPopNameConverter
-    /// <summary>
-    /// Converts a molecule guid to a mol pop name given a ConfigCompartment.
-    /// So in the compartment, whichever mol pop has the molecule guid, its name is returned.
-    /// </summary>
-    [ValueConversion(typeof(string), typeof(string))]
-    public class MolGuidToMolPopNameConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string guid = value as string;
-            string mol_pop_name = "";
-            ConfigCompartment cc = parameter as ConfigCompartment;
-
-            foreach(ConfigMolecularPopulation molpop in cc.molpops) {
-                if (molpop.molecule_guid_ref == guid) {
-                    mol_pop_name = molpop.Name;
-                    break;
-                }
-            }
-            
-            return mol_pop_name;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
-    //MolGuidToMolPopNameMultiConverter
-    public class MolGuidToMolPopMultiConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string death_guid = (values[0] == null) ? string.Empty : values[0].ToString();
-            ConfigCompartment cc = values[1] as ConfigCompartment;
-
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-
-            ConfigMolecularPopulation MyMolPop = null;
-            string mol_guid = "";
-
-            if (death_guid == "")
-                return mol_guid;
-
-            if (drivers != null)
-            {
-                foreach (ConfigTransitionDriver driver in drivers)
-                {
-                    if (driver.entity_guid == death_guid)
-                    {
-                        ConfigTransitionDriverRow row = driver.DriverElements[0];
-                        mol_guid = row.elements[1].driver_mol_guid_ref;
-                        break;
-                    }
-                }
-            }
-
-            if (cc != null && mol_guid != "")
-            {
-                foreach (ConfigMolecularPopulation molpop in cc.molpops)
-                {
-                    if (molpop.molecule_guid_ref == mol_guid)
-                    {
-                        MyMolPop = molpop;
-                        break;
-                    }
-                }
-            }
-
-            return MyMolPop;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
-        {
-            object[] retval = new object[2];
-
-            if (value != null)
-            {
-                ConfigMolecularPopulation MyMolPop = value as ConfigMolecularPopulation;
-                if (MyMolPop != null)
-                {
-                    retval[0] = MyMolPop.molecule_guid_ref;
-                    retval[1] = value;
-                }
-            }
-
-            return retval;
-        }
-    }
-
     public class MolGuidToMolPopForDiffConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -5069,7 +4482,7 @@ namespace Daphne
 
             foreach (ConfigMolecularPopulation molpop in cc.molpops)
             {
-                if (molpop.molecule_guid_ref == driver_mol_guid)
+                if (molpop.molecule.entity_guid == driver_mol_guid)
                 {
                     MyMolPop = molpop;
                     break;
@@ -5083,11 +4496,13 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
-            string guid = "";
-            if (molpop != null)
-                guid = molpop.molecule_guid_ref;
 
-            return guid;
+            if (molpop != null)
+            {
+                return molpop.molecule.entity_guid;
+            }
+
+            return "";
         }
 
     }
@@ -5111,75 +4526,6 @@ namespace Daphne
             return null;
         }
 
-    }
-
-    public class MolGuidToMolPopForDiffMultiConverter : IMultiValueConverter
-    {
-        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string driver_mol_guid = (values[0] == null) ? string.Empty : values[0].ToString();
-            ConfigCompartment cc = values[1] as ConfigCompartment;
-
-            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-
-            ConfigMolecularPopulation MyMolPop = null;
-
-            if (driver_mol_guid == "" || cc == null)
-                return MyMolPop;
-            
-            foreach (ConfigMolecularPopulation molpop in cc.molpops)
-            {
-                if (molpop.molecule_guid_ref == driver_mol_guid)
-                {
-                    MyMolPop = molpop;
-                    break;
-                }
-            }
-
-            return MyMolPop;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
-        {
-            //val = molpop
-            //targetTypes has some guid and compartment
-            //parameter has drivers
-            //where is death_guid??  death guid?
-
-
-            object[] retval = new object[2];
-
-            if (value != null)
-            {
-                ConfigMolecularPopulation MyMolPop = value as ConfigMolecularPopulation;
-                if (MyMolPop != null)
-                {
-                    retval[1] = MyMolPop.molecule_guid_ref;
-                    retval[0] = value;
-                }
-            }
-
-            return retval;
-
-
-            //ConfigCompartment cc = targetTypes[1] as ConfigCompartment;
-            //System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            //ObservableCollection<ConfigTransitionDriver> drivers = cvs.Source as ObservableCollection<ConfigTransitionDriver>;
-            //if (cc != null)
-            //{
-            //    foreach (ConfigMolecularPopulation molpop in cc.molpops)
-            //    {
-            //        if (molpop.molecule_guid_ref == mol_guid)
-            //        {
-            //            MyMolPop = molpop;
-            //            break;
-            //        }
-            //    }
-            //}
-
-            //throw new NotImplementedException();
-        }
     }
 
     /// <summary>
@@ -5282,59 +4628,6 @@ namespace Daphne
             return "y";
         }
     }
-
-    /// <summary>
-    /// Converter to go between cell pop and cell reaction strings
-    /// </summary>
-    [ValueConversion(typeof(ConfigCell), typeof(ObservableCollection<string>))]
-    public class CellGuidToCellReactionsConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            ConfigCell cc = value as ConfigCell;
-
-            if (cc == null)
-                return null;
-
-            ObservableCollection<string> reacStrings = new ObservableCollection<string>();            
-
-            System.Windows.Data.CollectionViewSource cvs = parameter as System.Windows.Data.CollectionViewSource;
-            ObservableCollection<ConfigReaction> reac_list = cvs.Source as ObservableCollection<ConfigReaction>;
-            if (reac_list != null)
-            {
-                foreach (ConfigReaction reac in reac_list)
-                {
-                    foreach (string rguid in cc.membrane.reactions_guid_ref) 
-                    {
-                        if (reac.entity_guid == rguid) {
-                            reacStrings.Add("membrane: " + reac.TotalReactionString);
-                        }
-                    }
-                    foreach (string rguid in cc.cytosol.reactions_guid_ref)
-                    {
-                        if (reac.entity_guid == rguid)
-                        {
-                            reacStrings.Add("cytosol: " + reac.TotalReactionString);
-                        }
-                    }
-                }
-            }
-
-            if (reacStrings.Count == 0)
-                reacStrings.Add("No reactions in this cell.");
-
-            return reacStrings;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            // TODO: Should probably put something real here, but right now it never gets called,
-            // so I'm not sure what the value and parameter objects would be...
-            return "y";
-        }
-    }
-
-
 
     /// <summary>
     /// Converter to go between molecule GUID references in MolPops
@@ -5489,7 +4782,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             Color col = Color.FromRgb(255, 0, 0);
-            if (value == null)
+            if (value == null || (string)value == "")
                 return col;
 
             try
@@ -5579,25 +4872,10 @@ namespace Daphne
         }
     }
 
-    [ValueConversion(typeof(string), typeof(bool))]
-    public class IsNullConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return (value == null);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new InvalidOperationException("IsNullConverter can only be used OneWay.");
-        }
-    }
-
     // Base class for homog, linear, gauss distributions
     [XmlInclude(typeof(MolPopHomogeneousLevel)),
      XmlInclude(typeof(MolPopLinear)),
      XmlInclude(typeof(MolPopGaussian))]
-     //XmlInclude(typeof(MolPopCustom))]
     public abstract class MolPopDistribution : EntityModelBase
     {
         [XmlIgnore]

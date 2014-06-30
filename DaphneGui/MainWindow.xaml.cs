@@ -86,7 +86,7 @@ namespace DaphneGui
         /// uri for the scenario file
         /// </summary>
         public static Uri protocol_path;
-        private string orig_content, orig_path;
+        private string orig_content, orig_path, SBMLFolderPath;
         private bool tempFileContent = false, postConstruction = false;
 
         private bool exportAllFlag = false;
@@ -372,6 +372,12 @@ namespace DaphneGui
 
             }
 
+            //Defines default location of SBML folder within Daphne's directory structure
+            SBMLFolderPath = appPath + @"\Config\SBML\";
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
+
             // handle the application properties
             string file;
 
@@ -486,7 +492,7 @@ namespace DaphneGui
 
             if (file_exists)
             {
-                initialState(true, true, "");
+                initialState(true, true, ReadJson(""));
                 enableCritical(loadSuccess);
                 if (loadSuccess == true)
                 {
@@ -589,7 +595,7 @@ namespace DaphneGui
 
         private void showScenarioInitial()
         {
-            lockAndResetSim(true, "");
+            lockAndResetSim(true, ReadJson(""));
             if (loadSuccess == false)
             {
                 return;
@@ -660,12 +666,7 @@ namespace DaphneGui
 
             //Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
 
@@ -680,13 +681,13 @@ namespace DaphneGui
                 protocol = encodedSBML.ReadSBMLFile();
                 if (protocol != null)
                 {
-                    if (protocol.experiment_name.Equals("Experiment1"))
+                    if (encodedSBML.ContainsReactionComplex())
                     {
-                        LoadCustomReactionComplex(protocol);
+                        LoadReactionComplex(protocol);
                     }
                     else
                     {
-                        LoadCustomProtocol(protocol);
+                        LoadProtocolFromSBML(protocol);
                     }
                 }
                 //Obtain filled out configurator and store in tempConfigurator
@@ -698,7 +699,7 @@ namespace DaphneGui
         /// Loads the imported reaction complex into the GUI
         /// </summary>
         /// <param name="protocol"></param>
-        private void LoadCustomReactionComplex(Protocol protocol)
+        private void LoadReactionComplex(Protocol protocol)
         {
 
             //ReactionComplex that was added
@@ -713,7 +714,7 @@ namespace DaphneGui
 
             foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
             {
-                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule_guid_ref];
+                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
                 sop.Protocol.entity_repository.molecules.Add(configMol);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
@@ -742,13 +743,20 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Loads a custom Protocol object into Daphne
+        /// Loads a new Protocol object into Daphne
         /// </summary>
         /// <param name="tempProtocol"></param>
-        private void LoadCustomProtocol(Protocol protocol)
+        private void LoadProtocolFromSBML(Protocol protocol)
         {
-            //Use already existing routines in loading a scenario to populate GUI and simulation
-            prepareScenario(protocol);
+            protocol.InitializeStorageClasses();
+
+            //SetPaths
+            protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
+            protocol.TempFile = orig_path + @"\temp_scenario.json";
+
+            protocol_path = new Uri(protocol.FileName);   
+
+            prepareProtocol(protocol);
             protocol.SerializeToFile(false);
         }
 
@@ -764,12 +772,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
@@ -777,12 +780,12 @@ namespace DaphneGui
 
             // Show open  file dialog box
             Nullable<bool> result = dlg.ShowDialog();
-
+            SBMLModel encodedSBML;
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
-                encodedSBML.ConvertDaphneToSBML(dlg.SafeFileName.Replace(".xml", ""), dlg.FilterIndex);
+                encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
+                encodedSBML.ConvertDaphneToSBML(dlg.FilterIndex);
             }
             
         }
@@ -798,12 +801,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             dlg.FileName = "SBMLReactionComplex";
@@ -814,19 +812,16 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
                 ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
                 ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
                 ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
 
                 if (crc != null)
                 {
-                    encodedSBML.ConvertReactionComplexToSBML(crc, dlg.SafeFileName.Replace(".xml", ""));
+                    encodedSBML.ConvertReactionComplexToSBML(crc);
                 }
             }
-
-            //
-           
         }
 
         /// <summary>
@@ -890,7 +885,7 @@ namespace DaphneGui
                 lock (sim)
                 {
                     // re-initialize; if there are no cells, always do a full reset
-                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, "");
+                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
                     enableCritical(loadSuccess);
                     if (loadSuccess == false)
                     {
@@ -991,7 +986,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
         /// <param name="xmlConfigString">scenario as a string</param>
-        private void lockAndResetSim(bool newFile, string xmlConfigString, Protocol customProtocol = null)
+        private void lockAndResetSim(bool newFile, Protocol protocol)
         {
             // prevent when a fit is in progress
             lock (cellFitLock)
@@ -1000,7 +995,7 @@ namespace DaphneGui
                 {
                     vcrControl.SetInactive();
                 }
-                initialState(newFile || tempFileContent, true, xmlConfigString, customProtocol);
+                initialState(newFile || tempFileContent, true, protocol);
                 enableCritical(loadSuccess);
                 if (loadSuccess == false)
                 {
@@ -1835,7 +1830,53 @@ namespace DaphneGui
             return;
         }
 
-        private void initialState(bool newFile, bool completeReset, string jsonScenarioString, Protocol customProtocol=null)
+        /// <summary>
+        /// Takes care of loading a Protocol from string or file
+        /// </summary>
+        /// <param name="jsonScenarioString"></param>
+        /// <returns></returns>
+        private Protocol ReadJson(string jsonScenarioString) 
+        {
+            Protocol protocol;
+
+            // load past experiment
+            if (jsonScenarioString != "")
+            {
+                protocol = new Protocol();
+                protocol.TempFile = orig_path + @"\temp_protocol.json";
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
+                    return protocol;
+                }
+                catch
+                {
+                    handleLoadFailure("That configuration has problems. Please select another experiment.");
+                    return null;
+                }
+            }
+            else
+            {
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    protocol = new Protocol();
+                    protocol.FileName = protocol_path.LocalPath;
+                    protocol.TempFile = orig_path + @"\temp_protocol.json";
+                    SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
+                    return protocol;
+                    //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
+                }
+                catch
+                {
+                    handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
+                    return null;
+                }
+            }
+        }
+
+        private void initialState(bool newFile, bool completeReset, Protocol protocol)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
             // we always must deserialize the file
@@ -1854,58 +1895,15 @@ namespace DaphneGui
                         sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
                     }
                 }
-                if (customProtocol !=null)
+
+                if (protocol != null)
                 {
                     sop = new SystemOfPersistence();
-
-                    //Load Custom SimConfig
-                    sop.Protocol = customProtocol;
-                    sop.Protocol.InitializeStorageClasses();
-
-                    //SetPaths
-                    sop.Protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
-                    sop.Protocol.TempFile = orig_path + @"\temp_scenario.json";
-                    
-                    protocol_path = new Uri(sop.Protocol.FileName);
-            
+                    sop.Protocol = protocol;
+                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
-                
-                // load past experiment
-                else if (jsonScenarioString != "")
-                {
-                    // reinitialize the configurator
-                    sop = new SystemOfPersistence();
-                    sop.Protocol.TempFile = orig_path + @"\temp_protocol.json";
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        sop.DeserializeProtocolFromString(jsonScenarioString);
-                    }
-                    catch
-                    {
-                        handleLoadFailure("That configuration has problems. Please select another experiment.");
-                        return;
-                    }
-                }
-                else
-                {
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        sop = new SystemOfPersistence();
-                        sop.Protocol.FileName = protocol_path.LocalPath;
-                        sop.Protocol.TempFile = orig_path + @"\temp_protocol.json";
-                        sop.DeserializeProtocol(tempFileContent);
-                        //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
-                    }
-                    catch
-                    {
-                        handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
-                        return;
-                    }
-                }
-                orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+              
             }
 
             // (re)connect the handlers for the property changed event
@@ -2290,7 +2288,7 @@ namespace DaphneGui
 
         private void updateGraphicsAndGUI()
         {
-            lockAndResetSim(false, "");
+            lockAndResetSim(false, ReadJson(""));
             //also need to delete every for this experiment in database.
             //DataBaseTools.DeleteExperiment(configurator.Protocol.experiment_db_id);
             //SC.Protocol.experiment_db_id = -1;//reset
@@ -2521,13 +2519,13 @@ namespace DaphneGui
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
+                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
-                cmi.Concentration = conc; 
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Concentration = conc;
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
@@ -2602,7 +2600,7 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                prepareScenario();                 
+                prepareProtocol(ReadJson(""));                 
             }
         }
 
@@ -2724,13 +2722,13 @@ namespace DaphneGui
             }
 
             setScenarioPaths(filename);
-            prepareScenario();            
+            prepareProtocol(ReadJson(""));            
         }
 
-        private void prepareScenario(Protocol customProtocol=null)
+        private void prepareProtocol(Protocol protocol)
         {
             // show the inital state
-            lockAndResetSim(true, "", customProtocol);
+            lockAndResetSim(true, protocol);
             if (loadSuccess == false)
             {
                 return;

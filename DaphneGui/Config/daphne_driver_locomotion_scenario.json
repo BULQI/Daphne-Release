@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "3a0e6329-57a5-4f7b-9dad-978c4ab829bd",
+  "experiment_guid": "ffa2ed51-9ab8-494c-b63b-81528e6cd7e6",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "box_guid_box_dict": {},
@@ -33,14 +33,21 @@
         "molpops_dict": {},
         "molpops": [
           {
-            "molpop_guid": "4340b981-af69-4c44-bcdb-18f9038c0088",
-            "molecule_guid_ref": "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
+            "molpop_guid": "79f59719-5890-4484-a9db-ee758a80830c",
+            "molecule": {
+              "Name": "CXCL13",
+              "MolecularWeight": 7.96,
+              "EffectiveRadius": 1.0,
+              "DiffusionCoefficient": 4500.0,
+              "molecule_location": 0,
+              "entity_guid": "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
+            },
             "Name": "CXCL13",
             "report_mp": {
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "4340b981-af69-4c44-bcdb-18f9038c0088"
+              "molpop_guid_ref": "79f59719-5890-4484-a9db-ee758a80830c"
             },
             "mp_dist_name": "Linear",
             "mp_distribution": {
@@ -69,8 +76,8 @@
           }
         ],
         "reactions_guid_ref": [
-          "0ee6eaf1-5f5c-4129-9997-5c461c508a12",
-          "498e1425-f4f6-4a99-9f5b-6633f65959e6"
+          "3fd59fc1-516f-4466-b04f-8cb02f6e7f42",
+          "9c67ed1b-009a-4e6c-9f0e-fc8fbc0a9ba2"
         ],
         "reaction_complexes_guid_ref": []
       },
@@ -79,17 +86,187 @@
     "cellpopulations": [
       {
         "ecm_probe_dict": {
-          "4340b981-af69-4c44-bcdb-18f9038c0088": {
+          "79f59719-5890-4484-a9db-ee758a80830c": {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "4340b981-af69-4c44-bcdb-18f9038c0088"
+            "molpop_guid_ref": "79f59719-5890-4484-a9db-ee758a80830c"
           }
         },
-        "cell_guid_ref": "0313b513-fae4-4f31-939c-e9352248b46d",
+        "Cell": {
+          "CurrentDeathState": 0,
+          "CurrentDivState": 0,
+          "CellName": "Leukocyte_staticReceptor_motile",
+          "CellRadius": 5.0,
+          "locomotor_mol_guid_ref": "d2cd5d18-cfe7-49c3-99d2-4888aa238811",
+          "TransductionConstant": 100.0,
+          "DragCoefficient": 1.0,
+          "membrane": {
+            "molpops_dict": {},
+            "molpops": [
+              {
+                "molpop_guid": "20ff9955-66ab-47ab-8888-8c4be3b6df4b",
+                "molecule": {
+                  "Name": "CXCR5|",
+                  "MolecularWeight": 43.0,
+                  "EffectiveRadius": 1.0,
+                  "DiffusionCoefficient": 1E-07,
+                  "molecule_location": 1,
+                  "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+                },
+                "Name": "CXCR5|",
+                "report_mp": {
+                  "mp_extended": 0,
+                  "molpop_guid_ref": "20ff9955-66ab-47ab-8888-8c4be3b6df4b"
+                },
+                "mp_dist_name": "Uniform",
+                "mp_distribution": {
+                  "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+                  "concentration": 44.0,
+                  "mp_distribution_type": 0,
+                  "boundaryCondition": null
+                },
+                "mp_amplitude_keyframes": null,
+                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+                "mp_render_blending_weight": 2.0,
+                "mp_render_on": false
+              },
+              {
+                "molpop_guid": "9e4e61e3-e37a-4f51-9f4d-b6514a9e4481",
+                "molecule": {
+                  "Name": "CXCL13:CXCR5|",
+                  "MolecularWeight": 50.96,
+                  "EffectiveRadius": 1.0,
+                  "DiffusionCoefficient": 1E-07,
+                  "molecule_location": 1,
+                  "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+                },
+                "Name": "CXCL13:CXCR5|",
+                "report_mp": {
+                  "mp_extended": 0,
+                  "molpop_guid_ref": "9e4e61e3-e37a-4f51-9f4d-b6514a9e4481"
+                },
+                "mp_dist_name": "Uniform",
+                "mp_distribution": {
+                  "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+                  "concentration": 0.0,
+                  "mp_distribution_type": 0,
+                  "boundaryCondition": null
+                },
+                "mp_amplitude_keyframes": null,
+                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+                "mp_render_blending_weight": 2.0,
+                "mp_render_on": false
+              }
+            ],
+            "reactions_guid_ref": [],
+            "reaction_complexes_guid_ref": []
+          },
+          "cytosol": {
+            "molpops_dict": {},
+            "molpops": [
+              {
+                "molpop_guid": "3cad6123-f867-401f-a7f0-2aa2d4f2e9b1",
+                "molecule": {
+                  "Name": "A",
+                  "MolecularWeight": 1.0,
+                  "EffectiveRadius": 1.0,
+                  "DiffusionCoefficient": 750.0,
+                  "molecule_location": 0,
+                  "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
+                },
+                "Name": "A",
+                "report_mp": {
+                  "mp_extended": 0,
+                  "molpop_guid_ref": "3cad6123-f867-401f-a7f0-2aa2d4f2e9b1"
+                },
+                "mp_dist_name": "Uniform",
+                "mp_distribution": {
+                  "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+                  "concentration": 250.0,
+                  "mp_distribution_type": 0,
+                  "boundaryCondition": null
+                },
+                "mp_amplitude_keyframes": null,
+                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+                "mp_render_blending_weight": 2.0,
+                "mp_render_on": false
+              },
+              {
+                "molpop_guid": "3c68108c-6cbf-42b6-80c0-994b01fe3d42",
+                "molecule": {
+                  "Name": "A*",
+                  "MolecularWeight": 1.0,
+                  "EffectiveRadius": 1.0,
+                  "DiffusionCoefficient": 7.5,
+                  "molecule_location": 0,
+                  "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
+                },
+                "Name": "A*",
+                "report_mp": {
+                  "mp_extended": 0,
+                  "molpop_guid_ref": "3c68108c-6cbf-42b6-80c0-994b01fe3d42"
+                },
+                "mp_dist_name": "Uniform",
+                "mp_distribution": {
+                  "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+                  "concentration": 0.0,
+                  "mp_distribution_type": 0,
+                  "boundaryCondition": null
+                },
+                "mp_amplitude_keyframes": null,
+                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+                "mp_render_blending_weight": 2.0,
+                "mp_render_on": false
+              },
+              {
+                "molpop_guid": "ccbfc696-a374-48b8-817b-11d1ca7b2e14",
+                "molecule": {
+                  "Name": "sApop",
+                  "MolecularWeight": 1.0,
+                  "EffectiveRadius": 1.0,
+                  "DiffusionCoefficient": 1.0,
+                  "molecule_location": 0,
+                  "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
+                },
+                "Name": "sApop",
+                "report_mp": {
+                  "mp_extended": 0,
+                  "molpop_guid_ref": "ccbfc696-a374-48b8-817b-11d1ca7b2e14"
+                },
+                "mp_dist_name": "Uniform",
+                "mp_distribution": {
+                  "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
+                  "concentration": 0.0,
+                  "mp_distribution_type": 0,
+                  "boundaryCondition": null
+                },
+                "mp_amplitude_keyframes": null,
+                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
+                "mp_render_blending_weight": 2.0,
+                "mp_render_on": false
+              }
+            ],
+            "reactions_guid_ref": [
+              "b2ebd523-857b-4107-92c4-58331b0a15df",
+              "e8d741ba-372c-4ae1-974e-53d0f0c03f42",
+              "1005736d-b31c-403a-b95c-e271d8c65823"
+            ],
+            "reaction_complexes_guid_ref": []
+          },
+          "genes_guid_ref": [
+            "f342c373-fe04-4348-8f46-8573a5861752"
+          ],
+          "diff_scheme_guid_ref": "",
+          "diff_scheme": null,
+          "death_driver_guid_ref": "",
+          "death_driver": null,
+          "div_driver_guid_ref": "",
+          "div_driver": null,
+          "entity_guid": "f9e96753-decb-4728-ae6c-ec571e7044e2"
+        },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "ad8b6338-d326-4131-8dfe-7458007f8890",
+        "cellpopulation_guid": "cfe82c9e-e82d-4960-aa7a-bd648b5552aa",
         "cellpopulation_id": 0,
-        "cell_subset_guid_ref": "",
         "report_xvf": {
           "position": true,
           "velocity": true,
@@ -99,13 +276,10 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "4340b981-af69-4c44-bcdb-18f9038c0088"
+            "molpop_guid_ref": "79f59719-5890-4484-a9db-ee758a80830c"
           }
         ],
         "number": 1,
-        "cellpopulation_constrained_to_region": false,
-        "cellpopulation_region_guid_ref": "",
-        "wrt_region": 0,
         "cellpopulation_render_on": true,
         "cellpopulation_color": "sc#1, 1, 0.5, 0",
         "cellpopulation_predef_color": 1,
@@ -187,17 +361,24 @@
       {
         "Name": "Ligand/Receptor",
         "reactions_guid_ref": [
-          "3c60b93a-fd20-42e9-9311-fb187df4ac36",
-          "369ce869-a107-42be-a449-98bdf82b51e4"
+          "d8bf5f17-23ed-48b8-beaf-866a410dae87",
+          "e02cf8cf-37a7-4364-b49d-bee98787aacb"
         ],
         "molpops": [
           {
-            "molpop_guid": "2ffb9ab3-4b4f-44f8-a53b-9823273e162e",
-            "molecule_guid_ref": "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
+            "molpop_guid": "734f65da-1eb2-4b98-a318-83592b962517",
+            "molecule": {
+              "Name": "CXCL13",
+              "MolecularWeight": 7.96,
+              "EffectiveRadius": 1.0,
+              "DiffusionCoefficient": 4500.0,
+              "molecule_location": 0,
+              "entity_guid": "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
+            },
             "Name": "CXCL13",
             "report_mp": {
               "mp_extended": 0,
-              "molpop_guid_ref": "2ffb9ab3-4b4f-44f8-a53b-9823273e162e"
+              "molpop_guid_ref": "734f65da-1eb2-4b98-a318-83592b962517"
             },
             "mp_dist_name": "Uniform",
             "mp_distribution": {
@@ -212,12 +393,19 @@
             "mp_render_on": false
           },
           {
-            "molpop_guid": "1f5c700e-0dcf-4666-a33f-637f3d8cfa2b",
-            "molecule_guid_ref": "30683720-7dec-4222-a02d-db0915d31498",
+            "molpop_guid": "58ab54d1-bd19-40bd-82e0-c16599db822d",
+            "molecule": {
+              "Name": "CXCR5",
+              "MolecularWeight": 43.0,
+              "EffectiveRadius": 1.0,
+              "DiffusionCoefficient": 750.0,
+              "molecule_location": 0,
+              "entity_guid": "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
+            },
             "Name": "CXCR5",
             "report_mp": {
               "mp_extended": 0,
-              "molpop_guid_ref": "1f5c700e-0dcf-4666-a33f-637f3d8cfa2b"
+              "molpop_guid_ref": "58ab54d1-bd19-40bd-82e0-c16599db822d"
             },
             "mp_dist_name": "Uniform",
             "mp_distribution": {
@@ -232,12 +420,19 @@
             "mp_render_on": false
           },
           {
-            "molpop_guid": "4fb5db81-97b6-4b85-9940-26e808906310",
-            "molecule_guid_ref": "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64",
+            "molpop_guid": "fd35de76-c0d7-4e8d-8a13-c236713e7b92",
+            "molecule": {
+              "Name": "CXCL13:CXCR5",
+              "MolecularWeight": 50.96,
+              "EffectiveRadius": 1.0,
+              "DiffusionCoefficient": 750.0,
+              "molecule_location": 0,
+              "entity_guid": "d674bce5-e106-4d48-93f8-4e94db2ad192"
+            },
             "Name": "CXCL13:CXCR5",
             "report_mp": {
               "mp_extended": 0,
-              "molpop_guid_ref": "4fb5db81-97b6-4b85-9940-26e808906310"
+              "molpop_guid_ref": "fd35de76-c0d7-4e8d-8a13-c236713e7b92"
             },
             "mp_dist_name": "Uniform",
             "mp_distribution": {
@@ -257,15 +452,15 @@
           {
             "OriginalRate": 0.494,
             "ReactionComplexRate": 0.494,
-            "entity_guid": "3c60b93a-fd20-42e9-9311-fb187df4ac36"
+            "entity_guid": "d8bf5f17-23ed-48b8-beaf-866a410dae87"
           },
           {
             "OriginalRate": 16.25,
             "ReactionComplexRate": 16.25,
-            "entity_guid": "369ce869-a107-42be-a449-98bdf82b51e4"
+            "entity_guid": "e02cf8cf-37a7-4364-b49d-bee98787aacb"
           }
         ],
-        "entity_guid": "9078f1fd-1ccf-4123-9afc-e237bc39c941"
+        "entity_guid": "236f90d8-021a-414a-af3c-a106f04b75cd"
       }
     ],
     "cells": [
@@ -281,12 +476,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "242ad062-3918-47bb-9ab4-231a1dbda09b",
-              "molecule_guid_ref": "8500cb3b-28d3-40cb-a789-34029be2de09",
+              "molpop_guid": "f4ae3f9d-a47c-45ba-b3c8-11f93329c791",
+              "molecule": {
+                "Name": "CXCR5|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+              },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "242ad062-3918-47bb-9ab4-231a1dbda09b"
+                "molpop_guid_ref": "f4ae3f9d-a47c-45ba-b3c8-11f93329c791"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -301,12 +503,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "80c2fd46-1afa-42b1-ac11-5005eda375bc",
-              "molecule_guid_ref": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279",
+              "molpop_guid": "8198102c-5a98-48f1-87d1-446f1f4735bb",
+              "molecule": {
+                "Name": "CXCL13:CXCR5|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+              },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "80c2fd46-1afa-42b1-ac11-5005eda375bc"
+                "molpop_guid_ref": "8198102c-5a98-48f1-87d1-446f1f4735bb"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -337,26 +546,33 @@
         "death_driver": null,
         "div_driver_guid_ref": "",
         "div_driver": null,
-        "entity_guid": "956eeece-ea12-4866-aa23-3a40cb4c8860"
+        "entity_guid": "cf417adb-c8f1-4098-b20a-899870500100"
       },
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
         "CellName": "Leukocyte_staticReceptor_motile",
         "CellRadius": 5.0,
-        "locomotor_mol_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+        "locomotor_mol_guid_ref": "d2cd5d18-cfe7-49c3-99d2-4888aa238811",
         "TransductionConstant": 100.0,
         "DragCoefficient": 1.0,
         "membrane": {
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "6031a247-561f-41f1-9ede-e6468f3559c7",
-              "molecule_guid_ref": "8500cb3b-28d3-40cb-a789-34029be2de09",
+              "molpop_guid": "20ff9955-66ab-47ab-8888-8c4be3b6df4b",
+              "molecule": {
+                "Name": "CXCR5|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+              },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 2,
-                "molpop_guid_ref": "6031a247-561f-41f1-9ede-e6468f3559c7"
+                "molpop_guid_ref": "20ff9955-66ab-47ab-8888-8c4be3b6df4b"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -371,12 +587,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "0cf70546-ca5d-4605-acf3-15a9b8414c70",
-              "molecule_guid_ref": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279",
+              "molpop_guid": "9e4e61e3-e37a-4f51-9f4d-b6514a9e4481",
+              "molecule": {
+                "Name": "CXCL13:CXCR5|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+              },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 2,
-                "molpop_guid_ref": "0cf70546-ca5d-4605-acf3-15a9b8414c70"
+                "molpop_guid_ref": "9e4e61e3-e37a-4f51-9f4d-b6514a9e4481"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -398,12 +621,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "4b50e3e1-3c44-455d-9909-09bfef1068ef",
-              "molecule_guid_ref": "d7b78bc5-6a3b-4c01-b277-afb7f07896ce",
+              "molpop_guid": "3cad6123-f867-401f-a7f0-2aa2d4f2e9b1",
+              "molecule": {
+                "Name": "A",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
+              },
               "Name": "A",
               "report_mp": {
                 "mp_extended": 2,
-                "molpop_guid_ref": "4b50e3e1-3c44-455d-9909-09bfef1068ef"
+                "molpop_guid_ref": "3cad6123-f867-401f-a7f0-2aa2d4f2e9b1"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -418,12 +648,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "8b95839b-6f77-4001-a8f6-f443e181d657",
-              "molecule_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+              "molpop_guid": "3c68108c-6cbf-42b6-80c0-994b01fe3d42",
+              "molecule": {
+                "Name": "A*",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 7.5,
+                "molecule_location": 0,
+                "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
+              },
               "Name": "A*",
               "report_mp": {
                 "mp_extended": 2,
-                "molpop_guid_ref": "8b95839b-6f77-4001-a8f6-f443e181d657"
+                "molpop_guid_ref": "3c68108c-6cbf-42b6-80c0-994b01fe3d42"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -438,12 +675,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "7dcf213f-107c-437e-b1f5-7c02da743904",
-              "molecule_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+              "molpop_guid": "ccbfc696-a374-48b8-817b-11d1ca7b2e14",
+              "molecule": {
+                "Name": "sApop",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
+              },
               "Name": "sApop",
               "report_mp": {
                 "mp_extended": 2,
-                "molpop_guid_ref": "7dcf213f-107c-437e-b1f5-7c02da743904"
+                "molpop_guid_ref": "ccbfc696-a374-48b8-817b-11d1ca7b2e14"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -459,14 +703,14 @@
             }
           ],
           "reactions_guid_ref": [
-            "3fda16d8-8b5f-44d1-9c03-7c0893ef2f56",
-            "ac51c67e-7346-4832-8153-26f6ce6bd395",
-            "710418e1-368a-4b5b-969f-af37997fcefa"
+            "b2ebd523-857b-4107-92c4-58331b0a15df",
+            "e8d741ba-372c-4ae1-974e-53d0f0c03f42",
+            "1005736d-b31c-403a-b95c-e271d8c65823"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "bbd1a4f2-2e57-49dd-b06e-f1571ee24886"
+          "f342c373-fe04-4348-8f46-8573a5861752"
         ],
         "diff_scheme_guid_ref": "",
         "diff_scheme": null,
@@ -474,26 +718,33 @@
         "death_driver": null,
         "div_driver_guid_ref": "",
         "div_driver": null,
-        "entity_guid": "0313b513-fae4-4f31-939c-e9352248b46d"
+        "entity_guid": "f9e96753-decb-4728-ae6c-ec571e7044e2"
       },
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
         "CellName": "Leukocyte_dynamicReceptor_motile",
         "CellRadius": 5.0,
-        "locomotor_mol_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+        "locomotor_mol_guid_ref": "d2cd5d18-cfe7-49c3-99d2-4888aa238811",
         "TransductionConstant": 100.0,
         "DragCoefficient": 1.0,
         "membrane": {
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "a9886d2e-1fb8-4e17-bbe4-39a4b8737912",
-              "molecule_guid_ref": "8500cb3b-28d3-40cb-a789-34029be2de09",
+              "molpop_guid": "7e3404e5-98f8-4dfc-b04f-697088998104",
+              "molecule": {
+                "Name": "CXCR5|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+              },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "a9886d2e-1fb8-4e17-bbe4-39a4b8737912"
+                "molpop_guid_ref": "7e3404e5-98f8-4dfc-b04f-697088998104"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -508,12 +759,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "9c636ad4-99be-440e-8c33-dc23ef2f3e92",
-              "molecule_guid_ref": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279",
+              "molpop_guid": "5636fbb4-1e17-4655-9f46-c6e218d6b732",
+              "molecule": {
+                "Name": "CXCL13:CXCR5|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+              },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "9c636ad4-99be-440e-8c33-dc23ef2f3e92"
+                "molpop_guid_ref": "5636fbb4-1e17-4655-9f46-c6e218d6b732"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -535,12 +793,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "591387e7-ac72-4639-b28b-05004961da7b",
-              "molecule_guid_ref": "d7b78bc5-6a3b-4c01-b277-afb7f07896ce",
+              "molpop_guid": "faf1c6a5-b12d-41ea-ad27-39f880e3c71b",
+              "molecule": {
+                "Name": "A",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
+              },
               "Name": "A",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "591387e7-ac72-4639-b28b-05004961da7b"
+                "molpop_guid_ref": "faf1c6a5-b12d-41ea-ad27-39f880e3c71b"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -555,12 +820,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "d62736a9-9e0f-40d3-8a52-16ed6769aefe",
-              "molecule_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+              "molpop_guid": "d498e323-b2cd-47cd-895b-24ad951d5577",
+              "molecule": {
+                "Name": "A*",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 7.5,
+                "molecule_location": 0,
+                "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
+              },
               "Name": "A*",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "d62736a9-9e0f-40d3-8a52-16ed6769aefe"
+                "molpop_guid_ref": "d498e323-b2cd-47cd-895b-24ad951d5577"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -575,12 +847,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "e4e52fb4-aa3c-4e4c-b948-827e749de78e",
-              "molecule_guid_ref": "30683720-7dec-4222-a02d-db0915d31498",
+              "molpop_guid": "2efe6b85-9301-41e2-abef-df080aadef11",
+              "molecule": {
+                "Name": "CXCR5",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
+              },
               "Name": "CXCR5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "e4e52fb4-aa3c-4e4c-b948-827e749de78e"
+                "molpop_guid_ref": "2efe6b85-9301-41e2-abef-df080aadef11"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -595,12 +874,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "1891ed67-a449-4a29-a553-81834ee747a3",
-              "molecule_guid_ref": "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64",
+              "molpop_guid": "3370c200-ea61-49d2-8c86-926473a8ac2b",
+              "molecule": {
+                "Name": "CXCL13:CXCR5",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "d674bce5-e106-4d48-93f8-4e94db2ad192"
+              },
               "Name": "CXCL13:CXCR5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "1891ed67-a449-4a29-a553-81834ee747a3"
+                "molpop_guid_ref": "3370c200-ea61-49d2-8c86-926473a8ac2b"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -615,12 +901,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "7456750b-06b5-467c-852a-47d3cde2d2ec",
-              "molecule_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+              "molpop_guid": "ed766d19-0c2d-4908-ade5-ac59aaf8ee33",
+              "molecule": {
+                "Name": "sApop",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
+              },
               "Name": "sApop",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "7456750b-06b5-467c-852a-47d3cde2d2ec"
+                "molpop_guid_ref": "ed766d19-0c2d-4908-ade5-ac59aaf8ee33"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -636,20 +929,20 @@
             }
           ],
           "reactions_guid_ref": [
-            "3fda16d8-8b5f-44d1-9c03-7c0893ef2f56",
-            "ac51c67e-7346-4832-8153-26f6ce6bd395",
-            "043992b3-0ad9-4982-bc02-8d0bd68dc8c4",
-            "5e859d24-e3cf-4e98-abff-99e675b1a496",
-            "d9786f23-7236-49c0-9d82-5c8ee18ebf74",
-            "e7a3653b-abd3-45d0-ab6e-81c5a538e79a",
-            "b5d36e74-8be2-4a73-9a1d-f577d18c345f",
-            "710418e1-368a-4b5b-969f-af37997fcefa"
+            "b2ebd523-857b-4107-92c4-58331b0a15df",
+            "e8d741ba-372c-4ae1-974e-53d0f0c03f42",
+            "a18c869f-f115-4fd2-a9e6-52620aa34f59",
+            "aff21ae0-51ad-4612-9237-c6932fbf9ecf",
+            "cc6f19b3-0974-4d8d-9827-747101e49626",
+            "1c5f6502-9aad-4411-aae4-bcb512e54811",
+            "8963a76b-3385-4a4d-b5c6-aef59e295cc9",
+            "1005736d-b31c-403a-b95c-e271d8c65823"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "bbd1a4f2-2e57-49dd-b06e-f1571ee24886",
-          "556a3463-aa3a-47c0-b40b-c283e12fec35"
+          "f342c373-fe04-4348-8f46-8573a5861752",
+          "c856716c-bd8b-4a04-a477-535810bd2a8a"
         ],
         "diff_scheme_guid_ref": "",
         "diff_scheme": null,
@@ -657,26 +950,33 @@
         "death_driver": null,
         "div_driver_guid_ref": "",
         "div_driver": null,
-        "entity_guid": "0d82c7ea-c0ff-49b6-8233-c2e532d0edd0"
+        "entity_guid": "1550fa89-652a-4477-9737-f4797c4c93e6"
       },
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
         "CellName": "B",
         "CellRadius": 5.0,
-        "locomotor_mol_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+        "locomotor_mol_guid_ref": "d2cd5d18-cfe7-49c3-99d2-4888aa238811",
         "TransductionConstant": 100.0,
         "DragCoefficient": 1.0,
         "membrane": {
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "04f43c01-18ef-4735-b86f-068fe27f351f",
-              "molecule_guid_ref": "8500cb3b-28d3-40cb-a789-34029be2de09",
+              "molpop_guid": "c533c3d1-5883-4f4e-b599-065eff000668",
+              "molecule": {
+                "Name": "CXCR5|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+              },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "04f43c01-18ef-4735-b86f-068fe27f351f"
+                "molpop_guid_ref": "c533c3d1-5883-4f4e-b599-065eff000668"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -691,12 +991,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "f1674b60-7c70-4679-abe5-4cd56965bd36",
-              "molecule_guid_ref": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279",
+              "molpop_guid": "74ceadf3-3ef3-4387-bb06-afabcff5bd78",
+              "molecule": {
+                "Name": "CXCL13:CXCR5|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+              },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "f1674b60-7c70-4679-abe5-4cd56965bd36"
+                "molpop_guid_ref": "74ceadf3-3ef3-4387-bb06-afabcff5bd78"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -711,12 +1018,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "36b5b5a0-ba6e-4e97-81ec-e13a0554f514",
-              "molecule_guid_ref": "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85",
+              "molpop_guid": "ca2b5ec1-c52b-459f-81bb-ca55993203e3",
+              "molecule": {
+                "Name": "CXCR4|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "b2370053-b9bb-488c-b913-703682c3a9f1"
+              },
               "Name": "CXCR4|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "36b5b5a0-ba6e-4e97-81ec-e13a0554f514"
+                "molpop_guid_ref": "ca2b5ec1-c52b-459f-81bb-ca55993203e3"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -731,12 +1045,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "7de5343c-5427-494b-98ac-56e2f3d20a1d",
-              "molecule_guid_ref": "9f074388-2da7-4ef4-8521-80458d66e309",
+              "molpop_guid": "881f827a-aab3-4152-85c1-5012d7805f44",
+              "molecule": {
+                "Name": "CXCL12:CXCR4|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
+              },
               "Name": "CXCL12:CXCR4|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "7de5343c-5427-494b-98ac-56e2f3d20a1d"
+                "molpop_guid_ref": "881f827a-aab3-4152-85c1-5012d7805f44"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -758,12 +1079,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "2e00e9b3-6763-4ca7-8022-f6972303a4c3",
-              "molecule_guid_ref": "d7b78bc5-6a3b-4c01-b277-afb7f07896ce",
+              "molpop_guid": "f9a667db-11c7-46ed-acb6-15eda61efd65",
+              "molecule": {
+                "Name": "A",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
+              },
               "Name": "A",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "2e00e9b3-6763-4ca7-8022-f6972303a4c3"
+                "molpop_guid_ref": "f9a667db-11c7-46ed-acb6-15eda61efd65"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -778,12 +1106,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "9ee14761-d463-4ff7-ada6-3cadadf935ff",
-              "molecule_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+              "molpop_guid": "5e5adac6-ff63-46bc-8d57-372899133b69",
+              "molecule": {
+                "Name": "A*",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 7.5,
+                "molecule_location": 0,
+                "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
+              },
               "Name": "A*",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "9ee14761-d463-4ff7-ada6-3cadadf935ff"
+                "molpop_guid_ref": "5e5adac6-ff63-46bc-8d57-372899133b69"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -798,12 +1133,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "8cab27e5-33eb-46db-ab01-9824cb76148e",
-              "molecule_guid_ref": "d877c084-2298-4153-9ff2-8128f381082c",
+              "molpop_guid": "740a9bdf-3258-4053-8090-0be4b963fcfb",
+              "molecule": {
+                "Name": "sDif1",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "5bb6d1c3-b810-4af3-825c-50632d1a1ba3"
+              },
               "Name": "sDif1",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "8cab27e5-33eb-46db-ab01-9824cb76148e"
+                "molpop_guid_ref": "740a9bdf-3258-4053-8090-0be4b963fcfb"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -818,12 +1160,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "f4942460-2684-43c9-9f66-caab333a9934",
-              "molecule_guid_ref": "bee7de97-c074-4e02-9927-ec89f3d5d23c",
+              "molpop_guid": "87ba47ea-cc07-477d-9ce6-b48c3a1eec15",
+              "molecule": {
+                "Name": "sDif2",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6"
+              },
               "Name": "sDif2",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "f4942460-2684-43c9-9f66-caab333a9934"
+                "molpop_guid_ref": "87ba47ea-cc07-477d-9ce6-b48c3a1eec15"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -838,12 +1187,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "550f81de-308d-496a-ac7a-c3c664548ab2",
-              "molecule_guid_ref": "1e7ccfe8-0468-406f-8bb6-657d849121ef",
+              "molpop_guid": "c23fd230-fd86-4da7-98b0-3bffecf55a81",
+              "molecule": {
+                "Name": "sDif3",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "cbea9d9c-7897-4fe8-aaef-5c72506801d4"
+              },
               "Name": "sDif3",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "550f81de-308d-496a-ac7a-c3c664548ab2"
+                "molpop_guid_ref": "c23fd230-fd86-4da7-98b0-3bffecf55a81"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -858,12 +1214,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "e179e4f2-437f-4750-9117-2a31ae195c76",
-              "molecule_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+              "molpop_guid": "9e33d0c7-30d1-4d37-a3b6-e97f639e5964",
+              "molecule": {
+                "Name": "sDif4",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "c68626de-f496-4f05-b10d-2b15cb73a5df"
+              },
               "Name": "sDif4",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "e179e4f2-437f-4750-9117-2a31ae195c76"
+                "molpop_guid_ref": "9e33d0c7-30d1-4d37-a3b6-e97f639e5964"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -878,12 +1241,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "2e27d1d0-c548-4f52-ad4b-e014870f3928",
-              "molecule_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+              "molpop_guid": "dbe25cd5-4c84-435d-9630-6bde3127a24e",
+              "molecule": {
+                "Name": "sDif5",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "ad312683-856f-425c-a7f1-a33004bc0f6a"
+              },
               "Name": "sDif5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "2e27d1d0-c548-4f52-ad4b-e014870f3928"
+                "molpop_guid_ref": "dbe25cd5-4c84-435d-9630-6bde3127a24e"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -898,12 +1268,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "d3d709f8-bc5e-409e-97fc-bd57b16a4720",
-              "molecule_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+              "molpop_guid": "be0676ba-ac80-418d-a29a-a4cbf04df95c",
+              "molecule": {
+                "Name": "sDif6",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "e926ac22-e6cb-46aa-800b-695d416d2fbe"
+              },
               "Name": "sDif6",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "d3d709f8-bc5e-409e-97fc-bd57b16a4720"
+                "molpop_guid_ref": "be0676ba-ac80-418d-a29a-a4cbf04df95c"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -918,12 +1295,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "76750f16-918c-42f6-b521-fffc1d21cea8",
-              "molecule_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+              "molpop_guid": "f4f51cca-56a8-44bf-878a-fc7b64c70e51",
+              "molecule": {
+                "Name": "sDif7",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "3db8bd37-c2fa-4436-a4cb-90911574f9ad"
+              },
               "Name": "sDif7",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "76750f16-918c-42f6-b521-fffc1d21cea8"
+                "molpop_guid_ref": "f4f51cca-56a8-44bf-878a-fc7b64c70e51"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -938,12 +1322,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "734b353b-e3c3-461f-bd31-d35bb8320b46",
-              "molecule_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+              "molpop_guid": "80ff6452-9b76-4fed-bdb7-287fe592f22b",
+              "molecule": {
+                "Name": "sApop",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
+              },
               "Name": "sApop",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "734b353b-e3c3-461f-bd31-d35bb8320b46"
+                "molpop_guid_ref": "80ff6452-9b76-4fed-bdb7-287fe592f22b"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -958,12 +1349,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "71337ad6-7c19-4014-bcb6-f0534d43d166",
-              "molecule_guid_ref": "14ee707e-7f03-49b6-8f53-0f2ede14381b",
+              "molpop_guid": "2d0c1462-c282-41c9-8941-db75c869846e",
+              "molecule": {
+                "Name": "sDiv",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "7706df60-48bd-41aa-834f-94720bc0180e"
+              },
               "Name": "sDiv",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "71337ad6-7c19-4014-bcb6-f0534d43d166"
+                "molpop_guid_ref": "2d0c1462-c282-41c9-8941-db75c869846e"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -978,12 +1376,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "a2bef659-33eb-4f99-853d-7f0745e2521f",
-              "molecule_guid_ref": "dda939c6-3b7a-405b-81ff-03dd3b7929f7",
+              "molpop_guid": "44f3275b-339c-4e14-a8bc-82fcd4d62ab8",
+              "molecule": {
+                "Name": "CXCR4",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "f570481b-1bc4-4f58-b862-735673a605d1"
+              },
               "Name": "CXCR4",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "a2bef659-33eb-4f99-853d-7f0745e2521f"
+                "molpop_guid_ref": "44f3275b-339c-4e14-a8bc-82fcd4d62ab8"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -998,12 +1403,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "b5979aa2-8bba-485d-948b-3bf416c78878",
-              "molecule_guid_ref": "30683720-7dec-4222-a02d-db0915d31498",
+              "molpop_guid": "142d7fcc-dd34-479f-87dd-59d7f1a0f9e8",
+              "molecule": {
+                "Name": "CXCR5",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
+              },
               "Name": "CXCR5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "b5979aa2-8bba-485d-948b-3bf416c78878"
+                "molpop_guid_ref": "142d7fcc-dd34-479f-87dd-59d7f1a0f9e8"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1018,12 +1430,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "0b0b57a5-a406-49fe-bebb-dea6707c81ec",
-              "molecule_guid_ref": "461bb088-4274-4089-b92c-30a3762a44d4",
+              "molpop_guid": "309c7065-c29f-4a13-93d9-f711cab1a03d",
+              "molecule": {
+                "Name": "IgH",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "3d5baccf-43de-444f-b68c-ee31836c3061"
+              },
               "Name": "IgH",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "0b0b57a5-a406-49fe-bebb-dea6707c81ec"
+                "molpop_guid_ref": "309c7065-c29f-4a13-93d9-f711cab1a03d"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1038,12 +1457,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "148be780-df12-413f-a03a-de12ebd32979",
-              "molecule_guid_ref": "82900329-abcc-4c3a-a40e-7a0f9e611a76",
+              "molpop_guid": "a30d12a9-2e63-4602-b30f-94216f4b56c8",
+              "molecule": {
+                "Name": "IgL",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "889dcbaf-cde1-4421-bc53-db1949171062"
+              },
               "Name": "IgL",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "148be780-df12-413f-a03a-de12ebd32979"
+                "molpop_guid_ref": "a30d12a9-2e63-4602-b30f-94216f4b56c8"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1058,12 +1484,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "0ef3e470-6c68-4f04-a12c-a095d251aeaf",
-              "molecule_guid_ref": "516b2065-4b43-47b7-8cdf-47969ffc229a",
+              "molpop_guid": "e4543e2c-d58c-401d-92bb-a8a61c2bee55",
+              "molecule": {
+                "Name": "IgS",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "1534f348-0445-404e-a699-f7e53cb1ce95"
+              },
               "Name": "IgS",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "0ef3e470-6c68-4f04-a12c-a095d251aeaf"
+                "molpop_guid_ref": "e4543e2c-d58c-401d-92bb-a8a61c2bee55"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1078,12 +1511,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "d200a9c2-f481-46a4-bf26-e1fcbe8e6e09",
-              "molecule_guid_ref": "ccd22b3c-60ef-4a1c-a570-05a4483eddc9",
+              "molpop_guid": "4e9834d5-9b91-4ee4-ab41-183e74f975b9",
+              "molecule": {
+                "Name": "AID",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "e3c25a83-878d-4236-8c66-cdd7df3086c8"
+              },
               "Name": "AID",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "d200a9c2-f481-46a4-bf26-e1fcbe8e6e09"
+                "molpop_guid_ref": "4e9834d5-9b91-4ee4-ab41-183e74f975b9"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1098,12 +1538,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "24e0b004-1fae-4c1b-bd66-33a6ed2d9ff5",
-              "molecule_guid_ref": "72c8d89e-30db-4026-b29f-e4c796a8ade0",
+              "molpop_guid": "1de95a2c-14f0-41cc-9449-bc8dc8eb1bbd",
+              "molecule": {
+                "Name": "BL1",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "40ca14bf-ec22-40f2-ad15-0558c133e96e"
+              },
               "Name": "BL1",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "24e0b004-1fae-4c1b-bd66-33a6ed2d9ff5"
+                "molpop_guid_ref": "1de95a2c-14f0-41cc-9449-bc8dc8eb1bbd"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1118,12 +1565,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "0fcc3424-e42c-4551-b0be-65b755eee952",
-              "molecule_guid_ref": "6594c33e-5c56-4661-9d2b-d8cea82f0c83",
+              "molpop_guid": "2cc4609a-be66-46a5-8dfd-63370a11c991",
+              "molecule": {
+                "Name": "MHCII",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "44cc89b4-6cf5-430b-8d53-38fbd7c39c0a"
+              },
               "Name": "MHCII",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "0fcc3424-e42c-4551-b0be-65b755eee952"
+                "molpop_guid_ref": "2cc4609a-be66-46a5-8dfd-63370a11c991"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1139,63 +1593,63 @@
             }
           ],
           "reactions_guid_ref": [
-            "3fda16d8-8b5f-44d1-9c03-7c0893ef2f56",
-            "ac51c67e-7346-4832-8153-26f6ce6bd395",
-            "d38df0ab-c230-4204-a7c1-951010799f03",
-            "043992b3-0ad9-4982-bc02-8d0bd68dc8c4",
-            "c89faf89-c92a-4df2-bd00-eb8d05640975",
-            "5ac2e05c-b2b8-4d61-b17c-d1ba8734eccf",
-            "62b6a4e2-e7e6-4d20-8317-670cf656ec0f",
-            "156e3e35-3b2a-4187-88ec-fe01e3fd9686",
-            "51e0a629-0f16-4eee-94f1-bdfb0c3ee130",
-            "2921e335-3b2d-4f03-a356-9ac77616aa09",
-            "710418e1-368a-4b5b-969f-af37997fcefa",
-            "25a2c8c0-ca76-4333-895a-f33c9c5d9d6e",
-            "f8bf23f7-af33-42dd-b0ce-f21b69e2f4c0",
-            "d1aa6039-e981-4c46-976d-4960f89aa02f",
-            "6599efc8-48ac-4908-8d84-aba50727b318",
-            "1419b0e2-bd5e-45b7-8fd0-4599e9c98b96",
-            "3546e4d9-1ec3-4375-951d-f56544ebdc2d",
-            "ca570123-6598-4dd9-8738-58cd2cbeebef",
-            "cba39719-5c05-49e6-9159-9ceed707749d",
-            "09adcbed-1d14-4aa5-bd48-0649f0a1b155",
-            "dfca270b-a37b-4ebc-934b-ef30d573331f",
-            "efaed390-038d-430e-a7c9-f563bcfaf201",
-            "24d1a768-8e2b-42cd-86d0-fa11964a9975",
-            "60cef307-c3af-43f2-9209-14fbd13a8903",
-            "ef21b4ed-4bd0-4fdc-b94b-66bce8150608",
-            "fc3c1bb3-7380-4ec5-95eb-c2cce10bcb19",
-            "7ab855c2-51c7-4e90-abfb-30bb0089bd87",
-            "72cdd97a-c5f7-4363-8b36-129fcf6ce95f",
-            "f888ba99-5212-4875-b488-d3602e801a99",
-            "1bfeab68-4725-4dcb-9c07-fd65749ed590",
-            "6fc60247-7a68-49f7-9fea-0ddde7e7db34",
-            "b0c6e7a4-a1db-4a5c-993c-ecb42bb699ab",
-            "d655aea7-c38e-4bb9-92f3-8ab930cf0bad",
-            "2560c48e-b74e-411b-b0be-e82b0ba119ca"
+            "b2ebd523-857b-4107-92c4-58331b0a15df",
+            "e8d741ba-372c-4ae1-974e-53d0f0c03f42",
+            "80411c66-4c9e-4d43-b4f9-68de75371050",
+            "a18c869f-f115-4fd2-a9e6-52620aa34f59",
+            "376ae1d6-6d1a-4c14-91df-511682eac521",
+            "c881b5d2-6be0-4723-a122-b565bc732eed",
+            "749fed11-6f52-413a-b250-5492b99f1615",
+            "768bae82-663f-4e65-9670-5ee5678741f2",
+            "1c07b22f-1f8e-4b47-96ea-acd7a66eb9c1",
+            "d9c85d00-a56c-4ff6-92d7-5e3a17baf964",
+            "1005736d-b31c-403a-b95c-e271d8c65823",
+            "182b7f8f-02b9-40d9-9bbf-7e760e063911",
+            "800ead58-f3b8-4b9a-b775-527a590cf85a",
+            "95f52c06-db2f-42ad-bf54-9b85f13b25e2",
+            "60cb84ec-e077-4a7b-9c02-35bc4d1e765b",
+            "fda69f85-ed19-4db4-a755-34aca39843ae",
+            "a46199bc-44b3-468d-bfdc-8b6c73a088ad",
+            "af87ffc3-2539-4dee-b2d0-406baccb7ab4",
+            "3a0acc19-ba79-4806-a833-b84b6f70c5ae",
+            "333571b1-7501-4517-9054-a978266745ff",
+            "6914e289-310f-440a-93d8-34adae3cab9a",
+            "eb1dd02a-9a28-49ac-b474-36f227bfa6aa",
+            "218a8a86-4d80-441e-90c8-b1516f311a21",
+            "eb9bea51-9bc6-491d-9243-80b13e3d46cc",
+            "92f91e04-1206-46f5-979f-e13c9d873c7d",
+            "5b2754d2-f49e-4e92-858e-0c38d43cd205",
+            "025acf2c-8817-4d8f-9b09-00c10eed528d",
+            "4eb9bd58-373a-4d33-b57c-8f0d65e45306",
+            "ecd0755c-9244-4f5a-8ddc-45a51eae3fe9",
+            "c2d610e9-1832-48ca-8498-941931c43269",
+            "b2f36fd2-3c8b-42c5-bfd3-38404a32c67f",
+            "bd8fc115-4822-4a96-aac0-44533c3f4e30",
+            "480aac37-bf39-476e-a425-7e89ee5d5975",
+            "d1e24ad4-cceb-4de3-b34b-8e79e75a69cf"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "44d20c11-8d10-48b7-83a4-a988743403a1",
-          "556a3463-aa3a-47c0-b40b-c283e12fec35",
-          "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-          "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-          "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-          "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-          "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-          "acd416e2-b80a-4ab6-9653-8bd55a6a4e24",
-          "bbd1a4f2-2e57-49dd-b06e-f1571ee24886",
-          "cc91ba4b-701f-442a-83f9-5086745c8eef",
-          "1c64ab1f-957e-4a85-9d81-fe0f41d09e12",
-          "e0e3240b-edc7-4da4-ae31-0dbff15d8758",
-          "c5657b00-07ed-4702-996f-5440cc916092",
-          "e08d1c0b-f405-4369-b3e0-316adc9f68b5",
-          "c626a113-e89d-46d6-878e-e8b8066f7540",
-          "fabf7fa6-4532-49ef-ad9f-6ee9d331bc62",
-          "d20861dc-03db-4cdf-a44d-3165334c3368"
+          "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+          "c856716c-bd8b-4a04-a477-535810bd2a8a",
+          "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+          "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+          "4bd1f00f-11ac-4588-b706-7773a659fd08",
+          "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+          "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+          "496ddb2b-3c29-479c-82f0-c5b0d34df580",
+          "f342c373-fe04-4348-8f46-8573a5861752",
+          "847af1a0-5665-4a41-b717-8845ca867b3d",
+          "6fb7b08f-7fbe-475a-b2da-3d589ae4276c",
+          "2eab24c8-7a3b-4e2b-af2a-6fad2b670abf",
+          "ab127857-d1bd-4120-b046-ec48666dc332",
+          "3ab0c160-f8eb-4665-8f20-422ae09bcb8f",
+          "a1219cf4-1d3e-4acb-b51a-bf04026a1037",
+          "6ec7e187-5186-46dd-9fc6-73d27eb939e9",
+          "b48d119c-c484-49a5-b058-f38e7487f619"
         ],
-        "diff_scheme_guid_ref": "7e2d4dcc-6bc9-4a67-9998-b1b9135280b6",
+        "diff_scheme_guid_ref": "240eb0d1-bd6c-4e4c-9d56-5bc18116d2dd",
         "diff_scheme": {
           "Name": "B cell 7 state",
           "Driver": {
@@ -1217,7 +1671,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "d877c084-2298-4153-9ff2-8128f381082c",
+                    "driver_mol_guid_ref": "5bb6d1c3-b810-4af3-825c-50632d1a1ba3",
                     "CurrentState": 0,
                     "CurrentStateName": "naive",
                     "DestState": 1,
@@ -1293,7 +1747,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "bee7de97-c074-4e02-9927-ec89f3d5d23c",
+                    "driver_mol_guid_ref": "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6",
                     "CurrentState": 1,
                     "CurrentStateName": "activated",
                     "DestState": 2,
@@ -1302,7 +1756,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "1e7ccfe8-0468-406f-8bb6-657d849121ef",
+                    "driver_mol_guid_ref": "cbea9d9c-7897-4fe8-aaef-5c72506801d4",
                     "CurrentState": 1,
                     "CurrentStateName": "activated",
                     "DestState": 3,
@@ -1445,7 +1899,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                    "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                     "CurrentState": 3,
                     "CurrentStateName": "centroblast",
                     "DestState": 4,
@@ -1503,7 +1957,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                    "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                     "CurrentState": 4,
                     "CurrentStateName": "centrocyte",
                     "DestState": 3,
@@ -1521,7 +1975,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                    "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                     "CurrentState": 4,
                     "CurrentStateName": "centrocyte",
                     "DestState": 5,
@@ -1530,7 +1984,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                    "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                     "CurrentState": 4,
                     "CurrentStateName": "centrocyte",
                     "DestState": 6,
@@ -1682,17 +2136,17 @@
               "long-lived plasmacyte",
               "memory"
             ],
-            "entity_guid": "e037d275-9326-4b33-b62a-a137ce573ed8"
+            "entity_guid": "2d8b05bf-0356-4220-90e6-4d7e43ddeb09"
           },
           "genes": [
-            "44d20c11-8d10-48b7-83a4-a988743403a1",
-            "556a3463-aa3a-47c0-b40b-c283e12fec35",
-            "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-            "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-            "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-            "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-            "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-            "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+            "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+            "c856716c-bd8b-4a04-a477-535810bd2a8a",
+            "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+            "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+            "4bd1f00f-11ac-4588-b706-7773a659fd08",
+            "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+            "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+            "496ddb2b-3c29-479c-82f0-c5b0d34df580"
           ],
           "activationRows": [
             {
@@ -1780,9 +2234,9 @@
               ]
             }
           ],
-          "entity_guid": "4601cd59-8cb7-4a1a-b4b2-f9f6f2bb8da3"
+          "entity_guid": "dfea84cc-f610-469d-86d5-b70e6921b441"
         },
-        "death_driver_guid_ref": "53e305ac-1588-4fb1-ac67-6cf393943282",
+        "death_driver_guid_ref": "ff1732dc-d2b6-4761-9a83-f55345e9a0fb",
         "death_driver": {
           "Name": "generic apoptosis",
           "CurrentState": 0,
@@ -1802,7 +2256,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.002,
-                  "driver_mol_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+                  "driver_mol_guid_ref": "633590c4-aa92-4feb-9416-b7096126bc79",
                   "CurrentState": 0,
                   "CurrentStateName": "alive",
                   "DestState": 1,
@@ -1837,9 +2291,9 @@
             "alive",
             "dead"
           ],
-          "entity_guid": "a9e0b62c-a9ad-4449-9bb6-1e4b02bab8df"
+          "entity_guid": "af473a50-0808-4f8a-b55d-75eb56ed8389"
         },
-        "div_driver_guid_ref": "9a8ccf6d-4410-40a5-bccf-fc4f210c607a",
+        "div_driver_guid_ref": "b2067757-70b3-4f1b-9699-e4f3c18342db",
         "div_driver": {
           "Name": "generic division",
           "CurrentState": 0,
@@ -1859,7 +2313,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.002,
-                  "driver_mol_guid_ref": "14ee707e-7f03-49b6-8f53-0f2ede14381b",
+                  "driver_mol_guid_ref": "7706df60-48bd-41aa-834f-94720bc0180e",
                   "CurrentState": 0,
                   "CurrentStateName": "quiescent",
                   "DestState": 1,
@@ -1894,28 +2348,35 @@
             "quiescent",
             "mitotic"
           ],
-          "entity_guid": "1520ac85-0109-4135-ab28-75d8537ead4a"
+          "entity_guid": "e52c6483-d40c-479e-a60b-8e5157373bf9"
         },
-        "entity_guid": "ee43d807-9918-4ea5-9f02-b52837d063b3"
+        "entity_guid": "2229098e-c05d-4faa-9420-155ef59da04b"
       },
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
         "CellName": "GC B",
         "CellRadius": 5.0,
-        "locomotor_mol_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+        "locomotor_mol_guid_ref": "d2cd5d18-cfe7-49c3-99d2-4888aa238811",
         "TransductionConstant": 100.0,
         "DragCoefficient": 1.0,
         "membrane": {
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "8913cbb0-9530-4a0e-8d4e-9451fc81fd47",
-              "molecule_guid_ref": "8500cb3b-28d3-40cb-a789-34029be2de09",
+              "molpop_guid": "5b3950e6-49d5-474a-9719-aed7c6a55e35",
+              "molecule": {
+                "Name": "CXCR5|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
+              },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "8913cbb0-9530-4a0e-8d4e-9451fc81fd47"
+                "molpop_guid_ref": "5b3950e6-49d5-474a-9719-aed7c6a55e35"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1930,12 +2391,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "6379f7d5-cdf8-482c-888d-60f8dc97c004",
-              "molecule_guid_ref": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279",
+              "molpop_guid": "1c13e86d-d276-455f-a7d6-0955a2cb5a76",
+              "molecule": {
+                "Name": "CXCL13:CXCR5|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
+              },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "6379f7d5-cdf8-482c-888d-60f8dc97c004"
+                "molpop_guid_ref": "1c13e86d-d276-455f-a7d6-0955a2cb5a76"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1950,12 +2418,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "77884377-e178-4a99-835f-ae8ef1ec5646",
-              "molecule_guid_ref": "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85",
+              "molpop_guid": "a403f601-7254-4f59-a711-638efd57602b",
+              "molecule": {
+                "Name": "CXCR4|",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "b2370053-b9bb-488c-b913-703682c3a9f1"
+              },
               "Name": "CXCR4|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "77884377-e178-4a99-835f-ae8ef1ec5646"
+                "molpop_guid_ref": "a403f601-7254-4f59-a711-638efd57602b"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1970,12 +2445,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "6209b574-82f1-4ae5-ac5f-db4e164f5342",
-              "molecule_guid_ref": "9f074388-2da7-4ef4-8521-80458d66e309",
+              "molpop_guid": "fb5ef039-9657-4dea-a694-d3056747be30",
+              "molecule": {
+                "Name": "CXCL12:CXCR4|",
+                "MolecularWeight": 50.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
+              },
               "Name": "CXCL12:CXCR4|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "6209b574-82f1-4ae5-ac5f-db4e164f5342"
+                "molpop_guid_ref": "fb5ef039-9657-4dea-a694-d3056747be30"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -1997,12 +2479,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "974fdaa0-43e3-4fc3-9cf2-f3d83b4ac11d",
-              "molecule_guid_ref": "d7b78bc5-6a3b-4c01-b277-afb7f07896ce",
+              "molpop_guid": "75daa944-fc57-4bcd-bf7e-27e12643b9ac",
+              "molecule": {
+                "Name": "A",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
+              },
               "Name": "A",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "974fdaa0-43e3-4fc3-9cf2-f3d83b4ac11d"
+                "molpop_guid_ref": "75daa944-fc57-4bcd-bf7e-27e12643b9ac"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2017,12 +2506,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "b4c5b128-c4a3-4d28-a516-0a3120ebcb79",
-              "molecule_guid_ref": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c",
+              "molpop_guid": "567a425f-0bce-4220-b62c-2964ee5e2842",
+              "molecule": {
+                "Name": "A*",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 7.5,
+                "molecule_location": 0,
+                "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
+              },
               "Name": "A*",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "b4c5b128-c4a3-4d28-a516-0a3120ebcb79"
+                "molpop_guid_ref": "567a425f-0bce-4220-b62c-2964ee5e2842"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2037,12 +2533,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "523b03da-5b36-46eb-b410-e0b6e44c6d12",
-              "molecule_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+              "molpop_guid": "028e5f47-697e-45e3-bf15-f95291276be0",
+              "molecule": {
+                "Name": "sDif4",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "c68626de-f496-4f05-b10d-2b15cb73a5df"
+              },
               "Name": "sDif4",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "523b03da-5b36-46eb-b410-e0b6e44c6d12"
+                "molpop_guid_ref": "028e5f47-697e-45e3-bf15-f95291276be0"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2057,12 +2560,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "93a8c8f5-9d48-4e26-ad27-a3d8b38fe014",
-              "molecule_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+              "molpop_guid": "cbb0c036-7af8-4242-a4ab-cd6e86e9d927",
+              "molecule": {
+                "Name": "sDif5",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "ad312683-856f-425c-a7f1-a33004bc0f6a"
+              },
               "Name": "sDif5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "93a8c8f5-9d48-4e26-ad27-a3d8b38fe014"
+                "molpop_guid_ref": "cbb0c036-7af8-4242-a4ab-cd6e86e9d927"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2077,12 +2587,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "caa8f323-28ab-4c6e-80ba-0c4ae004c668",
-              "molecule_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+              "molpop_guid": "fd38b6c6-fde8-4f34-87f8-f264d45eebbe",
+              "molecule": {
+                "Name": "sDif6",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "e926ac22-e6cb-46aa-800b-695d416d2fbe"
+              },
               "Name": "sDif6",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "caa8f323-28ab-4c6e-80ba-0c4ae004c668"
+                "molpop_guid_ref": "fd38b6c6-fde8-4f34-87f8-f264d45eebbe"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2097,12 +2614,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "ee9dc174-2741-4ff5-954b-37d8da42d6fa",
-              "molecule_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+              "molpop_guid": "fe6bce8e-df91-4da0-8729-feb9e57daf5a",
+              "molecule": {
+                "Name": "sDif7",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "3db8bd37-c2fa-4436-a4cb-90911574f9ad"
+              },
               "Name": "sDif7",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "ee9dc174-2741-4ff5-954b-37d8da42d6fa"
+                "molpop_guid_ref": "fe6bce8e-df91-4da0-8729-feb9e57daf5a"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2117,12 +2641,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "94142c39-d4f7-497f-8245-b8ab678a27a2",
-              "molecule_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+              "molpop_guid": "8b8945c2-3be7-4c7b-a121-acd95886daf0",
+              "molecule": {
+                "Name": "sApop",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
+              },
               "Name": "sApop",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "94142c39-d4f7-497f-8245-b8ab678a27a2"
+                "molpop_guid_ref": "8b8945c2-3be7-4c7b-a121-acd95886daf0"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2137,12 +2668,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "b09b77a1-d741-410b-9a30-cccbd433851b",
-              "molecule_guid_ref": "14ee707e-7f03-49b6-8f53-0f2ede14381b",
+              "molpop_guid": "a16b9fe4-2001-4433-9149-0387e9fe1a96",
+              "molecule": {
+                "Name": "sDiv",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "7706df60-48bd-41aa-834f-94720bc0180e"
+              },
               "Name": "sDiv",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "b09b77a1-d741-410b-9a30-cccbd433851b"
+                "molpop_guid_ref": "a16b9fe4-2001-4433-9149-0387e9fe1a96"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2157,12 +2695,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "2d9d11d1-f5d2-4dff-851a-0d269c0792c1",
-              "molecule_guid_ref": "dda939c6-3b7a-405b-81ff-03dd3b7929f7",
+              "molpop_guid": "5b2c69c8-a3bb-420b-b552-de6447699c21",
+              "molecule": {
+                "Name": "CXCR4",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "f570481b-1bc4-4f58-b862-735673a605d1"
+              },
               "Name": "CXCR4",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "2d9d11d1-f5d2-4dff-851a-0d269c0792c1"
+                "molpop_guid_ref": "5b2c69c8-a3bb-420b-b552-de6447699c21"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2177,12 +2722,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "8ae36424-dc9c-4814-8287-862641f95a00",
-              "molecule_guid_ref": "30683720-7dec-4222-a02d-db0915d31498",
+              "molpop_guid": "3bcaf0e6-951d-464a-b4df-4a25c1aa25a9",
+              "molecule": {
+                "Name": "CXCR5",
+                "MolecularWeight": 43.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 750.0,
+                "molecule_location": 0,
+                "entity_guid": "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
+              },
               "Name": "CXCR5",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "8ae36424-dc9c-4814-8287-862641f95a00"
+                "molpop_guid_ref": "3bcaf0e6-951d-464a-b4df-4a25c1aa25a9"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2197,12 +2749,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "0c3281bc-484a-4aec-bc74-ee747d34172c",
-              "molecule_guid_ref": "461bb088-4274-4089-b92c-30a3762a44d4",
+              "molpop_guid": "b0a266fe-2968-4c84-95e1-c981ab490a7d",
+              "molecule": {
+                "Name": "IgH",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "3d5baccf-43de-444f-b68c-ee31836c3061"
+              },
               "Name": "IgH",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "0c3281bc-484a-4aec-bc74-ee747d34172c"
+                "molpop_guid_ref": "b0a266fe-2968-4c84-95e1-c981ab490a7d"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2217,12 +2776,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "7ca5ba4b-c281-42c4-ad11-58dbffb7d2ca",
-              "molecule_guid_ref": "82900329-abcc-4c3a-a40e-7a0f9e611a76",
+              "molpop_guid": "60a7f2ec-d0ba-4ccf-a4e5-fef44d5a5684",
+              "molecule": {
+                "Name": "IgL",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "889dcbaf-cde1-4421-bc53-db1949171062"
+              },
               "Name": "IgL",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "7ca5ba4b-c281-42c4-ad11-58dbffb7d2ca"
+                "molpop_guid_ref": "60a7f2ec-d0ba-4ccf-a4e5-fef44d5a5684"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2237,12 +2803,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "7f293fc5-748f-42f7-ae74-4b598d06765e",
-              "molecule_guid_ref": "516b2065-4b43-47b7-8cdf-47969ffc229a",
+              "molpop_guid": "a47e9fc2-b384-4f59-80be-ee5355a843c6",
+              "molecule": {
+                "Name": "IgS",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "1534f348-0445-404e-a699-f7e53cb1ce95"
+              },
               "Name": "IgS",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "7f293fc5-748f-42f7-ae74-4b598d06765e"
+                "molpop_guid_ref": "a47e9fc2-b384-4f59-80be-ee5355a843c6"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2257,12 +2830,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "9b7a8ff2-a669-4e8c-a128-8a8d8c8c4a2d",
-              "molecule_guid_ref": "ccd22b3c-60ef-4a1c-a570-05a4483eddc9",
+              "molpop_guid": "c8d346ed-9532-4c45-bdd8-fa34404f923e",
+              "molecule": {
+                "Name": "AID",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "e3c25a83-878d-4236-8c66-cdd7df3086c8"
+              },
               "Name": "AID",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "9b7a8ff2-a669-4e8c-a128-8a8d8c8c4a2d"
+                "molpop_guid_ref": "c8d346ed-9532-4c45-bdd8-fa34404f923e"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2277,12 +2857,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "06f0c45b-e623-4d96-ac8b-5f605b892f31",
-              "molecule_guid_ref": "72c8d89e-30db-4026-b29f-e4c796a8ade0",
+              "molpop_guid": "8aef52b3-9537-4ed0-a893-9c081396fac0",
+              "molecule": {
+                "Name": "BL1",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "40ca14bf-ec22-40f2-ad15-0558c133e96e"
+              },
               "Name": "BL1",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "06f0c45b-e623-4d96-ac8b-5f605b892f31"
+                "molpop_guid_ref": "8aef52b3-9537-4ed0-a893-9c081396fac0"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2297,12 +2884,19 @@
               "mp_render_on": false
             },
             {
-              "molpop_guid": "f0c8820d-7a27-446d-b8f8-3964623ea6f4",
-              "molecule_guid_ref": "6594c33e-5c56-4661-9d2b-d8cea82f0c83",
+              "molpop_guid": "a01ac548-e4b4-4d14-a90b-517b7c57a28f",
+              "molecule": {
+                "Name": "MHCII",
+                "MolecularWeight": 1.0,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1.0,
+                "molecule_location": 0,
+                "entity_guid": "44cc89b4-6cf5-430b-8d53-38fbd7c39c0a"
+              },
               "Name": "MHCII",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "f0c8820d-7a27-446d-b8f8-3964623ea6f4"
+                "molpop_guid_ref": "a01ac548-e4b4-4d14-a90b-517b7c57a28f"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2318,54 +2912,54 @@
             }
           ],
           "reactions_guid_ref": [
-            "3fda16d8-8b5f-44d1-9c03-7c0893ef2f56",
-            "ac51c67e-7346-4832-8153-26f6ce6bd395",
-            "d38df0ab-c230-4204-a7c1-951010799f03",
-            "043992b3-0ad9-4982-bc02-8d0bd68dc8c4",
-            "c89faf89-c92a-4df2-bd00-eb8d05640975",
-            "5ac2e05c-b2b8-4d61-b17c-d1ba8734eccf",
-            "62b6a4e2-e7e6-4d20-8317-670cf656ec0f",
-            "156e3e35-3b2a-4187-88ec-fe01e3fd9686",
-            "51e0a629-0f16-4eee-94f1-bdfb0c3ee130",
-            "2921e335-3b2d-4f03-a356-9ac77616aa09",
-            "710418e1-368a-4b5b-969f-af37997fcefa",
-            "6599efc8-48ac-4908-8d84-aba50727b318",
-            "1419b0e2-bd5e-45b7-8fd0-4599e9c98b96",
-            "3546e4d9-1ec3-4375-951d-f56544ebdc2d",
-            "ca570123-6598-4dd9-8738-58cd2cbeebef",
-            "cba39719-5c05-49e6-9159-9ceed707749d",
-            "09adcbed-1d14-4aa5-bd48-0649f0a1b155",
-            "60cef307-c3af-43f2-9209-14fbd13a8903",
-            "ef21b4ed-4bd0-4fdc-b94b-66bce8150608",
-            "fc3c1bb3-7380-4ec5-95eb-c2cce10bcb19",
-            "7ab855c2-51c7-4e90-abfb-30bb0089bd87",
-            "2560c48e-b74e-411b-b0be-e82b0ba119ca",
-            "72cdd97a-c5f7-4363-8b36-129fcf6ce95f",
-            "f888ba99-5212-4875-b488-d3602e801a99",
-            "1bfeab68-4725-4dcb-9c07-fd65749ed590",
-            "6fc60247-7a68-49f7-9fea-0ddde7e7db34",
-            "b0c6e7a4-a1db-4a5c-993c-ecb42bb699ab",
-            "d655aea7-c38e-4bb9-92f3-8ab930cf0bad"
+            "b2ebd523-857b-4107-92c4-58331b0a15df",
+            "e8d741ba-372c-4ae1-974e-53d0f0c03f42",
+            "80411c66-4c9e-4d43-b4f9-68de75371050",
+            "a18c869f-f115-4fd2-a9e6-52620aa34f59",
+            "376ae1d6-6d1a-4c14-91df-511682eac521",
+            "c881b5d2-6be0-4723-a122-b565bc732eed",
+            "749fed11-6f52-413a-b250-5492b99f1615",
+            "768bae82-663f-4e65-9670-5ee5678741f2",
+            "1c07b22f-1f8e-4b47-96ea-acd7a66eb9c1",
+            "d9c85d00-a56c-4ff6-92d7-5e3a17baf964",
+            "1005736d-b31c-403a-b95c-e271d8c65823",
+            "60cb84ec-e077-4a7b-9c02-35bc4d1e765b",
+            "fda69f85-ed19-4db4-a755-34aca39843ae",
+            "a46199bc-44b3-468d-bfdc-8b6c73a088ad",
+            "af87ffc3-2539-4dee-b2d0-406baccb7ab4",
+            "3a0acc19-ba79-4806-a833-b84b6f70c5ae",
+            "333571b1-7501-4517-9054-a978266745ff",
+            "eb9bea51-9bc6-491d-9243-80b13e3d46cc",
+            "92f91e04-1206-46f5-979f-e13c9d873c7d",
+            "5b2754d2-f49e-4e92-858e-0c38d43cd205",
+            "025acf2c-8817-4d8f-9b09-00c10eed528d",
+            "d1e24ad4-cceb-4de3-b34b-8e79e75a69cf",
+            "4eb9bd58-373a-4d33-b57c-8f0d65e45306",
+            "ecd0755c-9244-4f5a-8ddc-45a51eae3fe9",
+            "c2d610e9-1832-48ca-8498-941931c43269",
+            "b2f36fd2-3c8b-42c5-bfd3-38404a32c67f",
+            "bd8fc115-4822-4a96-aac0-44533c3f4e30",
+            "480aac37-bf39-476e-a425-7e89ee5d5975"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "44d20c11-8d10-48b7-83a4-a988743403a1",
-          "556a3463-aa3a-47c0-b40b-c283e12fec35",
-          "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-          "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-          "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-          "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-          "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-          "acd416e2-b80a-4ab6-9653-8bd55a6a4e24",
-          "bbd1a4f2-2e57-49dd-b06e-f1571ee24886",
-          "c5657b00-07ed-4702-996f-5440cc916092",
-          "e08d1c0b-f405-4369-b3e0-316adc9f68b5",
-          "c626a113-e89d-46d6-878e-e8b8066f7540",
-          "fabf7fa6-4532-49ef-ad9f-6ee9d331bc62",
-          "d20861dc-03db-4cdf-a44d-3165334c3368"
+          "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+          "c856716c-bd8b-4a04-a477-535810bd2a8a",
+          "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+          "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+          "4bd1f00f-11ac-4588-b706-7773a659fd08",
+          "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+          "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+          "496ddb2b-3c29-479c-82f0-c5b0d34df580",
+          "f342c373-fe04-4348-8f46-8573a5861752",
+          "ab127857-d1bd-4120-b046-ec48666dc332",
+          "3ab0c160-f8eb-4665-8f20-422ae09bcb8f",
+          "a1219cf4-1d3e-4acb-b51a-bf04026a1037",
+          "6ec7e187-5186-46dd-9fc6-73d27eb939e9",
+          "b48d119c-c484-49a5-b058-f38e7487f619"
         ],
-        "diff_scheme_guid_ref": "7c273aee-8c95-402e-a883-6ddc8ff6c81a",
+        "diff_scheme_guid_ref": "e3cadf8d-036a-4554-b5e3-82bb347f3c7d",
         "diff_scheme": {
           "Name": "GC B cell",
           "Driver": {
@@ -2387,7 +2981,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                    "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                     "CurrentState": 0,
                     "CurrentStateName": "centroblast",
                     "DestState": 1,
@@ -2418,7 +3012,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 0.5,
-                    "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                    "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                     "CurrentState": 1,
                     "CurrentStateName": "centrocyte",
                     "DestState": 0,
@@ -2436,7 +3030,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 1.0,
-                    "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                    "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                     "CurrentState": 1,
                     "CurrentStateName": "centrocyte",
                     "DestState": 2,
@@ -2445,7 +3039,7 @@
                   {
                     "Alpha": 0.0,
                     "Beta": 0.25,
-                    "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                    "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                     "CurrentState": 1,
                     "CurrentStateName": "centrocyte",
                     "DestState": 3,
@@ -2540,17 +3134,17 @@
               "long-lived plasmacyte",
               "memory"
             ],
-            "entity_guid": "ebdaa1b3-a286-4916-a31b-d293cb6aad5c"
+            "entity_guid": "9e4ca259-9056-4fff-9011-066485da9c30"
           },
           "genes": [
-            "44d20c11-8d10-48b7-83a4-a988743403a1",
-            "556a3463-aa3a-47c0-b40b-c283e12fec35",
-            "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-            "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-            "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-            "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-            "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-            "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+            "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+            "c856716c-bd8b-4a04-a477-535810bd2a8a",
+            "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+            "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+            "4bd1f00f-11ac-4588-b706-7773a659fd08",
+            "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+            "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+            "496ddb2b-3c29-479c-82f0-c5b0d34df580"
           ],
           "activationRows": [
             {
@@ -2602,9 +3196,9 @@
               ]
             }
           ],
-          "entity_guid": "bc2ce7ca-3c9e-453b-a4df-e9a7fe4303b6"
+          "entity_guid": "eba11763-9551-45b7-aaf3-5a4a4c50c1b3"
         },
-        "death_driver_guid_ref": "53e305ac-1588-4fb1-ac67-6cf393943282",
+        "death_driver_guid_ref": "ff1732dc-d2b6-4761-9a83-f55345e9a0fb",
         "death_driver": {
           "Name": "generic apoptosis",
           "CurrentState": 0,
@@ -2624,7 +3218,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.002,
-                  "driver_mol_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+                  "driver_mol_guid_ref": "633590c4-aa92-4feb-9416-b7096126bc79",
                   "CurrentState": 0,
                   "CurrentStateName": "alive",
                   "DestState": 1,
@@ -2659,9 +3253,9 @@
             "alive",
             "dead"
           ],
-          "entity_guid": "ec04ad84-3c17-4446-8b8c-a8b65ba4af88"
+          "entity_guid": "f43e5421-d86b-4737-871e-110ec9061cea"
         },
-        "div_driver_guid_ref": "9a8ccf6d-4410-40a5-bccf-fc4f210c607a",
+        "div_driver_guid_ref": "b2067757-70b3-4f1b-9699-e4f3c18342db",
         "div_driver": {
           "Name": "generic division",
           "CurrentState": 0,
@@ -2681,7 +3275,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.002,
-                  "driver_mol_guid_ref": "14ee707e-7f03-49b6-8f53-0f2ede14381b",
+                  "driver_mol_guid_ref": "7706df60-48bd-41aa-834f-94720bc0180e",
                   "CurrentState": 0,
                   "CurrentStateName": "quiescent",
                   "DestState": 1,
@@ -2716,9 +3310,9 @@
             "quiescent",
             "mitotic"
           ],
-          "entity_guid": "12517aa4-e41a-4348-8291-c27df4cc2cbd"
+          "entity_guid": "781dabd0-e630-4bd6-b97e-9da6aac7e82c"
         },
-        "entity_guid": "0d2049fa-a861-4f11-bb51-92ecfc785cee"
+        "entity_guid": "dd0156e0-4f1c-446e-91ab-1d373ff762e9"
       },
       {
         "CurrentDeathState": 0,
@@ -2732,12 +3326,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "bddec896-a72c-482d-9b85-44f9a2d65956",
-              "molecule_guid_ref": "38f1519c-f156-4db7-91a7-967aaf64177d",
+              "molpop_guid": "4250bfc0-72d2-41c7-83a6-7cecaeb07b79",
+              "molecule": {
+                "Name": "CXCL12|",
+                "MolecularWeight": 7.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "c75771a8-4457-4ea3-9be6-99de866c11dc"
+              },
               "Name": "CXCL12|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "bddec896-a72c-482d-9b85-44f9a2d65956"
+                "molpop_guid_ref": "4250bfc0-72d2-41c7-83a6-7cecaeb07b79"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2759,12 +3360,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "36940ef4-fae2-4c11-9996-5079c30ded10",
-              "molecule_guid_ref": "e618ce28-38a1-430d-9f28-37cd0974adf2",
+              "molpop_guid": "1cd71244-3a60-4271-9a8a-db9b107ed8b9",
+              "molecule": {
+                "Name": "CXCL12",
+                "MolecularWeight": 7.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 4500.0,
+                "molecule_location": 0,
+                "entity_guid": "26f4ba31-72d6-4b97-a12b-792462029b89"
+              },
               "Name": "CXCL12",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "36940ef4-fae2-4c11-9996-5079c30ded10"
+                "molpop_guid_ref": "1cd71244-3a60-4271-9a8a-db9b107ed8b9"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2780,13 +3388,13 @@
             }
           ],
           "reactions_guid_ref": [
-            "8be621a9-d0d8-4cf4-bbdd-1137cd127175",
-            "ab8c0d6a-5840-4af9-ae48-882db4971f3a"
+            "fa23c1a9-4a96-40ec-9475-dc2ec2ed1a30",
+            "b93c9525-611b-4fad-8c77-05feb291708d"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "39ffec2a-1f9a-4617-8d34-805105a5eee3"
+          "398a3319-c5fe-494f-a6f0-f86c809c2fec"
         ],
         "diff_scheme_guid_ref": "",
         "diff_scheme": null,
@@ -2794,7 +3402,7 @@
         "death_driver": null,
         "div_driver_guid_ref": "",
         "div_driver": null,
-        "entity_guid": "04f2c31f-d103-4072-80f9-a32e9356c0fd"
+        "entity_guid": "c0c69df0-84be-4443-9965-8aa4b5d757c5"
       },
       {
         "CurrentDeathState": 0,
@@ -2808,12 +3416,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "d5f7144e-99a4-4fe0-b462-0344471a912f",
-              "molecule_guid_ref": "dede5c74-0b89-471b-9666-8278621568a9",
+              "molpop_guid": "e39e2429-95b2-4d1a-be98-1a02acdf93db",
+              "molecule": {
+                "Name": "CXCL13|",
+                "MolecularWeight": 7.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 1E-07,
+                "molecule_location": 1,
+                "entity_guid": "66d46d3f-f5b8-421c-9fea-200c28dcc176"
+              },
               "Name": "CXCL13|",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "d5f7144e-99a4-4fe0-b462-0344471a912f"
+                "molpop_guid_ref": "e39e2429-95b2-4d1a-be98-1a02acdf93db"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2835,12 +3450,19 @@
           "molpops_dict": {},
           "molpops": [
             {
-              "molpop_guid": "2fa357fc-37b8-40d5-9fb5-d4159d87b0e2",
-              "molecule_guid_ref": "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
+              "molpop_guid": "0173231e-c9f1-4852-9da9-3b21ba1a2aab",
+              "molecule": {
+                "Name": "CXCL13",
+                "MolecularWeight": 7.96,
+                "EffectiveRadius": 1.0,
+                "DiffusionCoefficient": 4500.0,
+                "molecule_location": 0,
+                "entity_guid": "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
+              },
               "Name": "CXCL13",
               "report_mp": {
                 "mp_extended": 0,
-                "molpop_guid_ref": "2fa357fc-37b8-40d5-9fb5-d4159d87b0e2"
+                "molpop_guid_ref": "0173231e-c9f1-4852-9da9-3b21ba1a2aab"
               },
               "mp_dist_name": "Uniform",
               "mp_distribution": {
@@ -2856,13 +3478,13 @@
             }
           ],
           "reactions_guid_ref": [
-            "11bad638-8c28-4546-b626-e4d2d0928ede",
-            "5526418c-5b59-43af-86f9-d8496db90163"
+            "c34740a0-465d-4978-8ae0-3cd75a05697a",
+            "6b4da349-6d9b-46aa-8866-097f9f130787"
           ],
           "reaction_complexes_guid_ref": []
         },
         "genes_guid_ref": [
-          "137c02e1-d5e6-4412-91d1-fd8d31587f80"
+          "115e8202-03f1-4439-aed0-8fce179c1b45"
         ],
         "diff_scheme_guid_ref": "",
         "diff_scheme": null,
@@ -2870,7 +3492,7 @@
         "death_driver": null,
         "div_driver_guid_ref": "",
         "div_driver": null,
-        "entity_guid": "21bccbf8-97e6-461d-903e-fe173bb156a2"
+        "entity_guid": "434f7d06-8298-4ef1-ad64-54ca74ca8a90"
       }
     ],
     "molecules": [
@@ -2880,7 +3502,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
         "molecule_location": 0,
-        "entity_guid": "e618ce28-38a1-430d-9f28-37cd0974adf2"
+        "entity_guid": "26f4ba31-72d6-4b97-a12b-792462029b89"
       },
       {
         "Name": "CXCL13",
@@ -2888,7 +3510,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
         "molecule_location": 0,
-        "entity_guid": "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+        "entity_guid": "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
       },
       {
         "Name": "CXCR4|",
@@ -2896,7 +3518,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85"
+        "entity_guid": "b2370053-b9bb-488c-b913-703682c3a9f1"
       },
       {
         "Name": "CXCR5|",
@@ -2904,7 +3526,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "8500cb3b-28d3-40cb-a789-34029be2de09"
+        "entity_guid": "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
       },
       {
         "Name": "CXCL12:CXCR4|",
@@ -2912,7 +3534,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "9f074388-2da7-4ef4-8521-80458d66e309"
+        "entity_guid": "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
       },
       {
         "Name": "CXCL13:CXCR5|",
@@ -2920,7 +3542,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "cc72fefc-bbf8-41a7-8ed8-22c51dad5279"
+        "entity_guid": "43b89974-fc31-4c63-bfca-545147706970"
       },
       {
         "Name": "CXCL12|",
@@ -2928,7 +3550,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "38f1519c-f156-4db7-91a7-967aaf64177d"
+        "entity_guid": "c75771a8-4457-4ea3-9be6-99de866c11dc"
       },
       {
         "Name": "CXCL13|",
@@ -2936,7 +3558,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "dede5c74-0b89-471b-9666-8278621568a9"
+        "entity_guid": "66d46d3f-f5b8-421c-9fea-200c28dcc176"
       },
       {
         "Name": "CXCR5",
@@ -2944,7 +3566,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
         "molecule_location": 0,
-        "entity_guid": "30683720-7dec-4222-a02d-db0915d31498"
+        "entity_guid": "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
       },
       {
         "Name": "CXCR4",
@@ -2952,7 +3574,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
         "molecule_location": 0,
-        "entity_guid": "dda939c6-3b7a-405b-81ff-03dd3b7929f7"
+        "entity_guid": "f570481b-1bc4-4f58-b862-735673a605d1"
       },
       {
         "Name": "CXCL13:CXCR5",
@@ -2960,7 +3582,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
         "molecule_location": 0,
-        "entity_guid": "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64"
+        "entity_guid": "d674bce5-e106-4d48-93f8-4e94db2ad192"
       },
       {
         "Name": "CXCL12:CXCR4",
@@ -2968,7 +3590,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
         "molecule_location": 0,
-        "entity_guid": "bba05c81-db99-4c52-9687-d37cbdc7e3fd"
+        "entity_guid": "7bae08d2-05d9-4c02-9c94-20ba63f73186"
       },
       {
         "Name": "A",
@@ -2976,7 +3598,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
         "molecule_location": 0,
-        "entity_guid": "d7b78bc5-6a3b-4c01-b277-afb7f07896ce"
+        "entity_guid": "b732099b-8f0f-462f-9c55-7a11edef5ede"
       },
       {
         "Name": "A*",
@@ -2984,7 +3606,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 7.5,
         "molecule_location": 0,
-        "entity_guid": "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c"
+        "entity_guid": "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
       },
       {
         "Name": "sDiv",
@@ -2992,7 +3614,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "14ee707e-7f03-49b6-8f53-0f2ede14381b"
+        "entity_guid": "7706df60-48bd-41aa-834f-94720bc0180e"
       },
       {
         "Name": "sDif1",
@@ -3000,7 +3622,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "d877c084-2298-4153-9ff2-8128f381082c"
+        "entity_guid": "5bb6d1c3-b810-4af3-825c-50632d1a1ba3"
       },
       {
         "Name": "sDif2",
@@ -3008,7 +3630,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "bee7de97-c074-4e02-9927-ec89f3d5d23c"
+        "entity_guid": "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6"
       },
       {
         "Name": "sDif3",
@@ -3016,7 +3638,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "1e7ccfe8-0468-406f-8bb6-657d849121ef"
+        "entity_guid": "cbea9d9c-7897-4fe8-aaef-5c72506801d4"
       },
       {
         "Name": "sDif4",
@@ -3024,7 +3646,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "117c6241-0870-49ca-b2e1-254f2ca6d6ed"
+        "entity_guid": "c68626de-f496-4f05-b10d-2b15cb73a5df"
       },
       {
         "Name": "sDif5",
@@ -3032,7 +3654,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "a1c876f1-24b4-4655-be3b-4bc098ea1465"
+        "entity_guid": "ad312683-856f-425c-a7f1-a33004bc0f6a"
       },
       {
         "Name": "sDif6",
@@ -3040,7 +3662,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "b4ded6f5-477c-4c3e-95a7-317288ffedc9"
+        "entity_guid": "e926ac22-e6cb-46aa-800b-695d416d2fbe"
       },
       {
         "Name": "sDif7",
@@ -3048,7 +3670,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce"
+        "entity_guid": "3db8bd37-c2fa-4436-a4cb-90911574f9ad"
       },
       {
         "Name": "sApop",
@@ -3056,7 +3678,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "dad5b801-8456-4224-bc24-7fabf72823a3"
+        "entity_guid": "633590c4-aa92-4feb-9416-b7096126bc79"
       },
       {
         "Name": "sResc1",
@@ -3064,7 +3686,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "4c607ad8-cf12-4f53-959d-e32c94e2e634"
+        "entity_guid": "2cc3a4a8-75fa-4e3e-82fa-dab149277853"
       },
       {
         "Name": "sResc2",
@@ -3072,7 +3694,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "e5f7812a-cf19-4f52-863f-bf589bd86a26"
+        "entity_guid": "1a94a900-2f3d-49a2-82bf-610bf22a0502"
       },
       {
         "Name": "IgL",
@@ -3080,7 +3702,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "82900329-abcc-4c3a-a40e-7a0f9e611a76"
+        "entity_guid": "889dcbaf-cde1-4421-bc53-db1949171062"
       },
       {
         "Name": "IgS",
@@ -3088,7 +3710,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "516b2065-4b43-47b7-8cdf-47969ffc229a"
+        "entity_guid": "1534f348-0445-404e-a699-f7e53cb1ce95"
       },
       {
         "Name": "IgH",
@@ -3096,7 +3718,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "461bb088-4274-4089-b92c-30a3762a44d4"
+        "entity_guid": "3d5baccf-43de-444f-b68c-ee31836c3061"
       },
       {
         "Name": "AID",
@@ -3104,7 +3726,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "ccd22b3c-60ef-4a1c-a570-05a4483eddc9"
+        "entity_guid": "e3c25a83-878d-4236-8c66-cdd7df3086c8"
       },
       {
         "Name": "BL1",
@@ -3112,7 +3734,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "72c8d89e-30db-4026-b29f-e4c796a8ade0"
+        "entity_guid": "40ca14bf-ec22-40f2-ad15-0558c133e96e"
       },
       {
         "Name": "MHCII",
@@ -3120,7 +3742,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
         "molecule_location": 0,
-        "entity_guid": "6594c33e-5c56-4661-9d2b-d8cea82f0c83"
+        "entity_guid": "44cc89b4-6cf5-430b-8d53-38fbd7c39c0a"
       }
     ],
     "genes": [
@@ -3128,912 +3750,912 @@
         "Name": "gCXCR5",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "556a3463-aa3a-47c0-b40b-c283e12fec35"
+        "entity_guid": "c856716c-bd8b-4a04-a477-535810bd2a8a"
       },
       {
         "Name": "gCXCR4",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "44d20c11-8d10-48b7-83a4-a988743403a1"
+        "entity_guid": "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5"
       },
       {
         "Name": "gCXCL12",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "39ffec2a-1f9a-4617-8d34-805105a5eee3"
+        "entity_guid": "398a3319-c5fe-494f-a6f0-f86c809c2fec"
       },
       {
         "Name": "gCXCL13",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "137c02e1-d5e6-4412-91d1-fd8d31587f80"
+        "entity_guid": "115e8202-03f1-4439-aed0-8fce179c1b45"
       },
       {
         "Name": "gIgH",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "4f48ad73-2b06-468d-a663-03f8fdc5245a"
+        "entity_guid": "cca26bff-73e5-45dc-96f8-3d835d2ebaee"
       },
       {
         "Name": "gIgL",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "eb7c5b04-47a4-4308-9e39-d3f465fe35aa"
+        "entity_guid": "7037d141-a5e0-46fb-862b-d5e40b4d06f0"
       },
       {
         "Name": "gIgS",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "1ffc5692-7688-4fa3-b3a5-068f76059ae5"
+        "entity_guid": "4bd1f00f-11ac-4588-b706-7773a659fd08"
       },
       {
         "Name": "gAID",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "77101bf2-3143-4cd1-9ef0-07ae3c513df8"
+        "entity_guid": "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24"
       },
       {
         "Name": "gBL1",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "3eef4f3e-8fc8-4b84-affb-9898ab5fc193"
+        "entity_guid": "cbce968b-86a7-4d16-b3eb-ed067ec83335"
       },
       {
         "Name": "gMHCII",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+        "entity_guid": "496ddb2b-3c29-479c-82f0-c5b0d34df580"
       },
       {
         "Name": "gApop",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "bbd1a4f2-2e57-49dd-b06e-f1571ee24886"
+        "entity_guid": "f342c373-fe04-4348-8f46-8573a5861752"
       },
       {
         "Name": "gDiv",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "d20861dc-03db-4cdf-a44d-3165334c3368"
+        "entity_guid": "b48d119c-c484-49a5-b058-f38e7487f619"
       },
       {
         "Name": "gResc1",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "945705cb-e170-4131-9516-440cbc8707fe"
+        "entity_guid": "fb64d654-a4e0-4ad6-bb40-42fc225948f3"
       },
       {
         "Name": "gResc2",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "b02f7950-a6e1-4bd2-b8da-8ba51ad9fb3c"
+        "entity_guid": "692a47ee-c385-4d90-9353-fc24e33feb45"
       },
       {
         "Name": "gDif1",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "cc91ba4b-701f-442a-83f9-5086745c8eef"
+        "entity_guid": "847af1a0-5665-4a41-b717-8845ca867b3d"
       },
       {
         "Name": "gDif2",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "1c64ab1f-957e-4a85-9d81-fe0f41d09e12"
+        "entity_guid": "6fb7b08f-7fbe-475a-b2da-3d589ae4276c"
       },
       {
         "Name": "gDif3",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "e0e3240b-edc7-4da4-ae31-0dbff15d8758"
+        "entity_guid": "2eab24c8-7a3b-4e2b-af2a-6fad2b670abf"
       },
       {
         "Name": "gDif4",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "c5657b00-07ed-4702-996f-5440cc916092"
+        "entity_guid": "ab127857-d1bd-4120-b046-ec48666dc332"
       },
       {
         "Name": "gDif5",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "e08d1c0b-f405-4369-b3e0-316adc9f68b5"
+        "entity_guid": "3ab0c160-f8eb-4665-8f20-422ae09bcb8f"
       },
       {
         "Name": "gDif6",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "c626a113-e89d-46d6-878e-e8b8066f7540"
+        "entity_guid": "a1219cf4-1d3e-4acb-b51a-bf04026a1037"
       },
       {
         "Name": "gDif7",
         "CopyNumber": 2,
         "ActivationLevel": 1.0,
-        "entity_guid": "fabf7fa6-4532-49ef-ad9f-6ee9d331bc62"
+        "entity_guid": "6ec7e187-5186-46dd-9fc6-73d27eb939e9"
       }
     ],
     "reactions": [
       {
         "reactants_molecule_guid_ref": [
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCR5 ->",
-        "entity_guid": "e7a3653b-abd3-45d0-ab6e-81c5a538e79a"
+        "entity_guid": "1c5f6502-9aad-4411-aae4-bcb512e54811"
       },
       {
         "reactants_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCL13 ->",
-        "entity_guid": "28bc735a-9989-445a-8405-f9c6d1616aed"
+        "entity_guid": "87adca52-45a1-4386-bc1d-60a7ab2223ec"
       },
       {
         "reactants_molecule_guid_ref": [
-          "dda939c6-3b7a-405b-81ff-03dd3b7929f7"
+          "f570481b-1bc4-4f58-b862-735673a605d1"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCR4 ->",
-        "entity_guid": "460e1120-1667-4dd7-a7c4-f7792467359b"
+        "entity_guid": "3509abb4-18a1-4cf2-83ce-d2e276050028"
       },
       {
         "reactants_molecule_guid_ref": [
-          "bba05c81-db99-4c52-9687-d37cbdc7e3fd"
+          "7bae08d2-05d9-4c02-9c94-20ba63f73186"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCL12:CXCR4 ->",
-        "entity_guid": "40cbc20c-ad11-42dc-be2b-50d0ba6fd2c0"
+        "entity_guid": "d3a226c9-8d1a-4f12-85ed-d9feea2f1222"
       },
       {
         "reactants_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2"
+          "26f4ba31-72d6-4b97-a12b-792462029b89"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCL12 ->",
-        "entity_guid": "cfafa9ea-8ad8-4517-b8b6-25ca8adb7e02"
+        "entity_guid": "b38ea5d4-71e7-499e-9718-4096eb48a231"
       },
       {
         "reactants_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "CXCL13 ->",
-        "entity_guid": "32dbb043-a208-4e35-bbd0-bf71f0b00643"
+        "entity_guid": "f6852bcf-c5c5-4e02-a97f-bde7f34eb966"
       },
       {
         "reactants_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
-          "8500cb3b-28d3-40cb-a789-34029be2de09"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c",
+          "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
         ],
         "products_molecule_guid_ref": [
-          "cc72fefc-bbf8-41a7-8ed8-22c51dad5279"
+          "43b89974-fc31-4c63-bfca-545147706970"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "54ab03ae-036f-4145-a203-c7a757d90953",
+        "reaction_template_guid_ref": "d146b5d7-0060-46e6-a70b-ebab14378462",
         "rate_const": 16.25,
         "TotalReactionString": "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-        "entity_guid": "0ee6eaf1-5f5c-4129-9997-5c461c508a12"
+        "entity_guid": "3fd59fc1-516f-4466-b04f-8cb02f6e7f42"
       },
       {
         "reactants_molecule_guid_ref": [
-          "cc72fefc-bbf8-41a7-8ed8-22c51dad5279"
+          "43b89974-fc31-4c63-bfca-545147706970"
         ],
         "products_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
-          "8500cb3b-28d3-40cb-a789-34029be2de09"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c",
+          "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "e134ba1a-c33a-4777-9160-639d0ff22dc1",
+        "reaction_template_guid_ref": "e9d16846-d184-4ebc-949e-a875fecbba03",
         "rate_const": 0.494,
         "TotalReactionString": "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-        "entity_guid": "498e1425-f4f6-4a99-9f5b-6633f65959e6"
+        "entity_guid": "9c67ed1b-009a-4e6c-9f0e-fc8fbc0a9ba2"
       },
       {
         "reactants_molecule_guid_ref": [
-          "d7b78bc5-6a3b-4c01-b277-afb7f07896ce"
+          "b732099b-8f0f-462f-9c55-7a11edef5ede"
         ],
         "products_molecule_guid_ref": [
-          "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c"
+          "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
         ],
         "modifiers_molecule_guid_ref": [
-          "cc72fefc-bbf8-41a7-8ed8-22c51dad5279"
+          "43b89974-fc31-4c63-bfca-545147706970"
         ],
-        "reaction_template_guid_ref": "383fda91-4f8c-4a31-b5df-79b56c2705bd",
+        "reaction_template_guid_ref": "ee85536c-c280-4cf9-8409-0d5aa1721ecf",
         "rate_const": 0.005,
         "TotalReactionString": "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-        "entity_guid": "3fda16d8-8b5f-44d1-9c03-7c0893ef2f56"
+        "entity_guid": "b2ebd523-857b-4107-92c4-58331b0a15df"
       },
       {
         "reactants_molecule_guid_ref": [
-          "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c"
+          "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
         ],
         "products_molecule_guid_ref": [
-          "d7b78bc5-6a3b-4c01-b277-afb7f07896ce"
+          "b732099b-8f0f-462f-9c55-7a11edef5ede"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "b82d43db-d248-4d91-baa1-08939d4814fe",
+        "reaction_template_guid_ref": "a48da290-03f1-4929-b301-0902b2f0efa7",
         "rate_const": 0.0005,
         "TotalReactionString": "A* -> A",
-        "entity_guid": "ac51c67e-7346-4832-8153-26f6ce6bd395"
+        "entity_guid": "e8d741ba-372c-4ae1-974e-53d0f0c03f42"
       },
       {
         "reactants_molecule_guid_ref": [
-          "d7b78bc5-6a3b-4c01-b277-afb7f07896ce"
+          "b732099b-8f0f-462f-9c55-7a11edef5ede"
         ],
         "products_molecule_guid_ref": [
-          "4b8c6bce-c41b-45fa-9b08-b457a03d6e8c"
+          "d2cd5d18-cfe7-49c3-99d2-4888aa238811"
         ],
         "modifiers_molecule_guid_ref": [
-          "9f074388-2da7-4ef4-8521-80458d66e309"
+          "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
         ],
-        "reaction_template_guid_ref": "383fda91-4f8c-4a31-b5df-79b56c2705bd",
+        "reaction_template_guid_ref": "ee85536c-c280-4cf9-8409-0d5aa1721ecf",
         "rate_const": 0.005,
         "TotalReactionString": "A + CXCL12:CXCR4| -> A* + CXCL12:CXCR4|",
-        "entity_guid": "c051fba6-5f03-4525-9958-5bfa707b4335"
+        "entity_guid": "0ce3eceb-3e26-4915-8e2d-53cec0d9c893"
       },
       {
         "reactants_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2",
-          "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85"
+          "26f4ba31-72d6-4b97-a12b-792462029b89",
+          "b2370053-b9bb-488c-b913-703682c3a9f1"
         ],
         "products_molecule_guid_ref": [
-          "9f074388-2da7-4ef4-8521-80458d66e309"
+          "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "54ab03ae-036f-4145-a203-c7a757d90953",
+        "reaction_template_guid_ref": "d146b5d7-0060-46e6-a70b-ebab14378462",
         "rate_const": 23.6,
         "TotalReactionString": "CXCL12 + CXCR4| -> CXCL12:CXCR4|",
-        "entity_guid": "43796284-1c53-447c-8a97-bfd43d12ba88"
+        "entity_guid": "ea53fd70-db4d-4674-9180-7056e082ad89"
       },
       {
         "reactants_molecule_guid_ref": [
-          "9f074388-2da7-4ef4-8521-80458d66e309"
+          "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
         ],
         "products_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2",
-          "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85"
+          "26f4ba31-72d6-4b97-a12b-792462029b89",
+          "b2370053-b9bb-488c-b913-703682c3a9f1"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "e134ba1a-c33a-4777-9160-639d0ff22dc1",
+        "reaction_template_guid_ref": "e9d16846-d184-4ebc-949e-a875fecbba03",
         "rate_const": 0.494,
         "TotalReactionString": "CXCL12:CXCR4| -> CXCL12 + CXCR4|",
-        "entity_guid": "911d14a4-bdc4-4a9f-83ae-ca77ab8217eb"
+        "entity_guid": "8fc97b13-13db-4e96-a5cc-eaa3fbe98c01"
       },
       {
         "reactants_molecule_guid_ref": [
-          "cc72fefc-bbf8-41a7-8ed8-22c51dad5279"
+          "43b89974-fc31-4c63-bfca-545147706970"
         ],
         "products_molecule_guid_ref": [
-          "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64"
+          "d674bce5-e106-4d48-93f8-4e94db2ad192"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 0.01,
         "TotalReactionString": "CXCL13:CXCR5| -> CXCL13:CXCR5",
-        "entity_guid": "b5d36e74-8be2-4a73-9a1d-f577d18c345f"
+        "entity_guid": "8963a76b-3385-4a4d-b5c6-aef59e295cc9"
       },
       {
         "reactants_molecule_guid_ref": [
-          "9f074388-2da7-4ef4-8521-80458d66e309"
+          "bdeb1ce6-c94b-40dd-9743-bfcaece01d87"
         ],
         "products_molecule_guid_ref": [
-          "bba05c81-db99-4c52-9687-d37cbdc7e3fd"
+          "7bae08d2-05d9-4c02-9c94-20ba63f73186"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 0.027,
         "TotalReactionString": "CXCL12:CXCR4| -> CXCL12:CXCR4",
-        "entity_guid": "d5f55c2a-3f25-4138-b2f9-f61b82faadba"
+        "entity_guid": "d6cf5f37-a264-41bf-aa3f-699809c49c95"
       },
       {
         "reactants_molecule_guid_ref": [
-          "8500cb3b-28d3-40cb-a789-34029be2de09"
+          "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
         ],
         "products_molecule_guid_ref": [
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 0.0001,
         "TotalReactionString": "CXCR5| -> CXCR5",
-        "entity_guid": "d9786f23-7236-49c0-9d82-5c8ee18ebf74"
+        "entity_guid": "cc6f19b3-0974-4d8d-9827-747101e49626"
       },
       {
         "reactants_molecule_guid_ref": [
-          "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85"
+          "b2370053-b9bb-488c-b913-703682c3a9f1"
         ],
         "products_molecule_guid_ref": [
-          "dda939c6-3b7a-405b-81ff-03dd3b7929f7"
+          "f570481b-1bc4-4f58-b862-735673a605d1"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 0.00027,
         "TotalReactionString": "CXCR4| -> CXCR4",
-        "entity_guid": "2437cc41-c2e0-4381-a02b-6d5c21201d43"
+        "entity_guid": "dcca37f7-08c8-49e1-a36e-22afdf421426"
       },
       {
         "reactants_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2"
+          "26f4ba31-72d6-4b97-a12b-792462029b89"
         ],
         "products_molecule_guid_ref": [
-          "38f1519c-f156-4db7-91a7-967aaf64177d"
+          "c75771a8-4457-4ea3-9be6-99de866c11dc"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "7fece84a-1f64-4499-9f53-1a5ed7559057",
+        "reaction_template_guid_ref": "a1798e47-1e8b-4a32-ae95-2fcab764b29c",
         "rate_const": 1.0,
         "TotalReactionString": "CXCL12 -> CXCL12|",
-        "entity_guid": "ab8c0d6a-5840-4af9-ae48-882db4971f3a"
+        "entity_guid": "b93c9525-611b-4fad-8c77-05feb291708d"
       },
       {
         "reactants_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
         ],
         "products_molecule_guid_ref": [
-          "dede5c74-0b89-471b-9666-8278621568a9"
+          "66d46d3f-f5b8-421c-9fea-200c28dcc176"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "7fece84a-1f64-4499-9f53-1a5ed7559057",
+        "reaction_template_guid_ref": "a1798e47-1e8b-4a32-ae95-2fcab764b29c",
         "rate_const": 1.0,
         "TotalReactionString": "CXCL13 -> CXCL13|",
-        "entity_guid": "5526418c-5b59-43af-86f9-d8496db90163"
+        "entity_guid": "6b4da349-6d9b-46aa-8866-097f9f130787"
       },
       {
         "reactants_molecule_guid_ref": [
-          "38f1519c-f156-4db7-91a7-967aaf64177d"
+          "c75771a8-4457-4ea3-9be6-99de866c11dc"
         ],
         "products_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2"
+          "26f4ba31-72d6-4b97-a12b-792462029b89"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 1.0,
         "TotalReactionString": "CXCL12| -> CXCL12",
-        "entity_guid": "10e60328-f7f3-4908-aea0-e73361754ffb"
+        "entity_guid": "8bf2ffa5-df9e-44bb-b49d-54de969bdc5a"
       },
       {
         "reactants_molecule_guid_ref": [
-          "dede5c74-0b89-471b-9666-8278621568a9"
+          "66d46d3f-f5b8-421c-9fea-200c28dcc176"
         ],
         "products_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4",
+        "reaction_template_guid_ref": "1a2aa953-ab22-4f8f-9d02-6464cc073f42",
         "rate_const": 1.0,
         "TotalReactionString": "CXCL13| -> CXCL13",
-        "entity_guid": "e0966629-66bd-4417-bfd0-fe65662b0607"
+        "entity_guid": "d2f34359-623c-437a-b475-ac891155767f"
       },
       {
         "reactants_molecule_guid_ref": [
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "products_molecule_guid_ref": [
-          "8500cb3b-28d3-40cb-a789-34029be2de09"
+          "bdf71b1f-90a1-41c0-a2c7-f96aed8fbe1e"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "7fece84a-1f64-4499-9f53-1a5ed7559057",
+        "reaction_template_guid_ref": "a1798e47-1e8b-4a32-ae95-2fcab764b29c",
         "rate_const": 1.0,
         "TotalReactionString": "CXCR5 -> CXCR5|",
-        "entity_guid": "5e859d24-e3cf-4e98-abff-99e675b1a496"
+        "entity_guid": "aff21ae0-51ad-4612-9237-c6932fbf9ecf"
       },
       {
         "reactants_molecule_guid_ref": [
-          "dda939c6-3b7a-405b-81ff-03dd3b7929f7"
+          "f570481b-1bc4-4f58-b862-735673a605d1"
         ],
         "products_molecule_guid_ref": [
-          "1e5abf46-dc33-44e7-a7b1-5a4d1e43cc85"
+          "b2370053-b9bb-488c-b913-703682c3a9f1"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "7fece84a-1f64-4499-9f53-1a5ed7559057",
+        "reaction_template_guid_ref": "a1798e47-1e8b-4a32-ae95-2fcab764b29c",
         "rate_const": 1.0,
         "TotalReactionString": "CXCR4 -> CXCR4|",
-        "entity_guid": "11bf5e51-9e9b-4b2c-af4e-9bd379585472"
+        "entity_guid": "20300d84-215e-4e79-b1fb-76d50fb5d707"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "dda939c6-3b7a-405b-81ff-03dd3b7929f7"
+          "f570481b-1bc4-4f58-b862-735673a605d1"
         ],
         "modifiers_molecule_guid_ref": [
-          "44d20c11-8d10-48b7-83a4-a988743403a1"
+          "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gCXCR4 -> CXCR4 + gCXCR4",
-        "entity_guid": "d38df0ab-c230-4204-a7c1-951010799f03"
+        "entity_guid": "80411c66-4c9e-4d43-b4f9-68de75371050"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "modifiers_molecule_guid_ref": [
-          "556a3463-aa3a-47c0-b40b-c283e12fec35"
+          "c856716c-bd8b-4a04-a477-535810bd2a8a"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gCXCR5 -> CXCR5 + gCXCR5",
-        "entity_guid": "043992b3-0ad9-4982-bc02-8d0bd68dc8c4"
+        "entity_guid": "a18c869f-f115-4fd2-a9e6-52620aa34f59"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "e618ce28-38a1-430d-9f28-37cd0974adf2"
+          "26f4ba31-72d6-4b97-a12b-792462029b89"
         ],
         "modifiers_molecule_guid_ref": [
-          "39ffec2a-1f9a-4617-8d34-805105a5eee3"
+          "398a3319-c5fe-494f-a6f0-f86c809c2fec"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gCXCL12 -> CXCL12 + gCXCL12",
-        "entity_guid": "8be621a9-d0d8-4cf4-bbdd-1137cd127175"
+        "entity_guid": "fa23c1a9-4a96-40ec-9475-dc2ec2ed1a30"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c"
         ],
         "modifiers_molecule_guid_ref": [
-          "137c02e1-d5e6-4412-91d1-fd8d31587f80"
+          "115e8202-03f1-4439-aed0-8fce179c1b45"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gCXCL13 -> CXCL13 + gCXCL13",
-        "entity_guid": "11bad638-8c28-4546-b626-e4d2d0928ede"
+        "entity_guid": "c34740a0-465d-4978-8ae0-3cd75a05697a"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "461bb088-4274-4089-b92c-30a3762a44d4"
+          "3d5baccf-43de-444f-b68c-ee31836c3061"
         ],
         "modifiers_molecule_guid_ref": [
-          "4f48ad73-2b06-468d-a663-03f8fdc5245a"
+          "cca26bff-73e5-45dc-96f8-3d835d2ebaee"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gIgH -> IgH + gIgH",
-        "entity_guid": "c89faf89-c92a-4df2-bd00-eb8d05640975"
+        "entity_guid": "376ae1d6-6d1a-4c14-91df-511682eac521"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "82900329-abcc-4c3a-a40e-7a0f9e611a76"
+          "889dcbaf-cde1-4421-bc53-db1949171062"
         ],
         "modifiers_molecule_guid_ref": [
-          "eb7c5b04-47a4-4308-9e39-d3f465fe35aa"
+          "7037d141-a5e0-46fb-862b-d5e40b4d06f0"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gIgL -> IgL + gIgL",
-        "entity_guid": "5ac2e05c-b2b8-4d61-b17c-d1ba8734eccf"
+        "entity_guid": "c881b5d2-6be0-4723-a122-b565bc732eed"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "516b2065-4b43-47b7-8cdf-47969ffc229a"
+          "1534f348-0445-404e-a699-f7e53cb1ce95"
         ],
         "modifiers_molecule_guid_ref": [
-          "1ffc5692-7688-4fa3-b3a5-068f76059ae5"
+          "4bd1f00f-11ac-4588-b706-7773a659fd08"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gIgS -> IgS + gIgS",
-        "entity_guid": "62b6a4e2-e7e6-4d20-8317-670cf656ec0f"
+        "entity_guid": "749fed11-6f52-413a-b250-5492b99f1615"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "ccd22b3c-60ef-4a1c-a570-05a4483eddc9"
+          "e3c25a83-878d-4236-8c66-cdd7df3086c8"
         ],
         "modifiers_molecule_guid_ref": [
-          "77101bf2-3143-4cd1-9ef0-07ae3c513df8"
+          "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gAID -> AID + gAID",
-        "entity_guid": "156e3e35-3b2a-4187-88ec-fe01e3fd9686"
+        "entity_guid": "768bae82-663f-4e65-9670-5ee5678741f2"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "72c8d89e-30db-4026-b29f-e4c796a8ade0"
+          "40ca14bf-ec22-40f2-ad15-0558c133e96e"
         ],
         "modifiers_molecule_guid_ref": [
-          "3eef4f3e-8fc8-4b84-affb-9898ab5fc193"
+          "cbce968b-86a7-4d16-b3eb-ed067ec83335"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gBL1 -> BL1 + gBL1",
-        "entity_guid": "51e0a629-0f16-4eee-94f1-bdfb0c3ee130"
+        "entity_guid": "1c07b22f-1f8e-4b47-96ea-acd7a66eb9c1"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "6594c33e-5c56-4661-9d2b-d8cea82f0c83"
+          "44cc89b4-6cf5-430b-8d53-38fbd7c39c0a"
         ],
         "modifiers_molecule_guid_ref": [
-          "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+          "496ddb2b-3c29-479c-82f0-c5b0d34df580"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gMHCII -> MHCII + gMHCII",
-        "entity_guid": "2921e335-3b2d-4f03-a356-9ac77616aa09"
+        "entity_guid": "d9c85d00-a56c-4ff6-92d7-5e3a17baf964"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "dad5b801-8456-4224-bc24-7fabf72823a3"
+          "633590c4-aa92-4feb-9416-b7096126bc79"
         ],
         "modifiers_molecule_guid_ref": [
-          "bbd1a4f2-2e57-49dd-b06e-f1571ee24886"
+          "f342c373-fe04-4348-8f46-8573a5861752"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gApop -> sApop + gApop",
-        "entity_guid": "710418e1-368a-4b5b-969f-af37997fcefa"
+        "entity_guid": "1005736d-b31c-403a-b95c-e271d8c65823"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "14ee707e-7f03-49b6-8f53-0f2ede14381b"
+          "7706df60-48bd-41aa-834f-94720bc0180e"
         ],
         "modifiers_molecule_guid_ref": [
-          "d20861dc-03db-4cdf-a44d-3165334c3368"
+          "b48d119c-c484-49a5-b058-f38e7487f619"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDiv -> sDiv + gDiv",
-        "entity_guid": "cba39719-5c05-49e6-9159-9ceed707749d"
+        "entity_guid": "3a0acc19-ba79-4806-a833-b84b6f70c5ae"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "4c607ad8-cf12-4f53-959d-e32c94e2e634"
+          "2cc3a4a8-75fa-4e3e-82fa-dab149277853"
         ],
         "modifiers_molecule_guid_ref": [
-          "945705cb-e170-4131-9516-440cbc8707fe"
+          "fb64d654-a4e0-4ad6-bb40-42fc225948f3"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gResc1 -> sResc1 + gResc1",
-        "entity_guid": "9265e876-92ab-4006-807c-c05d7694e1c4"
+        "entity_guid": "ea8b477c-a108-4f98-ac48-55fbd4a91789"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "e5f7812a-cf19-4f52-863f-bf589bd86a26"
+          "1a94a900-2f3d-49a2-82bf-610bf22a0502"
         ],
         "modifiers_molecule_guid_ref": [
-          "b02f7950-a6e1-4bd2-b8da-8ba51ad9fb3c"
+          "692a47ee-c385-4d90-9353-fc24e33feb45"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gResc2 -> sResc2 + gResc2",
-        "entity_guid": "ba65161a-6e35-4735-a665-762119b52b2c"
+        "entity_guid": "e506e2b4-f327-4cf7-9f32-5c3b556b2e67"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "d877c084-2298-4153-9ff2-8128f381082c"
+          "5bb6d1c3-b810-4af3-825c-50632d1a1ba3"
         ],
         "modifiers_molecule_guid_ref": [
-          "cc91ba4b-701f-442a-83f9-5086745c8eef"
+          "847af1a0-5665-4a41-b717-8845ca867b3d"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif1 -> sDif1 + gDif1",
-        "entity_guid": "25a2c8c0-ca76-4333-895a-f33c9c5d9d6e"
+        "entity_guid": "182b7f8f-02b9-40d9-9bbf-7e760e063911"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "bee7de97-c074-4e02-9927-ec89f3d5d23c"
+          "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6"
         ],
         "modifiers_molecule_guid_ref": [
-          "1c64ab1f-957e-4a85-9d81-fe0f41d09e12"
+          "6fb7b08f-7fbe-475a-b2da-3d589ae4276c"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif2 -> sDif2 + gDif2",
-        "entity_guid": "f8bf23f7-af33-42dd-b0ce-f21b69e2f4c0"
+        "entity_guid": "800ead58-f3b8-4b9a-b775-527a590cf85a"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "1e7ccfe8-0468-406f-8bb6-657d849121ef"
+          "cbea9d9c-7897-4fe8-aaef-5c72506801d4"
         ],
         "modifiers_molecule_guid_ref": [
-          "e0e3240b-edc7-4da4-ae31-0dbff15d8758"
+          "2eab24c8-7a3b-4e2b-af2a-6fad2b670abf"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif3 -> sDif3 + gDif3",
-        "entity_guid": "d1aa6039-e981-4c46-976d-4960f89aa02f"
+        "entity_guid": "95f52c06-db2f-42ad-bf54-9b85f13b25e2"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "117c6241-0870-49ca-b2e1-254f2ca6d6ed"
+          "c68626de-f496-4f05-b10d-2b15cb73a5df"
         ],
         "modifiers_molecule_guid_ref": [
-          "c5657b00-07ed-4702-996f-5440cc916092"
+          "ab127857-d1bd-4120-b046-ec48666dc332"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif4 -> sDif4 + gDif4",
-        "entity_guid": "6599efc8-48ac-4908-8d84-aba50727b318"
+        "entity_guid": "60cb84ec-e077-4a7b-9c02-35bc4d1e765b"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "a1c876f1-24b4-4655-be3b-4bc098ea1465"
+          "ad312683-856f-425c-a7f1-a33004bc0f6a"
         ],
         "modifiers_molecule_guid_ref": [
-          "e08d1c0b-f405-4369-b3e0-316adc9f68b5"
+          "3ab0c160-f8eb-4665-8f20-422ae09bcb8f"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif5 -> sDif5 + gDif5",
-        "entity_guid": "1419b0e2-bd5e-45b7-8fd0-4599e9c98b96"
+        "entity_guid": "fda69f85-ed19-4db4-a755-34aca39843ae"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "b4ded6f5-477c-4c3e-95a7-317288ffedc9"
+          "e926ac22-e6cb-46aa-800b-695d416d2fbe"
         ],
         "modifiers_molecule_guid_ref": [
-          "c626a113-e89d-46d6-878e-e8b8066f7540"
+          "a1219cf4-1d3e-4acb-b51a-bf04026a1037"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif6 -> sDif6 + gDif6",
-        "entity_guid": "3546e4d9-1ec3-4375-951d-f56544ebdc2d"
+        "entity_guid": "a46199bc-44b3-468d-bfdc-8b6c73a088ad"
       },
       {
         "reactants_molecule_guid_ref": [],
         "products_molecule_guid_ref": [
-          "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce"
+          "3db8bd37-c2fa-4436-a4cb-90911574f9ad"
         ],
         "modifiers_molecule_guid_ref": [
-          "fabf7fa6-4532-49ef-ad9f-6ee9d331bc62"
+          "6ec7e187-5186-46dd-9fc6-73d27eb939e9"
         ],
-        "reaction_template_guid_ref": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c",
+        "reaction_template_guid_ref": "b4b514d8-c69c-41ec-9ac1-1c925d910c63",
         "rate_const": 1.6666666666666667,
         "TotalReactionString": "gDif7 -> sDif7 + gDif7",
-        "entity_guid": "ca570123-6598-4dd9-8738-58cd2cbeebef"
+        "entity_guid": "af87ffc3-2539-4dee-b2d0-406baccb7ab4"
       },
       {
         "reactants_molecule_guid_ref": [
-          "d877c084-2298-4153-9ff2-8128f381082c"
+          "5bb6d1c3-b810-4af3-825c-50632d1a1ba3"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif1 ->",
-        "entity_guid": "dfca270b-a37b-4ebc-934b-ef30d573331f"
+        "entity_guid": "6914e289-310f-440a-93d8-34adae3cab9a"
       },
       {
         "reactants_molecule_guid_ref": [
-          "bee7de97-c074-4e02-9927-ec89f3d5d23c"
+          "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif2 ->",
-        "entity_guid": "efaed390-038d-430e-a7c9-f563bcfaf201"
+        "entity_guid": "eb1dd02a-9a28-49ac-b474-36f227bfa6aa"
       },
       {
         "reactants_molecule_guid_ref": [
-          "1e7ccfe8-0468-406f-8bb6-657d849121ef"
+          "cbea9d9c-7897-4fe8-aaef-5c72506801d4"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif3 ->",
-        "entity_guid": "24d1a768-8e2b-42cd-86d0-fa11964a9975"
+        "entity_guid": "218a8a86-4d80-441e-90c8-b1516f311a21"
       },
       {
         "reactants_molecule_guid_ref": [
-          "117c6241-0870-49ca-b2e1-254f2ca6d6ed"
+          "c68626de-f496-4f05-b10d-2b15cb73a5df"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif4 ->",
-        "entity_guid": "60cef307-c3af-43f2-9209-14fbd13a8903"
+        "entity_guid": "eb9bea51-9bc6-491d-9243-80b13e3d46cc"
       },
       {
         "reactants_molecule_guid_ref": [
-          "a1c876f1-24b4-4655-be3b-4bc098ea1465"
+          "ad312683-856f-425c-a7f1-a33004bc0f6a"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif5 ->",
-        "entity_guid": "ef21b4ed-4bd0-4fdc-b94b-66bce8150608"
+        "entity_guid": "92f91e04-1206-46f5-979f-e13c9d873c7d"
       },
       {
         "reactants_molecule_guid_ref": [
-          "b4ded6f5-477c-4c3e-95a7-317288ffedc9"
+          "e926ac22-e6cb-46aa-800b-695d416d2fbe"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif6 ->",
-        "entity_guid": "fc3c1bb3-7380-4ec5-95eb-c2cce10bcb19"
+        "entity_guid": "5b2754d2-f49e-4e92-858e-0c38d43cd205"
       },
       {
         "reactants_molecule_guid_ref": [
-          "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce"
+          "3db8bd37-c2fa-4436-a4cb-90911574f9ad"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDif7 ->",
-        "entity_guid": "7ab855c2-51c7-4e90-abfb-30bb0089bd87"
+        "entity_guid": "025acf2c-8817-4d8f-9b09-00c10eed528d"
       },
       {
         "reactants_molecule_guid_ref": [
-          "14ee707e-7f03-49b6-8f53-0f2ede14381b"
+          "7706df60-48bd-41aa-834f-94720bc0180e"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sDiv ->",
-        "entity_guid": "2560c48e-b74e-411b-b0be-e82b0ba119ca"
+        "entity_guid": "d1e24ad4-cceb-4de3-b34b-8e79e75a69cf"
       },
       {
         "reactants_molecule_guid_ref": [
-          "dad5b801-8456-4224-bc24-7fabf72823a3"
+          "633590c4-aa92-4feb-9416-b7096126bc79"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sApop ->",
-        "entity_guid": "09adcbed-1d14-4aa5-bd48-0649f0a1b155"
+        "entity_guid": "333571b1-7501-4517-9054-a978266745ff"
       },
       {
         "reactants_molecule_guid_ref": [
-          "4c607ad8-cf12-4f53-959d-e32c94e2e634"
+          "2cc3a4a8-75fa-4e3e-82fa-dab149277853"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sResc1 ->",
-        "entity_guid": "fc5b9e31-6262-4c92-af73-ae2872f900e5"
+        "entity_guid": "d676bd0e-9b05-455e-aa1c-141f58c8a966"
       },
       {
         "reactants_molecule_guid_ref": [
-          "e5f7812a-cf19-4f52-863f-bf589bd86a26"
+          "1a94a900-2f3d-49a2-82bf-610bf22a0502"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "sResc2 ->",
-        "entity_guid": "337b684a-c479-417f-ad6b-0c5e7b82adbd"
+        "entity_guid": "9eef62c9-a0b5-4293-ad71-fe91f9efd243"
       },
       {
         "reactants_molecule_guid_ref": [
-          "461bb088-4274-4089-b92c-30a3762a44d4"
+          "3d5baccf-43de-444f-b68c-ee31836c3061"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "IgH ->",
-        "entity_guid": "72cdd97a-c5f7-4363-8b36-129fcf6ce95f"
+        "entity_guid": "4eb9bd58-373a-4d33-b57c-8f0d65e45306"
       },
       {
         "reactants_molecule_guid_ref": [
-          "82900329-abcc-4c3a-a40e-7a0f9e611a76"
+          "889dcbaf-cde1-4421-bc53-db1949171062"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "IgL ->",
-        "entity_guid": "f888ba99-5212-4875-b488-d3602e801a99"
+        "entity_guid": "ecd0755c-9244-4f5a-8ddc-45a51eae3fe9"
       },
       {
         "reactants_molecule_guid_ref": [
-          "516b2065-4b43-47b7-8cdf-47969ffc229a"
+          "1534f348-0445-404e-a699-f7e53cb1ce95"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "IgS ->",
-        "entity_guid": "1bfeab68-4725-4dcb-9c07-fd65749ed590"
+        "entity_guid": "c2d610e9-1832-48ca-8498-941931c43269"
       },
       {
         "reactants_molecule_guid_ref": [
-          "ccd22b3c-60ef-4a1c-a570-05a4483eddc9"
+          "e3c25a83-878d-4236-8c66-cdd7df3086c8"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "AID ->",
-        "entity_guid": "6fc60247-7a68-49f7-9fea-0ddde7e7db34"
+        "entity_guid": "b2f36fd2-3c8b-42c5-bfd3-38404a32c67f"
       },
       {
         "reactants_molecule_guid_ref": [
-          "72c8d89e-30db-4026-b29f-e4c796a8ade0"
+          "40ca14bf-ec22-40f2-ad15-0558c133e96e"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "BL1 ->",
-        "entity_guid": "b0c6e7a4-a1db-4a5c-993c-ecb42bb699ab"
+        "entity_guid": "bd8fc115-4822-4a96-aac0-44533c3f4e30"
       },
       {
         "reactants_molecule_guid_ref": [
-          "6594c33e-5c56-4661-9d2b-d8cea82f0c83"
+          "44cc89b4-6cf5-430b-8d53-38fbd7c39c0a"
         ],
         "products_molecule_guid_ref": [],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "6a4a4961-cee8-4e0a-be24-c1450724e135",
+        "reaction_template_guid_ref": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4",
         "rate_const": 0.1,
         "TotalReactionString": "MHCII ->",
-        "entity_guid": "d655aea7-c38e-4bb9-92f3-8ab930cf0bad"
+        "entity_guid": "480aac37-bf39-476e-a425-7e89ee5d5975"
       },
       {
         "reactants_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c",
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "products_molecule_guid_ref": [
-          "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64"
+          "d674bce5-e106-4d48-93f8-4e94db2ad192"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "fe613119-69bb-491e-9b0a-79f146e89fb9",
+        "reaction_template_guid_ref": "fe2b54e7-d4ae-4f5e-bd39-e25d3334e1b3",
         "rate_const": 16.25,
         "TotalReactionString": "CXCL13 + CXCR5 -> CXCL13:CXCR5",
-        "entity_guid": "369ce869-a107-42be-a449-98bdf82b51e4"
+        "entity_guid": "e02cf8cf-37a7-4364-b49d-bee98787aacb"
       },
       {
         "reactants_molecule_guid_ref": [
-          "d152f858-9df9-4cc2-ae3a-d3bebd9e6a64"
+          "d674bce5-e106-4d48-93f8-4e94db2ad192"
         ],
         "products_molecule_guid_ref": [
-          "62f6cf88-654b-4833-90f5-d5a9dcd7f502",
-          "30683720-7dec-4222-a02d-db0915d31498"
+          "fbf6c9a8-ebc3-4d5f-85c9-5c4c33b3205c",
+          "19dab8cc-4b5f-44d7-b44b-d9e656b64a99"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "cfc8395c-1a13-4a9b-b9f8-8bd6a055fe62",
+        "reaction_template_guid_ref": "f61726f6-5f66-4e4d-bcdc-921d9756d407",
         "rate_const": 0.494,
         "TotalReactionString": "CXCL13:CXCR5 -> CXCL13 + CXCR5",
-        "entity_guid": "3c60b93a-fd20-42e9-9311-fb187df4ac36"
+        "entity_guid": "d8bf5f17-23ed-48b8-beaf-866a410dae87"
       }
     ],
     "reaction_templates": [
@@ -4046,7 +4668,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 2,
-        "entity_guid": "6a4a4961-cee8-4e0a-be24-c1450724e135"
+        "entity_guid": "038242a4-702b-4c6c-8eb0-b09f7eaa18e4"
       },
       {
         "name": "Association",
@@ -4060,7 +4682,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 0,
-        "entity_guid": "fe613119-69bb-491e-9b0a-79f146e89fb9"
+        "entity_guid": "fe2b54e7-d4ae-4f5e-bd39-e25d3334e1b3"
       },
       {
         "name": "Dimerization",
@@ -4073,7 +4695,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 3,
-        "entity_guid": "9893dc53-f2e4-48a1-89a2-484092c1a5d6"
+        "entity_guid": "1346849c-4495-4125-a21b-fc3e668bfcdc"
       },
       {
         "name": "DimerDissociation",
@@ -4086,7 +4708,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 4,
-        "entity_guid": "3d5a9d83-049d-4a43-a4b0-7df1c2b047b0"
+        "entity_guid": "a5a1521a-394e-4990-aaea-0d1eb0a921bd"
       },
       {
         "name": "Dissociation",
@@ -4100,7 +4722,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 1,
-        "entity_guid": "cfc8395c-1a13-4a9b-b9f8-8bd6a055fe62"
+        "entity_guid": "f61726f6-5f66-4e4d-bcdc-921d9756d407"
       },
       {
         "name": "Transformation",
@@ -4113,7 +4735,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 5,
-        "entity_guid": "b82d43db-d248-4d91-baa1-08939d4814fe"
+        "entity_guid": "a48da290-03f1-4929-b301-0902b2f0efa7"
       },
       {
         "name": "CatalyzedBoundaryActivation",
@@ -4128,7 +4750,7 @@
         ],
         "isBoundary": true,
         "reac_type": 14,
-        "entity_guid": "383fda91-4f8c-4a31-b5df-79b56c2705bd"
+        "entity_guid": "ee85536c-c280-4cf9-8409-0d5aa1721ecf"
       },
       {
         "name": "BoundaryAssociation",
@@ -4142,7 +4764,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 15,
-        "entity_guid": "54ab03ae-036f-4145-a203-c7a757d90953"
+        "entity_guid": "d146b5d7-0060-46e6-a70b-ebab14378462"
       },
       {
         "name": "BoundaryDissociation",
@@ -4156,7 +4778,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 16,
-        "entity_guid": "e134ba1a-c33a-4777-9160-639d0ff22dc1"
+        "entity_guid": "e9d16846-d184-4ebc-949e-a875fecbba03"
       },
       {
         "name": "BoundaryTransportTo",
@@ -4169,7 +4791,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 18,
-        "entity_guid": "923a3c7d-5b34-4dd0-aa2c-c4ba0a5195f4"
+        "entity_guid": "1a2aa953-ab22-4f8f-9d02-6464cc073f42"
       },
       {
         "name": "BoundaryTransportFrom",
@@ -4182,7 +4804,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 19,
-        "entity_guid": "7fece84a-1f64-4499-9f53-1a5ed7559057"
+        "entity_guid": "a1798e47-1e8b-4a32-ae95-2fcab764b29c"
       },
       {
         "name": "AutocatalyticTransformation",
@@ -4196,7 +4818,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": false,
         "reac_type": 6,
-        "entity_guid": "784ce2af-4de1-46b4-9756-1e5c95cc5962"
+        "entity_guid": "2f1beb27-4546-48b0-8a0f-c846bac2f5e3"
       },
       {
         "name": "CatalyzedAnnihilation",
@@ -4209,7 +4831,7 @@
         ],
         "isBoundary": false,
         "reac_type": 7,
-        "entity_guid": "b687e823-0f26-4317-a375-5d6cdc3028f9"
+        "entity_guid": "c27af03c-e2e3-43f8-82e4-f7d8cc709c37"
       },
       {
         "name": "CatalyzedAssociation",
@@ -4225,7 +4847,7 @@
         ],
         "isBoundary": false,
         "reac_type": 8,
-        "entity_guid": "24558d6b-87e8-479c-abd5-c4ecc1987806"
+        "entity_guid": "16ca8c7e-bc2e-497e-a143-2a3d5016314e"
       },
       {
         "name": "CatalyzedCreation",
@@ -4238,7 +4860,7 @@
         ],
         "isBoundary": false,
         "reac_type": 9,
-        "entity_guid": "d3bbb207-ca56-4de2-a367-4fa8ebc7edac"
+        "entity_guid": "9009cd33-de5d-4cd1-b25b-cf2d6f1ce73c"
       },
       {
         "name": "CatalyzedDimerization",
@@ -4253,7 +4875,7 @@
         ],
         "isBoundary": false,
         "reac_type": 10,
-        "entity_guid": "2378d95e-aa41-475b-8c4f-e1adce277135"
+        "entity_guid": "efff844e-4080-42e8-bb30-64103b848ed6"
       },
       {
         "name": "CatalyzedDimerDissociation",
@@ -4268,7 +4890,7 @@
         ],
         "isBoundary": false,
         "reac_type": 11,
-        "entity_guid": "1518df4e-f954-4ff2-a3f2-9a5a77de0512"
+        "entity_guid": "e80dd22a-4181-4a74-b2f9-b34a7f26e109"
       },
       {
         "name": "CatalyzedDissociation",
@@ -4284,7 +4906,7 @@
         ],
         "isBoundary": false,
         "reac_type": 13,
-        "entity_guid": "9eff0526-3d4b-47f0-9716-e2725145031c"
+        "entity_guid": "eecb52b3-7b50-442f-ad1b-c32767d70cd5"
       },
       {
         "name": "CatalyzedTransformation",
@@ -4299,7 +4921,7 @@
         ],
         "isBoundary": false,
         "reac_type": 12,
-        "entity_guid": "4aa9077d-a82e-4138-bc95-99a74f9366c1"
+        "entity_guid": "ac515c21-2cb5-48e7-b07b-8a3a5ff4c5de"
       },
       {
         "name": "Transcription",
@@ -4312,7 +4934,7 @@
         ],
         "isBoundary": false,
         "reac_type": 20,
-        "entity_guid": "5130671d-af7a-4e44-b38a-7e0c1ee2bb2c"
+        "entity_guid": "b4b514d8-c69c-41ec-9ac1-1c925d910c63"
       }
     ],
     "diff_schemes": [
@@ -4337,7 +4959,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "d877c084-2298-4153-9ff2-8128f381082c",
+                  "driver_mol_guid_ref": "5bb6d1c3-b810-4af3-825c-50632d1a1ba3",
                   "CurrentState": 0,
                   "CurrentStateName": "naive",
                   "DestState": 1,
@@ -4413,7 +5035,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "bee7de97-c074-4e02-9927-ec89f3d5d23c",
+                  "driver_mol_guid_ref": "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6",
                   "CurrentState": 1,
                   "CurrentStateName": "activated",
                   "DestState": 2,
@@ -4422,7 +5044,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "1e7ccfe8-0468-406f-8bb6-657d849121ef",
+                  "driver_mol_guid_ref": "cbea9d9c-7897-4fe8-aaef-5c72506801d4",
                   "CurrentState": 1,
                   "CurrentStateName": "activated",
                   "DestState": 3,
@@ -4565,7 +5187,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                  "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                   "CurrentState": 3,
                   "CurrentStateName": "centroblast",
                   "DestState": 4,
@@ -4623,7 +5245,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                  "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                   "CurrentState": 4,
                   "CurrentStateName": "centrocyte",
                   "DestState": 3,
@@ -4641,7 +5263,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                  "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                   "CurrentState": 4,
                   "CurrentStateName": "centrocyte",
                   "DestState": 5,
@@ -4650,7 +5272,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                  "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                   "CurrentState": 4,
                   "CurrentStateName": "centrocyte",
                   "DestState": 6,
@@ -4802,17 +5424,17 @@
             "long-lived plasmacyte",
             "memory"
           ],
-          "entity_guid": "e037d275-9326-4b33-b62a-a137ce573ed8"
+          "entity_guid": "2d8b05bf-0356-4220-90e6-4d7e43ddeb09"
         },
         "genes": [
-          "44d20c11-8d10-48b7-83a4-a988743403a1",
-          "556a3463-aa3a-47c0-b40b-c283e12fec35",
-          "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-          "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-          "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-          "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-          "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-          "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+          "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+          "c856716c-bd8b-4a04-a477-535810bd2a8a",
+          "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+          "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+          "4bd1f00f-11ac-4588-b706-7773a659fd08",
+          "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+          "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+          "496ddb2b-3c29-479c-82f0-c5b0d34df580"
         ],
         "activationRows": [
           {
@@ -4900,7 +5522,7 @@
             ]
           }
         ],
-        "entity_guid": "7e2d4dcc-6bc9-4a67-9998-b1b9135280b6"
+        "entity_guid": "240eb0d1-bd6c-4e4c-9d56-5bc18116d2dd"
       },
       {
         "Name": "GC B cell",
@@ -4923,7 +5545,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                  "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                   "CurrentState": 0,
                   "CurrentStateName": "centroblast",
                   "DestState": 1,
@@ -4954,7 +5576,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.5,
-                  "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                  "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                   "CurrentState": 1,
                   "CurrentStateName": "centrocyte",
                   "DestState": 0,
@@ -4972,7 +5594,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 1.0,
-                  "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                  "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                   "CurrentState": 1,
                   "CurrentStateName": "centrocyte",
                   "DestState": 2,
@@ -4981,7 +5603,7 @@
                 {
                   "Alpha": 0.0,
                   "Beta": 0.25,
-                  "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                  "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                   "CurrentState": 1,
                   "CurrentStateName": "centrocyte",
                   "DestState": 3,
@@ -5076,17 +5698,17 @@
             "long-lived plasmacyte",
             "memory"
           ],
-          "entity_guid": "ebdaa1b3-a286-4916-a31b-d293cb6aad5c"
+          "entity_guid": "9e4ca259-9056-4fff-9011-066485da9c30"
         },
         "genes": [
-          "44d20c11-8d10-48b7-83a4-a988743403a1",
-          "556a3463-aa3a-47c0-b40b-c283e12fec35",
-          "4f48ad73-2b06-468d-a663-03f8fdc5245a",
-          "eb7c5b04-47a4-4308-9e39-d3f465fe35aa",
-          "1ffc5692-7688-4fa3-b3a5-068f76059ae5",
-          "77101bf2-3143-4cd1-9ef0-07ae3c513df8",
-          "3eef4f3e-8fc8-4b84-affb-9898ab5fc193",
-          "acd416e2-b80a-4ab6-9653-8bd55a6a4e24"
+          "b6f4fbb0-3e2c-461f-8423-d67fc1a22ee5",
+          "c856716c-bd8b-4a04-a477-535810bd2a8a",
+          "cca26bff-73e5-45dc-96f8-3d835d2ebaee",
+          "7037d141-a5e0-46fb-862b-d5e40b4d06f0",
+          "4bd1f00f-11ac-4588-b706-7773a659fd08",
+          "ad145ea6-53b7-4461-b0a5-e99e5f4c3f24",
+          "cbce968b-86a7-4d16-b3eb-ed067ec83335",
+          "496ddb2b-3c29-479c-82f0-c5b0d34df580"
         ],
         "activationRows": [
           {
@@ -5138,7 +5760,7 @@
             ]
           }
         ],
-        "entity_guid": "7c273aee-8c95-402e-a883-6ddc8ff6c81a"
+        "entity_guid": "e3cadf8d-036a-4554-b5e3-82bb347f3c7d"
       }
     ],
     "transition_drivers": [
@@ -5161,7 +5783,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "d877c084-2298-4153-9ff2-8128f381082c",
+                "driver_mol_guid_ref": "5bb6d1c3-b810-4af3-825c-50632d1a1ba3",
                 "CurrentState": 0,
                 "CurrentStateName": "naive",
                 "DestState": 1,
@@ -5237,7 +5859,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "bee7de97-c074-4e02-9927-ec89f3d5d23c",
+                "driver_mol_guid_ref": "fcd15f3f-99b5-478c-81d9-8eb58a3e88e6",
                 "CurrentState": 1,
                 "CurrentStateName": "activated",
                 "DestState": 2,
@@ -5246,7 +5868,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "1e7ccfe8-0468-406f-8bb6-657d849121ef",
+                "driver_mol_guid_ref": "cbea9d9c-7897-4fe8-aaef-5c72506801d4",
                 "CurrentState": 1,
                 "CurrentStateName": "activated",
                 "DestState": 3,
@@ -5389,7 +6011,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                 "CurrentState": 3,
                 "CurrentStateName": "centroblast",
                 "DestState": 4,
@@ -5447,7 +6069,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                 "CurrentState": 4,
                 "CurrentStateName": "centrocyte",
                 "DestState": 3,
@@ -5465,7 +6087,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                 "CurrentState": 4,
                 "CurrentStateName": "centrocyte",
                 "DestState": 5,
@@ -5474,7 +6096,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                 "CurrentState": 4,
                 "CurrentStateName": "centrocyte",
                 "DestState": 6,
@@ -5626,7 +6248,7 @@
           "long-lived plasmacyte",
           "memory"
         ],
-        "entity_guid": "e037d275-9326-4b33-b62a-a137ce573ed8"
+        "entity_guid": "2d8b05bf-0356-4220-90e6-4d7e43ddeb09"
       },
       {
         "Name": "GC B Cell driver",
@@ -5647,7 +6269,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "117c6241-0870-49ca-b2e1-254f2ca6d6ed",
+                "driver_mol_guid_ref": "c68626de-f496-4f05-b10d-2b15cb73a5df",
                 "CurrentState": 0,
                 "CurrentStateName": "centroblast",
                 "DestState": 1,
@@ -5678,7 +6300,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 0.5,
-                "driver_mol_guid_ref": "a1c876f1-24b4-4655-be3b-4bc098ea1465",
+                "driver_mol_guid_ref": "ad312683-856f-425c-a7f1-a33004bc0f6a",
                 "CurrentState": 1,
                 "CurrentStateName": "centrocyte",
                 "DestState": 0,
@@ -5696,7 +6318,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 1.0,
-                "driver_mol_guid_ref": "b4ded6f5-477c-4c3e-95a7-317288ffedc9",
+                "driver_mol_guid_ref": "e926ac22-e6cb-46aa-800b-695d416d2fbe",
                 "CurrentState": 1,
                 "CurrentStateName": "centrocyte",
                 "DestState": 2,
@@ -5705,7 +6327,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 0.25,
-                "driver_mol_guid_ref": "dbaf9544-2495-4e43-b7f6-3af30dc8a2ce",
+                "driver_mol_guid_ref": "3db8bd37-c2fa-4436-a4cb-90911574f9ad",
                 "CurrentState": 1,
                 "CurrentStateName": "centrocyte",
                 "DestState": 3,
@@ -5800,7 +6422,7 @@
           "long-lived plasmacyte",
           "memory"
         ],
-        "entity_guid": "ebdaa1b3-a286-4916-a31b-d293cb6aad5c"
+        "entity_guid": "9e4ca259-9056-4fff-9011-066485da9c30"
       },
       {
         "Name": "generic apoptosis",
@@ -5821,7 +6443,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 0.002,
-                "driver_mol_guid_ref": "dad5b801-8456-4224-bc24-7fabf72823a3",
+                "driver_mol_guid_ref": "633590c4-aa92-4feb-9416-b7096126bc79",
                 "CurrentState": 0,
                 "CurrentStateName": "alive",
                 "DestState": 1,
@@ -5856,7 +6478,7 @@
           "alive",
           "dead"
         ],
-        "entity_guid": "53e305ac-1588-4fb1-ac67-6cf393943282"
+        "entity_guid": "ff1732dc-d2b6-4761-9a83-f55345e9a0fb"
       },
       {
         "Name": "generic division",
@@ -5877,7 +6499,7 @@
               {
                 "Alpha": 0.0,
                 "Beta": 0.002,
-                "driver_mol_guid_ref": "14ee707e-7f03-49b6-8f53-0f2ede14381b",
+                "driver_mol_guid_ref": "7706df60-48bd-41aa-834f-94720bc0180e",
                 "CurrentState": 0,
                 "CurrentStateName": "quiescent",
                 "DestState": 1,
@@ -5912,7 +6534,7 @@
           "quiescent",
           "mitotic"
         ],
-        "entity_guid": "9a8ccf6d-4410-40a5-bccf-fc4f210c607a"
+        "entity_guid": "b2067757-70b3-4f1b-9699-e4f3c18342db"
       }
     ]
   }

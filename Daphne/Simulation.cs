@@ -208,18 +208,18 @@ namespace Daphne
                                                         S[0,2], S[1,2], S[2,2],
                                                         mpgg.peak_concentration };
 
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "gauss", initArray);
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "gauss", initArray);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
                     MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
 
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
                     MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "explicit", mpc.conc);
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "explicit", mpc.conc);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
@@ -243,8 +243,8 @@ namespace Daphne
                             x2 = protocol.scenario.environment.extent_x; 
                             break;
                     }
-                         
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "linear", new double[] {       
+
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "linear", new double[] {       
                                 c1, 
                                 c2,
                                 mpl.x1, 
@@ -530,8 +530,8 @@ namespace Daphne
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
 
-                configComp[0] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-                configComp[1] = protocol.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+                configComp[0] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
+                configComp[1] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
 
                 bulk_reacs[0] = protocol.GetReactions(configComp[0], false);
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
@@ -540,7 +540,7 @@ namespace Daphne
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius));
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius));
 
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
@@ -558,18 +558,18 @@ namespace Daphne
                             //it for not customized cell later(?)
 
                             // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
-                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule.entity_guid)) continue;
 
                             MolPopExplicit mp_explicit = new MolPopExplicit();
                             // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
-                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
+                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule.entity_guid];
                             cmp.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
                     }
 
                     // cell genes
-                    foreach (string s in protocol.entity_repository.cells_dict[cp.cell_guid_ref].genes_guid_ref)
+                    foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
                     {
                         ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
@@ -587,13 +587,13 @@ namespace Daphne
                     AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
                     
                     // locomotion
-                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref) == true)
+                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.cell_guid_ref].locomotor_mol_guid_ref];
+                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
 
-                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.cell_guid_ref].TransductionConstant);
+                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.Cell.entity_guid].TransductionConstant);
                         cell.IsMotile = true;
-                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.cell_guid_ref].DragCoefficient;
+                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].DragCoefficient;
                     }
                     else
                     {
@@ -612,9 +612,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver != null)
                     {
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].death_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
@@ -644,9 +644,9 @@ namespace Daphne
                         }
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme != null)
                     {
-                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.cell_guid_ref].diff_scheme;
+                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme;
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
@@ -679,9 +679,9 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 #else
-                    if (protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver != null)
+                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver != null)
                     {
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.cell_guid_ref].div_driver;
+                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
@@ -710,17 +710,17 @@ namespace Daphne
                     {
                         int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
 
-                        if (!dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.ContainsKey(face))
+                        if (!dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.ContainsKey(face))
                         {
-                            dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
+                            dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.Add(face, bc.boundaryType);
 
                             if (bc.boundaryType == MolBoundaryType.Dirichlet)
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
+                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
                             }
                             else
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
+                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
                             }
                         }
                     }

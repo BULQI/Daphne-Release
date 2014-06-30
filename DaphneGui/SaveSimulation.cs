@@ -37,7 +37,7 @@ namespace DaphneGui
                 //copy initial settings, only done once
                 ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json");
             }
-            sop.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
+            SystemOfPersistence.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
             foreach (KeyValuePair<int, CellPopulation> item in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
@@ -89,7 +89,7 @@ namespace DaphneGui
             foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.ecs.molpops)
             {
                 //loop through molecular population
-                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref];
+                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid];
 
                 MolPopExplicit mpex = new MolPopExplicit();
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];

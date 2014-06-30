@@ -449,17 +449,17 @@
                                                 <ToggleButton x:Name="ScalarBarMarkerButton" 
                                                         IsChecked="{Binding ScalarBarMarker_IsChecked}" 
                                                         ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="OrientationMarkerButton" 
                                                         IsChecked="{Binding OrientationMarker_IsChecked}" 
                                                         ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="ResetCameraButton" 
                                                         IsChecked="{Binding ResetCamera_IsChecked}" 
                                                         ToolTip="Reset camera" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="Never"/>
                                                 <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>
