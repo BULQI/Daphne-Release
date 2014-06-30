@@ -2824,6 +2824,13 @@ namespace Daphne
                 throw new Exception("Undefined report type in ConfigMolecularPopulation.");
             }
             reportMP.molpop_guid_ref = molpop_guid;
+            
+            mp_distribution = new MolPopHomogeneousLevel();
+            mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
+            mp_color = new System.Windows.Media.Color();
+            mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+            mp_render_blending_weight = 1.0;
+            mp_render_on = true;
         }
     }
 
@@ -4782,7 +4789,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             Color col = Color.FromRgb(255, 0, 0);
-            if (value == null || value == "")
+            if (value == null)
                 return col;
 
             try

@@ -1749,12 +1749,11 @@
                                 <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
                                                     ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="entity_guid"
                                                     SelectionChanged="molecule_combo_box2_SelectionChanged" >
 
                                 </ComboBox>
-                                                    
                             </StackPanel>
 
                         </Grid>

@@ -1926,6 +1926,10 @@ namespace DaphneGui
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             CheckBox cb = e.OriginalSource as CheckBox;
+
+            if (cb.CommandParameter == null)
+                return;
+
             string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
@@ -3822,7 +3826,7 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
-            if (mol_pop == null)
+            if (mol_pop == null || mol_pop.mp_distribution == null)
                 return;
 
             if (mol_pop.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
