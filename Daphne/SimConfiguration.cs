@@ -4782,7 +4782,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             Color col = Color.FromRgb(255, 0, 0);
-            if (value == null || (string)value == "")
+            if (value == null)
                 return col;
 
             try

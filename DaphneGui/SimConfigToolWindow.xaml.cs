@@ -3822,7 +3822,7 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
-            if (mol_pop == null)
+            if (mol_pop == null || mol_pop.mp_distribution == null)
                 return;
 
             if (mol_pop.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
