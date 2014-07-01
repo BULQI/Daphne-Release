@@ -444,12 +444,6 @@ namespace Daphne
         {
             ConfigCompartment ecs = scenario.environment.ecs;
 
-            ecs.molpops_dict.Clear();
-            foreach (ConfigMolecularPopulation cmp in ecs.molpops)
-            {
-                ecs.molpops_dict.Add(cmp.molpop_guid, cmp);
-            }
-
             // build ecm_probe_dict
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
@@ -648,25 +642,44 @@ namespace Daphne
                     //Remove molecule from molecules_dict
                     entity_repository.molecules_dict.Remove(cm.entity_guid);
 
+                    //old
                     //Remove all the ECM molpops that have this molecule type
-                    foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
+                    //foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
+                    //{
+                    //    if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                    //    {
+                    //        scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
+                    //        scenario.environment.ecs.molpops.Remove(kvp.Value);
+                    //    }
+                    //}
+                    //new
+                    foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops.ToList())
                     {
-                        if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                        if (cmp.molecule.entity_guid == cm.entity_guid)
                         {
-                            scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
-                            scenario.environment.ecs.molpops.Remove(kvp.Value);
+                            scenario.environment.ecs.molpops.Remove(cmp);
                         }
                     }
 
                     //Remove all the cell membrane molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
+                        //old
+                        //foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
+                        //{
+                        //    if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                        //    {
+                        //        cell.membrane.molpops_dict.Remove(kvp.Key);
+                        //        cell.membrane.molpops.Remove(kvp.Value);
+                        //    }
+                        //}
+
+                        //new
+                        foreach (ConfigMolecularPopulation cmp in cell.membrane.molpops.ToList())
                         {
-                            if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
-                                cell.membrane.molpops_dict.Remove(kvp.Key);
-                                cell.membrane.molpops.Remove(kvp.Value);
+                                cell.membrane.molpops.Remove(cmp);
                             }
                         }
                     }
@@ -678,7 +691,6 @@ namespace Daphne
                         {
                             if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
-                                //cell.cytosol.molpops_dict.Remove(kvp.Key);
                                 cell.cytosol.molpops.Remove(cmp);
                             }
                         }
@@ -694,7 +706,6 @@ namespace Daphne
                             entity_repository.reactions.Remove(kvp.Value);
                         }
                     }
-
                 }
             }
         }
@@ -706,9 +717,6 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
-
-                    // add molpop into molpops_dict
-                    scenario.environment.ecs.molpops_dict.Add(mp.molpop_guid, mp);
 
                     // add ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
@@ -726,9 +734,6 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
-
-                    // remove from molpops_dict
-                    scenario.environment.ecs.molpops_dict.Remove(mp.molpop_guid);
 
                     // remove ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
@@ -2847,7 +2852,6 @@ namespace Daphne
     {
         // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;      //IS THIS NEEDED??
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -2870,7 +2874,6 @@ namespace Daphne
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             reactions_guid_ref = new ObservableCollection<string>();
             reaction_complexes_guid_ref = new ObservableCollection<string>();
-            molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
             reactions_guid_ref.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_guid_ref_CollectionChanged);
