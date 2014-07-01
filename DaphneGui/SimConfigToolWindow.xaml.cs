@@ -3611,7 +3611,7 @@ namespace DaphneGui
 
                 if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(false);
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
