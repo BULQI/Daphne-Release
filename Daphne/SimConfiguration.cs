@@ -2521,7 +2521,7 @@ namespace Daphne
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
     
-    public class ConfigDiffScheme : ConfigEntity
+    public class ConfigDiffScheme : ConfigEntity, IEquatable<ConfigDiffScheme>
     {
         public string Name { get; set; }
 
@@ -2635,6 +2635,15 @@ namespace Daphne
             // at this point we'd insert this into the hyperlocal store with the new guid
 
             return new_cds;
+        }
+
+        public bool Equals(ConfigDiffScheme other)
+        {
+            if (other == null)
+            {
+                return this.Name == "None";
+            }
+            return this.Name == other.Name;
         }
     }
 

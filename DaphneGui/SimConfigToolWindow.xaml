@@ -15,6 +15,16 @@
 
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+        <Style TargetType="ComboBox">
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </docking:ToolWindow.Resources>
     
     
@@ -1318,6 +1328,11 @@
                         </StackPanel>
                         
                         <StackPanel Orientation="Horizontal" Width="220" >
+
+                            <StackPanel.Resources>
+                                <local:diffSchemeValueConverter x:Key="diffSchemeValueConverter" />
+                            </StackPanel.Resources>
+                            
                             <Expander 
                                 Header="select another differentiator"   
                                 ExpandDirection="Down" 
@@ -1334,13 +1349,13 @@
                                                                 
                                 <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
                                         DisplayMemberPath="Name"
-                                        SelectedValue="{Binding Path=diff_scheme}"
+                                        SelectedValue="{Binding Path=diff_scheme, Converter={StaticResource diffSchemeValueConverter}}"
                                         
                                         SelectionChanged="cbCellDiffSchemes_SelectionChanged"
                                         >
                                         <ComboBox.ItemsSource>
                                             <CompositeCollection>
-                                            <daph:ConfigDiffScheme Name="None"/>
+                                            <daph:ConfigDiffScheme Name=""/>
                                             <CollectionContainer Collection="{Binding Source={StaticResource diffSchemesListView}}" />
                                             </CompositeCollection>
                                         </ComboBox.ItemsSource>

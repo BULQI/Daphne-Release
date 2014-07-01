@@ -24,6 +24,7 @@ using Workbench;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -2779,11 +2780,14 @@ namespace DaphneGui
 
             //------ Use a composite collection to insert "None" item
             CompositeCollection coll = new CompositeCollection();
-            ComboBoxItem nullItem = new ComboBoxItem();
-            nullItem.IsEnabled = true;
-            nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            nullItem.Content = "None";
-            coll.Add(nullItem);
+            ConfigMolecularPopulation nullcmp = new ConfigMolecularPopulation(new ReportType());
+            nullcmp.Name = "None";
+            coll.Add(nullcmp);
+            //ComboBoxItem nullItem = new ComboBoxItem();
+            //nullItem.IsEnabled = true;
+            //nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            //nullItem.Content = "None";
+            //coll.Add(nullItem);
             CollectionContainer cc = new CollectionContainer();
             cc.Collection = cell.cytosol.molpops;
             coll.Add(cc);
@@ -3865,7 +3869,47 @@ namespace DaphneGui
 
         }
 
-    }    
+        //[ValueConversion(typeof(ConfigDiffScheme), typeof(ConfigDiffScheme))]
+        //public class diffSchemeValueConverter : IValueConverter
+        //{
+        //    public object Convert(object value, Type targetType,
+        //        object parameter, CultureInfo culture)
+        //    {
+        //        if (value == null)
+        //        {
+        //            return new ConfigDiffScheme() { Name = "None" };
+        //        }
+        //        return value;
+        //    }
+
+        //    public object ConvertBack(object value, Type targetType,
+        //        object parameter, CultureInfo culture)
+        //    {
+        //        ConfigDiffScheme val = value as ConfigDiffScheme;
+        //        if (val != null && val.Name == "None") return null;
+        //        return value;
+        //    }
+        //}
+    }
+
+    public class diffSchemeValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ConfigDiffScheme val = value as ConfigDiffScheme;
+            if (val != null && val.Name == "") return null;
+            return value;
+        }
+    }
+
+
 
     public class DataGridBehavior
     {
