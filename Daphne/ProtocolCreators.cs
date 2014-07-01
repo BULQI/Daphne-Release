@@ -746,7 +746,7 @@ namespace Daphne
 
             if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(false);
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
@@ -852,12 +852,12 @@ namespace Daphne
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 100;
 
-            // Add differentiatior
+            // Add differentiator
             // Assumes all genes and signal molecules are present
             diff_scheme_guid = findDiffSchemeGuid("GC B cell", protocol);
             if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(false);
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
