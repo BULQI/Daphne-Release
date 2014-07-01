@@ -208,18 +208,18 @@ namespace Daphne
                                                         S[0,2], S[1,2], S[2,2],
                                                         mpgg.peak_concentration };
 
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "gauss", initArray);
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "gauss", initArray);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
                     MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
 
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "const", new double[] { mphl.concentration });
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
                     MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "explicit", mpc.conc);
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "explicit", mpc.conc);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
@@ -243,8 +243,8 @@ namespace Daphne
                             x2 = protocol.scenario.environment.extent_x; 
                             break;
                     }
-                         
-                    simComp.AddMolecularPopulation(cmp.molecule_guid_ref, "linear", new double[] {       
+
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "linear", new double[] {       
                                 c1, 
                                 c2,
                                 mpl.x1, 
@@ -558,11 +558,11 @@ namespace Daphne
                             //it for not customized cell later(?)
 
                             // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
-                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
+                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule.entity_guid)) continue;
 
                             MolPopExplicit mp_explicit = new MolPopExplicit();
                             // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
-                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule_guid_ref];
+                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule.entity_guid];
                             cmp.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
@@ -710,17 +710,17 @@ namespace Daphne
                     {
                         int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
 
-                        if (!dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.ContainsKey(face))
+                        if (!dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.ContainsKey(face))
                         {
-                            dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].boundaryCondition.Add(face, bc.boundaryType);
+                            dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.Add(face, bc.boundaryType);
 
                             if (bc.boundaryType == MolBoundaryType.Dirichlet)
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
+                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
                             }
                             else
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule_guid_ref].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
+                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
                             }
                         }
                     }
@@ -748,12 +748,12 @@ namespace Daphne
             {
                 foreach (ConfigTransitionDriverElement config_tde in row.elements)
                 {
-                    if (population.ContainsKey(config_tde.Driver_Mol.entity_guid) == true)
+                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
                     {
                         TransitionDriverElement tde = new TransitionDriverElement();
                         tde.Alpha = config_tde.Alpha;
                         tde.Beta = config_tde.Beta;
-                        tde.DriverPop = population[config_tde.Driver_Mol.entity_guid];
+                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
                         behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
                     }
                 }                        

@@ -75,7 +75,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -191,7 +191,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
 
                     MolPopLinear molpoplin = new MolPopLinear();
@@ -337,7 +337,7 @@ namespace Daphne
             foreach (ConfigMolecule cm in query)
             {
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                configMolPop.molecule_guid_ref = cm.entity_guid;
+                configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
                 configMolPop.mp_dist_name = "Gaussian";
                 configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -435,7 +435,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -507,7 +507,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -529,7 +529,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -584,7 +584,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -606,7 +606,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -671,7 +671,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -696,7 +696,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -783,7 +783,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -808,7 +808,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -893,7 +893,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -916,7 +916,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -969,7 +969,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -992,7 +992,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -2436,7 +2436,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2533,13 +2533,7 @@ namespace Daphne
                     {
                         driverElement.Alpha = alpha[i, j];
                         driverElement.Beta = beta[i, j];
-
-                        string molecule_guid = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
-
-                        if(protocol.entity_repository.molecules_dict.ContainsKey(molecule_guid) == true)
-                        {
-                            driverElement.Driver_Mol = protocol.entity_repository.molecules_dict[molecule_guid].Clone(null);
-                        }
+                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
                     }
                     row.elements.Add(driverElement);
                 }

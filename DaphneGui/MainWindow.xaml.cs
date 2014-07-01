@@ -714,7 +714,7 @@ namespace DaphneGui
 
             foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
             {
-                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule_guid_ref];
+                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
                 sop.Protocol.entity_repository.molecules.Add(configMol);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
@@ -2519,13 +2519,13 @@ namespace DaphneGui
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
+                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
-                cmi.Concentration = conc; 
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Concentration = conc;
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
