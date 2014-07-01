@@ -742,10 +742,11 @@ namespace Daphne
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell 7 state", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", protocol);
+
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
@@ -851,12 +852,12 @@ namespace Daphne
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 100;
 
-            // Add differentiatior
+            // Add differentiator
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("GC B cell", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            diff_scheme_guid = findDiffSchemeGuid("GC B cell", protocol);
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis

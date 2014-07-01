@@ -642,17 +642,6 @@ namespace Daphne
                     //Remove molecule from molecules_dict
                     entity_repository.molecules_dict.Remove(cm.entity_guid);
 
-                    //old
-                    //Remove all the ECM molpops that have this molecule type
-                    //foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
-                    //{
-                    //    if (kvp.Value.molecule.entity_guid == cm.entity_guid)
-                    //    {
-                    //        scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
-                    //        scenario.environment.ecs.molpops.Remove(kvp.Value);
-                    //    }
-                    //}
-                    //new
                     foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops.ToList())
                     {
                         if (cmp.molecule.entity_guid == cm.entity_guid)
@@ -664,17 +653,6 @@ namespace Daphne
                     //Remove all the cell membrane molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        //old
-                        //foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
-                        //{
-                        //    if (kvp.Value.molecule.entity_guid == cm.entity_guid)
-                        //    {
-                        //        cell.membrane.molpops_dict.Remove(kvp.Key);
-                        //        cell.membrane.molpops.Remove(kvp.Value);
-                        //    }
-                        //}
-
-                        //new
                         foreach (ConfigMolecularPopulation cmp in cell.membrane.molpops.ToList())
                         {
                             if (cmp.molecule.entity_guid == cm.entity_guid)
@@ -2626,7 +2604,7 @@ namespace Daphne
             OnPropertyChanged("Driver");
         }
 
-        public ConfigDiffScheme Clone()
+        public ConfigDiffScheme Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2634,9 +2612,13 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
 
             ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            new_cds.entity_guid = id.ToString();
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                new_cds.entity_guid = id.ToString();
+            }
             // at this point we'd insert this into the hyperlocal store with the new guid
 
             return new_cds;
@@ -2852,6 +2834,7 @@ namespace Daphne
     {
         // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+        public ObservableCollection<ConfigReaction> reactions;
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -3405,7 +3388,6 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            diff_scheme_guid_ref = "";
             death_driver_guid_ref = "";
             div_driver_guid_ref = "";
 
@@ -3478,7 +3460,6 @@ namespace Daphne
             }
         }
 
-
         private double transductionConstant;
         public double TransductionConstant
         {
@@ -3512,7 +3493,6 @@ namespace Daphne
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
-        public string diff_scheme_guid_ref { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme

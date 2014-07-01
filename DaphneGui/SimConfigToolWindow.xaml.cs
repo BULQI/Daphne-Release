@@ -2672,7 +2672,7 @@ namespace DaphneGui
             }
 
             //Get the diff_scheme using the guid
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
 
             //EPIGENETIC MAP SECTION
             EpigeneticMapGrid.DataContext = diff_scheme;
@@ -2981,9 +2981,6 @@ namespace DaphneGui
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
-
-            //if (cell.diff_scheme_guid_ref == "")
-            //    return;
 
             //if cell does not have a diff scheme, create one
             if (cell.diff_scheme == null)
@@ -3599,21 +3596,22 @@ namespace DaphneGui
             if (combo.SelectedIndex == 0)
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme_guid_ref = "";
                 combo.Text = "None";
             }
             else
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.entity_guid == cell.diff_scheme_guid_ref)
+                if (diffNew.entity_guid == cell.diff_scheme.entity_guid)
+                {
                     return;
+                }
 
                 EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
                 if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme_guid_ref = diffNew.entity_guid;
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone();
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
