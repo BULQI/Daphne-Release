@@ -3884,7 +3884,7 @@ namespace DaphneGui
             object parameter, CultureInfo culture)
         {
             ConfigDiffScheme val = value as ConfigDiffScheme;
-            if (val != null && val.Name == "None") return null;
+            if (val != null && val.Name == "") return null;
             return value;
         }
     }
