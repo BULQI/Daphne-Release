@@ -35,7 +35,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
+                if (cell != null && cell.death_driver != null && driver.entity_guid == cell.death_driver.entity_guid)
                 {
                     e.Accepted = true;
                 }
@@ -53,7 +53,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
+                if (cell != null && cell.div_driver != null && driver.entity_guid == cell.div_driver.entity_guid)
                 {
                     e.Accepted = true;
                 }

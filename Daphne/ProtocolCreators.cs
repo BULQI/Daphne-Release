@@ -750,17 +750,18 @@ namespace Daphne
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
@@ -861,17 +862,17 @@ namespace Daphne
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
