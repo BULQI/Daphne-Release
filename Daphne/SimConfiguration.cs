@@ -2470,7 +2470,7 @@ namespace Daphne
             states = new ObservableCollection<string>();
         }
 
-        public ConfigTransitionDriver Clone()
+        public ConfigTransitionDriver Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2478,10 +2478,13 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
 
             ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            new_ctd.entity_guid = id.ToString();
-            // at this point we'd insert this into the hyperlocal store with the new guid
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                new_ctd.entity_guid = id.ToString();
+            }
 
             return new_ctd;
         }
@@ -2619,7 +2622,6 @@ namespace Daphne
 
                 new_cds.entity_guid = id.ToString();
             }
-            // at this point we'd insert this into the hyperlocal store with the new guid
 
             return new_cds;
         }
@@ -2834,7 +2836,6 @@ namespace Daphne
     {
         // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public ObservableCollection<ConfigReaction> reactions;
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -3388,9 +3389,6 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            death_driver_guid_ref = "";
-            div_driver_guid_ref = "";
-
             genes_guid_ref = new ObservableCollection<string>();
         }
 
@@ -3509,11 +3507,9 @@ namespace Daphne
             }
         }
 
-        // Guid for ConfigTransitionDriver that drives cell death
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
-        public string death_driver_guid_ref { get; set; }
         private ConfigTransitionDriver _death_driver;
         public ConfigTransitionDriver death_driver
         {
@@ -3528,9 +3524,6 @@ namespace Daphne
                 OnPropertyChanged("death_driver");
             }
         }
-
-        // Guid for ConfigTransitionDriver that drives cell division
-        public string div_driver_guid_ref { get; set; }
 
         private ConfigTransitionDriver _div_driver;
         public ConfigTransitionDriver div_driver 

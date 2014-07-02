@@ -603,22 +603,12 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
-#if GUID_REF_BASED
-                    //if (sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref != "")
-                    if (sc.entity_repository.transition_drivers_dict.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref) == true)
-                    {
-                        string death_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].death_driver_guid_ref;
-                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[death_driver_guid];
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
-                    }
-#else
                     if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver != null)
                     {
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
-#endif
 
                     // Differentiation
                     if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme != null)
@@ -646,22 +636,12 @@ namespace Daphne
                     }
 
                     // division behavior
-#if GUID_REF_BASED
-                    //if (sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref != "")
-                    if (sc.entity_repository.transition_drivers_dict.ContainsKey(sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref) == true)
-                    {
-                        string div_driver_guid = sc.entity_repository.cells_dict[cp.cell_guid_ref].div_driver_guid_ref;
-                        ConfigTransitionDriver config_td = sc.entity_repository.transition_drivers_dict[div_driver_guid];
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
-                    }
-#else
                     if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver != null)
                     {
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
 
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
-#endif
 
                     AddCell(cell);
                 }

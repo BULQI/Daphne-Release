@@ -63,10 +63,9 @@ namespace DaphneGui
             {
                 //guid to object changes
                 ConfigCell cell_to_clone = er.cells.First();
-                cp.Cell = cell_to_clone.Clone(true);
+
+                cp.Cell = cell_to_clone.Clone(false);
                 cp.cellpopulation_name = cp.Cell.CellName;
-                //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
-                //cp.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
             }
             else
             {
@@ -516,7 +515,7 @@ namespace DaphneGui
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
 
-            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
+            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(MainWindow.SOP.Protocol);
             gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
@@ -1687,7 +1686,9 @@ namespace DaphneGui
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                {
                     cp.cellpopulation_name = new_cell_name;
+                }
             }
 
         }
@@ -3602,7 +3603,7 @@ namespace DaphneGui
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.entity_guid == cell.diff_scheme.entity_guid)
+                if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
                 {
                     return;
                 }
@@ -3635,17 +3636,17 @@ namespace DaphneGui
                 if (cell.div_driver == null)
                 {
                     EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                    //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
-                    cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                    if (cell.div_driver_guid_ref == "")
+                    ConfigTransitionDriver driver = FindFirstDivDriver();
+
+                    if (driver == null)
                     {
                         MessageBox.Show("No division drivers are defined");
                         return;
                     }
 
-                    if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                    if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
                     {
-                        cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                        cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(true);
                     }
                 }
             }
@@ -3654,6 +3655,7 @@ namespace DaphneGui
         private ConfigTransitionDriver FindFirstDeathDriver()
         {
             ConfigTransitionDriver driver = null;
+
             foreach (ConfigTransitionDriver d in MainWindow.SOP.Protocol.entity_repository.transition_drivers)
             {
                 string name = d.Name;
@@ -3723,16 +3725,17 @@ namespace DaphneGui
             if (cell.death_driver == null)
             {
                 EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                cell.death_driver_guid_ref = FindFirstDeathDriver().entity_guid;
-                if (cell.death_driver_guid_ref == "")
+                ConfigTransitionDriver driver = FindFirstDeathDriver();
+
+                if (driver == null)
                 {
                     MessageBox.Show("No death drivers are defined");
                     return;
                 }
-                if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
+
+                if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
                 {
-                    cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
+                    cell.death_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
                 }
             }
         }
@@ -3764,16 +3767,17 @@ namespace DaphneGui
             if (cell.div_driver == null)
             {
                 EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                if (cell.div_driver_guid_ref == "")
+                ConfigTransitionDriver driver = FindFirstDivDriver();
+
+                if (driver == null)
                 {
                     MessageBox.Show("No division drivers are defined");
                     return;
                 }
 
-                if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
                 {
-                    cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
                 }
             }
         }
