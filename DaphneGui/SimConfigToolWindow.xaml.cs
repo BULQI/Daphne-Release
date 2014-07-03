@@ -533,11 +533,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                     return;
 
-                foreach (string reacguid in MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.ToList())
+                foreach (ConfigReaction cr in MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.ToList())
                 {
-                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid].HasMolecule(cmp.molecule.entity_guid))
+                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[cr.entity_guid].HasMolecule(cmp.molecule.entity_guid))
                     {
-                        MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
+                        MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(cr);
                     }
                 }
 
@@ -696,13 +696,13 @@ namespace DaphneGui
         {
             bool needRefresh = false;
 
-                  foreach (var item in lvAvailableReacs.SelectedItems)
+            foreach (var item in lvAvailableReacs.SelectedItems)
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (!MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(reac.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(reac) == false)
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
                 }
             }
@@ -720,9 +720,9 @@ namespace DaphneGui
 
             string guid = (string)lvEcsReactions.SelectedValue;
             ConfigReaction grt = MainWindow.SOP.Protocol.entity_repository.reactions_dict[guid];
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(grt.entity_guid))
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(grt))
             {
-                MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(grt.entity_guid);
+                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(grt);
             }
         }
 
@@ -1103,9 +1103,9 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                    if (cc.membrane.Reactions.Contains(cr) == false)
                     {
-                        cc.membrane.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.membrane.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1152,9 +1152,9 @@ namespace DaphneGui
                 if (cc != null && cr != null)
                 {
                     //Add to reactions list only if the cell does not already contain this reaction
-                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid))
+                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
                     {
-                        cc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.cytosol.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1196,21 +1196,19 @@ namespace DaphneGui
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
             //added 1/10/14
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }            
 
@@ -1256,22 +1254,20 @@ namespace DaphneGui
             
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
 
             //added 1/10/14
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
 
@@ -1305,12 +1301,15 @@ namespace DaphneGui
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             int nIndex = MembReacListBox.SelectedIndex;
+
             if (nIndex >= 0)
             {
                 string guid = (string)MembReacListBox.SelectedValue;
-                if (cell.membrane.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = cell.membrane.GetReaction(guid);
+
+                if (cr != null)
                 {
-                    cell.membrane.reactions_guid_ref.Remove(guid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
         }
@@ -1322,9 +1321,11 @@ namespace DaphneGui
             if (nIndex >= 0)
             {
                 string guid = (string)CytosolReacListBox.SelectedValue;
-                if (cell.cytosol.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = cell.cytosol.GetReaction(guid);
+
+                if (cr != null)
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(guid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
         }
@@ -2273,7 +2274,12 @@ namespace DaphneGui
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
-                cc.cytosol.reactions_guid_ref.Add(rguid);
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
+                {
+                    ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
+
+                    cc.cytosol.Reactions.Add(cr.Clone(true));
+                }
             }
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();

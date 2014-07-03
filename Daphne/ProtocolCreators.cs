@@ -144,7 +144,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -274,7 +274,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -558,7 +558,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -643,7 +643,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -733,7 +733,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -846,7 +846,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -945,7 +945,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -1021,7 +1021,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             } 
             
