@@ -453,6 +453,7 @@ namespace Daphne
                     cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
                 }
             }
+
             ecs.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(ecm_molpops_CollectionChanged);
         }
 
@@ -696,6 +697,12 @@ namespace Daphne
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
 
+                    ////// add molpop into molpops_dict
+                    ////if (!scenario.environment.ecs.molpops_dict.ContainsKey(mp.molpop_guid))
+                    ////{
+                    ////    scenario.environment.ecs.molpops_dict.Add(mp.molpop_guid, mp);
+                    ////}
+
                     // add ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
                     {
@@ -713,6 +720,12 @@ namespace Daphne
                 {
                     ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
 
+                    ////// remove from molpops_dict
+                    ////if (scenario.environment.ecs.molpops_dict.ContainsKey(mp.molpop_guid))
+                    ////{
+                    ////    scenario.environment.ecs.molpops_dict.Remove(mp.molpop_guid);
+                    ////}
+
                     // remove ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
                     {
@@ -723,6 +736,7 @@ namespace Daphne
                 }
             }
         }
+
 
         private void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -2836,6 +2850,12 @@ namespace Daphne
     {
         // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigMolecule> molecules_dict;  //key=molecule_guid(string), value=ConfigMolecule
+
         private ObservableCollection<string> _reactions_guid_ref;
         public ObservableCollection<string> reactions_guid_ref
         {
@@ -2858,6 +2878,8 @@ namespace Daphne
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
             reactions_guid_ref = new ObservableCollection<string>();
             reaction_complexes_guid_ref = new ObservableCollection<string>();
+            molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
+            molecules_dict = new Dictionary<string, ConfigMolecule>();
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
             reactions_guid_ref.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_guid_ref_CollectionChanged);
@@ -2870,55 +2892,87 @@ namespace Daphne
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            //if (e.Action == NotifyCollectionChangedAction.Add)
-            //{
-            //    foreach (var nn in e.NewItems)
-            //    {
-            //    }
-            //}
-            //else 
-            //if (e.Action == NotifyCollectionChangedAction.Remove)
-            //{
-            //    foreach (var oo in e.OldItems)
-            //    {
-            //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
-            //        if (entity_repository.reactions_dict(reactions_guid_ref).)
-            //        {
-            //            reactions_guid_ref.Remove(cmp.molecule_guid_ref);
-            //        }
-            //    }
-            //}
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
+
+                    // add molpop into molpops_dict
+                    if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
+                    {
+                        molpops_dict.Add(mp.molpop_guid, mp);
+                    }
+                    if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                    {
+                        molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
+
+                    // remove from molpops_dict
+                    if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
+                    {
+                        molpops_dict.Remove(mp.molpop_guid);
+                    }
+                    if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == true)
+                    {
+                        molecules_dict.Remove(mp.molecule.entity_guid);
+                    }
+                }
+
+            }
 
             OnPropertyChanged("molpops");            
         }
 
 
+
+
         //Return true if this compartment has a molecular population with given molecule
         public bool HasMolecule(ConfigMolecule mol)
         {
-            bool res = false;
-            foreach (ConfigMolecularPopulation molpop in molpops)
+            if (molecules_dict.ContainsKey(mol.entity_guid))
             {
-                if (molpop.molecule.entity_guid == mol.entity_guid)
-                {
-                    return true;
-                }
+                return true;
             }
-            return res;
+            return false;
+
+            ////bool res = false;
+            ////foreach (ConfigMolecularPopulation molpop in molpops)
+            ////{
+            ////    if (molpop.molecule.entity_guid == mol.entity_guid)
+            ////    {
+            ////        return true;
+            ////    }
+            ////}
+            ////return res;
         }
 
         //Return true if this compartment has a molecular population with given molecule guid
         public bool HasMolecule(string molguid)
         {
-            bool res = false;
-            foreach (ConfigMolecularPopulation molpop in molpops)
+            if (molecules_dict.ContainsKey(molguid))
             {
-                if (molpop.molecule.entity_guid == molguid)
-                {
-                    return true;
-                }
+                return true;
             }
-            return res;
+            return false;
+
+            ////bool res = false;
+            ////foreach (ConfigMolecularPopulation molpop in molpops)
+            ////{
+            ////    if (molpop.molecule.entity_guid == molguid)
+            ////    {
+            ////        return true;
+            ////    }
+            ////}
+            ////return res;
         }
 
         //Return true if this compartment has all the molecules in the given list of molecule guids
@@ -4226,6 +4280,8 @@ namespace Daphne
         {
             get { return ecmProbe; }
         }
+
+        [JsonIgnore]
         public Dictionary<string, ReportECM> ecm_probe_dict;
 
         private int _number;

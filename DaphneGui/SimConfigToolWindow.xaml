@@ -26,9 +26,9 @@
             </Setter>
         </Style>
     </docking:ToolWindow.Resources>
-    
-    
-    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged">
+
+
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
         <TabControl.Resources >
             <!-- For changing color of alternating rows of ListBox -->
             <Style  TargetType="{x:Type ListBoxItem}">
@@ -1954,7 +1954,7 @@
         </TabControl.Resources>
 
         <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup">        
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">        
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
 
@@ -2115,7 +2115,7 @@
         </TabItem>
         
         <!-- Extracellular Medium -->
-        <TabItem x:Name="tabECM" Header="Extracellular Medium"  >
+        <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
                     <!-- Environment -->
@@ -2672,7 +2672,7 @@
         </TabItem>
 
         <!-- Library CELL POPULATIONS -->
-        <TabItem x:Name="tabCellPop" Header="Cell Populations">
+        <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
 
@@ -2784,7 +2784,7 @@
         </TabItem>
 
         <!-- REPORTS -->
-        <TabItem Header="Reports" x:Name="tabReports" Loaded="TabItem_Loaded">
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="TabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8" >
                     <StackPanel.Resources >
@@ -3232,7 +3232,7 @@
         </TabItem>
 
         <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTIONS COMPLEXES, AND DIFFERENTIATION SCHEMES -->
-        <TabItem x:Name="tabLibraries" Header="Component Libraries">
+        <TabItem x:Name="tabLibraries" Header="Component Libraries" AutomationProperties.AutomationId="DaphneLibsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <StackPanel.Resources>
@@ -3489,6 +3489,13 @@
                                           ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
                                           MinHeight="50" MaxHeight="150"
                                           >
+
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Height" Value="28" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                
                                 <ListView.View>
                                     <GridView>
                                         <GridView.ColumnHeaderContainerStyle>
@@ -3507,8 +3514,9 @@
 
                                         <GridViewColumn x:Name="colRate" Width="120" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
+                                                
                                                 <DataTemplate>                                                                                                  
-                                                    <uc:DoublesBox  Margin="-10,0" Width="{Binding ElementName=colRate, Path=Width}"
+                                                    <uc:DoublesBox  Width="{Binding ElementName=colRate, Path=Width}"
                                                                     Number="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     DecimalPlaces="2" 
                                                                     RangeFactor="2"
