@@ -3730,19 +3730,31 @@ namespace DaphneGui
             
             if (cell.death_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                ConfigTransitionDriver driver = FindFirstDeathDriver();
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDeathDriver();
 
-                if (driver == null)
-                {
-                    MessageBox.Show("No death drivers are defined");
-                    return;
-                }
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No death drivers are defined");
+                ////    return;
+                ////}
 
-                if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
-                {
-                    cell.death_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
-                }
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.death_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic apoptosis";
+                string[] stateName = new string[] { "alive", "dead" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.death_driver = config_td;
             }
         }
 
@@ -3772,19 +3784,31 @@ namespace DaphneGui
 
             if (cell.div_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                ConfigTransitionDriver driver = FindFirstDivDriver();
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDivDriver();
 
-                if (driver == null)
-                {
-                    MessageBox.Show("No division drivers are defined");
-                    return;
-                }
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No division drivers are defined");
+                ////    return;
+                ////}
 
-                if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
-                {
-                    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
-                }
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+                
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic division";
+                string[] stateName = new string[] { "quiescent", "mitotic" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.div_driver = config_td;
             }
         }
 
