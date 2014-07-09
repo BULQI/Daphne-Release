@@ -802,10 +802,8 @@ namespace SBMLayer
             }
 
             //adds reactions in the ECS
-            ConfigReaction cr;
-            foreach (string rguid in protocol.scenario.environment.ecs.reactions_guid_ref)
+            foreach (ConfigReaction cr in protocol.scenario.environment.ecs.Reactions)
             {
-                cr = protocol.entity_repository.reactions_dict[rguid];
                 AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
 
                 //Add reaction annotation
@@ -925,9 +923,8 @@ namespace SBMLayer
                 }
 
                 //Add reactions belonging to current cellPopulation and specify which compartment they take place in
-                foreach (string reaction in configCell.cytosol.reactions_guid_ref)
+                foreach (ConfigReaction cr in configCell.cytosol.Reactions)
                 {
-                    cr = protocol.entity_repository.reactions_dict[reaction];
                     cytosolId = string.Concat("Cytosol_", configCell.CellName);
                     AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, cytosolId, cellPop.Cell.entity_guid);
                 }
@@ -2045,7 +2042,7 @@ namespace SBMLayer
 
                             //Add the reaction to repository collection
                             protocol.entity_repository.reactions.Add(cr);
-                            gc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
+                            gc.cytosol.Reactions.Add(cr.Clone(true));
                         }
                     }
 
@@ -2112,7 +2109,7 @@ namespace SBMLayer
 
                         //Add the reaction to repository collection
                         protocol.entity_repository.reactions.Add(cr);
-                        protocol.scenario.environment.ecs.reactions_guid_ref.Add(cr.entity_guid);
+                        protocol.scenario.environment.ecs.Reactions.Add(cr.Clone(true));
                     }
                 }
             }
