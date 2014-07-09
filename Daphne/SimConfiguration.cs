@@ -2926,14 +2926,10 @@ namespace Daphne
                         molecules_dict.Remove(mp.molecule.entity_guid);
                     }
                 }
-
             }
 
             OnPropertyChanged("molpops");            
         }
-
-
-
 
         //Return true if this compartment has a molecular population with given molecule
         public bool HasMolecule(ConfigMolecule mol)
@@ -2943,16 +2939,6 @@ namespace Daphne
                 return true;
             }
             return false;
-
-            ////bool res = false;
-            ////foreach (ConfigMolecularPopulation molpop in molpops)
-            ////{
-            ////    if (molpop.molecule.entity_guid == mol.entity_guid)
-            ////    {
-            ////        return true;
-            ////    }
-            ////}
-            ////return res;
         }
 
         //Return true if this compartment has a molecular population with given molecule guid
@@ -2963,16 +2949,6 @@ namespace Daphne
                 return true;
             }
             return false;
-
-            ////bool res = false;
-            ////foreach (ConfigMolecularPopulation molpop in molpops)
-            ////{
-            ////    if (molpop.molecule.entity_guid == molguid)
-            ////    {
-            ////        return true;
-            ////    }
-            ////}
-            ////return res;
         }
 
         //Return true if this compartment has all the molecules in the given list of molecule guids
