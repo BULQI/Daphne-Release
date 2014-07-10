@@ -58,7 +58,7 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
-                <TextBlock VerticalAlignment="Center" >Maximum time (seconds):</TextBlock>
+                <TextBlock VerticalAlignment="Center" >Maximum time (minutes):</TextBlock>
                 <!--<Slider x:Name="slMaxTime" 
                         Orientation="Horizontal"
                         Width="100" Height="24"

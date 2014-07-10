@@ -35,7 +35,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.death_driver_guid_ref)
+                if (cell != null && cell.death_driver != null && driver.entity_guid == cell.death_driver.entity_guid)
                 {
                     e.Accepted = true;
                 }
@@ -53,7 +53,7 @@ namespace DaphneGui
             if (driver != null)
             {
                 // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && driver.entity_guid == cell.div_driver_guid_ref)
+                if (cell != null && cell.div_driver != null && driver.entity_guid == cell.div_driver.entity_guid)
                 {
                     e.Accepted = true;
                 }
@@ -148,7 +148,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -184,7 +184,7 @@ namespace DaphneGui
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
             //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+            if (cc.membrane.Reactions.Contains(cr))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -260,7 +260,7 @@ namespace DaphneGui
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+            if (cc.cytosol.Reactions.Contains(cr))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -289,7 +289,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
                 {
                     e.Accepted = true;
                 }
@@ -308,7 +308,7 @@ namespace DaphneGui
             {
                 e.Accepted = false;
                 // Filter out cr if not in membrane reaction list 
-                if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                if (cc.membrane.Reactions.Contains(cr))
                 {
                     e.Accepted = true;
                 }
@@ -345,7 +345,7 @@ namespace DaphneGui
             if (cr != null && cc != null)
             {
                 // Filter out cr if not in cytosol reaction list 
-                if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+                if (cc.cytosol.Reactions.Contains(cr))
                 {
                     e.Accepted = true;
                 }

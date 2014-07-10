@@ -444,12 +444,6 @@ namespace Daphne
         {
             ConfigCompartment ecs = scenario.environment.ecs;
 
-            ecs.molpops_dict.Clear();
-            foreach (ConfigMolecularPopulation cmp in ecs.molpops)
-            {
-                ecs.molpops_dict.Add(cmp.molpop_guid, cmp);
-            }
-
             // build ecm_probe_dict
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
@@ -459,6 +453,7 @@ namespace Daphne
                     cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
                 }
             }
+
             ecs.molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(ecm_molpops_CollectionChanged);
         }
 
@@ -648,25 +643,22 @@ namespace Daphne
                     //Remove molecule from molecules_dict
                     entity_repository.molecules_dict.Remove(cm.entity_guid);
 
-                    //Remove all the ECM molpops that have this molecule type
-                    foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in scenario.environment.ecs.molpops_dict.ToList())
+                    foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops.ToList())
                     {
-                        if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                        if (cmp.molecule.entity_guid == cm.entity_guid)
                         {
-                            scenario.environment.ecs.molpops_dict.Remove(kvp.Key);
-                            scenario.environment.ecs.molpops.Remove(kvp.Value);
+                            scenario.environment.ecs.molpops.Remove(cmp);
                         }
                     }
 
                     //Remove all the cell membrane molpops that have this molecule type
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        foreach (KeyValuePair<string, ConfigMolecularPopulation> kvp in cell.membrane.molpops_dict.ToList())
+                        foreach (ConfigMolecularPopulation cmp in cell.membrane.molpops.ToList())
                         {
-                            if (kvp.Value.molecule.entity_guid == cm.entity_guid)
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
-                                cell.membrane.molpops_dict.Remove(kvp.Key);
-                                cell.membrane.molpops.Remove(kvp.Value);
+                                cell.membrane.molpops.Remove(cmp);
                             }
                         }
                     }
@@ -678,7 +670,6 @@ namespace Daphne
                         {
                             if (cmp.molecule.entity_guid == cm.entity_guid)
                             {
-                                //cell.cytosol.molpops_dict.Remove(kvp.Key);
                                 cell.cytosol.molpops.Remove(cmp);
                             }
                         }
@@ -694,7 +685,6 @@ namespace Daphne
                             entity_repository.reactions.Remove(kvp.Value);
                         }
                     }
-
                 }
             }
         }
@@ -707,8 +697,11 @@ namespace Daphne
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
 
-                    // add molpop into molpops_dict
-                    scenario.environment.ecs.molpops_dict.Add(mp.molpop_guid, mp);
+                    ////// add molpop into molpops_dict
+                    ////if (!scenario.environment.ecs.molpops_dict.ContainsKey(mp.molpop_guid))
+                    ////{
+                    ////    scenario.environment.ecs.molpops_dict.Add(mp.molpop_guid, mp);
+                    ////}
 
                     // add ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
@@ -727,8 +720,11 @@ namespace Daphne
                 {
                     ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
 
-                    // remove from molpops_dict
-                    scenario.environment.ecs.molpops_dict.Remove(mp.molpop_guid);
+                    ////// remove from molpops_dict
+                    ////if (scenario.environment.ecs.molpops_dict.ContainsKey(mp.molpop_guid))
+                    ////{
+                    ////    scenario.environment.ecs.molpops_dict.Remove(mp.molpop_guid);
+                    ////}
 
                     // remove ecm report
                     foreach (CellPopulation cp in scenario.cellpopulations)
@@ -740,6 +736,7 @@ namespace Daphne
                 }
             }
         }
+
 
         private void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -793,8 +790,10 @@ namespace Daphne
                     //Remove all the ER reaction complex reactions that have this guid
                     foreach (ConfigReactionComplex comp in entity_repository.reaction_complexes)
                     {
-                        if (comp.reactions_guid_ref.Contains(cr.entity_guid) )
+                        if (comp.reactions_guid_ref.Contains(cr.entity_guid))
+                        {
                             comp.reactions_guid_ref.Remove(cr.entity_guid);
+                        }
                     }                    
 
                     //Remove all the ECM reaction complex reactions that have this guid
@@ -804,17 +803,23 @@ namespace Daphne
                     }
 
                     //Remove all the ECM reactions that have this guid
-                    if (scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
-                        scenario.environment.ecs.reactions_guid_ref.Remove(cr.entity_guid);
+                    if (scenario.environment.ecs.Reactions.Contains(cr))
+                    {
+                        scenario.environment.ecs.Reactions.Remove(cr);
+                    }
 
                     //Remove all the cell membrane/cytosol reactions that have this guid
                     foreach (ConfigCell cell in entity_repository.cells)
                     {
-                        if (cell.membrane.reactions_guid_ref.Contains(cr.entity_guid))
-                            cell.membrane.reactions_guid_ref.Remove(cr.entity_guid);
+                        if (cell.membrane.Reactions.Contains(cr))
+                        {
+                            cell.membrane.Reactions.Remove(cr);
+                        }
 
-                        if (cell.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
-                            cell.cytosol.reactions_guid_ref.Remove(cr.entity_guid);
+                        if (cell.cytosol.Reactions.Contains(cr))
+                        {
+                            cell.cytosol.Reactions.Remove(cr);
+                        }
                     }
                 }                
             }
@@ -963,25 +968,26 @@ namespace Daphne
             List<ConfigReaction> config_reacs = new List<ConfigReaction>();
 
             // Compartment reactions
-            foreach (string rguid in configComp.reactions_guid_ref)
+            foreach (ConfigReaction cr in configComp.Reactions)
             {
-                ConfigReaction cr = entity_repository.reactions_dict[rguid];
                 if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
                 {
-                    reac_guids.Add(rguid);
+                    reac_guids.Add(cr.entity_guid);
                     config_reacs.Add(cr);
                 }
             }
 
-            // Compartment reaction templates
+            // Compartment reaction complexes
             foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             {
                 ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+
                 foreach (string rguid in crc.reactions_guid_ref)
                 {
                     if (reac_guids.Contains(rguid) == false)
                     {
                         ConfigReaction cr = entity_repository.reactions_dict[rguid];
+
                         if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
                         {
                             config_reacs.Add(cr);
@@ -1005,25 +1011,26 @@ namespace Daphne
             List<ConfigReaction> config_reacs = new List<ConfigReaction>();
 
             // Compartment reactions
-            foreach (string rguid in configComp.reactions_guid_ref)
+            foreach (ConfigReaction cr in configComp.Reactions)
             {
-                ConfigReaction cr = entity_repository.reactions_dict[rguid];
                 if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
                 {
-                    reac_guids.Add(rguid);
+                    reac_guids.Add(cr.entity_guid);
                     config_reacs.Add(cr);
                 }
             }
 
-            // Compartment reaction templates
+            // Compartment reaction complexes
             foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             {
                 ConfigReactionComplex crc = entity_repository.reaction_complexes_dict[rcguid];
+
                 foreach (string rguid in crc.reactions_guid_ref)
                 {
                     if (reac_guids.Contains(rguid) == false)
                     {
                         ConfigReaction cr = entity_repository.reactions_dict[rguid];
+
                         if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
                         {
                             config_reacs.Add(cr);
@@ -2487,7 +2494,7 @@ namespace Daphne
             states = new ObservableCollection<string>();
         }
 
-        public ConfigTransitionDriver Clone()
+        public ConfigTransitionDriver Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2495,10 +2502,13 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
 
             ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            new_ctd.entity_guid = id.ToString();
-            // at this point we'd insert this into the hyperlocal store with the new guid
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                new_ctd.entity_guid = id.ToString();
+            }
 
             return new_ctd;
         }
@@ -2621,7 +2631,7 @@ namespace Daphne
             OnPropertyChanged("Driver");
         }
 
-        public ConfigDiffScheme Clone()
+        public ConfigDiffScheme Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2629,10 +2639,13 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
 
             ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            new_cds.entity_guid = id.ToString();
-            // at this point we'd insert this into the hyperlocal store with the new guid
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                new_cds.entity_guid = id.ToString();
+            }
 
             return new_cds;
         }
@@ -2847,19 +2860,24 @@ namespace Daphne
     {
         // private to Protocol; see comment in EntityRepository
         public ObservableCollection<ConfigMolecularPopulation> molpops { get; set; }
-        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;      //IS THIS NEEDED??
-        private ObservableCollection<string> _reactions_guid_ref;
-        public ObservableCollection<string> reactions_guid_ref
+
+        [JsonIgnore]
+        public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
+        [JsonIgnore]
+        public Dictionary<string, ConfigMolecule> molecules_dict;  //key=molecule_guid(string), value=ConfigMolecule
+
+        private ObservableCollection<ConfigReaction> _reactions;
+        public ObservableCollection<ConfigReaction> Reactions
         {
-            get { return _reactions_guid_ref; }
+            get { return _reactions; }
             set
             {
-                if (_reactions_guid_ref == value)
+                if (_reactions == value)
                     return;
                 else
                 {
-                    _reactions_guid_ref = value;
-                    OnPropertyChanged("reactions_guid_ref");
+                    _reactions = value;
+                    OnPropertyChanged("Reactions");
                 }
             }
         }
@@ -2868,70 +2886,95 @@ namespace Daphne
         public ConfigCompartment()
         {
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
-            reactions_guid_ref = new ObservableCollection<string>();
+            _reactions = new ObservableCollection<ConfigReaction>();
             reaction_complexes_guid_ref = new ObservableCollection<string>();
             molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
+            molecules_dict = new Dictionary<string, ConfigMolecule>();
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
-            reactions_guid_ref.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_guid_ref_CollectionChanged);
+            _reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
         }
 
-        private void reactions_guid_ref_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            //if (e.Action == NotifyCollectionChangedAction.Add)
-            //{
-            //    foreach (var nn in e.NewItems)
-            //    {
-            //    }
-            //}
-            //else 
-            //if (e.Action == NotifyCollectionChangedAction.Remove)
-            //{
-            //    foreach (var oo in e.OldItems)
-            //    {
-            //        ConfigMolecularPopulation cmp = oo as ConfigMolecularPopulation;
-            //        if (entity_repository.reactions_dict(reactions_guid_ref).)
-            //        {
-            //            reactions_guid_ref.Remove(cmp.molecule_guid_ref);
-            //        }
-            //    }
-            //}
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
+
+                    // add molpop into molpops_dict
+                    if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
+                    {
+                        molpops_dict.Add(mp.molpop_guid, mp);
+                    }
+                    if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                    {
+                        molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
+
+                    // remove from molpops_dict
+                    if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
+                    {
+                        molpops_dict.Remove(mp.molpop_guid);
+                    }
+                    if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == true)
+                    {
+                        molecules_dict.Remove(mp.molecule.entity_guid);
+                    }
+                }
+            }
 
             OnPropertyChanged("molpops");            
         }
-
+        /// <summary>
+        /// get a reaction with a specified guid
+        /// </summary>
+        /// <param name="guid">guid for lookup</param>
+        /// <returns>null if unsuccessful, the reaction otherwise</returns>
+        public ConfigReaction GetReaction(string guid)
+        {
+            foreach (ConfigReaction cr in Reactions)
+            {
+                if (cr.entity_guid == guid)
+                {
+                    return cr;
+                }
+            }
+            return null;
+        }
 
         //Return true if this compartment has a molecular population with given molecule
         public bool HasMolecule(ConfigMolecule mol)
         {
-            bool res = false;
-            foreach (ConfigMolecularPopulation molpop in molpops)
+            if (molecules_dict.ContainsKey(mol.entity_guid))
             {
-                if (molpop.molecule.entity_guid == mol.entity_guid)
-                {
-                    return true;
-                }
+                return true;
             }
-            return res;
+            return false;
         }
 
         //Return true if this compartment has a molecular population with given molecule guid
         public bool HasMolecule(string molguid)
         {
-            bool res = false;
-            foreach (ConfigMolecularPopulation molpop in molpops)
+            if (molecules_dict.ContainsKey(molguid))
             {
-                if (molpop.molecule.entity_guid == molguid)
-                {
-                    return true;
-                }
+                return true;
             }
-            return res;
+            return false;
         }
 
         //Return true if this compartment has all the molecules in the given list of molecule guids
@@ -3059,6 +3102,28 @@ namespace Daphne
             reactants_molecule_guid_ref = reac.reactants_molecule_guid_ref;
             products_molecule_guid_ref = reac.products_molecule_guid_ref;
             modifiers_molecule_guid_ref = reac.modifiers_molecule_guid_ref;
+        }
+
+        /// <summary>
+        /// create a clone of a reaction
+        /// </summary>
+        /// <param name="identical">true to create a literal copy</param>
+        /// <returns></returns>
+        public ConfigReaction Clone(bool identical)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigReaction newreaction = JsonConvert.DeserializeObject<ConfigReaction>(jsonSpec, Settings);
+
+            if (identical == false)
+            {
+                Guid id = Guid.NewGuid();
+
+                newreaction.entity_guid = id.ToString();
+            }
+            return newreaction;
         }
 
         public void GetTotalReactionString(EntityRepository repos)
@@ -3402,10 +3467,6 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            diff_scheme_guid_ref = "";
-            death_driver_guid_ref = "";
-            div_driver_guid_ref = "";
-
             genes_guid_ref = new ObservableCollection<string>();
         }
 
@@ -3475,7 +3536,6 @@ namespace Daphne
             }
         }
 
-
         private double transductionConstant;
         public double TransductionConstant
         {
@@ -3509,7 +3569,6 @@ namespace Daphne
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<string> genes_guid_ref { get; set; }
-        public string diff_scheme_guid_ref { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme
@@ -3526,11 +3585,9 @@ namespace Daphne
             }
         }
 
-        // Guid for ConfigTransitionDriver that drives cell death
         // ConfigTransitionDriver contains ConfigTransitionDriverElement
         // ConfigTransitionDriverElement contains information about 
         //      signaling molecule that drives cell death and alphas and betas
-        public string death_driver_guid_ref { get; set; }
         private ConfigTransitionDriver _death_driver;
         public ConfigTransitionDriver death_driver
         {
@@ -3545,9 +3602,6 @@ namespace Daphne
                 OnPropertyChanged("death_driver");
             }
         }
-
-        // Guid for ConfigTransitionDriver that drives cell division
-        public string div_driver_guid_ref { get; set; }
 
         private ConfigTransitionDriver _div_driver;
         public ConfigTransitionDriver div_driver 
@@ -4250,6 +4304,8 @@ namespace Daphne
         {
             get { return ecmProbe; }
         }
+
+        [JsonIgnore]
         public Dictionary<string, ReportECM> ecm_probe_dict;
 
         private int _number;

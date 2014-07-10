@@ -328,11 +328,12 @@
                           CanDocumentWindowsRaft="True"
                           AreDocumentWindowsDestroyedOnClose="False"
                           UseHostedAutoHidePopups="False"
+                          AutomationProperties.AutomationId="DaphneDockSite"
                           >            
 
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 <!-- Sim Config Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
                     <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Simulation Configuration" />
                 </docking:ToolWindowContainer>
 

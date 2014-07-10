@@ -144,7 +144,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -274,7 +274,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -558,7 +558,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -643,7 +643,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -733,7 +733,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -742,24 +742,26 @@ namespace Daphne
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell 7 state", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", protocol);
+
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
@@ -844,33 +846,33 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 100;
 
-            // Add differentiatior
+            // Add differentiator
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("GC B cell", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            diff_scheme_guid = findDiffSchemeGuid("GC B cell", protocol);
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
@@ -943,7 +945,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -1019,7 +1021,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             } 
             

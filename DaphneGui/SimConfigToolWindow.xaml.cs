@@ -63,10 +63,9 @@ namespace DaphneGui
             {
                 //guid to object changes
                 ConfigCell cell_to_clone = er.cells.First();
-                cp.Cell = cell_to_clone.Clone(true);
+
+                cp.Cell = cell_to_clone.Clone(false);
                 cp.cellpopulation_name = cp.Cell.CellName;
-                //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
-                //cp.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
             }
             else
             {
@@ -516,7 +515,7 @@ namespace DaphneGui
             
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
 
-            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
+            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(MainWindow.SOP.Protocol);
             gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
@@ -534,11 +533,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                     return;
 
-                foreach (string reacguid in MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.ToList())
+                foreach (ConfigReaction cr in MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.ToList())
                 {
-                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid].HasMolecule(cmp.molecule.entity_guid))
+                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[cr.entity_guid].HasMolecule(cmp.molecule.entity_guid))
                     {
-                        MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
+                        MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(cr);
                     }
                 }
 
@@ -697,13 +696,13 @@ namespace DaphneGui
         {
             bool needRefresh = false;
 
-                  foreach (var item in lvAvailableReacs.SelectedItems)
+            foreach (var item in lvAvailableReacs.SelectedItems)
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (!MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(reac.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(reac) == false)
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
                 }
             }
@@ -721,9 +720,9 @@ namespace DaphneGui
 
             string guid = (string)lvEcsReactions.SelectedValue;
             ConfigReaction grt = MainWindow.SOP.Protocol.entity_repository.reactions_dict[guid];
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(grt.entity_guid))
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(grt))
             {
-                MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(grt.entity_guid);
+                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(grt);
             }
         }
 
@@ -1104,9 +1103,9 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                    if (cc.membrane.Reactions.Contains(cr) == false)
                     {
-                        cc.membrane.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.membrane.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1153,9 +1152,9 @@ namespace DaphneGui
                 if (cc != null && cr != null)
                 {
                     //Add to reactions list only if the cell does not already contain this reaction
-                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid))
+                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
                     {
-                        cc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.cytosol.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1197,21 +1196,19 @@ namespace DaphneGui
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
             //added 1/10/14
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }            
 
@@ -1257,22 +1254,20 @@ namespace DaphneGui
             
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
 
             //added 1/10/14
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule.entity_guid))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
 
@@ -1306,12 +1301,15 @@ namespace DaphneGui
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             int nIndex = MembReacListBox.SelectedIndex;
+
             if (nIndex >= 0)
             {
                 string guid = (string)MembReacListBox.SelectedValue;
-                if (cell.membrane.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = cell.membrane.GetReaction(guid);
+
+                if (cr != null)
                 {
-                    cell.membrane.reactions_guid_ref.Remove(guid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
         }
@@ -1323,9 +1321,11 @@ namespace DaphneGui
             if (nIndex >= 0)
             {
                 string guid = (string)CytosolReacListBox.SelectedValue;
-                if (cell.cytosol.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = cell.cytosol.GetReaction(guid);
+
+                if (cr != null)
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(guid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
         }
@@ -1687,7 +1687,9 @@ namespace DaphneGui
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                {
                     cp.cellpopulation_name = new_cell_name;
+                }
             }
 
         }
@@ -2272,7 +2274,12 @@ namespace DaphneGui
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
-                cc.cytosol.reactions_guid_ref.Add(rguid);
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
+                {
+                    ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
+
+                    cc.cytosol.Reactions.Add(cr.Clone(true));
+                }
             }
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
@@ -2672,7 +2679,7 @@ namespace DaphneGui
             }
 
             //Get the diff_scheme using the guid
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
 
             //EPIGENETIC MAP SECTION
             EpigeneticMapGrid.DataContext = diff_scheme;
@@ -2981,9 +2988,6 @@ namespace DaphneGui
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
-
-            //if (cell.diff_scheme_guid_ref == "")
-            //    return;
 
             //if cell does not have a diff scheme, create one
             if (cell.diff_scheme == null)
@@ -3599,21 +3603,22 @@ namespace DaphneGui
             if (combo.SelectedIndex == 0)
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme_guid_ref = "";
                 combo.Text = "None";
             }
             else
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.entity_guid == cell.diff_scheme_guid_ref)
+                if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
+                {
                     return;
+                }
 
                 EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
                 if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme_guid_ref = diffNew.entity_guid;
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone();
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
@@ -3637,17 +3642,17 @@ namespace DaphneGui
                 if (cell.div_driver == null)
                 {
                     EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                    //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
-                    cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                    if (cell.div_driver_guid_ref == "")
+                    ConfigTransitionDriver driver = FindFirstDivDriver();
+
+                    if (driver == null)
                     {
                         MessageBox.Show("No division drivers are defined");
                         return;
                     }
 
-                    if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                    if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
                     {
-                        cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                        cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(true);
                     }
                 }
             }
@@ -3656,6 +3661,7 @@ namespace DaphneGui
         private ConfigTransitionDriver FindFirstDeathDriver()
         {
             ConfigTransitionDriver driver = null;
+
             foreach (ConfigTransitionDriver d in MainWindow.SOP.Protocol.entity_repository.transition_drivers)
             {
                 string name = d.Name;
@@ -3724,18 +3730,31 @@ namespace DaphneGui
             
             if (cell.death_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                cell.death_driver_guid_ref = FindFirstDeathDriver().entity_guid;
-                if (cell.death_driver_guid_ref == "")
-                {
-                    MessageBox.Show("No death drivers are defined");
-                    return;
-                }
-                if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
-                {
-                    cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
-                }
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDeathDriver();
+
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No death drivers are defined");
+                ////    return;
+                ////}
+
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.death_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic apoptosis";
+                string[] stateName = new string[] { "alive", "dead" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.death_driver = config_td;
             }
         }
 
@@ -3765,18 +3784,31 @@ namespace DaphneGui
 
             if (cell.div_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                if (cell.div_driver_guid_ref == "")
-                {
-                    MessageBox.Show("No division drivers are defined");
-                    return;
-                }
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDivDriver();
 
-                if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
-                {
-                    cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
-                }
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No division drivers are defined");
+                ////    return;
+                ////}
+
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+                
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic division";
+                string[] stateName = new string[] { "quiescent", "mitotic" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.div_driver = config_td;
             }
         }
 
@@ -3868,28 +3900,6 @@ namespace DaphneGui
             }
 
         }
-
-        //[ValueConversion(typeof(ConfigDiffScheme), typeof(ConfigDiffScheme))]
-        //public class diffSchemeValueConverter : IValueConverter
-        //{
-        //    public object Convert(object value, Type targetType,
-        //        object parameter, CultureInfo culture)
-        //    {
-        //        if (value == null)
-        //        {
-        //            return new ConfigDiffScheme() { Name = "None" };
-        //        }
-        //        return value;
-        //    }
-
-        //    public object ConvertBack(object value, Type targetType,
-        //        object parameter, CultureInfo culture)
-        //    {
-        //        ConfigDiffScheme val = value as ConfigDiffScheme;
-        //        if (val != null && val.Name == "None") return null;
-        //        return value;
-        //    }
-        //}
     }
 
     public class diffSchemeValueConverter : IValueConverter
