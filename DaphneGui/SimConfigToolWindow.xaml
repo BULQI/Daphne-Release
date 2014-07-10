@@ -2339,13 +2339,13 @@
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
                         
-                        <Expander.Resources>
+                        <!--<Expander.Resources>
                             <DataTemplate x:Key="ecsReacListItemTemplate">
                                 <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
                                  </TextBlock>
                             </DataTemplate>
-                        </Expander.Resources>
+                        </Expander.Resources>-->
 
                         <StackPanel>
                             <!-- Reactions -->
@@ -2363,7 +2363,7 @@
                             </StackPanel>
                             
                             <ListView x:Name="lvEcsReactions" 
-                                      ItemsSource="{Binding Path=scenario.environment.ecs.reactions_guid_ref}"
+                                      ItemsSource="{Binding Path=scenario.environment.ecs.Reactions}"
                                       SelectedIndex="-1"
                                 >
                                 
@@ -2386,9 +2386,7 @@
                                         <GridViewColumn Width="80" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView},
-                                                            ConverterCulture='de-DE'}">
+                                                    <TextBlock Text="{Binding rate_const, StringFormat=G5}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
@@ -2404,8 +2402,7 @@
 
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                    <TextBlock Text="{Binding TotalReactionString}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 
@@ -2559,7 +2556,7 @@
                                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                 <StackPanel Orientation="Vertical" >
-                                    <StackPanel.Resources>
+                                    <!--<StackPanel.Resources>
                                         <DataTemplate x:Key="ecsReacListItemTemplate">
                                             <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
                                                             ConverterParameter={StaticResource ecmReactionsListView}}">
@@ -2567,7 +2564,7 @@
                                         </DataTemplate>
                                         
                                         
-                                    </StackPanel.Resources>
+                                    </StackPanel.Resources>-->
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
@@ -3898,13 +3895,8 @@
                                             <StackPanel.Resources>
                                                 <DataTemplate x:Key="cellReacListItemTemplate">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Width="40" MinWidth="40" Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv}, StringFormat={}{0:#.00},
-                                                                ConverterParameter={StaticResource ecmReactionsListView}, ConverterCulture='de-DE'}">
-                                                        </TextBlock>
-                                                        
-                                                        <TextBlock Margin="10,0" Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},  
-                                                                ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                        </TextBlock>
+                                                        <TextBlock Width="40" MinWidth="40" Text="{Binding rate_const, StringFormat=G5}" />
+                                                        <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </StackPanel.Resources>
@@ -3918,7 +3910,7 @@
                                                         </TabItem.Header>
                                                         <StackPanel Orientation="Vertical">
                                                             <ListBox x:Name="MembReacListBox" MinHeight="50" Height="100" 
-                                                             ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.reactions_guid_ref}"
+                                                             ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
                                                             </ListBox>
@@ -4002,7 +3994,7 @@
                                                         </TabItem.Header>
                                                         <StackPanel Orientation="Vertical" >                                                            
                                                             <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" 
-                                                             ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.reactions_guid_ref}"
+                                                             ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
                                                             </ListBox>
