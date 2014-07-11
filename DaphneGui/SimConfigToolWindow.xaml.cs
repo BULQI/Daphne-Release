@@ -718,11 +718,10 @@ namespace DaphneGui
             if (lvEcsReactions.SelectedIndex < 0)
                 return;
 
-            string guid = (string)lvEcsReactions.SelectedValue;
-            ConfigReaction grt = MainWindow.SOP.Protocol.entity_repository.reactions_dict[guid];
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(grt))
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(reac))
             {
-                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(grt);
+                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(reac);
             }
         }
 
@@ -1066,7 +1065,7 @@ namespace DaphneGui
         ////    }
         ////}
 
-        //REACTIONS EVENT HANDLERS        
+        //LIBRARY REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
@@ -1304,9 +1303,7 @@ namespace DaphneGui
 
             if (nIndex >= 0)
             {
-                string guid = (string)MembReacListBox.SelectedValue;
-                ConfigReaction cr = cell.membrane.GetReaction(guid);
-
+                ConfigReaction cr = (ConfigReaction)MembReacListBox.SelectedValue;
                 if (cr != null)
                 {
                     cell.membrane.Reactions.Remove(cr);
@@ -1320,9 +1317,7 @@ namespace DaphneGui
             int nIndex = CytosolReacListBox.SelectedIndex;
             if (nIndex >= 0)
             {
-                string guid = (string)CytosolReacListBox.SelectedValue;
-                ConfigReaction cr = cell.cytosol.GetReaction(guid);
-
+                ConfigReaction cr = (ConfigReaction)CytosolReacListBox.SelectedValue;
                 if (cr != null)
                 {
                     cell.cytosol.Reactions.Remove(cr);
