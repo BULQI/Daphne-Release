@@ -2865,6 +2865,8 @@ namespace Daphne
         public Dictionary<string, ConfigMolecularPopulation> molpops_dict;
         [JsonIgnore]
         public Dictionary<string, ConfigMolecule> molecules_dict;  //key=molecule_guid(string), value=ConfigMolecule
+        [JsonIgnore]
+        public Dictionary<string, ConfigReaction> reactions_dict;
 
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> Reactions
@@ -2881,6 +2883,7 @@ namespace Daphne
                 }
             }
         }
+
         public ObservableCollection<string> reaction_complexes_guid_ref { get; set; }
 
         public ConfigCompartment()
@@ -2890,6 +2893,7 @@ namespace Daphne
             reaction_complexes_guid_ref = new ObservableCollection<string>();
             molpops_dict = new Dictionary<string, ConfigMolecularPopulation>();
             molecules_dict = new Dictionary<string, ConfigMolecule>();
+            reactions_dict = new Dictionary<string, ConfigReaction>();
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
             _reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
@@ -2897,12 +2901,34 @@ namespace Daphne
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReaction cr = nn as ConfigReaction;
+
+                    if (reactions_dict.ContainsKey(cr.entity_guid) == false)
+                    {
+                        reactions_dict.Add(cr.entity_guid, cr);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReaction cr = dd as ConfigReaction;
+
+                    if (reactions_dict.ContainsKey(cr.entity_guid) == true)
+                    {
+                        reactions_dict.Remove(cr.entity_guid);
+                    }
+                }
+            }
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -2940,6 +2966,7 @@ namespace Daphne
 
             OnPropertyChanged("molpops");            
         }
+
         /// <summary>
         /// get a reaction with a specified guid
         /// </summary>
@@ -2947,12 +2974,9 @@ namespace Daphne
         /// <returns>null if unsuccessful, the reaction otherwise</returns>
         public ConfigReaction GetReaction(string guid)
         {
-            foreach (ConfigReaction cr in Reactions)
+            if (reactions_dict.ContainsKey(guid) == true)
             {
-                if (cr.entity_guid == guid)
-                {
-                    return cr;
-                }
+                return reactions_dict[guid];
             }
             return null;
         }
