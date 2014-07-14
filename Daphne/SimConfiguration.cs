@@ -2299,7 +2299,7 @@ namespace Daphne
         /// </summary>
         /// <param name="protocol">null to create a literal copy</param>
         /// <returns></returns>
-        public ConfigMolecule Clone(Protocol protocol, bool identical = false)
+        public ConfigMolecule Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -2307,7 +2307,7 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
 
-            if (protocol != null && identical == false)
+            if (protocol != null)
             {
                 Guid id = Guid.NewGuid();
 
