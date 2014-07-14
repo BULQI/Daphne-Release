@@ -2909,8 +2909,7 @@ namespace DaphneGui
         {
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
-            DataGridRowHeader header = new DataGridRowHeader();
-            DataTemplate rowHeaderTemplate = new DataTemplate();
+            DataTemplate HeaderTemplate = new DataTemplate();
 
             CollectionViewSource cvs1 = new CollectionViewSource();
             cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
@@ -2932,9 +2931,8 @@ namespace DaphneGui
 
             addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
 
-            rowHeaderTemplate.VisualTree = addGenesCombo;
-            header.ContentTemplate = rowHeaderTemplate;
-            editor_col.Header = header;
+            HeaderTemplate.VisualTree = addGenesCombo;
+            editor_col.HeaderTemplate = HeaderTemplate;
 
             return editor_col;
         }
