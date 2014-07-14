@@ -15,6 +15,10 @@
 
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+        <CollectionViewSource x:Key="newBoundaryMoleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="boundaryMoleculesListView_Filter"
+                                  />
         <Style TargetType="ComboBox">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -1535,7 +1539,7 @@
                                 <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
                                                     DisplayMemberPath="Name"                                                    
-                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="entity_guid"
                                                     SelectionChanged="memb_molecule_combo_box_SelectionChanged"
                                                     GotFocus="memb_molecule_combo_box_GotFocus"
@@ -1618,7 +1622,7 @@
                                 <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                         ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
                                         DisplayMemberPath="Name"            
-                                        SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="entity_guid"
                                         SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
                                         GotFocus="cyto_molecule_combo_box_GotFocus"
