@@ -269,6 +269,8 @@ namespace DaphneGui
         private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigMolecule mol = e.Item as ConfigMolecule;
+            e.Accepted = true;
+
             if (mol != null)
             {
                 // Filter out mol if membrane bound 
