@@ -3138,7 +3138,7 @@
                                             <DataGridTemplateColumn Header="molecular population" Width="125">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule.entity_guid, Converter={StaticResource MolGUIDtoMolNameConv},
                                                             ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
@@ -3208,7 +3208,7 @@
                                             <DataGridTemplateColumn Header="molecular population" Width="120">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule.entity_guid, Converter={StaticResource MolGUIDtoMolNameConv},
                                                             ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
