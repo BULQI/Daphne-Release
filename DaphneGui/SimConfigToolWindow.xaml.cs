@@ -39,8 +39,8 @@ namespace DaphneGui
         {
             InitializeComponent();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
-            cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
+            //CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
+            //cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
             //ButtonEdit.Click += EventFactory.Button_Edit_Click;
 
         }
@@ -513,18 +513,24 @@ namespace DaphneGui
                 return;
             }
             
+            //add a moleculepop that is not already added
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-
-            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
-            gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            if (cvs == null) return;
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                gmp.molecule = item.Clone(null);
+                gmp.Name = item.Name;
+                break;
+            }
+            if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
-
-            //ecm_molecule_combo_box.SelectionChanged += new SelectionChangedEventHandler(molecule_combo_box_SelectionChanged);
-
         }
+
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             int index = lbEcsMolPops.SelectedIndex;
@@ -1050,24 +1056,7 @@ namespace DaphneGui
                 dgLibMolecules.SelectedIndex = -1;
 
         }
-
-        ////private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
-        ////{
-        ////    ConfigMolecule mol = e.Item as ConfigMolecule;
-        ////    if (mol != null)
-        ////    {
-        ////        // Filter out mol if membrane bound 
-        ////        if (mol.molecule_location == MoleculeLocation.Boundary)
-        ////        {
-        ////            e.Accepted = true;
-        ////        }
-        ////        else
-        ////        {
-        ////            e.Accepted = false;
-        ////        }
-        ////    }
-        ////}
-
+        
         //LIBRARY REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
@@ -1170,19 +1159,39 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            gmp.Name = "NewMP";
-            gmp.mp_dist_name = "New distribution";
-            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mp_render_on = true;
-            gmp.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             if (cell == null)
-                return; 
+                return;
 
-            cell.membrane.molpops.Add(gmp);
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            cmp.Name = "NewMP";
+            cmp.mp_dist_name = "New distribution";
+            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            cmp.mp_render_on = true;
+            cmp.mp_distribution = new MolPopHomogeneousLevel();
+            cmp.molecule = null;
+
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            if (mol_list != null)
+            {
+                foreach (ConfigMolecule item in cvs.View)
+                {
+                    if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                    cmp.molecule = item;
+                    break;
+                }
+                if (cmp.molecule == null) return;
+            }
+            else
+            {
+                return;
+            }
+
+            cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+
         }
 
         private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -1223,24 +1232,29 @@ namespace DaphneGui
 
         private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+                return; 
 
-            
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
             cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
+            cmp.molecule = null;
+            //cmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
 
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            if (cell == null)
-                return; 
-
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                cmp.molecule = item;
+                break;
+            }
+            if (cmp.molecule == null) return;
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-
-            //cytosolMolPopDetailsTemplate
-            //cyto_molecule_combo_box.SelectedIndex = 0;
         }
 
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -1293,10 +1307,57 @@ namespace DaphneGui
 
         private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach(ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
         }
+
+        private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
+        }
+
 
         private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
         }
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
@@ -2437,6 +2498,16 @@ namespace DaphneGui
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
+
+            if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
+            {
+                ConfigMolecule newmol = (ConfigMolecule)e.AddedItems[0];
+                ConfigMolecule oldmol = (ConfigMolecule)e.RemovedItems[0];
+
+                if (newmol.entity_guid == oldmol.entity_guid)
+                    return;
+
+            }
 
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
 

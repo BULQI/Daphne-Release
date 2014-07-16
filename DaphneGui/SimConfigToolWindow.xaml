@@ -14,7 +14,20 @@
 
 
     <docking:ToolWindow.Resources>
-        <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+        <CollectionViewSource x:Key="CytosolBulkMoleculesListView"  
+                              Source="{Binding Path=entity_repository.molecules}" 
+                              Filter="CytosolMoleculesListView_Filter"
+                              />
+        
+        <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
+                              Source="{Binding Path=entity_repository.molecules}" 
+                              Filter="EcsMoleculesListView_Filter"
+                              />
+        
+        <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"
+                                  Filter="AvailableBoundaryMoleculesListView_Filter"
+                                  />
         <Style TargetType="ComboBox">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -157,10 +170,6 @@
             <CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   
-                                  />
-            <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"
-                                  Filter="boundaryMoleculesListView_Filter"
                                   />
             <CollectionViewSource x:Key="cytoGenesListView"  
                                   Source="{Binding Path=entity_repository.genes}"/>
@@ -1534,8 +1543,9 @@
 
                                 <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
                                                     ItemsSource="{Binding Source={StaticResource boundaryMoleculesListView}}"
-                                                    DisplayMemberPath="Name"                                                    
-                                                    SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                                    IsSynchronizedWithCurrentItem="True"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="entity_guid"
                                                     SelectionChanged="memb_molecule_combo_box_SelectionChanged"
                                                     GotFocus="memb_molecule_combo_box_GotFocus"
@@ -1616,9 +1626,9 @@
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                 <ComboBox  x:Name="cyto_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                        ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
+                                        ItemsSource="{Binding Source={StaticResource CytosolBulkMoleculesListView}}"
                                         DisplayMemberPath="Name"            
-                                        SelectedValue="{Binding Path=molecule_guid_ref, UpdateSourceTrigger=Explicit}"
+                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="entity_guid"
                                         SelectionChanged="cyto_molecule_combo_box_SelectionChanged"
                                         GotFocus="cyto_molecule_combo_box_GotFocus"
@@ -1762,7 +1772,7 @@
                                 <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                 <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    ItemsSource="{Binding Source={StaticResource newBulkMoleculesListView}}"
+                                                    ItemsSource="{Binding Source={StaticResource EcsBulkMoleculesListView}}"
                                                     DisplayMemberPath="Name"
                                                     SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                     SelectedValuePath="entity_guid"
@@ -2303,6 +2313,8 @@
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
                                     ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
+                                    SelectionChanged="EcsMolPopsListBox_SelectionChanged"
+                                     IsSynchronizedWithCurrentItem="True"
                                     SelectedIndex="-1"
                             />
 
@@ -3794,6 +3806,7 @@
                                                         <StackPanel Orientation="Vertical">
                                                             <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                                 ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.membrane.molpops}" 
+                                                                IsSynchronizedWithCurrentItem="True"     
                                                                 DisplayMemberPath="Name"
                                                                 SelectedIndex="0" 
                                                                      SelectionChanged="CellMembraneMolPopsListBox_SelectionChanged"/>
@@ -3819,9 +3832,10 @@
                                                         <StackPanel Orientation="Vertical" >
                                                             <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                                     ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.molpops}" 
-                                                                    DisplayMemberPath="Name"                                                    
+                                                                    DisplayMemberPath="Name"
+                                                                    IsSynchronizedWithCurrentItem="True"
                                                                     SelectedIndex="-1"
-                                                                     SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"/>
+                                                                    SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"/>
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                                 <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
                                                                 <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
