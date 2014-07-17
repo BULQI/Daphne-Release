@@ -2082,40 +2082,6 @@ namespace DaphneGui
             x++;
         }
 
-        private void MolPopDistributionTypeComboBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
-            if (cmp == null)
-                return;
-
-            ComboBox cb = sender as ComboBox;
-            int index = (int)MolPopDistributionType.Linear;
-            ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
-
-            cbi.IsEnabled = true;
-            if (comboToroidal.SelectedIndex > 0)
-            //if (cbToroidal.IsChecked == true)
-            {
-                cbi.IsEnabled = false;
-            }
-            else if (cmp == null)
-            {
-                cbi.IsEnabled = false;
-            }
-            else if (cmp.mp_distribution.GetType() == typeof(MolPopLinear))
-            {
-                MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
-                if (mpl.boundary_face == BoundaryFace.None)
-                {
-                    cbi.IsEnabled = false;
-                }
-            }
-
-            index = (int)MolPopDistributionType.Explicit;
-            cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
-            cbi.IsEnabled = false;
-        }
-
         private void RemoveCellButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = CellsListBox.SelectedIndex;
