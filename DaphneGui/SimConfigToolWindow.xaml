@@ -817,8 +817,18 @@
                     <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
                                            SelectedValue="{Binding Path=boundary_face, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                           SelectionChanged="cbBoundFace_SelectionChanged">                        
-                    </ComboBox>
+                                           SelectionChanged="cbBoundFace_SelectionChanged">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="None">
+                                                <Setter Property="Visibility" Value="Collapsed">
+                                            </Setter>
+                                        </DataTrigger> 
+                                    </Style.Triggers> 
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                 </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
                         <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
@@ -1804,35 +1814,27 @@
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                         SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        GotFocus="MolPopDistributionTypeComboBox_GotFocus"
                                         MinWidth="120">
-
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">                                            
-                                            <Style.Triggers>                                                
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="0" />
-                                                        <Condition Binding="{Binding ElementName=MolPopDistributionTypeComboBox, Path=SelectedIndex}" Value="1"/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property="ComboBox.SelectedIndex" Value="0"/>
-                                                </MultiDataTrigger>
-                                                
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
-                                    
                                     <ComboBox.ItemContainerStyle>
                                         <Style TargetType="{x:Type ComboBoxItem}">
                                             <Style.Triggers>
+                                                <!--"Explicit" can only set programmatically, not selectable by user!-->
+                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Explicit">
+                                                    <Setter Property="IsEnabled" Value="False">
+                                                    </Setter>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Linear">
+                                                    <Setter Property="IsEnabled" Value="False">
+                                                    </Setter>
+                                                </DataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
-                                                        <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
-                                                        <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
+                                                        <Condition Binding="{Binding ElementName=comboToroidal, Path=SelectedIndex}" Value="0" />
+                                                        <Condition Binding="{Binding Content, RelativeSource={RelativeSource self}}" Value="Linear" />
                                                     </MultiDataTrigger.Conditions>
-                                                    <Setter Property="IsEnabled" Value="False" />
+                                                    <Setter Property="IsEnabled" Value="True">
+                                                    </Setter>
                                                 </MultiDataTrigger>
-                                                
                                             </Style.Triggers>
                                         </Style>
                                     </ComboBox.ItemContainerStyle>
