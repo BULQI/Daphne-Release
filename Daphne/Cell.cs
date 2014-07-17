@@ -295,8 +295,8 @@ namespace Daphne
 
             CellPopulation cp = Simulation.ProtocolHandle.scenario.GetCellPopulation(daughter.Population_id);
 
-            configComp[0] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.cell_guid_ref].cytosol;
-            configComp[1] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.cell_guid_ref].membrane;
+            configComp[0] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
+            configComp[1] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
 
             bulk_reacs[0] = Simulation.ProtocolHandle.GetReactions(configComp[0], false);
             bulk_reacs[1] = Simulation.ProtocolHandle.GetReactions(configComp[1], false);

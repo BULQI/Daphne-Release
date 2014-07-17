@@ -24,6 +24,7 @@ using Workbench;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -38,8 +39,8 @@ namespace DaphneGui
         {
             InitializeComponent();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
-            cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
+            //CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
+            //cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
             //ButtonEdit.Click += EventFactory.Button_Edit_Click;
 
         }
@@ -53,13 +54,18 @@ namespace DaphneGui
             // Some relevant CellPopulation constructor defaults: 
             //      number = 1
             //      no instantiation of cellPopDist
-            CellPopulation cs = new CellPopulation();
+            CellPopulation cp = new CellPopulation();
+
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
 
             // Default cell type and name to first entry in the cell repository
             if (MainWindow.SOP.Protocol.entity_repository.cells.Count > 0)
             {
-                cs.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells.First().entity_guid;
-                cs.cellpopulation_name = MainWindow.SOP.Protocol.entity_repository.cells.First().CellName;
+                //guid to object changes
+                ConfigCell cell_to_clone = er.cells.First();
+
+                cp.Cell = cell_to_clone.Clone(false);
+                cp.cellpopulation_name = cp.Cell.CellName;
             }
             else
             {
@@ -70,14 +76,16 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_z };
-            double minDisSquared = 2*MainWindow.SOP.Protocol.entity_repository.cells_dict[cs.cell_guid_ref].CellRadius;
+            //guid to object changes
+            //double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
+            double minDisSquared = 2 * cp.Cell.CellRadius;
             minDisSquared *= minDisSquared;
 
             // Default is uniform probability distribution
-            cs.cellPopDist = new CellPopUniform(extents, minDisSquared, cs);
+            cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
-            cs.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cs);
+            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
@@ -505,15 +513,24 @@ namespace DaphneGui
                 return;
             }
             
+            //add a moleculepop that is not already added
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-
-            gmp.molecule_guid_ref = MainWindow.SOP.Protocol.entity_repository.molecules.First().entity_guid;
-            gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            if (cvs == null) return;
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                gmp.molecule = item.Clone(null);
+                gmp.Name = item.Name;
+                break;
+            }
+            if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
+
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             int index = lbEcsMolPops.SelectedIndex;
@@ -525,11 +542,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                     return;
 
-                foreach (string reacguid in MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.ToList())
+                foreach (ConfigReaction cr in MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.ToList())
                 {
-                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid].HasMolecule(cmp.molecule_guid_ref))
+                    if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[cr.entity_guid].HasMolecule(cmp.molecule.entity_guid))
                     {
-                        MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(reacguid);
+                        MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(cr);
                     }
                 }
 
@@ -654,7 +671,7 @@ namespace DaphneGui
         {
             foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                if (molpop.molecule_guid_ref == molguid)
+                if (molpop.molecule.entity_guid == molguid)
                     return true;
             }
             return false;
@@ -664,7 +681,7 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (MembraneHasMolecule(cell, molguid))
                     return true;
             }
@@ -676,7 +693,7 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.cell_guid_ref];
+                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (CytosolHasMolecule(cell, molguid))
                     return true;
             }
@@ -688,13 +705,13 @@ namespace DaphneGui
         {
             bool needRefresh = false;
 
-                  foreach (var item in lvAvailableReacs.SelectedItems)
+            foreach (var item in lvAvailableReacs.SelectedItems)
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (!MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(reac.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_dict.ContainsKey(reac.entity_guid) == false)
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
                 }
             }
@@ -710,11 +727,10 @@ namespace DaphneGui
             if (lvEcsReactions.SelectedIndex < 0)
                 return;
 
-            string guid = (string)lvEcsReactions.SelectedValue;
-            ConfigReaction grt = MainWindow.SOP.Protocol.entity_repository.reactions_dict[guid];
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(grt.entity_guid))
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_dict.ContainsKey(reac.entity_guid))
             {
-                MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Remove(grt.entity_guid);
+                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(reac);
             }
         }
 
@@ -1040,25 +1056,8 @@ namespace DaphneGui
                 dgLibMolecules.SelectedIndex = -1;
 
         }
-
-        ////private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
-        ////{
-        ////    ConfigMolecule mol = e.Item as ConfigMolecule;
-        ////    if (mol != null)
-        ////    {
-        ////        // Filter out mol if membrane bound 
-        ////        if (mol.molecule_location == MoleculeLocation.Boundary)
-        ////        {
-        ////            e.Accepted = true;
-        ////        }
-        ////        else
-        ////        {
-        ////            e.Accepted = false;
-        ////        }
-        ////    }
-        ////}
-
-        //REACTIONS EVENT HANDLERS        
+        
+        //LIBRARY REACTIONS EVENT HANDLERS        
         private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         {
             ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
@@ -1095,9 +1094,9 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (!cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+                    if (cc.membrane.Reactions.Contains(cr) == false)
                     {
-                        cc.membrane.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.membrane.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1114,7 +1113,7 @@ namespace DaphneGui
         {
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
-                if (molguid == molpop.molecule_guid_ref)
+                if (molguid == molpop.molecule.entity_guid)
                 {
                     return true;
                 }
@@ -1125,7 +1124,7 @@ namespace DaphneGui
         {
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
-                if (molguid == molpop.molecule_guid_ref)
+                if (molguid == molpop.molecule.entity_guid)
                 {
                     return true;
                 }
@@ -1144,9 +1143,9 @@ namespace DaphneGui
                 if (cc != null && cr != null)
                 {
                     //Add to reactions list only if the cell does not already contain this reaction
-                    if (!cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid))
+                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
                     {
-                        cc.cytosol.reactions_guid_ref.Add(cr.entity_guid);
+                        cc.cytosol.Reactions.Add(cr.Clone(true));
 
                         needRefresh = true;
                     }
@@ -1160,19 +1159,39 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            gmp.Name = "NewMP";
-            gmp.mp_dist_name = "New distribution";
-            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            gmp.mp_render_on = true;
-            gmp.mp_distribution = new MolPopHomogeneousLevel();
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             if (cell == null)
-                return; 
+                return;
 
-            cell.membrane.molpops.Add(gmp);
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            cmp.Name = "NewMP";
+            cmp.mp_dist_name = "New distribution";
+            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            cmp.mp_render_on = true;
+            cmp.mp_distribution = new MolPopHomogeneousLevel();
+            cmp.molecule = null;
+
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            if (mol_list != null)
+            {
+                foreach (ConfigMolecule item in cvs.View)
+                {
+                    if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                    cmp.molecule = item;
+                    break;
+                }
+                if (cmp.molecule == null) return;
+            }
+            else
+            {
+                return;
+            }
+
+            cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
+
         }
 
         private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -1188,21 +1207,19 @@ namespace DaphneGui
 
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
             //added 1/10/14
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }            
 
@@ -1215,24 +1232,29 @@ namespace DaphneGui
 
         private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
         {
-            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            if (cell == null)
+                return; 
 
-            
+            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
             cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
+            cmp.molecule = null;
+            //cmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
 
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            if (cell == null)
-                return; 
-
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                cmp.molecule = item;
+                break;
+            }
+            if (cmp.molecule == null) return;
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-
-            //cytosolMolPopDetailsTemplate
-            //cyto_molecule_combo_box.SelectedIndex = 0;
         }
 
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
@@ -1248,22 +1270,20 @@ namespace DaphneGui
             
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
 
-            foreach (string reacguid in cell.cytosol.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(reacguid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
 
             //added 1/10/14
-            foreach (string reacguid in cell.membrane.reactions_guid_ref.ToList())
+            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
-                ConfigReaction reac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reacguid];
-                if (reac.HasMolecule(cmp.molecule_guid_ref))
+                if (cr.HasMolecule(cmp.molecule.entity_guid))
                 {
-                    cell.membrane.reactions_guid_ref.Remove(reacguid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
 
@@ -1287,22 +1307,70 @@ namespace DaphneGui
 
         private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach(ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
         }
+
+        private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
+        }
+
 
         private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
         }
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             int nIndex = MembReacListBox.SelectedIndex;
+
             if (nIndex >= 0)
             {
-                string guid = (string)MembReacListBox.SelectedValue;
-                if (cell.membrane.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = (ConfigReaction)MembReacListBox.SelectedValue;
+                if (cr != null)
                 {
-                    cell.membrane.reactions_guid_ref.Remove(guid);
+                    cell.membrane.Reactions.Remove(cr);
                 }
             }
         }
@@ -1313,10 +1381,10 @@ namespace DaphneGui
             int nIndex = CytosolReacListBox.SelectedIndex;
             if (nIndex >= 0)
             {
-                string guid = (string)CytosolReacListBox.SelectedValue;
-                if (cell.cytosol.reactions_guid_ref.Contains(guid))
+                ConfigReaction cr = (ConfigReaction)CytosolReacListBox.SelectedValue;
+                if (cr != null)
                 {
-                    cell.cytosol.reactions_guid_ref.Remove(guid);
+                    cell.cytosol.Reactions.Remove(cr);
                 }
             }
         }
@@ -1477,7 +1545,7 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.scenario.environment.extent_z };
-            double minDisSquared = 2*MainWindow.SOP.Protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
 
             MessageBoxResult res;
@@ -1662,17 +1730,26 @@ namespace DaphneGui
 
             string curr_cell_pop_name = cp.cellpopulation_name;
             string curr_cell_type_guid = "";
-            curr_cell_type_guid = cp.cell_guid_ref;
+            curr_cell_type_guid = cp.Cell.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
-            cp.cell_guid_ref = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
+            //guid to object changes
+            //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
+            ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
 
-            string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
-            if (curr_cell_type_guid != cp.cell_guid_ref) // && curr_cell_pop_name.Length == 0)
-                cp.cellpopulation_name = new_cell_name;
+            if (cell_to_clone.entity_guid != curr_cell_type_guid)
+            {
+                cp.Cell = cell_to_clone.Clone(true);
+
+                string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
+                if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                {
+                    cp.cellpopulation_name = new_cell_name;
+                }
+            }
 
         }
 
@@ -1911,6 +1988,10 @@ namespace DaphneGui
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             CheckBox cb = e.OriginalSource as CheckBox;
+
+            if (cb.CommandParameter == null)
+                return;
+
             string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
@@ -2077,7 +2158,7 @@ namespace DaphneGui
                 return;
             }
 
-            ConfigCell cellNew = cell.Clone();
+            ConfigCell cellNew = cell.Clone(false);
             
             //Generate a new cell name
             cellNew.CellName = GenerateNewCellName(cell, "_Copy");
@@ -2139,11 +2220,13 @@ namespace DaphneGui
             int n = ColorComboBox.SelectedIndex;
         }
 
-        private void molecule_combo_box2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
+
+            //cb.SelectionChanged -= ecs_molpop_molecule_combo_box_SelectionChanged;
 
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
@@ -2152,17 +2235,17 @@ namespace DaphneGui
 
             string curr_mol_pop_name = molpop.Name;
             string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule_guid_ref;
+            curr_mol_guid = molpop.molecule.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.entity_guid;
+            molpop.molecule = mol.Clone(null);
 
             string new_mol_name = mol.Name;
-            if (curr_mol_guid != molpop.molecule_guid_ref)
+            if (curr_mol_guid != molpop.molecule.entity_guid)
                 molpop.Name = new_mol_name;
 
             CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
@@ -2252,13 +2335,19 @@ namespace DaphneGui
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
-                cc.cytosol.reactions_guid_ref.Add(rguid);
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
+                {
+                    ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
+
+                    cc.cytosol.Reactions.Add(cr.Clone(true));
+                }
             }
             MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
 
             CellPopulation cp = new CellPopulation();
-            cp.cell_guid_ref = cc.entity_guid;
+            cp.Cell = cc;
+            //cp.Cell.entity_guid = cc.entity_guid;
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
@@ -2266,7 +2355,7 @@ namespace DaphneGui
             double[] extents = new double[3] { MainWindow.SOP.Protocol.rc_scenario.environment.extent_x, 
                                                MainWindow.SOP.Protocol.rc_scenario.environment.extent_y, 
                                                MainWindow.SOP.Protocol.rc_scenario.environment.extent_z };
-            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
             cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
@@ -2410,6 +2499,16 @@ namespace DaphneGui
             if (cb == null)
                 return;
 
+            if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
+            {
+                ConfigMolecule newmol = (ConfigMolecule)e.AddedItems[0];
+                ConfigMolecule oldmol = (ConfigMolecule)e.RemovedItems[0];
+
+                if (newmol.entity_guid == oldmol.entity_guid)
+                    return;
+
+            }
+
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
 
             if (molpop == null)
@@ -2417,17 +2516,17 @@ namespace DaphneGui
 
             string curr_mol_pop_name = molpop.Name;
             string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule_guid_ref;
+            curr_mol_guid = molpop.molecule.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.entity_guid;
+            molpop.molecule = mol.Clone(null);
 
             string new_mol_name = mol.Name;
-            if (curr_mol_guid != molpop.molecule_guid_ref)
+            if (curr_mol_guid != molpop.molecule.entity_guid)
                 molpop.Name = new_mol_name;
 
             CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
@@ -2446,17 +2545,17 @@ namespace DaphneGui
 
             string curr_mol_pop_name = molpop.Name;
             string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule_guid_ref;
+            curr_mol_guid = molpop.molecule.entity_guid;
 
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule_guid_ref = mol.entity_guid;
+            molpop.molecule = mol.Clone(null);
 
             string new_mol_name = mol.Name;
-            if (curr_mol_guid != molpop.molecule_guid_ref)
+            if (curr_mol_guid != molpop.molecule.entity_guid)
                 molpop.Name = new_mol_name;
             
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
@@ -2473,6 +2572,12 @@ namespace DaphneGui
             ComboBox combo = sender as ComboBox;
             CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
         }
+
+        //private void ecm_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        //{
+        //    ComboBox combo = sender as ComboBox;
+        //    combo.SelectionChanged += new SelectionChangedEventHandler(ecs_molpop_molecule_combo_box_SelectionChanged);
+        //}
 
         private void btnRegenerateCellPositions_Click(object sender, RoutedEventArgs e)
         {
@@ -2651,7 +2756,7 @@ namespace DaphneGui
             }
 
             //Get the diff_scheme using the guid
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;   //er.diff_schemes_dict[cell.diff_scheme_guid_ref];
+            ConfigDiffScheme diff_scheme = cell.diff_scheme;
 
             //EPIGENETIC MAP SECTION
             EpigeneticMapGrid.DataContext = diff_scheme;
@@ -2731,7 +2836,7 @@ namespace DaphneGui
             DataTemplate cellTemplate = new DataTemplate();
 
             //SET UP A TEXTBLOCK ONLY
-            Binding bn = new Binding(string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count));
+            Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
             bn.Mode = BindingMode.TwoWay;
             bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
             MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
@@ -2759,11 +2864,14 @@ namespace DaphneGui
 
             //------ Use a composite collection to insert "None" item
             CompositeCollection coll = new CompositeCollection();
-            ComboBoxItem nullItem = new ComboBoxItem();
-            nullItem.IsEnabled = true;
-            nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            nullItem.Content = "None";
-            coll.Add(nullItem);
+            ConfigMolecularPopulation nullcmp = new ConfigMolecularPopulation(new ReportType());
+            nullcmp.Name = "None";
+            coll.Add(nullcmp);
+            //ComboBoxItem nullItem = new ComboBoxItem();
+            //nullItem.IsEnabled = true;
+            //nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+            //nullItem.Content = "None";
+            //coll.Add(nullItem);
             CollectionContainer cc = new CollectionContainer();
             cc.Collection = cell.cytosol.molpops;
             coll.Add(cc);
@@ -2774,9 +2882,9 @@ namespace DaphneGui
             comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
             comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
 
-            //NEED TO SOMEHOW CONVERT Driver_Mol.entity_grid to mol_pop!  Set up a converter and pass it the cytosol.
+            //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
             MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
-            string sText = string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count);
+            string sText = string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count);
             Binding b3 = new Binding(sText);
             b3.Mode = BindingMode.TwoWay;
             b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
@@ -2793,7 +2901,7 @@ namespace DaphneGui
 
             //This disables the expander if no driver molecule is selected
             DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
-            Binding bEnabled = new Binding(string.Format("elements[{0}].Driver_Mol.entity_guid", DiffRegGrid.Columns.Count));
+            Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
             bEnabled.Mode = BindingMode.OneWay;
             bEnabled.Converter = enabledConv;
 
@@ -2878,8 +2986,7 @@ namespace DaphneGui
         {
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
-            DataGridRowHeader header = new DataGridRowHeader();
-            DataTemplate rowHeaderTemplate = new DataTemplate();
+            DataTemplate HeaderTemplate = new DataTemplate();
 
             CollectionViewSource cvs1 = new CollectionViewSource();
             cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
@@ -2901,9 +3008,8 @@ namespace DaphneGui
 
             addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
 
-            rowHeaderTemplate.VisualTree = addGenesCombo;
-            header.ContentTemplate = rowHeaderTemplate;
-            editor_col.Header = header;
+            HeaderTemplate.VisualTree = addGenesCombo;
+            editor_col.HeaderTemplate = HeaderTemplate;
 
             return editor_col;
         }
@@ -2957,9 +3063,6 @@ namespace DaphneGui
             ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             if (cell == null)
                 return;
-
-            //if (cell.diff_scheme_guid_ref == "")
-            //    return;
 
             //if cell does not have a diff scheme, create one
             if (cell.diff_scheme == null)
@@ -3275,7 +3378,7 @@ namespace DaphneGui
 
             //    ConfigMolecularPopulation selMolPop = ((ConfigMolecularPopulation)(combo.SelectedItem));
 
-            //    driverRow.elements[ncol].Driver_Mol.entity_guid = selMolPop.molecule_guid_ref;
+            //    driverRow.elements[ncol].driver_mol_guid_ref = selMolPop.molecule_guid_ref;
             //}
 #endif
 
@@ -3575,21 +3678,22 @@ namespace DaphneGui
             if (combo.SelectedIndex == 0)
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme_guid_ref = "";
                 combo.Text = "None";
             }
             else
             {
                 ConfigDiffScheme diffNew = (ConfigDiffScheme)combo.SelectedItem;
 
-                if (diffNew.entity_guid == cell.diff_scheme_guid_ref)
+                if (cell.diff_scheme != null && diffNew.entity_guid == cell.diff_scheme.entity_guid)
+                {
                     return;
+                }
 
                 EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+
                 if (er.diff_schemes_dict.ContainsKey(diffNew.entity_guid) == true)
                 {
-                    cell.diff_scheme_guid_ref = diffNew.entity_guid;
-                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone();
+                    cell.diff_scheme = er.diff_schemes_dict[diffNew.entity_guid].Clone(true);
                 }
             }
             int nIndex = CellsListBox.SelectedIndex;
@@ -3613,17 +3717,17 @@ namespace DaphneGui
                 if (cell.div_driver == null)
                 {
                     EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                    //cell.div_driver_guid_ref = er.transition_drivers[3].driver_guid;
-                    cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                    if (cell.div_driver_guid_ref == "")
+                    ConfigTransitionDriver driver = FindFirstDivDriver();
+
+                    if (driver == null)
                     {
                         MessageBox.Show("No division drivers are defined");
                         return;
                     }
 
-                    if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
+                    if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
                     {
-                        cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
+                        cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(true);
                     }
                 }
             }
@@ -3632,6 +3736,7 @@ namespace DaphneGui
         private ConfigTransitionDriver FindFirstDeathDriver()
         {
             ConfigTransitionDriver driver = null;
+
             foreach (ConfigTransitionDriver d in MainWindow.SOP.Protocol.entity_repository.transition_drivers)
             {
                 string name = d.Name;
@@ -3700,18 +3805,31 @@ namespace DaphneGui
             
             if (cell.death_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                //cell.death_driver_guid_ref = er.transition_drivers[2].driver_guid;
-                cell.death_driver_guid_ref = FindFirstDeathDriver().entity_guid;
-                if (cell.death_driver_guid_ref == "")
-                {
-                    MessageBox.Show("No death drivers are defined");
-                    return;
-                }
-                if (er.transition_drivers_dict.ContainsKey(cell.death_driver_guid_ref) == true)
-                {
-                    cell.death_driver = er.transition_drivers_dict[cell.death_driver_guid_ref].Clone();
-                }
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDeathDriver();
+
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No death drivers are defined");
+                ////    return;
+                ////}
+
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.death_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic apoptosis";
+                string[] stateName = new string[] { "alive", "dead" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.death_driver = config_td;
             }
         }
 
@@ -3741,18 +3859,31 @@ namespace DaphneGui
 
             if (cell.div_driver == null)
             {
-                EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                cell.div_driver_guid_ref = FindFirstDivDriver().entity_guid;
-                if (cell.div_driver_guid_ref == "")
-                {
-                    MessageBox.Show("No division drivers are defined");
-                    return;
-                }
+                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+                ////ConfigTransitionDriver driver = FindFirstDivDriver();
 
-                if (er.transition_drivers_dict.ContainsKey(cell.div_driver_guid_ref) == true)
-                {
-                    cell.div_driver = er.transition_drivers_dict[cell.div_driver_guid_ref].Clone();
-                }
+                ////if (driver == null)
+                ////{
+                ////    MessageBox.Show("No division drivers are defined");
+                ////    return;
+                ////}
+
+                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+                ////{
+                ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+                ////}
+                
+                //I think this is what we want
+                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+                config_td.Name = "generic division";
+                string[] stateName = new string[] { "quiescent", "mitotic" };
+                string[,] signal = new string[,] { { "", "" }, { "", "" } };
+                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+                config_td.CurrentState = 0;
+                config_td.StateName = config_td.states[config_td.CurrentState];
+                cell.div_driver = config_td;
             }
         }
 
@@ -3806,7 +3937,7 @@ namespace DaphneGui
         {
             ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
-            if (mol_pop == null)
+            if (mol_pop == null || mol_pop.mp_distribution == null)
                 return;
 
             if (mol_pop.mp_distribution.mp_distribution_type != MolPopDistributionType.Gaussian)
@@ -3844,8 +3975,26 @@ namespace DaphneGui
             }
 
         }
+    }
 
-    }    
+    public class diffSchemeValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ConfigDiffScheme val = value as ConfigDiffScheme;
+            if (val != null && val.Name == "") return null;
+            return value;
+        }
+    }
+
+
 
     public class DataGridBehavior
     {

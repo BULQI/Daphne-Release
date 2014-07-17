@@ -75,7 +75,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -100,13 +100,13 @@ namespace Daphne
             // Add cell population
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.entity_guid;
+            cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
                                                protocol.scenario.environment.extent_y, 
                                                protocol.scenario.environment.extent_z };
-            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
@@ -144,7 +144,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -191,7 +191,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
 
                     MolPopLinear molpoplin = new MolPopLinear();
@@ -225,13 +225,13 @@ namespace Daphne
 
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
-            cellPop.cell_guid_ref = configCell.entity_guid;
+            cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
             double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
                                                protocol.scenario.environment.extent_y, 
                                                protocol.scenario.environment.extent_z };
-            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.cell_guid_ref].CellRadius;
+            double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
@@ -274,7 +274,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.reactions_guid_ref.Add(reac.entity_guid);
+                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -337,7 +337,7 @@ namespace Daphne
             foreach (ConfigMolecule cm in query)
             {
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                configMolPop.molecule_guid_ref = cm.entity_guid;
+                configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
                 configMolPop.mp_dist_name = "Gaussian";
                 configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -435,7 +435,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -507,7 +507,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -529,7 +529,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -558,7 +558,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -584,7 +584,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -606,7 +606,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -643,7 +643,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -671,7 +671,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -696,7 +696,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -733,7 +733,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -742,24 +742,26 @@ namespace Daphne
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("B cell 7 state", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", protocol);
+
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
@@ -783,7 +785,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -808,7 +810,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -844,33 +846,33 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 100;
 
-            // Add differentiatior
+            // Add differentiator
             // Assumes all genes and signal molecules are present
-            gc.diff_scheme_guid_ref = findDiffSchemeGuid("GC B cell", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(gc.diff_scheme_guid_ref) == true)
+            diff_scheme_guid = findDiffSchemeGuid("GC B cell", protocol);
+            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[gc.diff_scheme_guid_ref].Clone();
+                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            gc.death_driver_guid_ref = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.death_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[gc.death_driver_guid_ref].Clone();
+                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
-            gc.div_driver_guid_ref = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(gc.div_driver_guid_ref) == true)
+            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
+            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.div_driver = protocol.entity_repository.transition_drivers_dict[gc.div_driver_guid_ref].Clone();
+                gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             protocol.entity_repository.cells.Add(gc);
@@ -893,7 +895,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -916,7 +918,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -943,7 +945,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             }
 
@@ -969,7 +971,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -992,7 +994,7 @@ namespace Daphne
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    gmp.molecule_guid_ref = cm.entity_guid;
+                    gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
                     gmp.mp_dist_name = "Uniform";
@@ -1019,7 +1021,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    gc.cytosol.reactions_guid_ref.Add(reac.entity_guid);
+                    gc.cytosol.Reactions.Add(reac.Clone(true));
                 }
             } 
             
@@ -2436,7 +2438,7 @@ namespace Daphne
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-                    configMolPop.molecule_guid_ref = configMolecule.entity_guid;
+                    configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2533,13 +2535,7 @@ namespace Daphne
                     {
                         driverElement.Alpha = alpha[i, j];
                         driverElement.Beta = beta[i, j];
-
-                        string molecule_guid = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
-
-                        if(protocol.entity_repository.molecules_dict.ContainsKey(molecule_guid) == true)
-                        {
-                            driverElement.Driver_Mol = protocol.entity_repository.molecules_dict[molecule_guid].Clone();
-                        }
+                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
                     }
                     row.elements.Add(driverElement);
                 }

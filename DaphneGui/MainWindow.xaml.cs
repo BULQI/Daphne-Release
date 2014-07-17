@@ -86,7 +86,7 @@ namespace DaphneGui
         /// uri for the scenario file
         /// </summary>
         public static Uri protocol_path;
-        private string orig_content, orig_path;
+        private string orig_content, orig_path, SBMLFolderPath;
         private bool tempFileContent = false, postConstruction = false;
 
         private bool exportAllFlag = false;
@@ -371,6 +371,12 @@ namespace DaphneGui
                 execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
             }
+
+            //Defines default location of SBML folder within Daphne's directory structure
+            SBMLFolderPath = appPath + @"\Config\SBML\";
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
 
             // handle the application properties
             string file;
@@ -660,12 +666,7 @@ namespace DaphneGui
 
             //Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
 
@@ -713,7 +714,7 @@ namespace DaphneGui
 
             foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
             {
-                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule_guid_ref];
+                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
                 sop.Protocol.entity_repository.molecules.Add(configMol);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
@@ -771,12 +772,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
@@ -784,12 +780,12 @@ namespace DaphneGui
 
             // Show open  file dialog box
             Nullable<bool> result = dlg.ShowDialog();
-
+            SBMLModel encodedSBML;
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
-                encodedSBML.ConvertDaphneToSBML(dlg.SafeFileName.Replace(".xml", ""), dlg.FilterIndex);
+                encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
+                encodedSBML.ConvertDaphneToSBML(dlg.FilterIndex);
             }
             
         }
@@ -805,12 +801,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-
-            //Used to check that SBML directory can be the initial directory
-            string SBML_folder = new Uri(appPath + @"\SBML\").LocalPath;
-            if (Directory.Exists(SBML_folder)) { dlg.InitialDirectory = appPath + @"\SBML\"; }
-            else { dlg.InitialDirectory = appPath; }
-
+            dlg.InitialDirectory =SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             dlg.FileName = "SBMLReactionComplex";
@@ -821,19 +812,16 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                SBMLModel encodedSBML = new SBMLModel(appPath, sop.Protocol);
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
                 ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
                 ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
                 ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
 
                 if (crc != null)
                 {
-                    encodedSBML.ConvertReactionComplexToSBML(crc, dlg.SafeFileName.Replace(".xml", ""));
+                    encodedSBML.ConvertReactionComplexToSBML(crc);
                 }
             }
-
-            //
-           
         }
 
         /// <summary>
@@ -1859,7 +1847,7 @@ namespace DaphneGui
                 // catch xaml parse exception if it's not a good sim config file
                 try
                 {
-                    protocol.DeserializeFromString(jsonScenarioString);
+                    SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
                     return protocol;
                 }
                 catch
@@ -1876,7 +1864,7 @@ namespace DaphneGui
                     protocol = new Protocol();
                     protocol.FileName = protocol_path.LocalPath;
                     protocol.TempFile = orig_path + @"\temp_protocol.json";
-                    protocol.Deserialize(tempFileContent);
+                    SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
                     return protocol;
                     //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
                 }
@@ -1908,7 +1896,7 @@ namespace DaphneGui
                     }
                 }
 
-                if (protocol!=null)
+                if (protocol != null)
                 {
                     sop = new SystemOfPersistence();
                     sop.Protocol = protocol;
@@ -2531,13 +2519,13 @@ namespace DaphneGui
             //need the ecm probe concentrations for this purpose
             foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
+                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
-                cmi.Concentration = conc; 
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Concentration = conc;
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
