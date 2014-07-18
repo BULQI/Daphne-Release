@@ -124,6 +124,11 @@
                         <Separator />
                         <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
                     </MenuItem>
+                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
+                        <MenuItem Header="Cells..." Name="cellColorsMenu" />
+                        <MenuItem Header="Molecules..." Name="molColorsMenu" />
+                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" Click="setDrawingSettings_Click" />
+                    </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
                         <MenuItem Header="Skip Inter Cell Distance" Name="skipInterCell" IsCheckable="True" IsChecked="False"        />

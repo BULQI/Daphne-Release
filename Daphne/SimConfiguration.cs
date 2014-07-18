@@ -37,11 +37,17 @@ namespace Daphne
         public Level UserStore { get; set; }
 
         /// <summary>
+        /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
+        /// </summary>
+        public RenderPalette Palette { get; set; }
+
+        /// <summary>
         /// constructor
         /// </summary>
         public SystemOfPersistence()
         {
             Protocol = new Protocol("", "Config\\temp_protocol.json");
+            Palette = new RenderPalette();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             //UserStore = new Level("", "Config\\temp_userstore.json");
         }
@@ -3276,6 +3282,7 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
+                OnPropertyChanged("rate_const");
             } 
         }
 
@@ -5149,6 +5156,56 @@ namespace Daphne
 
             ////Add this after 2/4/14
             ////DrawAsWireframe = false;
+        }
+    }
+
+    //Graphics classes
+    public class RenderColor
+    {
+        public System.Windows.Media.Color EntityColor { get; set; }  // RGB plus alpha channel
+    }
+
+    public class RenderCellPop
+    {
+        RenderColor base_color;  // solid color for applicable render methods
+        //ObservableCollection<RenderColor> state_colors
+        //ObservableCollection<RenderColor> gen_colors
+        bool renderOn;          // toggles rendering
+        //Method renderMethod;    // indicates the render option
+        int shades;             // number of shades for applicable options
+    }
+
+
+    public class RenderMolPop
+    {
+        RenderColor color;     // the one color used
+        bool renderOn;         // toggles rendering
+        //Method renderMethod;   // render option
+        double min, max;       // to scale when rendering by conc
+        int shades;            // number of shades for applicable options
+        double blendingWeight; // controls color mixing for multiple molpops
+    }
+
+    public class RenderDrawing
+    {
+        public RenderColor bg_color { get; set; }     // the background color
+
+        public RenderDrawing()
+        {
+            bg_color = new RenderColor();
+            bg_color.EntityColor = Color.FromScRgb(255.0f, 128.0f, 0.0f, 0.0f);
+        }
+    }
+
+    public class RenderPalette
+    {
+        ObservableCollection<RenderCellPop> renderCellPops;
+        ObservableCollection<RenderMolPop> renderMolPops;
+        public RenderDrawing renderDrawing { get; set; }
+
+        public RenderPalette()
+        {
+            renderDrawing = new RenderDrawing();
         }
     }
 

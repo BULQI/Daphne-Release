@@ -7,12 +7,15 @@
                     xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     ImageSource="Images/Properties16.png"
                     x:Name="MyToolWindow"
                     >
 
-
+    <!--xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"-->
+    <!--xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"-->
+    
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
         <CollectionViewSource x:Key="newBoundaryMoleculesListView"  
@@ -2330,6 +2333,33 @@
                                 </StackPanel>
 
                             </Expander>
+                            <Expander ExpandDirection="Down"
+                                              IsExpanded="False"
+                                              Header="Molecule Parameters"
+                                              x:Name="MolParamExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}"
+                                              >
+
+                                <!--DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem.molecule}"-->
+
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="150" Text="Name"></TextBlock>
+                                        <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                                        <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
+                                        <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox Width="150" Text="{Binding Path=molecule.Name}" IsEnabled="False"></TextBox>
+                                        <TextBox Width="80" Margin="20,0" Text="{Binding Path=molecule.DiffusionCoefficient, Mode=TwoWay}"></TextBox>
+                                        <TextBox Width="80" Margin="20,0" Text="{Binding Path=molecule.MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                        <TextBox Width="80" Margin="20,0" Text="{Binding Path=molecule.EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </Expander>
                         </StackPanel>
                     </Expander>
                     <!-- Reactions -->
@@ -3130,7 +3160,7 @@
                                             <DataGridTemplateColumn Header="molecular population" Width="125">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule.entity_guid, Converter={StaticResource MolGUIDtoMolNameConv},
                                                             ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
@@ -3200,7 +3230,7 @@
                                             <DataGridTemplateColumn Header="molecular population" Width="120">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule_guid_ref, Converter={StaticResource MolGUIDtoMolNameConv},
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding Path=molecule.entity_guid, Converter={StaticResource MolGUIDtoMolNameConv},
                                                             ConverterParameter={StaticResource moleculesListView}}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
@@ -3989,6 +4019,24 @@
                                                                             </StackPanel>
                                                                     </StackPanel>
                                                                 </Expander>
+
+                                                                <Expander ExpandDirection="Down"
+                                                                      IsExpanded="False"
+                                                                      Header="Reaction Parameters"
+                                                                      x:Name="ReacParams"
+                                                                      Margin="0,0,0,0" 
+                                                                      Canvas.ZIndex="1"                                                                      
+                                                                      >
+                                                                    <StackPanel Orientation="Vertical">
+                                                                        <Label Height="24" Width="80" HorizontalAlignment="Left">Reaction:</Label>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding ElementName=MembReacListBox, Path=SelectedItem.rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                                                                            <!--<TextBox Width="100" Text="{Binding ElementName=MembReacListBox, Path=SelectedItem.rate_const, StringFormat={}{0:#.00}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>-->
+                                                                            <TextBox Margin="10,0" Height="24" Width="400" IsEnabled="False" Text="{Binding ElementName=MembReacListBox, Path=SelectedItem.TotalReactionString}"></TextBox>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                </Expander>
+
                                                             </StackPanel>
                                                         </StackPanel>
                                                     </TabItem>
@@ -4002,6 +4050,7 @@
                                                             <ListBox x:Name="CytosolReacListBox" MinHeight="50" Height="100" 
                                                              ItemsSource="{Binding ElementName=CellsListBox, Path=SelectedItem.cytosol.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
+                                                             MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
                                                              >
                                                             </ListBox>
                                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -4070,6 +4119,24 @@
                                                                         </ListView>
                                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                                                             <Button Name="CytosolAddReacButton"  Width="120" Content="Add" Click="CytosolAddReacButton_Click"/>
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                </Expander>
+                                                                <Expander ExpandDirection="Down"
+                                                                      IsExpanded="False"
+                                                                      Header="Reaction Parameters"
+                                                                      x:Name="ReacParams2"
+                                                                      Margin="0,0,0,0" 
+                                                                      Canvas.ZIndex="1"
+                                                                      >
+                                                                    <StackPanel Orientation="Vertical">
+                                                                        <Label Height="24" Width="80" HorizontalAlignment="Left">Reaction:</Label>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding ElementName=CytosolReacListBox, Path=SelectedItem.rate_const, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"></uc:DoublesBox>
+                                                                            <!--<TextBox Width="100" Text="{Binding ElementName=CytosolReacListBox, Path=SelectedItem.rate_const, StringFormat={}{0:#.00}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>-->
+                                                                            <TextBox Margin="10,0" Height="24" Width="350" IsEnabled="False" 
+                                                                                     Text="{Binding ElementName=CytosolReacListBox, Path=SelectedItem.TotalReactionString}">
+                                                                            </TextBox>
                                                                         </StackPanel>
                                                                     </StackPanel>
                                                                 </Expander>

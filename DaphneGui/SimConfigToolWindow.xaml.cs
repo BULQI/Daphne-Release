@@ -675,9 +675,16 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
-                if (MembraneHasMolecule(cell, molguid))
-                    return true;
+                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
+                {
+                    ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
+                    if (MembraneHasMolecule(cell, molguid))
+                        return true;
+                }
+                else
+                {
+                    return ret;
+                }
             }
             
             return ret;
@@ -2185,6 +2192,14 @@ namespace DaphneGui
             int nIndex = cb.SelectedIndex;
             if (nIndex < 0)
                 return;
+
+            ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
+
+            //if molecule has not changed, return
+            if (newmol.entity_guid == curr_mol_guid)
+            {
+                return;
+            }
 
             ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
             molpop.molecule = mol.Clone(null);
@@ -3919,6 +3934,27 @@ namespace DaphneGui
                 gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
             }
 
+        }
+
+        public void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            //This is not getting called for some reason!
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            int nIndex = CytosolReacListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                ConfigReaction cr = (ConfigReaction)CytosolReacListBox.SelectedItem;
+                if (cr != null)
+                {
+                    cell.cytosol.Reactions.Remove(cr);
+                    cell.cytosol.Reactions.Add(cr);
+                }
+            }
+        }
+
+        private void CytosolReacListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ReacParams2.IsExpanded = true;
         }
     }
 

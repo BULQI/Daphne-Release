@@ -83,7 +83,14 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DaphneColorDlg.xaml.cs">
+      <DependentUpon>DaphneColorDlg.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControlExtensions.cs" />
+    <Page Include="DaphneColorDlg.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DoublesBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

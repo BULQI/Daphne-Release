@@ -164,6 +164,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>..\dependencies\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -187,6 +190,9 @@
     <Compile Include="GraphicsController.cs" />
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
+    <Compile Include="Rendering\RenderDrawing.xaml.cs">
+      <DependentUpon>RenderDrawing.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -235,6 +241,10 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Rendering\RenderDrawing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Workbench\AddReacComplex.xaml">
       <Generator>MSBuild:Compile</Generator>
