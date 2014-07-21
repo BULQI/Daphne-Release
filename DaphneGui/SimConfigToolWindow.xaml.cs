@@ -1858,44 +1858,6 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// Called when a cell in the data grid is selected and after each key stroke.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgLocations_Scroll(object sender, RoutedEventArgs e)
-        {
-            DataGrid dgData = (DataGrid)sender;
-            //BindingExpression b = dgData.GetBindingExpression(System.Windows.Controls.DataGrid.ItemsSourceProperty);
-            //b.UpdateTarget();
-            //if (e.RoutedEvent.Name == 
-
-
-            //IF CURRENTLY EDITING A CELL, WANT TO PREVENT CALLING REFRESH!  HOW TO DO?
-            //if (dgData.IsEditing())  //DOESN'T WORK
-            //if (dgData.SelectedIndex > -1)
-            //    return;
-
-            //if (dgData.SelectedCells.Count > 0)
-            //{
-            //    //DataGridCellInfo dgci = dgData.SelectedCells[0];
-            //    DataGridCellInfo dgci = (DataGridCellInfo)dgData.SelectedCells[0];
-            //    DataGridCell dgc = TryToFindGridCell(dgData, dgci);
-
-            //    bool bEditing = dgc.IsEditing;
-            //    if (bEditing == true)
-            //        return;
-            //}
-
-            try
-            {
-                dgData.Items.Refresh();
-            }
-            catch
-            {
-            }
-        }
-
-        /// <summary>
         ///  Called when user selects "Specific" for cell population locations.
         /// </summary>
         /// <param name="sender"></param>
