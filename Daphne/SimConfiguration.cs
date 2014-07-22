@@ -2797,7 +2797,7 @@ namespace Daphne
                 }
             }
         }
-        public ObservableCollection<TimeAmpPair> mp_amplitude_keyframes { get; set; }
+
         private System.Windows.Media.Color _mp_color;
         public System.Windows.Media.Color mp_color
         {
@@ -2848,7 +2848,6 @@ namespace Daphne
             reportMP.molpop_guid_ref = molpop_guid;
             
             mp_distribution = new MolPopHomogeneousLevel();
-            mp_amplitude_keyframes = new ObservableCollection<TimeAmpPair>();
             mp_color = new System.Windows.Media.Color();
             mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
             mp_render_blending_weight = 1.0;
@@ -5713,48 +5712,6 @@ namespace Daphne
         public void BoxChangedEventHandler(object obj, EventArgs e)
         {
             // not sure if anything goes here.
-        }
-    }
-
-
-    public class TimeAmpPair
-    {
-        // Not clear whether this should be time step or real time value...
-        private double _time_value;
-        public double time_value
-        {
-            get { return _time_value; }
-            set
-            {
-                if (value >= 0.0)
-                {
-                    _time_value = value;
-                }
-            }
-        }
-        private double _amplitude;
-        public double amplitude
-        {
-            get { return _amplitude; }
-            set
-            {
-                if (value >= 0.0 && value <= 1.0)
-                {
-                    _amplitude = value;
-                }
-            }
-        }
-
-        public TimeAmpPair()
-        {
-            time_value = 0.0;
-            amplitude = 0.0;
-        }
-
-        public TimeAmpPair(double ts, double a)
-        {
-            time_value = ts;
-            amplitude = a;
         }
     }
 
