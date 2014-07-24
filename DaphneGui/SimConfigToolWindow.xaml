@@ -2449,7 +2449,23 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
-                            
+
+                            <StackPanel>
+                                <Expander ExpandDirection="Down"
+                                              IsExpanded="False"
+                                              Header="Reaction Properties"
+                                              x:Name="ReacPropExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              DataContext="{Binding ElementName=lvEcsReactions, Path=SelectedItem}"
+                                              >
+                                    <ContentControl Name="ccReactionProperties"
+                                        Content="{Binding}" 
+                                        ContentTemplate="{StaticResource editReactionTemplate}" 
+                                        Margin="6"/>
+                                </Expander>
+                            </StackPanel>
+
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Add a reaction"

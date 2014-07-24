@@ -1,9 +1,10 @@
 ﻿<Application x:Class="DaphneGui.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!-- ConfigMolecule properties template-->
+        <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
         <DataTemplate x:Key="moleculeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
@@ -20,6 +21,8 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
+
+        <!-- ConfigMolecule properties template with non-editable Name field : DataContext must be ConfigMolecule -->
         <DataTemplate x:Key="editMoleculeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
@@ -33,6 +36,17 @@
                     <TextBox Width="80" Margin="20,0" Text="{Binding Path=DiffusionCoefficient, Mode=TwoWay}"></TextBox>
                     <TextBox Width="80" Margin="20,0" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
                     <TextBox Width="80" Margin="20,0" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        
+        <!-- ConfigReaction properties template : DataContext must be ConfigReaction -->
+        <DataTemplate x:Key="editReactionTemplate">
+            <StackPanel Orientation="Vertical">
+                <Label Height="24" Width="80" HorizontalAlignment="Left">Reaction:</Label>
+                <StackPanel Orientation="Horizontal">
+                    <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding rate_const, Mode=TwoWay}"></uc:DoublesBox>
+                    <TextBox Margin="10,0" Height="24" Width="400" IsEnabled="False" Text="{Binding TotalReactionString}"></TextBox>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
