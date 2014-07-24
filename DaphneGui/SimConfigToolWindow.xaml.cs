@@ -1070,20 +1070,6 @@ namespace DaphneGui
             MainWindow.SOP.Protocol.entity_repository.reactions.Remove(cr);
         }
 
-        private void btnCopyReaction_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
-            if (cr == null)
-            {
-                return;
-            }
-
-            ConfigReaction crNew = new ConfigReaction(cr);
-            MainWindow.SOP.Protocol.entity_repository.reactions.Add(crNew);
-
-            ReacComplexExpander.IsExpanded = true;
-        }
-
         //CELLS EVENT HANDLERS
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {

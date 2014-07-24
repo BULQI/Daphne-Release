@@ -3611,7 +3611,6 @@
                                 </ListView.View>
                             </ListView>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button x:Name="btnCopyReaction" Grid.Column="2" Grid.Row="1" Width="100" Click="btnCopyReaction_Click">Copy</Button>
                                 <Button x:Name="btnRemoveReaction" Grid.Column="2" Grid.Row="1" Width="100" Click="btnRemoveReaction_Click">Remove</Button>
                             </StackPanel>
 
