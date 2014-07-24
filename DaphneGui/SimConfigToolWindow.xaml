@@ -2354,7 +2354,7 @@
                                               >
 
                                 <ContentControl Name="ecmMolpopMolDetails"
-                                        Content="{Binding ElementName=ecm_molecule_combo_box, Path=SelectedItem}" 
+                                        Content="{Binding Path=molecule}" 
                                         ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                         Margin="6"/>
                             </Expander>
