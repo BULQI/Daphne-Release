@@ -5160,6 +5160,9 @@ namespace Daphne
     }
 
     //Graphics classes
+    public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
+    public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
+
     public class RenderColor
     {
         public System.Windows.Media.Color EntityColor { get; set; }  // RGB plus alpha channel
@@ -5193,7 +5196,7 @@ namespace Daphne
         public RenderDrawing()
         {
             bg_color = new RenderColor();
-            bg_color.EntityColor = Color.FromScRgb(255.0f, 128.0f, 0.0f, 0.0f);
+            bg_color.EntityColor = Color.FromScRgb(255.0f, 255.0f, 255.0f, 255.0f);
         }
     }
 

@@ -3,6 +3,38 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- ConfigMolecule properties template-->
+        <DataTemplate x:Key="moleculeTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Width="150" Text="Name"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="150" Text="{Binding Path=Name}" ></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=DiffusionCoefficient, Mode=TwoWay}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="editMoleculeTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Width="150" Text="Name"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=DiffusionCoefficient, Mode=TwoWay}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </Application.Resources>
 </Application>

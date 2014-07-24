@@ -179,6 +179,9 @@
     <Compile Include="AddDiffState.xaml.cs">
       <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddEditMolecule.xaml.cs">
+      <DependentUpon>AddEditMolecule.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddGeneToCell.xaml.cs">
       <DependentUpon>AddGeneToCell.xaml</DependentUpon>
     </Compile>
@@ -190,8 +193,14 @@
     <Compile Include="GraphicsController.cs" />
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
+    <Compile Include="Rendering\RenderCell.xaml.cs">
+      <DependentUpon>RenderCell.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Rendering\RenderDrawing.xaml.cs">
       <DependentUpon>RenderDrawing.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Rendering\RenderMolPop.xaml.cs">
+      <DependentUpon>RenderMolPop.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
@@ -230,6 +239,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="AddEditMolecule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AddGeneToCell.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -242,7 +255,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Rendering\RenderCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Rendering\RenderDrawing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Rendering\RenderMolPop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
