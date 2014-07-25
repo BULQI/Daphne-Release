@@ -43,7 +43,7 @@ namespace DaphneGui
             foreach (KeyValuePair<int, CellPopulation> item in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
-                item.Value.cellPopDist.CellStates.Clear();
+                item.Value.CellStates.Clear();
             }
 
             string sp = sop.Protocol.FileName;
@@ -116,7 +116,12 @@ namespace DaphneGui
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
-                cell_state.setState(cell.SpatialState);
+                cell_state.setSpatialState(cell.SpatialState);
+
+                cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
+                cell_state.setDivisonDriverState(cell.DivisionBehavior.CurrentState);
+                cell_state.setDifferentiationDriverState(cell.DifferentiationState);
+                cell_state.setGeneState(cell.Genes);
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)
@@ -131,7 +136,7 @@ namespace DaphneGui
                     MolecularPopulation mp = kvpair.Value;
                     cell_state.addMolPopulation(kvpair.Key, mp);
                 }
-                target_cp.cellPopDist.CellStates.Add(cell_state);
+                target_cp.CellStates.Add(cell_state);
                 //target_cp.cell_list.Add(cell_state);
             }
 

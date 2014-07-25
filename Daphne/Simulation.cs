@@ -544,7 +544,7 @@ namespace Daphne
 
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
-                    cell.setState(cp.cellPopDist.CellStates[i].ConfigState);
+                    cell.setState(cp.CellStates[i].spState);
 
                     simComp[0] = cell.Cytosol;
                     simComp[1] = cell.PlasmaMembrane;
@@ -558,11 +558,11 @@ namespace Daphne
                             //it for not customized cell later(?)
 
                             // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
-                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule.entity_guid)) continue;
+                            if (!cp.CellStates[i].cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid)) continue;
 
                             MolPopExplicit mp_explicit = new MolPopExplicit();
                             // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
-                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule.entity_guid];
+                            mp_explicit.conc = cp.CellStates[i].cmState.molPopDict[cmp.molecule.entity_guid];
                             cmp.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
@@ -573,9 +573,15 @@ namespace Daphne
                     {
                         ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
+                        double geneActivationLevel = cg.ActivationLevel;
+                        if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)
+                        {
+                            geneActivationLevel = cp.CellStates[i].cgState.geneDict[cg.entity_guid];
+                        }
+
                         Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
                                                      new ConstructorArgument("copyNumber", cg.CopyNumber),
-                                                     new ConstructorArgument("actLevel", cg.ActivationLevel));
+                                                     new ConstructorArgument("actLevel", geneActivationLevel));
                         cell.AddGene(cg.entity_guid, gene);
                     }
 
@@ -605,8 +611,11 @@ namespace Daphne
                     // death behavior
                     if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver != null)
                     {
+                        if (cp.CellStates[i].cbState.deathDriveState != -1)
+                        {
+                            cell.DeathBehavior.CurrentState = cp.CellStates[i].cbState.deathDriveState;
+                        }
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
-
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
@@ -631,6 +640,10 @@ namespace Daphne
                             }
                         }
                         // Set cell state and corresponding gene activity levels
+                        if (cp.CellStates[i].cbState.differentiationDriverState != -1)
+                        {
+                            cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
+                        }
                         cell.DifferentiationState = cell.Differentiator.CurrentState;
                         cell.SetGeneActivities();
                     }
@@ -638,8 +651,11 @@ namespace Daphne
                     // division behavior
                     if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver != null)
                     {
+                        if (cp.CellStates[i].cbState.divisionDriverState != -1)
+                        {
+                            cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
+                        }
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
-
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 

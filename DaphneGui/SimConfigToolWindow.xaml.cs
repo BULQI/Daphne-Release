@@ -1608,7 +1608,7 @@ namespace DaphneGui
                     CellPopulation tempCellPop = new CellPopulation();
                     tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.cellPopDist.CellStates = tempCellPop.cellPopDist.CellStates;
+                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -1774,22 +1774,22 @@ namespace DaphneGui
                 return;
 
             cp.number = numNew;
-            if (numNew > numOld && numNew > cp.cellPopDist.CellStates.Count)
+            if (numNew > numOld && numNew > cp.CellStates.Count)
             {
                 int rows_to_add = numNew - numOld;
                 cp.cellPopDist.AddByDistr(rows_to_add);
             }
             else if (numNew < numOld)
             {
-                if (numOld > cp.cellPopDist.CellStates.Count)
+                if (numOld > cp.CellStates.Count)
                 {
-                    numOld = cp.cellPopDist.CellStates.Count;
+                    numOld = cp.CellStates.Count;
                 }
 
                 int rows_to_delete = numOld - numNew;
-                cp.cellPopDist.RemoveCells(rows_to_delete);
+                cp.RemoveCells(rows_to_delete);
             }
-            cp.number = cp.cellPopDist.CellStates.Count;
+            cp.number = cp.CellStates.Count;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -1821,13 +1821,13 @@ namespace DaphneGui
                 char[] delim = { '\t', '\r', '\n' };
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-                cp.cellPopDist.CellStates.Clear();
+                cp.CellStates.Clear();
                 for (int i = 0; i < paste.Length; i += 3)
                 {
-                    cp.cellPopDist.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
+                    cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
 
-                cp.number = cp.cellPopDist.CellStates.Count;
+                cp.number = cp.CellStates.Count;
 
             }
         }
@@ -1894,43 +1894,43 @@ namespace DaphneGui
 
             // Remove out-of-bounds cells
             bool changed = false;
-            for (int i = cp.cellPopDist.CellStates.Count - 1; i >= 0; i--)
+            for (int i = cp.CellStates.Count - 1; i >= 0; i--)
             {
-                double[] pos = new double[3] { cp.cellPopDist.CellStates[i].X, cp.cellPopDist.CellStates[i].Y, cp.cellPopDist.CellStates[i].Z };
+                double[] pos = new double[3] { cp.CellStates[i].X, cp.CellStates[i].Y, cp.CellStates[i].Z };
                 // X
-                if (cp.cellPopDist.CellStates[i].X < 0) 
+                if (cp.CellStates[i].X < 0) 
                 {
                     // cp.cellPopDist.CellStates[i].X = 0;
                     pos[0] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].X > cp.cellPopDist.Extents[0]) 
+                if (cp.CellStates[i].X > cp.cellPopDist.Extents[0]) 
                 {
                     // cp.cellPopDist.CellStates[i].X = cp.cellPopDist.Extents[0];
                     pos[0] = cp.cellPopDist.Extents[0];
                     changed = true;
                 }
                 // Y
-                if (cp.cellPopDist.CellStates[i].Y < 0) 
+                if (cp.CellStates[i].Y < 0) 
                 {
                     //cp.cellPopDist.CellStates[i].Y = 0;
                     pos[1] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].Y > cp.cellPopDist.Extents[1])
+                if (cp.CellStates[i].Y > cp.cellPopDist.Extents[1])
                 {
                     //cp.cellPopDist.CellStates[i].Y = cp.cellPopDist.Extents[1];
                     pos[1] = cp.cellPopDist.Extents[1];
                     changed = true;
                 }
                 // Z
-                if (cp.cellPopDist.CellStates[i].Z < 0)
+                if (cp.CellStates[i].Z < 0)
                 {
                     //cp.cellPopDist.CellStates[i].Z = 0;
                     pos[2] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].Z > cp.cellPopDist.Extents[2])
+                if (cp.CellStates[i].Z > cp.cellPopDist.Extents[2])
                 {
                     //cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];
                     pos[2] = cp.cellPopDist.Extents[2];
@@ -1940,7 +1940,7 @@ namespace DaphneGui
                 {
                     // Can't update coordinates directly or the datagrid doesn't update properly
                     // (e.g., cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];)
-                    cp.cellPopDist.CellStates.RemoveAt(i);
+                    cp.CellStates.RemoveAt(i);
                     cp.cellPopDist.AddByPosition(pos);
                 }
             }
@@ -2286,7 +2286,7 @@ namespace DaphneGui
             double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
-            cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
+            cp.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
 
