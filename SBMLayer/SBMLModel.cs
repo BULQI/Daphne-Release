@@ -838,7 +838,7 @@ namespace SBMLayer
                     membraneDomainType = world.AddCellModel(compartment,true);
                     for (int z = 0; z < cellPop.number; z++)
                     {
-                        CellState positions = cellPop.cellPopDist.CellStates[z];
+                        CellState positions = cellPop.CellStates[z];
                         membraneDomain = world.AddCellDomain(membraneDomainType, compartment, positions.X+radius, positions.Y, positions.Z);
                         world.AddAdjacency(backgDomain.getSpatialId(), membraneDomain.getSpatialId());
                     }
@@ -865,7 +865,7 @@ namespace SBMLayer
                     
                     for (int z = 0; z < cellPop.number; z++)
                     {
-                        CellState positions = cellPop.cellPopDist.CellStates[z];
+                        CellState positions = cellPop.CellStates[z];
                         world.AddCellGeometry(cytoDomainType, ordinal, radius, positions.X, positions.Y, positions.Z);
                         cytoDomain = world.AddCellDomain(cytoDomainType, compartment, positions.X, positions.Y, positions.Z);
                         world.AddAdjacency(membraneDomain.getSpatialId(), cytoDomain.getSpatialId());
@@ -2061,7 +2061,7 @@ namespace SBMLayer
                     minDisSquared *= minDisSquared;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
-                    cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * gc.CellRadius - protocol.scenario.environment.gridstep / 2,
+                    cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * gc.CellRadius - protocol.scenario.environment.gridstep / 2,
                                                                         protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
                                                                         protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
                     cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);

@@ -1275,7 +1275,7 @@
 
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
-                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cellPopDist.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                                                     CanUserSortColumns="False" 
@@ -4520,6 +4520,25 @@
                                                     </DataGrid.RowHeaderTemplate>-->
 
                                                 </DataGrid>
+
+
+                                                <TextBlock Text="Differentiation Regulators" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
+                                                        <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+
+                                                </TextBlock>
+
+
                                                 <!-- This is the Differentiation Regulators datagrid -->
                                                 <DataGrid MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0" x:Name="DiffRegGrid" 
                                                             AutoGenerateColumns="False"
