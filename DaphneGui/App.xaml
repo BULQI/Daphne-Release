@@ -39,7 +39,39 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
-        
+
+        <!-- ConfigGene properties template : DataContext must be ConfigGene -->
+        <DataTemplate x:Key="newGeneTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Width="150" Text="Name"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Copy Number"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Activation Level"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="150" Text="{Binding Path=Name}" ></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- ConfigGene properties template with non-editable Name field : DataContext must be ConfigGene -->
+        <DataTemplate x:Key="editGeneTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Width="150" Text="Name"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Copy Number"></TextBlock>
+                    <TextBlock Width="80" Margin="20,0" Text="Activation Level"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
+                    <TextBox Width="80" Margin="20,0" Text="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
         <!-- ConfigReaction properties template : DataContext must be ConfigReaction -->
         <DataTemplate x:Key="editReactionTemplate">
             <StackPanel Orientation="Vertical">

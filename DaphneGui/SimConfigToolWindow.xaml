@@ -1587,7 +1587,11 @@
 
             <DataTemplate x:Key="geneDetailsTemplate">
                 <local:DaphneStackPanel x:Name="geneDetails" Margin="0,-8" Orientation="Horizontal" >
-                    <StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" Margin="10,4">
+                            <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                            <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="10,4">
                             <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                             <TextBox Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
@@ -1596,15 +1600,6 @@
                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                             <TextBox Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
                         </StackPanel>
-
-                    <!--<ComboBox  x:Name="cyto_gene_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                    ItemsSource="{Binding Source={StaticResource cytoGenesListView}}"
-                                                    DisplayMemberPath="Name"                                                    
-                                                    SelectedValue="{Binding Path=gene_guid_ref, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="gene_guid"
-                                                    SelectionChanged="cyto_gene_combo_box_SelectionChanged"
-                                                    GotFocus="cyto_gene_combo_box_GotFocus"
-                                                    />-->
                     </StackPanel>
                 </local:DaphneStackPanel>
             </DataTemplate>
@@ -4072,18 +4067,34 @@
                                                                     SelectedIndex="-1"
                                                                      SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
                                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                                            <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click"/>
                                                             <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click"/>
                                                             <Button Name="NucleusRemoveGeneButton" Width="50" Content="Remove" Click="NucleusRemoveGeneButton_Click"/>
                                                         </StackPanel>
                                                         <!-- Gene Details-->
-                                                        <ContentControl Name="CytoGeneDetails"
+                                                        <!--<ContentControl Name="CytoGeneDetails"
                                                                     Content="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem, 
                                                                                     Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenesListView}}"    
                                                                     ContentTemplate="{StaticResource geneDetailsTemplate}"
                                                                     Margin="6">
-                                                        </ContentControl>
-
-                                                    </StackPanel>
+                                                        </ContentControl>-->
+                                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem, 
+                                                                                    Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenesListView}}">
+                                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                                <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                            <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"
+                                                                     Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                                <TextBlock Text="Copy Number" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                                <TextBox x:Name="txtGeneCopyNum" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal" Margin="10,4">
+                                                                <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                                <TextBox x:Name="txtGeneActLevel" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                </StackPanel>
                                                 </TabItem>
                                             </TabControl>
                                         </StackPanel>

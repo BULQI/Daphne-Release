@@ -2770,7 +2770,22 @@ namespace DaphneGui
 
         private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            txtGeneName.IsEnabled = false;
+        }
 
+        private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigGene gene = new ConfigGene("NewGene", 0, 0);
+            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
+            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+            cell.genes_guid_ref.Add(gene.entity_guid);
+            //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
+            CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
+
+            string guid = (string)CellNucleusGenesListBox.SelectedItem;
+            CellNucleusGenesListBox.ScrollIntoView(guid);
+            txtGeneName.IsEnabled = true;
         }
 
         private void NucleusAddGeneButton_Click(object sender, RoutedEventArgs e)
@@ -2794,6 +2809,8 @@ namespace DaphneGui
 
                 cell.genes_guid_ref.Add(geneToAdd.entity_guid);
             }
+
+            txtGeneName.IsEnabled = false;
         }
 
         private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
@@ -2813,6 +2830,8 @@ namespace DaphneGui
             {
                 cell.genes_guid_ref.Remove(gene_guid);
             }
+
+            txtGeneName.IsEnabled = false;
         }
 
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
