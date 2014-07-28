@@ -2479,16 +2479,6 @@ namespace DaphneGui
             if (cb == null)
                 return;
 
-            if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
-            {
-                ConfigMolecule newmol = (ConfigMolecule)e.AddedItems[0];
-                ConfigMolecule oldmol = (ConfigMolecule)e.RemovedItems[0];
-
-                if (newmol.entity_guid == oldmol.entity_guid)
-                    return;
-
-            }
-
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
 
             if (molpop == null)
@@ -2502,14 +2492,83 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule = mol.Clone(null);
+            //if user picked 'new molecule' then create new molecule in ER
+            if (nIndex == (cb.Items.Count - 1))
+            {
+                ConfigMolecule newLibMol = new ConfigMolecule();
+                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                newLibMol.molecule_location = MoleculeLocation.Boundary;
+                AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
 
-            string new_mol_name = mol.Name;
-            if (curr_mol_guid != molpop.molecule.entity_guid)
-                molpop.Name = new_mol_name;
+                //if user cancels out of new molecule dialog, set selected molecule back to what it was
+                if (aem.ShowDialog() == false)
+                {
+                    if (e.RemovedItems.Count > 0)
+                    {
+                        cb.SelectedItem = e.RemovedItems[0];
+                    }
+                    else
+                    {
+                        cb.SelectedIndex = 0;
+                    }
+                    return;
+                }
+                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                molpop.molecule = newLibMol.Clone(null);
+                molpop.Name = newLibMol.Name;
 
-            CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+                CollectionViewSource.GetDefaultView(cb.ItemsSource).Refresh();
+                cb.SelectedItem = newLibMol;
+            }
+            //user picked an existing molecule
+            else
+            {
+                ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
+
+                //if molecule has not changed, return
+                if (newmol.entity_guid == curr_mol_guid)
+                {
+                    return;
+                }
+
+                //if molecule changed, then make a clone of the newly selected one from entity repository
+                ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+                molpop.molecule = mol.Clone(null);
+
+                string new_mol_name = mol.Name;
+                if (curr_mol_guid != molpop.molecule.entity_guid)
+                    molpop.Name = new_mol_name;
+            }
+            //if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
+            //{
+            //    ConfigMolecule newmol = (ConfigMolecule)e.AddedItems[0];
+            //    ConfigMolecule oldmol = (ConfigMolecule)e.RemovedItems[0];
+
+            //    if (newmol.entity_guid == oldmol.entity_guid)
+            //        return;
+
+            //}
+
+            //ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+
+            //if (molpop == null)
+            //    return;
+
+            //string curr_mol_pop_name = molpop.Name;
+            //string curr_mol_guid = "";
+            //curr_mol_guid = molpop.molecule.entity_guid;
+
+            //int nIndex = cb.SelectedIndex;
+            //if (nIndex < 0)
+            //    return;
+
+            //ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            //molpop.molecule = mol.Clone(null);
+
+            //string new_mol_name = mol.Name;
+            //if (curr_mol_guid != molpop.molecule.entity_guid)
+            //    molpop.Name = new_mol_name;
+
         }
 
         private void cyto_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2531,12 +2590,59 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            molpop.molecule = mol.Clone(null);
+            //if user picked 'new molecule' then create new molecule in ER
+            if (nIndex == (cb.Items.Count - 1))
+            {
+                ConfigMolecule newLibMol = new ConfigMolecule();
+                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
 
-            string new_mol_name = mol.Name;
-            if (curr_mol_guid != molpop.molecule.entity_guid)
-                molpop.Name = new_mol_name;
+                //if user cancels out of new molecule dialog, set selected molecule back to what it was
+                if (aem.ShowDialog() == false)
+                {
+                    if (e.RemovedItems.Count > 0)
+                    {
+                        cb.SelectedItem = e.RemovedItems[0];
+                    }
+                    else
+                    {
+                        cb.SelectedIndex = 0;
+                    }
+                    return;
+                }
+                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                molpop.molecule = newLibMol.Clone(null);
+                molpop.Name = newLibMol.Name;
+
+                CollectionViewSource.GetDefaultView(cb.ItemsSource).Refresh();
+                cb.SelectedItem = newLibMol;
+            }
+            //user picked an existing molecule
+            else
+            {
+                ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
+
+                //if molecule has not changed, return
+                if (newmol.entity_guid == curr_mol_guid)
+                {
+                    return;
+                }
+
+                //if molecule changed, then make a clone of the newly selected one from entity repository
+                ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+                molpop.molecule = mol.Clone(null);
+
+                string new_mol_name = mol.Name;
+                if (curr_mol_guid != molpop.molecule.entity_guid)
+                    molpop.Name = new_mol_name;
+            }
+
+            //ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
+            //molpop.molecule = mol.Clone(null);
+
+            //string new_mol_name = mol.Name;
+            //if (curr_mol_guid != molpop.molecule.entity_guid)
+            //    molpop.Name = new_mol_name;
             
             CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
