@@ -1488,20 +1488,6 @@
                     <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate x:Key="molpopDistributionTypeTemplate2">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding Converter={StaticResource MolPopDistTypeEnumConv}}"/>
-                </StackPanel>
-            </DataTemplate>
-
-            <DataTemplate x:Key="solfacTimeAmpListItemTemplate">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Time="/>
-                    <TextBlock Text="{Binding Path=time_value}"/>
-                    <TextBlock Text=", Amp="/>
-                    <TextBlock Text="{Binding Path=amplitude}"/>
-                </StackPanel>
-            </DataTemplate>            
 
             <DataTemplate x:Key="membraneMolPopDetailsTemplate">
                 <local:DaphneStackPanel x:Name="membMolPopDetails" Orientation="Horizontal" >
