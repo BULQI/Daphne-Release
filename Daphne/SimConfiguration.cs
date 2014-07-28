@@ -3999,7 +3999,6 @@ namespace Daphne
             if (_cellPop != null)
             {
                 AddByDistr(cellPop.number);
-                //OnPropertyChanged("CellStates");
             }
         }
 
@@ -4261,6 +4260,7 @@ namespace Daphne
             spState.X = new double[3];
             spState.V = new double[3];
             spState.F = new double[3];
+
             cmState = new CellMolPopState();
             cbState = new CellBehaviorState();
             cgState = new CellGeneState();

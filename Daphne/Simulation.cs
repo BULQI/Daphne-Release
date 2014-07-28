@@ -645,7 +645,14 @@ namespace Daphne
                             cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
                         }
                         cell.DifferentiationState = cell.Differentiator.CurrentState;
-                        cell.SetGeneActivities();
+                        if (cp.CellStates[i].cgState.geneDict.Count > 0)
+                        {
+                            cell.SetGeneActivities(cp.CellStates[i].cgState.geneDict);
+                        }
+                        else
+                        {
+                            cell.SetGeneActivities();
+                        }
                     }
 
                     // division behavior
