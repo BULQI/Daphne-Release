@@ -37,5 +37,8 @@
     <Setting Name="dataBaseBufferMinRows" Type="System.UInt32" Scope="User">
       <Value Profile="(Default)">10000</Value>
     </Setting>
+    <Setting Name="changesCounter" Type="System.UInt64" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
