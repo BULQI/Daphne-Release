@@ -212,6 +212,19 @@ namespace Daphne
         }
 
         /// <summary>
+        /// save gene activity from saved values.
+        /// </summary>
+        /// <param name="geneDict"></param>
+        public void SetGeneActivities(Dictionary<String, double> geneDict)
+        {
+            foreach (var kvp in geneDict)
+            {
+                Genes[kvp.Key].ActivationLevel = kvp.Value;
+            }
+        }
+
+
+        /// <summary>
         /// Returns the force the cell applies to the environment.
         /// </summary>
         public double[] Force(double[] position)
