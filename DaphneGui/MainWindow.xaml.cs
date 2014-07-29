@@ -492,6 +492,7 @@ namespace DaphneGui
 
             if (file_exists)
             {
+                sop = new SystemOfPersistence();
                 initialState(true, true, ReadJson(""));
                 enableCritical(loadSuccess);
                 if (loadSuccess == true)
@@ -1898,7 +1899,7 @@ namespace DaphneGui
 
                 if (protocol != null)
                 {
-                    sop = new SystemOfPersistence();
+                    //sop = new SystemOfPersistence();
                     sop.Protocol = protocol;
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
@@ -2669,6 +2670,10 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
+
+            // remember the changes counter
+            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
+
             // save the preferences
             Properties.Settings.Default.Save();
 

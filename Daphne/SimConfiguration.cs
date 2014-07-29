@@ -35,6 +35,10 @@ namespace Daphne
         /// User level
         /// </summary>
         public Level UserStore { get; set; }
+        /// <summary>
+        /// edit / change counter, used for pushing
+        /// </summary>
+        public static ulong changesCounter;
 
         /// <summary>
         /// constructor
@@ -146,6 +150,279 @@ namespace Daphne
             FileName = fileName;
             TempFile = tempFile;
             entity_repository = new EntityRepository();
+        }
+
+        /// <summary>
+        /// enum for push status
+        /// </summary>
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
+
+        /// <summary>
+        /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
+        /// ConfigMolecule, ConfigTransitionDriver, ConfigDiffScheme, ConfigReaction, ConfigCell, ConfigReactionComplex
+        /// </summary>
+        /// <param name="e">entity to test</param>
+        /// <returns>status</returns>
+        public PushStatus pushStatus(ConfigEntity e)
+        {
+            if (e is ConfigMolecule)
+            {
+                // item does not exist
+                if (entity_repository.molecules_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.molecules_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if(e is ConfigGene)
+            {
+                // item does not exist
+                if (entity_repository.genes_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.genes_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigTransitionDriver)
+            {
+                // item does not exist
+                if (entity_repository.transition_drivers_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.transition_drivers_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigDiffScheme)
+            {
+                // item does not exist
+                if (entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.diff_schemes_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigReaction)
+            {
+                // item does not exist
+                if (entity_repository.reactions_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.reactions_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigReactionTemplate)
+            {
+                // item does not exist
+                if (entity_repository.reaction_templates_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.reaction_templates_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigCell)
+            {
+                // item does not exist
+                if (entity_repository.cells_dict.ContainsKey(e.entity_guid) == false)
+                {
+                    return PushStatus.PUSH_CREATE_ITEM;
+                }
+
+                // newer
+                if (e.change_stamp > entity_repository.cells_dict[e.entity_guid].change_stamp)
+                {
+                    return PushStatus.PUSH_NEWER_ITEM;
+                }
+            }
+            else if (e is ConfigReactionComplex)
+            {
+            }
+            // invalid type
+            else
+            {
+                return PushStatus.PUSH_INVALID;
+            }
+            // must be older
+            return PushStatus.PUSH_OLDER_ITEM;
+        }
+
+        /// <summary>
+        /// push a newer entity into the entity repository of this level
+        /// </summary>
+        /// <param name="e">entity to push</param>
+        /// <param name="s">the push status of e</param>
+        public void repositoryPush(ConfigEntity e, PushStatus s)
+        {
+            if (e is ConfigMolecule)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.molecules.Add(e as ConfigMolecule);
+                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.molecules.Count; i++)
+                    {
+                        if (entity_repository.molecules[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.molecules[i] = e as ConfigMolecule;
+                        }
+                    }
+                    // dict update
+                    entity_repository.molecules_dict[e.entity_guid] = e as ConfigMolecule;
+                }
+            }
+            else if (e is ConfigTransitionDriver)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.transition_drivers.Add(e as ConfigTransitionDriver);
+                    entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.transition_drivers.Count; i++)
+                    {
+                        if (entity_repository.transition_drivers[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.transition_drivers[i] = e as ConfigTransitionDriver;
+                        }
+                    }
+                    // dict update
+                    entity_repository.transition_drivers_dict[e.entity_guid] = e as ConfigTransitionDriver;
+                }
+            }
+            else if (e is ConfigDiffScheme)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
+                    entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.diff_schemes.Count; i++)
+                    {
+                        if (entity_repository.diff_schemes[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.diff_schemes[i] = e as ConfigDiffScheme;
+                        }
+                    }
+                    // dict update
+                    entity_repository.diff_schemes_dict[e.entity_guid] = e as ConfigDiffScheme;
+                }
+            }
+            else if (e is ConfigReaction)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.reactions.Add(e as ConfigReaction);
+                    entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.reactions.Count; i++)
+                    {
+                        if (entity_repository.reactions[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.reactions[i] = e as ConfigReaction;
+                        }
+                    }
+                    // dict update
+                    entity_repository.reactions_dict[e.entity_guid] = e as ConfigReaction;
+                }
+            }
+            else if (e is ConfigReactionTemplate)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.reaction_templates.Add(e as ConfigReactionTemplate);
+                    entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.reactions.Count; i++)
+                    {
+                        if (entity_repository.reaction_templates[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.reaction_templates[i] = e as ConfigReactionTemplate;
+                        }
+                    }
+                    // dict update
+                    entity_repository.reaction_templates_dict[e.entity_guid] = e as ConfigReactionTemplate;
+                }
+            }
+            else if (e is ConfigCell)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.cells.Add(e as ConfigCell);
+                    entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.cells.Count; i++)
+                    {
+                        if (entity_repository.cells[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.cells[i] = e as ConfigCell;
+                        }
+                    }
+                    // dict update
+                    entity_repository.cells_dict[e.entity_guid] = e as ConfigCell;
+                }
+            }
+            else if (e is ConfigReactionComplex)
+            {
+            }
         }
 
         /// <summary>
@@ -284,6 +561,96 @@ namespace Daphne
             //////LoadDefaultGlobalParameters();
 
             reporter_file_name = "";
+        }
+
+        /// <summary>
+        /// special case, push into the entity level; updates all occurrences of e
+        /// </summary>
+        /// <param name="e">the entity to push</param>
+        /// <param name="forced">true for update regardless of change stamp</param>
+        public void entityPush(ConfigEntity e, bool forced)
+        {
+            if (e is ConfigMolecule)
+            {
+                // molecules exist in compartments
+                // ECS
+                scenario.environment.ecs.pushMolecule(e as ConfigMolecule, forced);
+
+                // cells
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    cp.Cell.cytosol.pushMolecule(e as ConfigMolecule, forced);
+                    cp.Cell.membrane.pushMolecule(e as ConfigMolecule, forced);
+                }
+
+                // Needed: molecules exist in reaction complexes and need to be updated there too
+            }
+            else if (e is ConfigTransitionDriver)
+            {
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    // death
+                    if (cp.Cell.death_driver.entity_guid == e.entity_guid)
+                    {
+                        if (forced == true || cp.Cell.death_driver.change_stamp < e.change_stamp)
+                        {
+                            cp.Cell.death_driver = e as ConfigTransitionDriver;
+                        }
+                    }
+                    // div
+                    if (cp.Cell.div_driver.entity_guid == e.entity_guid)
+                    {
+                        if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
+                        {
+                            cp.Cell.div_driver = e as ConfigTransitionDriver;
+                        }
+                    }
+                }
+            }
+            else if (e is ConfigDiffScheme)
+            {
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    if (cp.Cell.diff_scheme.entity_guid == e.entity_guid)
+                    {
+                        if (forced == true || cp.Cell.diff_scheme.change_stamp < e.change_stamp)
+                        {
+                            cp.Cell.diff_scheme = e as ConfigDiffScheme;
+                        }
+                    }
+                }
+            }
+            else if (e is ConfigReaction)
+            {
+                // reactions exist in compartments
+                // ECS
+                scenario.environment.ecs.pushReaction(e as ConfigReaction, forced);
+
+                // cells
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    cp.Cell.cytosol.pushReaction(e as ConfigReaction, forced);
+                    cp.Cell.membrane.pushReaction(e as ConfigReaction, forced);
+                }
+
+                // Needed: reactions exist in reaction complexes and need to be updated there too
+            }
+            else if (e is ConfigCell)
+            {
+                foreach (CellPopulation cp in scenario.cellpopulations)
+                {
+                    if (cp.Cell.entity_guid == e.entity_guid)
+                    {
+                        if (forced == true || cp.Cell.change_stamp < e.change_stamp)
+                        {
+                            cp.Cell = e as ConfigCell;
+                        }
+                    }
+                }
+            }
+            else if (e is ConfigReactionComplex)
+            {
+            }
         }
 
         /// <summary>
@@ -1528,15 +1895,15 @@ namespace Daphne
         public EntityRepository()
         {
             cells = new ObservableCollection<ConfigCell>();
-            molecules = new ObservableCollection<ConfigMolecule>();
-            genes = new ObservableCollection<ConfigGene>();
-            reactions = new ObservableCollection<ConfigReaction>();
-            reaction_templates = new ObservableCollection<ConfigReactionTemplate>();
-            molecules_dict = new Dictionary<string, ConfigMolecule>();
-            genes_dict = new Dictionary<string, ConfigGene>();
-            reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
-            reactions_dict = new Dictionary<string, ConfigReaction>();
             cells_dict = new Dictionary<string, ConfigCell>();
+            molecules = new ObservableCollection<ConfigMolecule>();
+            molecules_dict = new Dictionary<string, ConfigMolecule>();
+            genes = new ObservableCollection<ConfigGene>();
+            genes_dict = new Dictionary<string, ConfigGene>();
+            reactions = new ObservableCollection<ConfigReaction>();
+            reactions_dict = new Dictionary<string, ConfigReaction>();
+            reaction_templates = new ObservableCollection<ConfigReactionTemplate>();
+            reaction_templates_dict = new Dictionary<string, ConfigReactionTemplate>();
             reaction_complexes = new ObservableCollection<ConfigReactionComplex>();
             reaction_complexes_dict = new Dictionary<string, ConfigReactionComplex>();
             diff_schemes = new ObservableCollection<ConfigDiffScheme>();
@@ -2221,8 +2588,13 @@ namespace Daphne
             // initialize time_stamp
         }
 
+        public void incrementChangeStamp()
+        {
+            change_stamp = SystemOfPersistence.changesCounter++;
+        }
+
         public string entity_guid { get; set; }
-        // Time time_stamp { get; set; }
+        public ulong change_stamp { get; set; }
     }
     
     /// <summary>
@@ -2853,6 +3225,22 @@ namespace Daphne
             mp_render_blending_weight = 1.0;
             mp_render_on = true;
         }
+
+        /// <summary>
+        /// push a molecule into this molpop
+        /// </summary>
+        /// <param name="m">the molecule</param>
+        /// <param name="forced">true for forced push regardless of change stamp</param>
+        public void pushMolecule(ConfigMolecule m, bool forced)
+        {
+            if (molecule.entity_guid == m.entity_guid)
+            {
+                if (forced == true || molecule.change_stamp < m.change_stamp)
+                {
+                    molecule = m;
+                }
+            }
+        }
     }
 
     public class ConfigCompartment : EntityModelBase
@@ -2896,6 +3284,55 @@ namespace Daphne
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
             _reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+        }
+
+        /// <summary>
+        /// push a molecule into this compartment
+        /// </summary>
+        /// <param name="m">the molecule</param>
+        /// <param name="forced">true for forced push regardless of change stamp</param>
+        public void pushMolecule(ConfigMolecule m, bool forced)
+        {
+            if (molecules_dict.ContainsKey(m.entity_guid) == true)
+            {
+                if (forced == true || molecules_dict[m.entity_guid].change_stamp < m.change_stamp)
+                {
+                    molecules_dict[m.entity_guid] = m;
+                }
+            }
+            foreach(ConfigMolecularPopulation mp in molpops)
+            {
+                mp.pushMolecule(m, forced);
+                // should always be in the dictionary also, but check for safety
+                if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
+                {
+                    molpops_dict[mp.molpop_guid].pushMolecule(m, forced);
+                }
+            }
+        }
+
+        /// <summary>
+        /// push a reaction into this compartment
+        /// </summary>
+        /// <param name="r">the reaction</param>
+        /// <param name="forced">true for forced push regardless of change stamp</param>
+        public void pushReaction(ConfigReaction r, bool forced)
+        {
+            for(int i = 0; i < Reactions.Count; i++)
+            {
+                if (Reactions[i].entity_guid == r.entity_guid)
+                {
+                    if (forced == true || Reactions[i].change_stamp < r.change_stamp)
+                    {
+                        Reactions[i] = r;
+                        // should always be in the dictionary also, but check for safety
+                        if (reactions_dict.ContainsKey(r.entity_guid) == true)
+                        {
+                            reactions_dict[r.entity_guid] = r;
+                        }
+                    }
+                }
+            }
         }
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
