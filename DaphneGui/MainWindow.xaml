@@ -485,6 +485,10 @@
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" >
                                 </work:ChartViewToolWindow>
 
+                                <!--<docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="rightCellDetailsTWContainer" AutomationProperties.AutomationId="DaphneRightCellDetailsTWContainer">
+                                    <local:CellDetailsToolWindow x:Name="CellDetailsToolWindow" Title="Cell Details" />
+                                </docking:ToolWindowContainer>-->
+
                             </docking:TabbedMdiContainer>
 
                         </docking:TabbedMdiHost>

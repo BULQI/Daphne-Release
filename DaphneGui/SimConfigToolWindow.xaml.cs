@@ -319,160 +319,6 @@ namespace DaphneGui
             }
         }
 
-        private void MembraneMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Only want to respond to purposeful user interaction, not just population and depopulation
-            // of solfacs list
-            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            ////////    return;
-
-
-            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
-
-            if (current_mol != null)
-            {
-                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
-                if (e.AddedItems.Count > 0)
-                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
-
-
-                // Only want to change distribution type if the combo box isn't just selecting 
-                // the type of current item in the solfacs list box (e.g. when list selection is changed)
-
-                if (current_mol.mp_distribution == null)
-                {
-                }
-                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
-                {
-                    return;
-                }
-                switch (new_dist_type)
-                {
-                    case MolPopDistributionType.Homogeneous:
-                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_mol.mp_distribution = shl;
-                        break;
-                    case MolPopDistributionType.Linear:
-                        MolPopLinear slg = new MolPopLinear();
-                        current_mol.mp_distribution = slg;
-                        break;
-                    case MolPopDistributionType.Gaussian:
-                        // Make sure there is at least one gauss_spec in repository
-                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
-                        ////{
-                        ////    this.AddGaussianSpecification();
-                        ////}
-                        MolPopGaussian sgg = new MolPopGaussian();
-                        GaussianSpecification gg = new GaussianSpecification();
-                        BoxSpecification box = new BoxSpecification();
-                        box.x_scale = 200;
-                        box.y_scale = 200;
-                        box.z_scale = 200;
-                        box.x_trans = 500;
-                        box.y_trans = 500;
-                        box.z_trans = 500;
-                        MainWindow.SOP.Protocol.scenario.box_specifications.Add(box);
-                        gg.gaussian_spec_box_guid_ref = box.box_guid;
-                        gg.gaussian_spec_name = "Off-center gaussian";
-                        gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-                        MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
-                        sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
-                        current_mol.mp_distribution = sgg;
-                        break;                    
-                    default:
-                        throw new ArgumentException("MolPop distribution type out of range");
-                }
-            }
-        }
-
-        private void CytosolMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Only want to respond to purposeful user interaction, not just population and depopulation
-            // of solfacs list
-            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-            ////////    return;
-
-
-            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
-
-            if (current_mol != null)
-            {
-
-                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
-                if (e.AddedItems.Count > 0)
-                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
-
-
-                // Only want to change distribution type if the combo box isn't just selecting 
-                // the type of current item in the solfacs list box (e.g. when list selection is changed)
-
-                if (current_mol.mp_distribution == null)
-                {
-                }
-                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
-                {
-                    return;
-                }
-                //else
-                //{
-                switch (new_dist_type)
-                {
-                    case MolPopDistributionType.Homogeneous:
-                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-                        current_mol.mp_distribution = shl;
-                        break;
-                    case MolPopDistributionType.Linear:
-                        MolPopLinear slg = new MolPopLinear();
-                        current_mol.mp_distribution = slg;
-                        break;
-                    case MolPopDistributionType.Gaussian:
-                        // Make sure there is at least one gauss_spec in repository
-                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
-                        ////{
-                        ////    this.AddGaussianSpecification();
-                        ////}
-                        MolPopGaussian sgg = new MolPopGaussian();
-                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SOP.Protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-                        current_mol.mp_distribution = sgg;
-                        break;
-
-#if allow_dist_from_file
-                    //case MolPopDistributionType.Custom:
-
-                    //    var prev_distribution = current_mol.mp_distribution;
-                    //    MolPopCustom scg = new MolPopCustom();
-                    //    current_mol.mp_distribution = scg;
-
-                    //    // Configure open file dialog box
-                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-                    //    dlg.InitialDirectory = MainWindow.appPath;
-                    //    dlg.DefaultExt = ".txt"; // Default file extension
-                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
-
-                    //    // Show open file dialog box
-                    //    Nullable<bool> result = dlg.ShowDialog();
-
-                    //    // Process open file dialog box results
-                    //    if (result == true)
-                    //    {
-                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-                    //        string filename = dlg.FileName;
-                    //        scg.custom_gradient_file_string = filename;
-                    //    }
-                    //    else
-                    //    {
-                    //        current_mol.mp_distribution = prev_distribution;
-                    //    }
-                    //    break;  
-#endif
-
-                    default:
-                        throw new ArgumentException("MolPop distribution type out of range");
-                }
-                //}
-            }
-        }
-
         /// <summary>
         /// switch to the sim setup panel
         /// </summary>
@@ -1071,30 +917,6 @@ namespace DaphneGui
         }
 
         //CELLS EVENT HANDLERS
-        private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            bool needRefresh = false;
-
-            foreach (var item in lvCellAvailableReacs.SelectedItems)
-            {
-                ConfigReaction cr = (ConfigReaction)item;
-                if (cc != null && cr != null)
-                {
-                    if (cc.membrane.Reactions.Contains(cr) == false)
-                    {
-                        cc.membrane.Reactions.Add(cr.Clone(true));
-
-                        needRefresh = true;
-                    }
-                }
-            }
-
-            //Refresh filter
-            if (needRefresh && lvCellAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
-
-        }
 
         private bool MembraneHasMolecule(ConfigCell cell, string molguid)
         {
@@ -1119,172 +941,12 @@ namespace DaphneGui
             return false;
         }
 
-        private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
-            bool needRefresh = false;
-
-            foreach (var item in lvCytosolAvailableReacs.SelectedItems)
-            {
-                ConfigReaction cr = (ConfigReaction)item;
-                if (cc != null && cr != null)
-                {
-                    //Add to reactions list only if the cell does not already contain this reaction
-                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
-                    {
-                        cc.cytosol.Reactions.Add(cr.Clone(true));
-
-                        needRefresh = true;
-                    }
-                }
-            }
-
-            //Refresh the filter
-            if (needRefresh && lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
-        }
-
-        private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            cmp.Name = "NewMP";
-            cmp.mp_dist_name = "New distribution";
-            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            cmp.mp_render_on = true;
-            cmp.mp_distribution = new MolPopHomogeneousLevel();
-
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBoundaryMoleculesListView"));
-            cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
-
-            ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
-            mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            if (mol_list != null)
-            {
-                cmp.molecule = mol_list.First().Clone(null);
-            }
-            else
-            {
-                return;
-            }
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            if (cell == null)
-                return;
-
-            cell.membrane.molpops.Add(cmp);
-            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
-
-
-        }
-
-        private void MembraneRemoveMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
-
-            if (cmp == null)
-                return;
-
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-
-            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
-            {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
-                {
-                    cell.membrane.Reactions.Remove(cr);
-                }
-            }
-            //added 1/10/14
-            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
-            {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
-                {
-                    cell.cytosol.Reactions.Remove(cr);
-                }
-            }            
-
-            cell.membrane.molpops.Remove(cmp);
-            CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
-
-            if (lvCellAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
-        }
-
-        private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            cmp.Name = "NewMP";
-            cmp.mp_dist_name = "New distribution";
-            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            cmp.mp_render_on = true;
-            cmp.mp_distribution = new MolPopHomogeneousLevel();
-            //cmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
-
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
-            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            if (mol_list != null)
-            {
-                cmp.molecule = mol_list.First().Clone(null);
-            }
-            else
-            {
-                return;
-            }
-
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            if (cell == null)
-                return; 
-
-            cell.cytosol.molpops.Add(cmp);
-            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-        }
-
-        private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
-
-            if (cmp == null)
-                return;
-
-            MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove cell reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
-            
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-
-            foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
-            {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
-                {
-                    cell.cytosol.Reactions.Remove(cr);
-                }
-            }
-
-            //added 1/10/14
-            foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
-            {
-                if (cr.HasMolecule(cmp.molecule.entity_guid))
-                {
-                    cell.membrane.Reactions.Remove(cr);
-                }
-            }
-
-            cell.cytosol.molpops.Remove(cmp);
-            CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
-
-            if (lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();            
-        }
-
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (lvCellAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
-            if (lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //if (lvCellAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            //if (lvCytosolAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
 
             DiffSchemeExpander_Expanded(null, null);
 
@@ -1298,34 +960,7 @@ namespace DaphneGui
         {
         }
 
-        private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            int nIndex = MembReacListBox.SelectedIndex;
-
-            if (nIndex >= 0)
-            {
-                ConfigReaction cr = (ConfigReaction)MembReacListBox.SelectedValue;
-                if (cr != null)
-                {
-                    cell.membrane.Reactions.Remove(cr);
-                }
-            }
-        }
-
-        private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            int nIndex = CytosolReacListBox.SelectedIndex;
-            if (nIndex >= 0)
-            {
-                ConfigReaction cr = (ConfigReaction)CytosolReacListBox.SelectedValue;
-                if (cr != null)
-                {
-                    cell.cytosol.Reactions.Remove(cr);
-                }
-            }
-        }
+        
 
         //****************************************************************************************************************
 
@@ -2400,22 +2035,22 @@ namespace DaphneGui
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (lvCellAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
-            if (lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //if (lvCellAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            //if (lvCytosolAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
-            if (lvCellAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+            //if (lvCellAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
         }
 
         private void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
         {
-            if (lvCytosolAvailableReacs.ItemsSource != null)
-                CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //if (lvCytosolAvailableReacs.ItemsSource != null)
+            //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         //This helps in refreshing the available reactions for the ECM tab
@@ -2473,179 +2108,6 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
         }
 
-        private void memb_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox cb = (ComboBox)e.Source;
-            if (cb == null)
-                return;
-
-            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
-
-            if (molpop == null)
-                return;
-
-            string curr_mol_pop_name = molpop.Name;
-            string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule.entity_guid;
-
-            int nIndex = cb.SelectedIndex;
-            if (nIndex < 0)
-                return;
-
-            //if user picked 'new molecule' then create new molecule in ER
-            if (nIndex == (cb.Items.Count - 1))
-            {
-                ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                newLibMol.molecule_location = MoleculeLocation.Boundary;
-                AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
-
-                //if user cancels out of new molecule dialog, set selected molecule back to what it was
-                if (aem.ShowDialog() == false)
-                {
-                    if (e.RemovedItems.Count > 0)
-                    {
-                        cb.SelectedItem = e.RemovedItems[0];
-                    }
-                    else
-                    {
-                        cb.SelectedIndex = 0;
-                    }
-                    return;
-                }
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
-                molpop.molecule = newLibMol.Clone(null);
-                molpop.Name = newLibMol.Name;
-
-                CollectionViewSource.GetDefaultView(cb.ItemsSource).Refresh();
-                cb.SelectedItem = newLibMol;
-            }
-            //user picked an existing molecule
-            else
-            {
-                ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
-
-                //if molecule has not changed, return
-                if (newmol.entity_guid == curr_mol_guid)
-                {
-                    return;
-                }
-
-                //if molecule changed, then make a clone of the newly selected one from entity repository
-                ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-                molpop.molecule = mol.Clone(null);
-
-                string new_mol_name = mol.Name;
-                if (curr_mol_guid != molpop.molecule.entity_guid)
-                    molpop.Name = new_mol_name;
-            }
-            //if (e.AddedItems.Count > 0 && e.RemovedItems.Count > 0)
-            //{
-            //    ConfigMolecule newmol = (ConfigMolecule)e.AddedItems[0];
-            //    ConfigMolecule oldmol = (ConfigMolecule)e.RemovedItems[0];
-
-            //    if (newmol.entity_guid == oldmol.entity_guid)
-            //        return;
-
-            //}
-
-            //ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
-
-            //if (molpop == null)
-            //    return;
-
-            //string curr_mol_pop_name = molpop.Name;
-            //string curr_mol_guid = "";
-            //curr_mol_guid = molpop.molecule.entity_guid;
-
-            //int nIndex = cb.SelectedIndex;
-            //if (nIndex < 0)
-            //    return;
-
-            //ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            //molpop.molecule = mol.Clone(null);
-
-            //string new_mol_name = mol.Name;
-            //if (curr_mol_guid != molpop.molecule.entity_guid)
-            //    molpop.Name = new_mol_name;
-
-        }
-
-        private void cyto_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox cb = (ComboBox)e.Source;
-            if (cb == null)
-                return;
-
-            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
-
-            if (molpop == null)
-                return;
-
-            string curr_mol_pop_name = molpop.Name;
-            string curr_mol_guid = "";
-            curr_mol_guid = molpop.molecule.entity_guid;
-
-            int nIndex = cb.SelectedIndex;
-            if (nIndex < 0)
-                return;
-
-            //if user picked 'new molecule' then create new molecule in ER
-            if (nIndex == (cb.Items.Count - 1))
-            {
-                ConfigMolecule newLibMol = new ConfigMolecule();
-                newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
-
-                //if user cancels out of new molecule dialog, set selected molecule back to what it was
-                if (aem.ShowDialog() == false)
-                {
-                    if (e.RemovedItems.Count > 0)
-                    {
-                        cb.SelectedItem = e.RemovedItems[0];
-                    }
-                    else
-                    {
-                        cb.SelectedIndex = 0;
-                    }
-                    return;
-                }
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
-                molpop.molecule = newLibMol.Clone(null);
-                molpop.Name = newLibMol.Name;
-
-                CollectionViewSource.GetDefaultView(cb.ItemsSource).Refresh();
-                cb.SelectedItem = newLibMol;
-            }
-            //user picked an existing molecule
-            else
-            {
-                ConfigMolecule newmol = (ConfigMolecule)cb.SelectedItem;
-
-                //if molecule has not changed, return
-                if (newmol.entity_guid == curr_mol_guid)
-                {
-                    return;
-                }
-
-                //if molecule changed, then make a clone of the newly selected one from entity repository
-                ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-                molpop.molecule = mol.Clone(null);
-
-                string new_mol_name = mol.Name;
-                if (curr_mol_guid != molpop.molecule.entity_guid)
-                    molpop.Name = new_mol_name;
-            }
-
-            //ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            //molpop.molecule = mol.Clone(null);
-
-            //string new_mol_name = mol.Name;
-            //if (curr_mol_guid != molpop.molecule.entity_guid)
-            //    molpop.Name = new_mol_name;
-            
-            CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
-        }
 
         private void memb_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -2767,73 +2229,7 @@ namespace DaphneGui
             //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
 
         }
-
-        private void CellNucleusGenesListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            txtGeneName.IsEnabled = false;
-        }
-
-        private void NucleusNewGeneButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigGene gene = new ConfigGene("NewGene", 0, 0);
-            gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            cell.genes_guid_ref.Add(gene.entity_guid);
-            //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
-            CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
-
-            string guid = (string)CellNucleusGenesListBox.SelectedItem;
-            CellNucleusGenesListBox.ScrollIntoView(guid);
-            txtGeneName.IsEnabled = true;
-        }
-
-        private void NucleusAddGeneButton_Click(object sender, RoutedEventArgs e)
-        {
-            //Get selected cell
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-
-            //if no cell selected, return
-            if (cell == null)
-                return;
-
-            //Show a dialog that gets the new gene's name
-            AddGeneToCell ads = new AddGeneToCell(cell);
-
-            //If user clicked 'apply' and not 'cancel'
-            if (ads.ShowDialog() == true)
-            {
-                ConfigGene geneToAdd = ads.SelectedGene;
-                if (geneToAdd == null)
-                    return;
-
-                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
-            }
-
-            txtGeneName.IsEnabled = false;
-        }
-
-        private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
-
-            if (gene_guid == "")
-                return;
-
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
-
-            if (res == MessageBoxResult.No)
-                return;
-
-            if (cell.genes_guid_ref.Contains(gene_guid))
-            {
-                cell.genes_guid_ref.Remove(gene_guid);
-            }
-
-            txtGeneName.IsEnabled = false;
-        }
-
+       
         private void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
         {
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
@@ -4081,27 +3477,9 @@ namespace DaphneGui
 
         }
 
-        public void TextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            //This is not getting called for some reason!
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            int nIndex = CytosolReacListBox.SelectedIndex;
-            if (nIndex >= 0)
-            {
-                ConfigReaction cr = (ConfigReaction)CytosolReacListBox.SelectedItem;
-                if (cr != null)
-                {
-                    cell.cytosol.Reactions.Remove(cr);
-                    cell.cytosol.Reactions.Add(cr);
-                }
-            }
-        }
+        
 
-        private void CytosolReacListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ReacParams2.IsExpanded = true;
-        }
-
+        
         private void ecm_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;

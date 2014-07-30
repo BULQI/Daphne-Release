@@ -185,6 +185,9 @@
     <Compile Include="AddGeneToCell.xaml.cs">
       <DependentUpon>AddGeneToCell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsControl.xaml.cs">
+      <DependentUpon>CellDetailsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
     <Compile Include="DaphneStackPanel.cs" />
     <Compile Include="DocWindow.xaml.cs">
@@ -244,6 +247,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="AddGeneToCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellDetailsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
