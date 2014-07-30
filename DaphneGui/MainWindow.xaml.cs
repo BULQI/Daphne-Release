@@ -1253,12 +1253,12 @@ namespace DaphneGui
         private void setDrawingSettings_Click(object sender, RoutedEventArgs e)
         {
             RenderDrawingDlg ren = new RenderDrawingDlg();
-            Color oldColor = SOP.Palette.renderDrawing.bg_color.EntityColor;
-            ren.DataContext = SOP;
-            if (ren.ShowDialog() == false)
-            {
-                SOP.Palette.renderDrawing.bg_color.EntityColor = oldColor;
-            }
+            //Color oldColor = SOP.Palette.renderDrawing.bg_color.EntityColor;
+            //ren.DataContext = SOP;
+            //if (ren.ShowDialog() == false)
+            //{
+            //    SOP.Palette.renderDrawing.bg_color.EntityColor = oldColor;
+            //}
         }
 
         private void bufferDatabaseWriteMenu_Click(object sender, RoutedEventArgs e)
