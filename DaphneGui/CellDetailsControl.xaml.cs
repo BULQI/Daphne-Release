@@ -385,7 +385,7 @@ namespace DaphneGui
 
         private void CytosolReacListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ReacParams2.IsExpanded = true;
+            //ReacParams2.IsExpanded = true;
         }
 
         private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)

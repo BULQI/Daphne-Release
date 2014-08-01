@@ -2194,18 +2194,18 @@
                                             </Style>
                                         </GridView.ColumnHeaderContainerStyle>
 
-                                        <GridViewColumn Width="80" Header="Rate constant">
+                                        <GridViewColumn Width="100" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding rate_const, StringFormat=G5}">
-                                                        <TextBlock.Style>
+                                                    <TextBox Width="70" Text="{Binding rate_const, StringFormat=G5}">
+                                                        <TextBox.Style>
                                                             <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
+                                                                <Setter Property="TextBox.Foreground" 
                                                                         Value="Black">
                                                                 </Setter>
                                                             </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                        </TextBox.Style>
+                                                    </TextBox>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -2235,7 +2235,7 @@
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
 
-                            <StackPanel>
+                            <!--<StackPanel>
                                 <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Reaction Properties"
@@ -2249,7 +2249,7 @@
                                         ContentTemplate="{StaticResource editReactionTemplate}" 
                                         Margin="6"/>
                                 </Expander>
-                            </StackPanel>
+                            </StackPanel>-->
 
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"

@@ -474,7 +474,7 @@
                         <StackPanel.Resources>
                             <DataTemplate x:Key="cellReacListItemTemplate">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Width="40" MinWidth="40" Text="{Binding rate_const, StringFormat=G5}" />
+                                    <TextBox Width="60" MinWidth="40" Text="{Binding rate_const, StringFormat=G5}" />
                                     <TextBlock Margin="10,0" Text="{Binding TotalReactionString}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -505,7 +505,7 @@
                                             <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                         </StackPanel>
                                         <StackPanel>
-                                            <Expander x:Name="ReacProperties"
+                                            <!--<Expander x:Name="ReacProperties"
                                                                   ExpandDirection="Down"
                                                                       IsExpanded="False"
                                                                       Header="Reaction Properties"
@@ -519,7 +519,7 @@
                                                         <TextBox Margin="10,0" Height="24" Width="400" IsEnabled="False" Text="{Binding ElementName=MembReacListBox, Path=SelectedItem.TotalReactionString}"></TextBox>
                                                     </StackPanel>
                                                 </StackPanel>
-                                            </Expander>
+                                            </Expander>-->
                                             <Expander x:Name="CellAddReacExpander"
                                                                 ExpandDirection="Down"
                                                                 IsExpanded="False"
@@ -626,7 +626,7 @@
                                             <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
                                         </StackPanel>
                                         <StackPanel>
-                                            <Expander x:Name="ReacParams2" 
+                                            <!--<Expander x:Name="ReacParams2" 
                                                                   ExpandDirection="Down"
                                                                       IsExpanded="False"
                                                                       Header="Reaction Properties"
@@ -642,7 +642,7 @@
                                                         </TextBox>
                                                     </StackPanel>
                                                 </StackPanel>
-                                            </Expander>
+                                            </Expander>-->
                                             <Expander x:Name="CellAddReacExpander2" 
                                                                   ExpandDirection="Down"
                                                                     IsExpanded="False"
