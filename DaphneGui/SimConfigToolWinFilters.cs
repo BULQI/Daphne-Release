@@ -73,25 +73,6 @@ namespace DaphneGui
                 e.Accepted = false;
                 return;
             }
-
-            if (this.DataContext == null)return;
-            var ecs_molpops = MainWindow.SOP.Protocol.scenario.environment.ecs.molpops;
-            if (ecs_molpops == null)
-            {
-                e.Accepted = true;
-                return;
-            }
-            CollectionView colView = (CollectionView)CollectionViewSource.GetDefaultView(ecs_molpops);
-            //check if the molecule is in the list
-            foreach (ConfigMolecularPopulation cfp in colView)
-            {
-                if (cfp == colView.CurrentItem) continue;
-                if (cfp.molecule.Name == mol.Name)
-                {
-                    e.Accepted = false;
-                    return;
-                }
-            }
             e.Accepted = true;
             return;
         }
