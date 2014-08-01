@@ -339,7 +339,7 @@
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 <!-- Sim Config Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Simulation Configuration" />
+                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Protocol" />
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->

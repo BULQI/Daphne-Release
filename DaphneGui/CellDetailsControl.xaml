@@ -15,6 +15,8 @@
     <UserControl.Resources>
         <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
         <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
+        <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
+        <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
 
         <CollectionViewSource x:Key="cytoGenes2ListView"  
                               />
@@ -490,7 +492,15 @@
                                                              ItemsSource="{Binding Path=membrane.Reactions}"
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              >
-                                        </ListBox>
+
+
+                                        <ListBox.ContextMenu>
+                                            <ContextMenu >
+                                                <MenuItem Header="Push to Protocol level" Name="menuPushToProto"></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menuPullFromProto" ></MenuItem>
+                                            </ContextMenu>
+                                        </ListBox.ContextMenu>
+                                    </ListBox>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                         </StackPanel>
@@ -526,7 +536,8 @@
                                                                                 MinHeight="50" MaxHeight="150"
                                                                                 >
 
-                                                        <ListView.View>
+                                                    
+                                                    <ListView.View>
                                                             <GridView>
                                                                 <GridView.ColumnHeaderContainerStyle>
                                                                     <Style TargetType="GridViewColumnHeader">
@@ -602,7 +613,15 @@
                                                              ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
                                                              MouseDoubleClick="CytosolReacListBox_MouseDoubleClick"
                                                              >
-                                        </ListBox>
+
+                                        <ListBox.ContextMenu>
+                                            <ContextMenu >
+                                                <MenuItem Header="Push to Protocol level" Name="menu2PushToProto" Click="menu2PushToProto_Click"></MenuItem>
+                                                <MenuItem Header="Pull from Potocol level" Name="menu2PullFromProto" ></MenuItem>
+                                            </ContextMenu>
+                                        </ListBox.ContextMenu>
+
+                                    </ListBox>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
                                         </StackPanel>
@@ -711,7 +730,434 @@
                     </StackPanel>
                 </Expander>
 
-            </local:DaphneStackPanel>
+            <!-- Cell Death -->
+            <Expander   Padding="5" ExpandDirection="Down" IsExpanded="False"  Header="Cell Death" x:Name="CellDeathExpander" 
+                                                Margin="0,5,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                <StackPanel>
+                    <StackPanel x:Name="spDeath" Orientation="Vertical" >
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <Button x:Name="btnNewDeathDriver" Click="btnNewDeathDriver_Click">New Death Driver</Button>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding  Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=death_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Button x:Name="btnDelDeathDriver" Click="btnDelDeathDriver_Click">Delete Death Driver</Button>
+                            <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label1" VerticalAlignment="Top" Width="200" />
+                            <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDeathMolPop2" VerticalAlignment="Top" Width="196"
+                                                              ItemsSource="{Binding Path=cytosol.molpops}"
+                                                              DisplayMemberPath="Name" 
+                                                              SelectedValue="{Binding Path=death_driver.DriverElements[0].elements[1].driver_mol_guid_ref, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectedValuePath="molecule.entity_guid"
+                                                              
+                                                              >
+                            </ComboBox>
+                            <Label Content="Background Death Rate" Height="28" HorizontalAlignment="Left"  Name="labelDeath1" VerticalAlignment="Top" Width="200" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDeathRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
+                                                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                                             />
+
+                            <Label Content="Death Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDeath2" VerticalAlignment="Top" Width="200" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtDeathRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
+                                                            Text="{Binding Path=death_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"
+                                                             />
+
+                        </StackPanel>
+
+                        <StackPanel Height="10"></StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+
+            <!-- Cell Division -->
+            <Expander   Header="Cell Division"
+                                                Padding="5" 
+                                                ExpandDirection="Down"
+                                                IsExpanded="False"
+                                                x:Name="CellDivisionExpander"
+                                                Margin="0,5,0,0" 
+                                                Canvas.ZIndex="1"
+                                                BorderThickness="1"
+                                                BorderBrush="Black"
+                                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                <StackPanel>
+                    <StackPanel x:Name="spDivision" Orientation="Vertical" >
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=div_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=div_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <Button x:Name="btnNewDivDriver" Click="btnNewDivDriver_Click">New Division Driver</Button>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=div_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=div_driver, Converter={StaticResource DivDeathDriverToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Button x:Name="btnDelDivDriver" Click="btnDelDivDriver_Click">Delete Division Driver</Button>
+                            <Label Content="Molecular Population" Height="28" HorizontalAlignment="Left" Name="label111" VerticalAlignment="Top" Width="200" />
+                            <ComboBox Height="24" HorizontalAlignment="Left" Margin="4,0" x:Name="comboDivisionMolPops" VerticalAlignment="Top" Width="196"
+                                                          ItemsSource="{Binding Path=cytosol.molpops}" 
+                                                          DisplayMemberPath="Name" 
+                                                          SelectedValue="{Binding Path=div_driver.DriverElements[0].elements[1].driver_mol_guid_ref}"
+                                                          SelectedValuePath="molecule.entity_guid"
+                                                          >
+                            </ComboBox>
+                            <Label Content="Background Division Rate" Height="28" HorizontalAlignment="Left"  Name="labelDiv1" VerticalAlignment="Top" Width="200" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtBackgroundDivRate" Margin="4,-4" VerticalAlignment="Top" Width="196" 
+                                                        Text="{Binding Path=div_driver.DriverElements[0].elements[1].Alpha, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
+
+                            <Label Content="Division Rate Linear Coefficient" Height="28" HorizontalAlignment="Left" Name="labelDiv2" VerticalAlignment="Top" Width="200" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Name="txtDivRateLinearCoeff" Margin="4,-4" VerticalAlignment="Bottom" Width="196"
+                                                        Text="{Binding Path=div_driver.DriverElements[0].elements[1].Beta, Mode=TwoWay, UpdateSourceTrigger=LostFocus }"/>
+
+                        </StackPanel>
+
+
+
+
+
+                        <StackPanel Height="10"></StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+
+            <!-- DIFFERENTIATION SCHEME -->
+            <Expander   
+                                        Padding="5" ExpandDirection="Down"
+                                        IsExpanded="False"
+                                        Header="Differentiation Scheme"                                                  
+                                        x:Name="DiffSchemeExpander"
+                                        Margin="0,4,0,0" 
+                                        Canvas.ZIndex="1"
+                                        BorderThickness="1"
+                                        BorderBrush="Black"
+                                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
+                    <StackPanel>
+                        <Grid >
+                            <Grid.Resources>
+                                <DataTemplate x:Key="diffSchemeListItemTemplate2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Path=Hello}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="geneListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="50" Text="{Binding Path=Name}" />
+                                        <CheckBox IsChecked="{Binding Path=Active}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="stateListItemTemplate">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock VerticalAlignment="Top" Text="{Binding Path=Name}" />
+                                        <ListBox VerticalContentAlignment="Top" HorizontalContentAlignment="Center" 
+                                                            ItemsSource="{Binding Path=Genes}" DisplayMemberPath="Active" 
+                                                            ItemTemplate="{Binding Source={StaticResource geneListItemTemplate}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="cellState2ListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="20" Text="{Binding Path=Name}" />
+                                        <TextBlock Width="10" Text="" />
+                                        <TextBox Width="50" Text="{Binding Path=MolName}" />
+
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="diffStatesListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="80" Text="{Binding Path=Name}" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="cellStateGridItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Width="80" Text="{Binding Path=MolName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </Grid.Resources>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="120" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- DIFFERENTIATION SCHEME -->
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click">Delete Differentiation Scheme</Button>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click">New Differentiation Scheme</Button>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
+
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
+                                <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
+                                                                Text="{Binding  Path=diff_scheme.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                </TextBox>
+                            </StackPanel>
+
+                            <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
+                                                        <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+
+                            </TextBlock>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
+
+                            </StackPanel>
+
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical" x:Name="spDiffRegPanel" 
+                                                  Visibility="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}">
+
+                        <!-- This datagrid is for Epigenetic Map and is the best one so far -->
+                        <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
+                                                            AutoGenerateColumns="False"
+                                                            IsReadOnly="False"
+                                                            CanUserAddRows="True"       
+                                                            CanUserReorderColumns="False"
+                                                            CanUserSortColumns="False"
+                                                            AlternatingRowBackground="Beige"
+                                                            SelectionMode="Extended"
+                                                            SelectionUnit="FullRow"
+                                                            PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
+                                                            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
+                                                            >
+
+                            <DataGrid.ContextMenu>
+                                <ContextMenu >
+                                    <MenuItem Header="Delete Selected Genes" Name="menuDeleteGenes" Click="menuDeleteGenes_Click"></MenuItem>
+                                    <MenuItem Header="Delete Selected States" Name="menuDeleteStates" Click="menuDeleteStates_Click"></MenuItem>
+                                    <MenuItem Header="Add a State" Name="menuAddState" Click="menuAddState_Click"></MenuItem>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+
+                            <DataGrid.Resources>
+                                <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                                                                BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <!-- This trigger highlights a column if user clicks on column header -->
+                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                                            <Setter Property="Background" Value="LightGray"/>
+                                        </Trigger>
+
+                                        <!-- This trigger highlights a grid cell if user hovers over it -->
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
+                                            <Setter Property="Background" Value="LightGray"/>
+                                        </Trigger>
+
+                                        <!-- This trigger highlights a grid cell if user clicks on it -->
+                                        <Trigger Property="IsSelected" Value="true">
+                                            <Setter Property="Background" Value="LightBlue" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                            <Setter Property="BorderBrush" Value="Black" />
+                                        </Trigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                                <Style TargetType="{x:Type DataGridColumnHeader}">
+                                    <Style.Triggers>
+                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                                            <Setter Property="Background"  Value="LightGray"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style TargetType="{x:Type DataGridRow}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background"  Value="LightGray"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+
+                            </DataGrid.Resources>
+
+
+                        </DataGrid>
+                        <!-- This is the Differentiation Regulators datagrid -->
+                        <DataGrid MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0" x:Name="DiffRegGrid" 
+                                                            AutoGenerateColumns="False"
+                                                            IsReadOnly="False"
+                                                            CanUserAddRows="False"
+                                                            AlternatingRowBackground="Beige"
+                                                            SelectionMode="Single"
+                                                            SelectionUnit="Cell"
+                                                            SelectedCellsChanged="DiffRegGrid_SelectedCellsChanged"
+                                                            PresentationTraceSources.TraceLevel="High"
+                                                            HorizontalGridLinesBrush="DarkBlue"
+                                                            
+                                                            >
+
+                            <DataGrid.Resources>
+                                <Style x:Name="DiffRegComboStyle" TargetType="ComboBox">
+                                    <Setter Property="IsEnabled" Value="True" />
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </Style>
+                            </DataGrid.Resources>
+
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+
+                        </DataGrid>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
+
+        </local:DaphneStackPanel>
         <!--</Expander>-->
     </Grid>
 </UserControl>
