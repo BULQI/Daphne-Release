@@ -1133,8 +1133,8 @@
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=Cell.entity_guid, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="entity_guid">
+                                        SelectedValue="{Binding Path=Cell.CellName, UpdateSourceTrigger=Explicit}"
+                                        SelectedValuePath="CellName">
                             
                         </ComboBox>
 

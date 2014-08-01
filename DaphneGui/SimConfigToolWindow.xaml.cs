@@ -681,7 +681,8 @@ namespace DaphneGui
             bool ret = false;
             foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
             {
-                ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
+                //ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
+                ConfigCell cell = cell_pop.Cell;
                 if (MembraneHasMolecule(cell, molguid))
                     return true;
             }
@@ -1739,10 +1740,11 @@ namespace DaphneGui
             //guid to object changes
             //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
             ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
-
+            //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
+            //of configCell, it will has its own entity_guid - only the name stays the same ---
             if (cell_to_clone.entity_guid != curr_cell_type_guid)
             {
-                cp.Cell = cell_to_clone.Clone(true);
+                cp.Cell = cell_to_clone.Clone(false);
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
