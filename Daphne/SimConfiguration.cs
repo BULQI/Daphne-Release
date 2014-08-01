@@ -4363,7 +4363,6 @@ namespace Daphne
                             AddByPosition( new double[] {Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 } );
                         }
                         System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellPop.CellStates.Count + ".");
-                        OnPropertyChanged("CellStates");
                         cellPop.number = cellPop.CellStates.Count;
                         return;
                     }
@@ -4469,12 +4468,12 @@ namespace Daphne
             {
                 AddByDistr(_cellPop.number);
             }
-            else
-            {
-                // json deserialization puts us here
-                AddByDistr(1);
-            }
-            OnPropertyChanged("CellStates");
+            //else
+            //{
+            //    // json deserialization puts us here
+            //    AddByDistr(1);
+            //}
+            //OnPropertyChanged("CellStates");
         }
 
         public override double[] nextPosition()
@@ -4561,13 +4560,13 @@ namespace Daphne
             {
                 AddByDistr(_cellPop.number);
             }
-            else
-            {
-                // json deserialization puts us here
-                AddByDistr(1);
-            }
+            //else
+            //{
+            //    // json deserialization puts us here
+            //    AddByDistr(1);
+            //}
  
-            OnPropertyChanged("CellStates");
+            //OnPropertyChanged("CellStates");
         }
 
         public override void Resize(double[] newExtents)
