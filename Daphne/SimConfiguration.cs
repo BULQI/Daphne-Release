@@ -5226,6 +5226,11 @@ namespace Daphne
         {
             renderCells = new ObservableCollection<RenderCell>();
             renderMols = new ObservableCollection<RenderMol>();
+            RenderCell renc = new RenderCell();
+            RenderColor rcol = new RenderColor();
+            rcol.EntityColor = Color.FromScRgb(255.0f, 255.0f, 0.0f, 0.0f);
+            renc.base_color = rcol;
+            renderCells.Add(renc);
         }
 
         //Serialization method needed

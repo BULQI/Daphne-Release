@@ -160,6 +160,7 @@
     <Reference Include="TBKMath">
       <HintPath>..\dependencies\TBKMath.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -189,6 +190,15 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellPropertiesControl.xaml.cs">
+      <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellStudioToolWindow.xaml.cs">
+      <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentsToolWindow.xaml.cs">
+      <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DaphneStackPanel.cs" />
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
@@ -251,6 +261,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellDetailsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPropertiesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellStudioToolWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ComponentsToolWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

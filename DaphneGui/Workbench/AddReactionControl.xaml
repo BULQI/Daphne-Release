@@ -86,7 +86,33 @@
                 </StackPanel.ToolTip>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="0,0,4,0" Text="Reactants:" VerticalAlignment="Center" Width="80" />
-                    <TextBox x:Name="txtReac" Width="320"  />
+                    <!--<TextBox x:Name="txtReac" Width="320"  />-->
+
+                    <TextBox x:Name="txtReac" Width="320">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox"  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="CXCR5 + CXCL13" Foreground="Gray" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <!--<Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>-->
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    
                     <Button x:Name="btnRClear" Content="Clear" Width="40" Click="btnRClear_Click" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">

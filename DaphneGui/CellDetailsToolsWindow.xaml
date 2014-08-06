@@ -1,0 +1,27 @@
+﻿<docking:ToolWindow x:Class="DaphneGui.CellDetailsToolWindow"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:DaphneGui"
+                    xmlns:daph="clr-namespace:Daphne;assembly=Daphne"                    
+                    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+                    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
+                    xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    ImageSource="Images/Properties16.png"
+                    x:Name="MyToolWindow"
+                    Width="500"
+                    >
+    <StackPanel>
+        <Expander ExpandDirection="Down" Padding="6"
+                                    IsExpanded="True"
+                                    Header="Cell Details"
+                                    x:Name="CellsDetailsExpander"
+                                    Margin="0,0,0,0" 
+                                    Canvas.ZIndex="1"
+                                    >
+            <local:CellDetailsControl></local:CellDetailsControl>
+        </Expander>
+    </StackPanel>
+
+</docking:ToolWindow>
