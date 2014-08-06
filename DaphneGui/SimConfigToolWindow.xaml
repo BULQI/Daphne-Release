@@ -67,10 +67,10 @@
                 </Style.Triggers>
             </Style>
 
-            <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
+            <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> -->
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             
-            <daph:ManyToBooleanConverter x:Key="ManyConv" />
+            <!-- <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
             <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
