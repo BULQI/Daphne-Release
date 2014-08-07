@@ -15,7 +15,7 @@
 
 
     <docking:ToolWindow.Resources>
-        <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
+        <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />-->
         <daph:ManyToBooleanConverter x:Key="ManyConv" />
         <daph:TextToColorConverter x:Key="textToColorConv" />
         <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
