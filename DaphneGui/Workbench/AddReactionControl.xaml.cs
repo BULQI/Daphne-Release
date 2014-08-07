@@ -556,5 +556,20 @@ namespace DaphneGui
                 }
             }
         }
+
+        private void btnCreateNewMol_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecule newLibMol = new ConfigMolecule();
+            newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
+
+            //do if user did not cancel from dialog box
+            if (aem.ShowDialog() == true)
+            {
+                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+            }
+        }
+
+        
     }
 }

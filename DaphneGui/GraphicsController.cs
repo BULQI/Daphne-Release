@@ -2076,6 +2076,8 @@ namespace DaphneGui
             imageWriter.SetFileName(filename);
             imageWriter.Write();
 
+            //System.Windows.Media.Color col = MainWindow.SOP.Palette.renderDrawing.bg_color.EntityColor;
+            //ren.SetBackground(col.R, col.G, col.B);
             ren.SetBackground(0.0, 0.0, 0.0);
         }
     }

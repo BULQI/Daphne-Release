@@ -41,11 +41,17 @@ namespace Daphne
         public static ulong changesCounter;
 
         /// <summary>
+        /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
+        /// </summary>
+        public RenderSkin skin { get; set; }
+
+        /// <summary>
         /// constructor
         /// </summary>
         public SystemOfPersistence()
         {
             Protocol = new Protocol("", "Config\\temp_protocol.json");
+            skin = new RenderSkin();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             //UserStore = new Level("", "Config\\temp_userstore.json");
         }
@@ -531,6 +537,7 @@ namespace Daphne
         public SimulationParams sim_params { get; set; }
         public string reporter_file_name { get; set; }
 
+        public RenderPopOptions popOptions { get; set; }
         //public ChartViewToolWindow ChartWindow;
 
         /// <summary>
@@ -561,6 +568,8 @@ namespace Daphne
             //////LoadDefaultGlobalParameters();
 
             reporter_file_name = "";
+
+            popOptions = new RenderPopOptions();
         }
 
         /// <summary>
@@ -2602,6 +2611,8 @@ namespace Daphne
     /// </summary>
     public class ConfigMolecule : ConfigEntity
     {
+        public string label { get; set; }        //label to color scheme
+
         private string mol_name;
         public string Name {
             get
@@ -3199,6 +3210,8 @@ namespace Daphne
                 OnPropertyChanged("mp_render_on");
             }
         }
+
+        public string label { get; set; }        //label to color scheme
                     
         public ConfigMolecularPopulation(ReportType rt)
         {
@@ -3712,6 +3725,7 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
+                OnPropertyChanged("rate_const");
             } 
         }
 
@@ -3915,6 +3929,8 @@ namespace Daphne
 
     public class ConfigCell : ConfigEntity
     {
+        public string label { get; set; }        //label to color scheme
+
         public ConfigCell() : base()
         {
             CellName = "Default Cell";
@@ -4890,6 +4906,8 @@ namespace Daphne
             }
         }
 
+        public string label { get; set; }        //label to color scheme
+
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -5645,6 +5663,85 @@ namespace Daphne
 
             ////Add this after 2/4/14
             ////DrawAsWireframe = false;
+        }
+    }
+
+    //Graphics classes
+    //public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
+    //public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
+
+    public enum RenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN, MP_TYPE, MP_CONC, CELL_MP }
+
+    public class RenderColor
+    {
+        public System.Windows.Media.Color EntityColor { get; set; }  // RGB plus alpha channel
+    }
+
+    public class RenderCell
+    {
+        public RenderColor base_color { get; set; }         // solid color for applicable render methods
+        public ObservableCollection<RenderColor> state_colors { get; set; }    //state colors
+        public ObservableCollection<RenderColor> gen_colors { get; set; }      //gen colors
+        public int shades { get; set; }                                      // number of shades for applicable options
+        public string label { get; set; }                                      // ConfigCell's label
+    }
+
+    public class RenderMol
+    {
+        public RenderColor color { get; set; }      // the one color used
+        public double min { get; set; }             // to scale when rendering by conc
+        public double max { get; set; }
+        public int shades { get; set; }             // number of shades for applicable options
+        public double blendingWeight { get; set; }  // controls color mixing for multiple molpops
+        public string label { get; set; }           // ConfigMolecule’s label
+    }
+
+    public class RenderPop
+    {
+        public bool renderOn { get; set; }                 // toggles rendering
+        public RenderMethod renderMethod { get; set; }      // indicates the render option
+        public string label { get; set; }                   // cell or mol population's label
+    }
+
+    public class RenderDrawing
+    {
+        public RenderColor bg_color { get; set; }     // the background color
+
+        public RenderDrawing()
+        {
+            bg_color = new RenderColor();
+            bg_color.EntityColor = Color.FromScRgb(255.0f, 255.0f, 255.0f, 255.0f);
+        }
+    }
+
+    public class RenderSkin
+    {
+        public ObservableCollection<RenderCell> renderCells { get; set; }
+        public ObservableCollection<RenderMol> renderMols { get; set; }
+
+        public RenderSkin()
+        {
+            renderCells = new ObservableCollection<RenderCell>();
+            renderMols = new ObservableCollection<RenderMol>();
+            RenderCell renc = new RenderCell();
+            RenderColor rcol = new RenderColor();
+            rcol.EntityColor = Color.FromScRgb(255.0f, 255.0f, 0.0f, 0.0f);
+            renc.base_color = rcol;
+            renderCells.Add(renc);
+        }
+
+        //Serialization method needed
+    }
+
+    public class RenderPopOptions
+    {
+        public ObservableCollection<RenderPop> cellPopOptions { get; set; }
+        public ObservableCollection<RenderPop> molPopOptions { get; set; }
+
+        public RenderPopOptions()
+        {
+            cellPopOptions = new ObservableCollection<RenderPop>();
+            molPopOptions = new ObservableCollection<RenderPop>();
         }
     }
 
