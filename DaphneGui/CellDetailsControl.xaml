@@ -33,7 +33,7 @@
         <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Filter="ecmAvailableReactionsListView_Filter"                                   
                                   />
-        <CollectionViewSource x:Key="newBulkMoleculesListView"   />
+        <CollectionViewSource x:Key="CytosolBulkMoleculesListView"/>
     </UserControl.Resources>
    
     <Grid>
@@ -85,7 +85,7 @@
 
                                     <ComboBox.ItemsSource>
                                         <CompositeCollection>
-                                            <CollectionContainer Collection="{Binding Source={StaticResource newBulkMoleculesListView}}" />
+                                            <CollectionContainer Collection="{Binding Source={StaticResource CytosolBulkMoleculesListView}}" />
                                             <daph:ConfigMolecule Name="New Molecule"/>
                                         </CompositeCollection>
                                     </ComboBox.ItemsSource>
@@ -219,10 +219,11 @@
 
                                     <StackPanel Orientation="Vertical">
                                         <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" MaxHeight="100" 
-                                                                ItemsSource="{Binding Path=membrane.molpops}" 
-                                                                DisplayMemberPath="Name"
-                                                                SelectedIndex="0" 
-                                                                />
+                                                    ItemsSource="{Binding Path=membrane.molpops}" 
+                                                    IsSynchronizedWithCurrentItem="True"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedIndex="0" 
+                                                    />
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="MembraneAddMolButton"  Width="50" Content="Add" Click="MembraneAddMolButton_Click" />
@@ -253,6 +254,7 @@
                                                         <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                         <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
+                                                                        IsSynchronizedWithCurrentItem="True"
                                                                         DisplayMemberPath="Name"    
                                                                         SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                         SelectedValuePath="entity_guid"
@@ -365,10 +367,11 @@
 
                                     <StackPanel Orientation="Vertical" >
                                         <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" MaxHeight="100" 
-                                                                    ItemsSource="{Binding Path=cytosol.molpops}" 
-                                                                    DisplayMemberPath="Name"                                                    
-                                                                    SelectedIndex="-1"
-                                                                    />
+                                                        ItemsSource="{Binding Path=cytosol.molpops}" 
+                                                        DisplayMemberPath="Name"     
+                                                        IsSynchronizedWithCurrentItem="True"
+                                                        SelectedIndex="-1"
+                                                        SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"            />
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                             <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
                                             <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>
@@ -1118,6 +1121,23 @@
 
 
                         </DataGrid>
+
+                        <TextBlock Text="Differentiation Regulators" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
+                                                        <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+
+                        </TextBlock>
+
                         <!-- This is the Differentiation Regulators datagrid -->
                         <DataGrid MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0" x:Name="DiffRegGrid" 
                                                             AutoGenerateColumns="False"

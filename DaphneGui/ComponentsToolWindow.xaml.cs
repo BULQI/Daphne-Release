@@ -316,9 +316,10 @@ namespace DaphneGui
             double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
-            cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
+            cp.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
                                                             MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
+
 
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);

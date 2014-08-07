@@ -127,7 +127,7 @@
                     <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
                         <MenuItem Header="Cells..." Name="cellColorsMenu" />
                         <MenuItem Header="Molecules..." Name="molColorsMenu" />
-                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" Click="setDrawingSettings_Click" />
+                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
                     </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
@@ -364,8 +364,8 @@
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
-                            <docking:TabbedMdiContainer Background="DarkBlue" >
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="Black"  TabBackground="Beige">
+                            <docking:TabbedMdiContainer Background="LightGray" >
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
@@ -493,12 +493,15 @@
                                 </docking:DocumentWindow>
 
                                 <!-- This is the window that contains the reaction complex graph-->
-                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>
+                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
 
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="Blue"  TabBackground="LightBlue"/>
+                                <!--<local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="Blue"  TabBackground="LightBlue"/>-->
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
 
                                 <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow"  Title="Cells Library" ClipToBounds="True" TabBorderThickness="1"  TabForeground="BlueViolet"  TabBackground="#FFF7CCCC"/>-->
-                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="BlueViolet" TabBackground="#FFF7CCCC">
+                                <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="BlueViolet" TabBackground="#FFF7CCCC">-->
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     
                                 </local:CellStudioToolWindow>
                                 <!-- "#FFE7F5DC" -->

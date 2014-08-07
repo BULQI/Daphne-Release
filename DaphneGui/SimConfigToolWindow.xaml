@@ -34,10 +34,10 @@
     
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
-        <CollectionViewSource x:Key="newBoundaryMoleculesListView"  
+        <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
-                                  />
+                                  />-->
         <Style TargetType="ComboBox">
             <Setter Property="ItemContainerStyle">
                 <Setter.Value>
@@ -48,6 +48,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+            <!--<Style TargetType="{x:Type DataGridRowHeader}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="DataGridRowHeader" />
+                    </Setter.Value>
+                </Setter>
+            </Style>-->
+
     </docking:ToolWindow.Resources>
 
 
@@ -177,16 +186,16 @@
             <CollectionViewSource x:Key="molPopsListView"  
                                   Source="{Binding Path=scenario.environment.ecs.molpops}"
                                   />
-            <CollectionViewSource x:Key="ecmMoleculesListView"  
+            <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   
                                   />
-            <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
+            <!--<CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
-                                  />
+                                  />-->
             <CollectionViewSource x:Key="cytoGenesListView"  
                                   Source="{Binding Path=entity_repository.genes}"/>
 
@@ -835,8 +844,18 @@
                     <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
                                            ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
                                            SelectedValue="{Binding Path=boundary_face, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                           SelectionChanged="cbBoundFace_SelectionChanged">                        
-                    </ComboBox>
+                                           SelectionChanged="cbBoundFace_SelectionChanged">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="None">
+                                                <Setter Property="Visibility" Value="Collapsed">
+                                            </Setter>
+                                        </DataTrigger> 
+                                    </Style.Triggers> 
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+                        </ComboBox>
                 </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
                         <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
@@ -1132,8 +1151,8 @@
                                         ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=Cell.entity_guid, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="entity_guid">
+                                        SelectedValue="{Binding Path=Cell.CellName, UpdateSourceTrigger=Explicit}"
+                                        SelectedValuePath="CellName">
                             
                         </ComboBox>
 
@@ -1274,20 +1293,19 @@
 
                                                 <StackPanel  Margin="0,6,0,0" Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                                     <TextBlock Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center">Actual Cell Locations</TextBlock>
-                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cellPopDist.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    <DataGrid x:Name="dgLocations" ItemsSource="{Binding ElementName=CellPopsListBox, Path=SelectedItem.CellStates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                     Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                                                     CanUserReorderColumns="False" CanUserResizeRows="False"
-                                                                    CanUserSortColumns="False" RowHeaderWidth="0"
+                                                                    CanUserSortColumns="False" 
+                                                                    RowHeaderWidth="0"
                                                                     VerticalContentAlignment="Center"
                                                                     CanUserAddRows="False"
                                                                     BorderThickness="1"
                                                                     BorderBrush="Black"
-                                                                    local:DataGridBehavior.DisplayRowNumber="True"
                                                                     KeyDown="dgLocations_KeyDown"
-                                                                    ScrollBar.Scroll="dgLocations_Scroll"
-                                                                    ScrollViewer.ScrollChanged="dgLocations_Scroll"
                                                                     SourceUpdated="dgLocations_Unloaded"
                                                                     LostFocus="dgLocations_CheckPositions"
+                                                                    VirtualizingStackPanel.VirtualizationMode="Standard"
                                                                     >
                                                         <DataGrid.ContextMenu>
                                                             <ContextMenu >
@@ -1848,6 +1866,8 @@
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
                                     ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
+                                    SelectionChanged="EcsMolPopsListBox_SelectionChanged"
+                                     IsSynchronizedWithCurrentItem="True"
                                     SelectedIndex="-1"
                             />
 
@@ -1968,8 +1988,10 @@
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                         SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        GotFocus="MolPopDistributionTypeComboBox_GotFocus"
+                                        
                                         MinWidth="120">
+
+                                                        <!--GotFocus="MolPopDistributionTypeComboBox_GotFocus"-->
 
                                                         <ComboBox.Style>
                                                             <Style TargetType="ComboBox">
@@ -2121,23 +2143,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
-
-                            <!--<StackPanel>
-                                <Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Reaction Properties"
-                                              x:Name="ReacPropExpander"
-                                              Margin="0,0,0,0" 
-                                              Canvas.ZIndex="1"
-                                              DataContext="{Binding ElementName=lvEcsReactions, Path=SelectedItem}"
-                                              >
-                                    <ContentControl Name="ccReactionProperties"
-                                        Content="{Binding}" 
-                                        ContentTemplate="{StaticResource editReactionTemplate}" 
-                                        Margin="6"/>
-                                </Expander>
-                            </StackPanel>-->
-
+                            
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Add a reaction"

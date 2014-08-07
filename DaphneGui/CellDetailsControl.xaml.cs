@@ -45,7 +45,7 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
 
-            cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
+            cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
 
@@ -129,33 +129,87 @@ namespace DaphneGui
 
         private void CytosolAddMolButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return; 
+
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
             cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
+            cmp.molecule = null;
             //cmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
-            ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            if (mol_list != null)
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            foreach (ConfigMolecule item in cvs.View)
             {
-                cmp.molecule = mol_list.First().Clone(null);
+                if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                cmp.molecule = item;
+                break;
             }
-            else
-            {
-                return;
-            }
+            if (cmp.molecule == null) return;
 
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
-
+            ////ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+            ////if (mol_list != null)
+            ////{
+            ////    cmp.molecule = mol_list.First().Clone(null);
+            ////}
+            ////else
+            ////{
+            ////    return;
+            ////}
+            
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
+
+        private void CellMembraneMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            if (cvs == null || cvs.View == null)
+                return;
+
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
+        }
+
+     
+
+        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+            if (cvs == null || cvs.View == null)
+                return;
+
+            cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            foreach (ConfigMolecule cm in cvs.View)
+            {
+                if (cm.Name == tmp.molecule.Name)
+                {
+                    cvs.View.MoveCurrentTo(cm);
+                    return;
+                }
+            }
+        }
+
+
 
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {

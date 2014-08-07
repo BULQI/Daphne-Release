@@ -43,8 +43,6 @@ using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
 using SBMLayer;
-using DaphneGui.Rendering;
-
 namespace DaphneGui
 {
     /// <summary>
@@ -495,6 +493,7 @@ namespace DaphneGui
 
             if (file_exists)
             {
+                sop = new SystemOfPersistence();
                 initialState(true, true, ReadJson(""));
                 enableCritical(loadSuccess);
                 if (loadSuccess == true)
@@ -740,7 +739,7 @@ namespace DaphneGui
                 sop.Protocol.entity_repository.reactions.Add(cr);
             }
 
-            ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tagLibraries;
+            ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tabLibraries;
 
             ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
         }
@@ -1251,19 +1250,6 @@ namespace DaphneGui
             }
         }
 
-        private void setDrawingSettings_Click(object sender, RoutedEventArgs e)
-        {
-            RenderDrawingDlg ren = new RenderDrawingDlg();
-            //Color oldColor = SOP.Protocol.Palette.renderDrawing.bg_color.EntityColor;
-            Color oldColor = SOP.skin.renderCells[0].base_color.EntityColor;
-            ren.DataContext = SOP;
-            if (ren.ShowDialog() == false)
-            {
-                //SOP.Palette.renderDrawing. = oldColor;
-                SOP.skin.renderCells[0].base_color.EntityColor = oldColor;
-            }
-        }
-
         private void bufferDatabaseWriteMenu_Click(object sender, RoutedEventArgs e)
         {
             if (bufferDatabaseWriteMenu.IsChecked)
@@ -1757,7 +1743,7 @@ namespace DaphneGui
                     writer = new vtkBMPWriter();
                 }
 
-                gc.SaveToFile(saveFileDialog1.FileName, writer);
+                //gc.SaveToFile(saveFileDialog1.FileName, writer);
             }
         }
 
@@ -1914,7 +1900,7 @@ namespace DaphneGui
 
                 if (protocol != null)
                 {
-                    sop = new SystemOfPersistence();
+                    //sop = new SystemOfPersistence();
                     sop.Protocol = protocol;
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
@@ -2688,6 +2674,10 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
+
+            // remember the changes counter
+            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
+
             // save the preferences
             Properties.Settings.Default.Save();
 

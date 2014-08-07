@@ -109,7 +109,7 @@ namespace Daphne
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
+            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
                                                                 protocol.scenario.environment.extent_y / 2,
                                                                 protocol.scenario.environment.extent_z / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
@@ -235,7 +235,7 @@ namespace Daphne
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
-            cellPop.cellPopDist.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * configCell.CellRadius - protocol.scenario.environment.gridstep / 2,
+            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * configCell.CellRadius - protocol.scenario.environment.gridstep / 2,
                                                                 protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
                                                                 protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);

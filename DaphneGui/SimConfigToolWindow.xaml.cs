@@ -39,8 +39,8 @@ namespace DaphneGui
         {
             InitializeComponent();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
-            cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
+            //CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBulkMoleculesListView"));
+            //cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
             //ButtonEdit.Click += EventFactory.Button_Edit_Click;
 
         }
@@ -240,7 +240,23 @@ namespace DaphneGui
 
         }
 
-        
+        private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            //cvs.View.Refresh();
+
+            if (e.AddedItems.Count == 0) return;
+            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+            //foreach (ConfigMolecule cm in cvs.View)
+            //{
+            //    if (cm.Name == tmp.molecule.Name)
+            //    {
+            //        cvs.View.MoveCurrentTo(cm);
+            //        return;
+            //    }
+            //}
+        }
 
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -359,18 +375,24 @@ namespace DaphneGui
                 return;
             }
             
+            //add a moleculepop that is not already added
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-
-            gmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
-            gmp.Name = MainWindow.SOP.Protocol.entity_repository.molecules.First().Name;
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
+            if (cvs == null) return;
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                gmp.molecule = item.Clone(null);
+                gmp.Name = item.Name;
+                break;
+            }
+            if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
-
-            //ecm_molecule_combo_box.SelectionChanged += new SelectionChangedEventHandler(molecule_combo_box_SelectionChanged);
-
         }
+
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             int index = lbEcsMolPops.SelectedIndex;
@@ -896,7 +918,7 @@ namespace DaphneGui
                     CellPopulation tempCellPop = new CellPopulation();
                     tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.cellPopDist.CellStates = tempCellPop.cellPopDist.CellStates;
+                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -1027,7 +1049,8 @@ namespace DaphneGui
             //guid to object changes
             //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
             ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
-
+            //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
+            //of configCell, it will has its own entity_guid - only the name stays the same ---
             if (cell_to_clone.entity_guid != curr_cell_type_guid)
             {
                 cp.Cell = cell_to_clone.Clone(false);
@@ -1062,22 +1085,22 @@ namespace DaphneGui
                 return;
 
             cp.number = numNew;
-            if (numNew > numOld && numNew > cp.cellPopDist.CellStates.Count)
+            if (numNew > numOld && numNew > cp.CellStates.Count)
             {
                 int rows_to_add = numNew - numOld;
                 cp.cellPopDist.AddByDistr(rows_to_add);
             }
             else if (numNew < numOld)
             {
-                if (numOld > cp.cellPopDist.CellStates.Count)
+                if (numOld > cp.CellStates.Count)
                 {
-                    numOld = cp.cellPopDist.CellStates.Count;
+                    numOld = cp.CellStates.Count;
                 }
 
                 int rows_to_delete = numOld - numNew;
-                cp.cellPopDist.RemoveCells(rows_to_delete);
+                cp.RemoveCells(rows_to_delete);
             }
-            cp.number = cp.cellPopDist.CellStates.Count;
+            cp.number = cp.CellStates.Count;
         }
 
         private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
@@ -1109,13 +1132,13 @@ namespace DaphneGui
                 char[] delim = { '\t', '\r', '\n' };
                 string[] paste = s.Split(delim, StringSplitOptions.RemoveEmptyEntries);
 
-                cp.cellPopDist.CellStates.Clear();
+                cp.CellStates.Clear();
                 for (int i = 0; i < paste.Length; i += 3)
                 {
-                    cp.cellPopDist.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
+                    cp.CellStates.Add(new CellState(double.Parse(paste[i]), double.Parse(paste[i + 1]), double.Parse(paste[i + 2])));
                 }
 
-                cp.number = cp.cellPopDist.CellStates.Count;
+                cp.number = cp.CellStates.Count;
 
             }
         }
@@ -1143,44 +1166,6 @@ namespace DaphneGui
 
         private void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
         {
-        }
-
-        /// <summary>
-        /// Called when a cell in the data grid is selected and after each key stroke.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void dgLocations_Scroll(object sender, RoutedEventArgs e)
-        {
-            DataGrid dgData = (DataGrid)sender;
-            //BindingExpression b = dgData.GetBindingExpression(System.Windows.Controls.DataGrid.ItemsSourceProperty);
-            //b.UpdateTarget();
-            //if (e.RoutedEvent.Name == 
-
-
-            //IF CURRENTLY EDITING A CELL, WANT TO PREVENT CALLING REFRESH!  HOW TO DO?
-            //if (dgData.IsEditing())  //DOESN'T WORK
-            //if (dgData.SelectedIndex > -1)
-            //    return;
-
-            //if (dgData.SelectedCells.Count > 0)
-            //{
-            //    //DataGridCellInfo dgci = dgData.SelectedCells[0];
-            //    DataGridCellInfo dgci = (DataGridCellInfo)dgData.SelectedCells[0];
-            //    DataGridCell dgc = TryToFindGridCell(dgData, dgci);
-
-            //    bool bEditing = dgc.IsEditing;
-            //    if (bEditing == true)
-            //        return;
-            //}
-
-            try
-            {
-                //dgData.Items.Refresh();
-            }
-            catch
-            {
-            }
         }
 
         /// <summary>
@@ -1220,43 +1205,43 @@ namespace DaphneGui
 
             // Remove out-of-bounds cells
             bool changed = false;
-            for (int i = cp.cellPopDist.CellStates.Count - 1; i >= 0; i--)
+            for (int i = cp.CellStates.Count - 1; i >= 0; i--)
             {
-                double[] pos = new double[3] { cp.cellPopDist.CellStates[i].X, cp.cellPopDist.CellStates[i].Y, cp.cellPopDist.CellStates[i].Z };
+                double[] pos = new double[3] { cp.CellStates[i].X, cp.CellStates[i].Y, cp.CellStates[i].Z };
                 // X
-                if (cp.cellPopDist.CellStates[i].X < 0) 
+                if (cp.CellStates[i].X < 0) 
                 {
                     // cp.cellPopDist.CellStates[i].X = 0;
                     pos[0] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].X > cp.cellPopDist.Extents[0]) 
+                if (cp.CellStates[i].X > cp.cellPopDist.Extents[0]) 
                 {
                     // cp.cellPopDist.CellStates[i].X = cp.cellPopDist.Extents[0];
                     pos[0] = cp.cellPopDist.Extents[0];
                     changed = true;
                 }
                 // Y
-                if (cp.cellPopDist.CellStates[i].Y < 0) 
+                if (cp.CellStates[i].Y < 0) 
                 {
                     //cp.cellPopDist.CellStates[i].Y = 0;
                     pos[1] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].Y > cp.cellPopDist.Extents[1])
+                if (cp.CellStates[i].Y > cp.cellPopDist.Extents[1])
                 {
                     //cp.cellPopDist.CellStates[i].Y = cp.cellPopDist.Extents[1];
                     pos[1] = cp.cellPopDist.Extents[1];
                     changed = true;
                 }
                 // Z
-                if (cp.cellPopDist.CellStates[i].Z < 0)
+                if (cp.CellStates[i].Z < 0)
                 {
                     //cp.cellPopDist.CellStates[i].Z = 0;
                     pos[2] = 0;
                     changed = true;
                 }
-                if (cp.cellPopDist.CellStates[i].Z > cp.cellPopDist.Extents[2])
+                if (cp.CellStates[i].Z > cp.cellPopDist.Extents[2])
                 {
                     //cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];
                     pos[2] = cp.cellPopDist.Extents[2];
@@ -1266,7 +1251,7 @@ namespace DaphneGui
                 {
                     // Can't update coordinates directly or the datagrid doesn't update properly
                     // (e.g., cp.cellPopDist.CellStates[i].Z = cp.cellPopDist.Extents[2];)
-                    cp.cellPopDist.CellStates.RemoveAt(i);
+                    cp.CellStates.RemoveAt(i);
                     cp.cellPopDist.AddByPosition(pos);
                 }
             }
@@ -1368,40 +1353,6 @@ namespace DaphneGui
         {
             int x = 1;
             x++;
-        }
-
-        private void MolPopDistributionTypeComboBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
-            if (cmp == null)
-                return;
-
-            ComboBox cb = sender as ComboBox;
-            int index = (int)MolPopDistributionType.Linear;
-            ComboBoxItem cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
-
-            cbi.IsEnabled = true;
-            if (comboToroidal.SelectedIndex > 0)
-            //if (cbToroidal.IsChecked == true)
-            {
-                cbi.IsEnabled = false;
-            }
-            else if (cmp == null)
-            {
-                cbi.IsEnabled = false;
-            }
-            else if (cmp.mp_distribution.GetType() == typeof(MolPopLinear))
-            {
-                MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
-                if (mpl.boundary_face == BoundaryFace.None)
-                {
-                    cbi.IsEnabled = false;
-                }
-            }
-
-            index = (int)MolPopDistributionType.Explicit;
-            cbi = (ComboBoxItem)(cb.ItemContainerGenerator.ContainerFromIndex(index));
-            cbi.IsEnabled = false;
         }
 
 

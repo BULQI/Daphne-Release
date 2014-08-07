@@ -211,7 +211,10 @@ namespace Daphne
                 for (int i = 0; i < 2; i++)
                 {
                     // 0: cytosol, 1: membrane
-                    ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                    //ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                    ConfigCompartment comp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
+
+
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
@@ -254,7 +257,7 @@ namespace Daphne
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
-                    writer.WriteLine("Cell {0} report from {1} run on {2}.", protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellName, protocol.experiment_name, startTime);
+                    writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, protocol.experiment_name, startTime);
                     writer.WriteLine(header);
                     cell_files.Add(cp.cellpopulation_id, writer);
                 }
@@ -293,7 +296,7 @@ namespace Daphne
                     for (int i = 0; i < 2; i++)
                     {
                         // 0: cytosol, 1: membrane
-                        ConfigCompartment configComp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                        ConfigCompartment configComp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
                         Compartment comp = (i == 0) ? c.Cytosol : c.PlasmaMembrane;
                         double[] pos = new double[] { 0, 0, 0 };
 

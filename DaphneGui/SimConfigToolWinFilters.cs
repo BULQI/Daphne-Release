@@ -2,6 +2,7 @@
 using Daphne;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace DaphneGui
 {
@@ -45,6 +46,55 @@ namespace DaphneGui
         //////        }
         //////    }
         //////}
+        /// <summary>
+        /// this filter retains the list of molecules that are not already in cytosol of a cell
+        /// and thus available to be added.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void CytosolMoleculesListView_Filter(object sender, FilterEventArgs e)
+        //{
+        //    ConfigMolecule mol = e.Item as ConfigMolecule;
+        //    if (mol == null || mol.molecule_location != MoleculeLocation.Bulk)
+        //    {
+        //        e.Accepted = false;
+        //        return;
+        //    }
+
+        //    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        //    if (cell == null)
+        //    {
+        //        e.Accepted = true;
+        //        return;
+        //    }
+        //    CollectionView colView = (CollectionView)CollectionViewSource.GetDefaultView(cell.cytosol.molpops);
+        //    //check if the molecule is in the list
+        //    foreach (ConfigMolecularPopulation cfp in colView)
+        //    {
+        //        if (cfp == colView.CurrentItem) continue;
+        //        if (cfp.molecule.Name == mol.Name)
+        //        {
+        //            e.Accepted = false;
+        //            return;
+        //        }
+        //    }
+        //    e.Accepted = true;
+        //    return;
+        //}
+
+        private void EcsMoleculesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigMolecule mol = e.Item as ConfigMolecule;
+            if (mol == null || mol.molecule_location != MoleculeLocation.Bulk)
+            {
+                e.Accepted = false;
+                return;
+            }
+            e.Accepted = true;
+            return;
+        }
+
+
 
         //////private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
         //////{
@@ -266,6 +316,7 @@ namespace DaphneGui
         //////    e.Accepted = bOK;
         //////}
 
+        /*
         private void boundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigMolecule mol = e.Item as ConfigMolecule;
@@ -284,6 +335,41 @@ namespace DaphneGui
                 }
             }
         }
+         */
+
+        //private void AvailableBoundaryMoleculesListView_Filter(object sender, FilterEventArgs e)
+        //{
+
+        //    ConfigMolecule mol = e.Item as ConfigMolecule;
+        //    if (mol == null || mol.molecule_location != MoleculeLocation.Boundary)
+        //    {
+        //        e.Accepted = false;
+        //        return;
+        //    }
+
+        //    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        //    if (cell == null)
+        //    {
+        //        e.Accepted = true;
+        //        return;
+        //    }
+        //    CollectionView colView = (CollectionView)CollectionViewSource.GetDefaultView(cell.membrane.molpops);
+        //    //check if the molecule is in the list
+        //    foreach(ConfigMolecularPopulation cfp in colView)
+        //    {
+        //        if (cfp == colView.CurrentItem)continue;
+        //        if (cfp.molecule.Name == mol.Name)
+        //        {
+        //            e.Accepted = false;
+        //            return;
+        //        }
+        //    }
+        //    e.Accepted = true;
+        //    return;
+        //}
+
+
+
 
         private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {

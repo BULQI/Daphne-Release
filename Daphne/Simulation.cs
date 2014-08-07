@@ -530,8 +530,10 @@ namespace Daphne
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
 
-                configComp[0] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
-                configComp[1] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                //configComp[0] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
+                //configComp[1] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                configComp[0] = cp.Cell.cytosol;
+                configComp[1] = cp.Cell.membrane;
 
                 bulk_reacs[0] = protocol.GetReactions(configComp[0], false);
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
@@ -540,11 +542,10 @@ namespace Daphne
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius));
-
+                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
-                    cell.setState(cp.cellPopDist.CellStates[i].ConfigState);
+                    cell.setState(cp.CellStates[i].spState);
 
                     simComp[0] = cell.Cytosol;
                     simComp[1] = cell.PlasmaMembrane;
@@ -558,24 +559,30 @@ namespace Daphne
                             //it for not customized cell later(?)
 
                             // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
-                            if (!cp.cellPopDist.CellStates[i].configMolPop.ContainsKey(cmp.molecule.entity_guid)) continue;
+                            if (!cp.CellStates[i].cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid)) continue;
 
                             MolPopExplicit mp_explicit = new MolPopExplicit();
-                            // mp_explicit.conc = cp.cell_list[i].configMolPop[cmp.molecule_guid_ref];
-                            mp_explicit.conc = cp.cellPopDist.CellStates[i].configMolPop[cmp.molecule.entity_guid];
+                            mp_explicit.conc = cp.CellStates[i].cmState.molPopDict[cmp.molecule.entity_guid];
                             cmp.mp_distribution = mp_explicit;            
                         }
                         addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
                     }
 
                     // cell genes
-                    foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
+                    //foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
+                    foreach (string s in cp.Cell.genes_guid_ref)
                     {
                         ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
+                        double geneActivationLevel = cg.ActivationLevel;
+                        if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)
+                        {
+                            geneActivationLevel = cp.CellStates[i].cgState.geneDict[cg.entity_guid];
+                        }
+
                         Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
                                                      new ConstructorArgument("copyNumber", cg.CopyNumber),
-                                                     new ConstructorArgument("actLevel", cg.ActivationLevel));
+                                                     new ConstructorArgument("actLevel", geneActivationLevel));
                         cell.AddGene(cg.entity_guid, gene);
                     }
 
@@ -587,13 +594,14 @@ namespace Daphne
                     AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
                     
                     // locomotion
-                    if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+                    if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
                     {
-                        MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
-
-                        cell.Locomotor = new Locomotor(driver, protocol.entity_repository.cells_dict[cp.Cell.entity_guid].TransductionConstant);
+                        //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
+                        MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+                        cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
                         cell.IsMotile = true;
-                        cell.DragCoefficient = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].DragCoefficient;
+                        cell.DragCoefficient = cp.Cell.DragCoefficient;
                     }
                     else
                     {
@@ -603,15 +611,18 @@ namespace Daphne
 
                     //TRANSITION DRIVERS
                     // death behavior
-                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver != null)
+                    if (cp.Cell.death_driver != null)
                     {
+                        if (cp.CellStates[i].cbState.deathDriveState != -1)
+                        {
+                            cell.DeathBehavior.CurrentState = cp.CellStates[i].cbState.deathDriveState;
+                        }
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
-
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
                     // Differentiation
-                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme != null)
+                    if (cp.Cell.diff_scheme != null)
                     {
                         ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme;
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
@@ -631,15 +642,29 @@ namespace Daphne
                             }
                         }
                         // Set cell state and corresponding gene activity levels
+                        if (cp.CellStates[i].cbState.differentiationDriverState != -1)
+                        {
+                            cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
+                        }
                         cell.DifferentiationState = cell.Differentiator.CurrentState;
-                        cell.SetGeneActivities();
+                        if (cp.CellStates[i].cgState.geneDict.Count > 0)
+                        {
+                            cell.SetGeneActivities(cp.CellStates[i].cgState.geneDict);
+                        }
+                        else
+                        {
+                            cell.SetGeneActivities();
+                        }
                     }
 
                     // division behavior
-                    if (protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver != null)
+                    if (cp.Cell.div_driver != null)
                     {
+                        if (cp.CellStates[i].cbState.divisionDriverState != -1)
+                        {
+                            cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
+                        }
                         ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
-
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 
