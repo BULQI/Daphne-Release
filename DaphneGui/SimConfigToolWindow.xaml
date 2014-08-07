@@ -34,6 +34,9 @@
     
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
+        <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"/>
+
         <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
@@ -76,7 +79,7 @@
                 </Style.Triggers>
             </Style>
 
-            <!--<daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> -->
+            <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> 
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
             
             <!-- <daph:ManyToBooleanConverter x:Key="ManyConv" />
@@ -186,8 +189,7 @@
             <CollectionViewSource x:Key="molPopsListView"  
                                   Source="{Binding Path=scenario.environment.ecs.molpops}"
                                   />
-            <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"/>
+            
             <CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   
@@ -1959,7 +1961,7 @@
                                                         >
                                                         <ComboBox.ItemsSource>
                                                             <CompositeCollection>
-                                                                <CollectionContainer Collection="{Binding Source={StaticResource newBulkMoleculesListView}}" />
+                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
                                                                 <daph:ConfigMolecule Name="New Molecule"/>
                                                             </CompositeCollection>
                                                         </ComboBox.ItemsSource>
@@ -2470,7 +2472,7 @@
                                     </StackPanel>
 
                                     <StackPanel Margin="10,6">
-                                        <local:CellDetailsControl DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
+                                        <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
                                     
                                 </local:DaphneStackPanel>
