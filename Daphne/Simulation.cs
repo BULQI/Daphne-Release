@@ -34,6 +34,9 @@ namespace Daphne
         public static DataBasket dataBasket;
         public static Protocol ProtocolHandle;
 
+        private CellManager cellManager;
+        private CollisionManager collisionManager;
+
         private byte runStatus;
         private byte simFlags;
         private double accumulatedTime, duration, renderStep, sampleStep;
@@ -856,8 +859,5 @@ namespace Daphne
         {
             get { return collisionManager; }
         }
-
-        private CellManager cellManager;
-        private CollisionManager collisionManager;
     }
 }
