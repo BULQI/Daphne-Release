@@ -2769,5 +2769,31 @@ namespace DaphneGui
             About about = new About();
             about.ShowDialog();
         }
+
+        private void pushMol_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+
+            pw.LevelADataGrid.ItemsSource = SOP.Protocol.entity_repository.molecules;
+            pw.ShowDialog();
+        }
+
+        private void pushGene_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
+
+        private void pushReac_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
+
+        private void pushCell_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
     }
 }

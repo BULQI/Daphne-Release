@@ -1586,10 +1586,10 @@ namespace DaphneGui
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
 
-                Point position = cb.PointToScreen(new Point(0d, 0d));
-                double wid = cb.Width;
-                aem.Top = position.Y;
-                aem.Left = position.X + wid;
+                //Point position = cb.PointToScreen(new Point(0d, 0d));
+                //double wid = cb.Width;
+                //aem.Top = position.Y;
+                //aem.Left = position.X + wid;
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -1605,7 +1605,19 @@ namespace DaphneGui
                     return;
                 }
                 
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                //molpop.molecule = newLibMol.Clone(null);
+                //molpop.Name = newLibMol.Name;
+                //cb.SelectedItem = newLibMol;
+
+                Protocol B = MainWindow.SOP.Protocol;
+                newLibMol.incrementChangeStamp();
+                PushStatus status = B.pushStatus(newLibMol);
+                if (status == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    B.repositoryPush(newLibMol, status); // push into B, inserts as new
+                }
+
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
@@ -2498,6 +2510,32 @@ namespace DaphneGui
         private void ecm_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
+        }
+
+        private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            if (molpop == null)
+                return;
+
+            ConfigMolecule mol = molpop.molecule;
+
+            if (mol == null)
+                return;
+
+            Protocol B = MainWindow.SOP.Protocol;
+            mol.incrementChangeStamp();
+            PushStatus status = B.pushStatus(mol);
+            if (status == PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(mol, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                //for now just push
+                B.repositoryPush(mol, status); // push into B
+            }
+
         }
     }
 
