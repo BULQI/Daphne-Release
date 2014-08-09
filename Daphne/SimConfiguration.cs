@@ -129,6 +129,53 @@ namespace Daphne
         }
     }
 
+    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(PushType), typeof(string))]
+    public class PushTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the BoundaryFace enum...
+        private List<string> _push_type_strings = new List<string>()
+                                {
+                                    "Entity",
+                                    "Protocol",
+                                    "User Store",
+                                    "Daphne Store"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                int index = (int)value;
+                return _push_type_strings[index];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _push_type_strings.FindIndex(item => item == str);
+            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+        }
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+
+    /// <summary>
+    /// enum for push status
+    /// </summary>
+    public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
+
     /// <summary>
     /// base for all levels
     /// </summary>
@@ -158,10 +205,9 @@ namespace Daphne
             entity_repository = new EntityRepository();
         }
 
-        /// <summary>
-        /// enum for push status
-        /// </summary>
-        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
+
+
+        
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
@@ -294,7 +340,7 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    //entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
                 }
                 // update
                 else
