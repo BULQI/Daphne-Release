@@ -4762,6 +4762,29 @@ namespace Daphne
         }
     }
 
+    public class ReportStates
+    {
+        bool division_state = false;
+        public bool Death { get; set; }
+        public bool Division 
+        {
+            get
+            {
+                return division_state == true;
+                //return division_state;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    Debugger.Break();
+                }
+                division_state = value;
+            }
+        }
+        public bool Differentiation { get; set; }
+    }
+
     public class CellPopulation : EntityModelBase
     {
         //public string cell_guid_ref { get; set; }
@@ -4789,6 +4812,19 @@ namespace Daphne
             set
             {
                 reportXVF = value;
+            }
+        }
+
+        private ReportStates report_states;
+        public ReportStates reportStates
+        {
+            get
+            {
+                return report_states;
+            }
+            set
+            {
+                report_states = value;
             }
         }
 
@@ -4904,6 +4940,7 @@ namespace Daphne
             cellpopulation_id = Protocol.SafeCellPopulationID++;
             // reporting
             reportXVF = new ReportXVF();
+            reportStates = new ReportStates();
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();

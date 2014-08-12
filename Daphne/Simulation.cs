@@ -617,14 +617,14 @@ namespace Daphne
                         {
                             cell.DeathBehavior.CurrentState = cp.CellStates[i].cbState.deathDriveState;
                         }
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].death_driver;
+                        ConfigTransitionDriver config_td = cp.Cell.death_driver;
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
                     // Differentiation
                     if (cp.Cell.diff_scheme != null)
                     {
-                        ConfigDiffScheme config_diffScheme = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].diff_scheme;
+                        ConfigDiffScheme config_diffScheme = cp.Cell.diff_scheme;
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
@@ -664,7 +664,7 @@ namespace Daphne
                         {
                             cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
                         }
-                        ConfigTransitionDriver config_td = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].div_driver;
+                        ConfigTransitionDriver config_td = cp.Cell.div_driver;
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 

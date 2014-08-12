@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace DaphneGui
 {
@@ -3907,6 +3908,23 @@ namespace DaphneGui
         }
     }
 
+    public class DatabindingDebugConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            //Debugger.Break();
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            Debugger.Break();
+            return value;
+        }
+    }
+
     public class diffSchemeValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType,
@@ -3924,7 +3942,31 @@ namespace DaphneGui
         }
     }
 
+    //public class DataGridCol :Freezable
+    //{
 
+    //    public static readonly DependencyProperty TagProperty = DependencyProperty.RegisterAttached(
+    //        "Tag",
+    //        typeof(object),
+    //        typeof(DataGridCol),
+    //        new FrameworkPropertyMetadata(null));
+
+    //    protected override Freezable CreateInstanceCore()
+    //    {
+    //        return new DataGridCol();
+    //    }
+
+    //    public static object GetTag(DependencyObject dependencyObject)
+    //    {
+    //        return dependencyObject.GetValue(TagProperty);
+    //    }
+
+    //    public static void SetTag(DependencyObject dependencyObject, object value)
+    //    {
+    //        dependencyObject.SetValue(TagProperty, value);
+    //    }
+
+    //}
 
     public class DataGridBehavior
     {
@@ -4207,6 +4249,11 @@ namespace DaphneGui
             }
         }
     }
+
+
+    
+
+
 
 
     ///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER
