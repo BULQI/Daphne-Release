@@ -26,8 +26,6 @@ namespace DaphneGui
         {
             InitializeComponent();
 
-            DataGridDiffScheme dgds = new DataGridDiffScheme(this);
-
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -1297,6 +1295,39 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
+            
+            DataGrid dataGrid = (DataGrid)DataGridDiffScheme.FindVisualParent<DataGrid>(combo);
+            if (dataGrid == null) return;
+            ConfigDiffScheme scheme1 = DataGridDiffScheme.GetDiffSchemeSource(dataGrid);
+            if (scheme1 != null)
+            {
+                //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
+                //otherwise, it is the old way, remove those code when all changed to this new way.
+                ConfigGene gene1 = (ConfigGene)combo.SelectedItem;
+                if (gene1 == null)
+                    return;
+
+                if (scheme1.genes.Contains(gene1.entity_guid)) return; //shouldnot happen...
+
+                //If no states exist, then create at least 2 new ones
+                if (scheme1.Driver.states.Count == 0)
+                {
+                    scheme1.AddState("state1");
+                    scheme1.AddState("state2");
+                }
+
+                scheme1.genes.Add(gene1.entity_guid);
+                foreach (ConfigActivationRow row in scheme1.activationRows)
+                {
+                    row.activations.Add(1.0);
+                }
+                //force refresh
+                DataGridDiffScheme.SetDiffSchemeSource(dataGrid, null);
+                DataGridDiffScheme.SetDiffSchemeSource(dataGrid, scheme1);
+                return;
+            }
+
+
             //if cell does not have a diff scheme, create one
             if (cell.diff_scheme == null)
             {
@@ -2016,7 +2047,6 @@ namespace DaphneGui
             DiffRegGenerateRowHeaders();
         }
 
-
     }
 
     /// <summary>
@@ -2024,9 +2054,6 @@ namespace DaphneGui
     /// </summary>
     public class DataGridDiffScheme
     {
-        static CellDetailsControl parent = null;
-
-        public DataGridDiffScheme(CellDetailsControl p) { parent = p; }
 
         /// <summary>
         /// ConfigDiffScheme Attached Dependency Property
@@ -2084,6 +2111,9 @@ namespace DaphneGui
 
             string DiffSchemeTarget = GetDiffSchemeTarget(dataGrid);
 
+            //var tmp = FindLogicalParent<CellDetailsControl>(dataGrid);
+
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid); ;
             if (DiffSchemeTarget == "EpigeneticMap")
             {
                 Binding b1 = new Binding("activationRows") { Source = diffScheme };
@@ -2109,7 +2139,7 @@ namespace DaphneGui
                     count++;
                 }
 
-                DataGridTextColumn combobox_col = CreateUnusedGenesColumn();
+                DataGridTextColumn combobox_col = cdc.CreateUnusedGenesColumn();
                 dataGrid.Columns.Add(combobox_col);
             }
             else
@@ -2117,6 +2147,7 @@ namespace DaphneGui
                 dataGrid.ItemsSource = diffScheme.Driver.DriverElements;
                 int count = 0;
                 dataGrid.Columns.Clear();
+
                 foreach (string s in diffScheme.Driver.states)
                 {
                     DataGridTemplateColumn col = new DataGridTemplateColumn();
@@ -2132,14 +2163,9 @@ namespace DaphneGui
                     col.HeaderTemplate = new DataTemplate() { VisualTree = txtStateName };
 
                     col.CanUserSort = false;
-                    //each cell is an ConfigTransitiionDriverelement object
-                    //testing...testing...
                     Binding b = new Binding(string.Format("elements[{0}]", count));
-                    //b.Mode = BindingMode.TwoWay;
-                    //b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                    //sett binding???
 
-                    var cellTemplate = parent.FindResource("DiffRegCellTemplate");
+                    var cellTemplate = cdc.FindResource("DiffRegCellTemplate");
                     FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
                     factory.SetBinding(ContentPresenter.ContentProperty, b);
@@ -2149,9 +2175,8 @@ namespace DaphneGui
                     Binding b2 = new Binding(string.Format("elements[{0}]", count));
                     b2.Mode = BindingMode.TwoWay;
                     b2.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                    //sett binding???
 
-                    var cellEditingTemplate = parent.FindResource("DiffRegCellEditingTemplate");
+                    var cellEditingTemplate = cdc.FindResource("DiffRegCellEditingTemplate");
                     FrameworkElementFactory factory2 = new FrameworkElementFactory(typeof(ContentPresenter));
                     factory2.SetValue(ContentPresenter.ContentTemplateProperty, cellEditingTemplate);
                     factory2.SetBinding(ContentPresenter.ContentProperty, b2);
@@ -2229,119 +2254,6 @@ namespace DaphneGui
             }
         }
 
-        public static DataGridTextColumn CreateUnusedGenesColumn()
-        {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            DataGridTextColumn editor_col = new DataGridTextColumn();
-            editor_col.CanUserSort = false;
-            DataTemplate HeaderTemplate = new DataTemplate();
-
-            CollectionViewSource cvs1 = new CollectionViewSource();
-            cvs1.SetValue(CollectionViewSource.SourceProperty, er.genes);
-            cvs1.Filter += new FilterEventHandler(unusedGenesListView_Filter);
-
-            CompositeCollection coll1 = new CompositeCollection();
-            ConfigGene dummyItem = new ConfigGene("Add a gene", 0, 0);
-            coll1.Add(dummyItem);
-            CollectionContainer cc1 = new CollectionContainer();
-            cc1.Collection = cvs1.View;
-            coll1.Add(cc1);
-
-            FrameworkElementFactory addGenesCombo = new FrameworkElementFactory(typeof(ComboBox));
-            addGenesCombo.SetValue(ComboBox.WidthProperty, 100D);
-            addGenesCombo.SetValue(ComboBox.ItemsSourceProperty, coll1);
-            addGenesCombo.SetValue(ComboBox.DisplayMemberPathProperty, "Name");
-            addGenesCombo.SetValue(ComboBox.ToolTipProperty, "Click here to add another gene column to the grid.");
-            addGenesCombo.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboAddGeneToEpigeneticMap_SelectionChanged));
-
-            addGenesCombo.SetValue(ComboBox.SelectedIndexProperty, 0);
-
-            HeaderTemplate.VisualTree = addGenesCombo;
-            editor_col.HeaderTemplate = HeaderTemplate;
-
-            return editor_col;
-        }
-
-        private static void unusedGenesListView_Filter(object sender, FilterEventArgs e)
-        {
-
-            ConfigCell cell = parent.DataContext as ConfigCell;
-            e.Accepted = false;
-
-            if (cell == null)
-                return;
-
-            ConfigDiffScheme ds = cell.diff_scheme;
-            ConfigGene gene = e.Item as ConfigGene;
-
-            //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            //this filter might be wrong, because it might be differ for the two schemes!!!
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
-                return;
-
-
-            if (ds != null)
-            {
-                //if scheme already contains this gene, exclude it from the available gene pool
-                if (ds.genes.Contains(gene.entity_guid))
-                {
-                    e.Accepted = false;
-                }
-                else
-                {
-                    e.Accepted = true;
-                }
-            }
-            else
-            {
-                e.Accepted = true;
-            }
-        }
-
-        /// <summary>
-        /// This handler gets called when user selects a gene in the "add genes" 
-        /// combo box in the upper right of the epigenetic map data grid.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        public static void comboAddGeneToEpigeneticMap_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox combo = sender as ComboBox;
-            if (combo.SelectedIndex <= 0) return;
-
-            DataGrid dataGrid = (DataGrid)FindVisualParent<DataGrid>(combo);
-            if (dataGrid == null) return;
-
-            ConfigCell cell = dataGrid.DataContext as ConfigCell;
-            if (cell == null)
-                return;
-
-            ConfigDiffScheme scheme = GetDiffSchemeSource(dataGrid);
-
-            ConfigGene gene = (ConfigGene)combo.SelectedItem;
-            if (gene == null)
-                return;
-
-            if (scheme.genes.Contains(gene.entity_guid)) return; //shouldnot happen...
-
-            //If no states exist, then create at least 2 new ones
-            if (scheme.Driver.states.Count == 0)
-            {
-                scheme.AddState("state1");
-                scheme.AddState("state2");
-            }
-
-            scheme.genes.Add(gene.entity_guid);
-            foreach (ConfigActivationRow row in scheme.activationRows)
-            {
-                row.activations.Add(1.0);
-            }
-            //force refresh
-            SetDiffSchemeSource(dataGrid, null);
-            SetDiffSchemeSource(dataGrid, scheme);
-        }
-
-
         public static T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
         {
             // get parent item
@@ -2363,6 +2275,26 @@ namespace DaphneGui
             }
         }
 
+        public static T FindLogicalParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            // get parent item
+            DependencyObject parentObject = LogicalTreeHelper.GetParent(child);
+
+            // we’ve reached the end of the tree
+            if (parentObject == null) return null;
+
+            // check if the parent matches the type we’re looking for
+            T parent = parentObject as T;
+            if (parent != null)
+            {
+                return parent;
+            }
+            else
+            {
+                // use recursion to proceed with next level
+                return FindLogicalParent<T>(parentObject);
+            }
+        }
 
     }
 

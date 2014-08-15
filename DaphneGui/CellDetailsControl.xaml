@@ -991,7 +991,6 @@
                     <StackPanel>
                         <Grid >
                             <Grid.Resources>
-
                                 <DataTemplate x:Key="geneListItemTemplate">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Width="50" Text="{Binding Path=Name}" />
