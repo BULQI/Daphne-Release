@@ -1,0 +1,147 @@
+﻿<UserControl x:Class="DaphneGui.CellPropertiesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
+             xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+             xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             mc:Ignorable="d" 
+             >
+    
+    <!-- This user control shows the cell's immediate properties only, i.e., the properties in the ConfigCell class.
+         It does not show the details like mols, reactions, genes, div/death drivers, diff_scheme. 
+         The user control CellDetailsControl shows these other items.
+    -->
+    
+    <Grid>
+        <Grid.Resources>
+            <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
+            <daph:TextToColorConverter x:Key="textToColorConv" />
+
+            <CollectionViewSource x:Key="diffSchemesListView"  
+                                  Source="{Binding Path=entity_repository.diff_schemes}"/>
+
+            <CollectionViewSource x:Key="moleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"/>
+
+        </Grid.Resources>
+
+            <local:DaphneStackPanel x:Name="panelCellDetails" Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" Width="220" >
+                        <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
+                        <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120" LostFocus="CellTextBox_LostFocus" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Width="220" >
+                        <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
+                        <uc:DoublesBox SliderEnabled="False" Width="100" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        </uc:DoublesBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Width="220" >
+                        <TextBlock Text="differentiator" Margin="6,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
+                        <TextBox x:Name="txtCellDiff" Width="120" IsEnabled="False" IsReadOnly="True" 
+                                     Text="{Binding Path=diff_scheme, Mode=OneWay, Converter={StaticResource DiffSchemeToDiffNameConv}}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Width="220" >
+
+                        <StackPanel.Resources>
+                            <local:diffSchemeValueConverter x:Key="diffSchemeValueConverter" />
+                        </StackPanel.Resources>
+
+                        <Expander 
+                                Header="select another differentiator"   
+                                ExpandDirection="Down" 
+                                Padding="6" 
+                                Margin="0,0,0,0" 
+                                Canvas.ZIndex="1"     
+                                HorizontalAlignment="Right"
+                                Width="Auto"
+                                Visibility="Hidden"
+                                >
+                            <ComboBox x:Name="cbCellDiffSchemes" MinWidth="120" Margin="10,0"
+                                        DisplayMemberPath="Name"
+                                        SelectedValue="{Binding Path=diff_scheme, Converter={StaticResource diffSchemeValueConverter}}"
+                                        
+                                        SelectionChanged="cbCellDiffSchemes_SelectionChanged"
+                                        >
+                                <ComboBox.ItemsSource>
+                                    <CompositeCollection>
+                                        <daph:ConfigDiffScheme Name=""/>
+                                        <CollectionContainer Collection="{Binding Source={StaticResource diffSchemesListView}}" />
+                                    </CompositeCollection>
+                                </ComboBox.ItemsSource>
+                            </ComboBox>
+                        </Expander>
+
+                    </StackPanel>
+                </StackPanel>
+
+                <Expander                                            
+                                Padding="5" ExpandDirection="Down"
+                                IsExpanded="True"
+                                Header="Locomotor"                                                  
+                                x:Name="LocomotorExpander"
+                                Margin="0,-10,0,0" 
+                                Canvas.ZIndex="1"     
+                                HorizontalAlignment="Right"
+                                Width="Auto"
+                                Visibility="Visible"
+                                >
+
+                    <StackPanel Orientation="Vertical" Margin="0,-10">
+                        <StackPanel Orientation="Horizontal" Width="240">
+                            <StackPanel.Resources>
+                                <DataTemplate x:Key="libMolListItemTemplate">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Path=Name}" 
+                                                       Foreground="{Binding Path=ForegroundColor, Converter={StaticResource textToColorConv}}" 
+                                                       Margin="5,0,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </StackPanel.Resources>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="driver" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                                <ComboBox x:Name="cbLocomotorDriver" MinWidth="100"
+                                                DisplayMemberPath="Name"
+                                                SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
+                                                SelectedValuePath="entity_guid">
+
+                                    <ComboBox.ItemsSource>
+                                        <CompositeCollection>
+                                            <daph:ConfigMolecule Name="None" entity_guid=""/>
+                                            <!--<ComboBoxItem>None</ComboBoxItem>-->
+                                            <CollectionContainer
+                                                    Collection="{Binding Source={StaticResource moleculesListView}}" />
+                                        </CompositeCollection>
+                                    </ComboBox.ItemsSource>
+                                </ComboBox>
+
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                            <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=TransductionConstant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                            <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                        </StackPanel>
+
+                    </StackPanel>
+                </Expander>
+            </local:DaphneStackPanel>
+
+
+    </Grid>
+</UserControl>

@@ -665,6 +665,7 @@ namespace Daphne
                             cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
                         }
                         ConfigTransitionDriver config_td = cp.Cell.div_driver;
+
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 

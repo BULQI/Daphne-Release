@@ -139,6 +139,7 @@
     <Reference Include="Ninject.Extensions.Factory">
       <HintPath>..\packages\Ninject.Extensions.Factory.3.0.2-unstable-6\lib\net40\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="SBMLayer">
       <HintPath>..\dependencies\SBMLayer.dll</HintPath>
     </Reference>
@@ -160,10 +161,14 @@
     <Reference Include="TBKMath">
       <HintPath>..\dependencies\TBKMath.dll</HintPath>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>..\dependencies\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -176,10 +181,25 @@
     <Compile Include="AddDiffState.xaml.cs">
       <DependentUpon>AddDiffState.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AddEditMolecule.xaml.cs">
+      <DependentUpon>AddEditMolecule.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AddGeneToCell.xaml.cs">
       <DependentUpon>AddGeneToCell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CellDetailsControl.xaml.cs">
+      <DependentUpon>CellDetailsControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellPropertiesControl.xaml.cs">
+      <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CellStudioToolWindow.xaml.cs">
+      <DependentUpon>CellStudioToolWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentsToolWindow.xaml.cs">
+      <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DaphneStackPanel.cs" />
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
@@ -187,6 +207,15 @@
     <Compile Include="GraphicsController.cs" />
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
+    <Compile Include="Rendering\RenderCell.xaml.cs">
+      <DependentUpon>RenderCell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Rendering\RenderDrawing.xaml.cs">
+      <DependentUpon>RenderDrawing.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Rendering\RenderMolPop.xaml.cs">
+      <DependentUpon>RenderMolPop.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -224,7 +253,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="AddEditMolecule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="AddGeneToCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellDetailsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPropertiesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellStudioToolWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ComponentsToolWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -235,6 +284,18 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Rendering\RenderCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Rendering\RenderDrawing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Rendering\RenderMolPop.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Workbench\AddReacComplex.xaml">
       <Generator>MSBuild:Compile</Generator>

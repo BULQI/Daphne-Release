@@ -38,7 +38,7 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "DaphneInstall", "DaphneInst
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 7
+		SccNumberOfProjects = 8
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://tfs.bumc.bu.edu:8080/tfs/bu-micro-msi
 		SccLocalPath0 = .
@@ -60,6 +60,9 @@ Global
 		SccProjectUniqueName6 = DaphneInstall\\DaphneInstall.vdproj
 		SccProjectName6 = DaphneInstall
 		SccLocalPath6 = DaphneInstall
+		SccProjectUniqueName7 = DaphneUserControlLib\\DaphneUserControlLib.csproj
+		SccProjectName7 = DaphneUserControlLib
+		SccLocalPath7 = DaphneUserControlLib
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

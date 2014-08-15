@@ -462,6 +462,7 @@ namespace DaphneGui
             } while (file_exists == false && repeat < 2);
 
             ProtocolToolWindow.MW = this;
+            ComponentsToolWindow.MW = this;
 
             // Hide fitting tab control until sim has ended
             this.LPFittingToolWindow.Close();
@@ -738,9 +739,9 @@ namespace DaphneGui
                 sop.Protocol.entity_repository.reactions.Add(cr);
             }
 
-            ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
+            ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tabLibraries;
 
-            ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
+            ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
         }
 
         /// <summary>
@@ -814,9 +815,9 @@ namespace DaphneGui
             if (result == true)
             {
                 SBMLModel encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
-                ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabLibraries;
-                ProtocolToolWindow.ReacComplexExpander.IsExpanded = true;
-                ConfigReactionComplex crc = ProtocolToolWindow.GetConfigReactionComplex();
+                ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tagLibraries;
+                ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
+                ConfigReactionComplex crc = ComponentsToolWindow.GetConfigReactionComplex();
 
                 if (crc != null)
                 {
@@ -1575,13 +1576,13 @@ namespace DaphneGui
                 nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
             }
 
-            int nLibCellSelIndex = -1;
-            int nLibRCSelIndex = -1;
-            if (selectedTab == ProtocolToolWindow.tabLibraries)
-            {
-                nLibCellSelIndex = ProtocolToolWindow.CellsListBox.SelectedIndex;
-                nLibRCSelIndex = ProtocolToolWindow.lbComplexes.SelectedIndex;
-            }
+            ////////////int nLibCellSelIndex = -1;
+            ////////////int nLibRCSelIndex = -1;
+            ////////////if (selectedTab == ComponentsToolWindow.tabLibraries)
+            ////////////{
+            ////////////    nLibCellSelIndex = CellStudioToolWindow.CellsListBox.SelectedIndex;
+            ////////////    nLibRCSelIndex = ComponentsToolWindow.lbComplexes.SelectedIndex;
+            ////////////}
 
             int nRepEcmMolSelIndex = -1;
             int nRepCellSelIndex = -1;
@@ -1608,11 +1609,11 @@ namespace DaphneGui
             {
                 ProtocolToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
             }
-            else if (selectedTab == ProtocolToolWindow.tabLibraries)
-            {
-                ProtocolToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
-                ProtocolToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
-            }
+            ////////////else if (selectedTab == ComponentsToolWindow.tabLibraries)
+            ////////////{
+            ////////////    CellStudioToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
+            ////////////    ComponentsToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
+            ////////////}
             else if (selectedTab == ProtocolToolWindow.tabReports)
             {
                 ProtocolToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
@@ -1920,6 +1921,7 @@ namespace DaphneGui
             // GUI Resources
             // Set the data context for the main tab control config GUI
             this.ProtocolToolWindow.DataContext = sop.Protocol;
+            this.CellStudioToolWindow.DataContext = sop.Protocol;
 
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
@@ -2023,6 +2025,8 @@ namespace DaphneGui
             orig_content = sop.Protocol.SerializeToStringSkipDeco();
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             ProtocolToolWindow.DataContext = sop.Protocol;
+            CellStudioToolWindow.DataContext = sop.Protocol;
+            ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
             displayTitle("");
