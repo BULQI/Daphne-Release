@@ -2374,11 +2374,25 @@ namespace Daphne
 
 
     [ValueConversion(typeof(object), typeof(bool))]
-    public class ObjectToBoolValueConverter : IValueConverter
+    public class ObjectToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return parameter == null ? value == null : !(value == null);
+            if (parameter == null)
+            {
+                return value != null ? Visibility.Visible : Visibility.Hidden;
+            }
+            var option = parameter as string;
+            if (option == "Reverse")
+            {
+                return value == null ? Visibility.Visible : Visibility.Hidden;
+            }
+            else if (option == "Collapsed")
+            {
+                return value != null ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            return value != null ? Visibility.Visible : Visibility.Hidden;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2958,7 +2972,10 @@ namespace Daphne
 
         public ConfigDiffScheme() : base()
         {
-            //genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+            genes = new ObservableCollection<string>();
+            Name = "New diff scheme";
+            Driver = new ConfigTransitionDriver();
+            activationRows = new ObservableCollection<ConfigActivationRow>();
         }
 
         private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

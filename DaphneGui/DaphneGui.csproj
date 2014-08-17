@@ -201,6 +201,9 @@
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DaphneStackPanel.cs" />
+    <Compile Include="DiffSchemeDataGrid.xaml.cs">
+      <DependentUpon>DiffSchemeDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
@@ -278,6 +281,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dictionary1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DiffSchemeDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

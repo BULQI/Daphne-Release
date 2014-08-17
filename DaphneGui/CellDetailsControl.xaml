@@ -18,17 +18,15 @@
         <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
         <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
         <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
-        <daph:ObjectToBoolValueConverter x:Key="ObjectToBoolValueConverter"/>
+        <daph:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
         <daph:MolGuidToMolPopForDiffMultiValueConverter x:Key="MolGuidToMolPopForDiffMultiValueConverter" />
 
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        <local:DataGridRowColumnIndexEqualValueConverter x:Key="DataGridRowColumnIndexEqualValueConverter" />
 
         <CollectionViewSource x:Key="cytoGenes2ListView"  
                               />
 
-        <CollectionViewSource x:Key="moleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"/>
+        <CollectionViewSource x:Key="moleculesListView"  />
 
         <CollectionViewSource x:Name="cvsBoundaryMolListView" x:Key="boundaryMoleculesListView"  
                                   Filter="boundaryMoleculesListView_Filter"
@@ -47,55 +45,6 @@
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
 
         <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter" />
-
-
-        <Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
-            <Setter Property="Height" Value="8"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Cursor" Value="SizeNS"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Thumb}">
-                        <Border Padding="{TemplateBinding Padding}"
-                                        Background="{TemplateBinding Background}"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="CustomDataGridRowHeader" TargetType="{x:Type DataGridRowHeader}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
-                        <Grid Width="Auto">
-                            <Themes:DataGridHeaderBorder IsSelected="{TemplateBinding IsRowSelected}"
-                                     IsHovered ="{TemplateBinding IsMouseOver}"
-                                     IsPressed="{TemplateBinding IsPressed}"
-                                     Background="{TemplateBinding Background}"                                                                     
-                                     BorderBrush="Transparent"                                                      
-                                     BorderThickness="0" 
-                                     Padding ="{TemplateBinding Padding}"
-                                     Orientation="Horizontal"
-                                     SeparatorVisibility="{TemplateBinding SeparatorVisibility}"
-                                     SeparatorBrush="{TemplateBinding SeparatorBrush}">
-                                <DockPanel Margin="1">
-                                    <Control SnapsToDevicePixels="false"
-                                                    Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=(Validation.HasError), Converter={StaticResource bool2VisibilityConverter}}"
-                                                    Template="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=ValidationErrorTemplate}" />
-                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
-                                </DockPanel>
-                            </Themes:DataGridHeaderBorder>
-                            <Thumb x:Name="PART_TopHeaderGripper"
-                                           VerticalAlignment="Top"
-                                           Style="{StaticResource RowHeaderGripperStyle}"/>
-                            <Thumb x:Name="PART_BottomHeaderGripper"
-                                           VerticalAlignment="Bottom"
-                                           Style="{StaticResource RowHeaderGripperStyle}"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
 
         <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConverter" />
 
@@ -986,7 +935,6 @@
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                 <!--Expanded="DivSchemeExpander_Expanded"-->
-
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                     <StackPanel>
                         <Grid >
@@ -1039,332 +987,39 @@
                                 <RowDefinition Height="auto" />
                                 <RowDefinition Height="auto" />
                                 <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
                             </Grid.RowDefinitions>
 
                             <!-- DIVISION SCHEME -->
-                            <!-- show or hide Delete Division Scheme button-->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <!--<Button x:Name="btnDelDivScheme" Click="btnDelDivScheme_Click">Delete Division Scheme</Button>-->
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                        Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
+                                        >
                                 <Button x:Name="btnDelDivScheme">Delete Division Scheme</Button>
                             </StackPanel>
 
-                            <!-- show or hide the New Division Scheme button -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <!--<Button x:Name="btnNewDivScheme" Click="btnNewDivScheme_Click">New Division Scheme</Button>-->
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                        Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
+                                        >
                                 <Button x:Name="btnNewDivScheme">New Division Scheme</Button>
                             </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
-
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
-                                <TextBox x:Name="txtDivName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
-                                                                Text="{Binding  ElementName=CellsListBox, Path=SelectedItem.div_scheme.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                                </TextBox>
-                            </StackPanel>
-
-                            <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
-                                                        <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-
-                            </TextBlock>
-
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
-
-                            </StackPanel>
-
                         </Grid>
                     </StackPanel>
-
-                    <StackPanel Orientation="Vertical" x:Name="spDivRegPanel" 
-                            Visibility="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}">
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
-                            <TextBlock Text="Division scheme starting state" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" />
-                            <!--<TextBox Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme.Driver.CurrentState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, FallbackValue=-1}" Margin="0,2" Width="120"  />-->
-                            <TextBox Text="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme.Driver.CurrentState, Mode=TwoWay, FallbackValue=0, ValidatesOnExceptions=True}"
-                                                             Margin="0,2"
-                                                             Width="120" />
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                        </StackPanel>
-                        <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
-                        <DataGrid x:Name="EpigeneticMapGridDiv" 
-                                  local:DataGridDiffScheme.DiffSchemeSource ="{Binding diff_scheme}"
-                                  local:DataGridDiffScheme.DiffSchemeTarget ="EpigeneticMap" 
-                                  MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
-                                  AutoGenerateColumns="False"
-                                  IsReadOnly="False"
-                                  CanUserAddRows="False"                                                                   
-                                  CanUserReorderColumns="False"                                                            
-                                  CanUserSortColumns="False"                                                            
-                                  AlternatingRowBackground="Beige"                                                            
-                                  SelectionMode="Extended"                  
-                                  SelectionUnit="FullRow"
-                                  VirtualizingStackPanel.VirtualizationMode="Standard"
-                                  VirtualizingStackPanel.IsVirtualizing="False"
-                                  PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"                                                            
-                                  PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"                      
-                                  >
-
-                            <DataGrid.ContextMenu>
-                                <ContextMenu >
-                                    <MenuItem Header="Delete Selected Genes" Name="menuDeleteDivGenes" Click="ContextMenuDeleteGenes_Click" 
-                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-                                    <MenuItem Header="Delete Selected States" Name="menuDeleteDivStates" Click="ContextMenuDeleteStates_Click"
-                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-                                    <MenuItem Header="Add a State" Name="menuAddDivState" Click="ContextMenuAddState_Click"
-                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-                                </ContextMenu>
-                            </DataGrid.ContextMenu>
-
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-
-                            <DataGrid.Resources>
-                                <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderBrush" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
-                                                                                BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
-                                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <!-- This trigger highlights a column if user clicks on column header -->
-                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
-                                            <Setter Property="Background" Value="LightGray"/>
-                                        </Trigger>
-
-                                        <!-- This trigger highlights a grid cell if user hovers over it -->
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
-                                            <Setter Property="Background" Value="LightGray"/>
-                                        </Trigger>
-
-                                        <!-- This trigger highlights a grid cell if user clicks on it -->
-                                        <Trigger Property="IsSelected" Value="true">
-                                            <Setter Property="Background" Value="LightBlue" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                            <Setter Property="BorderBrush" Value="Black" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                                <Style TargetType="{x:Type DataGridColumnHeader}">
-                                    <Style.Triggers>
-                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
-                                            <Setter Property="Background"  Value="LightGray"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                                <Style TargetType="{x:Type DataGridRow}">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background"  Value="LightGray"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Resources>
-
-                            <DataGrid.RowHeaderStyle>
-                                <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource CustomDataGridRowHeader}">
-                                    <Setter Property="BorderBrush" Value="LightGray"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsRowSelected" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
-                                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.RowHeaderStyle>
-                            <DataGrid.RowHeaderTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />
-                                </DataTemplate>
-                            </DataGrid.RowHeaderTemplate>
-
-                        </DataGrid>
-
-                        <!-- This is the Division Regulators datagrid -->
-                        <TextBlock Text="Division Regulators" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
-                                                        <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                        </TextBlock>
-
-                        <DataGrid x:Name="DivRegGrid" 
-                                  local:DataGridDiffScheme.DiffSchemeSource ="{Binding diff_scheme}"
-                                  local:DataGridDiffScheme.DiffSchemeTarget ="Regulator"
-                                  MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
-                                    AutoGenerateColumns="False"
-                                    IsReadOnly="False"
-                                    CanUserAddRows="False"
-                                    CanUserDeleteRows="False"
-                                    AlternatingRowBackground="Beige"
-                                    SelectionMode="Single"
-                                    SelectionUnit="Cell"
-                                    PresentationTraceSources.TraceLevel="High"
-                                    HorizontalGridLinesBrush="DarkBlue"                      
-                                  >
-                            <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
-                            <DataGrid.Resources>
-                                <Style x:Name="DivRegComboStyle" TargetType="ComboBox">
-                                    <Setter Property="IsEnabled" Value="True" />
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </Style>
-
-                            </DataGrid.Resources>
-
-                            <DataGrid.CellStyle>
-                                <Style TargetType="{x:Type DataGridCell}">
-                                    <Style.Triggers>
-                                        <DataTrigger Value="True">
-                                            <DataTrigger.Binding>
-                                                <MultiBinding Converter="{StaticResource DataGridRowColumnIndexEqualValueConverter}">
-                                                    <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type DataGridRow}}"/>
-                                                    <Binding RelativeSource="{RelativeSource self}" Path="Column" />
-                                            </MultiBinding>
-                                            </DataTrigger.Binding>
-                                            <Setter Property="IsEnabled" Value="False"/>
-                                            <Setter Property="Background" Value="LightGray" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-
-                            </DataGrid.CellStyle>
-
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.div_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-
-                            <DataGrid.RowHeaderStyle>
-                                <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource CustomDataGridRowHeader}">
-                                    <Setter Property="BorderBrush" Value="LightGray"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsRowSelected" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
-                                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.RowHeaderStyle>
-
-                            <DataGrid.RowHeaderTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Content}" MinWidth="100" Width="Auto" IsReadOnly="True" />
-                                </DataTemplate>
-                            </DataGrid.RowHeaderTemplate>
-
-                        </DataGrid>
-
-                    </StackPanel>
-
+                    <!--<local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" 
+                           Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" />-->
                 </StackPanel>
             </Expander>
 
 
-
-
             <!-- DIFFERENTIATION SCHEME -->
             <Expander   
-                                        Padding="5" ExpandDirection="Down"
-                                        IsExpanded="False"
-                                        Header="Differentiation Scheme"                                                  
-                                        x:Name="DiffSchemeExpander"
-                                        Margin="0,4,0,0" 
-                                        Canvas.ZIndex="1"
-                                        BorderThickness="1"
-                                        BorderBrush="Black"
-                                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+                    Padding="5" ExpandDirection="Down"
+                    IsExpanded="False"
+                    Header="Differentiation Scheme"                                                  
+                    x:Name="DiffSchemeExpander"
+                    Margin="0,4,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                 <StackPanel Orientation="Vertical" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                     <StackPanel>
@@ -1425,244 +1080,29 @@
                                 <RowDefinition Height="auto" />
                                 <RowDefinition Height="auto" />
                                 <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="auto" />
                             </Grid.RowDefinitions>
 
                             <!-- DIFFERENTIATION SCHEME -->
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click">Delete Differentiation Scheme</Button>
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}" >
+                                <Button x:Name="btnDelDiffScheme" Click="btnDelDiffScheme_Click" Tag="Differentiation">Delete Differentiation Scheme</Button>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click">New Differentiation Scheme</Button>
+                            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
+                                    Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}">        
+                                <Button x:Name="btnNewDiffScheme" Click="btnNewDiffScheme_Click" Tag="Differentiation">New Differentiation Scheme</Button>
                             </StackPanel>
-
-                            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
-
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
-                                <TextBox x:Name="txtDiffName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
-                                                                Text="{Binding  Path=diff_scheme.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
-                                </TextBox>
-                            </StackPanel>
-
-                            <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
-                                                        <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-
-                            </TextBlock>
-
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="5">
-
-                            </StackPanel>
-
                         </Grid>
                     </StackPanel>
 
-                    <StackPanel Orientation="Vertical" x:Name="spDiffRegPanel" 
-                                                  Visibility="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}">
+                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" 
+                            Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
 
-                        <!-- This datagrid is for Epigenetic Map and is the best one so far -->
-                        <DataGrid Margin="0,10,0,0" x:Name="EpigeneticMapGrid" MinHeight="150" MaxHeight="500" MinWidth="360"
-                                                            AutoGenerateColumns="False"
-                                                            IsReadOnly="False"
-                                                            CanUserAddRows="True"       
-                                                            CanUserReorderColumns="False"
-                                                            CanUserSortColumns="False"
-                                                            AlternatingRowBackground="Beige"
-                                                            SelectionMode="Extended"
-                                                            SelectionUnit="FullRow"
-                                                            PreviewMouseLeftButtonUp="EpigeneticMapGrid_PreviewMouseLeftButtonUp"
-                                                            PreviewMouseRightButtonUp="EpigeneticMapGrid_PreviewMouseRightButtonUp"
-                                                            >
-
-                            <DataGrid.ContextMenu>
-                                <ContextMenu >
-                                    <MenuItem Header="Delete Selected Genes" Name="menuDeleteGenes" Click="menuDeleteGenes_Click"></MenuItem>
-                                    <MenuItem Header="Delete Selected States" Name="menuDeleteStates" Click="menuDeleteStates_Click"></MenuItem>
-                                    <MenuItem Header="Add a State" Name="menuAddState" Click="menuAddState_Click"></MenuItem>
-                                </ContextMenu>
-                            </DataGrid.ContextMenu>
-
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-
-                            <DataGrid.Resources>
-                                <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderBrush" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
-                                                                                BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
-                                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <!-- This trigger highlights a column if user clicks on column header -->
-                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
-                                            <Setter Property="Background" Value="LightGray"/>
-                                        </Trigger>
-
-                                        <!-- This trigger highlights a grid cell if user hovers over it -->
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
-                                            <Setter Property="Background" Value="LightGray"/>
-                                        </Trigger>
-
-                                        <!-- This trigger highlights a grid cell if user clicks on it -->
-                                        <Trigger Property="IsSelected" Value="true">
-                                            <Setter Property="Background" Value="LightBlue" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                            <Setter Property="BorderBrush" Value="Black" />
-                                        </Trigger>
-
-                                    </Style.Triggers>
-                                </Style>
-                                <Style TargetType="{x:Type DataGridColumnHeader}">
-                                    <Style.Triggers>
-                                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
-                                            <Setter Property="Background"  Value="LightGray"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                                <Style TargetType="{x:Type DataGridRow}">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background"  Value="LightGray"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-
-                            </DataGrid.Resources>
-
-
-                        </DataGrid>
-
-                        <TextBlock Text="Differentiation Regulators" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0">
-                                                        <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding ElementName=CellsListBox, Path=SelectedItem.diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                                                    <Setter Property="Visibility" Value="Hidden"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-
-                        </TextBlock>
-
-                        <!-- This is the Differentiation Regulators datagrid -->
-                        <DataGrid MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0" x:Name="DiffRegGrid" 
-                                                            AutoGenerateColumns="False"
-                                                            IsReadOnly="False"
-                                                            CanUserAddRows="False"
-                                                            AlternatingRowBackground="Beige"
-                                                            SelectionMode="Single"
-                                                            SelectionUnit="Cell"
-                                                            SelectedCellsChanged="DiffRegGrid_SelectedCellsChanged"
-                                                            PresentationTraceSources.TraceLevel="High"
-                                                            HorizontalGridLinesBrush="DarkBlue"
-                                                            
-                                                            >
-
-                            <DataGrid.Resources>
-                                <Style x:Name="DiffRegComboStyle" TargetType="ComboBox">
-                                    <Setter Property="IsEnabled" Value="True" />
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </Style>
-                            </DataGrid.Resources>
-
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Path=diff_scheme, Converter={StaticResource DiffSchemeToBoolConv}}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-
-                        </DataGrid>
-                    </StackPanel>
                 </StackPanel>
             </Expander>
 
         </local:DaphneStackPanel>
         <!--</Expander>-->
     </Grid>
+    
 </UserControl>

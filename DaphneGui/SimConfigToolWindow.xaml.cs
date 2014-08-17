@@ -1216,8 +1216,6 @@ namespace DaphneGui
                 }
             }
             ucCellPopCellDetails.DataContext = cp.Cell;
-            ucCellPopCellDetails.DiffSchemeExpander_Expanded(null, null);
-
         }
 
         /// <summary>

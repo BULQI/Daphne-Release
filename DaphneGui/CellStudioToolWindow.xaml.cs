@@ -32,13 +32,6 @@ namespace DaphneGui
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (lvCellAvailableReacs.ItemsSource != null)
-            //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
-            //if (lvCytosolAvailableReacs.ItemsSource != null)
-            //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
-
-            //DiffSchemeExpander_Expanded(null, null);
-            ucCellDetails.DiffSchemeExpander_Expanded(null, null);
 
         }
 
