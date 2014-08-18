@@ -215,13 +215,13 @@ namespace Daphne
                     }
 
                 }
-                //if (cp.reportStates.Division == true)
-                //{
-                //    if (cp.Cell.div_scheme.Driver.states.Count > 0)
-                //    {
-                //        header += "\tDivState";
-                //    }
-                //}
+                if (cp.reportStates.Division == true)
+                {
+                    if (cp.Cell.div_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDivState";
+                    }
+                }
                 if (cp.reportStates.Death == true)
                 {
                     header += "\tDeathState";

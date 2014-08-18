@@ -621,6 +621,32 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
+                    // Division before differentiation
+                    if (cp.Cell.div_scheme != null)
+                    {
+                        ConfigDiffScheme config_divScheme = cp.Cell.div_scheme;
+                        ConfigTransitionDriver config_td = config_divScheme.Driver;
+
+                        cell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Divider.Behavior);
+
+                        // Epigenetic information
+                        for (int ii = 0; ii < cell.Divider.nGenes; ii++)
+                        {
+                            cell.Divider.AddGene(ii, config_divScheme.genes[ii]);
+
+                            for (int j = 0; j < cell.Divider.nStates; j++)
+                            {
+                                cell.Divider.AddActivity(j, ii, config_divScheme.activationRows[j].activations[ii]);
+                                cell.Divider.AddState(j, config_divScheme.Driver.states[j]);
+                            }
+                        }
+
+                        // Set cell state and corresponding gene activity levels
+                        cell.DividerState = cell.Divider.CurrentState;
+                        cell.SetGeneActivities(cell.Divider);
+                    }
+
                     // Differentiation
                     if (cp.Cell.diff_scheme != null)
                     {
@@ -628,7 +654,7 @@ namespace Daphne
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Differentiator.Behavior);
 
                         // Epigenetic information
                         for (int ii = 0; ii < cell.Differentiator.nGenes; ii++)
@@ -655,18 +681,6 @@ namespace Daphne
                         {
                             cell.SetGeneActivities();
                         }
-                    }
-
-                    // division behavior
-                    if (cp.Cell.div_driver != null)
-                    {
-                        if (cp.CellStates[i].cbState.divisionDriverState != -1)
-                        {
-                            cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
-                        }
-                        ConfigTransitionDriver config_td = cp.Cell.div_driver;
-
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 
                     AddCell(cell);

@@ -19,6 +19,21 @@ namespace Daphne
         public static int Dim = 9;
     }
 
+    public class Gene
+    {
+        public string Name { get; private set; }
+        public int CopyNumber { get; private set; }
+        // Activation level may be adjusted depending on cell state 
+        public double ActivationLevel { get; set; }
+
+        public Gene(string name, int copyNumber, double actLevel)
+        {
+            Name = name;
+            CopyNumber = copyNumber;
+            ActivationLevel = actLevel;
+        }
+    }
+
     public class Cytosol : Attribute { }
     public class Membrane : Attribute { }
 
@@ -49,7 +64,7 @@ namespace Daphne
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
         private ITransitionDriver deathBehavior, divisionBehavior;
-        private IDifferentiator differentiator;
+        private ITransitionScheme differentiator, divider;
 
         /// <summary>
         /// the genes in a cell
@@ -127,14 +142,25 @@ namespace Daphne
         }
 
         [Inject]
-        public void InjectDifferentiator(IDifferentiator diff)
+        public void InjectDifferentiator(ITransitionScheme diff)
         {
             differentiator = diff;
         }
 
-        public IDifferentiator Differentiator
+        public ITransitionScheme Differentiator
         {
             get { return differentiator; }
+        }
+
+        [Inject]
+        public void InjectDivider(ITransitionScheme div)
+        {
+            divider = div;
+        }
+
+        public ITransitionScheme Divider
+        {
+            get { return divider; }
         }
 
 
@@ -223,6 +249,18 @@ namespace Daphne
             }
         }
 
+        public void SetGeneActivities(ITransitionScheme scheme)
+        {
+            // Set gene activity levels based on current differentiation state
+            for (int i = 0; i < scheme.gene_id.Length; i++)
+            {
+                // Negative activation means leave the gene as is
+                if (scheme.activity[scheme.CurrentState, i] >= 0)
+                {
+                    Genes[scheme.gene_id[i]].ActivationLevel = scheme.activity[scheme.CurrentState, i];
+                }
+            }
+        }
 
         /// <summary>
         /// Returns the force the cell applies to the environment.
@@ -366,11 +404,11 @@ namespace Daphne
                 }
             }
 
-            // differentiation
-            if (Differentiator.nStates > 1)
+            // division
+            if (Divider.nStates > 1)
             {
-                daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
-                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.DiffBehavior.Drivers)
+                daughter.Divider.Initialize(Divider.nStates, Divider.nGenes);
+                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Divider.Behavior.Drivers)
                 {
                     foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
                     {
@@ -380,7 +418,32 @@ namespace Daphne
                         tde.Alpha = kvp_inner.Value.Alpha;
                         tde.Beta = kvp_inner.Value.Beta;
                         // add it to the daughter
-                        daughter.Differentiator.DiffBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                        daughter.Divider.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
+                    }
+                }
+                Array.Copy(Divider.State, daughter.Divider.State, Divider.State.Length);
+                Array.Copy(Divider.gene_id, daughter.Divider.gene_id, Divider.gene_id.Length);
+                Array.Copy(Divider.activity, daughter.Divider.activity, Divider.activity.Length);
+                daughter.DividerState = Divider.CurrentState;
+                daughter.SetGeneActivities(Divider);
+            }
+
+
+            // differentiation
+            if (Differentiator.nStates > 1)
+            {
+                daughter.Differentiator.Initialize(Differentiator.nStates, Differentiator.nGenes);
+                foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in Differentiator.Behavior.Drivers)
+                {
+                    foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+
+                        tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
+                        tde.Alpha = kvp_inner.Value.Alpha;
+                        tde.Beta = kvp_inner.Value.Beta;
+                        // add it to the daughter
+                        daughter.Differentiator.Behavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                     }
                 }
                 Array.Copy(Differentiator.State, daughter.Differentiator.State, Differentiator.State.Length);
@@ -393,7 +456,7 @@ namespace Daphne
             return daughter;
         }
 
-        public int DifferentiationState;
+        public int DifferentiationState, DividerState;
 
         public Locomotor Locomotor { get; set; }
         public Compartment Cytosol { get; private set; }

@@ -27,9 +27,9 @@
                                   Source="{Binding Path=entity_repository.transition_drivers}"
                                   Filter="selectedCellTransitionDeathDriverListView_Filter"/>
 
-            <CollectionViewSource x:Key="cellTransitionDivisionDriverListView"  
+            <!--<CollectionViewSource x:Key="cellTransitionDivisionDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"
-                                  Filter="selectedCellTransitionDivisionDriverListView_Filter"/>
+                                  Filter="selectedCellTransitionDivisionDriverListView_Filter"/>-->
 
             <CollectionViewSource x:Key="diffSchemesListView"  
                                   Source="{Binding Path=entity_repository.diff_schemes}"/>

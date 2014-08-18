@@ -607,13 +607,15 @@ namespace Daphne
                         }
                     }
                     // div
-                    if (cp.Cell.div_driver.entity_guid == e.entity_guid)
-                    {
-                        if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell.div_driver = e as ConfigTransitionDriver;
-                        }
-                    }
+
+                    throw (new NotImplementedException("need work here, sanjeev"));
+                    //if (cp.Cell.div_driver.entity_guid == e.entity_guid)
+                    //{
+                    //    if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
+                    //    {
+                    //        cp.Cell.div_driver = e as ConfigTransitionDriver;
+                    //    }
+                    //}
                 }
             }
             else if (e is ConfigDiffScheme)
@@ -4116,18 +4118,35 @@ namespace Daphne
             }
         }
 
-        private ConfigTransitionDriver _div_driver;
-        public ConfigTransitionDriver div_driver 
+
+        //private ConfigTransitionDriver _div_driver;
+        //public ConfigTransitionDriver div_driver 
+        //{
+        //    get
+        //    {
+        //        return _div_driver;
+        //    }
+
+        //    set
+        //    {
+        //        _div_driver = value;
+        //        OnPropertyChanged("div_driver");
+        //    }
+        //}
+
+
+        private ConfigDiffScheme _div_scheme;
+        public ConfigDiffScheme div_scheme
         {
             get
             {
-                return _div_driver;
+                return _div_scheme;
             }
 
             set
             {
-                _div_driver = value;
-                OnPropertyChanged("div_driver");
+                _div_scheme = value;
+                OnPropertyChanged("div_scheme");
             }
         }
 

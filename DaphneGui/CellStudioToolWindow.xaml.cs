@@ -206,37 +206,37 @@ namespace DaphneGui
             CellsListBox.SelectedIndex = nIndex;
         }
 
-        private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            if (cell == null)
-                return;
+        //private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+        //    if (cell == null)
+        //        return;
 
-            CheckBox ch = sender as CheckBox;
-            if (ch.IsChecked == false)
-            {
-                cell.div_driver = null;
-            }
-            else
-            {
-                if (cell.div_driver == null)
-                {
-                    EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                    ConfigTransitionDriver driver = FindFirstDivDriver();
+        //    CheckBox ch = sender as CheckBox;
+        //    if (ch.IsChecked == false)
+        //    {
+        //        cell.div_driver = null;
+        //    }
+        //    else
+        //    {
+        //        if (cell.div_driver == null)
+        //        {
+        //            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+        //            ConfigTransitionDriver driver = FindFirstDivDriver();
 
-                    if (driver == null)
-                    {
-                        MessageBox.Show("No division drivers are defined");
-                        return;
-                    }
+        //            if (driver == null)
+        //            {
+        //                MessageBox.Show("No division drivers are defined");
+        //                return;
+        //            }
 
-                    if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
-                    {
-                        cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(true);
-                    }
-                }
-            }
-        }
+        //            if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+        //            {
+        //                cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(true);
+        //            }
+        //        }
+        //    }
+        //}
 
         private ConfigTransitionDriver FindFirstDeathDriver()
         {
@@ -325,58 +325,58 @@ namespace DaphneGui
 
         }
 
-        private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            if (cell == null)
-                return;
+        //private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+        //    if (cell == null)
+        //        return;
 
 
-            if (cell.div_driver == null)
-            {
-                ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-                ////ConfigTransitionDriver driver = FindFirstDivDriver();
+        //    if (cell.div_driver == null)
+        //    {
+        //        ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+        //        ////ConfigTransitionDriver driver = FindFirstDivDriver();
 
-                ////if (driver == null)
-                ////{
-                ////    MessageBox.Show("No division drivers are defined");
-                ////    return;
-                ////}
+        //        ////if (driver == null)
+        //        ////{
+        //        ////    MessageBox.Show("No division drivers are defined");
+        //        ////    return;
+        //        ////}
 
-                ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
-                ////{
-                ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
-                ////}
+        //        ////if (er.transition_drivers_dict.ContainsKey(driver.entity_guid) == true)
+        //        ////{
+        //        ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
+        //        ////}
 
-                //I think this is what we want
-                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-                config_td.Name = "generic division";
-                string[] stateName = new string[] { "quiescent", "mitotic" };
-                string[,] signal = new string[,] { { "", "" }, { "", "" } };
-                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
-                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
-                cell.div_driver = config_td;
-            }
-        }
+        //        //I think this is what we want
+        //        ConfigTransitionDriver config_td = new ConfigTransitionDriver();
+        //        config_td.Name = "generic division";
+        //        string[] stateName = new string[] { "quiescent", "mitotic" };
+        //        string[,] signal = new string[,] { { "", "" }, { "", "" } };
+        //        double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
+        //        double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
+        //        ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
+        //        config_td.CurrentState = 0;
+        //        config_td.StateName = config_td.states[config_td.CurrentState];
+        //        cell.div_driver = config_td;
+        //    }
+        //}
 
-        private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            if (cell == null)
-                return;
+        //private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
+        //    if (cell == null)
+        //        return;
 
-            //confirm deletion of driver
-            MessageBoxResult res;
-            res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
+        //    //confirm deletion of driver
+        //    MessageBoxResult res;
+        //    res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
+        //    if (res == MessageBoxResult.No)
+        //        return;
 
-            //delete driver
-            cell.div_driver = null;
-        }
+        //    //delete driver
+        //    cell.div_driver = null;
+        //}
 
         private void cytosolReactionsCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
@@ -559,23 +559,23 @@ namespace DaphneGui
             }
         }
 
-        private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
-            if (driver != null)
-            {
-                // Filter out driver if its guid does not match selected cell's driver guid
-                if (cell != null && cell.div_driver != null && driver.entity_guid == cell.div_driver.entity_guid)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
-            }
-        }
+        //private void selectedCellTransitionDivisionDriverListView_Filter(object sender, FilterEventArgs e)
+        //{
+        //    ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+        //    ConfigTransitionDriver driver = e.Item as ConfigTransitionDriver;
+        //    if (driver != null)
+        //    {
+        //        // Filter out driver if its guid does not match selected cell's driver guid
+        //        if (cell != null && cell.div_driver != null && driver.entity_guid == cell.div_driver.entity_guid)
+        //        {
+        //            e.Accepted = true;
+        //        }
+        //        else
+        //        {
+        //            e.Accepted = false;
+        //        }
+        //    }
+        //}
 
         private void selectedCellTransitionDeathDriverListView_Filter(object sender, FilterEventArgs e)
         {

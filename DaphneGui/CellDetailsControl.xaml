@@ -853,7 +853,7 @@
             </Expander>
 
             <!-- Cell Division -->
-            <Expander   Header="Cell Division"
+            <!--<Expander   Header="Cell Division"
                                                 Padding="5" 
                                                 ExpandDirection="Down"
                                                 IsExpanded="False"
@@ -922,7 +922,7 @@
                         <StackPanel Height="10"></StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </Expander>
+            </Expander>-->
 
             <Expander   Header="Division Scheme"
                         Padding="5" ExpandDirection="Down"
@@ -991,20 +991,25 @@
 
                             <!-- DIVISION SCHEME -->
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                        Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
+                                        Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}}"
                                         >
-                                <Button x:Name="btnDelDivScheme">Delete Division Scheme</Button>
+                                <Button x:Name="btnDelDivScheme" Click="btnDelDiffScheme_Click" Tag="Division">Delete Division Scheme</Button>
                             </StackPanel>
 
                             <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"
-                                        Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
+                                        Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Reverse}"
                                         >
-                                <Button x:Name="btnNewDivScheme">New Division Scheme</Button>
+                                <Button x:Name="btnNewDivScheme" Click="btnNewDiffScheme_Click" Tag="Division">New Division Scheme</Button>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                    <!--<local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" 
-                           Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToBoolValueConverter}}" />-->
+                    <!--<local:DiffSchemeDataGrid local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding div_scheme}" 
+                           Visibility="{Binding Path=div_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />-->
+
+                    <local:DiffSchemeDataGrid DataContext="{Binding div_scheme}" x:Name="DivSchemeGrid"
+                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
+                    
+                    
                 </StackPanel>
             </Expander>
 
@@ -1095,8 +1100,11 @@
                         </Grid>
                     </StackPanel>
 
-                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" 
-                            Visibility="{Binding Path=., Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
+                    <!--<local:DiffSchemeDataGrid local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding diff_scheme}" 
+                           Visibility="{Binding Path=diff_scheme, Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />-->
+                    
+                    <local:DiffSchemeDataGrid DataContext="{Binding diff_scheme}" x:Name="DiffSchemeGrid"
+                            Visibility="{Binding Converter={StaticResource ObjectToVisibilityConverter}, ConverterParameter=Collapsed}" />
 
                 </StackPanel>
             </Expander>

@@ -920,50 +920,6 @@ namespace DaphneGui
 
         }
 
-        private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-
-            if (cell.div_driver == null)
-            {
-                //I think this is what we want
-                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-                config_td.Name = "generic division";
-                string[] stateName = new string[] { "quiescent", "mitotic" };
-                string[,] signal = new string[,] { { "", "" }, { "", "" } };
-                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
-                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
-                cell.div_driver = config_td;
-            }
-        }
-
-        private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            //confirm deletion of driver
-            MessageBoxResult res;
-            res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
-
-            //delete driver
-            cell.div_driver = null;
-        }
-
-
         /// <summary>
         /// This method creates a data grid column with a combo box in the header.
         /// The combo box contains genes that are not in the epigenetic map of of 
@@ -1071,11 +1027,10 @@ namespace DaphneGui
             ConfigDiffScheme diff_scheme = null;
             if (schemeName == "Division")
             {
-                diff_scheme = null; //cell.div_driver;
+                diff_scheme = cell.div_scheme;
                 if (diff_scheme == null)
                 {
-                    diff_scheme = new ConfigDiffScheme();
-                    //cell.div_scheme = diff_scheme;
+                    cell.div_scheme = diff_scheme = new ConfigDiffScheme();
                 }
             }
             else if (schemeName == "Differentiation")
@@ -1089,6 +1044,18 @@ namespace DaphneGui
             else return;
 
             diff_scheme.AddState(stateName);
+
+            //refresh display
+            if (schemeName == "Division")
+            {
+                cell.div_scheme = null;
+                cell.div_scheme = diff_scheme;
+            }
+            else if (schemeName == "Differentiation")
+            {
+                cell.diff_scheme = null;
+                cell.diff_scheme = diff_scheme;
+            }
         }
 
         private void btnNewDiffScheme_Click(object sender, RoutedEventArgs e)
@@ -1119,14 +1086,13 @@ namespace DaphneGui
 
             if (schemeName == "Division")
             {
-                cell.div_driver = null;
+                cell.div_scheme = null;
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
             }
         }
-
 
         /// <summary>
         /// This method is called when the user changes a combo box selection in a grid cell

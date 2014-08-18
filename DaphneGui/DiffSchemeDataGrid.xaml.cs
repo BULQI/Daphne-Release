@@ -77,6 +77,10 @@ namespace DaphneGui
             }
 
             DiffSchemeDataGrid.update_datagrid_rowheaders(dataGrid);
+            //update the reg grid
+            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
+            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);
+
         }
 
         private void ContextMenuAddState_Click(object sender, RoutedEventArgs e)
@@ -92,6 +96,11 @@ namespace DaphneGui
             if (diff_scheme == null) return;
 
             diff_scheme.AddState(ads.StateName);
+
+            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
+            DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, diff_scheme);
+            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, null);
+            DiffSchemeDataGrid.SetDiffSchemeSource(this.DivRegGrid, diff_scheme);         
         }
 
         #endregion
@@ -157,7 +166,7 @@ namespace DaphneGui
 
             //var tmp = FindLogicalParent<CellDetailsControl>(dataGrid);
 
-            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid); ;
+            CellDetailsControl cdc = FindLogicalParent<CellDetailsControl>(dataGrid);
             if (DiffSchemeTarget == "EpigeneticMap")
             {
                 Binding b1 = new Binding("activationRows") { Source = diffScheme };
