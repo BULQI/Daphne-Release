@@ -54,6 +54,18 @@ namespace Daphne
         /// a flag that signals that the cell is motile
         /// </summary>
         private bool isMotile = true;
+        /// <summary>
+        /// a flag that signals that the cell responds to chemokine gradients
+        /// </summary>
+        private bool isChemotactic = true;
+        /// <summary>
+        /// a flag that signals that the cell is subject to stochastic forces
+        /// </summary>
+        private bool isStochastic = true;
+        /// <summary>
+        /// A flag that signals to the cell manager whether the cell is exiting the simulation space.
+        /// </summary>
+        private bool exiting;
 
         /// <summary>
         /// The radius of the cell
@@ -63,7 +75,7 @@ namespace Daphne
         /// <summary>
         /// the cell's behaviors (death, division, differentiation)
         /// </summary>
-        private ITransitionDriver deathBehavior, divisionBehavior;
+        private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
 
         /// <summary>
@@ -91,6 +103,7 @@ namespace Daphne
             cytokinetic = false;
             this.radius = radius;
             genes = new Dictionary<string, Gene>();
+            exiting = false;
 
             Cell_id = SafeCell_id++;
         }
@@ -128,17 +141,6 @@ namespace Daphne
         public ITransitionDriver DeathBehavior
         {
             get { return deathBehavior; }
-        }
-
-        [Inject]
-        public void InjectDivisionBehavior(ITransitionDriver behavior)
-        {
-            divisionBehavior = behavior;
-        }
-
-        public ITransitionDriver DivisionBehavior
-        {
-            get { return divisionBehavior; }
         }
 
         [Inject]
@@ -207,45 +209,35 @@ namespace Daphne
             if (deathBehavior.TransitionOccurred == true && deathBehavior.CurrentState == 1)
             {
                 alive = false;
+                cytokinetic = false;
             }
+
             // division
-            divisionBehavior.Step(dt);
-            if (divisionBehavior.TransitionOccurred == true && divisionBehavior.CurrentState == 1)
+            Divider.Step(dt);
+            if (Divider.TransitionOccurred == true)
             {
-                cytokinetic = true;
-                divisionBehavior.TransitionOccurred = false;
-                divisionBehavior.CurrentState = 0;
+                Divider.TransitionOccurred = false;
+                if (Divider.CurrentState == Divider.Behavior.FinalState)
+                {
+                    cytokinetic = true;
+                    Divider.CurrentState = 0;
+                    Divider.Behavior.CurrentState = 0;
+                    Divider.PreviousState = Divider.Behavior.FinalState;
+                    Divider.Behavior.PreviousState = Divider.Behavior.FinalState;
+                }
+                // Epigentic changes
+                SetGeneActivities(Divider);
+                DividerState = Divider.CurrentState;
             }
 
+            // Differentiation
             Differentiator.Step(dt);
-
             if (Differentiator.TransitionOccurred == true)
             {
                 // Epigentic changes
-                SetGeneActivities();
+                SetGeneActivities(Differentiator);
                 Differentiator.TransitionOccurred = false;
                 DifferentiationState = Differentiator.CurrentState;
-            }
-        }
-
-        public void SetGeneActivities()
-        {
-            // Set gene activity levels based on current differentiation state
-            for (int i = 0; i < Differentiator.gene_id.Length; i++)
-            {
-                Genes[Differentiator.gene_id[i]].ActivationLevel = Differentiator.activity[Differentiator.CurrentState, i];
-            }
-        }
-
-        /// <summary>
-        /// save gene activity from saved values.
-        /// </summary>
-        /// <param name="geneDict"></param>
-        public void SetGeneActivities(Dictionary<String, double> geneDict)
-        {
-            foreach (var kvp in geneDict)
-            {
-                Genes[kvp.Key].ActivationLevel = kvp.Value;
             }
         }
 
@@ -261,6 +253,19 @@ namespace Daphne
                 }
             }
         }
+
+        /// <summary>
+        /// save gene activity from saved values.
+        /// </summary>
+        /// <param name="geneDict"></param>
+        public void SetGeneActivities(Dictionary<String, double> geneDict)
+        {
+            foreach (var kvp in geneDict)
+            {
+                Genes[kvp.Key].ActivationLevel = kvp.Value;
+            }
+        }
+
 
         /// <summary>
         /// Returns the force the cell applies to the environment.
@@ -367,13 +372,22 @@ namespace Daphne
 
             // locomotion
             daughter.IsMotile = isMotile;
-            if (isMotile == true)
+            daughter.IsChemotactic = isChemotactic;
+            if (IsChemotactic == true)
             {
                 MolecularPopulation driver = daughter.Cytosol.Populations[Locomotor.Driver.MoleculeKey];
 
                 daughter.Locomotor = new Locomotor(driver, Locomotor.TransductionConstant);
-                daughter.DragCoefficient = DragCoefficient;
             }
+
+            // stochastic locomotion
+            daughter.IsStochastic = isStochastic;
+            if (isStochastic == true)
+            {
+                daughter.StochLocomotor = new StochLocomotor(StochLocomotor.Sigma);
+            }
+
+            daughter.DragCoefficient = DragCoefficient;
 
             // death
             foreach(KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DeathBehavior.Drivers)
@@ -387,20 +401,6 @@ namespace Daphne
                     tde.Beta = kvp_inner.Value.Beta;
                     // add it to the daughter
                     daughter.DeathBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
-                }
-            }
-
-            // division
-            foreach (KeyValuePair<int, Dictionary<int, TransitionDriverElement>> kvp_outer in DivisionBehavior.Drivers)
-            {
-                foreach (KeyValuePair<int, TransitionDriverElement> kvp_inner in kvp_outer.Value)
-                {
-                    TransitionDriverElement tde = new TransitionDriverElement();
-                    tde.DriverPop = daughter.Cytosol.Populations[kvp_inner.Value.DriverPop.MoleculeKey];
-                    tde.Alpha = kvp_inner.Value.Alpha;
-                    tde.Beta = kvp_inner.Value.Beta;
-                    // add it to the daughter
-                    daughter.DivisionBehavior.AddDriverElement(kvp_outer.Key, kvp_inner.Key, tde);
                 }
             }
 
@@ -450,7 +450,7 @@ namespace Daphne
                 Array.Copy(Differentiator.gene_id, daughter.Differentiator.gene_id, Differentiator.gene_id.Length);
                 Array.Copy(Differentiator.activity, daughter.Differentiator.activity, Differentiator.activity.Length);
                 daughter.DifferentiationState = Differentiator.CurrentState;
-                daughter.SetGeneActivities();
+                daughter.SetGeneActivities(Differentiator);
             }
 
             return daughter;
@@ -464,6 +464,7 @@ namespace Daphne
         //public Differentiator Differentiator { get; private set; }
         private CellSpatialState spatialState;
         public double DragCoefficient { get; set; }
+        public StochLocomotor StochLocomotor { get; set; } 
 
         public int Cell_id { get; private set; }
         public static int SafeCell_id = 0;
@@ -482,7 +483,18 @@ namespace Daphne
             get { return isMotile; }
             set { isMotile = value; }
         }
+        public bool IsChemotactic
+        {
+            get { return isChemotactic; }
+            set { isChemotactic = value; }
 
+        }
+        public bool IsStochastic
+        {
+            get { return isStochastic; }
+            set { isStochastic = value; }
+
+        }
         public bool Alive
         {
             get { return alive; }
@@ -506,6 +518,12 @@ namespace Daphne
         public int[] GridIndex
         {
             get { return gridIndex; }
+        }
+
+        public bool Exiting
+        {
+            get { return exiting; }
+            set { exiting = value; }
         }
 
         /// <summary>
@@ -622,8 +640,8 @@ namespace Daphne
                     // detect out of bounds cells
                     if (SpatialState.X[i] < 0.0 || SpatialState.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
                     {
-                        // cell dies
-                        alive = false;
+                        // cell exits
+                        exiting = true;
                     }
                 }
             }

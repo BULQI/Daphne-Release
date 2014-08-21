@@ -592,14 +592,31 @@ namespace Daphne
                     // membrane; no boundary
                     AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
                     AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
-                    
-                    // locomotion
-                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+
+
+                    // locomotion - merged from release-dev
                     if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
                     {
-                        //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
                         MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+
                         cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
+                        cell.IsChemotactic = true;
+                    }
+                    else
+                    {
+                        cell.IsChemotactic = false;
+                    }
+                    if (cp.Cell.Sigma > 0)
+                    {
+                        cell.IsStochastic = true;
+                        cell.StochLocomotor = new StochLocomotor(cp.Cell.Sigma);
+                    }
+                    else
+                    {
+                        cell.IsStochastic = false;
+                    }
+                    if (cell.IsChemotactic || cell.IsStochastic)
+                    {
                         cell.IsMotile = true;
                         cell.DragCoefficient = cp.Cell.DragCoefficient;
                     }
@@ -607,6 +624,22 @@ namespace Daphne
                     {
                         cell.IsMotile = false;
                     }
+
+
+                    // locomotion
+                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+                    //if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
+                    //{
+                    //    //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
+                    //    MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+                    //    cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
+                    //    cell.IsMotile = true;
+                    //    cell.DragCoefficient = cp.Cell.DragCoefficient;
+                    //}
+                    //else
+                    //{
+                    //    cell.IsMotile = false;
+                    //}
 
 
                     //TRANSITION DRIVERS
@@ -673,13 +706,14 @@ namespace Daphne
                             cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
                         }
                         cell.DifferentiationState = cell.Differentiator.CurrentState;
+                        //saving from saved states
                         if (cp.CellStates[i].cgState.geneDict.Count > 0)
                         {
                             cell.SetGeneActivities(cp.CellStates[i].cgState.geneDict);
                         }
                         else
                         {
-                            cell.SetGeneActivities();
+                            cell.SetGeneActivities(cell.Differentiator);
                         }
                     }
 

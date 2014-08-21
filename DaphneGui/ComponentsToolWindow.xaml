@@ -32,6 +32,11 @@
                                   Source="{Binding Path=entity_repository.reaction_complexes}"
                                   />
 
+        <CollectionViewSource x:Key="GenesListView"  
+                                  Source="{Binding Path=entity_repository.genes}"
+                                  />
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
     </docking:ToolWindow.Resources>
 
     <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTION COMPLEXES, AND DIFF SCHEMES -->
@@ -41,7 +46,7 @@
                 <StackPanel.Resources>
                     <DataTemplate x:Key="libMolListItemTemplate">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Path=Name}" 
+                        <TextBlock Text="{Binding Path=Name}" 
                                                    Foreground="Black" 
                                                    Margin="5,0,0,0" />
                         </StackPanel>
@@ -63,8 +68,12 @@
 
                     <StackPanel>
 
+                    <TextBlock Text="checking datacontext" />
+                    <TextBlock Text="{Binding Converter={StaticResource DebugConverter}}" />
+
                         <DataGrid x:Name="dgLibGenes" 
-                                ItemsSource="{Binding Path=entity_repository.genes}" AutoGenerateColumns="False" 
+                                ItemsSource="{Binding Source={StaticResource GenesListView}}" 
+                                AutoGenerateColumns="False" 
                                 Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="False" RowHeaderWidth="0"

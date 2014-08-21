@@ -1867,9 +1867,13 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
+            deathConstant = 1e-3;
+            deathOrder = 1;
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
+        public double deathConstant { get; set; }
+        public int deathOrder { get; set; }
     }
 
     public class EntityRepository 
@@ -3976,6 +3980,7 @@ namespace Daphne
             CellRadius = 5.0;
             TransductionConstant = 0.0;
             DragCoefficient = 1.0;
+            Sigma = 0.0;
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -4076,6 +4081,23 @@ namespace Daphne
             {
                 dragCoefficient = value;
                 OnPropertyChanged("DragCoefficient");
+            }
+        }
+
+        /// <summary>
+        /// Parameter for stochastic force
+        /// </summary>
+        private double sigma;
+        public double Sigma
+        {
+            get
+            {
+                return sigma;
+            }
+            set
+            {
+                sigma = value;
+                OnPropertyChanged("Sigma");
             }
         }
 

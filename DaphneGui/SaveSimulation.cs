@@ -119,7 +119,7 @@ namespace DaphneGui
                 cell_state.setSpatialState(cell.SpatialState);
 
                 cell_state.setDeathDriverState(cell.DeathBehavior.CurrentState);
-                cell_state.setDivisonDriverState(cell.DivisionBehavior.CurrentState);
+                cell_state.setDivisonDriverState(cell.Divider.CurrentState);
                 cell_state.setDifferentiationDriverState(cell.DifferentiationState);
                 cell_state.setGeneState(cell.Genes);
 

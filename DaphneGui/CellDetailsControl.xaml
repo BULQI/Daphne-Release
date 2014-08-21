@@ -352,7 +352,7 @@
                                                                         IsSnapToTickEnabled="True" 
                                                                         TickFrequency="0.1" 
                                                                     />
-                                                    <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
+                                                    <TextBlock Text="{Binding ElementName=solfac2_weight_slider, Path=Value}" 
                                                                         VerticalAlignment="Center"
                                                                         TextAlignment="Right"
                                                                         Margin="5,0,0,0"

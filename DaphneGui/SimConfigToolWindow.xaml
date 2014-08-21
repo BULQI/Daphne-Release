@@ -36,6 +36,9 @@
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
+        
+        <CollectionViewSource x:Key="moleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"/>
 
         <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
@@ -108,6 +111,8 @@
             <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
             <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
             <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+            <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
+            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1996,7 +2001,7 @@
 
                                                         <!--GotFocus="MolPopDistributionTypeComboBox_GotFocus"-->
 
-                                                        <ComboBox.Style>
+                                                        <!--<ComboBox.Style>
                                                             <Style TargetType="ComboBox">
                                                                 <Style.Triggers>
                                                                     <MultiDataTrigger>
@@ -2009,7 +2014,7 @@
 
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </ComboBox.Style>
+                                                        </ComboBox.Style>-->
 
                                                         <ComboBox.ItemContainerStyle>
                                                             <Style TargetType="{x:Type ComboBoxItem}">
@@ -2451,41 +2456,95 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
-                            <Expander  Padding="12"
+                            <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
                                 Header="Cell Properties"                                              
                                 x:Name="CellDetExpander"
-                                Margin="6,-15,0,0" 
-                                 >
-                                <Expander.Resources>
-                                    
-                                </Expander.Resources>
-
+                                Margin="6, 0,0,0" 
+                                >
+                               
                                 <local:DaphneStackPanel x:Name="EcmMolpopPanelCellMolPops" >
                                     <StackPanel Orientation="Horizontal" Margin="10,0">
-                                        
-                                            <!--<ContentControl Name="CellPopCellTypeProperties" 
-                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}" 
-                                                    ContentTemplate="{StaticResource ResourceKey=cellDetailsTemplate}" 
-                                                    Margin="6,0"/>-->
                                         <local:CellPropertiesControl DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
 
                                     <StackPanel Margin="10,6">
                                         <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
-                                    </StackPanel>
-                                    
+                                    </StackPanel>                                    
                                 </local:DaphneStackPanel>
-                                
-                                
-
+ 
                             </Expander>
                             
                         </StackPanel>
                     </Expander>
 
-                   
+
+                    <!-- CELL DEATH PARAMETERS -->
+                    <Expander
+                            Padding="5" 
+                            ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Cell Death Parameters"                                              
+                                x:Name="CellDeathParamsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                        <StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                    TextAlignment="Left"
+                                                    Width="Auto"
+                                                    />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="time constant" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />
+                                <editors:DoubleEditBox x:Name="deathConstant_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="E2"
+                                                              StepValue="0.1"
+                                                              Width="100" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="order parameter" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="3"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />
+
+                                <editors:DoubleEditBox x:Name="deathOrder_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="F0"
+                                                              StepValue="0.1"
+                                                              Width="100" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                                <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Expander>
 
 
                     <!-- Cell Interaction Parameters -->

@@ -758,13 +758,6 @@ namespace Daphne
             }
 
             // add division
-            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
-            {
-
-                throw (new NotImplementedException("todo for dev merge"));
-                //gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
-            }
 
             protocol.entity_repository.cells.Add(gc);
 
@@ -871,12 +864,7 @@ namespace Daphne
             }
 
             // add division
-            death_driver_guid = findTransitionDriverGuid("generic division", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
-            {
-                throw (new NotImplementedException("need work here, to do for merge"));
-                //gc.div_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
-            }
+            //div_driver changed to div_scheme now, need to add div_scheme for this part?
 
             protocol.entity_repository.cells.Add(gc);
 

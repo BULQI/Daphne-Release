@@ -37,7 +37,17 @@
             <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
-            <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
+
+            <CompositeCollection x:Key="testCollection">
+                <daph:ConfigMolecule Name="None" entity_guid=""/>
+                <ComboBoxItem>None</ComboBoxItem>
+                <CollectionContainer
+                 Collection="{Binding Source={StaticResource moleculesListView}}" />
+            </CompositeCollection>
+        
+
+
+        <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
 
 
 
@@ -152,7 +162,13 @@
                                     Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                             </StackPanel>
 
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"/>
+                            <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=Sigma, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                         </StackPanel>
+
+                    </StackPanel>
                     </Expander>
                 </local:DaphneStackPanel>
 

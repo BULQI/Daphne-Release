@@ -16,16 +16,17 @@
          The user control CellDetailsControl shows these other items.
     -->
     
+    <UserControl.Resources>
+        <CollectionViewSource x:Key="diffSchemesListView" />
+        <CollectionViewSource x:Key="moleculesListView"  />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
             <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
-
-            <CollectionViewSource x:Key="diffSchemesListView"  
-                                  Source="{Binding Path=entity_repository.diff_schemes}"/>
-
-            <CollectionViewSource x:Key="moleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"/>
+                                  
+            <!--<CollectionViewSource x:Key="moleculesListView"  />-->
 
         </Grid.Resources>
 
@@ -87,14 +88,14 @@
                                 IsExpanded="True"
                                 Header="Locomotor"                                                  
                                 x:Name="LocomotorExpander"
-                                Margin="0,-10,0,0" 
+                                Margin="0, 0,0,0" 
                                 Canvas.ZIndex="1"     
                                 HorizontalAlignment="Right"
                                 Width="Auto"
                                 Visibility="Visible"
                                 >
 
-                    <StackPanel Orientation="Vertical" Margin="0,-10">
+                    <StackPanel Orientation="Vertical" Margin="0,0">
                         <StackPanel Orientation="Horizontal" Width="240">
                             <StackPanel.Resources>
                                 <DataTemplate x:Key="libMolListItemTemplate">
@@ -110,17 +111,15 @@
                                 <ComboBox x:Name="cbLocomotorDriver" MinWidth="100"
                                                 DisplayMemberPath="Name"
                                                 SelectedValue="{Binding Path=locomotor_mol_guid_ref, Mode=TwoWay}"
-                                                SelectedValuePath="entity_guid">
-
+                                                SelectedValuePath="entity_guid" >
                                     <ComboBox.ItemsSource>
                                         <CompositeCollection>
                                             <daph:ConfigMolecule Name="None" entity_guid=""/>
-                                            <!--<ComboBoxItem>None</ComboBoxItem>-->
                                             <CollectionContainer
                                                     Collection="{Binding Source={StaticResource moleculesListView}}" />
                                         </CompositeCollection>
                                     </ComboBox.ItemsSource>
-                                </ComboBox>
+                            </ComboBox>
 
                             </StackPanel>
                         </StackPanel>
@@ -138,7 +137,13 @@
                                     Number="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                         </StackPanel>
 
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"/>
+                        <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                    Number="{Binding Path=Sigma, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                     </StackPanel>
+
+                </StackPanel>
                 </Expander>
             </local:DaphneStackPanel>
 

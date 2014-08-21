@@ -1922,6 +1922,7 @@ namespace DaphneGui
             // Set the data context for the main tab control config GUI
             this.ProtocolToolWindow.DataContext = sop.Protocol;
             this.CellStudioToolWindow.DataContext = sop.Protocol;
+            this.ComponentsToolWindow.DataContext = sop.Protocol;
 
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)

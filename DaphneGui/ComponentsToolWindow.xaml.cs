@@ -26,7 +26,6 @@ namespace DaphneGui
         public ComponentsToolWindow()
         {
             InitializeComponent();
-            
         }
 
         private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
@@ -353,7 +352,8 @@ namespace DaphneGui
 
         private void MyComponentsWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            DataContext = MainWindow.SOP.Protocol;
+            var dc = this.DataContext;
+            //DataContext = MainWindow.SOP.Protocol;
         }
 
         
