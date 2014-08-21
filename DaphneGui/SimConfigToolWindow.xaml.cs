@@ -1630,7 +1630,8 @@ namespace DaphneGui
                     molpop.Name = new_mol_name;
             }
 
-            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            if (lvAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
         private void TabItem_Loaded(object sender, RoutedEventArgs e)
