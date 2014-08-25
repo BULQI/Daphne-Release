@@ -2550,13 +2550,16 @@ namespace DaphneGui
             //show a confirmation dialog that shows current and new values.
 
             PushMolecule pm = new PushMolecule();
-            pm.EntityLevelStackPanel.DataContext = mol;
+            pm.DataContext = MainWindow.SOP;
+            //pm.EntityLevelStackPanel.DataContext = mol;
+            //pm.StackPanelA.DataContext = MainWindow.SOP.Protocol;
+            
 
-            ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
-            if (erMol != null)
-            {
-                pm.ComponentsLevelStackPanel.DataContext = erMol;
-            }
+            //ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
+            //if (erMol != null)
+            //{
+            //    pm.ComponentsLevelStackPanel.DataContext = erMol;
+            //}
 
             //Here show the confirmation dialog
             if (pm.ShowDialog() == false)

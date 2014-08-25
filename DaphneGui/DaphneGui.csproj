@@ -204,6 +204,9 @@
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphicsController.cs" />
+    <Compile Include="MoleculeGridControl.xaml.cs">
+      <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PushMolecule.xaml.cs">
       <DependentUpon>PushMolecule.xaml</DependentUpon>
     </Compile>
@@ -289,6 +292,10 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MoleculeGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PushMolecule.xaml">
       <SubType>Designer</SubType>
