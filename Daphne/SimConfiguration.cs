@@ -171,16 +171,17 @@ namespace Daphne
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    /// <summary>
-    /// enum for push status
-    /// </summary>
-    public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
-
+    
     /// <summary>
     /// base for all levels
     /// </summary>
     public class Level
     {
+        /// <summary>
+        /// enum for push status
+        /// </summary>
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
+
         /// <summary>
         /// constructor
         /// </summary>
@@ -2676,9 +2677,58 @@ namespace Daphne
             }
         }
 
-        public double MolecularWeight { get; set; }
-        public double EffectiveRadius { get; set; }
-        public double DiffusionCoefficient { get; set; }
+        //public double MolecularWeight { get; set; }
+        //public double EffectiveRadius { get; set; }
+        //public double DiffusionCoefficient { get; set; }
+
+        private double molWeight;
+        public double MolecularWeight 
+        { 
+            get
+            {
+                return molWeight;
+            }
+            set
+            {
+                if (molWeight != value)
+                {
+                    molWeight = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double effRadius;
+        public double EffectiveRadius
+        {
+            get
+            {
+                return effRadius;
+            }
+            set
+            {
+                if (effRadius != value)
+                {
+                    effRadius = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double diffCoeff;
+        public double DiffusionCoefficient
+        {
+            get
+            {
+                return diffCoeff;
+            }
+            set
+            {
+                if (diffCoeff != value)
+                {
+                    diffCoeff = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
         
         public MoleculeLocation molecule_location { get; set; }
 

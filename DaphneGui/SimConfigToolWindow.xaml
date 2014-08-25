@@ -2055,7 +2055,7 @@
                                             ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                             Margin="6"/>
                                 
-                                    <Button x:Name="PushEcmMoleculeButton" Content="Push molecule..." Click="PushEcmMoleculeButton_Click">
+                                    <Button x:Name="PushEcmMoleculeButton" Content="Save molecule to components library..." Click="PushEcmMoleculeButton_Click">
                                         
                                     </Button>
                                 </StackPanel>

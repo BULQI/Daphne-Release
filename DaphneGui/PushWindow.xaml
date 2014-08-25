@@ -4,7 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
-        Title="Push Entities Between Levels" Height="600" Width="1000">
+        Title="Save Entities Between Levels" Height="600" Width="1000">
     
     <Window.Resources>
         <daph:PushTypeToStringConverter x:Key="PushTypeToStringConv" />

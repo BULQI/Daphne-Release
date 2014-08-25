@@ -157,7 +157,7 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Push Entities"    Name="pushMenu">
+                <MenuItem Header="Save Entities"    Name="pushMenu">
                     <MenuItem Header="Molecules..." Name="pushMol"  Click="pushMol_Click"></MenuItem>
                     <MenuItem Header="Genes..."     Name="pushGene" Click="pushGene_Click" />
                     <MenuItem Header="Reactions..." Name="pushReac" Click="pushReac_Click" />
@@ -505,7 +505,7 @@
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
 
                                 <!--<local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="Blue"  TabBackground="LightBlue"/>-->
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
 
                                 <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow"  Title="Cells Library" ClipToBounds="True" TabBorderThickness="1"  TabForeground="BlueViolet"  TabBackground="#FFF7CCCC"/>-->
                                 <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="BlueViolet" TabBackground="#FFF7CCCC">-->

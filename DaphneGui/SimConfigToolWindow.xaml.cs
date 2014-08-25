@@ -1560,6 +1560,26 @@ namespace DaphneGui
             int n = ColorComboBox.SelectedIndex;
         }
 
+        private void genericRepositoryPush(ConfigEntity e)
+        {
+            //-get status
+            //-make sure it’s pushable at all, not all entities are
+            //-(A)if it’s pushable, they may want to push it even if it is older (to reset or such), and you have to ask for that
+            //-(B) if it’s a new item there is no further choice, execute the push
+            //-(C)if it’s an existing item they may want to override the original or insert as new; to insert as new, regenerate the guid; execute the push
+
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(e);
+
+            //Is pushable
+            if (e is ConfigMolecule)
+            {
+                B.repositoryPush(e, status); // push into B, inserts as new
+            }
+
+        }
+
+
         private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cb = (ComboBox)e.Source;
@@ -1612,8 +1632,8 @@ namespace DaphneGui
 
                 Protocol B = MainWindow.SOP.Protocol;
                 newLibMol.incrementChangeStamp();
-                PushStatus status = B.pushStatus(newLibMol);
-                if (status == PushStatus.PUSH_CREATE_ITEM)
+                Level.PushStatus status = B.pushStatus(newLibMol);
+                if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
                     B.repositoryPush(newLibMol, status); // push into B, inserts as new
                 }
@@ -2514,6 +2534,7 @@ namespace DaphneGui
 
         private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
+            //Error cases
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
             if (molpop == null)
                 return;
@@ -2523,16 +2544,37 @@ namespace DaphneGui
             if (mol == null)
                 return;
 
+
+            //Really, this can never be a newly created molecule
+            //All we want to do is to push the molecule but should
+            //show a confirmation dialog that shows current and new values.
+
+            PushMolecule pm = new PushMolecule();
+            pm.EntityLevelStackPanel.DataContext = mol;
+
+            ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
+            if (erMol != null)
+            {
+                pm.ComponentsLevelStackPanel.DataContext = erMol;
+            }
+
+            //Here show the confirmation dialog
+            if (pm.ShowDialog() == false)
+            {
+                //User clicked Cancel
+                return;
+            }
+
+            //If we get here, then the user confirmed a PUSH
+
             Protocol B = MainWindow.SOP.Protocol;
-            mol.incrementChangeStamp();
-            PushStatus status = B.pushStatus(mol);
-            if (status == PushStatus.PUSH_CREATE_ITEM)
+            Level.PushStatus status = B.pushStatus(mol);
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
             {
                 B.repositoryPush(mol, status); // push into B, inserts as new
             }
             else // the item exists; could be newer or older
             {
-                //for now just push
                 B.repositoryPush(mol, status); // push into B
             }
 

@@ -8,6 +8,7 @@
              xmlns:local="clr-namespace:DaphneGui"
              xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
              xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             Loaded="UserControl_Loaded"
              mc:Ignorable="d" 
              >
     
@@ -16,16 +17,19 @@
          The user control CellDetailsControl shows these other items.
     -->
     
+    <UserControl.Resources>
+        <CollectionViewSource x:Key="diffSchemesListView"  />
+        <!--Source="{Binding Path=entity_repository.diff_schemes}"-->
+
+        <CollectionViewSource x:Key="moleculesListView"  />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.Resources>
             <daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
 
-            <CollectionViewSource x:Key="diffSchemesListView"  
-                                  Source="{Binding Path=entity_repository.diff_schemes}"/>
-
-            <CollectionViewSource x:Key="moleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"/>
+            
 
         </Grid.Resources>
 
