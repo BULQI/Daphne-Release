@@ -17,21 +17,50 @@ namespace Daphne
         /// The constant of proportionality that convert concentration gradient into a force.
         /// </summary>
         public double TransductionConstant { get; set; }
+        /// <summary>
+        /// Re-use this array for calculating the force
+        /// </summary>
+        public double[] force = {0, 0, 0};
 
         public Locomotor(MolecularPopulation _driver, double constant)
         {
             Driver = _driver;
             TransductionConstant = constant;
-        }
+         }
 
         public double[] Force(double[] position)
         {
-            double[] force = new double[3];
-
             force = Driver.Conc.Gradient(position);
             for (int i = 0; i < force.Length; i++)
             {
                 force[i] *= TransductionConstant;
+            }
+
+            return force;
+        }
+    }
+
+    public class StochLocomotor
+    {
+        /// <summary>
+        /// Sigma / sqrt(dt) = standard deviation of stochastic force
+        /// </summary>
+        public double Sigma;
+        /// <summary>
+        /// Re-use this array for calculating the force
+        /// </summary>
+        public double[] force = { 0, 0, 0 };
+
+        public StochLocomotor(double sigma)
+        {
+            Sigma = sigma;
+        }
+
+        public double[] Force(double dt)
+        {
+            for (int i = 0; i < force.Length; i++)
+            {
+                force[i] = Sigma * Rand.NormalDist.NextDouble() / Math.Sqrt(dt);
             }
 
             return force;

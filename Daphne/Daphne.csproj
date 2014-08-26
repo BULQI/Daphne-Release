@@ -115,7 +115,6 @@
     <Compile Include="ProtocolCreators.cs" />
     <Compile Include="DaphneUtilities.cs" />
     <Compile Include="DataBasket.cs" />
-    <Compile Include="Differentiator.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Locomotor.cs" />

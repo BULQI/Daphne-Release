@@ -207,6 +207,27 @@ namespace Daphne
                     create = true;
                 }
 
+                if (cp.reportStates.Differentiation == true)
+                {
+                    if (cp.Cell.diff_scheme != null && cp.Cell.diff_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDiffState";
+                    }
+
+                }
+                if (cp.reportStates.Division == true)
+                {
+                    if (cp.Cell.div_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDivState";
+                    }
+                }
+                if (cp.reportStates.Death == true)
+                {
+                    header += "\tDeathState";
+                }
+
+
                 // cell molpop concentrations
                 for (int i = 0; i < 2; i++)
                 {
@@ -318,6 +339,19 @@ namespace Daphne
                                 }
                             }
                         }
+                    }
+
+                    if (cp.reportStates.Differentiation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Differentiator.CurrentState);
+                    }
+                    //if (cp.reportStates.Division)
+                    //{
+                    //    cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
+                    //}
+                    if (cp.reportStates.Death)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
                     }
 
                     // ecm probe concentrations

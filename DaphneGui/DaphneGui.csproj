@@ -139,6 +139,7 @@
     <Reference Include="Ninject.Extensions.Factory">
       <HintPath>..\packages\Ninject.Extensions.Factory.3.0.2-unstable-6\lib\net40\Ninject.Extensions.Factory.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="SBMLayer">
       <HintPath>..\dependencies\SBMLayer.dll</HintPath>
     </Reference>
@@ -200,6 +201,9 @@
       <DependentUpon>ComponentsToolWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DaphneStackPanel.cs" />
+    <Compile Include="DiffSchemeDataGrid.xaml.cs">
+      <DependentUpon>DiffSchemeDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
@@ -277,6 +281,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dictionary1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DiffSchemeDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

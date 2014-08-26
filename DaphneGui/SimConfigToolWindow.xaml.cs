@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace DaphneGui
 {
@@ -41,8 +42,6 @@ namespace DaphneGui
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
-            //ButtonEdit.Click += EventFactory.Button_Edit_Click;
-
         }
 
         public MainWindow MW { get; set; }
@@ -243,6 +242,7 @@ namespace DaphneGui
 
         private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            return;
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             if (cvs == null || cvs.View == null)
                 return;
@@ -1191,6 +1191,9 @@ namespace DaphneGui
             if (cp == null)
                 return;
 
+            if (cb.IsDropDownOpen == false) return;
+            cb.IsDropDownOpen = false;
+
             string curr_cell_pop_name = cp.cellpopulation_name;
             string curr_cell_type_guid = "";
             curr_cell_type_guid = cp.Cell.entity_guid;
@@ -1214,9 +1217,7 @@ namespace DaphneGui
                     cp.cellpopulation_name = new_cell_name;
                 }
             }
-            ucCellPopCellDetails.DataContext = cp.Cell;
-            ucCellPopCellDetails.DiffSchemeExpander_Expanded(null, null);
-
+            //ucCellPopCellDetails.DataContext = cp.Cell;
         }
 
         /// <summary>
@@ -1562,6 +1563,7 @@ namespace DaphneGui
 
         private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
@@ -2499,6 +2501,29 @@ namespace DaphneGui
         private void ecm_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
+        }
+    }
+
+    public class DatabindingDebugConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            //Debugger.Break();
+            //double newvalue = (double)value - 1.0;
+            if (value is ConfigCell)
+            {
+                return ((ConfigCell)value).DragCoefficient;
+            }
+            //return newvalue;
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            Debugger.Break();
+            return value;
         }
     }
 

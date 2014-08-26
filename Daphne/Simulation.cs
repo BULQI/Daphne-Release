@@ -592,14 +592,31 @@ namespace Daphne
                     // membrane; no boundary
                     AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
                     AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
-                    
-                    // locomotion
-                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+
+
+                    // locomotion - merged from release-dev
                     if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
                     {
-                        //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
                         MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+
                         cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
+                        cell.IsChemotactic = true;
+                    }
+                    else
+                    {
+                        cell.IsChemotactic = false;
+                    }
+                    if (cp.Cell.Sigma > 0)
+                    {
+                        cell.IsStochastic = true;
+                        cell.StochLocomotor = new StochLocomotor(cp.Cell.Sigma);
+                    }
+                    else
+                    {
+                        cell.IsStochastic = false;
+                    }
+                    if (cell.IsChemotactic || cell.IsStochastic)
+                    {
                         cell.IsMotile = true;
                         cell.DragCoefficient = cp.Cell.DragCoefficient;
                     }
@@ -607,6 +624,22 @@ namespace Daphne
                     {
                         cell.IsMotile = false;
                     }
+
+
+                    // locomotion
+                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
+                    //if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
+                    //{
+                    //    //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
+                    //    MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
+                    //    cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
+                    //    cell.IsMotile = true;
+                    //    cell.DragCoefficient = cp.Cell.DragCoefficient;
+                    //}
+                    //else
+                    //{
+                    //    cell.IsMotile = false;
+                    //}
 
 
                     //TRANSITION DRIVERS
@@ -621,6 +654,32 @@ namespace Daphne
                         LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
                     }
 
+                    // Division before differentiation
+                    if (cp.Cell.div_scheme != null)
+                    {
+                        ConfigDiffScheme config_divScheme = cp.Cell.div_scheme;
+                        ConfigTransitionDriver config_td = config_divScheme.Driver;
+
+                        cell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Divider.Behavior);
+
+                        // Epigenetic information
+                        for (int ii = 0; ii < cell.Divider.nGenes; ii++)
+                        {
+                            cell.Divider.AddGene(ii, config_divScheme.genes[ii]);
+
+                            for (int j = 0; j < cell.Divider.nStates; j++)
+                            {
+                                cell.Divider.AddActivity(j, ii, config_divScheme.activationRows[j].activations[ii]);
+                                cell.Divider.AddState(j, config_divScheme.Driver.states[j]);
+                            }
+                        }
+
+                        // Set cell state and corresponding gene activity levels
+                        cell.DividerState = cell.Divider.CurrentState;
+                        cell.SetGeneActivities(cell.Divider);
+                    }
+
                     // Differentiation
                     if (cp.Cell.diff_scheme != null)
                     {
@@ -628,7 +687,7 @@ namespace Daphne
                         ConfigTransitionDriver config_td = config_diffScheme.Driver;
 
                         cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, ((Differentiator)cell.Differentiator).DiffBehavior);
+                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Differentiator.Behavior);
 
                         // Epigenetic information
                         for (int ii = 0; ii < cell.Differentiator.nGenes; ii++)
@@ -647,26 +706,15 @@ namespace Daphne
                             cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
                         }
                         cell.DifferentiationState = cell.Differentiator.CurrentState;
+                        //saving from saved states
                         if (cp.CellStates[i].cgState.geneDict.Count > 0)
                         {
                             cell.SetGeneActivities(cp.CellStates[i].cgState.geneDict);
                         }
                         else
                         {
-                            cell.SetGeneActivities();
+                            cell.SetGeneActivities(cell.Differentiator);
                         }
-                    }
-
-                    // division behavior
-                    if (cp.Cell.div_driver != null)
-                    {
-                        if (cp.CellStates[i].cbState.divisionDriverState != -1)
-                        {
-                            cell.DivisionBehavior.CurrentState = cp.CellStates[i].cbState.divisionDriverState;
-                        }
-                        ConfigTransitionDriver config_td = cp.Cell.div_driver;
-
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DivisionBehavior);
                     }
 
                     AddCell(cell);

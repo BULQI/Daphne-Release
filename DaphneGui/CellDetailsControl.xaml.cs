@@ -25,7 +25,7 @@ namespace DaphneGui
         public CellDetailsControl()
         {
             InitializeComponent();
-            
+
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -34,6 +34,9 @@ namespace DaphneGui
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.genes;
 
             cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+
+            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
 
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
@@ -48,8 +51,6 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
-
-            DiffSchemeExpander_Expanded(null, null);
         }
 
         private void memb_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -118,7 +119,7 @@ namespace DaphneGui
                 if (curr_mol_guid != molpop.molecule.entity_guid)
                     molpop.Name = new_mol_name;
             }
-            
+
         }
 
         private void memb_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -131,7 +132,7 @@ namespace DaphneGui
         {
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
-                return; 
+                return;
 
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
@@ -160,7 +161,7 @@ namespace DaphneGui
             ////{
             ////    return;
             ////}
-            
+
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
         }
@@ -186,28 +187,28 @@ namespace DaphneGui
             }
         }
 
-     
 
-        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
-            if (cvs == null || cvs.View == null)
-                return;
 
-            cvs.View.Refresh();
+        //private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+        //    if (cvs == null || cvs.View == null)
+        //        return;
 
-            if (e.AddedItems.Count == 0) return;
-            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-            foreach (ConfigMolecule cm in cvs.View)
-            {
-                if (cm.Name == tmp.molecule.Name)
-                {
-                    cvs.View.MoveCurrentTo(cm);
-                    return;
-                }
-            }
-        }
+        //    cvs.View.Refresh();
+
+        //    if (e.AddedItems.Count == 0) return;
+        //    var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+        //    //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+        //    foreach (ConfigMolecule cm in cvs.View)
+        //    {
+        //        if (cm.Name == tmp.molecule.Name)
+        //        {
+        //            cvs.View.MoveCurrentTo(cm);
+        //            return;
+        //        }
+        //    }
+        //}
 
 
 
@@ -919,320 +920,6 @@ namespace DaphneGui
 
         }
 
-        private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-
-            if (cell.div_driver == null)
-            {
-                //I think this is what we want
-                ConfigTransitionDriver config_td = new ConfigTransitionDriver();
-                config_td.Name = "generic division";
-                string[] stateName = new string[] { "quiescent", "mitotic" };
-                string[,] signal = new string[,] { { "", "" }, { "", "" } };
-                double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
-                double[,] beta = new double[,] { { 0, 0 }, { 0, 0 } };
-                ProtocolCreators.LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, MainWindow.SOP.Protocol);
-                config_td.CurrentState = 0;
-                config_td.StateName = config_td.states[config_td.CurrentState];
-                cell.div_driver = config_td;
-            }
-        }
-
-        private void btnDelDivDriver_Click(object sender, RoutedEventArgs e)
-        {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            //confirm deletion of driver
-            MessageBoxResult res;
-            res = MessageBox.Show("Are you sure you want to delete the selected cell's division driver?", "Warning", MessageBoxButton.YesNo);
-            if (res == MessageBoxResult.No)
-                return;
-
-            //delete driver
-            cell.div_driver = null;
-        }
-
-        /// <summary>
-        /// This generates the row headers for the Epigenetic Map grid.
-        /// These headers represent differentiation state names and are editable.
-        /// </summary>
-        private void EpigeneticMapGenerateRowHeaders()
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
-            if (cell.diff_scheme == null)
-                return;
-            ConfigDiffScheme scheme = cell.diff_scheme;
-            if (scheme == null)
-                return;
-
-            int rowcount = EpigeneticMapGrid.Items.Count;
-
-            for (int ii = 0; ii < rowcount; ii++)
-            {
-                if (ii >= scheme.Driver.states.Count)
-                    break;
-
-                DataGridRow row = EpigeneticMapGrid.GetRow(ii);
-                if (row != null)
-                {
-                    string sbind = string.Format("states[{0}]", ii);
-                    Binding b = new Binding(sbind);
-                    b.Path = new PropertyPath(sbind);
-                    b.Mode = BindingMode.TwoWay;
-                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-
-                    //Create a TextBox so the state name is editable
-                    FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBox));
-                    txtStateName.SetValue(TextBox.StyleProperty, null);
-                    //txtStateName.SetValue(TextBox.WidthProperty, 120D);
-                    txtStateName.SetValue(TextBox.WidthProperty, 120D);
-                    Thickness th = new Thickness(0D);
-                    txtStateName.SetValue(TextBox.BorderThicknessProperty, th);
-                    txtStateName.SetValue(TextBox.DataContextProperty, cell.diff_scheme.Driver);
-                    txtStateName.SetBinding(TextBox.TextProperty, b);
-
-                    DataGridRowHeader header = new DataGridRowHeader();
-                    DataTemplate rowHeaderTemplate = new DataTemplate();
-
-                    rowHeaderTemplate.VisualTree = txtStateName;
-                    header.Style = null;
-                    header.ContentTemplate = rowHeaderTemplate;
-                    row.HeaderStyle = null;
-                    row.Header = header;
-                }
-            }
-        }
-
-        private DataGridTemplateColumn CreateDiffRegColumn(EntityRepository er, ConfigCell cell, string state)
-        {
-            DataGridTemplateColumn col = new DataGridTemplateColumn();
-
-            string sbind = string.Format("states[{0}]", DiffRegGrid.Columns.Count);
-            Binding bcol = new Binding(sbind);
-            bcol.Path = new PropertyPath(sbind);
-            bcol.Mode = BindingMode.OneWay;
-
-            //Create a TextBox so the state name is editable
-            FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-            txtStateName.SetValue(TextBlock.StyleProperty, null);
-            txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
-            txtStateName.SetBinding(TextBlock.TextProperty, bcol);
-
-            //DataGridRowHeader header = new DataGridRowHeader();
-            DataTemplate colHeaderTemplate = new DataTemplate();
-
-            colHeaderTemplate.VisualTree = txtStateName;
-            col.HeaderStyle = null;
-            col.HeaderTemplate = colHeaderTemplate;
-            col.CanUserSort = false;
-            col.MinWidth = 50;
-
-            //SET UP CELL LAYOUT - COMBOBOX OF MOLECULES PLUS ALPHA AND BETA VALUES
-
-            //NON-EDITING TEMPLATE - THIS IS WHAT SHOWS WHEN NOT EDITING THE GRID CELL
-            DataTemplate cellTemplate = new DataTemplate();
-
-            //SET UP A TEXTBLOCK ONLY
-            Binding bn = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
-            bn.Mode = BindingMode.TwoWay;
-            bn.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            MolGUIDtoMolNameConverter c = new MolGUIDtoMolNameConverter();
-            bn.Converter = c;
-            CollectionViewSource cvs = new CollectionViewSource();
-            cvs.Source = er.molecules;
-            bn.ConverterParameter = cvs;
-            FrameworkElementFactory txtDriverMol = new FrameworkElementFactory(typeof(TextBlock));
-            txtDriverMol.Name = "DriverTextBlock";
-            txtDriverMol.SetBinding(TextBlock.TextProperty, bn);
-            cellTemplate.VisualTree = txtDriverMol;
-
-            //EDITING TEMPLATE - THIS IS WHAT SHOWS WHEN USER EDITS THE GRID CELL
-
-            //SET UP A STACK PANEL THAT WILL CONTAIN A COMBOBOX AND AN EXPANDER
-            FrameworkElementFactory spFactory = new FrameworkElementFactory(typeof(StackPanel));
-            spFactory.Name = "mySpFactory";
-            spFactory.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
-
-            DataTemplate cellEditingTemplate = new DataTemplate();
-
-            //SET UP THE COMBO BOX
-            FrameworkElementFactory comboMolPops = new FrameworkElementFactory(typeof(ComboBox));
-            comboMolPops.Name = "MolPopComboBox";
-
-            //------ Use a composite collection to insert "None" item
-            CompositeCollection coll = new CompositeCollection();
-            ConfigMolecularPopulation nullcmp = new ConfigMolecularPopulation(new ReportType());
-            nullcmp.Name = "None";
-            coll.Add(nullcmp);
-            //ComboBoxItem nullItem = new ComboBoxItem();
-            //nullItem.IsEnabled = true;
-            //nullItem.Foreground = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-            //nullItem.Content = "None";
-            //coll.Add(nullItem);
-            CollectionContainer cc = new CollectionContainer();
-            cc.Collection = cell.cytosol.molpops;
-            coll.Add(cc);
-            comboMolPops.SetValue(ComboBox.ItemsSourceProperty, coll);
-
-            //--------------
-
-            comboMolPops.SetValue(ComboBox.DisplayMemberPathProperty, "Name");     //displays mol pop name
-            comboMolPops.AddHandler(ComboBox.SelectionChangedEvent, new SelectionChangedEventHandler(comboMolPops_SelectionChanged));
-
-            //NEED TO SOMEHOW CONVERT driver_mol_guid_ref to mol_pop!  Set up a converter and pass it the cytosol.
-            MolGuidToMolPopForDiffConverter conv2 = new MolGuidToMolPopForDiffConverter();
-            string sText = string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count);
-            Binding b3 = new Binding(sText);
-            b3.Mode = BindingMode.TwoWay;
-            b3.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            b3.Converter = conv2;
-            b3.ConverterParameter = cell.cytosol;
-            comboMolPops.SetBinding(ComboBox.SelectedValueProperty, b3);
-            comboMolPops.SetValue(ComboBox.ToolTipProperty, "Mol Pop Name");
-
-            spFactory.AppendChild(comboMolPops);
-
-            //--------------------------------------------------
-
-            //SET UP AN EXPANDER THAT WILL CONTAIN ALPHA AND BETA
-
-            //This disables the expander if no driver molecule is selected
-            DriverElementToBoolConverter enabledConv = new DriverElementToBoolConverter();
-            Binding bEnabled = new Binding(string.Format("elements[{0}].driver_mol_guid_ref", DiffRegGrid.Columns.Count));
-            bEnabled.Mode = BindingMode.OneWay;
-            bEnabled.Converter = enabledConv;
-
-            //Expander
-            FrameworkElementFactory expAlphaBeta = new FrameworkElementFactory(typeof(Expander));
-            expAlphaBeta.SetValue(Expander.HeaderProperty, "Transition rate values");
-            expAlphaBeta.SetValue(Expander.ExpandDirectionProperty, ExpandDirection.Down);
-            expAlphaBeta.SetValue(Expander.BorderBrushProperty, Brushes.White);
-            expAlphaBeta.SetValue(Expander.IsExpandedProperty, false);
-            expAlphaBeta.SetValue(Expander.BackgroundProperty, Brushes.White);
-            expAlphaBeta.SetBinding(Expander.IsEnabledProperty, bEnabled);
-
-            FrameworkElementFactory spProduction = new FrameworkElementFactory(typeof(StackPanel));
-            spProduction.SetValue(StackPanel.OrientationProperty, Orientation.Vertical);
-
-            FrameworkElementFactory spAlpha = new FrameworkElementFactory(typeof(StackPanel));
-            spAlpha.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-
-            FrameworkElementFactory tbAlpha = new FrameworkElementFactory(typeof(TextBlock));
-            tbAlpha.SetValue(TextBlock.TextProperty, "Background:  ");
-            tbAlpha.SetValue(TextBlock.ToolTipProperty, "Background production rate");
-            tbAlpha.SetValue(TextBox.WidthProperty, 110D);
-            //tbAlpha.SetValue(TextBlock.WidthProperty, new GridLength(50, GridUnitType.Pixel));
-            spAlpha.AppendChild(tbAlpha);
-
-            //SET UP THE ALPHA TEXTBOX
-            Binding b = new Binding(string.Format("elements[{0}].Alpha", DiffRegGrid.Columns.Count));
-            b.Mode = BindingMode.TwoWay;
-            b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            FrameworkElementFactory txtDriverAlpha = new FrameworkElementFactory(typeof(TextBox));
-            txtDriverAlpha.SetBinding(TextBox.TextProperty, b);
-
-            txtDriverAlpha.SetValue(TextBox.ToolTipProperty, "Background production rate");
-            txtDriverAlpha.SetValue(TextBox.WidthProperty, 50D);
-            spAlpha.AppendChild(txtDriverAlpha);
-            spProduction.AppendChild(spAlpha);
-
-            FrameworkElementFactory spBeta = new FrameworkElementFactory(typeof(StackPanel));
-            spBeta.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-
-            FrameworkElementFactory tbBeta = new FrameworkElementFactory(typeof(TextBlock));
-            tbBeta.SetValue(TextBlock.TextProperty, "Linear coefficient:  ");
-            tbBeta.SetValue(TextBox.WidthProperty, 110D);
-            tbBeta.SetValue(TextBlock.ToolTipProperty, "Production rate linear coefficient");
-            spBeta.AppendChild(tbBeta);
-
-            //SET UP THE BETA TEXTBOX
-            Binding beta = new Binding(string.Format("elements[{0}].Beta", DiffRegGrid.Columns.Count));
-            beta.Mode = BindingMode.TwoWay;
-            beta.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            FrameworkElementFactory txtDriverBeta = new FrameworkElementFactory(typeof(TextBox));
-            txtDriverBeta.SetBinding(TextBox.TextProperty, beta);
-            txtDriverBeta.SetValue(TextBox.WidthProperty, 50D);
-            txtDriverBeta.SetValue(TextBox.ToolTipProperty, "Production rate linear coefficient");
-            spBeta.AppendChild(txtDriverBeta);
-            spProduction.AppendChild(spBeta);
-
-            expAlphaBeta.AppendChild(spProduction);
-            spFactory.AppendChild(expAlphaBeta);
-
-            //---------------------------
-
-            //set the visual tree of the data template
-            cellEditingTemplate.VisualTree = spFactory;
-
-            //set cell layout
-            col.CellTemplate = cellTemplate;
-            col.CellEditingTemplate = cellEditingTemplate;
-
-            return col;
-        }
-
-        private void DiffRegGenerateRowHeaders()
-        {
-            //The code below generates the row headers
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            if (cell.diff_scheme == null)
-                return;
-
-            ConfigDiffScheme scheme = cell.diff_scheme;
-
-            if (scheme == null)
-                return;
-
-            int rowcount = DiffRegGrid.Items.Count;
-            for (int ii = 0; ii < rowcount; ii++)
-            {
-                if (ii >= scheme.Driver.states.Count)
-                    break;
-
-                DataGridRow row = DiffRegGrid.GetRow(ii);
-                if (row != null)
-                {
-                    string sbind = string.Format("states[{0}]", ii);
-                    Binding b = new Binding(sbind);
-                    b.Path = new PropertyPath(sbind);
-                    b.Mode = BindingMode.OneWay;
-
-                    //Create a TextBox so the state name is editable
-                    FrameworkElementFactory txtStateName = new FrameworkElementFactory(typeof(TextBlock));
-                    txtStateName.SetValue(TextBlock.StyleProperty, null);
-                    txtStateName.SetValue(TextBlock.WidthProperty, 120D);
-                    txtStateName.SetValue(TextBlock.DataContextProperty, cell.diff_scheme.Driver);
-                    txtStateName.SetBinding(TextBlock.TextProperty, b);
-
-                    DataGridRowHeader header = new DataGridRowHeader();
-                    DataTemplate rowHeaderTemplate = new DataTemplate();
-
-                    rowHeaderTemplate.VisualTree = txtStateName;
-                    header.Style = null;
-                    header.ContentTemplate = rowHeaderTemplate;
-                    row.HeaderStyle = null;
-                    row.Header = header;
-                }
-            }
-        }
-
         /// <summary>
         /// This method creates a data grid column with a combo box in the header.
         /// The combo box contains genes that are not in the epigenetic map of of 
@@ -1240,8 +927,9 @@ namespace DaphneGui
         /// This allows the user to add genes to the epigenetic map.
         /// </summary>
         /// <returns></returns>
-        private DataGridTextColumn CreateUnusedGenesColumn(EntityRepository er)
+        public DataGridTextColumn CreateUnusedGenesColumn()
         {
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             DataGridTextColumn editor_col = new DataGridTextColumn();
             editor_col.CanUserSort = false;
             DataTemplate HeaderTemplate = new DataTemplate();
@@ -1291,212 +979,119 @@ namespace DaphneGui
             if (cell == null)
                 return;
 
-            //if cell does not have a diff scheme, create one
-            if (cell.diff_scheme == null)
+
+            DataGrid dataGrid = (DataGrid)DiffSchemeDataGrid.FindVisualParent<DataGrid>(combo);
+            if (dataGrid == null) return;
+            ConfigDiffScheme scheme = DiffSchemeDataGrid.GetDiffSchemeSource(dataGrid);
+            if (scheme != null)
             {
-                ConfigDiffScheme ds = new ConfigDiffScheme();
+                //this is the new way to creating datagrid dyamically with diffscheme specified in the grid
+                //otherwise, it is the old way, remove those code when all changed to this new way.
+                ConfigGene gene1 = (ConfigGene)combo.SelectedItem;
+                if (gene1 == null)
+                    return;
 
-                ds.genes = new ObservableCollection<string>();
-                ds.Name = "New diff scheme";
-                ds.Driver = new ConfigTransitionDriver();
-                ds.activationRows = new ObservableCollection<ConfigActivationRow>();
+                if (scheme.genes.Contains(gene1.entity_guid)) return; //shouldnot happen...
 
-                cell.diff_scheme = ds;
-
-            }
-
-            ConfigDiffScheme scheme = cell.diff_scheme;
-            ConfigGene gene = null;
-
-            if (combo != null && combo.Items.Count > 0)
-            {
-                //Skip 0'th combo box item because it is the "None" string
-                if (combo.SelectedIndex > 0)
+                //If no states exist, then create at least 2 new ones
+                if (scheme.Driver.states.Count == 0)
                 {
-                    gene = (ConfigGene)combo.SelectedItem;
-                    if (gene == null)
-                        return;
-
-                    if (!scheme.genes.Contains(gene.entity_guid))
-                    {
-                        //If no states exist, then create at least 2 new ones
-                        if (scheme.Driver.states.Count == 0)
-                        {
-                            AddDifferentiationState("State1");
-                            AddDifferentiationState("State2");
-                            //menuAddState_Click(null, null);
-                            //menuAddState_Click(null, null);
-                        }
-
-                        scheme.genes.Add(gene.entity_guid);
-                        foreach (ConfigActivationRow row in scheme.activationRows)
-                        {
-                            row.activations.Add(1.0);
-                        }
-                    }
+                    scheme.AddState("state1");
+                    scheme.AddState("state2");
                 }
-            }
 
-            if (gene == null)
+                scheme.genes.Add(gene1.entity_guid);
+                foreach (ConfigActivationRow row in scheme.activationRows)
+                {
+                    row.activations.Add(1.0);
+                }
+                //force refresh
+                DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, null);
+                DiffSchemeDataGrid.SetDiffSchemeSource(dataGrid, scheme);
                 return;
-
-            //Have to refresh the data grid!
-            DataGridTextColumn col = new DataGridTextColumn();
-            col.Header = gene.Name;
-            col.CanUserSort = false;
-
-            if (scheme.activationRows.Count > 0)
-            {
-                Binding b = new Binding(string.Format("activations[{0}]", scheme.activationRows[0].activations.Count - 1));   //EpigeneticMapGrid.Columns.Count-1));  
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                col.Binding = b;
             }
-
-            //if (EpigeneticMapGrid.Columns == null || EpigeneticMapGrid.Columns.Count <= 0)
-            //    return;                        
-
-            EpigeneticMapGrid.Columns.Insert(EpigeneticMapGrid.Columns.Count - 1, col);
-
-            combo.SelectedIndex = 0;
-
-            //This deletes the last column
-            int colcount = EpigeneticMapGrid.Columns.Count;
-            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
-            EpigeneticMapGrid.Columns.Remove(comboCol);
-
-            //This regenerates the last column
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            comboCol = CreateUnusedGenesColumn(er);
-            EpigeneticMapGrid.Columns.Add(comboCol);
-
-        }
-
-        /// <summary>
-        /// This method updates the differentiation regulators grid.
-        /// It is meant to be called after the user adds a new diff state.
-        /// </summary>
-        private void UpdateDiffRegGrid()
-        {
-            if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-            {
-                int nRows = DiffRegGrid.Items.Count;
-                for (int j = 0; j < nRows; j++)
-                {
-                    var currRow = DiffRegGrid.GetRow(j);
-                    int nCols = DiffRegGrid.Columns.Count;
-                    for (int i = 0; i < nCols; i++)
-                    {
-                        if (j == i)
-                        {
-                            var columnCell = DiffRegGrid.GetCell(currRow, i);
-                            if (columnCell != null)
-                            {
-                                columnCell.IsEnabled = false;
-                                columnCell.Background = Brushes.LightGray;
-                            }
-                        }
-                        else
-                        {
-                            //Trying to disable the expander here but this does not work, at least not yet.
-                            var columnCell = DiffRegGrid.GetCell(currRow, i);
-                            ComboBox cbx = FindChild<ComboBox>(columnCell, "comboMolPops");
-                        }
-                    }
-                }
-            }
-
-            //Generate the row headers
-            DiffRegGenerateRowHeaders();
         }
 
 
         /// <summary>
         /// This method adds a differentiation state given a name 
         /// </summary>
-        /// <param name="name"></param>
-        private void AddDifferentiationState(string name)
+        /// <param name="stateName"></param>
+        private void AddDifferentiationState(string schemeName, string stateName)
         {
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)return;
 
-            if (cell == null)
-                return;
-
-            //If no diff scheme defined for this cell, create one
-            if (cell.diff_scheme == null)
+            ConfigDiffScheme diff_scheme = null;
+            if (schemeName == "Division")
             {
-                ConfigDiffScheme ds = new ConfigDiffScheme();
-
-                ds.genes = new ObservableCollection<string>();
-                ds.Name = "New diff scheme";
-                ds.Driver = new ConfigTransitionDriver();
-                ds.activationRows = new ObservableCollection<ConfigActivationRow>();
-                cell.diff_scheme = ds;
-            }
-
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;
-            diff_scheme.AddState(name);
-            DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, name));
-
-            EpigeneticMapGrid.ItemsSource = null;
-            EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
-            EpigeneticMapGenerateRowHeaders();
-
-            //if adding first row, then need to add the columns too - one for each gene
-            if (diff_scheme.activationRows.Count == 1)
-            {
-                foreach (string gene_guid in diff_scheme.genes)
+                diff_scheme = cell.div_scheme;
+                if (diff_scheme == null)
                 {
-                    DataGridTextColumn col = new DataGridTextColumn();
-                    col.Header = er.genes_dict[gene_guid].Name;
-                    col.CanUserSort = false;
-                    Binding b = new Binding(string.Format("activations[{0}]", diff_scheme.activationRows[0].activations.Count - 1));
-                    b.Mode = BindingMode.TwoWay;
-                    b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                    col.Binding = b;
+                    cell.div_scheme = diff_scheme = new ConfigDiffScheme();
                 }
-
             }
+            else if (schemeName == "Differentiation")
+            {
+                diff_scheme = cell.diff_scheme;
+                if (diff_scheme == null)
+                {
+                    cell.diff_scheme = diff_scheme = new ConfigDiffScheme();
+                }
+            }
+            else return;
 
-            DiffRegGrid.ItemsSource = null;
-            DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
-            UpdateDiffRegGrid();
+            diff_scheme.AddState(stateName);
 
+            //refresh display
+            if (schemeName == "Division")
+            {
+                cell.div_scheme = null;
+                cell.div_scheme = diff_scheme;
+            }
+            else if (schemeName == "Differentiation")
+            {
+                cell.diff_scheme = null;
+                cell.diff_scheme = diff_scheme;
+            }
         }
 
         private void btnNewDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            AddDifferentiationState("State1");
-            AddDifferentiationState("State2");
+
+            string schemeName = ((Button)sender).Tag as string;
+            if (schemeName == null) return;
+            AddDifferentiationState(schemeName, "State1");
+            AddDifferentiationState(schemeName, "State2");
         }
 
         private void btnDelDiffScheme_Click(object sender, RoutedEventArgs e)
         {
+
+            string schemeName = ((Button)sender).Tag as string;
+            if (schemeName == null) return;
+
             MessageBoxResult res;
-            res = MessageBox.Show("Are you sure you want to delete the selected cell's differentiation scheme?", "Warning", MessageBoxButton.YesNo);
+            string message = string.Format("Are you sure you want to delete the selected cell's {0} scheme?", schemeName);
+            res = MessageBox.Show(message, "Warning", MessageBoxButton.YesNo);
             if (res == MessageBoxResult.No)
                 return;
 
             //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             ConfigCell cell = DataContext as ConfigCell;
-
             if (cell == null)
                 return;
 
-            cell.diff_scheme = null;
-
-            //Clear the grids
-            EpigeneticMapGrid.ItemsSource = null;
-            EpigeneticMapGrid.Columns.Clear();
-            DiffRegGrid.ItemsSource = null;
-            DiffRegGrid.Columns.Clear();
-
-            //Still want 'Add Genes' combo box
-            DataGridTextColumn combo_col = CreateUnusedGenesColumn(MainWindow.SOP.Protocol.entity_repository);
-            EpigeneticMapGrid.Columns.Add(combo_col);
-            EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
+            if (schemeName == "Division")
+            {
+                cell.div_scheme = null;
+            }
+            else if (schemeName == "Differentiation")
+            {
+                cell.diff_scheme = null;
+            }
         }
 
         /// <summary>
@@ -1551,14 +1146,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void DiffRegGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            var selectedRow = DiffRegGrid.GetSelectedRow();
-            if (selectedRow == null)
-                return;
-
-            int row = DiffRegGrid.SelectedIndex;
-
-            DataGridCellInfo selected = DiffRegGrid.SelectedCells.First();
-            DataGridColumn col = selected.Column;
         }
 
         private void EpigeneticMapGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -1593,95 +1180,6 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// This method is called on right-click + "delete selected genes", 
-        /// on the epigenetic map data grid. Selected columns (genes) will 
-        /// get deleted.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void menuDeleteGenes_Click(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-            {
-                return;
-            }
-
-            if (cell.diff_scheme == null)
-                return;
-
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;
-
-            foreach (DataGridTextColumn col in EpigeneticMapGrid.Columns.ToList())
-            {
-                bool isSelected = DataGridBehavior.GetHighlightColumn(col);
-                string gene_name = col.Header as string;
-                string guid = MainWindow.SOP.Protocol.findGeneGuid(gene_name, MainWindow.SOP.Protocol);
-                if (isSelected && guid != null && guid.Length > 0)
-                {
-                    diff_scheme.genes.Remove(guid);
-                    EpigeneticMapGrid.Columns.Remove(col);
-                }
-            }
-
-            //This deletes the last column
-            int colcount = EpigeneticMapGrid.Columns.Count;
-            DataGridTextColumn comboCol = EpigeneticMapGrid.Columns[colcount - 1] as DataGridTextColumn;
-            EpigeneticMapGrid.Columns.Remove(comboCol);
-
-            //This regenerates the last column
-            comboCol = CreateUnusedGenesColumn(er);
-            EpigeneticMapGrid.Columns.Add(comboCol);
-        }
-
-        private void menuDeleteStates_Click(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            ConfigCell cell = DataContext as ConfigCell;
-
-            if (cell == null)
-                return;
-
-            if (cell.diff_scheme == null)
-                return;
-
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;
-
-            int i = 0;
-            foreach (ConfigActivationRow diffrow in diff_scheme.activationRows.ToList())
-            {
-                if (EpigeneticMapGrid.SelectedItems.Contains(diffrow))
-                {
-                    int index = diff_scheme.activationRows.IndexOf(diffrow);
-                    string stateToDelete = diff_scheme.Driver.states[index];
-
-                    //this deletes the column from the differentiation regulators grid
-                    DeleteDiffRegGridColumn(stateToDelete);
-
-                    //this removes the activation row from the differentiation scheme
-                    diff_scheme.RemoveActivationRow(diffrow);
-                }
-                i++;
-            }
-
-        }
-
-        private void DeleteDiffRegGridColumn(string state)
-        {
-            foreach (DataGridTemplateColumn col in DiffRegGrid.Columns.ToList())
-            {
-                if ((string)(col.Header) == state)
-                {
-                    DiffRegGrid.Columns.Remove(col);
-                    break;
-                }
-            }
-        }
 
         private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -1724,36 +1222,6 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// This method is called when the user clicks on Add State menu item for Epigenetic Map grid
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void menuAddState_Click(object sender, RoutedEventArgs e)
-        {
-            //Show a dialog that gets the new state's name
-            AddDiffState ads = new AddDiffState();
-
-            if (ads.ShowDialog() == true)
-            {
-                AddDifferentiationState(ads.StateName);
-            }
-        }
-
-        /// <summary>
-        /// This method gets called after the EpigeneticMapGrid gui objects are generated. 
-        /// Here we can set up the row headers.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void EpigeneticItemContainerGenerator_StatusChanged(object sender, EventArgs e)
-        {
-            if (EpigeneticMapGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-            {
-                EpigeneticMapGrid.ItemContainerGenerator.StatusChanged -= EpigeneticItemContainerGenerator_StatusChanged;
-                EpigeneticMapGenerateRowHeaders();
-            }
-        }
 
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {
@@ -1805,127 +1273,6 @@ namespace DaphneGui
 
             return foundChild;
         }
-
-        public void DiffSchemeExpander_Expanded(object sender, RoutedEventArgs e)
-        {
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
-            ConfigCell cell = DataContext as ConfigCell;
-
-            //Clear the grids
-            EpigeneticMapGrid.ItemsSource = null;
-            EpigeneticMapGrid.Columns.Clear();
-
-            DiffRegGrid.ItemsSource = null;
-            DiffRegGrid.Columns.Clear();
-
-            if (cell == null)
-            {
-                return;
-            }
-
-            //if cell does not have a diff scheme, return
-            if (cell.diff_scheme == null)
-            {
-                //Create a column that allows the user to add genes to the grid
-                DataGridTextColumn combo_col = CreateUnusedGenesColumn(er);
-                EpigeneticMapGrid.Columns.Add(combo_col);
-                return;
-            }
-
-            //Get the diff_scheme using the guid
-            ConfigDiffScheme diff_scheme = cell.diff_scheme;
-
-            //EPIGENETIC MAP SECTION
-            EpigeneticMapGrid.DataContext = diff_scheme;
-            EpigeneticMapGrid.ItemsSource = diff_scheme.activationRows;
-
-            int nn = 0;
-            foreach (string gene_guid in diff_scheme.genes)
-            {
-                //SET UP COLUMNS
-                ConfigGene gene = er.genes_dict[gene_guid];
-                DataGridTextColumn col = new DataGridTextColumn();
-                col.Header = gene.Name;
-                col.CanUserSort = false;
-                Binding b = new Binding(string.Format("activations[{0}]", nn));
-                b.Mode = BindingMode.TwoWay;
-                b.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-                col.Binding = b;
-                EpigeneticMapGrid.Columns.Add(col);
-                nn++;
-            }
-
-            //Create a column that allows the user to add genes to the grid
-            DataGridTextColumn editor_col = CreateUnusedGenesColumn(er);
-            EpigeneticMapGrid.Columns.Add(editor_col);
-            EpigeneticMapGrid.ItemContainerGenerator.StatusChanged += new EventHandler(EpigeneticItemContainerGenerator_StatusChanged);
-
-            //EpigeneticMapGrid.Visibility = Visibility.Hidden;
-
-
-            //----------------------------------
-            //DIFFERENTIATION REGULATORS SECTION
-
-            DiffRegGrid.ItemsSource = diff_scheme.Driver.DriverElements;
-            //DiffRegGrid.DataContext = diff_scheme.Driver;
-            DiffRegGrid.CanUserAddRows = false;
-            DiffRegGrid.CanUserDeleteRows = false;
-
-            int i = 0;
-            foreach (string s in diff_scheme.Driver.states)
-            {
-                //SET UP COLUMN HEADINGS
-                DataGridTemplateColumn col2 = new DataGridTemplateColumn();
-                DiffRegGrid.Columns.Add(CreateDiffRegColumn(er, cell, s));
-                i++;
-            }
-
-            DiffRegGrid.ItemContainerGenerator.StatusChanged += new EventHandler(DiffRegItemContainerGenerator_StatusChanged);
-        }
-
-        /// <summary>
-        /// This method gets called after the DiffRegGrid gui objects are generated. 
-        /// This is the place to disable the diagonal grid cells.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DiffRegItemContainerGenerator_StatusChanged(object sender, EventArgs e)
-        {
-            if (DiffRegGrid.ItemContainerGenerator.Status == GeneratorStatus.ContainersGenerated)
-            {
-                DiffRegGrid.ItemContainerGenerator.StatusChanged -= DiffRegItemContainerGenerator_StatusChanged;
-                int nRows = DiffRegGrid.Items.Count;
-                for (int j = 0; j < nRows; j++)
-                {
-                    var currRow = DiffRegGrid.GetRow(j);
-                    int nCols = DiffRegGrid.Columns.Count;
-                    for (int i = 0; i < nCols; i++)
-                    {
-                        if (j == i)
-                        {
-                            var columnCell = DiffRegGrid.GetCell(currRow, i);
-                            if (columnCell != null)
-                            {
-                                columnCell.IsEnabled = false;
-                                columnCell.Background = Brushes.LightGray;
-                            }
-                        }
-                        else
-                        {
-                            //Trying to disable the expander here but this does not work, at least not yet.
-                            var columnCell = DiffRegGrid.GetCell(currRow, i);
-                            ComboBox cbx = FindChild<ComboBox>(columnCell, "comboMolPops");
-                        }
-                    }
-                }
-            }
-
-            //Generate the row headers
-            DiffRegGenerateRowHeaders();
-        }
-
-
-       
     }
+
 }
