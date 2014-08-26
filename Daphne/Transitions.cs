@@ -117,6 +117,8 @@ namespace Daphne
             drivers = new Dictionary<int, Dictionary<int, TransitionDriverElement>>();
             TransitionOccurred = false;
             CurrentState = 0;
+            PreviousState = 0;
+            FinalState = 0;
             destinationPMF = new PMF<int>();
         }
 
@@ -137,6 +139,14 @@ namespace Daphne
                 drivers.Remove(destination);
             }
             drivers[origin].Add(destination, driverElement);
+            if (origin > FinalState)
+            {
+                FinalState = origin;
+            }
+            if (destination > FinalState)
+            {
+                FinalState = destination;
+            }
         }
 
         /// <summary>
@@ -168,6 +178,7 @@ namespace Daphne
             if (u < TotalRate * dt)
             {
                 TransitionOccurred = true;
+                PreviousState = CurrentState;
 
                 double[] probabilities = new double[drivers[CurrentState].Count];
                 int[] destinations = new int[drivers[CurrentState].Count];
@@ -269,7 +280,5 @@ namespace Daphne
             }
         }
     }
-
-
 
 }
