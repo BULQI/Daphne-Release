@@ -2150,6 +2150,7 @@
                             </ListView>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="PushEcmReacButton"  Content="Save reaction to component library..." Click="PushEcmReacButton_Click" />
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
                             
@@ -2454,6 +2455,10 @@
                                                 Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
                                                 ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
                                                 Margin="6,-4"/>
+
+                                        <StackPanel HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                            <Button Name="PushCellButton" Content="Save cell to component library..." Click="EcsPushCellButton_Click"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>

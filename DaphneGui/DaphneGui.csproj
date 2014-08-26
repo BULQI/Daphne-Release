@@ -207,8 +207,17 @@
     <Compile Include="MoleculeGridControl.xaml.cs">
       <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PushMolecule.xaml.cs">
+    <Compile Include="Pushing\PushCell.xaml.cs">
+      <DependentUpon>PushCell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushGene.xaml.cs">
+      <DependentUpon>PushGene.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushMolecule.xaml.cs">
       <DependentUpon>PushMolecule.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushReaction.xaml.cs">
+      <DependentUpon>PushReaction.xaml</DependentUpon>
     </Compile>
     <Compile Include="PushWindow.xaml.cs">
       <DependentUpon>PushWindow.xaml</DependentUpon>
@@ -297,7 +306,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PushMolecule.xaml">
+    <Page Include="Pushing\PushCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushGene.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushMolecule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushReaction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

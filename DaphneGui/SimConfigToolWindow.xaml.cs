@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
+using DaphneGui.Pushing;
 
 namespace DaphneGui
 {
@@ -1206,7 +1207,7 @@ namespace DaphneGui
             //of configCell, it will has its own entity_guid - only the name stays the same ---
             if (cell_to_clone.entity_guid != curr_cell_type_guid)
             {
-                cp.Cell = cell_to_clone.Clone(false);
+                cp.Cell = cell_to_clone.Clone(true);
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
@@ -2534,54 +2535,174 @@ namespace DaphneGui
 
         private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
-            //Error cases
+            //Error case
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
             if (molpop == null)
                 return;
 
             ConfigMolecule mol = molpop.molecule;
+            GenericPush(mol);
 
-            if (mol == null)
-                return;
-
+            ////////if (mol == null)
+            ////////    return;
 
             //Really, this can never be a newly created molecule
             //All we want to do is to push the molecule but should
             //show a confirmation dialog that shows current and new values.
 
-            PushMolecule pm = new PushMolecule();
-            pm.DataContext = MainWindow.SOP;
-            pm.EntityLevelMolDetails.DataContext = mol;
-            //pm.StackPanelA.DataContext = MainWindow.SOP.Protocol;
+            ////////PushMolecule pm = new PushMolecule();
+            ////////pm.DataContext = MainWindow.SOP;
+            ////////pm.EntityLevelMolDetails.DataContext = mol;
 
+            ////////ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
+            
 
-            ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
-            if (erMol != null)
+            ////////if (erMol != null)
+            ////////{
+            ////////    pm.ComponentLevelMolDetails.DataContext = erMol;
+            ////////}
+
+            //////////Here show the confirmation dialog
+            ////////if (pm.ShowDialog() == false)
+            ////////{
+            ////////    //User clicked Cancel
+            ////////    return;
+            ////////}
+
+            //////////If we get here, then the user confirmed a PUSH
+
+            ////////Protocol B = MainWindow.SOP.Protocol;
+            ////////Level.PushStatus status = B.pushStatus(mol);
+            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////////{
+            ////////    B.repositoryPush(mol, status); // push into B, inserts as new
+            ////////}
+            ////////else // the item exists; could be newer or older
+            ////////{
+            ////////    B.repositoryPush(mol, status); // push into B
+            ////////}
+
+        }
+
+        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellpop == null)
+                return;
+
+            ConfigCell cell = cellpop.Cell;
+            GenericPush(cell);
+        }
+
+        private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvEcsReactions.SelectedIndex < 0)
             {
-                pm.ComponentLevelMolDetails.DataContext = erMol;
-            }
-
-            //Here show the confirmation dialog
-            if (pm.ShowDialog() == false)
-            {
-                //User clicked Cancel
+                MessageBox.Show("Please select a reaction.");
                 return;
             }
 
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            GenericPush(reac);
+
+            ////////PushReaction pr = new PushReaction();
+            ////////pr.EntityLevelReactionDetails.DataContext = reac;
+
+            ////////if (!MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            ////////    return;
+
+            ////////GenericPush(reac, MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid]);
+            
+
+            ////////pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+
+            ////////if (pr.ShowDialog() == false)
+            ////////{
+            ////////    return;
+            ////////}
+
+            //////////If we get here, then the user confirmed a PUSH
+
+            ////////Protocol B = MainWindow.SOP.Protocol;
+            ////////Level.PushStatus status = B.pushStatus(reac);
+            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////////{
+            ////////    B.repositoryPush(reac, status); // push into B, inserts as new
+            ////////}
+            ////////else // the item exists; could be newer or older
+            ////////{
+            ////////    B.repositoryPush(reac, status); // push into B
+            ////////}
+        }
+
+        private void GenericPush(ConfigEntity source)
+        {
+            if (source == null)
+            {
+                MessageBox.Show("Nothing to push");
+                return;
+            }
+
+            if (source is ConfigMolecule)
+            {
+                PushMolecule pm = new PushMolecule();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelMolDetails.DataContext = source;
+
+                ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+                if (erMol != null)
+                    pm.ComponentLevelMolDetails.DataContext = erMol;
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
+                    return;
+            }
+            else if (source is ConfigReaction)
+            {
+                PushReaction pr = new PushReaction();
+                pr.EntityLevelReactionDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                    pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+
+                if (pr.ShowDialog() == false)
+                    return;
+            }
+            else if (source is ConfigCell)
+            {
+                PushCell pc = new PushCell();
+                pc.DataContext = MainWindow.SOP;
+                pc.EntityLevelCellDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+
+                //Show the confirmation dialog
+                if (pc.ShowDialog() == false)
+                    return;
+            }
+            else
+            {
+                MessageBox.Show("Entity type 'save' operation not supported.");
+                return;
+            }
+
+
             //If we get here, then the user confirmed a PUSH
 
+            //Push the entity
             Protocol B = MainWindow.SOP.Protocol;
-            Level.PushStatus status = B.pushStatus(mol);
+            Level.PushStatus status = B.pushStatus(source);
             if (status == Level.PushStatus.PUSH_CREATE_ITEM)
             {
-                B.repositoryPush(mol, status); // push into B, inserts as new
+                B.repositoryPush(source, status); // push into B, inserts as new
             }
             else // the item exists; could be newer or older
             {
-                B.repositoryPush(mol, status); // push into B
+                B.repositoryPush(source, status); // push into B
             }
-
         }
+
     }
 
     public class diffSchemeValueConverter : IValueConverter

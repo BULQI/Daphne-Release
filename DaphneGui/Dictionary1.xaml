@@ -95,7 +95,7 @@
             <Label Height="24" Width="80" HorizontalAlignment="Left">Reaction:</Label>
             <StackPanel Orientation="Horizontal">
                 <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding rate_const, Mode=TwoWay}"></uc:DoublesBox>
-                <TextBox Margin="10,0" Height="24" Width="400" IsEnabled="False" Text="{Binding TotalReactionString}"></TextBox>
+                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding TotalReactionString}"></TextBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
