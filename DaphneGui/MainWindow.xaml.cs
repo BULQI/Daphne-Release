@@ -2611,6 +2611,7 @@ namespace DaphneGui
         }
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
+        [DebuggerStepThrough]
         private void CommandBindingSave_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;

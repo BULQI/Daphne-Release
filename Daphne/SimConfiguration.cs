@@ -4878,7 +4878,21 @@ namespace Daphne
     public class CellPopulation : EntityModelBase
     {
         //public string cell_guid_ref { get; set; }
-        public ConfigCell Cell { get; set; }
+        private ConfigCell _Cell;
+
+        public ConfigCell Cell
+        {
+            get
+            {
+                return _Cell;
+            }
+            set
+            {
+                _Cell = value;
+                OnPropertyChanged("Cell");
+            }
+        }
+
         private string _Name;
         public string cellpopulation_name
         {

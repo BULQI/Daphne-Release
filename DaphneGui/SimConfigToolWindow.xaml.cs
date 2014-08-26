@@ -42,8 +42,6 @@ namespace DaphneGui
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
-            //ButtonEdit.Click += EventFactory.Button_Edit_Click;
-
         }
 
         public MainWindow MW { get; set; }
@@ -244,6 +242,7 @@ namespace DaphneGui
 
         private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            return;
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             if (cvs == null || cvs.View == null)
                 return;
@@ -1192,6 +1191,9 @@ namespace DaphneGui
             if (cp == null)
                 return;
 
+            if (cb.IsDropDownOpen == false) return;
+            cb.IsDropDownOpen = false;
+
             string curr_cell_pop_name = cp.cellpopulation_name;
             string curr_cell_type_guid = "";
             curr_cell_type_guid = cp.Cell.entity_guid;
@@ -1215,7 +1217,7 @@ namespace DaphneGui
                     cp.cellpopulation_name = new_cell_name;
                 }
             }
-            ucCellPopCellDetails.DataContext = cp.Cell;
+            //ucCellPopCellDetails.DataContext = cp.Cell;
         }
 
         /// <summary>
@@ -1561,6 +1563,7 @@ namespace DaphneGui
 
         private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
             ComboBox cb = (ComboBox)e.Source;
             if (cb == null)
                 return;
@@ -1629,7 +1632,8 @@ namespace DaphneGui
                     molpop.Name = new_mol_name;
             }
 
-            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            if (lvAvailableReacs.ItemsSource != null)
+                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
         private void TabItem_Loaded(object sender, RoutedEventArgs e)
@@ -2506,6 +2510,12 @@ namespace DaphneGui
             object parameter, CultureInfo culture)
         {
             //Debugger.Break();
+            //double newvalue = (double)value - 1.0;
+            if (value is ConfigCell)
+            {
+                return ((ConfigCell)value).DragCoefficient;
+            }
+            //return newvalue;
             return value;
         }
 
@@ -2534,31 +2544,7 @@ namespace DaphneGui
         }
     }
 
-    //public class DataGridCol :Freezable
-    //{
 
-    //    public static readonly DependencyProperty TagProperty = DependencyProperty.RegisterAttached(
-    //        "Tag",
-    //        typeof(object),
-    //        typeof(DataGridCol),
-    //        new FrameworkPropertyMetadata(null));
-
-    //    protected override Freezable CreateInstanceCore()
-    //    {
-    //        return new DataGridCol();
-    //    }
-
-    //    public static object GetTag(DependencyObject dependencyObject)
-    //    {
-    //        return dependencyObject.GetValue(TagProperty);
-    //    }
-
-    //    public static void SetTag(DependencyObject dependencyObject, object value)
-    //    {
-    //        dependencyObject.SetValue(TagProperty, value);
-    //    }
-
-    //}
 
     public class DataGridBehavior
     {
@@ -2841,11 +2827,6 @@ namespace DaphneGui
             }
         }
     }
-
-
-    
-
-
 
 
     ///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER

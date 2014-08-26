@@ -40,6 +40,11 @@
         <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
+        <CompositeCollection x:Key="moleclueListColletion">
+            <daph:ConfigMolecule Name="None" entity_guid=""/>
+            <CollectionContainer Collection="{Binding Source={StaticResource moleculesListView}}" />
+        </CompositeCollection>
+
         <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
@@ -857,12 +862,13 @@
                                 <Style TargetType="{x:Type ComboBoxItem}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="None">
-                                                <Setter Property="Visibility" Value="Collapsed">
+                                            <Setter Property="Visibility" Value="Collapsed">
                                             </Setter>
-                                        </DataTrigger> 
-                                    </Style.Triggers> 
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ComboBox.ItemContainerStyle>
+
                         </ComboBox>
                 </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
@@ -1874,8 +1880,6 @@
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
                                     ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
-                                    SelectionChanged="EcsMolPopsListBox_SelectionChanged"
-                                     IsSynchronizedWithCurrentItem="True"
                                     SelectedIndex="-1"
                             />
 
@@ -1922,55 +1926,50 @@
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                                     <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
                                                     <editors:ColorEditBox x:Name="cellColorEditBox"
-                                                        CheckBoxVisibility="Collapsed"
-                                                        SpinnerVisibility="Collapsed"
-                                                        Width="140"
-                                                        HorizontalAlignment="Left" 
-                                                        Format="a r g b"
-                                                        Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
-                                                        Margin="4,2"
-                                                        ValueChanged="molPopColorEditBox_ValueChanged"
-                                                        />
+                                    CheckBoxVisibility="Collapsed"
+                                    SpinnerVisibility="Collapsed"
+                                    Width="140"
+                                    HorizontalAlignment="Left" 
+                                    Format="a r g b"
+                                    Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="4,2"
+                                    ValueChanged="molPopColorEditBox_ValueChanged"
+                                    />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
                                                     <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                                     <Slider x:Name="solfac_weight_slider"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Left"
-                                                        Width="50"
-                                                        Margin="4,0"
-                                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                                        Minimum="0" 
-                                                        Maximum="5" 
-                                                        Value="{Binding Path=mp_render_blending_weight}" 
-                                                        IsSnapToTickEnabled="True" 
-                                                        TickFrequency="0.1" 
-                                                    />
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                Width="50"
+                                    Margin="4,0"
+                                RenderTransform="1.0,0,0,0.5,0,7"
+                                Minimum="0" 
+                                Maximum="5" 
+                                Value="{Binding Path=mp_render_blending_weight}" 
+                                IsSnapToTickEnabled="True" 
+                                TickFrequency="0.1" 
+                                />
                                                     <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                                        VerticalAlignment="Center"
-                                                        TextAlignment="Right"
-                                                        Margin="5,0,0,0"
-                                                        MinWidth="20"
-                                                        />
+                                VerticalAlignment="Center"
+                                TextAlignment="Right"
+                                Margin="5,0,0,0"
+                                MinWidth="20"
+                                />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                     <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    
-                                                        DisplayMemberPath="Name"
-                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                        SelectedValuePath="entity_guid"
-                                                        SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
-                                                        GotFocus="ecm_molecule_combo_box_GotFocus"
-                                                        >
-                                                        <ComboBox.ItemsSource>
-                                                            <CompositeCollection>
-                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
-                                                                <daph:ConfigMolecule Name="New Molecule"/>
-                                                            </CompositeCollection>
-                                                        </ComboBox.ItemsSource>
+                                                    ItemsSource="{Binding Source={StaticResource EcsBulkMoleculesListView}}"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                    SelectedValuePath="entity_guid"
+                                                    SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
+                                                   
+                                                    >
+                                                        <!--GotFocus="ecm_molecule_combo_box_GotFocus"-->
 
                                                     </ComboBox>
                                                 </StackPanel>
@@ -1996,37 +1995,27 @@
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                         SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        
                                         MinWidth="120">
-
-                                                        <!--GotFocus="MolPopDistributionTypeComboBox_GotFocus"-->
-
-                                                        <!--<ComboBox.Style>
-                                                            <Style TargetType="ComboBox">
-                                                                <Style.Triggers>
-                                                                    <MultiDataTrigger>
-                                                                        <MultiDataTrigger.Conditions>
-                                                                            <Condition Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="0" />
-                                                                            <Condition Binding="{Binding ElementName=MolPopDistributionTypeComboBox, Path=SelectedIndex}" Value="1"/>
-                                                                        </MultiDataTrigger.Conditions>
-                                                                        <Setter Property="ComboBox.SelectedIndex" Value="0"/>
-                                                                    </MultiDataTrigger>
-
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </ComboBox.Style>-->
-
                                                         <ComboBox.ItemContainerStyle>
                                                             <Style TargetType="{x:Type ComboBoxItem}">
                                                                 <Style.Triggers>
+                                                                    <!--"Explicit" can only set programmatically, not selectable by user!-->
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Explicit">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Linear">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
                                                                     <MultiDataTrigger>
                                                                         <MultiDataTrigger.Conditions>
-                                                                            <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
-                                                                            <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
+                                                                            <Condition Binding="{Binding ElementName=comboToroidal, Path=SelectedIndex}" Value="0" />
+                                                                            <Condition Binding="{Binding Content, RelativeSource={RelativeSource self}}" Value="Linear" />
                                                                         </MultiDataTrigger.Conditions>
-                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                        <Setter Property="IsEnabled" Value="True">
+                                                                        </Setter>
                                                                     </MultiDataTrigger>
-
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </ComboBox.ItemContainerStyle>
@@ -2035,14 +2024,15 @@
 
                                                 <StackPanel Grid.Column="0" Grid.Row="1">
                                                     <ContentControl Name="SolfacDistributionDetails"
-                                                    Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
-                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                    Margin="6,2"/>
+                                        Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                        Margin="6,2"/>
                                                 </StackPanel>
 
                                             </Grid>
                                         </StackPanel>
                                     </StackPanel>
+
                                 </StackPanel>
 
                             </Expander>
@@ -2052,11 +2042,11 @@
                                               x:Name="ecmMolPropExpander"
                                               Margin="0,0,0,0" 
                                               Canvas.ZIndex="1"
-                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}"
+                                              DataContext="{Binding ElementName=ecm_molecule_combo_box, Path=SelectedItem}"
                                               >
 
                                 <ContentControl Name="ecmMolpopMolDetails"
-                                        Content="{Binding Path=molecule}" 
+                                        Content="{Binding}" 
                                         ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                         Margin="6"/>
                             </Expander>
@@ -2465,8 +2455,9 @@
                                 >
                                
                                 <local:DaphneStackPanel x:Name="EcmMolpopPanelCellMolPops" >
-                                    <StackPanel Orientation="Horizontal" Margin="10,0">
-                                        <local:CellPropertiesControl DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
+                                    <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
+                                        <local:CellPropertiesControl Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                                            DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
 
                                     <StackPanel Margin="10,6">

@@ -275,7 +275,6 @@
                                 <StackPanel Orientation="Vertical">
                                     <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                     ItemsSource="{Binding Path=membrane.molpops}" 
-                                                    IsSynchronizedWithCurrentItem="True"
                                                     DisplayMemberPath="Name"
                                                     SelectedIndex="0" 
                                                     />
@@ -309,7 +308,6 @@
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                     <ComboBox  x:Name="memb_molecule_combo_box" MinWidth="100" HorizontalAlignment="Left"  Margin="4,0" IsEditable="True"
-                                                                        IsSynchronizedWithCurrentItem="True"
                                                                         DisplayMemberPath="Name"    
                                                                         SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
                                                                         SelectedValuePath="entity_guid"
@@ -424,9 +422,8 @@
                                     <ListBox x:Name="CellCytosolMolPopsListBox" MinHeight="50" MaxHeight="100" 
                                                         ItemsSource="{Binding Path=cytosol.molpops}" 
                                                         DisplayMemberPath="Name"     
-                                                        IsSynchronizedWithCurrentItem="True"
                                                         SelectedIndex="-1"
-                                                        SelectionChanged="CellCytosolMolPopsListBox_SelectionChanged"            />
+                                                       />
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="CytosolAddMolButton"  Width="50" Content="Add" Click="CytosolAddMolButton_Click"/>
                                         <Button Name="CytosolRemoveMolButton" Width="50" Content="Remove" Click="CytosolRemoveMolButton_Click"/>

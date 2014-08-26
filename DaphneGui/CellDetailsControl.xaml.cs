@@ -189,26 +189,26 @@ namespace DaphneGui
 
 
 
-        private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
-            if (cvs == null || cvs.View == null)
-                return;
+        //private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
+        //    if (cvs == null || cvs.View == null)
+        //        return;
 
-            cvs.View.Refresh();
+        //    cvs.View.Refresh();
 
-            if (e.AddedItems.Count == 0) return;
-            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-            foreach (ConfigMolecule cm in cvs.View)
-            {
-                if (cm.Name == tmp.molecule.Name)
-                {
-                    cvs.View.MoveCurrentTo(cm);
-                    return;
-                }
-            }
-        }
+        //    if (e.AddedItems.Count == 0) return;
+        //    var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
+        //    //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
+        //    foreach (ConfigMolecule cm in cvs.View)
+        //    {
+        //        if (cm.Name == tmp.molecule.Name)
+        //        {
+        //            cvs.View.MoveCurrentTo(cm);
+        //            return;
+        //        }
+        //    }
+        //}
 
 
 
