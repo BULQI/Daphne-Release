@@ -16,7 +16,7 @@ namespace Daphne
     public class ReactionComplexProcessor : EntityModelBase
     {
         public Simulation Sim { get; set; }
-        public SimConfiguration SC { get; set; }
+        public Protocol SC { get; set; }
         public ConfigReactionComplex CRC { get; set; }
 
         public int nSteps { get; set; }
@@ -146,7 +146,7 @@ namespace Daphne
             OnPropertyChanged("initConcs");
         }
 
-        public void Initialize(SimConfiguration mainSC, ConfigReactionComplex crc, Simulation sim )
+        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, Simulation sim )
         {
             Sim = sim;
             SC = mainSC;
@@ -202,7 +202,10 @@ namespace Daphne
             dictGraphConcs.Clear();
             listTimes.Clear();
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            if (Simulation.dataBasket.Cells.Count == 0)
+                return;
+                
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
@@ -311,8 +314,8 @@ namespace Daphne
 
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
-            
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
 
             if (comp == null)
                 return;
@@ -342,7 +345,7 @@ namespace Daphne
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -355,9 +358,9 @@ namespace Daphne
             {
                 dictOriginalConcs[kvp.Key] = kvp.Value;
 
-                //Now overwrite the concs in SimConfiguration
+                //Now overwrite the concs in Protocoluration
                 ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
-                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mpInfo.mp_distribution;
+                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
                 homo.concentration = kvp.Value;                
             }           
         }
@@ -372,7 +375,7 @@ namespace Daphne
             if (Simulation.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells[0].Cytosol;
+            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -402,7 +405,7 @@ namespace Daphne
         {
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                string guid = grp.Guid;
+                string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.ReactionComplexRate;
             }
@@ -412,7 +415,7 @@ namespace Daphne
         {
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
-                string guid = grp.Guid;
+                string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.OriginalRate;
                 grp.ReactionComplexRate = grp.OriginalRate;
@@ -430,11 +433,11 @@ namespace Daphne
         {
         }
 
-        public MolConcInfo(string guid, double c, SimConfiguration sc)
+        public MolConcInfo(string guid, double c, Protocol protocol)
         {
             molguid = guid;
             conc = c;
-            molname = sc.entity_repository.molecules_dict[guid].Name ;
+            molname = protocol.entity_repository.molecules_dict[guid].Name ;
         }
     }
 }

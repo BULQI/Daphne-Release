@@ -112,10 +112,9 @@
     <Compile Include="Cell.cs" />
     <Compile Include="CellManager.cs" />
     <Compile Include="Compartment.cs" />
-    <Compile Include="ConfigCreators.cs" />
+    <Compile Include="ProtocolCreators.cs" />
     <Compile Include="DaphneUtilities.cs" />
     <Compile Include="DataBasket.cs" />
-    <Compile Include="Differentiator.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="Locomotor.cs" />

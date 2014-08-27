@@ -36,7 +36,7 @@ namespace DaphneGui
             //Show = true;
         }
         public string Molecule { get; set; }        
-        public string Concentration { get; set; }
+        public double Concentration { get; set; }
         public double[] Gradient { get; set; }
         //public bool Show { get; set; }
         public void AddMoleculaInfo_gradient(double[] gradient)
@@ -129,7 +129,7 @@ namespace DaphneGui
             //Now populate the time trajectory dictionary, get data from database
             //Need to write new code in Database.cs
             dictTT.Clear();
-            DataReader reader = new DataReader(MainWindow.SC.SimConfig.experiment_db_id);
+            DataReader reader = new DataReader(MainWindow.SOP.Protocol.experiment_db_id);
             //dictTT = reader.GetCellMolecularConcs(CellId);
 
             dictTT2.Clear();

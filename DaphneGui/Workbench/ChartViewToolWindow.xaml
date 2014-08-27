@@ -58,7 +58,7 @@
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
-                <TextBlock VerticalAlignment="Center" >Maximum time (seconds):</TextBlock>
+                <TextBlock VerticalAlignment="Center" >Maximum time (minutes):</TextBlock>
                 <!--<Slider x:Name="slMaxTime" 
                         Orientation="Horizontal"
                         Width="100" Height="24"
@@ -223,7 +223,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                              Text="{Binding Path=Guid, Converter={StaticResource ReacGUIDToStringConv},
+                                              Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDToStringConv},
                                                             ConverterParameter={StaticResource ecmReacsListView}}">
                                     </TextBox>
                                 </DataTemplate>

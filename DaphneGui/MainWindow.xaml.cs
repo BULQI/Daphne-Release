@@ -55,6 +55,11 @@ namespace DaphneGui
         /// </summary>
         public static string appPath;
 
+        /// <summary>
+        /// Path of the executable file in installation folder
+        /// </summary>
+        public string execPath = string.Empty;
+   
         private DocWindow dw;
         private Thread simThread;
         private VCRControl vcrControl = null;
@@ -71,7 +76,7 @@ namespace DaphneGui
 
         private Reporter reporter;
         private Process devHelpProc;
-        private static SimConfigurator configurator = null;
+        private static SystemOfPersistence sop = null;
         private static int repetition;
         private static bool argDev = false, argBatch = false, argSave = false;
         private string argScenarioFile = "";
@@ -80,8 +85,8 @@ namespace DaphneGui
         /// <summary>
         /// uri for the scenario file
         /// </summary>
-        public static Uri scenario_path;
-        private string orig_content, orig_path;
+        public static Uri protocol_path;
+        private string orig_content, orig_path, SBMLFolderPath;
         private bool tempFileContent = false, postConstruction = false;
 
         private bool exportAllFlag = false;
@@ -146,9 +151,9 @@ namespace DaphneGui
         /// <summary>
         /// retrieve a pointer to the configurator
         /// </summary>
-        public static SimConfigurator SC
+        public static SystemOfPersistence SOP
         {
-            get { return configurator; }
+            get { return sop; }
         }
 
         /// <summary>
@@ -243,7 +248,7 @@ namespace DaphneGui
 
             //try
             //{
-            //    CreateAndSerializeDaphneScenarios();
+            //    CreateAndSerializeDaphneProtocols();
             //}
             //catch (Exception e)
             //{
@@ -358,11 +363,20 @@ namespace DaphneGui
             if (AssumeIDE() == true)
             {
                 appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+
             }
             else
             {
                 appPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + @"\DaphneGui";
+                execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
             }
+
+            //Defines default location of SBML folder within Daphne's directory structure
+            SBMLFolderPath = appPath + @"\Config\SBML\";
+            //Used to check that SBML directory can be the initial directory
+            string SBML_folder = new Uri(SBMLFolderPath).LocalPath;
+            if (!Directory.Exists(SBML_folder)) { Directory.CreateDirectory(SBML_folder); }
 
             // handle the application properties
             string file;
@@ -410,20 +424,20 @@ namespace DaphneGui
             {
                 // attempt to load a default simulation file; if it doesn't exist disable the gui
                 //skg daphne Wednesday, May 08, 2013
-                scenario_path = new Uri(appPath + @"\Config\" + file);
-                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+                protocol_path = new Uri(appPath + @"\Config\" + file);
+                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
-                file_exists = File.Exists(scenario_path.LocalPath);
+                file_exists = File.Exists(protocol_path.LocalPath);
 
                 if (file_exists)
                 {
-                    SimConfigToolWindow.IsEnabled = true;
+                    ProtocolToolWindow.IsEnabled = true;
                     saveScenario.IsEnabled = true;
                     //displayTitle();
                 }
                 else
                 {
-                    SimConfigToolWindow.IsEnabled = false;
+                    ProtocolToolWindow.IsEnabled = false;
                     saveScenario.IsEnabled = false;
 
                     // notify the user; loading will always fail for protocols from the UserScenarios folder
@@ -447,7 +461,8 @@ namespace DaphneGui
                 repeat++;
             } while (file_exists == false && repeat < 2);
 
-            SimConfigToolWindow.MW = this;
+            ProtocolToolWindow.MW = this;
+            ComponentsToolWindow.MW = this;
 
             // Hide fitting tab control until sim has ended
             this.LPFittingToolWindow.Close();
@@ -472,13 +487,14 @@ namespace DaphneGui
             gc = new VTKGraphicsController(this);
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             vtkDisplay_DockPanel.DataContext = gc;
-            // this.SimConfigSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
+            // this.ProtocolSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
             // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
             saveState.DataContext = sim;
 
             if (file_exists)
             {
-                initialState(true, true, "");
+                sop = new SystemOfPersistence();
+                initialState(true, true, ReadJson(""));
                 enableCritical(loadSuccess);
                 if (loadSuccess == true)
                 {
@@ -548,48 +564,52 @@ namespace DaphneGui
         /// <summary>
         /// Create and serialize all scenarios
         /// </summary>
-        public void CreateAndSerializeDaphneScenarios()
+        public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var config = new SimConfigurator("Config\\daphne_blank_scenario.json");
-            ConfigCreators.CreateAndSerializeBlankScenario(config);
+            var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json");
+            
+            ProtocolCreators.CreateBlankProtocol(protocol);
             //serialize to json
-            config.SerializeSimConfigToFile();
+            protocol.SerializeToFile();
 
             //DRIVER-LOCOMOTOR SCENARIO
-            config = new SimConfigurator("Config\\daphne_driver_locomotion_scenario.json");
-            ConfigCreators.CreateAndSerializeDriverLocomotionScenario(config);
+            protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json");
+            
+            ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             // serialize to json
-            config.SerializeSimConfigToFile();
+            protocol.SerializeToFile();
 
             //DIFFUSIION SCENARIO
-            config = new SimConfigurator("Config\\daphne_diffusion_scenario.json");
-            ConfigCreators.CreateAndSerializeDiffusionScenario(config);
+            protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json");
+            
+            ProtocolCreators.CreateDiffusionProtocol(protocol);
             //Serialize to json
-            config.SerializeSimConfigToFile();
+            protocol.SerializeToFile();
 
             //LIGAND-RECEPTOR SCENARIO
-            config = new SimConfigurator("Config\\daphne_ligand_receptor_scenario.json");
-            ConfigCreators.CreateAndSerializeLigandReceptorScenario(config);
+            protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json");
+
+            ProtocolCreators.CreateLigandReceptorProtocol(protocol);
             //serialize to json
-            config.SerializeSimConfigToFile();
+            protocol.SerializeToFile();
         }
 
         private void showScenarioInitial()
         {
-            lockAndResetSim(true, "");
+            lockAndResetSim(true, ReadJson(""));
             if (loadSuccess == false)
             {
                 return;
             }
-            SimConfigToolWindow.IsEnabled = true;
+            ProtocolToolWindow.IsEnabled = true;
             saveScenario.IsEnabled = true;
         }
 
         private void setScenarioPaths(string filename)
         {
-            scenario_path = new Uri(filename);
-            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+            protocol_path = new Uri(filename);
+            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             displayTitle();
         }
 
@@ -629,16 +649,181 @@ namespace DaphneGui
             tempFileContent = false;
         }
 
+
         /// <summary>
-        /// Exports a model specification into SBML
+        /// Imports a model specification in SBML
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void exportSBML_Click(object sender, RoutedEventArgs e)
+        private void ImportSBML_Click(object sender, RoutedEventArgs e)
+        {
+            //Check that previous changes are saved before loading new Protocol
+            if (tempFileContent == true || saveTempFiles() == true)
+            {
+                applyTempFilesAndSave(true);
+            }
+
+            AddlibSBMLEnv();
+            Protocol protocol = new Protocol();
+
+            //Configure open file dialog box
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.InitialDirectory = SBMLFolderPath;
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML files (.xml)|*.xml"; // Filter files by extension
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
+            {
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, protocol);
+                //Extract directory path and file name of the file to be imported
+                protocol = encodedSBML.ReadSBMLFile();
+                if (protocol != null)
+                {
+                    if (encodedSBML.ContainsReactionComplex())
+                    {
+                        LoadReactionComplex(protocol);
+                    }
+                    else
+                    {
+                        LoadProtocolFromSBML(protocol);
+                    }
+                }
+                //Obtain filled out configurator and store in tempConfigurator
+                //SBMLToProtocol();
+            }
+        }
+
+        /// <summary>
+        /// Loads the imported reaction complex into the GUI
+        /// </summary>
+        /// <param name="protocol"></param>
+        private void LoadReactionComplex(Protocol protocol)
+        {
+
+            //ReactionComplex that was added
+            ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
+
+            //Add reaction complex
+            // prevent when a fit is in progress
+            lock (cellFitLock)
+            {
+                sop.Protocol.entity_repository.reaction_complexes.Add(crc);
+            }
+
+            foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
+            {
+                ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
+                sop.Protocol.entity_repository.molecules.Add(configMol);
+                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
+            }
+
+            foreach (ConfigGene configGenePop in crc.genes)
+            {
+                ConfigGene configGen = protocol.entity_repository.genes_dict[configGenePop.entity_guid];
+                sop.Protocol.entity_repository.genes.Add(configGen);
+                //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
+            }
+
+            //Reactions in the reaction complex
+            ConfigReaction cr;
+            foreach (string rguid in crc.reactions_guid_ref)
+            {
+                cr = protocol.entity_repository.reactions_dict[rguid];
+                int index = protocol.entity_repository.reaction_templates.IndexOf(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
+                cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
+
+                sop.Protocol.entity_repository.reactions.Add(cr);
+            }
+
+            ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tabLibraries;
+
+            ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
+        }
+
+        /// <summary>
+        /// Loads a new Protocol object into Daphne
+        /// </summary>
+        /// <param name="tempProtocol"></param>
+        private void LoadProtocolFromSBML(Protocol protocol)
+        {
+            protocol.InitializeStorageClasses();
+
+            //SetPaths
+            protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
+            protocol.TempFile = orig_path + @"\temp_scenario.json";
+
+            protocol_path = new Uri(protocol.FileName);   
+
+            prepareProtocol(protocol);
+            protocol.SerializeToFile(false);
+        }
+
+
+        /// <summary>
+        /// Exports a model specification in SBML
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExportSBML_Click(object sender, RoutedEventArgs e)
         {
             AddlibSBMLEnv();
-            SBMLModel encodedSBML = new SBMLModel(appPath, configurator);
-            encodedSBML.ConvertToSBML();
+            //
+            //Configure open file dialog box
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.InitialDirectory =SBMLFolderPath;
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
+            //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
+            dlg.FileName = "SBMLModel";
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+            SBMLModel encodedSBML;
+            // Process open file dialog box results
+            if (result == true)
+            {
+                encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
+                encodedSBML.ConvertDaphneToSBML(dlg.FilterIndex);
+            }
+            
+        }
+
+        /// <summary>
+        /// Exports a reaction complex specification in SBML
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void ExportReactionComplexSBML_Click(object sender, RoutedEventArgs e)
+        {
+            AddlibSBMLEnv();
+            //
+            //Configure open file dialog box
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.InitialDirectory =SBMLFolderPath;
+            dlg.DefaultExt = ".xml"; // Default file extension
+            dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
+            dlg.FileName = "SBMLReactionComplex";
+
+            // Show open  file dialog box
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Process open file dialog box results
+            if (result == true)
+            {
+                SBMLModel encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
+                ////////////ProtocolToolWindow.ConfigTabControl.SelectedItem = ComponentsToolWindow.tagLibraries;
+                ComponentsToolWindow.ReacComplexExpander.IsExpanded = true;
+                ConfigReactionComplex crc = ComponentsToolWindow.GetConfigReactionComplex();
+
+                if (crc != null)
+                {
+                    encodedSBML.ConvertReactionComplexToSBML(crc);
+                }
+            }
         }
 
         /// <summary>
@@ -647,7 +832,17 @@ namespace DaphneGui
         private void AddlibSBMLEnv()
         {
             //Path of the dependencies folder
-            string dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
+            string dependencies;
+
+            //True means that we are in IDE, false that we have installed Daphne
+            if (execPath.Equals(string.Empty))
+            {
+                dependencies = new Uri(Directory.GetParent(Directory.GetParent(Directory.GetParent(Directory.GetParent(new Uri(appPath).LocalPath).ToString()).ToString()).ToString()).ToString()).LocalPath + @"/dependencies";
+            }
+            else
+            {
+                dependencies = new Uri(Directory.GetParent(new Uri(execPath).LocalPath).ToString()).LocalPath;
+            }
             //Adds the dependecies folder to the environment variable PATH stored in the current process
             string newPathEnv = System.Environment.GetEnvironmentVariable("PATH") + ";" + dependencies.Replace(@"/", @"\");
             System.Environment.SetEnvironmentVariable("PATH", newPathEnv);
@@ -673,12 +868,12 @@ namespace DaphneGui
                 string filename = dlg.FileName;
                 // Save dialog catches trying to overwrite Read-Only files, so this should be safe...
 
-                configurator.FileName = filename;
-                configurator.SerializeSimConfigToFile();
+                sop.Protocol.FileName = filename;
+                sop.Protocol.SerializeToFile();
 
-                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                scenario_path = new Uri(filename);
-                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                protocol_path = new Uri(filename);
+                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 displayTitle();
             }
             return result;
@@ -692,7 +887,7 @@ namespace DaphneGui
                 lock (sim)
                 {
                     // re-initialize; if there are no cells, always do a full reset
-                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, "");
+                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
                     enableCritical(loadSuccess);
                     if (loadSuccess == false)
                     {
@@ -708,24 +903,13 @@ namespace DaphneGui
 
                     // next time around, force a reset
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
-#if CELL_REGIONS
-                // hide the cell regions
-                foreach (Region rr in configurator.SimConfig.scenario.regions)
-                {
-                    // Use the utility dict to find the box associated with this region
-                    BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[rr.region_box_spec_guid_ref];
 
-                    // Property changed notifications will take care of turning off the Widgets and Actors
-                    bb.box_visibility = false;
-                    rr.region_visibility = false;
-                }
-#endif
                     // hide the regions used to control Gaussians
-                    foreach (GaussianSpecification gg in configurator.SimConfig.entity_repository.gaussian_specifications)
+                    foreach (GaussianSpecification gg in sop.Protocol.scenario.gaussian_specifications)
                     {
                         // Use the utility dict to find the box associated with this region
-                        BoxSpecification bb = configurator.SimConfig.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
-                        
+                        BoxSpecification bb = sop.Protocol.scenario.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+
                         // Save current visibility statuses
                         bb.current_box_visibility = bb.box_visibility;
                         bb.current_blob_visibility = gg.gaussian_region_visibility;
@@ -733,7 +917,7 @@ namespace DaphneGui
                         // Property changed notifications will take care of turning off the Widgets and Actors
                         bb.box_visibility = false;
                         gg.gaussian_region_visibility = false;
-                        
+
                     }
 
                     //// always reset the simulation for now to start at the beginning
@@ -747,7 +931,7 @@ namespace DaphneGui
                     // since the above call resets the experiment name each time, reset comparison string
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
-                    orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     sim.restart();
                     UpdateGraphics();
 
@@ -761,8 +945,8 @@ namespace DaphneGui
                     gc.DisablePickingButtons();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-                    SimConfigToolWindow.Close();
-
+                    ProtocolToolWindow.Close();
+                    ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
                     ExportMenu.IsEnabled = false;
@@ -782,6 +966,8 @@ namespace DaphneGui
             loadExp.IsEnabled = enable;
             recentFileList.IsEnabled = enable;
             newScenario.IsEnabled = enable;
+            ImportSBML.IsEnabled = enable;
+
         }
 
         /// <summary>
@@ -794,15 +980,15 @@ namespace DaphneGui
             analysisMenu.IsEnabled = enable;
             saveScenario.IsEnabled = enable;
             saveScenarioAs.IsEnabled = enable;
+            ImportSBML.IsEnabled = enable;
             abortButton.IsEnabled = false;
         }
-
         /// <summary>
         /// reset the simulation; will also apply the initial state; call after loading a scenario file
         /// </summary>
         /// <param name="newFile">true to indicate we are loading a new file</param>
         /// <param name="xmlConfigString">scenario as a string</param>
-        private void lockAndResetSim(bool newFile, string xmlConfigString)
+        private void lockAndResetSim(bool newFile, Protocol protocol)
         {
             // prevent when a fit is in progress
             lock (cellFitLock)
@@ -811,7 +997,7 @@ namespace DaphneGui
                 {
                     vcrControl.SetInactive();
                 }
-                initialState(newFile || tempFileContent, true, xmlConfigString);
+                initialState(newFile || tempFileContent, true, protocol);
                 enableCritical(loadSuccess);
                 if (loadSuccess == false)
                 {
@@ -863,7 +1049,7 @@ namespace DaphneGui
             ////Console.WriteLine("ExpID is: " + sim.SC.id.ToString());
             //if (lpfw == null)
             //{
-            //    lpfw = new LPFittingWindow(lpm, configurator.SimConfig.experiment_db_id);
+            //    lpfw = new LPFittingWindow(lpm, configurator.Protocol.experiment_db_id);
             //    lpfw.Show();
             //}
             //else
@@ -873,13 +1059,13 @@ namespace DaphneGui
             //        if (!lpfw.Activate())
             //        {
             //            lpfw.Close();
-            //            lpfw = new LPFittingWindow(lpm, configurator.SimConfig.experiment_db_id);
+            //            lpfw = new LPFittingWindow(lpm, configurator.Protocol.experiment_db_id);
             //            lpfw.Show();
             //        }
             //    }
             //    else
             //    {
-            //        lpfw = new LPFittingWindow(lpm, configurator.SimConfig.experiment_db_id);
+            //        lpfw = new LPFittingWindow(lpm, configurator.Protocol.experiment_db_id);
             //        lpfw.Show();
             //    }
             //} 
@@ -896,7 +1082,7 @@ namespace DaphneGui
 
             //if (cdw == null)
             //{
-            //    cdw = new CellDivisionWindow(cdm, configurator.SimConfig.experiment_db_id);
+            //    cdw = new CellDivisionWindow(cdm, configurator.Protocol.experiment_db_id);
             //    cdw.Show();
             //}
             //else
@@ -906,13 +1092,13 @@ namespace DaphneGui
             //        if (!cdw.Activate())
             //        {
             //            cdw.Close();
-            //            cdw = new CellDivisionWindow(cdm, configurator.SimConfig.experiment_db_id);
+            //            cdw = new CellDivisionWindow(cdm, configurator.Protocol.experiment_db_id);
             //            cdw.Show();
             //        }
             //    }
             //    else
             //    {
-            //        cdw = new CellDivisionWindow(cdm, configurator.SimConfig.experiment_db_id);
+            //        cdw = new CellDivisionWindow(cdm, configurator.Protocol.experiment_db_id);
             //        cdw.Show();
             //    }
             //} 
@@ -1007,7 +1193,7 @@ namespace DaphneGui
 
         private string extractFileName()
         {
-            string[] segments = scenario_path.LocalPath.Split('\\');
+            string[] segments = protocol_path.LocalPath.Split('\\');
 
             return segments.Last();
         }
@@ -1124,8 +1310,8 @@ namespace DaphneGui
 
         private void printHeader(StreamWriter sw, String notes)
         {
-            sw.WriteLine("//-- Exp:" + MainWindow.SC.SimConfig.experiment_name);
-            sw.WriteLine("//-- Description:" + MainWindow.SC.SimConfig.experiment_description);
+            sw.WriteLine("//-- Exp:" + MainWindow.SOP.Protocol.experiment_name);
+            sw.WriteLine("//-- Description:" + MainWindow.SOP.Protocol.experiment_description);
             sw.WriteLine(notes);
             sw.WriteLine("");
 
@@ -1153,16 +1339,16 @@ namespace DaphneGui
             List<int> frameTimeIds = new List<int>(); //used to hold all the sorted framed time ids of the simulation
             List<double> frameTimeVals = new List<double>();//used to hold all the sorted framed time values of the simulation
             //go through
-            double samplingFreq = SC.SimConfig.scenario.time_config.sampling_interval;
+            double samplingFreq = SOP.Protocol.scenario.time_config.sampling_interval;
             //get the frameTime from the database.  
-            //DataBaseTools.GetTimeFrame(SC.SimConfig.experiment_db_id, frameTimeIds, frameTimeVals);
+            //DataBaseTools.GetTimeFrame(SC.Protocol.experiment_db_id, frameTimeIds, frameTimeVals);
 
             int samplingStep = 0;
             //rebuild the simulation frame by using rendering interval and timeFrame ,
             //
             for (int i = 0; i < frameTimeIds.Count; i++)
             {
-                if (frameTimeVals[i] >= samplingStep * SC.SimConfig.scenario.time_config.sampling_interval || (i == frameTimeIds.Count - 1))
+                if (frameTimeVals[i] >= samplingStep * SOP.Protocol.scenario.time_config.sampling_interval || (i == frameTimeIds.Count - 1))
                 {
                     samplingTimeArr.Add(frameTimeIds[i]);
                     samplingStep++;
@@ -1171,12 +1357,12 @@ namespace DaphneGui
             //now with this array build the sql statement
 
 
-            //Dictionary<int, Dictionary<int, BCellPhenotype>> cellState = DataBaseTools.GetBCellSummaryCellState(SC.SimConfig.experiment_db_id, samplingTimeArr);
+            //Dictionary<int, Dictionary<int, BCellPhenotype>> cellState = DataBaseTools.GetBCellSummaryCellState(SC.Protocol.experiment_db_id, samplingTimeArr);
 
             ////n
-            //Dictionary<int, Dictionary<string, double>> simState = DataBaseTools.GetBCellSummarySimState(SC.SimConfig.experiment_db_id, samplingTimeArr);
+            //Dictionary<int, Dictionary<string, double>> simState = DataBaseTools.GetBCellSummarySimState(SC.Protocol.experiment_db_id, samplingTimeArr);
 
-            //Dictionary<int, Dictionary<int, double>> FDCState = DataBaseTools.GetFDCSummaryCellState(SC.SimConfig.experiment_db_id, samplingTimeArr);
+            //Dictionary<int, Dictionary<int, double>> FDCState = DataBaseTools.GetFDCSummaryCellState(SC.Protocol.experiment_db_id, samplingTimeArr);
 
 
 
@@ -1240,7 +1426,7 @@ namespace DaphneGui
             //TBKMath.FileIDs fileID = new TBKMath.FileIDs();
             //Directory.CreateDirectory(igGeneFolderName + fileID.Stamp);
             //StreamWriter fastaWriter = File.CreateText(igGeneFolderName + fileID.Stamp + @"\Ig.fasta");
-            //Dictionary<int, string> igData = DataBaseTools.GetIgGene(SC.SimConfig.experiment_db_id);
+            //Dictionary<int, string> igData = DataBaseTools.GetIgGene(SC.Protocol.experiment_db_id);
             //foreach (KeyValuePair<int, string> kvpc in igData)
             //{
             //    fastaWriter.WriteLine(">" + kvpc.Value);
@@ -1269,7 +1455,7 @@ namespace DaphneGui
 
 
             ////get family tree first.
-            //Dictionary<int, GeneologyInfo> familytree = CellDivTools.GetFamilyTree(SC.SimConfig.experiment_db_id);
+            //Dictionary<int, GeneologyInfo> familytree = CellDivTools.GetFamilyTree(SC.Protocol.experiment_db_id);
 
             ////now what?
             //foreach (KeyValuePair<int, GeneologyInfo> kvpc in familytree)
@@ -1304,7 +1490,7 @@ namespace DaphneGui
 
 
             ////Dictionary<int, string> st = new Dictionary<int, string>();
-            ////st = DataBaseTools.GetSynapse(SC.SimConfig.experiment_db_id);
+            ////st = DataBaseTools.GetSynapse(SC.Protocol.experiment_db_id);
 
             ////foreach (KeyValuePair<int, string> kv in st)
             ////{
@@ -1376,36 +1562,36 @@ namespace DaphneGui
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
             //Code to preserve focus to the element that was in focus before "Apply" button clicked.
-            TabItem selectedTab = SimConfigToolWindow.ConfigTabControl.SelectedItem as TabItem;
+            TabItem selectedTab = ProtocolToolWindow.ConfigTabControl.SelectedItem as TabItem;
 
             int nCellPopSelIndex = -1;
-            if (selectedTab == SimConfigToolWindow.tabCellPop)
+            if (selectedTab == ProtocolToolWindow.tabCellPop)
             {
-                nCellPopSelIndex = SimConfigToolWindow.CellPopsListBox.SelectedIndex;
+                nCellPopSelIndex = ProtocolToolWindow.CellPopsListBox.SelectedIndex;
             }
 
             int nMolPopSelIndex = -1;
-            if (selectedTab == SimConfigToolWindow.tabECM)
+            if (selectedTab == ProtocolToolWindow.tabECM)
             {
-                nMolPopSelIndex = SimConfigToolWindow.lbEcsMolPops.SelectedIndex;
+                nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
             }
 
-            int nLibCellSelIndex = -1;
-            int nLibRCSelIndex = -1;
-            if (selectedTab == SimConfigToolWindow.tabLibraries)
-            {
-                nLibCellSelIndex = SimConfigToolWindow.CellsListBox.SelectedIndex;
-                nLibRCSelIndex = SimConfigToolWindow.lbComplexes.SelectedIndex;
-            }
+            ////////////int nLibCellSelIndex = -1;
+            ////////////int nLibRCSelIndex = -1;
+            ////////////if (selectedTab == ComponentsToolWindow.tabLibraries)
+            ////////////{
+            ////////////    nLibCellSelIndex = CellStudioToolWindow.CellsListBox.SelectedIndex;
+            ////////////    nLibRCSelIndex = ComponentsToolWindow.lbComplexes.SelectedIndex;
+            ////////////}
 
             int nRepEcmMolSelIndex = -1;
             int nRepCellSelIndex = -1;
             int nRepCellPopSelIndex = -1;
-            if (selectedTab == SimConfigToolWindow.tabReports)
+            if (selectedTab == ProtocolToolWindow.tabReports)
             {
-                nRepEcmMolSelIndex = SimConfigToolWindow.dgEcmMols.SelectedIndex;
-                nRepCellSelIndex = SimConfigToolWindow.dgCellDetails.SelectedIndex;
-                nRepCellPopSelIndex = SimConfigToolWindow.lbRptCellPops.SelectedIndex;
+                nRepEcmMolSelIndex = ProtocolToolWindow.dgEcmMols.SelectedIndex;
+                nRepCellSelIndex = ProtocolToolWindow.dgCellDetails.SelectedIndex;
+                nRepCellPopSelIndex = ProtocolToolWindow.lbRptCellPops.SelectedIndex;
             }
 
             runButton.IsEnabled = false;
@@ -1414,25 +1600,25 @@ namespace DaphneGui
             saveTempFiles();
             updateGraphicsAndGUI();
 
-            SimConfigToolWindow.ConfigTabControl.SelectedItem = selectedTab;
-            if (selectedTab == SimConfigToolWindow.tabCellPop)
+            ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;
+            if (selectedTab == ProtocolToolWindow.tabCellPop)
             {
-                SimConfigToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
+                ProtocolToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
             }
-            else if (selectedTab == SimConfigToolWindow.tabECM)
+            else if (selectedTab == ProtocolToolWindow.tabECM)
             {
-                SimConfigToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
+                ProtocolToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
             }
-            else if (selectedTab == SimConfigToolWindow.tabLibraries)
+            ////////////else if (selectedTab == ComponentsToolWindow.tabLibraries)
+            ////////////{
+            ////////////    CellStudioToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
+            ////////////    ComponentsToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
+            ////////////}
+            else if (selectedTab == ProtocolToolWindow.tabReports)
             {
-                SimConfigToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
-                SimConfigToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
-            }
-            else if (selectedTab == SimConfigToolWindow.tabReports)
-            {
-                SimConfigToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
-                SimConfigToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
-                SimConfigToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
+                ProtocolToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
+                ProtocolToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
+                ProtocolToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
             }
         }
 
@@ -1622,36 +1808,7 @@ namespace DaphneGui
                 MainWindow.GC.Rwc.Invalidate();
             }
         }
-#if CELL_REGIONS
-        public static void GUIRegionSurfacePropertyChange(object sender, PropertyChangedEventArgs e)
-        {
-            Region region = (Region)sender;
 
-            if (region == null)
-            {
-                return;
-            }
-
-            if (e.PropertyName == "region_visibility")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, region.region_visibility);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_type")
-            {
-                MainWindow.VTKBasket.Regions[region.region_box_spec_guid_ref].SetShape(region.region_type);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetShape(MainWindow.GC.Rwc.RenderWindow, region.region_type);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            if (e.PropertyName == "region_color")
-            {
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetColor(region.region_color.ScR, region.region_color.ScG, region.region_color.ScB);
-                MainWindow.GC.Regions[region.region_box_spec_guid_ref].SetOpacity(region.region_color.ScA);
-                MainWindow.GC.Rwc.Invalidate();
-            }
-            return;
-        }
-#endif
         public static void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
         {
             GaussianSpecification gauss = (GaussianSpecification)sender;
@@ -1675,100 +1832,108 @@ namespace DaphneGui
             return;
         }
 
-        private void initialState(bool newFile, bool completeReset, string jsonScenarioString)
+        /// <summary>
+        /// Takes care of loading a Protocol from string or file
+        /// </summary>
+        /// <param name="jsonScenarioString"></param>
+        /// <returns></returns>
+        private Protocol ReadJson(string jsonScenarioString) 
+        {
+            Protocol protocol;
+
+            // load past experiment
+            if (jsonScenarioString != "")
+            {
+                protocol = new Protocol();
+                protocol.TempFile = orig_path + @"\temp_protocol.json";
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    SystemOfPersistence.DeserializeExternalProtocolFromString(ref protocol, jsonScenarioString);
+                    return protocol;
+                }
+                catch
+                {
+                    handleLoadFailure("That configuration has problems. Please select another experiment.");
+                    return null;
+                }
+            }
+            else
+            {
+                // catch xaml parse exception if it's not a good sim config file
+                try
+                {
+                    protocol = new Protocol();
+                    protocol.FileName = protocol_path.LocalPath;
+                    protocol.TempFile = orig_path + @"\temp_protocol.json";
+                    SystemOfPersistence.DeserializeExternalProtocol(ref protocol, tempFileContent);
+                    return protocol;
+                    //configurator.Protocol.ChartWindow = ReacComplexChartWindow;
+                }
+                catch
+                {
+                    handleLoadFailure("There is a problem loading the protocol file.\nPress OK, then try to load another.");
+                    return null;
+                }
+            }
+        }
+
+        private void initialState(bool newFile, bool completeReset, Protocol protocol)
         {
             // if we read a new file we may have to disconnect event handlers if they were connected previously;
             // we always must deserialize the file
             if (newFile == true)
             {
-                if (configurator != null)
+                if (sop != null)
                 {
                     // if we configured a simulation prior to this call, remove all property changed event handlers
 
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+                    for (int i = 0; i < sop.Protocol.scenario.box_specifications.Count; i++)
                     {
-                        configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
+                        sop.Protocol.scenario.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
                     }
-#if CELL_REGIONS
-                    for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+                    for (int i = 0; i < sop.Protocol.scenario.gaussian_specifications.Count; i++)
                     {
-                        configurator.SimConfig.scenario.regions[i].PropertyChanged -= GUIRegionSurfacePropertyChange;
-                    }
-#endif
-                    for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-                    {
-                        configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
+                        sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
                     }
                 }
-                // load past experiment
-                if (jsonScenarioString != "")
+
+                if (protocol != null)
                 {
-                    // reinitialize the configurator
-                    configurator = new SimConfigurator();
-                    configurator.TempScenarioFile = orig_path + @"\temp_scenario.json";
-                    configurator.TempUserDefFile = orig_path + @"\temp_userdef.json";
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        configurator.DeserializeSimConfigFromString(jsonScenarioString);
-                    }
-                    catch
-                    {
-                        handleLoadFailure("That configuration has problems. Please select another experiment.");
-                        return;
-                    }
+                    //sop = new SystemOfPersistence();
+                    sop.Protocol = protocol;
+                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
-                else
-                {
-                    // catch xaml parse exception if it's not a good sim config file
-                    try
-                    {
-                        configurator = new SimConfigurator(scenario_path.LocalPath);
-                        configurator.TempScenarioFile = orig_path + @"\temp_scenario.json";
-                        configurator.TempUserDefFile = orig_path + @"\temp_userdef.json";
-                        configurator.DeserializeSimConfig(tempFileContent);
-                        //configurator.SimConfig.ChartWindow = ReacComplexChartWindow;
-                    }
-                    catch
-                    {
-                        handleLoadFailure("There is a problem loading the configuration file.\nPress OK, then try to load another.");
-                        return;
-                    }
-                }
-                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+              
             }
 
             // (re)connect the handlers for the property changed event
-            for (int i = 0; i < configurator.SimConfig.entity_repository.box_specifications.Count; i++)
+            for (int i = 0; i < sop.Protocol.scenario.box_specifications.Count; i++)
             {
-                configurator.SimConfig.entity_repository.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
+                sop.Protocol.scenario.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
             }
-#if CELL_REGIONS
-            for (int i = 0; i < configurator.SimConfig.scenario.regions.Count; i++)
+            for (int i = 0; i < sop.Protocol.scenario.gaussian_specifications.Count; i++)
             {
-                configurator.SimConfig.scenario.regions[i].PropertyChanged += GUIRegionSurfacePropertyChange;
-            }
-#endif
-            for (int i = 0; i < configurator.SimConfig.entity_repository.gaussian_specifications.Count; i++)
-            {
-                configurator.SimConfig.entity_repository.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
+                sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
             }
 
             // GUI Resources
             // Set the data context for the main tab control config GUI
-            this.SimConfigToolWindow.DataContext = configurator.SimConfig;
+            this.ProtocolToolWindow.DataContext = sop.Protocol;
+            this.CellStudioToolWindow.DataContext = sop.Protocol;
+            this.ComponentsToolWindow.DataContext = sop.Protocol;
 
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
             {
-                sim.Load(configurator.SimConfig, completeReset);
+                sim.Load(sop.Protocol, completeReset);
             }
             else
             {
                 try
                 {
-                    sim.Load(configurator.SimConfig, completeReset);
+                    sim.Load(sop.Protocol, completeReset);
                 }
                 catch (Exception e)
                 {
@@ -1778,15 +1943,15 @@ namespace DaphneGui
             }
 
             // reporter file name
-            reporter.FileName = configurator.SimConfig.reporter_file_name;
+            reporter.FileName = sop.Protocol.reporter_file_name;
 
             // temporary solution to avoid popup resaving states -axin
             if (true)
             {
-                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
 
-            vtkDataBasket.SetupVTKData(configurator.SimConfig);
+            vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
 
@@ -1809,7 +1974,7 @@ namespace DaphneGui
                 // NOTE: For now not doing any callbacks on property change for RegionControls...
                 kvp.Value.ClearCallbacks();
                 kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
-                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(SimConfigToolWindow.RegionFocusToGUISection));
+                kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWindow.RegionFocusToGUISection));
             }
 
             //////////VCR_Toolbar.IsEnabled = false;
@@ -1855,12 +2020,14 @@ namespace DaphneGui
         private void handleLoadFailure(string s)
         {
             loadSuccess = false;
-            configurator.SimConfig = new SimConfiguration();
-            configurator.SimConfig.experiment_name = "";
-            configurator.SimConfig.experiment_description = "";
-            orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
-            SimConfigToolWindow.DataContext = configurator.SimConfig;
+            sop.Protocol = new Protocol();
+            sop.Protocol.experiment_name = "";
+            sop.Protocol.experiment_description = "";
+            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+            ProtocolToolWindow.DataContext = sop.Protocol;
+            CellStudioToolWindow.DataContext = sop.Protocol;
+            ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
             displayTitle("");
@@ -1918,13 +2085,13 @@ namespace DaphneGui
                             }
                             if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
                             {
-                                reporter.AppendReporter(configurator.SimConfig, sim);
+                                reporter.AppendReporter(sop.Protocol, sim);
                             }
 
                             if (sim.RunStatus != Simulation.RUNSTAT_RUN)
                             {
                                 // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < configurator.SimConfig.experiment_reps)
+                                if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                                 }
@@ -1941,7 +2108,7 @@ namespace DaphneGui
                                         reporter.CloseReporter();
                                     }
                                     // for profiling: close the application after a completed experiment
-                                    if (ControlledProfiling() == true && repetition >= configurator.SimConfig.experiment_reps)
+                                    if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
                                     {
                                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(CloseApp));
                                         return;
@@ -2041,27 +2208,27 @@ namespace DaphneGui
             gc.ToolsToolbarEnableAllIcons();            
 
             //Set the box and blob visibilities to how they were pre-run
-            foreach (ConfigMolecularPopulation molpop in SC.SimConfig.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    MolPopGaussian mpg = molpop.mpInfo.mp_distribution as MolPopGaussian;
-                    SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
-                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
+                    MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
+                    SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
+                    SOP.Protocol.scenario.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
                 }
             }
-            foreach (CellPopulation cellpop in SC.SimConfig.scenario.cellpopulations)
+            foreach (CellPopulation cellpop in SOP.Protocol.scenario.cellpopulations)
             {
                 if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
                 {
                     CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
-                    SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
-                    SC.SimConfig.entity_repository.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SC.SimConfig.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
+                    SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
+                    SOP.Protocol.scenario.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
                 }
             }
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
-            this.SimConfigToolWindow.Activate();
+            this.ProtocolToolWindow.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
@@ -2076,9 +2243,9 @@ namespace DaphneGui
         private bool saveTempFiles()
         {
             // check if there were changes
-            if (configurator != null && configurator.SerializeSimConfigToStringSkipDeco() != orig_content)
+            if (sop != null && sop.Protocol.SerializeToStringSkipDeco() != orig_content)
             {
-                configurator.SerializeSimConfigToFile(true);
+                sop.Protocol.SerializeToFile(true);
                 tempFileContent = true;
                 return true;
             }
@@ -2089,7 +2256,7 @@ namespace DaphneGui
         {
             if (tempFileContent == true)
             {
-                configurator.DeserializeSimConfig(true);
+                sop.DeserializeProtocol(true);
                 // handled this set of files
                 tempFileContent = false;
 
@@ -2099,9 +2266,9 @@ namespace DaphneGui
                 if (result == MessageBoxResult.Yes)
                 {
                     // save into the same file
-                    configurator.SerializeSimConfigToFile();
-                    orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                    orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+                    sop.Protocol.SerializeToFile();
+                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
                 else if (result == MessageBoxResult.No)
                 {
@@ -2114,7 +2281,7 @@ namespace DaphneGui
                     {
                         // reload the file; also resets the gui, discards changes
                         tempFileContent = false;
-                        loadScenarioFromFile(scenario_path.LocalPath);
+                        loadScenarioFromFile(protocol_path.LocalPath);
                     }
                     return false;
                 }
@@ -2127,10 +2294,10 @@ namespace DaphneGui
 
         private void updateGraphicsAndGUI()
         {
-            lockAndResetSim(false, "");
+            lockAndResetSim(false, ReadJson(""));
             //also need to delete every for this experiment in database.
-            //DataBaseTools.DeleteExperiment(configurator.SimConfig.experiment_db_id);
-            //SC.SimConfig.experiment_db_id = -1;//reset
+            //DataBaseTools.DeleteExperiment(configurator.Protocol.experiment_db_id);
+            //SC.Protocol.experiment_db_id = -1;//reset
             runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateTwoArgs(GUIUpdate), -1, false);
 
             //If main VTK window is not open, open it. Close the CellInfo tab.
@@ -2194,7 +2361,7 @@ namespace DaphneGui
 
                     // if database writing is on, notify the user that it may be a good idea to have unique experiment names
                     // don't consider the template name a good idea
-                    if (configurator.SimConfig.experiment_name == nameTemplate || checkExpNameUniqueness(configurator.SimConfig.experiment_name) == false)
+                    if (configurator.Protocol.experiment_name == nameTemplate || checkExpNameUniqueness(configurator.Protocol.experiment_name) == false)
                     {
                         string messageBoxText = "Consider using a unique, meaningful experiment name.\n\nDo you want to go back to setup to make this change?";
                         string caption = "Experiment name unchanged";
@@ -2209,10 +2376,10 @@ namespace DaphneGui
                         {
                             case MessageBoxResult.Yes:
                                 // show the sim setup panels if they are closed
-                                SimConfigToolWindow.Activate();
+                                ProtocolToolWindow.Activate();
                                 // switch to the panel that has the name, give the name box the focus and change
                                 // its content to something indicating what the user should do
-                                SimConfigToolWindow.SelectSimSetupInGUISetExpName(nameTemplate);
+                                ProtocolToolWindow.SelectSimSetupInGUISetExpName(nameTemplate);
                                 return;
                             case MessageBoxResult.No:
                                 break;
@@ -2222,7 +2389,7 @@ namespace DaphneGui
                     }
                 }*/
 
-                if (tempFileContent == false && configurator.SerializeSimConfigToStringSkipDeco() == orig_content)
+                if (tempFileContent == false && sop.Protocol.SerializeToStringSkipDeco() == orig_content)
                 {
                     // initiating a run starts always at repetition 1
                     repetition = 1;
@@ -2239,9 +2406,9 @@ namespace DaphneGui
                     switch (result)
                     {
                         case MessageBoxResult.Yes:
-                            configurator.SerializeSimConfigToFile();
-                            orig_content = configurator.SerializeSimConfigToStringSkipDeco();
-                            orig_path = System.IO.Path.GetDirectoryName(scenario_path.LocalPath);
+                            sop.Protocol.SerializeToFile();
+                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                             // initiating a run starts always at repetition 1
                             repetition = 1;
                             lockSaveStartSim(true);
@@ -2266,7 +2433,7 @@ namespace DaphneGui
                 {
                     if(Properties.Settings.Default.skipDataBaseWrites == false)
                     {
-                        reporter.StartReporter(configurator.SimConfig);
+                        reporter.StartReporter(sop.Protocol);
                     }
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";
@@ -2327,14 +2494,14 @@ namespace DaphneGui
             //ItemsSource="{Binding Path=SelectedCellInfo.ciList}"
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
 
-            EntityRepository er = MainWindow.SC.SimConfig.entity_repository;
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
                 double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
+                cmi.Concentration = conc;  
                 // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
                 //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
@@ -2347,7 +2514,7 @@ namespace DaphneGui
                 double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc.ToString("#.000");
+                cmi.Concentration = conc; 
                 // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
                 //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
@@ -2356,15 +2523,15 @@ namespace DaphneGui
             }
 
             //need the ecm probe concentrations for this purpose
-            foreach (ConfigMolecularPopulation mp in MainWindow.SC.SimConfig.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
             {
-                string name = MainWindow.SC.SimConfig.entity_repository.molecules_dict[mp.molecule_guid_ref].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Value(selectedCell.SpatialState.X);
+                string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "ECM: " + name;
-                cmi.Concentration = conc.ToString("#.000");
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule_guid_ref].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Concentration = conc;
+                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
@@ -2439,11 +2606,12 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                prepareScenario();                 
+                prepareProtocol(ReadJson(""));                 
             }
         }
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
+        [DebuggerStepThrough]
         private void CommandBindingSave_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
@@ -2451,16 +2619,16 @@ namespace DaphneGui
 
         private void CommandBindingSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            FileInfo fi = new FileInfo(configurator.FileName);
+            FileInfo fi = new FileInfo(sop.Protocol.FileName);
 
-            if (fi.IsReadOnly == false)
+            if (fi.IsReadOnly == false || !fi.Exists)
             {
-                configurator.SerializeSimConfigToFile();
-                orig_content = configurator.SerializeSimConfigToStringSkipDeco();
+                sop.Protocol.SerializeToFile();
+                orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
             else
             {
-                string messageBoxText = "The file is write protected: " + configurator.FileName;
+                string messageBoxText = "The file is write protected: " + sop.Protocol.FileName;
                 string caption = "File write protected";
                 MessageBoxButton button = MessageBoxButton.OK;
                 MessageBoxImage icon = MessageBoxImage.Warning;
@@ -2508,6 +2676,10 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
+
+            // remember the changes counter
+            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
+
             // save the preferences
             Properties.Settings.Default.Save();
 
@@ -2561,18 +2733,18 @@ namespace DaphneGui
             }
 
             setScenarioPaths(filename);
-            prepareScenario();            
+            prepareProtocol(ReadJson(""));            
         }
 
-        private void prepareScenario()
+        private void prepareProtocol(Protocol protocol)
         {
             // show the inital state
-            lockAndResetSim(true, "");
+            lockAndResetSim(true, protocol);
             if (loadSuccess == false)
             {
                 return;
             }
-            SimConfigToolWindow.IsEnabled = true;
+            ProtocolToolWindow.IsEnabled = true;
             saveScenario.IsEnabled = true;
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();

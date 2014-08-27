@@ -26,15 +26,15 @@ namespace DaphneGui
         public AddGeneToCell(ConfigCell cell)
         {
             InitializeComponent();
-            er = MainWindow.SC.SimConfig.entity_repository;
-            //SimConfig = sc;
+            er = MainWindow.SOP.Protocol.entity_repository;
+            //Protocol = sc;
             SelectedCell = cell;
             DataContext = this;
 
             GeneComboBox.Items.Clear();
             foreach (ConfigGene g in er.genes)
             {
-                if (!SelectedCell.genes_guid_ref.Contains(g.gene_guid))
+                if (!SelectedCell.genes_guid_ref.Contains(g.entity_guid))
                 {
                     GeneComboBox.Items.Add(g);
                 }

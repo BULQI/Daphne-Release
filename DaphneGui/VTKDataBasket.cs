@@ -157,6 +157,16 @@ namespace DaphneGui
         }
     }
 
+    public class MolpopTypeExplicitController : MolPopTypeController
+    {
+        public double max;
+        public MolpopTypeExplicitController(double max_conc)
+        {
+            type = MolPopDistributionType.Explicit;
+            max = max_conc;
+        }
+    }
+
     ///// <summary>
     ///// custom distribution molpop
     ///// </summary>
@@ -284,12 +294,7 @@ namespace DaphneGui
         /// <param name="region">pointer to the region controlling this gradient, if any</param>
         public void addGradient3D(ConfigMolecularPopulation molpop, RegionControl region)
         {
-            if (!molpop.mpInfo.mp_render_on)
-            {
-                return;
-            }
-
-            if (molpopTypeControllers.ContainsKey(molpop.mpInfo.mp_guid) == true)
+            if (molpopTypeControllers.ContainsKey(molpop.molpop_guid) == true)
             {
                 MessageBox.Show("Duplicate molpop guid! Aborting insertion.");
                 return;
@@ -298,43 +303,49 @@ namespace DaphneGui
             MolPopTypeController molpopControl;
 
             // check here for linear, Gaussian, homogeneous...
-            if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+            if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
-                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mpInfo.mp_distribution).peak_concentration,
-                                                                 ((MolPopGaussian)molpop.mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref);
+                molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
+                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
             }
-            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                double x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
-                switch (((MolPopLinear)(molpop.mpInfo.mp_distribution)).dim)
+                double x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
+                switch (((MolPopLinear)(molpop.mp_distribution)).dim)
                 {
                     case 0:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_x;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
                         break;
                     case 1:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_y;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_y;
                         break;
                     case 2:
-                        x2 = MainWindow.SC.SimConfig.scenario.environment.extent_z;
+                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_z;
                         break;
                     default:
                         break;
                 }
 
-                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[0].concVal,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).boundaryCondition[1].concVal,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).x1,
+                molpopControl = new MolpopTypeLinearController(((MolPopLinear)molpop.mp_distribution).boundaryCondition[0].concVal,
+                                                               ((MolPopLinear)molpop.mp_distribution).boundaryCondition[1].concVal,
+                                                               ((MolPopLinear)molpop.mp_distribution).x1,
                                                                x2,
-                                                               ((MolPopLinear)molpop.mpInfo.mp_distribution).dim);
+                                                               ((MolPopLinear)molpop.mp_distribution).dim);
 
             }
-            else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
             {
-                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mpInfo.mp_distribution).concentration);
+                molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mp_distribution).concentration);
             }
-            //else if (molpop.mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+            {
+                MolPopExplicit mpc = (MolPopExplicit)molpop.mp_distribution;
+                double max = mpc.conc.Max();
+                molpopControl = new MolpopTypeExplicitController(max);
+            }
+            //else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
             //{
-            //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mpInfo.mp_distribution).custom_gradient_file_uri.LocalPath);
+            //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mp_distribution).custom_gradient_file_uri.LocalPath);
             //    //if (chemokine.populateSolfacCustom(molpop, ref molpopControl) == false)
             //    //{
             //    //    // there was a problem with creating the custom chemokine, do not proceed with inserting the molpop controller
@@ -354,18 +365,18 @@ namespace DaphneGui
             }
 
             // set the remaining molpop controller fields
-            molpopControl.RenderGradient = molpop.mpInfo.mp_render_on;
+            molpopControl.RenderGradient = molpop.mp_render_on;
             // assign color and weight
-            molpopControl.Color[0] = molpop.mpInfo.mp_color.R;
-            molpopControl.Color[1] = molpop.mpInfo.mp_color.G;
-            molpopControl.Color[2] = molpop.mpInfo.mp_color.B;
+            molpopControl.Color[0] = molpop.mp_color.R;
+            molpopControl.Color[1] = molpop.mp_color.G;
+            molpopControl.Color[2] = molpop.mp_color.B;
             // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = molpop.mpInfo.mp_color.A;
-            molpopControl.BlendingWeight = molpop.mpInfo.mp_render_blending_weight;
-            molpopControl.TypeGUID = molpop.molecule_guid_ref;
+            molpopControl.Color[3] = molpop.mp_color.A;
+            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
+            molpopControl.TypeGUID = molpop.molecule.entity_guid;
 
             // add the controller to the dictionary
-            molpopTypeControllers.Add(molpop.mpInfo.mp_guid, molpopControl);
+            molpopTypeControllers.Add(molpop.molpop_guid, molpopControl);
         }
 
         /// <summary>
@@ -397,7 +408,7 @@ namespace DaphneGui
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Linear)
                 {
-                    div = Math.Max(((MolpopTypeLinearController)kvp.Value).c1,((MolpopTypeLinearController)kvp.Value).c2);
+                    div = ((MolpopTypeLinearController)kvp.Value).c2;
                 }
                 else if (kvp.Value.Type == MolPopDistributionType.Gaussian)
                 {
@@ -407,6 +418,10 @@ namespace DaphneGui
                 //{
                 //    div = ((MolpopTypeCustomController)kvp.Value).max;
                 //}
+                else if (kvp.Value.Type == MolPopDistributionType.Explicit)
+                {
+                    div = ((MolpopTypeExplicitController)kvp.Value).max;
+                }
 
                 if (div == 0.0)
                 {
@@ -631,8 +646,10 @@ namespace DaphneGui
         private vtkIntArray cellID, cellSet, cellGeneration;
 #if ALL_DATA
         private Dictionary<string, vtkDoubleArray> cellReceptorArrays;
-#endif
         private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable, bivariateColorTable;
+#else
+        private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable;
+#endif
 
         // colormap
         private Dictionary<int, int> colorMap;
@@ -705,7 +722,7 @@ namespace DaphneGui
                 cv = ctf.GetColor(vv);
                 cellGenericColorTable.SetTableValue(jj, cv[0], cv[1], cv[2], 1.0f);
             }
-
+#if ALL_DATA
             // Red-Cyan 4 x 4 bivariate colormap
             List<uint[]> bvColors = new List<uint[]>();
             bvColors.Add(new uint[3] { 220, 220, 220 });
@@ -738,6 +755,7 @@ namespace DaphneGui
             // Range is 0-4, and position is calculated as (i + 4*j) with i,j in range 0-1
             bivariateColorTable.SetRange(0, 4);
             bivariateColorTable.Build();
+#endif
 
 #if WRITE_VTK_DATA
             writer = vtkPolyDataWriter.New();
@@ -767,7 +785,7 @@ namespace DaphneGui
         {
             get { return cellGenericColorTable; }
         }
-
+#if ALL_DATA
         /// <summary>
         /// accessor for the bivariate color table
         /// </summary>
@@ -775,7 +793,7 @@ namespace DaphneGui
         {
             get { return bivariateColorTable; }
         }
-
+#endif
         /// <summary>
         /// Retrieve the color map
         /// This is a dictionary mapping the cell set ID to the index in the CellSetColorTable
@@ -1119,7 +1137,7 @@ namespace DaphneGui
 #endif
         }
 
-        public void SetupVTKData(SimConfiguration sc)
+        public void SetupVTKData(Protocol protocol)
         {
             double useThisZValue,
                    gridStep = Cell.defaultRadius * 2;
@@ -1130,29 +1148,29 @@ namespace DaphneGui
             MainWindow.Basket.ResetTrackData();
 #endif
 
-            if (sc.scenario.environment.extent_z < gridStep)
+            if (protocol.scenario.environment.extent_z < gridStep)
             {
                 useThisZValue = gridStep;
             }
             else
             {
-                useThisZValue = sc.scenario.environment.extent_z;
+                useThisZValue = protocol.scenario.environment.extent_z;
             }
-            environmentDataController.setupBox(sc.scenario.environment.extent_x, sc.scenario.environment.extent_y, useThisZValue);
+            environmentDataController.setupBox(protocol.scenario.environment.extent_x, protocol.scenario.environment.extent_y, useThisZValue);
 
-            cellDataController.CreateCellColorTable(sc.scenario.cellpopulations.Count);
-            for (int i = 0; i < sc.scenario.cellpopulations.Count; i++)
+            cellDataController.CreateCellColorTable(protocol.scenario.cellpopulations.Count);
+            for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
             {
                 // add the cell set's color to the color table
                 cellDataController.AddCellSetColor(i,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScR,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScG,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScB,
-                                               sc.scenario.cellpopulations[i].cellpopulation_color.ScA);
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScR,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScG,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScB,
+                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScA);
                 // create the color map entry
-                if (cellDataController.ColorMap.ContainsKey(sc.scenario.cellpopulations[i].cellpopulation_id) == false)
+                if (cellDataController.ColorMap.ContainsKey(protocol.scenario.cellpopulations[i].cellpopulation_id) == false)
                 {
-                    cellDataController.ColorMap.Add(sc.scenario.cellpopulations[i].cellpopulation_id, i);
+                    cellDataController.ColorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, i);
                 }
             }
             CreateAllocatedCells();
@@ -1164,20 +1182,20 @@ namespace DaphneGui
             // set up the 3d image grid for the ecs
             ecsDataController.setupGradient3D();
 
-            for (int i = 0; i < sc.scenario.environment.ecs.molpops.Count; i++)
+            for (int i = 0; i < protocol.scenario.environment.ecs.molpops.Count; i++)
             {
                 RegionControl region = null;
 
-                if (sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (protocol.scenario.environment.ecs.molpops[i].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    region = regions[((MolPopGaussian)sc.scenario.environment.ecs.molpops[i].mpInfo.mp_distribution).gaussgrad_gauss_spec_guid_ref];
+                    region = regions[((MolPopGaussian)protocol.scenario.environment.ecs.molpops[i].mp_distribution).gaussgrad_gauss_spec_guid_ref];
                 }
 
                 // 3D gradient
-                ecsDataController.addGradient3D(sc.scenario.environment.ecs.molpops[i], region);
+                ecsDataController.addGradient3D(protocol.scenario.environment.ecs.molpops[i], region);
 
                 // finish 3d gradient-related graphics after processing the last molpop
-                if (i == sc.scenario.environment.ecs.molpops.Count - 1)
+                if (i == protocol.scenario.environment.ecs.molpops.Count - 1)
                 {
                     // update all gradients; do not cause a redraw
                     ecsDataController.updateGradients3D(true, false);
@@ -1224,16 +1242,16 @@ namespace DaphneGui
         {
             string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[box_guid];
 
             RegionControl rc = new RegionControl(RegionShape.Ellipsoid);
 
             // box transform
             rc.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
             // outer bounds of environment (not really needed for gauss_spec)
-            rc.SetExteriorBounds(new double[] { 0, MainWindow.SC.SimConfig.scenario.environment.extent_x,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_y,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_z });
+            rc.SetExteriorBounds(new double[] { 0, MainWindow.SOP.Protocol.scenario.environment.extent_x,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_y,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_z });
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
@@ -1244,16 +1262,16 @@ namespace DaphneGui
         {
             string box_guid = rr.region_box_spec_guid_ref;
             // Find the box spec that goes with this region
-            BoxSpecification bs = MainWindow.SC.SimConfig.box_guid_box_dict[box_guid];
+            BoxSpecification bs = MainWindow.SOP.Protocol.box_guid_box_dict[box_guid];
 
             RegionControl rc = new RegionControl(rr.region_type);
 
             // box transform
             rc.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
             // outer bounds of environment
-            rc.SetExteriorBounds(new double[] { 0, MainWindow.SC.SimConfig.scenario.environment.extent_x,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_y,
-                                                0, MainWindow.SC.SimConfig.scenario.environment.extent_z });
+            rc.SetExteriorBounds(new double[] { 0, MainWindow.SOP.Protocol.scenario.environment.extent_x,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_y,
+                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_z });
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
@@ -1263,13 +1281,13 @@ namespace DaphneGui
         public void CreateRegionControls()
         {
             // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SC.SimConfig.entity_repository.gaussian_specifications)
+            foreach (GaussianSpecification gs in MainWindow.SOP.Protocol.scenario.gaussian_specifications)
             {
                 AddGaussSpecRegionControl(gs);
             }
 #if ALL_VTK
             // Regions
-            foreach (Region rr in MainWindow.SC.SimConfig.scenario.regions)
+            foreach (Region rr in MainWindow.SOP.Protocol.scenario.regions)
             {
                 AddRegionRegionControl(rr);
             }
@@ -1293,7 +1311,7 @@ namespace DaphneGui
                 {
 #if ALL_VTK
                     // NOTE: For now take the receptor info from an example cell. Should probably use the Chemokine
-                    // or, like in the chemokine construction, go through the simconfig molpops to see which solfac types are
+                    // or, like in the chemokine construction, go through the Protocol molpops to see which solfac types are
                     // actually used, and then get receptor guid/name pairs from molpop types...
                     MotileCell example_cell = null;
                     int jj = 0;
@@ -1315,7 +1333,7 @@ namespace DaphneGui
                     foreach (KeyValuePair<string, ChemokineReceptor> kvp in example_cell.ChemokineReceptors)
                     {
                         string receptor_name = "xx";
-                        foreach (SolfacType st in MainWindow.SC.SimConfig.entity_repository.solfac_types)
+                        foreach (SolfacType st in MainWindow.SOP.Protocol.entity_repository.solfac_types)
                         {
                             if (st.solfac_type_guid == kvp.Key)
                             {
@@ -1334,7 +1352,7 @@ namespace DaphneGui
                         jj += 1;
                     }
                     // Loop through cell types, and then through receptor params for each type to find max receptor conc over all cell types
-                    foreach (CellSubset ct in MainWindow.SC.SimConfig.entity_repository.cell_subsets)
+                    foreach (CellSubset ct in MainWindow.SOP.Protocol.entity_repository.cell_subsets)
                     {
                         //skg 6/1/12
                         if (ct.cell_subset_type.baseCellType == CellBaseTypeLabel.BCell)

@@ -509,7 +509,7 @@ namespace DaphneGui
             // if we reach this point, i.e. no test was triggered, we know that the boxes are overlapping (not separated)
             return false;
         }
-
+#if BOX_FEASIBILITY_TEST
         /// <summary>
         /// test the feasibility for box-box using the OBB test for testing 'inside'
         /// </summary>
@@ -795,6 +795,7 @@ namespace DaphneGui
                 return false;
             }
         }
+#endif
 #if ALL_REGIONS
         /// <summary>
         /// generate a random point inside, outside, or on the surface of the region in local coordinates

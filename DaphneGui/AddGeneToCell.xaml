@@ -7,7 +7,7 @@
         <Grid.Resources>
             <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
             <CollectionViewSource x:Key="AllGenesListView"  
-                                  Source="{Binding Path=SimConfig.entity_repository.genes}"/>
+                                  Source="{Binding Path=Protocol.entity_repository.genes}"/>
         </Grid.Resources>
         <Label Content="Select a gene:" Height="28" HorizontalAlignment="Left" Margin="12,19,0,0" Name="label1" VerticalAlignment="Top" />
         <ComboBox Name="GeneComboBox" Margin="120,19,0,0" Height="24" VerticalAlignment="Top" Width="200"    />

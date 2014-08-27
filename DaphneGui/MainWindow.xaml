@@ -10,7 +10,7 @@
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Daphne"
-        Width="900" Height="770" Closing="Window_Closing"
+        Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         >
 
@@ -92,7 +92,12 @@
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
                     <Separator />
-                    <MenuItem Header="Export Model in SBML" Name="exportSBML" Click="exportSBML_Click" />
+                    <MenuItem Header="Export in SBML">
+                        <MenuItem Header="Simulation Model" Name="ExportSBML" Click="ExportSBML_Click" />
+                        <MenuItem Header="Reaction Complex" Name="ExportComplexSBML" Click="ExportReactionComplexSBML_Click" />
+                    </MenuItem>
+                    <MenuItem Header="Import from SBML" Name="ImportSBML" Click="ImportSBML_Click" />
+
                     <!--><Separator />
                     <MenuItem Header="Load 2P text file into database..." Name="parse2Ptext" Click="parse2Ptext_Click" />-->
                     <Separator />
@@ -119,6 +124,11 @@
                         <Separator />
                         <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
                     </MenuItem>
+                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
+                        <MenuItem Header="Cells..." Name="cellColorsMenu" />
+                        <MenuItem Header="Molecules..." Name="molColorsMenu" />
+                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
+                    </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
                         <MenuItem Header="Skip Inter Cell Distance" Name="skipInterCell" IsCheckable="True" IsChecked="False"        />
@@ -128,13 +138,17 @@
                     </MenuItem>-->
                 </MenuItem>
 
-                <MenuItem Header="_Activate">
-                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Activate Simulation Setup"  
-							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=SimConfigToolWindow}" />
-                    <MenuItem x:Name="menu_ActivateVTKView" Header="Activate 3D View"  
+                <MenuItem Header="_Window">
+                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Daphne Protocol"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ProtocolToolWindow}" />
+                    <MenuItem x:Name="menu_ActivateVTKView" Header="3D View"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ActivateLPFitting" Header="Activate LP Fitting Tool"  
+                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
+                    <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
+                    <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
                     
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
@@ -323,23 +337,35 @@
                           CanDocumentWindowsRaft="True"
                           AreDocumentWindowsDestroyedOnClose="False"
                           UseHostedAutoHidePopups="False"
+                          AutomationProperties.AutomationId="DaphneDockSite"
                           >            
 
-            <docking:SplitContainer x:Name="SimConfigSplitContainer">
+            <docking:SplitContainer x:Name="ProtocolSplitContainer">
+                
                 <!-- Sim Config Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer">
-                    <local:SimConfigToolWindow x:Name="SimConfigToolWindow" Title="Daphne Simulation Configuration" />
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
+                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Protocol" />
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
                 <docking:SplitContainer Orientation="Vertical">
 
+                    <docking:SplitContainer.Resources>
+                        <DataTemplate x:Key="cellTabTemplate">
+                            <Grid>
+                                <!--<Border BorderThickness="1" CornerRadius="4,4,4,4" BorderBrush="Lime"></Border>-->
+                                <!--<Image Source="Images/MyGreenCells.bmp" />-->
+                                <TextBlock Text="Cells Library" />
+                            </Grid>
+                        </DataTemplate>
+                    </docking:SplitContainer.Resources>
+                    
                     <!-- VTK Windows Forms Host panel -->
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
-                            <docking:TabbedMdiContainer>
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" >
+                            <docking:TabbedMdiContainer Background="LightGray" >
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
@@ -444,17 +470,17 @@
                                                 <ToggleButton x:Name="ScalarBarMarkerButton" 
                                                         IsChecked="{Binding ScalarBarMarker_IsChecked}" 
                                                         ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="OrientationMarkerButton" 
                                                         IsChecked="{Binding OrientationMarker_IsChecked}" 
                                                         ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="ResetCameraButton" 
                                                         IsChecked="{Binding ResetCamera_IsChecked}" 
                                                         ToolTip="Reset camera" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarImageStyle}" />
+                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
                                                 </ToggleButton>
                                                 <Separator ToolBar.OverflowMode="Never"/>
                                                 <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>
@@ -466,13 +492,15 @@
                                     </DockPanel>
                                 </docking:DocumentWindow>
 
-                                <!-- skg This window contains the reaction complex graph -->
-                                <!--<local:ChartViewDocumentWindow x:Name="ChartViewDocWindow" Title="Run Statistics Results" >
-                                </local:ChartViewDocumentWindow>-->
-
                                 <!-- This is the window that contains the reaction complex graph-->
-                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" >
-                                </work:ChartViewToolWindow>
+                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
+
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
+                                    
+                                </local:CellStudioToolWindow>
+                                <!-- "#FFE7F5DC" -->
 
                             </docking:TabbedMdiContainer>
 
@@ -727,6 +755,7 @@
                     </docking:ToolWindowContainer>
 
                 </docking:SplitContainer>
+                
             </docking:SplitContainer>
         </docking:DockSite>
     </DockPanel>

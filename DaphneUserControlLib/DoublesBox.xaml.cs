@@ -354,6 +354,7 @@ namespace DaphneUserControlLib
         {
             InitializeComponent();
             Format = "-";
+            FNumber = "0.000";
             SetMinMax();
         }
 

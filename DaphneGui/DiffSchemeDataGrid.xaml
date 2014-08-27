@@ -1,0 +1,252 @@
+﻿<UserControl x:Class="DaphneGui.DiffSchemeDataGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
+             xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+             xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <!-- this handles the two datagrids for a diffscheme -->
+    <!-- the context of this control will be a differentiation/division scheme-->
+
+    <UserControl.Resources>
+        <local:DataGridRowColumnIndexEqualValueConverter x:Key="DataGridRowColumnIndexEqualValueConverter" />
+        
+        <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter" />
+
+        <Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="SizeNS"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border Padding="{TemplateBinding Padding}"
+                                        Background="{TemplateBinding Background}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="CustomDataGridRowHeader" TargetType="{x:Type DataGridRowHeader}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+                        <Grid Width="Auto">
+                            <Themes:DataGridHeaderBorder IsSelected="{TemplateBinding IsRowSelected}"
+                                     IsHovered ="{TemplateBinding IsMouseOver}"
+                                     IsPressed="{TemplateBinding IsPressed}"
+                                     Background="{TemplateBinding Background}"                                                                     
+                                     BorderBrush="Transparent"                                                      
+                                     BorderThickness="0" 
+                                     Padding ="{TemplateBinding Padding}"
+                                     Orientation="Horizontal"
+                                     SeparatorVisibility="{TemplateBinding SeparatorVisibility}"
+                                     SeparatorBrush="{TemplateBinding SeparatorBrush}">
+                                <DockPanel Margin="1">
+                                    <Control SnapsToDevicePixels="false"
+                                                    Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=(Validation.HasError), Converter={StaticResource bool2VisibilityConverter}}"
+                                                    Template="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=ValidationErrorTemplate}" />
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Themes:DataGridHeaderBorder>
+                            <Thumb x:Name="PART_TopHeaderGripper"
+                                           VerticalAlignment="Top"
+                                           Style="{StaticResource RowHeaderGripperStyle}"/>
+                            <Thumb x:Name="PART_BottomHeaderGripper"
+                                           VerticalAlignment="Bottom"
+                                           Style="{StaticResource RowHeaderGripperStyle}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
+    <StackPanel Orientation="Vertical" x:Name="spDivRegPanel">
+
+        <!--Cell Name-->
+        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4">
+            <TextBlock Text="Name"  Width="50" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,0,0,0" />
+            <TextBox x:Name="txtDivName" Width="200" Height="24"  Margin="0,0,0,0" IsEnabled="True"
+                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+       
+        <!-- starting satate -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" >
+            <TextBlock Text="Scheme starting state" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="180" />
+            <TextBox Text="{Binding Path=Driver.CurrentState, Mode=TwoWay, FallbackValue=0, ValidatesOnExceptions=True}" Margin="0,2" Width="120" />
+        </StackPanel>
+        
+        <!-- This datagrid is for Division Epigenetic Map and is the best one so far -->
+        <TextBlock Text="Epigenetic Map" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+
+        <DataGrid x:Name="EpigeneticMapGridDiv" 
+            local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"               
+            local:DiffSchemeDataGrid.DiffSchemeTarget ="EpigeneticMap" 
+            MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
+            AutoGenerateColumns="False"
+            IsReadOnly="False"
+            CanUserAddRows="False"                                                                   
+            CanUserReorderColumns="False"                                                            
+            CanUserSortColumns="False"                                                            
+            AlternatingRowBackground="Beige"                                                            
+            SelectionMode="Extended"                  
+            SelectionUnit="FullRow"
+            VirtualizingStackPanel.VirtualizationMode="Standard"
+            VirtualizingStackPanel.IsVirtualizing="False"            
+            >
+            
+            <DataGrid.ContextMenu>
+                <ContextMenu >
+                    <MenuItem Header="Delete Selected Genes" Name="menuDeleteDivGenes" Click="ContextMenuDeleteGenes_Click" 
+                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+                    <MenuItem Header="Delete Selected States" Name="menuDeleteDivStates" Click="ContextMenuDeleteStates_Click"
+                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+                    <MenuItem Header="Add a State" Name="menuAddDivState" Click="ContextMenuAddState_Click"
+                                              CommandTarget="{Binding Path=PlacementTarget, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <DataGrid.Resources>
+                <Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                                                                BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <!-- This trigger highlights a column if user clicks on column header -->
+                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                            <Setter Property="Background" Value="LightGray"/>
+                        </Trigger>
+
+                        <!-- This trigger highlights a grid cell if user hovers over it -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <!--<Setter Property="local:DataGridBehavior.HighlightColumn" Value="True"/>-->
+                            <Setter Property="Background" Value="LightGray"/>
+                        </Trigger>
+
+                        <!-- This trigger highlights a grid cell if user clicks on it -->
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter Property="Background" Value="LightBlue" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="BorderBrush" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="{x:Type DataGridColumnHeader}">
+                    <Style.Triggers>
+                        <Trigger Property="local:DataGridBehavior.IsCellHighlighted" Value="True">
+                            <Setter Property="Background"  Value="LightGray"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background"  Value="LightGray"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource CustomDataGridRowHeader}">
+                    <Setter Property="BorderBrush" Value="LightGray"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsRowSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+            <DataGrid.RowHeaderTemplate>
+                <DataTemplate>
+                    <TextBox Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Width="Auto" />
+                </DataTemplate>
+            </DataGrid.RowHeaderTemplate>
+        </DataGrid>
+
+        <!-- This is the Division Regulators datagrid -->
+        <TextBlock Text="Division Regulators" Grid.Column="0" Grid.Row="2" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold"  Margin="0,10,0,0" />
+
+        <DataGrid x:Name="DivRegGrid" 
+                local:DiffSchemeDataGrid.DiffSchemeSource ="{Binding}"
+                local:DiffSchemeDataGrid.DiffSchemeTarget ="Regulator"
+                MinHeight="150" MaxHeight="500" MinWidth="360" Margin="0,10,0,0"
+                AutoGenerateColumns="False"
+                IsReadOnly="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                AlternatingRowBackground="Beige"
+                SelectionMode="Single"
+                SelectionUnit="Cell"
+                PresentationTraceSources.TraceLevel="High"
+                HorizontalGridLinesBrush="DarkBlue"                      
+                >
+            <!--SelectedCellsChanged="DivRegGrid_SelectedCellsChanged"-->
+            <DataGrid.Resources>
+                <Style x:Name="DivRegComboStyle" TargetType="ComboBox">
+                    <Setter Property="IsEnabled" Value="True" />
+                    <Setter Property="Visibility" Value="Visible" />
+                </Style>
+
+            </DataGrid.Resources>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="{x:Type DataGridCell}">
+                    <Style.Triggers>
+                        <DataTrigger Value="True">
+                            <DataTrigger.Binding>
+                                <MultiBinding Converter="{StaticResource DataGridRowColumnIndexEqualValueConverter}">
+                                    <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType ={x:Type DataGridRow}}"/>
+                                    <Binding RelativeSource="{RelativeSource self}" Path="Column" />
+                                </MultiBinding>
+                            </DataTrigger.Binding>
+                            <Setter Property="IsEnabled" Value="False"/>
+                            <Setter Property="Background" Value="LightGray" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+            </DataGrid.CellStyle>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="{x:Type DataGridRowHeader}" BasedOn="{StaticResource CustomDataGridRowHeader}">
+                    <Setter Property="BorderBrush" Value="LightGray"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsRowSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+
+            <DataGrid.RowHeaderTemplate>
+                <DataTemplate>
+                    <TextBox Text="{Binding Content}" MinWidth="100" Width="Auto" IsReadOnly="True" />
+                </DataTemplate>
+            </DataGrid.RowHeaderTemplate>
+        </DataGrid>
+    </StackPanel>
+
+</UserControl>

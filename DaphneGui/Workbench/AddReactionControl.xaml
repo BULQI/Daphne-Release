@@ -74,21 +74,79 @@
                     </Style.Triggers>
                 </Style>
             </StackPanel.Resources>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Margin="0,0,4,0" Text="Reactants:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtReac" Width="320" />
-                <Button x:Name="btnRClear" Content="Clear" Width="40" Click="btnRClear_Click" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Margin="0,0,4,0" Text="Products:" VerticalAlignment="Center" Width="80" />
-                <TextBox x:Name="txtProd" Width="320"/>
-                <Button x:Name="btnPClear" Content="Clear" Width="40" Click="btnPClear_Click"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" >
-                <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
-                <!--<uc:DoublesBox x:Name="txtRate" Width="60" SliderEnabled="False" Number="2.0" />-->
-                <TextBox x:Name="txtRate" Width="60" Text="2.0">                    
-                </TextBox>
+            
+            <StackPanel>
+                <StackPanel.ToolTip>
+                    <StackPanel Width="200" >
+                        <TextBlock Text="Examples:"></TextBlock>
+                        <TextBlock Text="2sDif1 -> sDif2"></TextBlock>
+                        <TextBlock Text="ngIgH -> IgH + gIg"></TextBlock>
+                        <TextBlock Text="CXCR5 + CXCL13 -> CXCL13:CXCR5"></TextBlock>
+                    </StackPanel>
+                </StackPanel.ToolTip>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,0,4,0" Text="Reactants:" VerticalAlignment="Center" Width="80" />
+                    <!--<TextBox x:Name="txtReac" Width="320"  />-->
+
+                    <TextBox x:Name="txtReac" Width="320">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox"  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="CXCR5 + CXCL13" Foreground="Gray" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <!--<Trigger Property="IsKeyboardFocused" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>-->
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    
+                    <Button x:Name="btnRClear" Content="Clear" Width="40" Click="btnRClear_Click" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0,0,4,0" Text="Products:" VerticalAlignment="Center" Width="80" />
+                    <!--<TextBox x:Name="txtProd" Width="320" />-->
+                    <TextBox x:Name="txtProd" Width="320">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox"  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <Style.Resources>
+                                    <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Label Content="CXCL13:CXCR5" Foreground="Gray" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Style.Resources>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    <Button x:Name="btnPClear" Content="Clear" Width="40" Click="btnPClear_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Margin="0,0,4,0" Text="Rate Constant:" VerticalAlignment="Center" Width="80" />
+                    <!--<uc:DoublesBox x:Name="txtRate" Width="60" SliderEnabled="False" Number="1.0" />-->
+                    <TextBox x:Name="txtRate" Width="60" Text="1.0">                    
+                    </TextBox>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
 
@@ -112,7 +170,7 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="250" />
-                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
@@ -141,10 +199,11 @@
                     </ListBox>
                 </StackPanel>
 
-                <StackPanel Orientation="Vertical"  Margin="10,10,0,0" Grid.Column="1" Grid.Row="1" >
-                    <Button x:Name="btnReac" Content="Add to Reactants" Width="110" Click="btnReac_Click" />
-                    <Button x:Name="btnProd" Content="Add to Products" Width="110"  Click="btnProd_Click"/>
-                    <Button x:Name="btnUnselectAll" Content="Clear" Width="110" Click="btnUnselectAll_Click" />
+                <StackPanel Orientation="Vertical"   Margin="10,10,0,0"             Grid.Column="1" Grid.Row="1" >
+                    <Button x:Name="btnReac"         Content="Add to Reactants"     Width="140"     Click="btnReac_Click" />
+                    <Button x:Name="btnProd"         Content="Add to Products"      Width="140"     Click="btnProd_Click" />
+                    <Button x:Name="btnUnselectAll"  Content="Clear Selections"     Width="140"     Click="btnUnselectAll_Click" />
+                    <Button x:Name="btnCreateNewMol" Content="Create New Molecule"  Width="140"     Click="btnCreateNewMol_Click"  Margin="0,10"/>
                 </StackPanel>
             </Grid>
 
