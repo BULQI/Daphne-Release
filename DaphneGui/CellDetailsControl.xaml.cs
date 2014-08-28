@@ -1027,37 +1027,37 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
-            ConfigDiffScheme diff_scheme = null;
+            ConfigDiffScheme new_scheme = null;
             if (schemeName == "Division")
             {
-                diff_scheme = cell.div_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.div_scheme;
+                if (new_scheme == null)
                 {
-                    cell.div_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.div_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else if (schemeName == "Differentiation")
             {
-                diff_scheme = cell.diff_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.diff_scheme;
+                if (new_scheme == null)
                 {
-                    cell.diff_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.diff_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else return;
 
-            diff_scheme.AddState(stateName);
+            new_scheme.AddState(stateName);
 
             //refresh display
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
-                cell.div_scheme = diff_scheme;
+                cell.div_scheme = new_scheme;
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme = diff_scheme;
+                cell.diff_scheme = new_scheme;
             }
         }
 
