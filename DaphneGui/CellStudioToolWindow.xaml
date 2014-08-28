@@ -15,13 +15,13 @@
     <!--<TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top"  AutomationProperties.AutomationId="DaphneTabsControl">-->
 
     <docking:ToolWindow.Resources>
-            <CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
+            <!--<CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
                                   Filter="cytosolAvailableReactionsListView_Filter"/>
 
             <CollectionViewSource x:Key="membraneAvailableReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="membraneAvailableReactionsListView_Filter"/>
+                                  Filter="membraneAvailableReactionsListView_Filter"/>-->
 
             <CollectionViewSource x:Key="cellTransitionDeathDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"

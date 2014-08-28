@@ -243,24 +243,7 @@ namespace DaphneGui
 
         private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            return;
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
-            if (cvs == null || cvs.View == null)
-                return;
 
-            cvs.View.Refresh();
-
-            if (e.AddedItems.Count == 0) return;
-            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-            foreach (ConfigMolecule cm in cvs.View)
-            {
-                if (cm.Name == tmp.molecule.Name)
-                {
-                    cvs.View.MoveCurrentTo(cm);
-                    return;
-                }
-            }
         }
 
 
@@ -1210,7 +1193,7 @@ namespace DaphneGui
             //of configCell, it will has its own entity_guid - only the name stays the same ---
             if (cell_to_clone.entity_guid != curr_cell_type_guid)
             {
-                cp.Cell = cell_to_clone.Clone(true);
+                cp.Cell = cell_to_clone.Clone(false);
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)

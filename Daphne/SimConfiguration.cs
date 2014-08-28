@@ -3257,7 +3257,18 @@ namespace Daphne
     public class ConfigMolecularPopulation : EntityModelBase
     {
         public string molpop_guid { get; set; }
-        public ConfigMolecule molecule { get; set; }
+
+        private ConfigMolecule _molecule;
+        public ConfigMolecule molecule
+        {
+            get { return _molecule; }
+            set
+            {
+                _molecule = value;
+                OnPropertyChanged("molecule");
+            }
+        }
+
         private string _Name;
         public string Name
         {
@@ -3518,6 +3529,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
+                    mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
@@ -3535,6 +3547,7 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
+                    mp.PropertyChanged -= mp_PropertyChanged;
 
                     // remove from molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
@@ -3550,6 +3563,25 @@ namespace Daphne
 
             OnPropertyChanged("molpops");            
         }
+
+        /// <summary>
+        /// rebuild the molecules_dict that is used to screen reactions available to add
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void mp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "molecule") return;
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation mp in molpops)
+            {
+                if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                    {
+                        molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
+                    }
+            }
+        }
+
 
         /// <summary>
         /// get a reaction with a specified guid

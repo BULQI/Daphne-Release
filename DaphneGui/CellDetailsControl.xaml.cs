@@ -260,7 +260,7 @@ namespace DaphneGui
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBoundaryMoleculesListView"));
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
             //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
@@ -608,8 +608,11 @@ namespace DaphneGui
             //string new_mol_name = mol.Name;
             //if (curr_mol_guid != molpop.molecule.entity_guid)
             //    molpop.Name = new_mol_name;
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
 
-            CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -1025,37 +1028,37 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
-            ConfigDiffScheme diff_scheme = null;
+            ConfigDiffScheme new_scheme = null;
             if (schemeName == "Division")
             {
-                diff_scheme = cell.div_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.div_scheme;
+                if (new_scheme == null)
                 {
-                    cell.div_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.div_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else if (schemeName == "Differentiation")
             {
-                diff_scheme = cell.diff_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.diff_scheme;
+                if (new_scheme == null)
                 {
-                    cell.diff_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.diff_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else return;
 
-            diff_scheme.AddState(stateName);
+            new_scheme.AddState(stateName);
 
             //refresh display
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
-                cell.div_scheme = diff_scheme;
+                cell.div_scheme = new_scheme;
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme = diff_scheme;
+                cell.diff_scheme = new_scheme;
             }
         }
 
@@ -1273,6 +1276,19 @@ namespace DaphneGui
             }
 
             return foundChild;
+        }
+
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
+            cvs.View.Refresh();
         }
 
         private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
