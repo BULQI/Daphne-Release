@@ -32,7 +32,6 @@ namespace DaphneGui
 
         private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void AddLibCellButton_Click(object sender, RoutedEventArgs e)
@@ -412,6 +411,7 @@ namespace DaphneGui
             }
         }
 
+        /*
         private void membraneAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigReaction cr = e.Item as ConfigReaction;
@@ -523,6 +523,7 @@ namespace DaphneGui
 
             e.Accepted = bOK;
         }
+         */
 
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
         {

@@ -11,7 +11,9 @@
              xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600"
-             Loaded="UserControl_Loaded">
+             Loaded="UserControl_Loaded"
+             DataContextChanged="UserControl_DataContextChanged"
+             >
 
     <UserControl.Resources>
         <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
@@ -52,6 +54,39 @@
             <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
                 ConverterParameter={StaticResource moleculesListView}}" />
         </DataTemplate>
+
+
+        <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+
+                        <uc:DoublesBox      HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                        </uc:DoublesBox>
+
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
 
         <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
             <StackPanel Name="CellEditStackPanel" Orientation="Vertical">
