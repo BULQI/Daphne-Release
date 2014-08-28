@@ -503,12 +503,8 @@
                                 <!-- This is the window that contains the reaction complex graph-->
                                 <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
-
-                                <!--<local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="Blue"  TabBackground="LightBlue"/>-->
+                               
                                 <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
-
-                                <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow"  Title="Cells Library" ClipToBounds="True" TabBorderThickness="1"  TabForeground="BlueViolet"  TabBackground="#FFF7CCCC"/>-->
-                                <!--<local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="BlueViolet" TabBackground="#FFF7CCCC">-->
                                 <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     
                                 </local:CellStudioToolWindow>

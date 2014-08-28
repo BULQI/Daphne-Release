@@ -178,11 +178,6 @@ namespace Daphne
     public class Level
     {
         /// <summary>
-        /// enum for push status
-        /// </summary>
-        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
-
-        /// <summary>
         /// constructor
         /// </summary>
         public Level() : this("", "")
@@ -206,9 +201,10 @@ namespace Daphne
             entity_repository = new EntityRepository();
         }
 
-
-
-        
+        /// <summary>
+        /// enum for push status
+        /// </summary>
+        public enum PushStatus { PUSH_INVALID, PUSH_CREATE_ITEM, PUSH_NEWER_ITEM, PUSH_OLDER_ITEM };
 
         /// <summary>
         /// check for existence of and whether the entity to test is newer; this applies to the entities that are editable
@@ -341,7 +337,7 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    //entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
                 }
                 // update
                 else
@@ -654,13 +650,15 @@ namespace Daphne
                         }
                     }
                     // div
-                    if (cp.Cell.div_driver.entity_guid == e.entity_guid)
-                    {
-                        if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell.div_driver = e as ConfigTransitionDriver;
-                        }
-                    }
+
+                    throw (new NotImplementedException("need work here, sanjeev"));
+                    //if (cp.Cell.div_driver.entity_guid == e.entity_guid)
+                    //{
+                    //    if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
+                    //    {
+                    //        cp.Cell.div_driver = e as ConfigTransitionDriver;
+                    //    }
+                    //}
                 }
             }
             else if (e is ConfigDiffScheme)
@@ -1912,9 +1910,13 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
+            deathConstant = 1e-3;
+            deathOrder = 1;
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
+        public double deathConstant { get; set; }
+        public int deathOrder { get; set; }
     }
 
     public class EntityRepository 
@@ -2418,6 +2420,35 @@ namespace Daphne
     }
 
     public enum MoleculeLocation { Bulk = 0, Boundary }
+
+
+    [ValueConversion(typeof(object), typeof(bool))]
+    public class ObjectToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (parameter == null)
+            {
+                return value != null ? Visibility.Visible : Visibility.Hidden;
+            }
+            var option = parameter as string;
+            if (option == "Reverse")
+            {
+                return value == null ? Visibility.Visible : Visibility.Hidden;
+            }
+            else if (option == "Collapsed")
+            {
+                return value != null ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            return value != null ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value;
+        }
+    }
 
     public class DiffSchemeToBoolConverter : IValueConverter
     {
@@ -3039,7 +3070,10 @@ namespace Daphne
 
         public ConfigDiffScheme() : base()
         {
-            //genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+            genes = new ObservableCollection<string>();
+            Name = "New diff scheme";
+            Driver = new ConfigTransitionDriver();
+            activationRows = new ObservableCollection<ConfigActivationRow>();
         }
 
         private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -3308,7 +3342,12 @@ namespace Daphne
         }
 
         public string label { get; set; }        //label to color scheme
-                    
+
+
+        public ConfigMolecularPopulation()
+        {
+        }
+    
         public ConfigMolecularPopulation(ReportType rt)
         {
             Guid id = Guid.NewGuid();
@@ -4033,6 +4072,7 @@ namespace Daphne
             CellRadius = 5.0;
             TransductionConstant = 0.0;
             DragCoefficient = 1.0;
+            Sigma = 0.0;
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -4136,6 +4176,23 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// Parameter for stochastic force
+        /// </summary>
+        private double sigma;
+        public double Sigma
+        {
+            get
+            {
+                return sigma;
+            }
+            set
+            {
+                sigma = value;
+                OnPropertyChanged("Sigma");
+            }
+        }
+
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
         
@@ -4175,18 +4232,35 @@ namespace Daphne
             }
         }
 
-        private ConfigTransitionDriver _div_driver;
-        public ConfigTransitionDriver div_driver 
+
+        //private ConfigTransitionDriver _div_driver;
+        //public ConfigTransitionDriver div_driver 
+        //{
+        //    get
+        //    {
+        //        return _div_driver;
+        //    }
+
+        //    set
+        //    {
+        //        _div_driver = value;
+        //        OnPropertyChanged("div_driver");
+        //    }
+        //}
+
+
+        private ConfigDiffScheme _div_scheme;
+        public ConfigDiffScheme div_scheme
         {
             get
             {
-                return _div_driver;
+                return _div_scheme;
             }
 
             set
             {
-                _div_driver = value;
-                OnPropertyChanged("div_driver");
+                _div_scheme = value;
+                OnPropertyChanged("div_scheme");
             }
         }
 
@@ -4874,10 +4948,43 @@ namespace Daphne
         }
     }
 
+    public class ReportStates
+    {
+        bool division_state = false;
+        public bool Death { get; set; }
+        public bool Division 
+        {
+            get
+            {
+                return division_state == true;
+                //return division_state;
+            }
+            set
+            {
+                division_state = value;
+            }
+        }
+        public bool Differentiation { get; set; }
+    }
+
     public class CellPopulation : EntityModelBase
     {
         //public string cell_guid_ref { get; set; }
-        public ConfigCell Cell { get; set; }
+        private ConfigCell _Cell;
+
+        public ConfigCell Cell
+        {
+            get
+            {
+                return _Cell;
+            }
+            set
+            {
+                _Cell = value;
+                OnPropertyChanged("Cell");
+            }
+        }
+
         private string _Name;
         public string cellpopulation_name
         {
@@ -4901,6 +5008,19 @@ namespace Daphne
             set
             {
                 reportXVF = value;
+            }
+        }
+
+        private ReportStates report_states;
+        public ReportStates reportStates
+        {
+            get
+            {
+                return report_states;
+            }
+            set
+            {
+                report_states = value;
             }
         }
 
@@ -5018,6 +5138,7 @@ namespace Daphne
             cellpopulation_id = Protocol.SafeCellPopulationID++;
             // reporting
             reportXVF = new ReportXVF();
+            reportStates = new ReportStates();
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
@@ -5199,6 +5320,7 @@ namespace Daphne
 
         }
 
+
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
@@ -5212,6 +5334,48 @@ namespace Daphne
         }
 
     }
+
+    public class MolGuidToMolPopForDiffMultiValueConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (values == null || values.Length < 2)return null;
+            string driver_mol_guid = values[0] as string;
+            ConfigCompartment cc = values[1] as ConfigCompartment;
+            ConfigMolecularPopulation MyMolPop = null;
+
+            if (driver_mol_guid == "" || cc == null)
+                return MyMolPop;
+
+            foreach (ConfigMolecularPopulation molpop in cc.molpops)
+            {
+                if (molpop.molecule.entity_guid == driver_mol_guid)
+                {
+                    MyMolPop = molpop;
+                    break;
+                }
+            }
+
+            return MyMolPop;
+
+        }
+
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
+
+            if (molpop != null && molpop.molecule != null)
+            {
+                return new object[] { molpop.molecule.entity_guid };
+            }
+
+            return new object[] { "" };
+        }
+
+    }
+
 
     public class DriverElementToBoolConverter : IValueConverter
     {

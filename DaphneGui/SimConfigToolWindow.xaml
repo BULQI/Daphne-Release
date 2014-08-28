@@ -36,6 +36,14 @@
         <CollectionViewSource x:Key="newBulkMoleculesListView"  Source="{Binding Path=entity_repository.molecules}" />
         <CollectionViewSource x:Key="EcsBulkMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
+        
+        <CollectionViewSource x:Key="moleculesListView"  
+                                  Source="{Binding Path=entity_repository.molecules}"/>
+
+        <CompositeCollection x:Key="moleclueListColletion">
+            <daph:ConfigMolecule Name="None" entity_guid=""/>
+            <CollectionContainer Collection="{Binding Source={StaticResource moleculesListView}}" />
+        </CompositeCollection>
 
         <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
@@ -108,6 +116,8 @@
             <!--<daph:DiffSchemeToDiffNameConverter x:Key="DiffSchemeToDiffNameConv" />-->
             <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
             <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
+            <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+            <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -852,12 +862,13 @@
                                 <Style TargetType="{x:Type ComboBoxItem}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="None">
-                                                <Setter Property="Visibility" Value="Collapsed">
+                                            <Setter Property="Visibility" Value="Collapsed">
                                             </Setter>
-                                        </DataTrigger> 
-                                    </Style.Triggers> 
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ComboBox.ItemContainerStyle>
+
                         </ComboBox>
                 </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
@@ -1869,8 +1880,6 @@
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
                                     ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
-                                    SelectionChanged="EcsMolPopsListBox_SelectionChanged"
-                                     IsSynchronizedWithCurrentItem="True"
                                     SelectedIndex="-1"
                             />
 
@@ -1917,55 +1926,50 @@
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
                                                     <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
                                                     <editors:ColorEditBox x:Name="cellColorEditBox"
-                                                        CheckBoxVisibility="Collapsed"
-                                                        SpinnerVisibility="Collapsed"
-                                                        Width="140"
-                                                        HorizontalAlignment="Left" 
-                                                        Format="a r g b"
-                                                        Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
-                                                        Margin="4,2"
-                                                        ValueChanged="molPopColorEditBox_ValueChanged"
-                                                        />
+                                    CheckBoxVisibility="Collapsed"
+                                    SpinnerVisibility="Collapsed"
+                                    Width="140"
+                                    HorizontalAlignment="Left" 
+                                    Format="a r g b"
+                                    Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="4,2"
+                                    ValueChanged="molPopColorEditBox_ValueChanged"
+                                    />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
                                                     <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
                                                     <Slider x:Name="solfac_weight_slider"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Left"
-                                                        Width="50"
-                                                        Margin="4,0"
-                                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                                        Minimum="0" 
-                                                        Maximum="5" 
-                                                        Value="{Binding Path=mp_render_blending_weight}" 
-                                                        IsSnapToTickEnabled="True" 
-                                                        TickFrequency="0.1" 
-                                                    />
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                Width="50"
+                                    Margin="4,0"
+                                RenderTransform="1.0,0,0,0.5,0,7"
+                                Minimum="0" 
+                                Maximum="5" 
+                                Value="{Binding Path=mp_render_blending_weight}" 
+                                IsSnapToTickEnabled="True" 
+                                TickFrequency="0.1" 
+                                />
                                                     <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                                        VerticalAlignment="Center"
-                                                        TextAlignment="Right"
-                                                        Margin="5,0,0,0"
-                                                        MinWidth="20"
-                                                        />
+                                VerticalAlignment="Center"
+                                TextAlignment="Right"
+                                Margin="5,0,0,0"
+                                MinWidth="20"
+                                />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                     <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    
-                                                        DisplayMemberPath="Name"
-                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                        SelectedValuePath="entity_guid"
-                                                        SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
-                                                        GotFocus="ecm_molecule_combo_box_GotFocus"
-                                                        >
-                                                        <ComboBox.ItemsSource>
-                                                            <CompositeCollection>
-                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
-                                                                <daph:ConfigMolecule Name="New Molecule"/>
-                                                            </CompositeCollection>
-                                                        </ComboBox.ItemsSource>
+                                                    ItemsSource="{Binding Source={StaticResource EcsBulkMoleculesListView}}"
+                                                    DisplayMemberPath="Name"
+                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                    SelectedValuePath="entity_guid"
+                                                    SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
+                                                   
+                                                    >
+                                                        <!--GotFocus="ecm_molecule_combo_box_GotFocus"-->
 
                                                     </ComboBox>
                                                 </StackPanel>
@@ -1991,37 +1995,27 @@
                                         ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
                                         SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
                                         SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        
                                         MinWidth="120">
-
-                                                        <!--GotFocus="MolPopDistributionTypeComboBox_GotFocus"-->
-
-                                                        <ComboBox.Style>
-                                                            <Style TargetType="ComboBox">
-                                                                <Style.Triggers>
-                                                                    <MultiDataTrigger>
-                                                                        <MultiDataTrigger.Conditions>
-                                                                            <Condition Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="0" />
-                                                                            <Condition Binding="{Binding ElementName=MolPopDistributionTypeComboBox, Path=SelectedIndex}" Value="1"/>
-                                                                        </MultiDataTrigger.Conditions>
-                                                                        <Setter Property="ComboBox.SelectedIndex" Value="0"/>
-                                                                    </MultiDataTrigger>
-
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </ComboBox.Style>
-
                                                         <ComboBox.ItemContainerStyle>
                                                             <Style TargetType="{x:Type ComboBoxItem}">
                                                                 <Style.Triggers>
+                                                                    <!--"Explicit" can only set programmatically, not selectable by user!-->
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Explicit">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Linear">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
                                                                     <MultiDataTrigger>
                                                                         <MultiDataTrigger.Conditions>
-                                                                            <Condition Binding="{Binding ElementName=cbBoundFace,Path=Visibility}" Value="Hidden" />
-                                                                            <Condition Binding="{Binding ComboBoxItem.Content}" Value="Linear" />
+                                                                            <Condition Binding="{Binding ElementName=comboToroidal, Path=SelectedIndex}" Value="0" />
+                                                                            <Condition Binding="{Binding Content, RelativeSource={RelativeSource self}}" Value="Linear" />
                                                                         </MultiDataTrigger.Conditions>
-                                                                        <Setter Property="IsEnabled" Value="False" />
+                                                                        <Setter Property="IsEnabled" Value="True">
+                                                                        </Setter>
                                                                     </MultiDataTrigger>
-
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </ComboBox.ItemContainerStyle>
@@ -2030,26 +2024,42 @@
 
                                                 <StackPanel Grid.Column="0" Grid.Row="1">
                                                     <ContentControl Name="SolfacDistributionDetails"
-                                                    Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
-                                                    ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                                    Margin="6,2"/>
+                                        Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                        Margin="6,2"/>
                                                 </StackPanel>
 
                                             </Grid>
                                         </StackPanel>
                                     </StackPanel>
+
                                 </StackPanel>
 
                             </Expander>
+                            <!--<Expander ExpandDirection="Down"
+                                              IsExpanded="False"
+                                              Header="Molecule Properties"
+                                              x:Name="ecmMolPropExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              DataContext="{Binding ElementName=ecm_molecule_combo_box, Path=SelectedItem}"
+                                              >
+
+                                <StackPanel>
+                                    <ContentControl Name="ecmMolpopMolDetails"
+                                        Content="{Binding}" 
+                                        ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                        Margin="6"/>
+                            </Expander>-->
+
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Molecule Properties"
                                               x:Name="ecmMolPropExpander"
                                               Margin="0,0,0,0" 
                                               Canvas.ZIndex="1"
-                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}"
+                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem, Mode=TwoWay}"
                                               >
-
                                 <StackPanel>
                                     <ContentControl Name="ecmMolpopMolDetails"
                                             Content="{Binding Path=molecule}" 
@@ -2062,6 +2072,7 @@
                                 </StackPanel>
                                 
                             </Expander>
+                            
                         </StackPanel>
                     </Expander>
                     <!-- Reactions -->
@@ -2463,41 +2474,96 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
-                            <Expander  Padding="12"
+                            <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
                                 Header="Cell Properties"                                              
                                 x:Name="CellDetExpander"
-                                Margin="6,-15,0,0" 
-                                 >
-                                <Expander.Resources>
-                                    
-                                </Expander.Resources>
-
+                                Margin="6, 0,0,0" 
+                                >
+                               
                                 <local:DaphneStackPanel x:Name="EcmMolpopPanelCellMolPops" >
-                                    <StackPanel Orientation="Horizontal" Margin="10,0">
-                                        
-                                            <!--<ContentControl Name="CellPopCellTypeProperties" 
-                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}" 
-                                                    ContentTemplate="{StaticResource ResourceKey=cellDetailsTemplate}" 
-                                                    Margin="6,0"/>-->
-                                        <local:CellPropertiesControl DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
+                                    <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
+                                        <local:CellPropertiesControl Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                                            DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
 
                                     <StackPanel Margin="10,6">
                                         <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
-                                    </StackPanel>
-                                    
+                                    </StackPanel>                                    
                                 </local:DaphneStackPanel>
-                                
-                                
-
+ 
                             </Expander>
                             
                         </StackPanel>
                     </Expander>
 
-                   
+
+                    <!-- CELL DEATH PARAMETERS -->
+                    <Expander
+                            Padding="5" 
+                            ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Cell Death Parameters"                                              
+                                x:Name="CellDeathParamsExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                        <StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="probability of removal = (t/time consant)^(order parameter)" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                    TextAlignment="Left"
+                                                    Width="Auto"
+                                                    />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="time constant" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="2"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />
+                                <editors:DoubleEditBox x:Name="deathConstant_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="E2"
+                                                              StepValue="0.1"
+                                                              Width="100" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.deathConstant, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                                <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="order parameter" Margin="6,0"
+                                                    Grid.Column="0" Grid.Row="3"  
+                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    TextAlignment="Right"
+                                                    Width="120"
+                                                    />
+
+                                <editors:DoubleEditBox x:Name="deathOrder_readout" 
+                                                              CheckBoxVisibility="Collapsed" 
+                                                              SpinnerVisibility="Collapsed"
+                                                              HorizontalAlignment="Right"
+                                                              Format="F0"
+                                                              StepValue="0.1"
+                                                              Width="100" 
+                                                              CenterSlotHorizontalAlignment="Right"
+                                                              Value="{Binding Path=sim_params.deathOrder, UpdateSourceTrigger=PropertyChanged}"
+                                                              />
+                                <TextBlock Text="dimensionless integer" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                    </Expander>
 
 
                     <!-- Cell Interaction Parameters -->
@@ -2777,6 +2843,110 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>
+
+                    <!-- Cell reportStates -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Cell State"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <DataGrid x:Name="dgCellStates" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Path=scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}"     
+                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              CanUserSortColumns="False" RowHeaderWidth="0"
+                              VerticalContentAlignment="Center"
+                              CanUserAddRows="False"
+                              BorderThickness="1"
+                              BorderBrush="Black"
+                              EnableColumnVirtualization="False"
+                            >
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Resources>
+                                <Style x:Key="gridcellstyle1" TargetType="{x:Type DataGridCell}">
+                                    <Style.Triggers>
+                                        <Trigger Property="Tag" Value="{x:Null}">
+                                            <Setter Property="Background" Value="LightGray" />
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style x:Key="checkboxstyle1" TargetType="{x:Type CheckBox}">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridCell}}, Path=Tag}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Resources>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="cell population" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=cellpopulation_name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                <DataGridCheckBoxColumn Header="Death"                 
+                                    Binding="{Binding Path=reportStates.Death, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding Cell.death_driver}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                                
+                                <DataGridCheckBoxColumn Header="Division"                 
+                                    Binding="{Binding Path=reportStates.Divison, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding Cell.div_driver}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+
+                                <DataGridCheckBoxColumn Header="Differentiation" MinWidth="60" Width="Auto"                
+                                    Binding="{Binding Path=reportStates.Differentiation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    ElementStyle="{StaticResource checkboxstyle1}">
+                                    <DataGridCheckBoxColumn.CellStyle>
+                                        <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
+                                            <Setter Property="Tag" Value="{Binding Cell.diff_scheme}" />
+                                        </Style>
+                                    </DataGridCheckBoxColumn.CellStyle>
+                                </DataGridCheckBoxColumn>
+                                
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+
 
                     <!-- Molecules by Cell -->
                     <Expander ExpandDirection="Down" Padding="5"

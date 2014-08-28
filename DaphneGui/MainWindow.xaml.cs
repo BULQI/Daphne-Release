@@ -1922,6 +1922,7 @@ namespace DaphneGui
             // Set the data context for the main tab control config GUI
             this.ProtocolToolWindow.DataContext = sop.Protocol;
             this.CellStudioToolWindow.DataContext = sop.Protocol;
+            this.ComponentsToolWindow.DataContext = sop.Protocol;
 
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
@@ -2610,6 +2611,7 @@ namespace DaphneGui
         }
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
+        [DebuggerStepThrough]
         private void CommandBindingSave_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;

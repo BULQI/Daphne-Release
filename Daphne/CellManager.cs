@@ -8,8 +8,15 @@ namespace Daphne
 {
     public class CellManager : IDynamic
     {
+        Dictionary<int, double> deadDict = null;
+        int[] tempDeadKeys = null;
+        public double deathTimeConstant;
+        public int deathOrder;
+        public double deathFactor;
+
         public CellManager()
         {
+            deadDict = new Dictionary<int, double>();
         }
 
         public void Step(double dt)
@@ -20,16 +27,27 @@ namespace Daphne
             foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
             {
                 // cell takes a step
-                kvp.Value.Step(dt);
+                if (kvp.Value.Alive == true)
+                {
+                    kvp.Value.Step(dt);
+                }
 
                 // still alive and motile
-                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true)
+                if (kvp.Value.Alive == true && kvp.Value.IsMotile == true && kvp.Value.Exiting == false)
                 {
-                    // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
-                    // add the chemotactic force (accumulate it into the force variable)
-                    kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
+                    if (kvp.Value.IsChemotactic)
+                    {
+                        // For TinySphere cytosol, the force is determined by the gradient of the driver molecule at position (0,0,0).
+                        // add the chemotactic force (accumulate it into the force variable)
+                        kvp.Value.addForce(kvp.Value.Force(new double[3] { 0.0, 0.0, 0.0 }));
+                    }
                     // apply the boundary force
                     kvp.Value.BoundaryForce();
+                    // apply stochastic force
+                    if (kvp.Value.IsStochastic)
+                    {
+                        kvp.Value.addForce(kvp.Value.StochLocomotor.Force(dt));
+                    }
 
                     // A simple implementation of movement. For testing.
                     for (int i = 0; i < kvp.Value.SpatialState.X.Length; i++)
@@ -42,14 +60,23 @@ namespace Daphne
                     kvp.Value.EnforceBC();
                 }
 
-                // if the cell died (true death or it moved out of bounds) schedule its removal
-                if (kvp.Value.Alive == false)
+                // if the cell  moved out of bounds schedule its removal
+                if (kvp.Value.Exiting == true)
                 {
                     if (removalList == null)
                     {
                         removalList = new List<int>();
                     }
                     removalList.Add(kvp.Value.Cell_id);
+                }
+
+                // if the cell died schedule its (stochastic) removal
+                if (kvp.Value.Alive == false) 
+                {
+                    if (!deadDict.ContainsKey(kvp.Value.Cell_id))
+                    {
+                        deadDict.Add(kvp.Value.Cell_id, 0);
+                    }
                 }
                 
                 // cell division
@@ -63,6 +90,7 @@ namespace Daphne
                         daughterList = new List<Cell>();
                     }
                     daughterList.Add(c);
+
                 }
            }
 
@@ -72,6 +100,22 @@ namespace Daphne
                 foreach (int key in removalList)
                 {
                     Simulation.dataBasket.RemoveCell(key);
+                }
+            }
+
+            // process death list
+            if (deadDict != null)
+            {
+                tempDeadKeys = deadDict.Keys.ToArray<int>();
+                foreach(int key in tempDeadKeys)
+                {
+                    // increment elapsed time since death
+                    deadDict[key] = deadDict[key] + dt;
+                    if (Rand.TroschuetzCUD.NextDouble() < deathFactor * Math.Pow(deadDict[key] * deathTimeConstant, deathOrder) * dt)
+                    {
+                        Simulation.dataBasket.RemoveCell(key);
+                        deadDict.Remove(key);
+                    }
                 }
             }
 
