@@ -770,6 +770,11 @@ namespace Daphne
             // general parameters
             Pair.Phi1 = protocol.sim_params.phi1;
             Pair.Phi2 = protocol.sim_params.phi2;
+
+            cellManager.deathTimeConstant = 1.0 / protocol.sim_params.deathConstant;
+            cellManager.deathOrder = (int)protocol.sim_params.deathOrder;
+            cellManager.deathFactor = (cellManager.deathOrder + 1) * cellManager.deathTimeConstant;
+
         }
 
         public void LoadTransitionDriverElements(ConfigTransitionDriver config_td, Dictionary<string,MolecularPopulation> population, ITransitionDriver behavior)
