@@ -242,24 +242,7 @@ namespace DaphneGui
 
         private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            return;
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
-            if (cvs == null || cvs.View == null)
-                return;
 
-            cvs.View.Refresh();
-
-            if (e.AddedItems.Count == 0) return;
-            var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-            //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-            foreach (ConfigMolecule cm in cvs.View)
-            {
-                if (cm.Name == tmp.molecule.Name)
-                {
-                    cvs.View.MoveCurrentTo(cm);
-                    return;
-                }
-            }
         }
 
 

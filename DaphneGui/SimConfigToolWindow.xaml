@@ -2896,11 +2896,11 @@
                                 </DataGridCheckBoxColumn>
                                 
                                 <DataGridCheckBoxColumn Header="Division"                 
-                                    Binding="{Binding Path=reportStates.Divison, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    Binding="{Binding Path=reportStates.Division, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
                                         <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
-                                            <Setter Property="Tag" Value="{Binding Cell.div_driver}" />
+                                            <Setter Property="Tag" Value="{Binding Cell.div_scheme}" />
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
@@ -3016,7 +3016,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
-                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.membrane.molpops}"                         
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -3086,7 +3086,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                                                                                 
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.cytosol.molpops}"                                                                                 
                                         Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"

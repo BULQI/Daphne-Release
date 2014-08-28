@@ -259,7 +259,7 @@ namespace DaphneGui
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBoundaryMoleculesListView"));
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
             //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
@@ -607,8 +607,11 @@ namespace DaphneGui
             //string new_mol_name = mol.Name;
             //if (curr_mol_guid != molpop.molecule.entity_guid)
             //    molpop.Name = new_mol_name;
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
 
-            CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -1272,6 +1275,19 @@ namespace DaphneGui
             }
 
             return foundChild;
+        }
+
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
+            cvs.View.Refresh();
         }
     }
 
