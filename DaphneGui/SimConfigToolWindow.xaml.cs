@@ -1209,7 +1209,7 @@ namespace DaphneGui
             //of configCell, it will has its own entity_guid - only the name stays the same ---
             if (cell_to_clone.entity_guid != curr_cell_type_guid)
             {
-                cp.Cell = cell_to_clone.Clone(false);
+                cp.Cell = cell_to_clone.Clone(true);
 
                 string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                 if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)

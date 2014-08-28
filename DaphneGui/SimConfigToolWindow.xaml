@@ -2036,7 +2036,7 @@
                                 </StackPanel>
 
                             </Expander>
-                            <Expander ExpandDirection="Down"
+                            <!--<Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Molecule Properties"
                                               x:Name="ecmMolPropExpander"
@@ -2049,7 +2049,25 @@
                                         Content="{Binding}" 
                                         ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                         Margin="6"/>
+                            </Expander>-->
+
+                            <Expander ExpandDirection="Down"
+                                              IsExpanded="False"
+                                              Header="Molecule Properties"
+                                              x:Name="ecmMolPropExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem, Mode=TwoWay}"
+                                              >
+                                <StackPanel>
+                                    <ContentControl Name="ecmMolpopMolDetails"
+                                            Content="{Binding Path=molecule}" 
+                                            ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                            Margin="6"/>
+                                </StackPanel>
+
                             </Expander>
+                            
                         </StackPanel>
                     </Expander>
                     <!-- Reactions -->
