@@ -212,6 +212,7 @@ namespace Daphne
                     if (cp.Cell.diff_scheme != null && cp.Cell.diff_scheme.Driver.states.Count > 0)
                     {
                         header += "\tDiffState";
+                        create = true;
                     }
 
                 }
@@ -220,11 +221,13 @@ namespace Daphne
                     if (cp.Cell.div_scheme.Driver.states.Count > 0)
                     {
                         header += "\tDivState";
+                        create = true;
                     }
                 }
                 if (cp.reportStates.Death == true)
                 {
                     header += "\tDeathState";
+                    create = true;
                 }
 
 
