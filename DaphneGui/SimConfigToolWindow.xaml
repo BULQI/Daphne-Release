@@ -81,11 +81,12 @@
 
             <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> 
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
+            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
             
             <!-- <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
-            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+            
             
             <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />-->
             <!--<daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />-->

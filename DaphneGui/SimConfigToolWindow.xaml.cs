@@ -2645,31 +2645,63 @@ namespace DaphneGui
 
             if (source is ConfigMolecule)
             {
-                PushMolecule pm = new PushMolecule();
+                ////This works
+                ////PushMolecule pm = new PushMolecule();
+                ////pm.DataContext = MainWindow.SOP;
+                ////pm.EntityLevelMolDetails.DataContext = source;
+
+                ////ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+                ////if (erMol != null)
+                ////    pm.ComponentLevelMolDetails.DataContext = erMol;
+
+                //////Show the confirmation dialog
+                ////if (pm.ShowDialog() == false)
+                ////    return;
+
+
+                //LET'S TRY A GENERIC PUSHER
+                PushEntity pm = new PushEntity();
                 pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelMolDetails.DataContext = source;
+                pm.EntityLevelDetails.DataContext = source;
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
-                    pm.ComponentLevelMolDetails.DataContext = erMol;
+                    pm.ComponentLevelDetails.DataContext = erMol;
 
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
                     return;
+
             }
             else if (source is ConfigReaction)
             {
-                PushReaction pr = new PushReaction();
-                pr.EntityLevelReactionDetails.DataContext = source;
+                //Use generic pusher
+                PushEntity pr = new PushEntity();
+                pr.EntityLevelDetails.DataContext = source;
 
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
-                    pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
 
                 if (pr.ShowDialog() == false)
                     return;
+
+
+                ////This works
+                ////PushReaction pr = new PushReaction();
+                ////pr.EntityLevelReactionDetails.DataContext = source;
+
+                ////if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                ////    pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+
+                ////if (pr.ShowDialog() == false)
+                ////    return;
             }
             else if (source is ConfigCell)
             {
+                //Use generic pusher - not yet done for cells
+
+
+                //This works
                 PushCell pc = new PushCell();
                 pc.DataContext = MainWindow.SOP;
                 pc.EntityLevelCellDetails.DataContext = source;
