@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Daphne;
 using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
+using DaphneGui.Pushing;
 
 namespace DaphneGui
 {
@@ -1289,6 +1290,36 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
             cvs.View.Refresh();
         }
+
+        private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+
+            if (gene_guid == "")
+                return;
+
+            MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.No)
+                return;
+
+            PushGene pg = new PushGene();
+            pg.DataContext = cell;
+            pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
+
+            //Here show the confirmation dialog
+            if (pg.ShowDialog() == false)
+            {
+                //User clicked Cancel
+                return;
+            }
+
+            //Here do the processing
+
+        }
     }
 
 }
+
+        

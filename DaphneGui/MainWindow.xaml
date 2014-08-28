@@ -156,6 +156,14 @@
                     <!--<MenuItem x:Name="menu_ActivateDisplayOptions" Header="Activate Display Options"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
+                
+                <MenuItem Header="Save Entities"    Name="pushMenu">
+                    <MenuItem Header="Molecules..." Name="pushMol"  Click="pushMol_Click"></MenuItem>
+                    <MenuItem Header="Genes..."     Name="pushGene" Click="pushGene_Click" />
+                    <MenuItem Header="Reactions..." Name="pushReac" Click="pushReac_Click" />
+                    <MenuItem Header="Cells..."     Name="pushCell" Click="pushCell_Click" />
+                </MenuItem>
+                
                 <MenuItem Header="Data Export" Name = "ExportMenu">
                     <MenuItem Header="B Cell Summary" Name="bCellSummaryExport" Click="bCellSummaryExport_Click" />
                     <MenuItem Header="B Cell Pedigree" Name="bCellPedigreeExport" Click="bCellPedigreeExport_Click" />
@@ -495,8 +503,8 @@
                                 <!-- This is the window that contains the reaction complex graph-->
                                 <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
-
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" Title="Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
+                               
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
                                 <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     
                                 </local:CellStudioToolWindow>

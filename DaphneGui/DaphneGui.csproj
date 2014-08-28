@@ -208,6 +208,27 @@
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphicsController.cs" />
+    <Compile Include="MoleculeGridControl.xaml.cs">
+      <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushCell.xaml.cs">
+      <DependentUpon>PushCell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushEntity.xaml.cs">
+      <DependentUpon>PushEntity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushGene.xaml.cs">
+      <DependentUpon>PushGene.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushMolecule.xaml.cs">
+      <DependentUpon>PushMolecule.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushReaction.xaml.cs">
+      <DependentUpon>PushReaction.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PushWindow.xaml.cs">
+      <DependentUpon>PushWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
     <Compile Include="Rendering\RenderCell.xaml.cs">
@@ -291,6 +312,34 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MoleculeGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushEntity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushGene.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushMolecule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushReaction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PushWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Rendering\RenderCell.xaml">
       <SubType>Designer</SubType>

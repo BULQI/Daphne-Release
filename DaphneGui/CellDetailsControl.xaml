@@ -536,6 +536,7 @@
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                             <TextBox x:Name="txtGeneActLevel" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save gene to component library..." Click="NucPushGeneButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>

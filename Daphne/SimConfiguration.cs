@@ -129,6 +129,49 @@ namespace Daphne
         }
     }
 
+    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(PushType), typeof(string))]
+    public class PushTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the BoundaryFace enum...
+        private List<string> _push_type_strings = new List<string>()
+                                {
+                                    "Entity",
+                                    "Protocol",
+                                    "User Store",
+                                    "Daphne Store"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                int index = (int)value;
+                return _push_type_strings[index];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _push_type_strings.FindIndex(item => item == str);
+            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+        }
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+
+    
     /// <summary>
     /// base for all levels
     /// </summary>
@@ -2665,9 +2708,58 @@ namespace Daphne
             }
         }
 
-        public double MolecularWeight { get; set; }
-        public double EffectiveRadius { get; set; }
-        public double DiffusionCoefficient { get; set; }
+        //public double MolecularWeight { get; set; }
+        //public double EffectiveRadius { get; set; }
+        //public double DiffusionCoefficient { get; set; }
+
+        private double molWeight;
+        public double MolecularWeight 
+        { 
+            get
+            {
+                return molWeight;
+            }
+            set
+            {
+                if (molWeight != value)
+                {
+                    molWeight = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double effRadius;
+        public double EffectiveRadius
+        {
+            get
+            {
+                return effRadius;
+            }
+            set
+            {
+                if (effRadius != value)
+                {
+                    effRadius = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double diffCoeff;
+        public double DiffusionCoefficient
+        {
+            get
+            {
+                return diffCoeff;
+            }
+            set
+            {
+                if (diffCoeff != value)
+                {
+                    diffCoeff = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
         
         public MoleculeLocation molecule_location { get; set; }
 
