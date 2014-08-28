@@ -12,6 +12,7 @@ namespace Daphne
         int[] tempDeadKeys = null;
         public double deathTimeConstant;
         public int deathOrder;
+        public double deathFactor;
 
         public CellManager()
         {
@@ -90,8 +91,6 @@ namespace Daphne
                     }
                     daughterList.Add(c);
 
-                    //got from release-dev....
-                    //Simulation.dataBasket.ReportDaughterCell(kvp.Value.Cell_id, c);
                 }
            }
 
@@ -112,8 +111,7 @@ namespace Daphne
                 {
                     // increment elapsed time since death
                     deadDict[key] = deadDict[key] + dt;
-                    double u = Rand.TroschuetzCUD.NextDouble();
-                    if (u < Math.Pow(deadDict[key] * deathTimeConstant, deathOrder))
+                    if (Rand.TroschuetzCUD.NextDouble() < deathFactor * Math.Pow(deadDict[key] * deathTimeConstant, deathOrder) * dt)
                     {
                         Simulation.dataBasket.RemoveCell(key);
                         deadDict.Remove(key);
