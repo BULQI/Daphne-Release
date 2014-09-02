@@ -125,11 +125,7 @@ namespace Daphne
             boundaryConcs.Add(key, boundConc);
         }
 
-        /// <summary>
-        /// moved some initalization from ... to here - axin
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="parameters"></param>
+
         public void Initialize(string type, double[] parameters)
         {
             this.Conc.Initialize(type, parameters);

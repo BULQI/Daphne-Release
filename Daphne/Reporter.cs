@@ -207,11 +207,38 @@ namespace Daphne
                     create = true;
                 }
 
+                if (cp.reportStates.Differentiation == true)
+                {
+                    if (cp.Cell.diff_scheme != null && cp.Cell.diff_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDiffState";
+                        create = true;
+                    }
+
+                }
+                if (cp.reportStates.Division == true)
+                {
+                    if (cp.Cell.div_scheme.Driver.states.Count > 0)
+                    {
+                        header += "\tDivState";
+                        create = true;
+                    }
+                }
+                if (cp.reportStates.Death == true)
+                {
+                    header += "\tDeathState";
+                    create = true;
+                }
+
+
                 // cell molpop concentrations
                 for (int i = 0; i < 2; i++)
                 {
                     // 0: cytosol, 1: membrane
-                    ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                    //ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                    ConfigCompartment comp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
+
+
 
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
@@ -254,7 +281,7 @@ namespace Daphne
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
-                    writer.WriteLine("Cell {0} report from {1} run on {2}.", protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellName, protocol.experiment_name, startTime);
+                    writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, protocol.experiment_name, startTime);
                     writer.WriteLine(header);
                     cell_files.Add(cp.cellpopulation_id, writer);
                 }
@@ -293,7 +320,7 @@ namespace Daphne
                     for (int i = 0; i < 2; i++)
                     {
                         // 0: cytosol, 1: membrane
-                        ConfigCompartment configComp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+                        ConfigCompartment configComp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
                         Compartment comp = (i == 0) ? c.Cytosol : c.PlasmaMembrane;
                         double[] pos = new double[] { 0, 0, 0 };
 
@@ -315,6 +342,19 @@ namespace Daphne
                                 }
                             }
                         }
+                    }
+
+                    if (cp.reportStates.Differentiation == true)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.Differentiator.CurrentState);
+                    }
+                    //if (cp.reportStates.Division)
+                    //{
+                    //    cell_files[cp.cellpopulation_id].Write("\t{0}", c.Divider.CurrentState);
+                    //}
+                    if (cp.reportStates.Death)
+                    {
+                        cell_files[cp.cellpopulation_id].Write("\t{0}", c.DeathBehavior.CurrentState);
                     }
 
                     // ecm probe concentrations

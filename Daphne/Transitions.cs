@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using Ninject;
+using Ninject.Parameters;
 
 namespace Daphne
 {
@@ -13,6 +15,8 @@ namespace Daphne
     {
         public bool TransitionOccurred { get; set; }
         public int CurrentState { get; set; }
+        public int PreviousState { get; set; }
+        public int FinalState { get; set; }
         public abstract void AddDriverElement(int origin, int destination, TransitionDriverElement driverElement);
         public abstract Dictionary<int, Dictionary<int, TransitionDriverElement>> Drivers { get; }
         public abstract void Step(double dt);
@@ -113,6 +117,8 @@ namespace Daphne
             drivers = new Dictionary<int, Dictionary<int, TransitionDriverElement>>();
             TransitionOccurred = false;
             CurrentState = 0;
+            PreviousState = 0;
+            FinalState = 0;
             destinationPMF = new PMF<int>();
         }
 
@@ -133,6 +139,14 @@ namespace Daphne
                 drivers.Remove(destination);
             }
             drivers[origin].Add(destination, driverElement);
+            if (origin > FinalState)
+            {
+                FinalState = origin;
+            }
+            if (destination > FinalState)
+            {
+                FinalState = destination;
+            }
         }
 
         /// <summary>
@@ -164,6 +178,7 @@ namespace Daphne
             if (u < TotalRate * dt)
             {
                 TransitionOccurred = true;
+                PreviousState = CurrentState;
 
                 double[] probabilities = new double[drivers[CurrentState].Count];
                 int[] destinations = new int[drivers[CurrentState].Count];
@@ -180,4 +195,90 @@ namespace Daphne
             }
         }
     }
+
+    /// <summary>
+    /// base class for a differentiatior and divider
+    /// </summary>
+    public abstract class ITransitionScheme : IDynamic
+    {
+        public bool TransitionOccurred { get; set; }
+        public int CurrentState { get; set; }
+        public int PreviousState { get; set; }
+        public int nStates { get; set; }
+        public int nGenes { get; set; }
+        public abstract void AddActivity(int _state, int _gene, double _activity);
+        public abstract void AddGene(int _state, string _gene_id);
+        public abstract void AddState(int _state, string stateName);
+        public string[] gene_id { get; set; }
+        public double[,] activity { get; set; }
+        public abstract void Step(double dt);
+        public string[] State { get; set; }
+
+        public abstract void Initialize(int _nStates, int _nGenes);
+
+        [Inject]
+        public void InjectDiffBehavior(ITransitionDriver _behavior)
+        {
+            behavior = _behavior;
+        }
+
+        protected ITransitionDriver behavior;
+
+        public ITransitionDriver Behavior
+        {
+            get { return behavior; }
+        }
+    }
+
+    /// <summary>
+    /// Contains TransitionDriver, epigenetic map, and genes for differentiation or division schemes.
+    /// </summary>
+    public class TransitionScheme : ITransitionScheme
+    {
+        public TransitionScheme()
+        {
+        }
+
+        public override void Initialize(int _nStates, int _nGenes)
+        {
+            CurrentState = 0;
+            PreviousState = 0;
+            TransitionOccurred = false;
+            nStates = _nStates;
+            nGenes = _nGenes;
+            activity = new double[nStates, nGenes];
+            gene_id = new string[nGenes];
+            State = new string[nStates];
+
+        }
+
+        public override void AddActivity(int _state, int _gene, double _activity)
+        {
+            activity[_state, _gene] = _activity;
+        }
+
+        public override void AddGene(int _gene, string _gene_guid)
+        {
+            gene_id[_gene] = _gene_guid;
+        }
+
+        public override void AddState(int _state, string stateName)
+        {
+            State[_state] = stateName;
+        }
+
+        public override void Step(double dt)
+        {
+            Behavior.Step(dt);
+            if (Behavior.TransitionOccurred == true)
+            {
+                // Epigentic changes are implemented by Cell
+                CurrentState = Behavior.CurrentState;
+                PreviousState = Behavior.PreviousState;
+                TransitionOccurred = true;
+                Behavior.TransitionOccurred = false;
+            }
+        }
+    }
+
 }

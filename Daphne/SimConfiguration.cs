@@ -41,11 +41,17 @@ namespace Daphne
         public static ulong changesCounter;
 
         /// <summary>
+        /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
+        /// </summary>
+        public RenderSkin skin { get; set; }
+
+        /// <summary>
         /// constructor
         /// </summary>
         public SystemOfPersistence()
         {
             Protocol = new Protocol("", "Config\\temp_protocol.json");
+            skin = new RenderSkin();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             //UserStore = new Level("", "Config\\temp_userstore.json");
         }
@@ -123,6 +129,49 @@ namespace Daphne
         }
     }
 
+    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(PushType), typeof(string))]
+    public class PushTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the BoundaryFace enum...
+        private List<string> _push_type_strings = new List<string>()
+                                {
+                                    "Entity",
+                                    "Protocol",
+                                    "User Store",
+                                    "Daphne Store"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                int index = (int)value;
+                return _push_type_strings[index];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _push_type_strings.FindIndex(item => item == str);
+            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+        }
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+
+    
     /// <summary>
     /// base for all levels
     /// </summary>
@@ -531,6 +580,7 @@ namespace Daphne
         public SimulationParams sim_params { get; set; }
         public string reporter_file_name { get; set; }
 
+        public RenderPopOptions popOptions { get; set; }
         //public ChartViewToolWindow ChartWindow;
 
         /// <summary>
@@ -561,6 +611,8 @@ namespace Daphne
             //////LoadDefaultGlobalParameters();
 
             reporter_file_name = "";
+
+            popOptions = new RenderPopOptions();
         }
 
         /// <summary>
@@ -598,13 +650,15 @@ namespace Daphne
                         }
                     }
                     // div
-                    if (cp.Cell.div_driver.entity_guid == e.entity_guid)
-                    {
-                        if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
-                        {
-                            cp.Cell.div_driver = e as ConfigTransitionDriver;
-                        }
-                    }
+
+                    throw (new NotImplementedException("need work here, sanjeev"));
+                    //if (cp.Cell.div_driver.entity_guid == e.entity_guid)
+                    //{
+                    //    if (forced == true || cp.Cell.div_driver.change_stamp < e.change_stamp)
+                    //    {
+                    //        cp.Cell.div_driver = e as ConfigTransitionDriver;
+                    //    }
+                    //}
                 }
             }
             else if (e is ConfigDiffScheme)
@@ -1856,9 +1910,13 @@ namespace Daphne
         {
             // default value
             phi1 = 100;
+            deathConstant = 1e-3;
+            deathOrder = 1;
         }
         public double phi1 { get; set; }
         public double phi2 { get; set; }
+        public double deathConstant { get; set; }
+        public int deathOrder { get; set; }
     }
 
     public class EntityRepository 
@@ -2363,6 +2421,35 @@ namespace Daphne
 
     public enum MoleculeLocation { Bulk = 0, Boundary }
 
+
+    [ValueConversion(typeof(object), typeof(bool))]
+    public class ObjectToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (parameter == null)
+            {
+                return value != null ? Visibility.Visible : Visibility.Hidden;
+            }
+            var option = parameter as string;
+            if (option == "Reverse")
+            {
+                return value == null ? Visibility.Visible : Visibility.Hidden;
+            }
+            else if (option == "Collapsed")
+            {
+                return value != null ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            return value != null ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
     public class DiffSchemeToBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -2602,6 +2689,8 @@ namespace Daphne
     /// </summary>
     public class ConfigMolecule : ConfigEntity
     {
+        public string label { get; set; }        //label to color scheme
+
         private string mol_name;
         public string Name {
             get
@@ -2619,9 +2708,58 @@ namespace Daphne
             }
         }
 
-        public double MolecularWeight { get; set; }
-        public double EffectiveRadius { get; set; }
-        public double DiffusionCoefficient { get; set; }
+        //public double MolecularWeight { get; set; }
+        //public double EffectiveRadius { get; set; }
+        //public double DiffusionCoefficient { get; set; }
+
+        private double molWeight;
+        public double MolecularWeight 
+        { 
+            get
+            {
+                return molWeight;
+            }
+            set
+            {
+                if (molWeight != value)
+                {
+                    molWeight = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double effRadius;
+        public double EffectiveRadius
+        {
+            get
+            {
+                return effRadius;
+            }
+            set
+            {
+                if (effRadius != value)
+                {
+                    effRadius = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
+        private double diffCoeff;
+        public double DiffusionCoefficient
+        {
+            get
+            {
+                return diffCoeff;
+            }
+            set
+            {
+                if (diffCoeff != value)
+                {
+                    diffCoeff = value;
+                    this.incrementChangeStamp();
+                }
+            }
+        }
         
         public MoleculeLocation molecule_location { get; set; }
 
@@ -2932,7 +3070,10 @@ namespace Daphne
 
         public ConfigDiffScheme() : base()
         {
-            //genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+            genes = new ObservableCollection<string>();
+            Name = "New diff scheme";
+            Driver = new ConfigTransitionDriver();
+            activationRows = new ObservableCollection<ConfigActivationRow>();
         }
 
         private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -3116,7 +3257,18 @@ namespace Daphne
     public class ConfigMolecularPopulation : EntityModelBase
     {
         public string molpop_guid { get; set; }
-        public ConfigMolecule molecule { get; set; }
+
+        private ConfigMolecule _molecule;
+        public ConfigMolecule molecule
+        {
+            get { return _molecule; }
+            set
+            {
+                _molecule = value;
+                OnPropertyChanged("molecule");
+            }
+        }
+
         private string _Name;
         public string Name
         {
@@ -3199,7 +3351,14 @@ namespace Daphne
                 OnPropertyChanged("mp_render_on");
             }
         }
-                    
+
+        public string label { get; set; }        //label to color scheme
+
+
+        public ConfigMolecularPopulation()
+        {
+        }
+    
         public ConfigMolecularPopulation(ReportType rt)
         {
             Guid id = Guid.NewGuid();
@@ -3370,6 +3529,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
+                    mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
@@ -3387,6 +3547,7 @@ namespace Daphne
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecularPopulation mp = dd as ConfigMolecularPopulation;
+                    mp.PropertyChanged -= mp_PropertyChanged;
 
                     // remove from molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == true)
@@ -3402,6 +3563,25 @@ namespace Daphne
 
             OnPropertyChanged("molpops");            
         }
+
+        /// <summary>
+        /// rebuild the molecules_dict that is used to screen reactions available to add
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void mp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "molecule") return;
+            molecules_dict.Clear();
+            foreach (ConfigMolecularPopulation mp in molpops)
+            {
+                if (molecules_dict.ContainsKey(mp.molecule.entity_guid) == false)
+                    {
+                        molecules_dict.Add(mp.molecule.entity_guid, mp.molecule);
+                    }
+            }
+        }
+
 
         /// <summary>
         /// get a reaction with a specified guid
@@ -3712,6 +3892,7 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
+                OnPropertyChanged("rate_const");
             } 
         }
 
@@ -3915,12 +4096,15 @@ namespace Daphne
 
     public class ConfigCell : ConfigEntity
     {
+        public string label { get; set; }        //label to color scheme
+
         public ConfigCell() : base()
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
             TransductionConstant = 0.0;
             DragCoefficient = 1.0;
+            Sigma = 0.0;
 
             membrane = new ConfigCompartment();
             cytosol = new ConfigCompartment();
@@ -4024,6 +4208,23 @@ namespace Daphne
             }
         }
 
+        /// <summary>
+        /// Parameter for stochastic force
+        /// </summary>
+        private double sigma;
+        public double Sigma
+        {
+            get
+            {
+                return sigma;
+            }
+            set
+            {
+                sigma = value;
+                OnPropertyChanged("Sigma");
+            }
+        }
+
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
         
@@ -4063,18 +4264,35 @@ namespace Daphne
             }
         }
 
-        private ConfigTransitionDriver _div_driver;
-        public ConfigTransitionDriver div_driver 
+
+        //private ConfigTransitionDriver _div_driver;
+        //public ConfigTransitionDriver div_driver 
+        //{
+        //    get
+        //    {
+        //        return _div_driver;
+        //    }
+
+        //    set
+        //    {
+        //        _div_driver = value;
+        //        OnPropertyChanged("div_driver");
+        //    }
+        //}
+
+
+        private ConfigDiffScheme _div_scheme;
+        public ConfigDiffScheme div_scheme
         {
             get
             {
-                return _div_driver;
+                return _div_scheme;
             }
 
             set
             {
-                _div_driver = value;
-                OnPropertyChanged("div_driver");
+                _div_scheme = value;
+                OnPropertyChanged("div_scheme");
             }
         }
 
@@ -4363,7 +4581,6 @@ namespace Daphne
                             AddByPosition( new double[] {Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 } );
                         }
                         System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellPop.CellStates.Count + ".");
-                        OnPropertyChanged("CellStates");
                         cellPop.number = cellPop.CellStates.Count;
                         return;
                     }
@@ -4469,12 +4686,12 @@ namespace Daphne
             {
                 AddByDistr(_cellPop.number);
             }
-            else
-            {
-                // json deserialization puts us here
-                AddByDistr(1);
-            }
-            OnPropertyChanged("CellStates");
+            //else
+            //{
+            //    // json deserialization puts us here
+            //    AddByDistr(1);
+            //}
+            //OnPropertyChanged("CellStates");
         }
 
         public override double[] nextPosition()
@@ -4561,13 +4778,13 @@ namespace Daphne
             {
                 AddByDistr(_cellPop.number);
             }
-            else
-            {
-                // json deserialization puts us here
-                AddByDistr(1);
-            }
+            //else
+            //{
+            //    // json deserialization puts us here
+            //    AddByDistr(1);
+            //}
  
-            OnPropertyChanged("CellStates");
+            //OnPropertyChanged("CellStates");
         }
 
         public override void Resize(double[] newExtents)
@@ -4763,10 +4980,43 @@ namespace Daphne
         }
     }
 
+    public class ReportStates
+    {
+        bool division_state = false;
+        public bool Death { get; set; }
+        public bool Division 
+        {
+            get
+            {
+                return division_state == true;
+                //return division_state;
+            }
+            set
+            {
+                division_state = value;
+            }
+        }
+        public bool Differentiation { get; set; }
+    }
+
     public class CellPopulation : EntityModelBase
     {
         //public string cell_guid_ref { get; set; }
-        public ConfigCell Cell { get; set; }
+        private ConfigCell _Cell;
+
+        public ConfigCell Cell
+        {
+            get
+            {
+                return _Cell;
+            }
+            set
+            {
+                _Cell = value;
+                OnPropertyChanged("Cell");
+            }
+        }
+
         private string _Name;
         public string cellpopulation_name
         {
@@ -4790,6 +5040,19 @@ namespace Daphne
             set
             {
                 reportXVF = value;
+            }
+        }
+
+        private ReportStates report_states;
+        public ReportStates reportStates
+        {
+            get
+            {
+                return report_states;
+            }
+            set
+            {
+                report_states = value;
             }
         }
 
@@ -4891,6 +5154,8 @@ namespace Daphne
             }
         }
 
+        public string label { get; set; }        //label to color scheme
+
         public CellPopulation()
         {
             Guid id = Guid.NewGuid();
@@ -4905,6 +5170,7 @@ namespace Daphne
             cellpopulation_id = Protocol.SafeCellPopulationID++;
             // reporting
             reportXVF = new ReportXVF();
+            reportStates = new ReportStates();
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
@@ -5086,6 +5352,7 @@ namespace Daphne
 
         }
 
+
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
@@ -5099,6 +5366,48 @@ namespace Daphne
         }
 
     }
+
+    public class MolGuidToMolPopForDiffMultiValueConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (values == null || values.Length < 2)return null;
+            string driver_mol_guid = values[0] as string;
+            ConfigCompartment cc = values[1] as ConfigCompartment;
+            ConfigMolecularPopulation MyMolPop = null;
+
+            if (driver_mol_guid == "" || cc == null)
+                return MyMolPop;
+
+            foreach (ConfigMolecularPopulation molpop in cc.molpops)
+            {
+                if (molpop.molecule.entity_guid == driver_mol_guid)
+                {
+                    MyMolPop = molpop;
+                    break;
+                }
+            }
+
+            return MyMolPop;
+
+        }
+
+
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            ConfigMolecularPopulation molpop = value as ConfigMolecularPopulation;
+
+            if (molpop != null && molpop.molecule != null)
+            {
+                return new object[] { molpop.molecule.entity_guid };
+            }
+
+            return new object[] { "" };
+        }
+
+    }
+
 
     public class DriverElementToBoolConverter : IValueConverter
     {
@@ -5646,6 +5955,85 @@ namespace Daphne
 
             ////Add this after 2/4/14
             ////DrawAsWireframe = false;
+        }
+    }
+
+    //Graphics classes
+    //public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
+    //public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
+
+    public enum RenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN, MP_TYPE, MP_CONC, CELL_MP }
+
+    public class RenderColor
+    {
+        public System.Windows.Media.Color EntityColor { get; set; }  // RGB plus alpha channel
+    }
+
+    public class RenderCell
+    {
+        public RenderColor base_color { get; set; }         // solid color for applicable render methods
+        public ObservableCollection<RenderColor> state_colors { get; set; }    //state colors
+        public ObservableCollection<RenderColor> gen_colors { get; set; }      //gen colors
+        public int shades { get; set; }                                      // number of shades for applicable options
+        public string label { get; set; }                                      // ConfigCell's label
+    }
+
+    public class RenderMol
+    {
+        public RenderColor color { get; set; }      // the one color used
+        public double min { get; set; }             // to scale when rendering by conc
+        public double max { get; set; }
+        public int shades { get; set; }             // number of shades for applicable options
+        public double blendingWeight { get; set; }  // controls color mixing for multiple molpops
+        public string label { get; set; }           // ConfigMolecule’s label
+    }
+
+    public class RenderPop
+    {
+        public bool renderOn { get; set; }                 // toggles rendering
+        public RenderMethod renderMethod { get; set; }      // indicates the render option
+        public string label { get; set; }                   // cell or mol population's label
+    }
+
+    public class RenderDrawing
+    {
+        public RenderColor bg_color { get; set; }     // the background color
+
+        public RenderDrawing()
+        {
+            bg_color = new RenderColor();
+            bg_color.EntityColor = Color.FromScRgb(255.0f, 255.0f, 255.0f, 255.0f);
+        }
+    }
+
+    public class RenderSkin
+    {
+        public ObservableCollection<RenderCell> renderCells { get; set; }
+        public ObservableCollection<RenderMol> renderMols { get; set; }
+
+        public RenderSkin()
+        {
+            renderCells = new ObservableCollection<RenderCell>();
+            renderMols = new ObservableCollection<RenderMol>();
+            RenderCell renc = new RenderCell();
+            RenderColor rcol = new RenderColor();
+            rcol.EntityColor = Color.FromScRgb(255.0f, 255.0f, 0.0f, 0.0f);
+            renc.base_color = rcol;
+            renderCells.Add(renc);
+        }
+
+        //Serialization method needed
+    }
+
+    public class RenderPopOptions
+    {
+        public ObservableCollection<RenderPop> cellPopOptions { get; set; }
+        public ObservableCollection<RenderPop> molPopOptions { get; set; }
+
+        public RenderPopOptions()
+        {
+            cellPopOptions = new ObservableCollection<RenderPop>();
+            molPopOptions = new ObservableCollection<RenderPop>();
         }
     }
 

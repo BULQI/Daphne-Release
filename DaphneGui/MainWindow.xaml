@@ -10,7 +10,7 @@
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Daphne"
-        Width="900" Height="770" Closing="Window_Closing"
+        Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
         >
 
@@ -124,6 +124,11 @@
                         <Separator />
                         <MenuItem Header="Select Report Folder" Name="selectReportFolderMenu" Click="setReporterFolder_Click" />
                     </MenuItem>
+                    <MenuItem Header="_Graphics Properties" x:Name="GraphicsMenu">
+                        <MenuItem Header="Cells..." Name="cellColorsMenu" />
+                        <MenuItem Header="Molecules..." Name="molColorsMenu" />
+                        <MenuItem Header="Drawing Settings..." Name="drawingSettingsMenu" />
+                    </MenuItem>
                     <!--<MenuItem Header="Statistical Analysis" Name = "StatsMenu">
                         <MenuItem Header="Skip Mean Distance From Center" Name="skipMeanDist" IsCheckable="True" IsChecked="False"   />
                         <MenuItem Header="Skip Inter Cell Distance" Name="skipInterCell" IsCheckable="True" IsChecked="False"        />
@@ -133,13 +138,17 @@
                     </MenuItem>-->
                 </MenuItem>
 
-                <MenuItem Header="_Activate">
-                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Activate Simulation Setup"  
+                <MenuItem Header="_Window">
+                    <MenuItem x:Name="menu_ActivateSimSetup" Header="Daphne Protocol"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ProtocolToolWindow}" />
-                    <MenuItem x:Name="menu_ActivateVTKView" Header="Activate 3D View"  
+                    <MenuItem x:Name="menu_ActivateVTKView" Header="3D View"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=VTKDisplayDocWindow}" />
-                    <MenuItem x:Name="menu_ActivateLPFitting" Header="Activate LP Fitting Tool"  
+                    <MenuItem x:Name="menu_ActivateLPFitting" Header="LP Fitting Tool"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=LPFittingToolWindow}" />
+                    <MenuItem x:Name="menu_ComponentsLibrary" Header="Components Library"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
+                    <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
+							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
                     
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
@@ -147,6 +156,14 @@
                     <!--<MenuItem x:Name="menu_ActivateDisplayOptions" Header="Activate Display Options"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
+                
+                <MenuItem Header="Save Entities"    Name="pushMenu">
+                    <MenuItem Header="Molecules..." Name="pushMol"  Click="pushMol_Click"></MenuItem>
+                    <MenuItem Header="Genes..."     Name="pushGene" Click="pushGene_Click" />
+                    <MenuItem Header="Reactions..." Name="pushReac" Click="pushReac_Click" />
+                    <MenuItem Header="Cells..."     Name="pushCell" Click="pushCell_Click" />
+                </MenuItem>
+                
                 <MenuItem Header="Data Export" Name = "ExportMenu">
                     <MenuItem Header="B Cell Summary" Name="bCellSummaryExport" Click="bCellSummaryExport_Click" />
                     <MenuItem Header="B Cell Pedigree" Name="bCellPedigreeExport" Click="bCellPedigreeExport_Click" />
@@ -332,20 +349,31 @@
                           >            
 
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
+                
                 <!-- Sim Config Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="540,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Simulation Configuration" />
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
+                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Protocol" />
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
                 <docking:SplitContainer Orientation="Vertical">
 
+                    <docking:SplitContainer.Resources>
+                        <DataTemplate x:Key="cellTabTemplate">
+                            <Grid>
+                                <!--<Border BorderThickness="1" CornerRadius="4,4,4,4" BorderBrush="Lime"></Border>-->
+                                <!--<Image Source="Images/MyGreenCells.bmp" />-->
+                                <TextBlock Text="Cells Library" />
+                            </Grid>
+                        </DataTemplate>
+                    </docking:SplitContainer.Resources>
+                    
                     <!-- VTK Windows Forms Host panel -->
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
-                            <docking:TabbedMdiContainer>
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" >
+                            <docking:TabbedMdiContainer Background="LightGray" >
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
                                     <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
@@ -472,13 +500,15 @@
                                     </DockPanel>
                                 </docking:DocumentWindow>
 
-                                <!-- skg This window contains the reaction complex graph -->
-                                <!--<local:ChartViewDocumentWindow x:Name="ChartViewDocWindow" Title="Run Statistics Results" >
-                                </local:ChartViewDocumentWindow>-->
-
                                 <!-- This is the window that contains the reaction complex graph-->
-                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" >
-                                </work:ChartViewToolWindow>
+                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" > </work:ChartViewToolWindow>                                  
+                               
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
+                                    
+                                </local:CellStudioToolWindow>
+                                <!-- "#FFE7F5DC" -->
 
                             </docking:TabbedMdiContainer>
 
@@ -733,6 +763,7 @@
                     </docking:ToolWindowContainer>
 
                 </docking:SplitContainer>
+                
             </docking:SplitContainer>
         </docking:DockSite>
     </DockPanel>

@@ -157,6 +157,16 @@ namespace DaphneGui
         }
     }
 
+    public class MolpopTypeExplicitController : MolPopTypeController
+    {
+        public double max;
+        public MolpopTypeExplicitController(double max_conc)
+        {
+            type = MolPopDistributionType.Explicit;
+            max = max_conc;
+        }
+    }
+
     ///// <summary>
     ///// custom distribution molpop
     ///// </summary>
@@ -327,6 +337,12 @@ namespace DaphneGui
             {
                 molpopControl = new MolpopTypeHomogeneousController(((MolPopHomogeneousLevel)molpop.mp_distribution).concentration);
             }
+            else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+            {
+                MolPopExplicit mpc = (MolPopExplicit)molpop.mp_distribution;
+                double max = mpc.conc.Max();
+                molpopControl = new MolpopTypeExplicitController(max);
+            }
             //else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Custom)
             //{
             //    molpopControl = new MolpopTypeCustomController(((MolPopCustom)molpop.mp_distribution).custom_gradient_file_uri.LocalPath);
@@ -402,6 +418,10 @@ namespace DaphneGui
                 //{
                 //    div = ((MolpopTypeCustomController)kvp.Value).max;
                 //}
+                else if (kvp.Value.Type == MolPopDistributionType.Explicit)
+                {
+                    div = ((MolpopTypeExplicitController)kvp.Value).max;
+                }
 
                 if (div == 0.0)
                 {
