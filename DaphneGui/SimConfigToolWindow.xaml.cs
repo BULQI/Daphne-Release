@@ -2494,10 +2494,13 @@ namespace DaphneGui
         {
             //Debugger.Break();
             //double newvalue = (double)value - 1.0;
-            if (value is ConfigCell)
-            {
-                return ((ConfigCell)value).DragCoefficient;
-            }
+            //if (value == null)
+            //{
+            //    var tmp = parameter as ObjectDataProvider;
+            //    ConfigMolecularPopulation mp = tmp.ObjectInstance as ConfigMolecularPopulation;
+            //    mp.mp_distribution = new MolPopHomogeneousLevel();
+            //    return mp;
+            //}
             //return newvalue;
             return value;
         }

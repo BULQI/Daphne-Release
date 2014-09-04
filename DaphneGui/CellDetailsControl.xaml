@@ -55,6 +55,7 @@
                 ConverterParameter={StaticResource moleculesListView}}" />
         </DataTemplate>
 
+        <daph:ConfigMolecularPopulation  x:Key="EmptyMolPop" Name="Null" />
 
         <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
             <Grid>
@@ -252,7 +253,7 @@
 
                             <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,-10">
                                 <ContentControl Name="SolfacDistributionDetails"
-                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}" 
+                                        Content="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem, TargetNullValue={StaticResource EmptyMolPop}, FallbackValue={StaticResource EmptyMolPop},  Converter={StaticResource DebugConverter}, ConverterParameter={StaticResource EmptyMolPop}}" 
                                         ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
                                         Margin="6,2"/>
                             </StackPanel>
