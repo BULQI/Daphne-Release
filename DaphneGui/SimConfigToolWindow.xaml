@@ -2902,8 +2902,8 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                
-                                <DataGridCheckBoxColumn Header="Death"                 
+
+                                <DataGridCheckBoxColumn Header="Death" Width="60"                
                                     Binding="{Binding Path=reportStates.Death, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -2912,8 +2912,8 @@
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
-                                
-                                <DataGridCheckBoxColumn Header="Division"                 
+
+                                <DataGridCheckBoxColumn Header="Division" Width="60"               
                                     Binding="{Binding Path=reportStates.Division, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -2923,7 +2923,7 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
-                                <DataGridCheckBoxColumn Header="Differentiation" MinWidth="60" Width="Auto"                
+                                <DataGridCheckBoxColumn Header="Differentiation" Width="85"                
                                     Binding="{Binding Path=reportStates.Differentiation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
