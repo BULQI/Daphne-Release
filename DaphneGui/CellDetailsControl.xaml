@@ -503,13 +503,12 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </StackPanel.Resources>
-
                                     <ListBox x:Name="CellNucleusGenesListBox" MinHeight="50" MaxHeight="100" 
-                                                                    ItemsSource="{Binding Path=genes_guid_ref}" 
-                                                                     ItemTemplate="{Binding Source={StaticResource cellGeneListItemTemplate}}"
+                                                                    ItemsSource="{Binding Path=genes}" 
                                                                     DisplayMemberPath="Name"                                                    
                                                                     SelectedIndex="-1"
-                                                                     SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
+                                                                    SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
+                                    
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click"/>
                                         <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click"/>
@@ -522,8 +521,8 @@
                                                                     ContentTemplate="{StaticResource geneDetailsTemplate}"
                                                                     Margin="6">
                                                         </ContentControl>-->
-                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem, 
-                                                                                    Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenes2ListView}}">
+                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem}">
+                                                                                    <!--Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenes2ListView}}">-->
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                             <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"

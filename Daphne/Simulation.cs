@@ -570,9 +570,9 @@ namespace Daphne
 
                     // cell genes
                     //foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
-                    foreach (string s in cp.Cell.genes_guid_ref)
+                    foreach (ConfigGene cg in cp.Cell.genes)
                     {
-                        ConfigGene cg = protocol.entity_repository.genes_dict[s];
+                        //ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
                         double geneActivationLevel = cg.ActivationLevel;
                         if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)

@@ -4129,7 +4129,8 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            genes_guid_ref = new ObservableCollection<string>();
+            genes = new ObservableCollection<ConfigGene>();
+
         }
 
         public ConfigCell Clone(bool identical)
@@ -4247,7 +4248,7 @@ namespace Daphne
         public ConfigCompartment cytosol { get; set; }
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
-        public ObservableCollection<string> genes_guid_ref { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme
@@ -4320,7 +4321,15 @@ namespace Daphne
         //Return true if this compartment has a molecular population with given molecule
         public bool HasGene(string gene_guid)
         {
-            return genes_guid_ref.Contains(gene_guid);
+            foreach (ConfigGene gene in genes)
+            {
+                if (gene.entity_guid == gene_guid)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         //Return true if this cell has all the genes in the given list of gene guids

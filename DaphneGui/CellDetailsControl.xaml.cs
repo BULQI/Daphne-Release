@@ -334,7 +334,7 @@ namespace DaphneGui
             MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            cell.genes_guid_ref.Add(gene.entity_guid);
+            cell.genes.Add(gene);
             //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
 
@@ -363,7 +363,7 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
+                cell.genes.Add(geneToAdd);
             }
 
             txtGeneName.IsEnabled = false;
@@ -373,19 +373,20 @@ namespace DaphneGui
         {
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
 
-            if (gene_guid == "")
-                return;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            //if (gene_guid == "")
+            //    return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
 
             if (res == MessageBoxResult.No)
                 return;
 
-            if (cell.genes_guid_ref.Contains(gene_guid))
-            {
-                cell.genes_guid_ref.Remove(gene_guid);
+            if (cell.HasGene(gene.entity_guid)) {
+                cell.genes.Remove(gene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -1204,7 +1205,7 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
+            if (!cell.HasGene(gene.entity_guid))
                 return;
 
 
