@@ -337,7 +337,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    if (!entity_repository.molecules_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    }
                 }
                 // update
                 else
@@ -360,7 +363,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.transition_drivers.Add(e as ConfigTransitionDriver);
-                    entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    if (!entity_repository.transition_drivers_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    }
                 }
                 // update
                 else
@@ -383,7 +389,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
-                    entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    if (!entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    }
                 }
                 // update
                 else
@@ -406,7 +415,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
-                    entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    if (!entity_repository.reactions_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    }
                 }
                 // update
                 else
@@ -429,7 +441,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reaction_templates.Add(e as ConfigReactionTemplate);
-                    entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    if (!entity_repository.reaction_templates_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    }
                 }
                 // update
                 else
@@ -452,7 +467,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.cells.Add(e as ConfigCell);
-                    entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    if (!entity_repository.cells_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    }
                 }
                 // update
                 else
