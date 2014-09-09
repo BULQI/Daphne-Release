@@ -331,7 +331,33 @@ namespace Daphne
         /// <param name="s">the push status of e</param>
         public void repositoryPush(ConfigEntity e, PushStatus s)
         {
-            if (e is ConfigMolecule)
+            if (e is ConfigGene)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.genes.Add(e as ConfigGene);
+                    if (!entity_repository.genes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.genes_dict.Add(e.entity_guid, e as ConfigGene);
+                    }
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.genes.Count; i++)
+                    {
+                        if (entity_repository.genes[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.genes[i] = e as ConfigGene;
+                        }
+                    }
+                    // dict update
+                    entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
+                }
+            }
+            else if (e is ConfigMolecule)
             {
                 // insert
                 if (s == PushStatus.PUSH_CREATE_ITEM)

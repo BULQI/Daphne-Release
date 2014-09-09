@@ -331,15 +331,17 @@ namespace DaphneGui
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
             //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
 
-            string guid = (string)CellNucleusGenesListBox.SelectedItem;
-            CellNucleusGenesListBox.ScrollIntoView(guid);
+            //string guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //CellNucleusGenesListBox.ScrollIntoView(guid);
+            CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
+
             txtGeneName.IsEnabled = true;
         }
 
@@ -1295,10 +1297,9 @@ namespace DaphneGui
         private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
-            ConfigGene gene = null;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            if (gene_guid == "")
+            if (gene == null)
                 return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
