@@ -538,7 +538,7 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
+            if (!cell.HasGene(gene.entity_guid))
                 return;
 
 

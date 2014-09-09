@@ -337,7 +337,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    //entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    if (!entity_repository.molecules_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    }
                 }
                 // update
                 else
@@ -360,7 +363,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.transition_drivers.Add(e as ConfigTransitionDriver);
-                    entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    if (!entity_repository.transition_drivers_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    }
                 }
                 // update
                 else
@@ -383,7 +389,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
-                    entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    if (!entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    }
                 }
                 // update
                 else
@@ -406,7 +415,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
-                    entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    if (!entity_repository.reactions_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    }
                 }
                 // update
                 else
@@ -429,7 +441,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reaction_templates.Add(e as ConfigReactionTemplate);
-                    entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    if (!entity_repository.reaction_templates_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    }
                 }
                 // update
                 else
@@ -452,7 +467,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.cells.Add(e as ConfigCell);
-                    //entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    if (!entity_repository.cells_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    }
                 }
                 // update
                 else
@@ -4118,7 +4136,8 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            genes_guid_ref = new ObservableCollection<string>();
+            genes = new ObservableCollection<ConfigGene>();
+
         }
 
         public ConfigCell Clone(bool identical)
@@ -4236,7 +4255,7 @@ namespace Daphne
         public ConfigCompartment cytosol { get; set; }
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
-        public ObservableCollection<string> genes_guid_ref { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme
@@ -4309,7 +4328,15 @@ namespace Daphne
         //Return true if this compartment has a molecular population with given molecule
         public bool HasGene(string gene_guid)
         {
-            return genes_guid_ref.Contains(gene_guid);
+            foreach (ConfigGene gene in genes)
+            {
+                if (gene.entity_guid == gene_guid)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         //Return true if this cell has all the genes in the given list of gene guids
