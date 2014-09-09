@@ -435,13 +435,17 @@
                                                               Header="Molecule Properties"
                                                               Margin="0,0,0,0" 
                                                               Canvas.ZIndex="1"
-                                                              DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}"
+                                                              DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
                                                               >
 
-                                        <ContentControl Name="membMoleculeDetails"
-                                                                Content="{Binding Path=molecule}" 
-                                                                ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                                                Margin="6"/>
+                                        <StackPanel>
+                                            <ContentControl Name="membMoleculeDetails"
+                                                                    Content="{Binding Path=molecule}" 
+                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                                                    Margin="6"/>
+
+                                            <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click"/>
+                                        </StackPanel>
                                     </Expander>
 
                                 </StackPanel>
@@ -477,11 +481,14 @@
                                                               Canvas.ZIndex="1"
                                                               DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"
                                                               >
-
-                                        <ContentControl Name="cytoMoleculeDetails"
-                                                                Content="{Binding Path=molecule}" 
-                                                                ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                                                Margin="6"/>
+                                        <StackPanel>
+                                            <ContentControl Name="cytoMoleculeDetails"
+                                                                    Content="{Binding Path=molecule}" 
+                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                                                    Margin="6"/>
+                                            <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click"/>
+                                        </StackPanel>
+                                    
                                     </Expander>
 
                                 </StackPanel>
@@ -535,6 +542,7 @@
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                             <TextBox x:Name="txtGeneActLevel" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>                                                
+                                                <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>

@@ -1295,6 +1295,7 @@ namespace DaphneGui
         private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
+            ConfigGene gene = null;
             string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
 
             if (gene_guid == "")
@@ -1305,19 +1306,58 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            PushGene pg = new PushGene();
-            pg.DataContext = cell;
-            pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
+            ////PushGene pg = new PushGene();
+            ////pg.DataContext = cell;
+            ////pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
 
-            //Here show the confirmation dialog
-            if (pg.ShowDialog() == false)
+            //////Here show the confirmation dialog
+            ////if (pg.ShowDialog() == false)
+            ////{
+            ////    //User clicked Cancel
+            ////    return;
+            ////}
+
+            //Here do the processing
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(gene);
+            if (status == Level.PushStatus.PUSH_INVALID)
             {
-                //User clicked Cancel
+                MessageBox.Show("Entity not pushable.");
                 return;
             }
 
-            //Here do the processing
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(gene, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(gene, status); // push into B, overwrite
+            }
 
+        }
+
+        private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellCytosolMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
+        }
+
+        private void PushMembMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
         }
     }
 

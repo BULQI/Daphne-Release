@@ -2743,6 +2743,7 @@ namespace Daphne
                 {
                     molWeight = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("MolecularWeight");
                 }
             }
         }
@@ -2759,6 +2760,7 @@ namespace Daphne
                 {
                     effRadius = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("EffectiveRadius");
                 }
             }
         }
@@ -2775,6 +2777,7 @@ namespace Daphne
                 {
                     diffCoeff = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("DiffusionCoefficient");
                 }
             }
         }
@@ -2910,11 +2913,15 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newgene.entity_guid = id.ToString();
-            newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
 
+                newgene.entity_guid = id.ToString();
+                newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            }
+                
             return newgene;
         }
 
@@ -5986,9 +5993,6 @@ namespace Daphne
     }
 
     //Graphics classes
-    //public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
-    //public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
-
     public enum RenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN, MP_TYPE, MP_CONC, CELL_MP }
 
     public class RenderColor
