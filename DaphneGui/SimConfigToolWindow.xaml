@@ -1164,8 +1164,8 @@
                                         MinWidth="80"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=Cell.CellName, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="CellName">
+                                        SelectedValue="{Binding Path=Cell.entity_guid, UpdateSourceTrigger=Explicit}"
+                                        SelectedValuePath="entity_guid">
 
                             <ComboBox.ItemsSource>
                                 <CompositeCollection>
