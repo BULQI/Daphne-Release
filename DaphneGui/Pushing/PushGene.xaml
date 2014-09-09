@@ -38,7 +38,7 @@
         </GroupBox>
 
         <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0">
-            <Button Content="Save Gene to Components Level" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="GeneSaveButton" VerticalAlignment="Top" Click="GeneSaveButton_Click"/>
+            <Button Content="Save Gene to Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="GeneSaveButton" VerticalAlignment="Top" Click="GeneSaveButton_Click"/>
             <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="GeneCancelButton" VerticalAlignment="Top" Click="GeneCancelButton_Click"/>
         </StackPanel>
     </Grid>

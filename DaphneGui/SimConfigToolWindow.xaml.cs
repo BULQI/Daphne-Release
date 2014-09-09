@@ -1186,22 +1186,57 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            //guid to object changes
-            //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
-            ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
-            //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
-            //of configCell, it will has its own entity_guid - only the name stays the same ---
-            if (cell_to_clone.entity_guid != curr_cell_type_guid)
+            //if user picked 'new cell type' then create new configcell in ER
+            if (nIndex == (cb.Items.Count - 1))
             {
-                cp.Cell = cell_to_clone.Clone(false);
+                ConfigCell newLibCell = new ConfigCell();
+                newLibCell.CellName = newLibCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                ////AddEditMolecule aem = new AddEditMolecule(newLibCell, MoleculeDialogType.NEW);
 
-                string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
-                if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                //////if user cancels out of new cell dialog, set selected cell back to what it was
+                ////if (aem.ShowDialog() == false)
+                ////{
+                ////    if (e.RemovedItems.Count > 0)
+                ////    {
+                ////        cb.SelectedItem = e.RemovedItems[0];
+                ////    }
+                ////    else
+                ////    {
+                ////        cb.SelectedIndex = 0;
+                ////    }
+                ////    return;
+                ////}
+
+                Protocol B = MainWindow.SOP.Protocol;
+                newLibCell.incrementChangeStamp();
+                Level.PushStatus status = B.pushStatus(newLibCell);
+                if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
-                    cp.cellpopulation_name = new_cell_name;
+                    B.repositoryPush(newLibCell, status); // push into B, inserts as new
                 }
+
+                cp.Cell = newLibCell.Clone(true);
+                cp.Cell.CellName = newLibCell.CellName;
+                cb.SelectedItem = newLibCell;
             }
-            //ucCellPopCellDetails.DataContext = cp.Cell;
+            //user picked existing cell type 
+            else
+            {
+                ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
+                //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
+                //of configCell, it will has its own entity_guid - only the name stays the same ---
+                if (cell_to_clone.entity_guid != curr_cell_type_guid)
+                {
+                    cp.Cell = cell_to_clone.Clone(true);
+
+                    string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
+                    if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                    {
+                        cp.cellpopulation_name = new_cell_name;
+                    }
+                }
+                //ucCellPopCellDetails.DataContext = cp.Cell;
+            }
         }
 
         /// <summary>
@@ -2570,15 +2605,15 @@ namespace DaphneGui
 
         }
 
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
-            if (cellpop == null)
-                return;
+        ////private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        ////{
+        ////    CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
+        ////    if (cellpop == null)
+        ////        return;
 
-            ConfigCell cell = cellpop.Cell;
-            GenericPush(cell);
-        }
+        ////    ConfigCell cell = cellpop.Cell;
+        ////    GenericPush(cell);
+        ////}
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
@@ -2631,20 +2666,6 @@ namespace DaphneGui
 
             if (source is ConfigMolecule)
             {
-                ////This works
-                ////PushMolecule pm = new PushMolecule();
-                ////pm.DataContext = MainWindow.SOP;
-                ////pm.EntityLevelMolDetails.DataContext = source;
-
-                ////ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
-                ////if (erMol != null)
-                ////    pm.ComponentLevelMolDetails.DataContext = erMol;
-
-                //////Show the confirmation dialog
-                ////if (pm.ShowDialog() == false)
-                ////    return;
-
-
                 //LET'S TRY A GENERIC PUSHER
                 PushEntity pm = new PushEntity();
                 pm.DataContext = MainWindow.SOP;
@@ -2671,16 +2692,6 @@ namespace DaphneGui
                 if (pr.ShowDialog() == false)
                     return;
 
-
-                ////This works
-                ////PushReaction pr = new PushReaction();
-                ////pr.EntityLevelReactionDetails.DataContext = source;
-
-                ////if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
-                ////    pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-
-                ////if (pr.ShowDialog() == false)
-                ////    return;
             }
             else if (source is ConfigCell)
             {
@@ -2711,6 +2722,12 @@ namespace DaphneGui
             //Push the entity
             Protocol B = MainWindow.SOP.Protocol;
             Level.PushStatus status = B.pushStatus(source);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show("Entity not pushable.");
+                return;
+            }
+
             if (status == Level.PushStatus.PUSH_CREATE_ITEM)
             {
                 B.repositoryPush(source, status); // push into B, inserts as new

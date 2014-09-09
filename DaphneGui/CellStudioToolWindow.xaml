@@ -57,18 +57,18 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="120" LostFocus="CellTextBox_LostFocus" />
+                            <TextBox Text="{Binding Path=CellName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,2" Width="130" LostFocus="CellTextBox_LostFocus" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="radius" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <uc:DoublesBox SliderEnabled="False" Width="100" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <uc:DoublesBox SliderEnabled="False" Width="130" Margin="-5,0" HorizontalAlignment="Left" Number="{Binding Path=CellRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             </uc:DoublesBox>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Width="220" >
                             <TextBlock Text="differentiator" Margin="6,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="80" />
-                            <TextBox x:Name="txtCellDiff" Width="120" IsEnabled="False" IsReadOnly="True" 
+                            <TextBox x:Name="txtCellDiff" Width="130" IsEnabled="False" IsReadOnly="True" 
                                      Text="{Binding Path=diff_scheme, Mode=OneWay, Converter={StaticResource DiffSchemeToDiffNameConv}}" />
                         </StackPanel>
 

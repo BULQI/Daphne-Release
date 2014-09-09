@@ -1162,12 +1162,18 @@
                         <ComboBox x:Name="cell_type_combo_box"
                                         Grid.Column="1" Grid.Row="0" Margin="0,2"
                                         MinWidth="80"
-                                        ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
                                         SelectedValue="{Binding Path=Cell.CellName, UpdateSourceTrigger=Explicit}"
                                         SelectedValuePath="CellName">
-                            
+
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <CollectionContainer Collection="{Binding Source={StaticResource cellTypesListView}}" />
+                                    <daph:ConfigCell CellName="New Cell Type"/>
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+
                         </ComboBox>
 
                         <TextBlock Text="number" Margin="6,0"
@@ -1962,14 +1968,20 @@
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
                                                     <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    ItemsSource="{Binding Source={StaticResource EcsBulkMoleculesListView}}"
-                                                    DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="entity_guid"
-                                                    SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
-                                                   
-                                                    >
+                                                        DisplayMemberPath="Name"
+                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                        SelectedValuePath="entity_guid"
+                                                        SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
+                                                        
+                                                        >
                                                         <!--GotFocus="ecm_molecule_combo_box_GotFocus"-->
+
+                                                        <ComboBox.ItemsSource>
+                                                            <CompositeCollection>
+                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
+                                                                <daph:ConfigMolecule Name="New Molecule"/>
+                                                            </CompositeCollection>
+                                                        </ComboBox.ItemsSource>
 
                                                     </ComboBox>
                                                 </StackPanel>
@@ -2036,21 +2048,7 @@
                                 </StackPanel>
 
                             </Expander>
-                            <!--<Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Molecule Properties"
-                                              x:Name="ecmMolPropExpander"
-                                              Margin="0,0,0,0" 
-                                              Canvas.ZIndex="1"
-                                              DataContext="{Binding ElementName=ecm_molecule_combo_box, Path=SelectedItem}"
-                                              >
-
-                                <ContentControl Name="ecmMolpopMolDetails"
-                                        Content="{Binding}" 
-                                        ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                        Margin="6"/>
-                            </Expander>-->
-
+                           
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Molecule Properties"
@@ -2064,8 +2062,8 @@
                                             Content="{Binding Path=molecule}" 
                                             ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                             Margin="6"/>
-                                
-                                    <Button x:Name="PushEcmMoleculeButton" Content="Save molecule to components library..." Click="PushEcmMoleculeButton_Click">
+
+                                    <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushEcmMoleculeButton_Click">
                                         
                                     </Button>
                                 </StackPanel>
@@ -2161,7 +2159,7 @@
                             </ListView>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                <Button Name="PushEcmReacButton"  Content="Save reaction to component library..." Click="PushEcmReacButton_Click" />
+                                <Button Name="PushEcmReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushEcmReacButton_Click" />
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
                             
@@ -2460,19 +2458,17 @@
                                     Canvas.ZIndex="1"
                                     >
 
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellPopDetails"
-                                                Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
-                                                Margin="6,-4"/>
-
-                                        <StackPanel HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                            <Button Name="PushCellButton" Content="Save cell to component library..." Click="EcsPushCellButton_Click"/>
-                                        </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel HorizontalAlignment="Left">
+                                            <ContentControl Name="CellPopDetails"
+                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                    ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
+                                                    Margin="6,0"/>
                                     </StackPanel>
+
                                 </StackPanel>
                             </Expander>
+                            
                             <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
@@ -2496,7 +2492,6 @@
                             
                         </StackPanel>
                     </Expander>
-
 
                     <!-- CELL DEATH PARAMETERS -->
                     <Expander
