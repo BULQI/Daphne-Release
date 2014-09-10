@@ -1,0 +1,95 @@
+﻿<Window x:Class="DaphneGui.Pushing.PushByLevel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+        xmlns:push="clr-namespace:DaphneGui.Pushing"
+        Title="Save Entities Between Levels" 
+        SizeToContent="WidthAndHeight"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <daph:PushTypeToStringConverter x:Key="PushTypeToStringConv" />
+
+        <ObjectDataProvider x:Key="pushTypesList"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="daph:PushType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <DataTemplate x:Key="pushLevelMoleculeTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid  Height="200" 
+                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="pushLevelGeneTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid  Height="200" 
+                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="pushLevelReactionTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <DataGrid  Height="200"
+                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+                </StackPanel>                
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="pushLevelCellTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <DataGrid  Height="200"
+                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        
+        <push:PushLevelTemplateSelector x:Key="pushLevelTemplateSelector"
+                PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
+                PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
+                PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
+                PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
+             />
+
+    </Window.Resources>
+
+    <Grid>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Width="450" HorizontalAlignment="Left">
+                <Label FontWeight="Bold">Level A (From)</Label>
+                <ComboBox x:Name="LevelAComboBox" 
+                          ItemsSource="{Binding Source={StaticResource pushTypesList}}" 
+                          SelectionChanged="LevelAComboBox_SelectionChanged"
+                    />
+                <ContentControl Name="LevelAContent"
+                        Content="{Binding Path=PushEntityType}" 
+                        ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
+                        Margin="6"/>
+            </StackPanel>
+            <!--<StackPanel>-->
+            <Button x:Name="PushButton" Content=">" Height="24" Width="60" HorizontalAlignment="Center" 
+                        Click="PushButton_Click">
+            </Button>
+            <!--</StackPanel>-->
+            <StackPanel Width="450" HorizontalAlignment="Right">
+                <Label FontWeight="Bold" Content="Level B (To)" />
+                <ComboBox x:Name="LevelBComboBox" 
+                          ItemsSource="{Binding Source={StaticResource pushTypesList}}" 
+                          SelectionChanged="LevelBComboBox_SelectionChanged"/>
+
+                    <ContentControl Name="LevelBContent"
+                        Content="{Binding Path=PushEntityType}" 
+                        ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
+                        Margin="6"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

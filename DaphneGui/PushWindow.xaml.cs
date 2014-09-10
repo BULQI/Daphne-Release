@@ -28,5 +28,15 @@ namespace DaphneGui
         {
 
         }
+
+        private void LevelAComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void LevelBComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

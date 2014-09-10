@@ -53,7 +53,7 @@ namespace Daphne
             Protocol = new Protocol("", "Config\\temp_protocol.json");
             skin = new RenderSkin();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
-            //UserStore = new Level("", "Config\\temp_userstore.json");
+            UserStore = new Level("", "Config\\temp_userstore.json");
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Daphne
         }
     }
 
-    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    public enum PushType { Component = 0, UserStore, DaphneStore }
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
@@ -140,8 +140,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_type_strings = new List<string>()
                                 {
-                                    "Entity",
-                                    "Protocol",
+                                    "Component",
                                     "User Store",
                                     "Daphne Store"
                                 };

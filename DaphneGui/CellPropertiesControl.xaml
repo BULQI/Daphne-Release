@@ -90,7 +90,7 @@
             </StackPanel>
 
             
-            <StackPanel Orientation="Vertical" Margin="0,0">
+            <StackPanel Orientation="Vertical" Margin="4,0">
                     
                 <StackPanel Orientation="Horizontal">
                         <TextBlock Text="transduction constant" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" TextWrapping="Wrap"/>
