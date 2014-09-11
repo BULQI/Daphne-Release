@@ -34,7 +34,7 @@ namespace DaphneGui
             GeneComboBox.Items.Clear();
             foreach (ConfigGene g in er.genes)
             {
-                if (!SelectedCell.genes_guid_ref.Contains(g.entity_guid))
+                if (!SelectedCell.HasGene(g.entity_guid))
                 {
                     GeneComboBox.Items.Add(g);
                 }

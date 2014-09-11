@@ -1,17 +1,24 @@
 ﻿<Window x:Class="DaphneGui.Rendering.RenderCell"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Cell Population Rendering Options " Height="300" Width="300">
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:rend="clr-namespace:DaphneGui.Rendering"
+        Title="Cell Population Rendering Options " Height="340" Width="516">
+    
+    <Window.Resources>
+                
+        <!--<rend:RenderTemplateSelector x:Key="renderTemplateSelector"
+            ByPopTemplate="{StaticResource byPopTemplate}" 
+            ByStateTemplate="{StaticResource byStateTemplate}" 
+            ByGenTemplate="{StaticResource byGenTemplate}"
+             />-->
+    </Window.Resources>
+    
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Label>Cell Population:</Label>
-                <TextBlock Text="Cell Population Name" Margin="10,4"></TextBlock>
-
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">                
-                <Label>Render Method:  </Label>
-                <ComboBox Height="23" Margin="20, 0" Name="comboBox1" Width="142">
+                <Label>Cell Colors by:</Label>
+                <ComboBox Height="23" Margin="20, 0" Name="TypeComboBox" Width="220" SelectedIndex="0" SelectionChanged="comboBox1_SelectionChanged">
                     <ComboBoxItem Content="Cell Type" />
                     <ComboBoxItem Content="Cell State" />
                     <ComboBoxItem Content="Cell Generation" />
@@ -19,55 +26,10 @@
                     <ComboBoxItem Content="Cell Generation Shade" />
                 </ComboBox>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <DataGrid x:Name="RenderColorGrid" AutoGenerateColumns="False" Height="152" Margin="20,10" Width="237" 
-                                CanUserReorderColumns="False" CanUserResizeRows="False"
-                                CanUserSortColumns="False" RowHeaderWidth="0"
-                                VerticalContentAlignment="Center"
-                                CanUserAddRows="False"
-                                BorderThickness="4"
-                                BorderBrush="Black"
-                          >
-
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="DataGridColumnHeader" >
-                            <Setter Property="FontSize" Value="12" />
-                            <Setter Property="Height" Value="24" />
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                            <Setter Property="BorderThickness" Value="1" />
-                            <Setter Property="BorderBrush" Value="Black" />
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                        <GradientStop Offset="0.0" Color="White" />
-                                        <GradientStop Offset="1.0" Color="Beige" />
-                                    </LinearGradientBrush>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-
-                    <DataGrid.Columns>
-
-                        <DataGridTemplateColumn Header="state" Width="150">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Cell.diff_scheme.Driver.states, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Header="color">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=state_colors, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-
-                </DataGrid>
-            </StackPanel>
+            <!--<ContentControl Name="EntityLevelDetails"
+                        Content="{Binding}" 
+                        ContentTemplateSelector="{StaticResource renderTemplateSelector}"
+                        Margin="6"/>-->
             
         </StackPanel>
         

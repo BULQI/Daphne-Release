@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Daphne;
 using System.Collections.ObjectModel;
 using System.Windows.Controls.Primitives;
+using DaphneGui.Pushing;
 
 namespace DaphneGui
 {
@@ -259,7 +260,7 @@ namespace DaphneGui
             cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("newBoundaryMoleculesListView"));
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
             //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
@@ -330,15 +331,17 @@ namespace DaphneGui
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            cell.genes_guid_ref.Add(gene.entity_guid);
+            cell.genes.Add(gene);
             //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
 
-            string guid = (string)CellNucleusGenesListBox.SelectedItem;
-            CellNucleusGenesListBox.ScrollIntoView(guid);
+            //string guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //CellNucleusGenesListBox.ScrollIntoView(guid);
+            CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
+
             txtGeneName.IsEnabled = true;
         }
 
@@ -362,7 +365,7 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
+                cell.genes.Add(geneToAdd);
             }
 
             txtGeneName.IsEnabled = false;
@@ -372,19 +375,20 @@ namespace DaphneGui
         {
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
 
-            if (gene_guid == "")
-                return;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            //if (gene_guid == "")
+            //    return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
 
             if (res == MessageBoxResult.No)
                 return;
 
-            if (cell.genes_guid_ref.Contains(gene_guid))
-            {
-                cell.genes_guid_ref.Remove(gene_guid);
+            if (cell.HasGene(gene.entity_guid)) {
+                cell.genes.Remove(gene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -607,8 +611,11 @@ namespace DaphneGui
             //string new_mol_name = mol.Name;
             //if (curr_mol_guid != molpop.molecule.entity_guid)
             //    molpop.Name = new_mol_name;
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
 
-            CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -1024,37 +1031,37 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
-            ConfigDiffScheme diff_scheme = null;
+            ConfigDiffScheme new_scheme = null;
             if (schemeName == "Division")
             {
-                diff_scheme = cell.div_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.div_scheme;
+                if (new_scheme == null)
                 {
-                    cell.div_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.div_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else if (schemeName == "Differentiation")
             {
-                diff_scheme = cell.diff_scheme;
-                if (diff_scheme == null)
+                new_scheme = cell.diff_scheme;
+                if (new_scheme == null)
                 {
-                    cell.diff_scheme = diff_scheme = new ConfigDiffScheme();
+                    cell.diff_scheme = new_scheme = new ConfigDiffScheme();
                 }
             }
             else return;
 
-            diff_scheme.AddState(stateName);
+            new_scheme.AddState(stateName);
 
             //refresh display
             if (schemeName == "Division")
             {
                 cell.div_scheme = null;
-                cell.div_scheme = diff_scheme;
+                cell.div_scheme = new_scheme;
             }
             else if (schemeName == "Differentiation")
             {
                 cell.diff_scheme = null;
-                cell.diff_scheme = diff_scheme;
+                cell.diff_scheme = new_scheme;
             }
         }
 
@@ -1200,7 +1207,7 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
+            if (!cell.HasGene(gene.entity_guid))
                 return;
 
 
@@ -1273,6 +1280,88 @@ namespace DaphneGui
 
             return foundChild;
         }
+
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
+            if (cvs.View == null) return; //not ready yet
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
+            cvs.View.Refresh();
+
+            cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
+            cvs.View.Refresh();
+        }
+
+        private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            if (gene == null)
+                return;
+
+            MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.No)
+                return;
+
+            ////PushGene pg = new PushGene();
+            ////pg.DataContext = cell;
+            ////pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
+
+            //////Here show the confirmation dialog
+            ////if (pg.ShowDialog() == false)
+            ////{
+            ////    //User clicked Cancel
+            ////    return;
+            ////}
+
+            //Here do the processing
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(gene);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show("Entity not pushable.");
+                return;
+            }
+
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(gene, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(gene, status); // push into B, overwrite
+            }
+
+        }
+
+        private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellCytosolMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
+        }
+
+        private void PushMembMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
+        }
     }
 
 }
+
+        

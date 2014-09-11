@@ -11,7 +11,9 @@
              xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600"
-             Loaded="UserControl_Loaded">
+             Loaded="UserControl_Loaded"
+             DataContextChanged="UserControl_DataContextChanged"
+             >
 
     <UserControl.Resources>
         <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
@@ -52,6 +54,39 @@
             <TextBlock Name="textblock"  Text="{Binding Path=driver_mol_guid_ref, Converter={StaticResource MolGUIDtoMolNameConverter},
                 ConverterParameter={StaticResource moleculesListView}}" />
         </DataTemplate>
+
+
+        <DataTemplate DataType="{x:Type daph:MolPopHomogeneousLevel}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="-50,2">
+
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+
+                        <uc:DoublesBox      HorizontalAlignment="Left"
+                                                TextFieldWidth="100"
+                                                Number="{Binding Path=concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                DecimalPlaces="2" 
+                                                RangeFactor="2"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                SliderEnabled="False"                                                
+                                                >
+                        </uc:DoublesBox>
+
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
 
         <DataTemplate x:Key="DiffRegCellEditingTemplate" DataType="daph:ConfigTransitionDriverElement">
             <StackPanel Name="CellEditStackPanel" Orientation="Vertical">
@@ -400,13 +435,17 @@
                                                               Header="Molecule Properties"
                                                               Margin="0,0,0,0" 
                                                               Canvas.ZIndex="1"
-                                                              DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem}"
+                                                              DataContext="{Binding ElementName=CellMembraneMolPopsListBox, Path=SelectedItem, Mode=TwoWay}"
                                                               >
 
-                                        <ContentControl Name="membMoleculeDetails"
-                                                                Content="{Binding Path=molecule}" 
-                                                                ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                                                Margin="6"/>
+                                        <StackPanel>
+                                            <ContentControl Name="membMoleculeDetails"
+                                                                    Content="{Binding Path=molecule}" 
+                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                                                    Margin="6"/>
+
+                                            <Button x:Name="PushMembMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushMembMoleculeButton_Click"/>
+                                        </StackPanel>
                                     </Expander>
 
                                 </StackPanel>
@@ -442,11 +481,14 @@
                                                               Canvas.ZIndex="1"
                                                               DataContext="{Binding ElementName=CellCytosolMolPopsListBox, Path=SelectedItem}"
                                                               >
-
-                                        <ContentControl Name="cytoMoleculeDetails"
-                                                                Content="{Binding Path=molecule}" 
-                                                                ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                                                Margin="6"/>
+                                        <StackPanel>
+                                            <ContentControl Name="cytoMoleculeDetails"
+                                                                    Content="{Binding Path=molecule}" 
+                                                                    ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                                                    Margin="6"/>
+                                            <Button x:Name="PushCytoMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushCytoMoleculeButton_Click"/>
+                                        </StackPanel>
+                                    
                                     </Expander>
 
                                 </StackPanel>
@@ -468,13 +510,12 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </StackPanel.Resources>
-
                                     <ListBox x:Name="CellNucleusGenesListBox" MinHeight="50" MaxHeight="100" 
-                                                                    ItemsSource="{Binding Path=genes_guid_ref}" 
-                                                                     ItemTemplate="{Binding Source={StaticResource cellGeneListItemTemplate}}"
+                                                                    ItemsSource="{Binding Path=genes}" 
                                                                     DisplayMemberPath="Name"                                                    
                                                                     SelectedIndex="-1"
-                                                                     SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
+                                                                    SelectionChanged="CellNucleusGenesListBox_SelectionChanged"/>
+                                    
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                         <Button Name="NucNewGeneButton"  Width="50" Content="New" Click="NucleusNewGeneButton_Click"/>
                                         <Button Name="NucleusAddGeneButton"  Width="50" Content="Add" Click="NucleusAddGeneButton_Click"/>
@@ -487,8 +528,8 @@
                                                                     ContentTemplate="{StaticResource geneDetailsTemplate}"
                                                                     Margin="6">
                                                         </ContentControl>-->
-                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem, 
-                                                                                    Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenes2ListView}}">
+                                    <StackPanel Orientation="Vertical" DataContext="{Binding ElementName=CellNucleusGenesListBox, Path=SelectedItem}">
+                                                                                    <!--Converter={StaticResource GeneGUIDtoConfigGeneConv}, ConverterParameter={StaticResource cytoGenes2ListView}}">-->
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Name" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
                                             <TextBox x:Name="txtGeneName" IsEnabled="False" Margin="4,2" MinWidth="140" HorizontalAlignment="Left"
@@ -500,7 +541,8 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="10,4">
                                             <TextBlock Text="Activation Level" Margin="0,0" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
-                                            <TextBox x:Name="txtGeneActLevel" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                            <TextBox x:Name="txtGeneActLevel" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>                                                
+                                                <Button Name="NucPushGeneButton" HorizontalAlignment="Right"  Content="Save Gene to Subcellular Components Library..." Click="NucPushGeneButton_Click"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>

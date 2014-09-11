@@ -874,7 +874,7 @@ namespace SBMLayer
                     ordinal = ordinal + 1;
                 }
 
-                ConfigGene configGene;
+                //ConfigGene configGene;
                 //}
 
                 for (int comp = 0; comp < 2; comp++)
@@ -912,11 +912,19 @@ namespace SBMLayer
                 }
 
                 //add genes
-                for (int i = 0; i < configCell.genes_guid_ref.Count; i++)
+                ////for (int i = 0; i < configCell.genes_guid_ref.Count; i++)
+                ////{
+                ////    configGene= protocol.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
+                ////    confMolPopName = configGene.Name;
+                ////    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false,configGene.ActivationLevel, "");
+                ////    SetGeneAnnotation(configGene, species);
+
+                ////    //No diffusion coefficients or Boundary Conditions are needed here
+                ////}
+                foreach (ConfigGene configGene in configCell.genes)
                 {
-                    configGene= protocol.entity_repository.genes_dict[configCell.genes_guid_ref[i]];
                     confMolPopName = configGene.Name;
-                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false,configGene.ActivationLevel, "");
+                    species = AddSpecies(confMolPopName + "_" + cytosolId, confMolPopName, cytosolId, false, false, false, configGene.ActivationLevel, "");
                     SetGeneAnnotation(configGene, species);
 
                     //No diffusion coefficients or Boundary Conditions are needed here
@@ -1003,11 +1011,13 @@ namespace SBMLayer
         private bool ExistMolecule(string cellId, string molecule, string compartment, bool isGene=false)
         {
             ObservableCollection<ConfigMolecularPopulation> configComp=null;
-            ObservableCollection<string> configGenes=null;
+            //ObservableCollection<string> configGenes=null;
+            ObservableCollection<ConfigGene> cGenes = null;
 
             if (!compartment.ToLower().Contains("complex") && isGene)
             {
-                configGenes = protocol.entity_repository.cells_dict[cellId].genes_guid_ref;
+                //configGenes = protocol.entity_repository.cells_dict[cellId].genes_guid_ref;
+                cGenes = protocol.entity_repository.cells_dict[cellId].genes;
             }
             else if (compartment.ToLower().Contains("membrane"))
             {
@@ -1049,11 +1059,21 @@ namespace SBMLayer
                     }
                 }  
             }
-            else if (configGenes != null)
+            ////else if (configGenes != null)
+            ////{
+            ////    foreach (string cng in configGenes)
+            ////    {
+            ////        if (protocol.entity_repository.genes_dict[cng].Name.Equals(molecule))
+            ////        {
+            ////            return true;
+            ////        }
+            ////    }
+            ////}
+            else if (cGenes != null)
             {
-                foreach (string cng in configGenes)
+                foreach (ConfigGene cg in cGenes)
                 {
-                    if (protocol.entity_repository.genes_dict[cng].Name.Equals(molecule))
+                    if (cg.Name.Equals(molecule))
                     {
                         return true;
                     }
@@ -2005,7 +2025,8 @@ namespace SBMLayer
                                         }
                                     }
                                     else {
-                                        gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).entity_guid);
+                                        //gc.genes_guid_ref.Add(PrepareGenes(tempSpecies).entity_guid);
+                                        gc.genes.Add(PrepareGenes(tempSpecies));
                                     }
                                 }
                             }

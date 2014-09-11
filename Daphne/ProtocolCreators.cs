@@ -476,7 +476,7 @@ namespace Daphne
             type = new string[1] { "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], sc));
+                gc.genes.Add(findGene(type[i], sc));
             }
 
             //
@@ -547,7 +547,7 @@ namespace Daphne
             type = new string[1] { "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -624,7 +624,7 @@ namespace Daphne
             type = new string[2] { "gApop", "gCXCR5" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -715,7 +715,7 @@ namespace Daphne
                                     "gDif1", "gDif2", "gDif3", "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -824,7 +824,7 @@ namespace Daphne
                                     "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -926,7 +926,7 @@ namespace Daphne
             type = new string[1] { "gCXCL12" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -1002,7 +1002,7 @@ namespace Daphne
             type = new string[1] { "gCXCL13" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes_guid_ref.Add(findGeneGuid(type[i], protocol));
+                gc.genes.Add(findGene(type[i], protocol));
             }
 
             // Reactions in Cytosol
@@ -1754,6 +1754,19 @@ namespace Daphne
                 }
             }
             return "";
+        }
+
+        // given a gene name, find its gene
+        public static ConfigGene findGene(string name, Protocol protocol)
+        {
+            foreach (ConfigGene gene in protocol.entity_repository.genes)
+            {
+                if (gene.Name == name)
+                {
+                    return gene;
+                }
+            }
+            return null;
         }
 
         // given a molecule name and location, find its guid

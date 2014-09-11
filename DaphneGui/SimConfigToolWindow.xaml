@@ -89,11 +89,12 @@
 
             <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" /> 
             <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
+            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
             
             <!-- <daph:ManyToBooleanConverter x:Key="ManyConv" />
             <daph:TextToColorConverter x:Key="textToColorConv" />
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
-            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+            
             
             <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />-->
             <!--<daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />-->
@@ -117,7 +118,6 @@
             <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
             <local:DatabindingDebugConverter x:Key="DebugConverter"/>
             <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
-            <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
 
             <ObjectDataProvider x:Key="regionShapesEnum"
                             MethodName="GetValues" 
@@ -1162,12 +1162,18 @@
                         <ComboBox x:Name="cell_type_combo_box"
                                         Grid.Column="1" Grid.Row="0" Margin="0,2"
                                         MinWidth="80"
-                                        ItemsSource="{Binding Source={StaticResource cellTypesListView}}"
                                         DisplayMemberPath="CellName"
                                         SelectionChanged="cell_type_combo_box_SelectionChanged"
-                                        SelectedValue="{Binding Path=Cell.CellName, UpdateSourceTrigger=Explicit}"
-                                        SelectedValuePath="CellName">
-                            
+                                        SelectedValue="{Binding Path=Cell.entity_guid, UpdateSourceTrigger=Explicit}"
+                                        SelectedValuePath="entity_guid">
+
+                            <ComboBox.ItemsSource>
+                                <CompositeCollection>
+                                    <CollectionContainer Collection="{Binding Source={StaticResource cellTypesListView}}" />
+                                    <daph:ConfigCell CellName="New Cell Type"/>
+                                </CompositeCollection>
+                            </ComboBox.ItemsSource>
+
                         </ComboBox>
 
                         <TextBlock Text="number" Margin="6,0"
@@ -1961,15 +1967,20 @@
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
-                                                    <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0" 
-                                                    ItemsSource="{Binding Source={StaticResource EcsBulkMoleculesListView}}"
-                                                    DisplayMemberPath="Name"
-                                                    SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
-                                                    SelectedValuePath="entity_guid"
-                                                    SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
-                                                   
-                                                    >
+                                                    <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0"                                                        
+                                                        DisplayMemberPath="Name"
+                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                        SelectedValuePath="entity_guid"
+                                                        SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
+                                                        >
                                                         <!--GotFocus="ecm_molecule_combo_box_GotFocus"-->
+
+                                                        <ComboBox.ItemsSource>
+                                                            <CompositeCollection>
+                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
+                                                                <daph:ConfigMolecule Name="New Molecule"/>
+                                                            </CompositeCollection>
+                                                        </ComboBox.ItemsSource>
 
                                                     </ComboBox>
                                                 </StackPanel>
@@ -2036,21 +2047,7 @@
                                 </StackPanel>
 
                             </Expander>
-                            <!--<Expander ExpandDirection="Down"
-                                              IsExpanded="False"
-                                              Header="Molecule Properties"
-                                              x:Name="ecmMolPropExpander"
-                                              Margin="0,0,0,0" 
-                                              Canvas.ZIndex="1"
-                                              DataContext="{Binding ElementName=ecm_molecule_combo_box, Path=SelectedItem}"
-                                              >
-
-                                <ContentControl Name="ecmMolpopMolDetails"
-                                        Content="{Binding}" 
-                                        ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                        Margin="6"/>
-                            </Expander>-->
-
+                           
                             <Expander ExpandDirection="Down"
                                               IsExpanded="False"
                                               Header="Molecule Properties"
@@ -2064,8 +2061,12 @@
                                             Content="{Binding Path=molecule}" 
                                             ContentTemplate="{StaticResource editMoleculeTemplate}" 
                                             Margin="6"/>
-                                </StackPanel>
 
+                                    <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushEcmMoleculeButton_Click">
+                                        
+                                    </Button>
+                                </StackPanel>
+                                
                             </Expander>
                             
                         </StackPanel>
@@ -2157,6 +2158,7 @@
                             </ListView>
                             
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                <Button Name="PushEcmReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushEcmReacButton_Click" />
                                 <Button Name="RemoveEcmReacButton" Width="50" Content="Remove" Click="RemoveEcmReacButton_Click" />
                             </StackPanel>
                             
@@ -2455,15 +2457,17 @@
                                     Canvas.ZIndex="1"
                                     >
 
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ContentControl Name="CellPopDetails"
-                                                Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
-                                                ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
-                                                Margin="6,-4"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel HorizontalAlignment="Left">
+                                            <ContentControl Name="CellPopDetails"
+                                                    Content="{Binding ElementName=CellPopsListBox, Path=SelectedItem}" 
+                                                    ContentTemplate="{StaticResource cellPopDetailsTemplate}" 
+                                                    Margin="6,0"/>
                                     </StackPanel>
+
                                 </StackPanel>
                             </Expander>
+                            
                             <Expander  Padding="0"
                                 ExpandDirection="Down"
                                 IsExpanded="False"
@@ -2487,7 +2491,6 @@
                             
                         </StackPanel>
                     </Expander>
-
 
                     <!-- CELL DEATH PARAMETERS -->
                     <Expander
@@ -2903,7 +2906,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
-                                <DataGridCheckBoxColumn Header="Death"                 
+                                <DataGridCheckBoxColumn Header="Death" Width="60"                 
                                     Binding="{Binding Path=reportStates.Death, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -2913,17 +2916,17 @@
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
                                 
-                                <DataGridCheckBoxColumn Header="Division"                 
-                                    Binding="{Binding Path=reportStates.Divison, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                <DataGridCheckBoxColumn Header="Division" Width="60"                 
+                                    Binding="{Binding Path=reportStates.Division, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
                                         <Style TargetType="DataGridCell" BasedOn="{StaticResource gridcellstyle1}">
-                                            <Setter Property="Tag" Value="{Binding Cell.div_driver}" />
+                                            <Setter Property="Tag" Value="{Binding Cell.div_scheme}" />
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
 
-                                <DataGridCheckBoxColumn Header="Differentiation" MinWidth="60" Width="Auto"                
+                                <DataGridCheckBoxColumn Header="Differentiation" Width="85"                
                                     Binding="{Binding Path=reportStates.Differentiation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
                                     <DataGridCheckBoxColumn.CellStyle>
@@ -3034,7 +3037,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
-                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellMembMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                         
+                                    ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.membrane.molpops}"                         
                                     Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
@@ -3104,7 +3107,7 @@
                             >
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
-                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.entity_guid, Converter={StaticResource CellGuidToCellCytoMolPopsConv}, ConverterParameter={StaticResource cellTypesListView}}"                                                                                 
+                                        ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.cytosol.molpops}"                                                                                 
                                         Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"
