@@ -1341,7 +1341,7 @@ namespace DaphneGui
 
         private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+            if (CellCytosolMolPopsListBox.SelectedIndex < 0)
                 return;
 
             ConfigCell cell = DataContext as ConfigCell;
