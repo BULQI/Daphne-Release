@@ -688,12 +688,6 @@ namespace Daphne
 
             // ADD ECS MOLECULAR POPULATIONS
             addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, protocol);
-            // NOTE: This boolean isn't used anywhere. Do we envision a need for it?
-            // Default: set diffusing
-            foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
-            {
-                mp.IsDiffusing = true;
-            }
 
             // ECS molpops boundary conditions
             foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops)
