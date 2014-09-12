@@ -45,7 +45,10 @@ namespace DaphneGui.Pushing
             switch (PushEntityType)
             {
                 case PushLevelEntityType.Molecule:
-                    cc.Tag = level.entity_repository.molecules;
+                    cc.Tag = level.entity_repository.molecules;                    
+                    break;
+                case PushLevelEntityType.Gene:
+                    cc.Tag = level.entity_repository.genes;
                     break;
                 case PushLevelEntityType.Reaction:
                     cc.Tag = level.entity_repository.reactions;
@@ -63,21 +66,22 @@ namespace DaphneGui.Pushing
         private void LevelAComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
-            PushType type = (PushType)combo.SelectedItem;
+            PushLevel level = (PushLevel)combo.SelectedItem;
 
             if (LevelAContent == null)
                 return;
 
-            LevelAContent.DataContext = PushEntityType;
+            LevelAContent.DataContext = this; // PushEntityType;
 
-            switch (type) {
-                case PushType.Component:
+            switch (level)
+            {
+                case PushLevel.Component:
                     SetContentTag(LevelAContent, MainWindow.SOP.Protocol);
                     break;
-                case PushType.DaphneStore:
+                case PushLevel.DaphneStore:
                     SetContentTag(LevelAContent, MainWindow.SOP.DaphneStore);
                     break;
-                case PushType.UserStore:
+                case PushLevel.UserStore:
                     SetContentTag(LevelAContent, MainWindow.SOP.UserStore);                    
                     break;
             }
@@ -86,22 +90,22 @@ namespace DaphneGui.Pushing
         private void LevelBComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
-            PushType type = (PushType)combo.SelectedItem;
+            PushLevel level = (PushLevel)combo.SelectedItem;
 
             if (LevelBContent == null)
                 return;
 
-            LevelBContent.DataContext = PushEntityType;
+            LevelBContent.DataContext = this;  // PushEntityType;
 
-            switch (type)
+            switch (level)
             {
-                case PushType.Component:
+                case PushLevel.Component:
                     SetContentTag(LevelBContent, MainWindow.SOP.Protocol);
                     break;
-                case PushType.DaphneStore:
+                case PushLevel.DaphneStore:
                     SetContentTag(LevelBContent, MainWindow.SOP.DaphneStore);
                     break;
-                case PushType.UserStore:
+                case PushLevel.UserStore:
                     SetContentTag(LevelBContent, MainWindow.SOP.UserStore);                    
                     break;
             }
