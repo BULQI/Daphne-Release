@@ -18,7 +18,7 @@
 
         <GroupBox Name="EntityLevelCellDetails" Grid.Row="0" Grid.Column="0">
             <GroupBox.Header>
-                <TextBlock Text="Entity Level" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="Entity Values" FontWeight="Bold" FontSize="16"/>
             </GroupBox.Header>
             
             <StackPanel>
@@ -29,7 +29,7 @@
 
         <GroupBox Name="ComponentLevelCellDetails" Grid.Column="1" Grid.Row="0" >
             <GroupBox.Header>
-                <TextBlock Text="Component Level" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="Library Values" FontWeight="Bold" FontSize="16"/>
             </GroupBox.Header>
             <StackPanel>
                 <local:CellPropertiesControl DataContext="{Binding}"/>
@@ -38,7 +38,7 @@
         </GroupBox>
 
         <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0">
-            <Button Content="Save Cell to Components Level" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="CellPushButton" VerticalAlignment="Top" Click="CellPushButton_Click"/>
+            <Button Content="Save Cell to Cells Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="CellPushButton" VerticalAlignment="Top" Click="CellPushButton_Click"/>
             <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="CellCancelButton" VerticalAlignment="Top" Click="CellCancelButton_Click"/>
         </StackPanel>
     </Grid>
