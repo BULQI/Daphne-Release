@@ -1360,6 +1360,30 @@ namespace DaphneGui
 
             MainWindow.GenericPush(mol);
         }
+
+        private void PushMembReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
+        }
+
+        private void PushCytoReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytosolReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
+        }
     }
 
 }

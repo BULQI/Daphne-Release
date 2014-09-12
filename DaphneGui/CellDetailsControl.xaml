@@ -599,6 +599,7 @@
                                         </ListBox.ContextMenu>
                                     </ListBox>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                        <Button Name="PushMembReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushMembReacButton_Click" />
                                         <Button Name="MembraneRemoveReacButton" Width="50" Content="Remove" Click="MembraneRemoveReacButton_Click"/>
                                     </StackPanel>
                                     <StackPanel>
@@ -720,6 +721,7 @@
 
                                     </ListBox>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                        <Button Name="PushCytoReacButton"  Content="Save Reaction to Subcellular Components Library..." Click="PushCytoReacButton_Click"/>
                                         <Button Name="CytosolRemoveReacButton" Width="50" Content="Remove" Click="CytosolRemoveReacButton_Click" />
                                     </StackPanel>
                                     <StackPanel>
