@@ -28,14 +28,8 @@ namespace Daphne
             NaturalBoundaryTransforms = new Dictionary<int, Transform>();
         }
 
-        public void AddMolecularPopulation(string moleculeKey, string type, double[] parameters)
+        public void AddMolecularPopulation(Molecule mol, string moleculeKey, string type, double[] parameters)
         {
-            if (Simulation.dataBasket.Molecules.ContainsKey(moleculeKey) == false)
-            {
-                throw new Exception("Invalid molecule key.");
-            }
-
-            Molecule mol = Simulation.dataBasket.Molecules[moleculeKey];
             MolecularPopulation mp = SimulationModule.kernel.Get<MolecularPopulation>(new ConstructorArgument("mol", mol), new ConstructorArgument("moleculeKey", moleculeKey), new ConstructorArgument("comp", this));
 
             mp.Initialize(type, parameters);
@@ -51,7 +45,6 @@ namespace Daphne
                 // NOTE: presumably, we need to also add the boundaries here
             }
         }
-
         /// <summary>
         /// Carries out the dynamics in-place for its molecular populations over time interval dt.
         /// </summary>
