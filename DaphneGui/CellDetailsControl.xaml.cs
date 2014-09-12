@@ -149,6 +149,7 @@ namespace DaphneGui
             {
                 if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
                 cmp.molecule = item;
+                cmp.Name = cmp.molecule.Name;
                 break;
             }
             if (cmp.molecule == null) return;
@@ -268,6 +269,7 @@ namespace DaphneGui
             if (mol_list != null)
             {
                 cmp.molecule = mol_list.First().Clone(null);
+                cmp.Name = cmp.molecule.Name;
             }
             else
             {
