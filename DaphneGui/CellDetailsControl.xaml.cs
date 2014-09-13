@@ -254,6 +254,10 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return;
+
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
@@ -262,10 +266,20 @@ namespace DaphneGui
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
-            //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
+            
+            if (cvs == null) return;
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
-            mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                if (item.molecule_location == MoleculeLocation.Boundary)
+                {
+                    mol_list.Add(item);
+                }
+            }
+
             if (mol_list != null)
             {
                 cmp.molecule = mol_list.First().Clone(null);
@@ -276,10 +290,7 @@ namespace DaphneGui
                 return;
             }
 
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
+            
 
             cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
