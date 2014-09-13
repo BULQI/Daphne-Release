@@ -2605,15 +2605,15 @@ namespace DaphneGui
 
         }
 
-        ////private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        ////{
-        ////    CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
-        ////    if (cellpop == null)
-        ////        return;
+        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
+            if (cellpop == null)
+                return;
 
-        ////    ConfigCell cell = cellpop.Cell;
-        ////    GenericPush(cell);
-        ////}
+            ConfigCell cell = cellpop.Cell;
+            GenericPush(cell);
+        }
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
         {

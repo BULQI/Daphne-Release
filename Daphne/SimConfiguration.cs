@@ -53,7 +53,7 @@ namespace Daphne
             Protocol = new Protocol("", "Config\\temp_protocol.json");
             skin = new RenderSkin();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
-            //UserStore = new Level("", "Config\\temp_userstore.json");
+            UserStore = new Level("", "Config\\temp_userstore.json");
         }
 
         /// <summary>
@@ -129,19 +129,18 @@ namespace Daphne
         }
     }
 
-    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    public enum PushLevel { Component = 0, UserStore, DaphneStore }
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
-    [ValueConversion(typeof(PushType), typeof(string))]
-    public class PushTypeToStringConverter : IValueConverter
+    [ValueConversion(typeof(PushLevel), typeof(string))]
+    public class PushLevelToStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the BoundaryFace enum...
-        private List<string> _push_type_strings = new List<string>()
+        private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Entity",
-                                    "Protocol",
+                                    "Component",
                                     "User Store",
                                     "Daphne Store"
                                 };
@@ -151,7 +150,7 @@ namespace Daphne
             try
             {
                 int index = (int)value;
-                return _push_type_strings[index];
+                return _push_level_strings[index];
             }
             catch
             {
@@ -162,8 +161,8 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string str = (string)value;
-            int idx = _push_type_strings.FindIndex(item => item == str);
-            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+            int idx = _push_level_strings.FindIndex(item => item == str);
+            return (PushLevel)Enum.ToObject(typeof(PushLevel), (int)idx);
         }
     }
 
