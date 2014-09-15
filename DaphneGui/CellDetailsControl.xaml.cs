@@ -520,6 +520,12 @@ namespace DaphneGui
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
@@ -528,9 +534,9 @@ namespace DaphneGui
             string guid = cb.CommandParameter as string;
             if (guid.Length > 0)
             {
-                if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+                if (((TissueScenario)MainWindow.SOP.Protocol.scenario).gauss_guid_gauss_dict.ContainsKey(guid))
                 {
-                    GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[guid];
+                    GaussianSpecification gs = ((TissueScenario)MainWindow.SOP.Protocol.scenario).gauss_guid_gauss_dict[guid];
                     gs.gaussian_region_visibility = (bool)(cb.IsChecked);
                 }
             }
@@ -784,7 +790,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Contains(cr))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -809,7 +815,7 @@ namespace DaphneGui
 
         private bool EcmHasMolecule(string molguid)
         {
-            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 if (molpop.molecule.entity_guid == molguid)
                     return true;
@@ -842,8 +848,14 @@ namespace DaphneGui
 
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
                 {
@@ -861,8 +873,14 @@ namespace DaphneGui
         }
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (CytosolHasMolecule(cell, molguid))

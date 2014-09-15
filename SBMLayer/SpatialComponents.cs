@@ -347,13 +347,21 @@ namespace SBMLayer
         /// </summary>
         private void InitializeCoordinateSystem()
         {
+            if (!(protocol.scenario.environment is ECSConfigEnvironment))
+            {
+                // for now
+                throw new InvalidCastException();
+            }
+
+            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+
             //Define dimensions of the simulation space
             xmin = 0;
             ymin = 0;
             zmin = 0;
-            xmax =  protocol.scenario.environment.extent_x;
-            ymax =  protocol.scenario.environment.extent_y;
-            zmax =  protocol.scenario.environment.extent_z;
+            xmax = envHandle.extent_x;
+            ymax = envHandle.extent_y;
+            zmax = envHandle.extent_z;
 
             //Defining a coordinate system
             SpatialModelPlugin plugin = (SpatialModelPlugin)model.getPlugin("spatial");

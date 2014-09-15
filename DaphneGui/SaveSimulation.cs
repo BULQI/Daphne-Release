@@ -35,12 +35,12 @@ namespace DaphneGui
             if (ProtocolSaver == null)
             {
                 //copy initial settings, only done once
-                ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json");
+                ProtocolSaver = new Protocol("", orig_path + @"\temp_protocol.json", sop.Protocol.GetScenarioType());
             }
             SystemOfPersistence.DeserializeExternalProtocolFromString(ref ProtocolSaver, sop.Protocol.SerializeToString());
  
             //clear the contents from last save
-            foreach (KeyValuePair<int, CellPopulation> item in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
+            foreach (KeyValuePair<int, CellPopulation> item in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict)
             {
                 // item.Value.cell_list.Clear();
                 item.Value.CellStates.Clear();
@@ -72,9 +72,9 @@ namespace DaphneGui
             }
             else
             {
-                if (reporter.FileName != "")
+                if (MainWindow.Sim.Reporter.FileName != "")
                 {
-                    filepath_prefix = Path.Combine(filepath_prefix, reporter.FileName);
+                    filepath_prefix = Path.Combine(filepath_prefix, MainWindow.Sim.Reporter.FileName);
                 }
                 else
                 {
@@ -85,11 +85,11 @@ namespace DaphneGui
 
             save_counter++;
 
-            //same Simulation.dataBasket.ECS.Space.Population inot scenario.environmnet.ecs.molpop
-            foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.ecs.molpops)
+            //same Simulation.dataBasket.ECS.Comp.Population inot scenario.environmnet.ecs.molpop
+            foreach (ConfigMolecularPopulation cmp in ProtocolSaver.scenario.environment.comp.molpops)
             {
                 //loop through molecular population
-                MolecularPopulation cur_mp = Simulation.dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid];
+                MolecularPopulation cur_mp = SimulationBase.dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid];
 
                 MolPopExplicit mpex = new MolPopExplicit();
                 double[] cur_conc_values = new double[cur_mp.Conc.M.ArraySize];
@@ -99,20 +99,20 @@ namespace DaphneGui
                 cmp.mp_distribution = mpex;
             }
 
-            foreach (var kvp in ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict)
+            foreach (var kvp in ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict)
             {
                 CellPopulation cp = kvp.Value;
                 cp.number = 0;
             }
 
             //add cells into their respenctive populaiton
-            foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
                 Cell cell = kvp.Value;
 
                 int cell_set_id = cell.Population_id;
 
-                CellPopulation target_cp = ProtocolSaver.scenario.cellpopulation_id_cellpopulation_dict[cell.Population_id];
+                CellPopulation target_cp = ((TissueScenario)ProtocolSaver.scenario).cellpopulation_id_cellpopulation_dict[cell.Population_id];
                 target_cp.number++;
 
                 CellState cell_state = new CellState();
@@ -159,7 +159,7 @@ namespace DaphneGui
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return (byte)value == Simulation.RUNSTAT_PAUSE || (byte)value == Simulation.RUNSTAT_FINISHED;
+            return (byte)value == SimulationBase.RUNSTAT_PAUSE || (byte)value == SimulationBase.RUNSTAT_FINISHED;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

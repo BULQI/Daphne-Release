@@ -15,7 +15,7 @@ namespace Daphne
 {
     public class ReactionComplexProcessor : EntityModelBase
     {
-        public Simulation Sim { get; set; }
+        public TissueSimulation Sim { get; set; }
         public Protocol SC { get; set; }
         public ConfigReactionComplex CRC { get; set; }
 
@@ -146,7 +146,7 @@ namespace Daphne
             OnPropertyChanged("initConcs");
         }
 
-        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, Simulation sim )
+        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, TissueSimulation sim )
         {
             Sim = sim;
             SC = mainSC;
@@ -202,10 +202,10 @@ namespace Daphne
             dictGraphConcs.Clear();
             listTimes.Clear();
 
-            if (Simulation.dataBasket.Cells.Count == 0)
+            if (SimulationBase.dataBasket.Cells.Count == 0)
                 return;
                 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
@@ -312,10 +312,10 @@ namespace Daphne
         {
             dictOriginalConcs.Clear();
 
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
 
             if (comp == null)
                 return;
@@ -342,10 +342,10 @@ namespace Daphne
 
         public void OverwriteOriginalConcs()
         {
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -372,10 +372,10 @@ namespace Daphne
             initConcs.Clear();
             initConcsDict.Clear();
 
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 

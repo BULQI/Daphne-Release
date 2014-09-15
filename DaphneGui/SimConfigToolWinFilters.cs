@@ -198,7 +198,7 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Contains(cr))
                 bOK = false;
 
             e.Accepted = bOK;
@@ -377,7 +377,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Contains(cr))
                 {
                     e.Accepted = true;
                 }

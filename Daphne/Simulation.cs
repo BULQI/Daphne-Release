@@ -13,42 +13,11 @@ using Ninject.Parameters;
 
 namespace Daphne
 {
-    public class Simulation : EntityModelBase, IDynamic
+    public abstract class SimulationBase : EntityModelBase, IDynamic
     {
-        /// <summary>
-        /// constants used to set the run status
-        /// </summary>
-        public static byte RUNSTAT_OFF = 0,
-                           RUNSTAT_READY = 1,
-                           RUNSTAT_RUN = 2,
-                           RUNSTAT_PAUSE = 3,
-                           RUNSTAT_ABORT = 4,
-                           RUNSTAT_FINISHED = 5;
-        /// <summary>
-        /// simulation actions
-        /// </summary>
-        public static byte SIMFLAG_RENDER = 1 << 0,
-                           SIMFLAG_SAMPLE = 1 << 1,
-                           SIMFLAG_ALL    = 0xFF;
-
-        public static DataBasket dataBasket;
-        public static Protocol ProtocolHandle;
-
-        private CellManager cellManager;
-        private CollisionManager collisionManager;
-
-        private byte runStatus;
-        private byte simFlags;
-        private double accumulatedTime, duration, renderStep, sampleStep;
-        private int renderCount, sampleCount;
-        private const double integratorStep = 0.001;
-
-
-        public Simulation()
+        public SimulationBase()
         {
             cellManager = new CellManager();
-            dataBasket = new DataBasket(this);
-            reset();
         }
 
         /// <summary>
@@ -64,7 +33,7 @@ namespace Daphne
             }
         }
 
-        private void clearFlag(byte flag)
+        protected void clearFlag(byte flag)
         {
             simFlags &= (byte)~flag;
         }
@@ -74,7 +43,7 @@ namespace Daphne
             return (simFlags & flag) != 0;
         }
 
-        private void setFlag(byte flag)
+        protected void setFlag(byte flag)
         {
             simFlags |= flag;
         }
@@ -95,170 +64,73 @@ namespace Daphne
             }
         }
 
-        public static void AddCell(Cell c)
+        public double AccumulatedTime
         {
-            // in order to add the cell membrane to the ecs
-            if (dataBasket.ECS == null)
-            {
-                throw new Exception("Need to create the ECS before adding cells.");
-            }
-
-            dataBasket.AddCell(c);
-
-            // no cell rotation currently
-            Transform t = new Transform(false);
-
-            dataBasket.ECS.Space.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
-            // set translation by reference: when the cell moves then the transform gets updated automatically
-            t.setTranslationByReference(c.SpatialState.X);
-            dataBasket.ECS.Space.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
+            get { return accumulatedTime; }
         }
 
-        public void RemoveCell(Cell c)
+        /// <summary>
+        /// calculate and return the progress of the simulation
+        /// </summary>
+        /// <returns>integer indicating the percent of progress</returns>
+        public int GetProgressPercent()
         {
-            // remove the boundary reactions involving this cell
-            dataBasket.ECS.Space.BoundaryReactions.Remove(c.PlasmaMembrane.Interior.Id);
+            int percent = (accumulatedTime == 0) ? 0 : (int)(100 * accumulatedTime / duration);
 
-            // remove the ecs boundary concs and fluxes that involve this cell
-            foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
+            if (RunStatus == RUNSTAT_RUN)
             {
-                mp.BoundaryConcs.Remove(c.PlasmaMembrane.Interior.Id);
-                mp.BoundaryFluxes.Remove(c.PlasmaMembrane.Interior.Id);
+                if (percent >= 100)
+                {
+                    percent = 99;
+                }
+            }
+            else if (RunStatus == RUNSTAT_FINISHED)
+            {
+                if (percent > 0)
+                {
+                    percent = 100;
+                }
+            }
+            else if (percent > 100)
+            {
+                percent = 100;
             }
 
-            // remove the cell's membrane from the ecs boundary
-            dataBasket.ECS.Space.Boundaries.Remove(c.PlasmaMembrane.Interior.Id);
-            dataBasket.ECS.Space.BoundaryTransforms.Remove(c.PlasmaMembrane.Interior.Id);
-
-            // remove the actual cell
-            dataBasket.Cells.Remove(c.Cell_id);
+            return percent;
         }
 
-        private void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp, Protocol protocol)
+        public virtual void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
         {
-            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            ProtocolHandle = protocol;
+
+            duration = protocol.scenario.time_config.duration;
+            sampleStep = protocol.scenario.time_config.sampling_interval;
+            renderStep = protocol.scenario.time_config.rendering_interval;
+            // make sure the simulation does not start to run immediately
+            RunStatus = RUNSTAT_OFF;
+
+            // exit if no reset required
+            if (completeReset == false)
             {
-                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                {
-                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
-
-                    // find the box associated with this gaussian
-                    int box_id = -1;
-
-                    for (int j = 0; j < protocol.scenario.box_specifications.Count; j++)
-                    {
-                        if (protocol.scenario.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
-                        {
-                            box_id = j;
-                            break;
-                        }
-                    }
-                    if (box_id == -1)
-                    {
-                        // Should never reach here... pop up notice
-                        MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
-                        return;
-                    }
-
-                    BoxSpecification box = protocol.scenario.box_specifications[box_id];
-
-                    double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
-
-                    // compute rotation matrix from box data
-                    // R is vtk's rotation matrix (tranpose of traditional definition)
-                    double[,] R = new double[3, 3];
-                    for (int i = 0; i < 3; i++)
-                    {
-                        R[i, 0] = box.transform_matrix[i][0] / box.getScale((byte)0);
-                        R[i, 1] = box.transform_matrix[i][1] / box.getScale((byte)1);
-                        R[i, 2] = box.transform_matrix[i][2] / box.getScale((byte)2);
-                    }
-
-                    // Rotate diagonal covariance (Sigma) matrix: D[i,j] = delta_ij sigma[i]^(-2)
-                    // Given vtk format where R is the transpose of the usual definition of the rotation matrix:  
-                    //      S = R' D R
-                    //      S is the rotated covariance matrix
-                    //      R is vtk's rotation matrix (tranpose of traditional definition)
-                    //      R' is the transpose of R
-
-                    // T = R D
-                    double[,] S = new double[3, 3];
-                    double[,] T = new double[3, 3];
-                    for (int i = 0; i < 3; i++)
-                    {
-                        T[i, 0] = R[i, 0] / (sigma[0] * sigma[0]);
-                        T[i, 1] = R[i, 1] / (sigma[1] * sigma[1]);
-                        T[i, 2] = R[i, 2] / (sigma[2] * sigma[2]);
-                    }
-
-                    // S = T R'
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            for (int k = 0; k < 3; k++)
-                            {
-                                S[i, j] += T[i, k] * R[j,k];
-                            }
-                         }
-                    }
-
-                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
-                    // box x,y,z_scale parameters are 2*sigma
-                    double[] initArray = new double[] { box.x_trans, box.y_trans, box.z_trans,
-                                                        S[0,0], S[1,0], S[2,0],
-                                                        S[0,1], S[1,1], S[2,1],
-                                                        S[0,2], S[1,2], S[2,2],
-                                                        mpgg.peak_concentration };
-
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "gauss", initArray);
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
-                {
-                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
-
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
-                {
-                    MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "explicit", mpc.conc);
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
-                {
-                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
-
-                    double c1 = mpl.boundaryCondition[0].concVal;
-                    double c2 = mpl.boundaryCondition[1].concVal;
-                    double x2;
-                    switch (mpl.dim)
-                    {
-                        case 0:
-                            x2 = protocol.scenario.environment.extent_x;
-                            break;
-                        case 1:
-                            x2 = protocol.scenario.environment.extent_y;
-                            break;
-                        case 2:
-                            x2 = protocol.scenario.environment.extent_z;
-                            break;
-                        default:
-                            x2 = protocol.scenario.environment.extent_x; 
-                            break;
-                    }
-
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "linear", new double[] {       
-                                c1, 
-                                c2,
-                                mpl.x1, 
-                                x2, 
-                                mpl.dim});
-                }
-                else
-                {
-                    throw new Exception("Molecular population distribution type not implemented.");
-                }
+                return;
             }
+
+            // executes the ninject bindings; call this after the config is initialized with valid values
+            SimulationModule.kernel = new StandardKernel(new SimulationModule(protocol.scenario));
+
+            // create a factory container: shared factories reside here; not all instances of a class
+            // need their own factory
+            SimulationModule.kernel.Get<FactoryContainer>();
+        }
+
+        public CollisionManager CollisionManager
+        {
+            get { return collisionManager; }
+        }
+
+        public ReporterBase Reporter
+        {
+            get { return reporter; }
         }
 
         public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
@@ -338,7 +210,7 @@ namespace Daphne
 
         public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
         {
-            foreach(ConfigReaction cr in config_reacs)
+            foreach (ConfigReaction cr in config_reacs)
             {
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Association)
                 {
@@ -447,22 +319,231 @@ namespace Daphne
 
         }
 
-        public void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
+        public static void AddCell(Cell c)
         {
-            Scenario scenario = protocol.scenario;
-
-            ProtocolHandle = protocol;
-
-            if (is_reaction_complex == true)
+            // in order to add the cell membrane to the ecs
+            if (dataBasket.Environment == null)
             {
-                scenario = protocol.rc_scenario;
+                throw new Exception("Need to create the ECS before adding cells.");
             }
 
-            duration = scenario.time_config.duration;
-            sampleStep = scenario.time_config.sampling_interval;
-            renderStep = scenario.time_config.rendering_interval;
-            // make sure the simulation does not start to run immediately
-            RunStatus = RUNSTAT_OFF;
+            dataBasket.AddCell(c);
+
+            // no cell rotation currently
+            Transform t = new Transform(false);
+
+            dataBasket.Environment.Comp.Boundaries.Add(c.PlasmaMembrane.Interior.Id, c.PlasmaMembrane);
+            // set translation by reference: when the cell moves then the transform gets updated automatically
+            t.setTranslationByReference(c.SpatialState.X);
+            dataBasket.Environment.Comp.BoundaryTransforms.Add(c.PlasmaMembrane.Interior.Id, t);
+        }
+
+        public void RemoveCell(Cell c)
+        {
+            // remove the boundary reactions involving this cell
+            dataBasket.Environment.Comp.BoundaryReactions.Remove(c.PlasmaMembrane.Interior.Id);
+
+            // remove the ecs boundary concs and fluxes that involve this cell
+            foreach (MolecularPopulation mp in dataBasket.Environment.Comp.Populations.Values)
+            {
+                mp.BoundaryConcs.Remove(c.PlasmaMembrane.Interior.Id);
+                mp.BoundaryFluxes.Remove(c.PlasmaMembrane.Interior.Id);
+            }
+
+            // remove the cell's membrane from the ecs boundary
+            dataBasket.Environment.Comp.Boundaries.Remove(c.PlasmaMembrane.Interior.Id);
+            dataBasket.Environment.Comp.BoundaryTransforms.Remove(c.PlasmaMembrane.Interior.Id);
+
+            // remove the actual cell
+            dataBasket.Cells.Remove(c.Cell_id);
+        }
+
+        protected abstract void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp);
+        public abstract void Step(double dt);
+        public abstract void RunForward();
+
+        /// <summary>
+        /// constants used to set the run status
+        /// </summary>
+        public static byte RUNSTAT_OFF = 0,
+                           RUNSTAT_READY = 1,
+                           RUNSTAT_RUN = 2,
+                           RUNSTAT_PAUSE = 3,
+                           RUNSTAT_ABORT = 4,
+                           RUNSTAT_FINISHED = 5;
+        /// <summary>
+        /// simulation actions
+        /// </summary>
+        public static byte SIMFLAG_RENDER = 1 << 0,
+                           SIMFLAG_SAMPLE = 1 << 1,
+                           SIMFLAG_ALL = 0xFF;
+
+        public static DataBasket dataBasket;
+        public static Protocol ProtocolHandle;
+
+        protected CellManager cellManager;
+        protected CollisionManager collisionManager;
+
+        protected byte runStatus;
+        protected byte simFlags;
+        protected double accumulatedTime, duration, renderStep, sampleStep;
+        protected int renderCount, sampleCount;
+        protected double integratorStep;
+        protected ReporterBase reporter;
+    }
+
+    public class TissueSimulation : SimulationBase
+    {
+        // have a local pointer of the correct type for use within this class
+        private TissueScenario scenarioHandle;
+        private ECSConfigEnvironment envHandle;
+
+        public TissueSimulation()
+        {
+            dataBasket = new DataBasket(this);
+            integratorStep = 0.001;
+            reporter = new TissueSimulationReporter();
+            reset();
+        }
+
+        protected override void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        {
+            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            {
+                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
+
+                    // find the box associated with this gaussian
+                    int box_id = -1;
+
+                    for (int j = 0; j < scenarioHandle.box_specifications.Count; j++)
+                    {
+                        if (scenarioHandle.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
+                        {
+                            box_id = j;
+                            break;
+                        }
+                    }
+                    if (box_id == -1)
+                    {
+                        // Should never reach here... pop up notice
+                        MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
+                        return;
+                    }
+
+                    BoxSpecification box = scenarioHandle.box_specifications[box_id];
+
+                    double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
+
+                    // compute rotation matrix from box data
+                    // R is vtk's rotation matrix (tranpose of traditional definition)
+                    double[,] R = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        R[i, 0] = box.transform_matrix[i][0] / box.getScale((byte)0);
+                        R[i, 1] = box.transform_matrix[i][1] / box.getScale((byte)1);
+                        R[i, 2] = box.transform_matrix[i][2] / box.getScale((byte)2);
+                    }
+
+                    // Rotate diagonal covariance (Sigma) matrix: D[i,j] = delta_ij sigma[i]^(-2)
+                    // Given vtk format where R is the transpose of the usual definition of the rotation matrix:  
+                    //      S = R' D R
+                    //      S is the rotated covariance matrix
+                    //      R is vtk's rotation matrix (tranpose of traditional definition)
+                    //      R' is the transpose of R
+
+                    // T = R D
+                    double[,] S = new double[3, 3];
+                    double[,] T = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        T[i, 0] = R[i, 0] / (sigma[0] * sigma[0]);
+                        T[i, 1] = R[i, 1] / (sigma[1] * sigma[1]);
+                        T[i, 2] = R[i, 2] / (sigma[2] * sigma[2]);
+                    }
+
+                    // S = T R'
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            for (int k = 0; k < 3; k++)
+                            {
+                                S[i, j] += T[i, k] * R[j,k];
+                            }
+                         }
+                    }
+
+                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
+                    // box x,y,z_scale parameters are 2*sigma
+                    double[] initArray = new double[] { box.x_trans, box.y_trans, box.z_trans,
+                                                        S[0,0], S[1,0], S[2,0],
+                                                        S[0,1], S[1,1], S[2,1],
+                                                        S[0,2], S[1,2], S[2,2],
+                                                        mpgg.peak_concentration };
+
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "gauss", initArray);
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+                {
+                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
+
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                {
+                    MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "explicit", mpc.conc);
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                {
+                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
+
+                    double c1 = mpl.boundaryCondition[0].concVal;
+                    double c2 = mpl.boundaryCondition[1].concVal;
+                    double x2;
+                    switch (mpl.dim)
+                    {
+                        case 0:
+                            x2 = envHandle.extent_x;
+                            break;
+                        case 1:
+                            x2 = envHandle.extent_y;
+                            break;
+                        case 2:
+                            x2 = envHandle.extent_z;
+                            break;
+                        default:
+                            x2 = envHandle.extent_x; 
+                            break;
+                    }
+
+                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "linear", new double[] {       
+                                c1, 
+                                c2,
+                                mpl.x1, 
+                                x2, 
+                                mpl.dim});
+                }
+                else
+                {
+                    throw new Exception("Molecular population distribution type not implemented.");
+                }
+            }
+        }
+
+        public override void Load(Protocol protocol, bool completeReset, bool is_reaction_complex)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+            scenarioHandle = (TissueScenario)protocol.scenario;
+            envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+
+            // call the base
+            base.Load(protocol, completeReset, is_reaction_complex);
 
             // exit if no reset required
             if (completeReset == false)
@@ -470,15 +551,13 @@ namespace Daphne
                 return;
             }
 
-            // executes the ninject bindings; call this after the config is initialized with valid values
-            SimulationModule.kernel = new StandardKernel(new SimulationModule(scenario));
-
-            // create a factory container: shared factories reside here; not all instances of a class
-            // need their own factory
-            SimulationModule.kernel.Get<FactoryContainer>();
+            if (is_reaction_complex == true)
+            {
+                scenarioHandle = protocol.rc_scenario;
+            }
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
-            dataBasket.ECS = SimulationModule.kernel.Get<ExtraCellularSpace>();
+            dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
 
             // clear the databasket dictionaries
             dataBasket.Clear();
@@ -507,16 +586,16 @@ namespace Daphne
 
             // set up the collision manager
             MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
-            
-            box[0] = protocol.scenario.environment.extent_x;
-            box[1] = protocol.scenario.environment.extent_y;
-            box[2] = protocol.scenario.environment.extent_z;
+
+            box[0] = envHandle.extent_x;
+            box[1] = envHandle.extent_y;
+            box[2] = envHandle.extent_z;
             collisionManager = SimulationModule.kernel.Get<CollisionManager>(new ConstructorArgument("gridSize", box), new ConstructorArgument("gridStep", 2 * Cell.defaultRadius));
 
             // cells
-            double[] extent = new double[] { dataBasket.ECS.Space.Interior.Extent(0), 
-                                             dataBasket.ECS.Space.Interior.Extent(1), 
-                                             dataBasket.ECS.Space.Interior.Extent(2) };
+            double[] extent = new double[] { dataBasket.Environment.Comp.Interior.Extent(0), 
+                                             dataBasket.Environment.Comp.Interior.Extent(1), 
+                                             dataBasket.Environment.Comp.Interior.Extent(2) };
 
             // ADD CELLS            
             double[] state = new double[CellSpatialState.Dim];
@@ -528,7 +607,7 @@ namespace Daphne
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
-            foreach (CellPopulation cp in scenario.cellpopulations)
+            foreach (CellPopulation cp in scenarioHandle.cellpopulations)
             {
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
@@ -568,7 +647,7 @@ namespace Daphne
                             mp_explicit.conc = cp.CellStates[i].cmState.molPopDict[cmp.molecule.entity_guid];
                             cmp.mp_distribution = mp_explicit;            
                         }
-                        addCompartmentMolpops(simComp[comp], configComp[comp], protocol);
+                        addCompartmentMolpops(simComp[comp], configComp[comp]);
                     }
 
                     // cell genes
@@ -725,35 +804,40 @@ namespace Daphne
             }
 
             // ADD ECS MOLECULAR POPULATIONS
-            addCompartmentMolpops(dataBasket.ECS.Space, scenario.environment.ecs, protocol);
+            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
             // NOTE: This boolean isn't used anywhere. Do we envision a need for it?
             // Default: set diffusing
-            foreach (MolecularPopulation mp in dataBasket.ECS.Space.Populations.Values)
+            foreach (MolecularPopulation mp in dataBasket.Environment.Comp.Populations.Values)
             {
                 mp.IsDiffusing = true;
             }
 
             // ECS molpops boundary conditions
-            foreach (ConfigMolecularPopulation cmp in scenario.environment.ecs.molpops)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
             {
-                if (cmp.mp_distribution.GetType() == typeof(MolPopLinear)) {
-                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
-                    foreach (BoundaryCondition bc in mpl.boundaryCondition)
-                    //foreach (BoundaryCondition bc in cmp.boundaryCondition)
+                foreach (ConfigMolecularPopulation cmp in scenarioHandle.environment.comp.molpops)
+                {
+                    if (cmp.mp_distribution.GetType() == typeof(MolPopLinear))
                     {
-                        int face = Simulation.dataBasket.ECS.Sides[bc.boundary.ToString()];
+                        MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
 
-                        if (!dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.ContainsKey(face))
+                        foreach (BoundaryCondition bc in mpl.boundaryCondition)
+                        //foreach (BoundaryCondition bc in cmp.boundaryCondition)
                         {
-                            dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].boundaryCondition.Add(face, bc.boundaryType);
+                            int face = ((ECSEnvironment)SimulationBase.dataBasket.Environment).Sides[bc.boundary.ToString()];
 
-                            if (bc.boundaryType == MolBoundaryType.Dirichlet)
+                            if (!dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid].boundaryCondition.ContainsKey(face))
                             {
-                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
-                            }
-                            else
-                            {
-                                dataBasket.ECS.Space.Populations[cmp.molecule.entity_guid].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
+                                dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid].boundaryCondition.Add(face, bc.boundaryType);
+
+                                if (bc.boundaryType == MolBoundaryType.Dirichlet)
+                                {
+                                    dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid].NaturalBoundaryConcs[face].Initialize("const", new double[] { bc.concVal });
+                                }
+                                else
+                                {
+                                    dataBasket.Environment.Comp.Populations[cmp.molecule.entity_guid].NaturalBoundaryFluxes[face].Initialize("const", new double[] { bc.concVal });
+                                }
                             }
                         }
                     }
@@ -762,12 +846,12 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = protocol.GetReactions(scenario.environment.ecs, false);
-            AddCompartmentBulkReactions(dataBasket.ECS.Space, protocol.entity_repository,reacs);
-            reacs = protocol.GetReactions(scenario.environment.ecs, true);
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository,reacs);
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                AddCompartmentBoundaryReactions(dataBasket.ECS.Space, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs);
+                AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs);
             }
 
             // general parameters
@@ -799,7 +883,7 @@ namespace Daphne
 
         }
         
-        public void RunForward()
+        public override void RunForward()
         {
             if (RunStatus == RUNSTAT_RUN)
             {
@@ -850,14 +934,14 @@ namespace Daphne
             }
         }
 
-        public void Step(double dt)
+        public override void Step(double dt)
         {
             double t = 0, localStep;
 
             while (t < dt)
             {
                 localStep = Math.Min(integratorStep, dt - t);
-                dataBasket.ECS.Space.Step(localStep);
+                dataBasket.Environment.Comp.Step(localStep);
                 // zero all cell forces; needs to happen first
                 cellManager.ResetCellForces();
                 // handle collisions
@@ -874,46 +958,6 @@ namespace Daphne
             {
                 RunStatus = RUNSTAT_FINISHED;
             }
-        }
-
-        public double AccumulatedTime
-        {
-            get { return accumulatedTime; }
-        }
-
-        /// <summary>
-        /// calculate and return the progress of the simulation
-        /// </summary>
-        /// <returns>integer indicating the percent of progress</returns>
-        public int GetProgressPercent()
-        {
-            int percent = (accumulatedTime == 0) ? 0 : (int)(100 * accumulatedTime / duration);
-
-            if (RunStatus == RUNSTAT_RUN)
-            {
-                if (percent >= 100)
-                {
-                    percent = 99;
-                }
-            }
-            else if (RunStatus == RUNSTAT_FINISHED)
-            {
-                if (percent > 0)
-                {
-                    percent = 100;
-                }
-            }
-            else if (percent > 100)
-            {
-                percent = 100;
-            }
-
-            return percent;
-        }
-
-        public CollisionManager CollisionManager
-        {
-            get { return collisionManager; }
         }
     }
 }

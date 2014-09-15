@@ -30,11 +30,11 @@ namespace Daphne
     public class SimulationModule : NinjectModule
     {
         public static IKernel kernel;
-        private Scenario scenario;
+        private ScenarioBase scenario;
 
         private enum MetadataValues { OneD = 1, TwoD, ThreeD, Membrane, Cytosol, ECS };
 
-        public SimulationModule(Scenario scenario)
+        public SimulationModule(ScenarioBase scenario)
             : base()
         {
             this.scenario = scenario;
@@ -83,7 +83,13 @@ namespace Daphne
 
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
-            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep).WithConstructorArgument("toroidal", scenario.environment.toroidal);
+            if (scenario.environment is ECSConfigEnvironment)
+            {
+                Bind<ECSEnvironment>().ToSelf().WithConstructorArgument("numGridPts",
+                                                                        ((ECSConfigEnvironment)scenario.environment).NumGridPts).WithConstructorArgument("gridStep",
+                                                                        ((ECSConfigEnvironment)scenario.environment).gridstep).WithConstructorArgument("toroidal",
+                                                                        ((ECSConfigEnvironment)scenario.environment).toroidal);
+            }
             Bind<CollisionManager>().ToSelf();
 
             // factory container
