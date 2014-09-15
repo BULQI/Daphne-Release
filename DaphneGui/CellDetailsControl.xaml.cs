@@ -149,6 +149,7 @@ namespace DaphneGui
             {
                 if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
                 cmp.molecule = item;
+                cmp.Name = cmp.molecule.Name;
                 break;
             }
             if (cmp.molecule == null) return;
@@ -253,6 +254,10 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return;
+
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
@@ -261,23 +266,31 @@ namespace DaphneGui
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
-            //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
+            
+            if (cvs == null) return;
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
-            mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                if (item.molecule_location == MoleculeLocation.Boundary)
+                {
+                    mol_list.Add(item);
+                }
+            }
+
             if (mol_list != null)
             {
                 cmp.molecule = mol_list.First().Clone(null);
+                cmp.Name = cmp.molecule.Name;
             }
             else
             {
                 return;
             }
 
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
+            
 
             cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
@@ -331,15 +344,17 @@ namespace DaphneGui
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            cell.genes_guid_ref.Add(gene.entity_guid);
+            cell.genes.Add(gene);
             //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
 
-            string guid = (string)CellNucleusGenesListBox.SelectedItem;
-            CellNucleusGenesListBox.ScrollIntoView(guid);
+            //string guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //CellNucleusGenesListBox.ScrollIntoView(guid);
+            CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
+
             txtGeneName.IsEnabled = true;
         }
 
@@ -363,7 +378,7 @@ namespace DaphneGui
                 if (geneToAdd == null)
                     return;
 
-                cell.genes_guid_ref.Add(geneToAdd.entity_guid);
+                cell.genes.Add(geneToAdd);
             }
 
             txtGeneName.IsEnabled = false;
@@ -373,19 +388,20 @@ namespace DaphneGui
         {
             //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+            //string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
 
-            if (gene_guid == "")
-                return;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
+
+            //if (gene_guid == "")
+            //    return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
 
             if (res == MessageBoxResult.No)
                 return;
 
-            if (cell.genes_guid_ref.Contains(gene_guid))
-            {
-                cell.genes_guid_ref.Remove(gene_guid);
+            if (cell.HasGene(gene.entity_guid)) {
+                cell.genes.Remove(gene);
             }
 
             txtGeneName.IsEnabled = false;
@@ -1222,7 +1238,7 @@ namespace DaphneGui
             ConfigGene gene = e.Item as ConfigGene;
 
             //if gene is not in the cell's nucleus, then exclude it from the available gene pool
-            if (!cell.genes_guid_ref.Contains(gene.entity_guid))
+            if (!cell.HasGene(gene.entity_guid))
                 return;
 
 
@@ -1312,9 +1328,9 @@ namespace DaphneGui
         private void NucPushGeneButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigCell cell = DataContext as ConfigCell;
-            string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
+            ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
 
-            if (gene_guid == "")
+            if (gene == null)
                 return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
@@ -1322,19 +1338,82 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            PushGene pg = new PushGene();
-            pg.DataContext = cell;
-            pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
+            ////PushGene pg = new PushGene();
+            ////pg.DataContext = cell;
+            ////pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
 
-            //Here show the confirmation dialog
-            if (pg.ShowDialog() == false)
+            //////Here show the confirmation dialog
+            ////if (pg.ShowDialog() == false)
+            ////{
+            ////    //User clicked Cancel
+            ////    return;
+            ////}
+
+            //Here do the processing
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(gene);
+            if (status == Level.PushStatus.PUSH_INVALID)
             {
-                //User clicked Cancel
+                MessageBox.Show("Entity not pushable.");
                 return;
             }
 
-            //Here do the processing
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(gene, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(gene, status); // push into B, overwrite
+            }
 
+        }
+
+        private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellCytosolMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellCytosolMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
+        }
+
+        private void PushMembMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+                return;
+
+            ConfigCell cell = DataContext as ConfigCell;
+            ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
+
+            MainWindow.GenericPush(mol);
+        }
+
+        private void PushMembReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
+        }
+
+        private void PushCytoReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytosolReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
         }
     }
 

@@ -179,7 +179,7 @@
                     <TextBox x:Name="txtSearch" Width="340" HorizontalAlignment="Left" Margin="20,4,4,0" SelectionChanged="txtSearch_SelectionChanged" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="0" Grid.Row="1">
+                <StackPanel Grid.Column="0" Grid.Row="1" >
                     <StackPanel.Resources>
                         <Style x:Key="myListboxStyle">
                             <Style.Resources>
@@ -191,12 +191,20 @@
                         </Style>
                     </StackPanel.Resources>
                     
-                    <ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2" Margin="10, 2" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1"                                                                                       
+                    <!--<ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2" Margin="10, 2" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1"                                                                                       
                                     SelectedIndex="-1"
                                     SelectionMode="Multiple"
                                     Style="{StaticResource myListboxStyle}"
                                     MaxHeight="150" Width="250">
+                    </ListBox>-->
+
+                    <ListBox x:Name="lbMol2" Visibility="Visible" AlternationCount="2"       
+                            SelectedIndex="-1"
+                            SelectionMode="Multiple"
+                            Style="{StaticResource myListboxStyle}"
+                            MaxHeight="150" Width="250">
                     </ListBox>
+                    
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical"   Margin="10,10,0,0"             Grid.Column="1" Grid.Row="1" >

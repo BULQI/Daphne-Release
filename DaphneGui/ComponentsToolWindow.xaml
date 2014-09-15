@@ -68,8 +68,8 @@
 
                     <StackPanel>
 
-                    <TextBlock Text="checking datacontext" />
-                    <TextBlock Text="{Binding}" />
+                    <!--<TextBlock Text="checking datacontext" />
+                    <TextBlock Text="{Binding}" />-->
 
                         <DataGrid x:Name="dgLibGenes" 
                                 ItemsSource="{Binding Source={StaticResource GenesListView}}" 

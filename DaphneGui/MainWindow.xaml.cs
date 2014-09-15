@@ -42,6 +42,8 @@ using Workbench;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
+using DaphneGui.Pushing;
+
 using SBMLayer;
 
 namespace DaphneGui
@@ -2781,28 +2783,108 @@ namespace DaphneGui
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-
-            pw.LevelADataGrid.ItemsSource = SOP.Protocol.entity_repository.molecules;
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Molecule);
+            pushWindow.ShowDialog();
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Gene);
+            pushWindow.ShowDialog();
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Reaction);
+            pushWindow.ShowDialog();
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Cell);
+            pushWindow.ShowDialog();
+        }
+
+        public static void GenericPush(ConfigEntity source)
+        {
+            if (source == null)
+            {
+                MessageBox.Show("Nothing to push");
+                return;
+            }
+
+            if (source is ConfigMolecule)
+            {
+                //LET'S TRY A GENERIC PUSHER
+                PushEntity pm = new PushEntity();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelDetails.DataContext = source;
+
+                ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+                if (erMol != null)
+                    pm.ComponentLevelDetails.DataContext = erMol;
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigReaction)
+            {
+                //Use generic pusher
+                PushEntity pr = new PushEntity();
+                pr.EntityLevelDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+
+                if (pr.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigCell)
+            {
+                //Use generic pusher - not yet done for cells
+
+
+                //This works
+                PushCell pc = new PushCell();
+                pc.DataContext = MainWindow.SOP;
+                pc.EntityLevelCellDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+
+                //Show the confirmation dialog
+                if (pc.ShowDialog() == false)
+                    return;
+            }
+            else
+            {
+                MessageBox.Show("Entity type 'save' operation not supported.");
+                return;
+            }
+
+
+            //If we get here, then the user confirmed a PUSH
+
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(source);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show("Entity not pushable.");
+                return;
+            }
+
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(source, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(source, status); // push into B
+            }
         }
     }
 }

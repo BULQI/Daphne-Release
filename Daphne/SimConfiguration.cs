@@ -53,7 +53,7 @@ namespace Daphne
             Protocol = new Protocol();
             skin = new RenderSkin();
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
-            //UserStore = new Level("", "Config\\temp_userstore.json");
+            UserStore = new Level("", "Config\\temp_userstore.json");
         }
 
         /// <summary>
@@ -129,19 +129,18 @@ namespace Daphne
         }
     }
 
-    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    public enum PushLevel { Component = 0, UserStore, DaphneStore }
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
-    [ValueConversion(typeof(PushType), typeof(string))]
-    public class PushTypeToStringConverter : IValueConverter
+    [ValueConversion(typeof(PushLevel), typeof(string))]
+    public class PushLevelToStringConverter : IValueConverter
     {
         // NOTE: This method is a bit fragile since the list of strings needs to 
         // correspond in length and index with the BoundaryFace enum...
-        private List<string> _push_type_strings = new List<string>()
+        private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Entity",
-                                    "Protocol",
+                                    "Component",
                                     "User Store",
                                     "Daphne Store"
                                 };
@@ -151,7 +150,7 @@ namespace Daphne
             try
             {
                 int index = (int)value;
-                return _push_type_strings[index];
+                return _push_level_strings[index];
             }
             catch
             {
@@ -162,8 +161,8 @@ namespace Daphne
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string str = (string)value;
-            int idx = _push_type_strings.FindIndex(item => item == str);
-            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+            int idx = _push_level_strings.FindIndex(item => item == str);
+            return (PushLevel)Enum.ToObject(typeof(PushLevel), (int)idx);
         }
     }
 
@@ -331,13 +330,42 @@ namespace Daphne
         /// <param name="s">the push status of e</param>
         public void repositoryPush(ConfigEntity e, PushStatus s)
         {
-            if (e is ConfigMolecule)
+            if (e is ConfigGene)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.genes.Add(e as ConfigGene);
+                    if (!entity_repository.genes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.genes_dict.Add(e.entity_guid, e as ConfigGene);
+                    }
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.genes.Count; i++)
+                    {
+                        if (entity_repository.genes[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.genes[i] = e as ConfigGene;
+                        }
+                    }
+                    // dict update
+                    entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
+                }
+            }
+            else if (e is ConfigMolecule)
             {
                 // insert
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    if (!entity_repository.molecules_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    }
                 }
                 // update
                 else
@@ -360,7 +388,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.transition_drivers.Add(e as ConfigTransitionDriver);
-                    entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    if (!entity_repository.transition_drivers_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    }
                 }
                 // update
                 else
@@ -383,7 +414,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
-                    entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    if (!entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    }
                 }
                 // update
                 else
@@ -406,7 +440,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
-                    entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    if (!entity_repository.reactions_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    }
                 }
                 // update
                 else
@@ -429,7 +466,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reaction_templates.Add(e as ConfigReactionTemplate);
-                    entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    if (!entity_repository.reaction_templates_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    }
                 }
                 // update
                 else
@@ -452,7 +492,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.cells.Add(e as ConfigCell);
-                    entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    if (!entity_repository.cells_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    }
                 }
                 // update
                 else
@@ -2876,6 +2919,7 @@ namespace Daphne
                 {
                     molWeight = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("MolecularWeight");
                 }
             }
         }
@@ -2892,6 +2936,7 @@ namespace Daphne
                 {
                     effRadius = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("EffectiveRadius");
                 }
             }
         }
@@ -2908,6 +2953,7 @@ namespace Daphne
                 {
                     diffCoeff = value;
                     this.incrementChangeStamp();
+                    OnPropertyChanged("DiffusionCoefficient");
                 }
             }
         }
@@ -3043,11 +3089,15 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newgene.entity_guid = id.ToString();
-            newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
 
+                newgene.entity_guid = id.ToString();
+                newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            }
+                
             return newgene;
         }
 
@@ -4262,7 +4312,8 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            genes_guid_ref = new ObservableCollection<string>();
+            genes = new ObservableCollection<ConfigGene>();
+
         }
 
         public ConfigCell Clone(bool identical)
@@ -4380,7 +4431,7 @@ namespace Daphne
         public ConfigCompartment cytosol { get; set; }
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
-        public ObservableCollection<string> genes_guid_ref { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme
@@ -4453,7 +4504,15 @@ namespace Daphne
         //Return true if this compartment has a molecular population with given molecule
         public bool HasGene(string gene_guid)
         {
-            return genes_guid_ref.Contains(gene_guid);
+            foreach (ConfigGene gene in genes)
+            {
+                if (gene.entity_guid == gene_guid)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         //Return true if this cell has all the genes in the given list of gene guids
@@ -6110,9 +6169,6 @@ namespace Daphne
     }
 
     //Graphics classes
-    //public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
-    //public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
-
     public enum RenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN, MP_TYPE, MP_CONC, CELL_MP }
 
     public class RenderColor

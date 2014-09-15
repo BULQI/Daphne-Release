@@ -410,6 +410,11 @@ namespace Daphne
         {
             foreach (ConfigMolecularPopulation cmp in configComp.molpops)
             {
+                Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
+                                                                     new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
+                                                                     new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
+                                                                     new ConstructorArgument("diffCoeff", cmp.molecule.DiffusionCoefficient));
+
                 if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
@@ -483,18 +488,17 @@ namespace Daphne
                                                         S[0,2], S[1,2], S[2,2],
                                                         mpgg.peak_concentration };
 
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "gauss", initArray);
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "gauss", initArray);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
                 {
                     MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
-
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
                 {
                     MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "explicit", mpc.conc);
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "explicit", mpc.conc);
                 }
                 else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
@@ -519,7 +523,7 @@ namespace Daphne
                             break;
                     }
 
-                    simComp.AddMolecularPopulation(cmp.molecule.entity_guid, "linear", new double[] {       
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "linear", new double[] {       
                                 c1, 
                                 c2,
                                 mpl.x1, 
@@ -561,28 +565,6 @@ namespace Daphne
 
             // clear the databasket dictionaries
             dataBasket.Clear();
-
-            // molecules
-            foreach (ConfigMolecule cm in protocol.entity_repository.molecules)
-            {
-                Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cm.Name),
-                                                                     new ConstructorArgument("mw", cm.MolecularWeight),
-                                                                     new ConstructorArgument("effRad", cm.EffectiveRadius),
-                                                                     new ConstructorArgument("diffCoeff", cm.DiffusionCoefficient));
-
-                dataBasket.Molecules.Add(cm.entity_guid, mol);
-            }
-
-            // genes
-            foreach (ConfigGene cg in protocol.entity_repository.genes)
-            {
-                Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
-                                             new ConstructorArgument("copyNumber", cg.CopyNumber),
-                                             new ConstructorArgument("actLevel", cg.ActivationLevel));
-
-
-                dataBasket.Genes.Add(cg.entity_guid, gene);
-            }
 
             // set up the collision manager
             MathNet.Numerics.LinearAlgebra.Vector box = new MathNet.Numerics.LinearAlgebra.Vector(3);
@@ -652,9 +634,9 @@ namespace Daphne
 
                     // cell genes
                     //foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
-                    foreach (string s in cp.Cell.genes_guid_ref)
+                    foreach (ConfigGene cg in cp.Cell.genes)
                     {
-                        ConfigGene cg = protocol.entity_repository.genes_dict[s];
+                        //ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
                         double geneActivationLevel = cg.ActivationLevel;
                         if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)
@@ -706,23 +688,6 @@ namespace Daphne
                     {
                         cell.IsMotile = false;
                     }
-
-
-                    // locomotion
-                    //if (cell.Cytosol.Populations.ContainsKey(protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref) == true)
-                    //if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
-                    //{
-                    //    //MolecularPopulation driver = cell.Cytosol.Populations[protocol.entity_repository.cells_dict[cp.Cell.entity_guid].locomotor_mol_guid_ref];
-                    //    MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
-                    //    cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
-                    //    cell.IsMotile = true;
-                    //    cell.DragCoefficient = cp.Cell.DragCoefficient;
-                    //}
-                    //else
-                    //{
-                    //    cell.IsMotile = false;
-                    //}
-
 
                     //TRANSITION DRIVERS
                     // death behavior
@@ -805,12 +770,6 @@ namespace Daphne
 
             // ADD ECS MOLECULAR POPULATIONS
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
-            // NOTE: This boolean isn't used anywhere. Do we envision a need for it?
-            // Default: set diffusing
-            foreach (MolecularPopulation mp in dataBasket.Environment.Comp.Populations.Values)
-            {
-                mp.IsDiffusing = true;
-            }
 
             // ECS molpops boundary conditions
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)

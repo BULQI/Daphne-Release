@@ -288,7 +288,8 @@ namespace DaphneGui
             }
             foreach (ConfigGene configGene in crc.genes)
             {
-                cc.genes_guid_ref.Add(configGene.entity_guid);
+                cc.genes.Add(configGene);
+                
             }
             foreach (string rguid in crc.reactions_guid_ref)
             {
