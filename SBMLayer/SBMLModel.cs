@@ -1692,7 +1692,7 @@ namespace SBMLayer
         /// </summary>
         private void GetModelAnnotation()
         {
-            if (!(protocol.scenario.environment is ECSConfigEnvironment))
+            if (protocol.scenario.environment is ECSConfigEnvironment == false)
             {
                 throw new InvalidCastException();
             }
@@ -1895,7 +1895,7 @@ namespace SBMLayer
             //If # of compartments==1, then build as a reaction complex. If not, build as a spatial simulation scenario.
             if (IsReactionComplex())
             {
-                if (!(protocol.rc_scenario.environment is ECSConfigEnvironment))
+                if (protocol.rc_scenario.environment is ECSConfigEnvironment == false)
                 {
                     throw new InvalidCastException();
                 }
@@ -1961,7 +1961,7 @@ namespace SBMLayer
             }
             else
             {
-                if(!(protocol.scenario.environment is ECSConfigEnvironment))
+                if(protocol.scenario.environment is ECSConfigEnvironment == false)
                 {
                     throw new InvalidCastException();
                 }

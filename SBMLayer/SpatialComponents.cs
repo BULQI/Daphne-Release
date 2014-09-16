@@ -347,7 +347,7 @@ namespace SBMLayer
         /// </summary>
         private void InitializeCoordinateSystem()
         {
-            if (!(protocol.scenario.environment is ECSConfigEnvironment))
+            if (protocol.scenario.environment is ECSConfigEnvironment == false)
             {
                 // for now
                 throw new InvalidCastException();
