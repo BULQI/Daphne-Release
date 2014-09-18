@@ -10,43 +10,48 @@
         <push:EntityTemplateSelector x:Key="entityTemplateSelector"
             ReactionTemplate="{StaticResource editReactionTemplate}" 
             MoleculeTemplate="{StaticResource moleculeTemplate}" 
+            GeneTemplate="{StaticResource editGeneTemplate}"
              />
     </Window.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <GroupBox Grid.Row="0" Grid.Column="0">
-            <GroupBox.Header>
-                <TextBlock Text="Entity Values" FontWeight="Bold" FontSize="16"/>
-            </GroupBox.Header>
-            <ContentControl Name="EntityLevelDetails"
+            <GroupBox Grid.Row="0" Grid.Column="0">
+                <GroupBox.Header>
+                    <TextBlock Text="Entity Values" FontWeight="Bold" FontSize="16"/>
+                </GroupBox.Header>
+                <ContentControl Name="EntityLevelDetails"
                         Content="{Binding}" 
                         ContentTemplateSelector="{StaticResource entityTemplateSelector}"
                         Margin="6"/>
-        </GroupBox>
+            </GroupBox>
 
-        <GroupBox Grid.Column="1" Grid.Row="0" >
-            <GroupBox.Header>
-                <TextBlock Text="Library Values" FontWeight="Bold" FontSize="16"/>
-            </GroupBox.Header>
-            <ContentControl Name="ComponentLevelDetails"
+            <GroupBox Grid.Column="1" Grid.Row="0" >
+                <GroupBox.Header>
+                    <TextBlock Text="Library Values" FontWeight="Bold" FontSize="16"/>
+                </GroupBox.Header>
+                <ContentControl Name="ComponentLevelDetails"
                             Content="{Binding}" 
                             ContentTemplateSelector="{StaticResource entityTemplateSelector}" 
                             Margin="6"/>
-        </GroupBox>
+            </GroupBox>
 
-        <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0">
-            <Button Content="Save Molecule to Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click"/>
-            <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="btnCancel" VerticalAlignment="Top" Click="btnCancel_Click" />
-        </StackPanel>
-    </Grid>
+            <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="0">
+                <Button Content="Save Molecule to Subcellular Components Library" Height="23" HorizontalAlignment="Right" Margin="20,20,0,0" Name="btnSave" VerticalAlignment="Top" Click="btnSave_Click"/>
+                <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="20,20" Name="btnCancel" VerticalAlignment="Top" Click="btnCancel_Click" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Window>

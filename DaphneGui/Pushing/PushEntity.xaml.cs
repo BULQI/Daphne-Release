@@ -39,6 +39,7 @@ namespace DaphneGui.Pushing
     {
         public DataTemplate ReactionTemplate { get; set; }
         public DataTemplate MoleculeTemplate { get; set; }
+        public DataTemplate GeneTemplate     { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -49,6 +50,8 @@ namespace DaphneGui.Pushing
 
             if (item is ConfigMolecule)
                 return MoleculeTemplate;
+            else if (item is ConfigGene)
+                return GeneTemplate;
 
             return ReactionTemplate;
         }

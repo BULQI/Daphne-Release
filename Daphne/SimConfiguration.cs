@@ -1344,6 +1344,21 @@ namespace Daphne
             return gm;
         }
 
+        public ConfigGene FindGene(string name)
+        {
+            ConfigGene cg = null;
+
+            foreach (ConfigGene g in entity_repository.genes)
+            {
+                if (g.Name == name)
+                {
+                    cg = g;
+                    break;
+                }
+            }
+            return cg;
+        }
+
         // given a gene name, find its guid
         public string findGeneGuid(string name, Protocol protocol)
         {
@@ -2921,8 +2936,42 @@ namespace Daphne
     public class ConfigGene : ConfigEntity
     {
         public string Name { get; set; }
-        public int CopyNumber { get; set; }
-        public double ActivationLevel { get; set; }
+
+        private int copyNumber;
+        public int CopyNumber
+        {
+            get
+            {
+                return copyNumber;
+            }
+            set
+            {
+                if (copyNumber != value)
+                {
+                    copyNumber = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("CopyNumber");
+                }
+            }
+        }
+
+        private double activationLevel;
+        public double ActivationLevel
+        {
+            get
+            {
+                return activationLevel;
+            }
+            set
+            {
+                if (activationLevel != value)
+                {
+                    activationLevel = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("ActivationLevel");
+                }
+            }
+        }
 
         public ConfigGene(string name, int copynum, double actlevel) : base()
         {

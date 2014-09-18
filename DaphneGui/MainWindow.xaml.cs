@@ -2780,24 +2780,28 @@ namespace DaphneGui
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
             PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Molecule);
+            pushWindow.DataContext = SOP.Protocol;
             pushWindow.ShowDialog();
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
             PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Gene);
+            pushWindow.DataContext = SOP.Protocol;
             pushWindow.ShowDialog();
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
             PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Reaction);
+            pushWindow.DataContext = SOP.Protocol;
             pushWindow.ShowDialog();
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
             PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Cell);
+            pushWindow.DataContext = SOP.Protocol;
             pushWindow.ShowDialog();
         }
 
@@ -2853,6 +2857,20 @@ namespace DaphneGui
 
                 //Show the confirmation dialog
                 if (pc.ShowDialog() == false)
+                    return;
+            }
+            else if (source is ConfigGene) 
+            {
+                PushEntity pm = new PushEntity();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelDetails.DataContext = source;
+
+                ConfigGene erGene = MainWindow.SOP.Protocol.FindGene( ((ConfigGene)source).Name );
+                if (erGene != null)
+                    pm.ComponentLevelDetails.DataContext = erGene;
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
                     return;
             }
             else

@@ -2562,7 +2562,7 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = molpop.molecule;
-            GenericPush(mol);
+            MainWindow.GenericPush(mol);
 
             ////////if (mol == null)
             ////////    return;

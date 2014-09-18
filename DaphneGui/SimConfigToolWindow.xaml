@@ -970,7 +970,7 @@
                                               DisplayMemberPath="box_guid"
                                               SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
                                               SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
+                                              
                                               />
                     <ContentControl Name="GaussianBoxSpecDetails"
                                                     Content="{Binding ElementName=molpopGaussianBoxSpecsListView, Path=SelectedItem}" 
@@ -1517,7 +1517,7 @@
                                               DisplayMemberPath="box_guid"
                                               SelectedValue="{Binding Path=gaussian_spec_box_guid_ref, Mode=OneWay}"
                                               SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
+                                              
                                               />
                     <ContentControl Name="GGBoxSpecDetails"
                                                     Content="{Binding ElementName=ggBoxSpecsListView, Path=SelectedItem}" 

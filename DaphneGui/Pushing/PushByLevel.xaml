@@ -9,27 +9,67 @@
         Loaded="Window_Loaded">
 
     <Window.Resources>
+
+        <!-- Filtered view sources for source entities -->
+        <CollectionViewSource x:Key="pushMoleculesListView"
+                Source="{Binding Path=entity_repository.molecules}"
+                Filter="pushMoleculesListView_Filter"/>
+        <CollectionViewSource x:Key="pushGenesListView" 
+                Source="{Binding Path=entity_repository.genes}"
+                Filter="pushGenesListView_Filter"/>
+        <CollectionViewSource x:Key="pushReactionsListView" 
+                Source="{Binding Path=entity_repository.reactions}"
+                Filter="pushReactionsListView_Filter"/>
+        <CollectionViewSource x:Key="pushCellsListView" 
+                Source="{Binding Path=entity_repository.cells}"
+                Filter="pushCellsListView_Filter"/>
+
+        <!-- Non filtered view sources for destination entities -->
+        <CollectionViewSource x:Key="destMoleculesListView" 
+                Source="{Binding Path=entity_repository.molecules}"  />
+        <CollectionViewSource x:Key="destGenesListView" 
+                Source="{Binding Path=entity_repository.genes}"  />
+        <CollectionViewSource x:Key="destReactionsListView" 
+                Source="{Binding Path=entity_repository.reactions}"  />
+        <CollectionViewSource x:Key="destCellsListView" 
+                Source="{Binding Path=entity_repository.cells}"  />
+        
         <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
 
         <ObjectDataProvider x:Key="pushLevelsList"
-                    MethodName="GetValues" 
-                    ObjectType="{x:Type sys:Enum}">
+            MethodName="GetValues" 
+            ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="daph:PushLevel" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
-            <DataTemplate.Resources>
-                <!--<CollectionViewSource x:Key="pushMoleculesListView"  
-                                  Source="{Binding Path=Tag}"/>-->
-            </DataTemplate.Resources>
+            <!--<DataTemplate.Resources>
+                <CollectionViewSource x:Key="pushMoleculesListView"
+                    Source="{Binding Path=LevelA.entity_repository.molecules}"
+                    Filter="pushMoleculesListView_Filter"/>
+            </DataTemplate.Resources>-->
             
             <StackPanel Orientation="Vertical">
+                
                 <StackPanel>
-                    <DataGrid x:Name="dgMol" MaxHeight="600" AutoGenerateColumns="False"
-                                ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                               >
+                    <DataGrid x:Name="dgMol" MaxHeight="600" AutoGenerateColumns="False" >
+                        <!--ItemsSource="{Binding Source={StaticResource pushMoleculesListView}}"-->
+                        <!--ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"-->
+
+                        <DataGrid.Resources>
+                            <!-- This allows us to display a different list in source vs destination level, but it is not working correctly -->
+                            <Style TargetType="{x:Type DataGrid}">
+                                <Setter Property="ItemsSource" Value="{Binding Source={StaticResource pushMoleculesListView}}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Name, RelativeSource={RelativeSource AncestorType=ContentControl}}" Value="LevelBContent">
+                                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource destMoleculesListView}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -39,11 +79,11 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=DiffusionCoefficient, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=MolecularWeight, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=EffectiveRadius, Mode=OneWay}" 
                             />
@@ -52,12 +92,60 @@
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
                         </DataGrid.Columns>
-
-                            <!--ItemsSource="{Binding Source={StaticResource pushMoleculesListView}}"-->
-                    <!--ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"-->
-
                     </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Name="destMols" x:Key="destLevelMoleculeTemplate">
+            <DataTemplate.Resources>
+                <CollectionViewSource x:Key="pushMoleculesListView"
+                    Source="{Binding Path=LevelB.entity_repository.molecules}"
+                    Filter="pushMoleculesListView_Filter"/>
+            </DataTemplate.Resources>
 
+            <StackPanel Orientation="Vertical">
+
+                <StackPanel>
+                    <DataGrid x:Name="dgMol" MaxHeight="600" AutoGenerateColumns="False"
+                              ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                        <!--ItemsSource="{Binding Source={StaticResource pushMoleculesListView}}"-->
+                        <!--ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"-->
+
+                        <DataGrid.Resources>
+                            <!-- This allows us to display a different list in source vs destination level, but it is not working correctly -->
+                            <Style TargetType="{x:Type DataGrid}">
+                                <Setter Property="ItemsSource" Value="{Binding Source={StaticResource pushMoleculesListView}}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Name, RelativeSource={RelativeSource AncestorType=ContentControl}}" Value="LevelBContent">
+                                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource destMoleculesListView}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=Name, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colDiffCoeff" Header="Diff Coeff" Width="60" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=DiffusionCoefficient, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=MolecularWeight, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=EffectiveRadius, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colMolStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
+                            />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -65,14 +153,27 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgGene" MaxHeight="600" AutoGenerateColumns="False"
-                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-
+                              >
+                        <!--ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"-->
+                        
+                        <DataGrid.Resources>
+                            <!-- This allows us to display a different list in source vs destination level, but it is not working correctly -->
+                            <Style TargetType="{x:Type DataGrid}">
+                                <Setter Property="ItemsSource" Value="{Binding Source={StaticResource pushGenesListView}}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Name, RelativeSource={RelativeSource AncestorType=ContentControl}}" Value="LevelBContent">
+                                        <Setter Property="ItemsSource" Value="{Binding Source={StaticResource destGenesListView}}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="100" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=CopyNumber, Mode=OneWay}" 
                             />
@@ -80,7 +181,7 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=ActivationLevel, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
@@ -141,50 +242,60 @@
             </StackPanel>
         </DataTemplate>
 
-
-
-
+        <DataTemplate x:Name="destLevel" x:Key="destLevelTemplate"
+                      >
+        </DataTemplate>
 
         <push:PushLevelTemplateSelector x:Key="pushLevelTemplateSelector"
-                PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
-                PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
-                PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
-                PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
-             />
+            PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
+            PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
+            PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
+            PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
+            />
 
     </Window.Resources>
 
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
             <StackPanel Orientation="Horizontal">
-                <StackPanel MaxWidth="500" HorizontalAlignment="Left">
-                    <Label FontWeight="Bold">Level (From)</Label>
+                <GroupBox Grid.Row="0" Grid.Column="0">
+                    <GroupBox.Header>
+                        <TextBlock Text="Level From" FontWeight="Bold" FontSize="16"/>
+                    </GroupBox.Header>
+                    <StackPanel MaxWidth="550" HorizontalAlignment="Left">
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
+                          SelectedIndex="0"
                           SelectionChanged="LevelAComboBox_SelectionChanged"
                     />
-                    <ContentControl Name="LevelAContent"
-                        Content="{Binding Path=PushEntityType}" 
+                    <ContentControl Name="LevelAContent" 
+                        Content="{Binding Path=Tag.PushEntityType}" 
                         ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
                         Margin="6"/>
                 </StackPanel>
-                <!--<StackPanel>-->
-                <Button x:Name="PushButton" Content="-->" Height="24" Width="60" HorizontalAlignment="Center" 
+                    </GroupBox>
+                <Button x:Name="PushButton" Content="-->" FontWeight="Bold" FontSize="24" Height="30" Width="50" Margin="0,10"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top" VerticalContentAlignment="Top"
                         Click="PushButton_Click">
                 </Button>
-                <!--</StackPanel>-->
-                <StackPanel MaxWidth="500" HorizontalAlignment="Right">
-                    <Label FontWeight="Bold" Content="Level (To)" />
-                    <ComboBox x:Name="LevelBComboBox" 
-                          ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
-                          SelectionChanged="LevelBComboBox_SelectionChanged"/>
-
-                    <ContentControl Name="LevelBContent"
-                        Content="{Binding Path=PushEntityType}" 
-                        ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
-                        Margin="6"/>
-                </StackPanel>
+                <GroupBox Grid.Row="0" Grid.Column="0">
+                    <GroupBox.Header>
+                        <TextBlock Text="Level To" FontWeight="Bold" FontSize="16"/>
+                    </GroupBox.Header>
+                    <StackPanel MaxWidth="550" HorizontalAlignment="Right">
+                        <ComboBox x:Name="LevelBComboBox" 
+                              ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
+                              SelectedIndex="1"
+                              SelectionChanged="LevelBComboBox_SelectionChanged"/>
+                        <ContentControl Name="LevelBContent" 
+                            Content="{Binding Path=Tag.PushEntityType}" 
+                            ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
+                            Margin="6" >
+                        </ContentControl>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
-        </ScrollViewer>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Window>

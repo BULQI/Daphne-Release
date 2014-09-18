@@ -1315,10 +1315,12 @@ namespace DaphneGui
             if (gene == null)
                 return;
 
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
+            MainWindow.GenericPush(gene);
 
-            if (res == MessageBoxResult.No)
-                return;
+            //MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
+
+            //if (res == MessageBoxResult.No)
+            //    return;
 
             ////PushGene pg = new PushGene();
             ////pg.DataContext = cell;
@@ -1331,24 +1333,24 @@ namespace DaphneGui
             ////    return;
             ////}
 
-            //Here do the processing
-            //Push the entity
-            Protocol B = MainWindow.SOP.Protocol;
-            Level.PushStatus status = B.pushStatus(gene);
-            if (status == Level.PushStatus.PUSH_INVALID)
-            {
-                MessageBox.Show("Entity not pushable.");
-                return;
-            }
+            //////Here do the processing
+            //////Push the entity
+            ////Protocol B = MainWindow.SOP.Protocol;
+            ////Level.PushStatus status = B.pushStatus(gene);
+            ////if (status == Level.PushStatus.PUSH_INVALID)
+            ////{
+            ////    MessageBox.Show("Entity not pushable.");
+            ////    return;
+            ////}
 
-            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            {
-                B.repositoryPush(gene, status); // push into B, inserts as new
-            }
-            else // the item exists; could be newer or older
-            {
-                B.repositoryPush(gene, status); // push into B, overwrite
-            }
+            ////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////{
+            ////    B.repositoryPush(gene, status); // push into B, inserts as new
+            ////}
+            ////else // the item exists; could be newer or older
+            ////{
+            ////    B.repositoryPush(gene, status); // push into B, overwrite
+            ////}
 
         }
 
