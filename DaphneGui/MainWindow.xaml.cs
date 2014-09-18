@@ -1906,6 +1906,9 @@ namespace DaphneGui
                     sop.Protocol = protocol;
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+
+                    //skg for testing
+                    //sop.UserStore = sop.UserStore.DeserializeFromString(orig_content);
                 }
               
             }
@@ -2776,28 +2779,26 @@ namespace DaphneGui
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-
-            pw.LevelADataGrid.ItemsSource = SOP.Protocol.entity_repository.molecules;
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Molecule);
+            pushWindow.ShowDialog();
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Gene);
+            pushWindow.ShowDialog();
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Reaction);
+            pushWindow.ShowDialog();
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            PushWindow pw = new PushWindow();
-            pw.ShowDialog();
+            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Cell);
+            pushWindow.ShowDialog();
         }
 
         public static void GenericPush(ConfigEntity source)

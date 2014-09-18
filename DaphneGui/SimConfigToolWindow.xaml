@@ -2482,7 +2482,11 @@
                                             DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
 
-                                    <StackPanel Margin="10,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
+                                        <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." Click="EcsPushCellButton_Click"/>
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10,0">
                                         <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>                                    
                                 </local:DaphneStackPanel>

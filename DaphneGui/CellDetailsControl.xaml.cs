@@ -149,6 +149,7 @@ namespace DaphneGui
             {
                 if (cell.cytosol.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
                 cmp.molecule = item;
+                cmp.Name = cmp.molecule.Name;
                 break;
             }
             if (cmp.molecule == null) return;
@@ -253,6 +254,10 @@ namespace DaphneGui
 
         private void MembraneAddMolButton_Click(object sender, RoutedEventArgs e)
         {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return;
+
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
             cmp.mp_dist_name = "New distribution";
@@ -261,23 +266,31 @@ namespace DaphneGui
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
-            //cvs.Filter += new FilterEventHandler(boundaryMoleculesListView_Filter);
+            
+            if (cvs == null) return;
 
             ObservableCollection<ConfigMolecule> mol_list = new ObservableCollection<ConfigMolecule>();
-            mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
+
+            foreach (ConfigMolecule item in cvs.View)
+            {
+                if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                if (item.molecule_location == MoleculeLocation.Boundary)
+                {
+                    mol_list.Add(item);
+                }
+            }
+
             if (mol_list != null)
             {
                 cmp.molecule = mol_list.First().Clone(null);
+                cmp.Name = cmp.molecule.Name;
             }
             else
             {
                 return;
             }
 
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
+            
 
             cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
@@ -1341,7 +1354,7 @@ namespace DaphneGui
 
         private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CellMembraneMolPopsListBox.SelectedIndex < 0)
+            if (CellCytosolMolPopsListBox.SelectedIndex < 0)
                 return;
 
             ConfigCell cell = DataContext as ConfigCell;
@@ -1359,6 +1372,30 @@ namespace DaphneGui
             ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
 
             MainWindow.GenericPush(mol);
+        }
+
+        private void PushMembReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MembReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
+        }
+
+        private void PushCytoReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CytosolReacListBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
+            MainWindow.GenericPush(reac);
         }
     }
 

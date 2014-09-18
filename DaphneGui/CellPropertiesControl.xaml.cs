@@ -106,13 +106,13 @@ namespace DaphneGui
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
         }
 
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
+        ////private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        ////{
+        ////    ConfigCell cell = DataContext as ConfigCell;
+        ////    if (cell == null)
+        ////        return;
 
-            MainWindow.GenericPush(cell);
-        }
+        ////    MainWindow.GenericPush(cell);
+        ////}
     }
 }
