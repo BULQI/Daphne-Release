@@ -96,35 +96,15 @@ namespace DaphneOptim
 
             // create the simulation
             sim = new Simulation();
+
             // reporter
             reporter = new Reporter();
             reporter.AppPath = orig_path + @"\";
-
 
             if (file_exists)
             {
                 sop = new SystemOfPersistence();
                 initialState_Abridged(true, true, ReadJson(""));
-                ////enableCritical(loadSuccess);
-                //if (loadSuccess == true)
-                //{
-                //    //// after doing a full reset, don't require one immediately
-                //    //MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, false);
-                //    //UpdateGraphics();
-                //    //displayTitle();
-                //}
-                //else
-                //{
-                //    //// if we are unsuccessfully trying to load the default scenario then recreate it
-                //    //// NOTE: keep disabled for safety; it seems a hacky thing to do
-                //    //// (what if the user has something important in that file and it gets overwritten?)
-                //    ////if (file == "default_scenario.xml")
-                //    ////{
-                //    ////    CreateAndSerializeDefaultScenario();
-                //    ////}
-                //    //Properties.Settings.Default.lastOpenScenario = "";
-                //    //openLastScenarioMenu.IsChecked = false;
-                //}
             }
 
             //// create the simulation thread
@@ -142,13 +122,12 @@ namespace DaphneOptim
 
             // run scenario
             string processArgs = @"-d -b -f:daphne_driver_locomotion_scenario.json";
-            //string processName = "C:\\Users\\gmkepler\\Documents\\Visual Studio 2010\\Projects\\BU-TFS\\Daphne\\Daphne-grace\\DaphneGui\\bin\\x64\\Debug\\DaphneGui.exe";
             string processName = @"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneGui\bin\x64\Debug\DaphneGui.exe";
             ProcessStartInfo info = new ProcessStartInfo(processName, processArgs);
             Process process = new Process();
             process.StartInfo = info;
             process.StartInfo.ErrorDialog = true;
-            process.StartInfo.CreateNoWindow = true;
+            //process.StartInfo.CreateNoWindow = true;
             process.Start();
             process.WaitForExit();
 
@@ -180,24 +159,6 @@ namespace DaphneOptim
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                }
             }
-
-            //// set up the simulation
-            //if (postConstruction == true && AssumeIDE_copied() == true)
-            //{
-            //    sim.Load(sop.Protocol, completeReset);
-            //}
-            //else
-            //{
-            //    try
-            //    {
-            //        sim.Load(sop.Protocol, completeReset);
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        handleLoadFailure_Abridged(exceptionMessage_copied(e));
-            //        return;
-            //    }
-            //}
 
             // reporter file name
             reporter.FileName = sop.Protocol.reporter_file_name;
