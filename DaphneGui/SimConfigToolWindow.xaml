@@ -198,7 +198,7 @@
             <CollectionViewSource x:Key="moleculesListView2"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="molPopsListView"  
-                                  Source="{Binding Path=scenario.environment.ecs.molpops}"
+                                  Source="{Binding Path=scenario.environment.comp.molpops}"
                                   />
             
             <CollectionViewSource x:Key="bulkMoleculesListView"  
@@ -1884,7 +1884,7 @@
 
                             </StackPanel>
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
+                                    ItemsSource="{Binding Path=scenario.environment.comp.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
                                     SelectedIndex="-1"
                             />
@@ -2100,7 +2100,7 @@
                             </StackPanel>
                             
                             <ListView x:Name="lvEcsReactions" 
-                                      ItemsSource="{Binding Path=scenario.environment.ecs.Reactions}"
+                                      ItemsSource="{Binding Path=scenario.environment.comp.Reactions}"
                                       SelectedIndex="-1"
                                 >
                                 
@@ -2285,7 +2285,7 @@
                                 </TextBlock>
                         
                                 <ListBox x:Name="ReactionComplexListBox" MinHeight="50" 
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.reaction_complexes_guid_ref}" 
+                                    ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes_guid_ref}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsReacComplexListItemTemplate}}"
                                     SelectedIndex="0"
                                  />
@@ -2689,7 +2689,7 @@
                             >
                         <!--<TextBlock Text="Molecules in Extracellular Medium" FontWeight="Bold" Margin="0,5,0,0" />-->
                         <DataGrid x:Name="dgEcmMols" 
-                            ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" AutoGenerateColumns="False" 
+                            ItemsSource="{Binding Path=scenario.environment.comp.molpops}" AutoGenerateColumns="False" 
                             Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
                             CanUserSortColumns="False" RowHeaderWidth="0"

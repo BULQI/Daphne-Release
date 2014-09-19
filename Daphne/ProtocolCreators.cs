@@ -50,7 +50,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -162,7 +162,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // Experiment
             protocol.experiment_name = "Cell locomotion with driver molecule.";
@@ -304,7 +304,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;

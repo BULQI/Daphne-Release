@@ -347,13 +347,13 @@ namespace SBMLayer
         /// </summary>
         private void InitializeCoordinateSystem()
         {
-            if (protocol.scenario.environment is ECSConfigEnvironment == false)
+            if (protocol.scenario.environment is ConfigECSEnvironment == false)
             {
                 // for now
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             //Define dimensions of the simulation space
             xmin = 0;

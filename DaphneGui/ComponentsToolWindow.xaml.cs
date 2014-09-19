@@ -309,7 +309,7 @@ namespace DaphneGui
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)MainWindow.SOP.Protocol.rc_scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.rc_scenario.environment;
             // Add cell population distribution information
             double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;

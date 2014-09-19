@@ -1576,6 +1576,13 @@ namespace Daphne
         public ScenarioBase()
         {
             time_config = new TimeConfig();
+
+            gaussian_specifications = new ObservableCollection<GaussianSpecification>();
+            box_specifications = new ObservableCollection<BoxSpecification>();
+
+            // utility storage
+            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
+            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
         }
 
         /// <summary>
@@ -1622,75 +1629,6 @@ namespace Daphne
             return false;
         }
 
-        /// <summary>
-        /// need to override this in scenario types that have something specific to initialize
-        /// </summary>
-        public abstract void InitializeStorageClasses();
-
-        public abstract void DisconnectHandlers(PropertyChangedEventHandler[] funcs);
-        public abstract void ConnectHandlers(PropertyChangedEventHandler[] funcs);
-
-        public TimeConfig time_config { get; set; }
-        public SimStates simInterpolate { get; set; }
-        public SimStates simCellSize { get; set; }
-        public ConfigEnvironmentBase environment { get; set; }
-    }
-    
-    public class TissueScenario : ScenarioBase
-    {
-        public ObservableCollection<CellPopulation> cellpopulations { get; set; }
-
-        public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
-        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
-
-        // Convenience utility storage (not serialized)
-        [XmlIgnore]
-        public Dictionary<string, BoxSpecification> box_guid_box_dict;
-
-        [XmlIgnore]
-        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
-
-        [XmlIgnore]
-        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
-        
-
-        public TissueScenario()
-        {
-            simInterpolate = SimStates.Linear;
-            simCellSize = SimStates.Tiny;
-            environment = new ECSConfigEnvironment();
-            cellpopulations = new ObservableCollection<CellPopulation>();
-
-            gaussian_specifications = new ObservableCollection<GaussianSpecification>();
-            box_specifications = new ObservableCollection<BoxSpecification>();
-
-            // Utility storage
-            // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
-            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
-            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
-            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
-            // Set callback to update box specification extents when environment extents change
-            environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
-        }
-
-        private void SetBoxSpecExtents(BoxSpecification bs)
-        {
-            bs.x_scale_max = ((ECSConfigEnvironment)environment).extent_x;
-            bs.x_scale_min = ((ECSConfigEnvironment)environment).extent_min;
-            bs.x_trans_max = 1.5 * ((ECSConfigEnvironment)environment).extent_x;
-            bs.x_trans_min = -((ECSConfigEnvironment)environment).extent_x / 2.0;
-
-            bs.y_scale_max = ((ECSConfigEnvironment)environment).extent_y;
-            bs.y_scale_min = ((ECSConfigEnvironment)environment).extent_min;
-            bs.y_trans_max = 1.5 * ((ECSConfigEnvironment)environment).extent_y;
-            bs.y_trans_min = -((ECSConfigEnvironment)environment).extent_y / 2.0;
-
-            bs.z_scale_max = ((ECSConfigEnvironment)environment).extent_z;
-            bs.z_scale_min = ((ECSConfigEnvironment)environment).extent_min;
-            bs.z_trans_max = 1.5 * ((ECSConfigEnvironment)environment).extent_z;
-            bs.z_trans_min = -((ECSConfigEnvironment)environment).extent_z / 2.0;
-        }
-
         private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -1699,9 +1637,13 @@ namespace Daphne
                 {
                     BoxSpecification bs = nn as BoxSpecification;
                     box_guid_box_dict.Add(bs.box_guid, bs);
-
+#if USE_BOX_LIMITS
                     // Piggyback on this callback to set extents from environment for new box specifications
-                    SetBoxSpecExtents(bs);
+                    if (environment is ConfigECSEnvironment)
+                    {
+                        bs.SetBoxSpecExtents((ConfigECSEnvironment)environment);
+                    }
+#endif
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
@@ -1734,6 +1676,80 @@ namespace Daphne
             }
         }
 
+        public void InitBoxExtentsAndGuidBoxDict()
+        {
+            box_guid_box_dict.Clear();
+            foreach (BoxSpecification bs in box_specifications)
+            {
+                box_guid_box_dict.Add(bs.box_guid, bs);
+#if USE_BOX_LIMITS
+                // Piggyback on this routine to set initial extents from environment values
+                if (environment is ConfigECSEnvironment)
+                {
+                    bs.SetBoxSpecExtents((ConfigECSEnvironment)environment);
+                }
+#endif
+            }
+            box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
+        }
+
+        public void InitGaussSpecsAndGuidGaussDict()
+        {
+            gauss_guid_gauss_dict.Clear();
+            foreach (GaussianSpecification gs in gaussian_specifications)
+            {
+                gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
+            }
+            gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
+        }
+
+        /// <summary>
+        /// need to override this in scenario types that have something specific to initialize
+        /// </summary>
+        public abstract void InitializeStorageClasses();
+
+        public abstract void DisconnectHandlers(PropertyChangedEventHandler[] funcs);
+        public abstract void ConnectHandlers(PropertyChangedEventHandler[] funcs);
+
+        public TimeConfig time_config { get; set; }
+        public SimStates simInterpolate { get; set; }
+        public SimStates simCellSize { get; set; }
+        public ConfigEnvironmentBase environment { get; set; }
+
+        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
+        public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
+
+        // Convenience utility storage (not serialized)
+        [JsonIgnore]
+        public Dictionary<string, BoxSpecification> box_guid_box_dict;
+
+        [JsonIgnore]
+        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
+    }
+    
+    public class TissueScenario : ScenarioBase
+    {
+        public ObservableCollection<CellPopulation> cellpopulations { get; set; }
+
+        // Convenience utility storage (not serialized)
+        [JsonIgnore]
+        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
+        
+
+        public TissueScenario()
+        {
+            simInterpolate = SimStates.Linear;
+            simCellSize = SimStates.Tiny;
+            environment = new ConfigECSEnvironment();
+            cellpopulations = new ObservableCollection<CellPopulation>();
+
+            // Utility storage
+            // NOTE: No use adding CollectionChanged event handlers here since it gets wiped out by deserialization anyway...
+            cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
+            // Set callback to update box specification extents when environment extents change
+            environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
+        }
+
         private void cellsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
@@ -1762,29 +1778,6 @@ namespace Daphne
                     cellpopulation_id_cellpopulation_dict.Remove(cs.cellpopulation_id);
                 }
             }
-        }
-
-        public void InitBoxExtentsAndGuidBoxDict()
-        {
-            box_guid_box_dict.Clear();
-            foreach (BoxSpecification bs in box_specifications)
-            {
-                box_guid_box_dict.Add(bs.box_guid, bs);
-
-                // Piggyback on this routine to set initial extents from environment values
-                SetBoxSpecExtents(bs);
-            }
-            box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
-        }
-
-        public void InitGaussSpecsAndGuidGaussDict()
-        {
-            gauss_guid_gauss_dict.Clear();
-            foreach (GaussianSpecification gs in gaussian_specifications)
-            {
-                gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
-            }
-            gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
         }
 
         public void InitCellPopulationIDCellPopulationDict()
@@ -1942,19 +1935,17 @@ namespace Daphne
             // Check that cells are still inside the simulation space.
             foreach (CellPopulation cellPop in cellpopulations)
             {
-                cellPop.cellPopDist.Resize(new double[3] { ((ECSConfigEnvironment)environment).extent_x,
-                                                           ((ECSConfigEnvironment)environment).extent_y,
-                                                           ((ECSConfigEnvironment)environment).extent_z });
+                cellPop.cellPopDist.Resize(new double[3] { ((ConfigECSEnvironment)environment).extent_x,
+                                                           ((ConfigECSEnvironment)environment).extent_y,
+                                                           ((ConfigECSEnvironment)environment).extent_z });
             }
-
-            // Update VTK environment box 
-            var env = environment;
-            /////MainWindow.VTKBasket.EnvironmentController.setupBox(env.extent_x, env.extent_y, env.extent_z);
-            // NOTE: Rwc.Invalidate happens to also be called because every box specification has a callback to
-            //   GUIInteractionToWidgetCallback on its PropertyChanged, and that calls Invalidate, but wanted to
-            //   call it here, too, for environment change explicitly just in case box specs are handled differently
-            //   in the future, didn't want the environment box to stop updating "live" mysteriously.
-            /////MainWindow.GC.Rwc.Invalidate();
+#if USE_BOX_LIMITS
+            // update all box min/max translation and scale
+            foreach (BoxSpecification box in box_guid_box_dict.Values)
+            {
+                box.SetBoxSpecExtents((ConfigECSEnvironment)environment);
+            }
+#endif
         }
 
         /// <summary>
@@ -2183,7 +2174,7 @@ namespace Daphne
         public ConfigCompartment comp { get; set; }
     }
     
-    public class ECSConfigEnvironment : ConfigEnvironmentBase
+    public class ConfigECSEnvironment : ConfigEnvironmentBase
     {
         private int _extent_x;
         private int _extent_y;
@@ -2210,7 +2201,6 @@ namespace Daphne
                         System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
                     }
                 }
-            
             }
         }
         public int extent_y
@@ -2284,13 +2274,13 @@ namespace Daphne
         }
         public int[] NumGridPts { get; set; }
 
-        [XmlIgnore]
+        [JsonIgnore]
         public int extent_min { get; set; }
-        [XmlIgnore]
+        [JsonIgnore]
         public int extent_max { get; set; }
-        [XmlIgnore]
+        [JsonIgnore]
         public int gridstep_min { get; set; }
-        [XmlIgnore]
+        [JsonIgnore]
         public int gridstep_max { get; set; }
 
         private bool _toroidal;
@@ -2309,7 +2299,7 @@ namespace Daphne
             }
         }
 
-        public ECSConfigEnvironment()
+        public ConfigECSEnvironment()
         {
             gridstep = 10;
             extent_x = 200;
@@ -5990,7 +5980,6 @@ namespace Daphne
      XmlInclude(typeof(MolPopGaussian))]
     public abstract class MolPopDistribution : EntityModelBase
     {
-        [XmlIgnore]
         public MolPopDistributionType mp_distribution_type { get; protected set; }
         public List<BoundaryCondition> boundaryCondition { get; set; }        
 
@@ -6256,6 +6245,7 @@ namespace Daphne
         private bool _current_box_visibility = true;
         
         // Range values calculated based on environment extents
+#if USE_BOX_LIMITS
         private double _x_trans_max;
         private double _x_trans_min;
         private double _x_scale_max;
@@ -6476,6 +6466,7 @@ namespace Daphne
                 }
             }
         }
+#endif
 
         public bool box_visibility 
         {
@@ -6722,12 +6713,31 @@ namespace Daphne
             blob_visibility = true;
             current_box_visibility = true;
             current_blob_visibility = true;
-            transform_matrix = new double[][] {
-                new double[]{1.0, 0.0, 0.0, 0.0},
-                new double[]{0.0, 1.0, 0.0, 0.0},
-                new double[]{0.0, 0.0, 1.0, 0.0},
-                new double[]{0.0, 0.0, 0.0, 1.0} };
+            transform_matrix = new double[][] { new double[]{1.0, 0.0, 0.0, 0.0},
+                                                new double[]{0.0, 1.0, 0.0, 0.0},
+                                                new double[]{0.0, 0.0, 1.0, 0.0},
+                                                new double[]{0.0, 0.0, 0.0, 1.0} };
         }
+
+#if USE_BOX_LIMITS
+        public void SetBoxSpecExtents(ConfigECSEnvironment environment)
+        {
+            x_scale_max = environment.extent_x;
+            x_scale_min = environment.extent_min;
+            x_trans_max = 1.5 * environment.extent_x;
+            x_trans_min = -environment.extent_x / 2.0;
+
+            y_scale_max = environment.extent_y;
+            y_scale_min = environment.extent_min;
+            y_trans_max = 1.5 * environment.extent_y;
+            y_trans_min = -environment.extent_y / 2.0;
+
+            z_scale_max = environment.extent_z;
+            z_scale_min = environment.extent_min;
+            z_trans_max = 1.5 * environment.extent_z;
+            z_trans_min = -environment.extent_z / 2.0;
+        }
+#endif
 
         public void SetMatrix(double[][] value)
         {

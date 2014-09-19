@@ -396,7 +396,7 @@ namespace Daphne
     {
         // have a local pointer of the correct type for use within this class
         private TissueScenario scenarioHandle;
-        private ECSConfigEnvironment envHandle;
+        private ConfigECSEnvironment envHandle;
 
         public TissueSimulation()
         {
@@ -544,7 +544,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
             scenarioHandle = (TissueScenario)protocol.scenario;
-            envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // call the base
             base.Load(protocol, completeReset, is_reaction_complex);

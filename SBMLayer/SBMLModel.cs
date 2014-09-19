@@ -66,7 +66,7 @@ namespace SBMLayer
         private Boolean isSpatialModel;
 
         private TissueScenario scenario;
-        private ECSConfigEnvironment envHandle;
+        private ConfigECSEnvironment envHandle;
 
         /// <summary>
         /// Sets Paths for SBMLDocument - Level 3 Version 1 format
@@ -85,7 +85,7 @@ namespace SBMLayer
                 throw new InvalidCastException();
             }
             scenario = (TissueScenario)protocol.scenario;
-            envHandle = (ECSConfigEnvironment)scenario.environment;
+            envHandle = (ConfigECSEnvironment)scenario.environment;
         }
 
         /// <summary>
@@ -982,7 +982,7 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.rc_scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
             double volume = envHandle.extent_x * envHandle.extent_y * envHandle.extent_z;
             AddCompartment(compName, compName, true, volume, envHandle.NumGridPts.Length, "");
 
@@ -1692,12 +1692,12 @@ namespace SBMLayer
         /// </summary>
         private void GetModelAnnotation()
         {
-            if (protocol.scenario.environment is ECSConfigEnvironment == false)
+            if (protocol.scenario.environment is ConfigECSEnvironment == false)
             {
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             //If there is a Daphne annotation
             if (model.isSetAnnotation())
@@ -1895,12 +1895,12 @@ namespace SBMLayer
             //If # of compartments==1, then build as a reaction complex. If not, build as a spatial simulation scenario.
             if (IsReactionComplex())
             {
-                if (protocol.rc_scenario.environment is ECSConfigEnvironment == false)
+                if (protocol.rc_scenario.environment is ConfigECSEnvironment == false)
                 {
                     throw new InvalidCastException();
                 }
 
-                ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.rc_scenario.environment;
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
 
                 ConfigReactionComplex crc = new ConfigReactionComplex(model.getId());
 
@@ -1961,12 +1961,12 @@ namespace SBMLayer
             }
             else
             {
-                if(protocol.scenario.environment is ECSConfigEnvironment == false)
+                if(protocol.scenario.environment is ConfigECSEnvironment == false)
                 {
                     throw new InvalidCastException();
                 }
 
-                ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
                 //Populate experiment
                 protocol.experiment_name = model.getId();

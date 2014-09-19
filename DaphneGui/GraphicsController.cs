@@ -1485,7 +1485,6 @@ namespace DaphneGui
                     if (transferMatrix == true)
                     {
                         double[] r = null, t = null, s = null;
-                        bool changed = false;
 
                         // get the scale, rotation, translation, check against their min/max values, and correct if needed
                         rw.GetScaleRotationTranslation(ref s, ref r, ref t);
@@ -1498,6 +1497,8 @@ namespace DaphneGui
                             MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
+#if USE_BOX_LIMITS
+                        bool changed = false;
 
                         // translation
                         if (t[0] < scenario.box_guid_box_dict[key].x_trans_min)
@@ -1567,6 +1568,7 @@ namespace DaphneGui
                         {
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
+#endif
                         WidgetTransformToBoxMatrix(rw, scenario.box_guid_box_dict[key]);
                         // Transfer transform to VTKDataBasket
                         MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);

@@ -81,7 +81,7 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
 
             double[] extents = new double[3] { envHandle.extent_x, 
                                                envHandle.extent_y, 
@@ -229,7 +229,7 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
 
             box.x_trans = envHandle.extent_x / 2;
             box.y_trans = envHandle.extent_y / 2;
@@ -1056,7 +1056,7 @@ namespace DaphneGui
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
 
             ComboBox cb = sender as ComboBox;
             if (cb.SelectedIndex == -1)

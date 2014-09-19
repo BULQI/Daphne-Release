@@ -310,7 +310,7 @@ namespace DaphneGui
             }
             else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                ECSConfigEnvironment envHandle = (ECSConfigEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
                 double x2 = envHandle.extent_x;
 
                 switch (((MolPopLinear)(molpop.mp_distribution)).dim)
@@ -1147,7 +1147,7 @@ namespace DaphneGui
                 throw new InvalidCastException();
             }
 
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)protocol.scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
             TissueScenario scenario = (TissueScenario)protocol.scenario;
             double useThisZValue,
                    gridStep = Cell.defaultRadius * 2;
@@ -1260,7 +1260,7 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            ECSConfigEnvironment envHandle = (ECSConfigEnvironment)scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)scenario.environment;
             string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
             BoxSpecification bs = scenario.box_guid_box_dict[box_guid];

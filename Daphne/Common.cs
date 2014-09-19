@@ -83,12 +83,12 @@ namespace Daphne
 
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
-            if (scenario.environment is ECSConfigEnvironment)
+            if (scenario.environment is ConfigECSEnvironment)
             {
                 Bind<ECSEnvironment>().ToSelf().WithConstructorArgument("numGridPts",
-                                                                        ((ECSConfigEnvironment)scenario.environment).NumGridPts).WithConstructorArgument("gridStep",
-                                                                        ((ECSConfigEnvironment)scenario.environment).gridstep).WithConstructorArgument("toroidal",
-                                                                        ((ECSConfigEnvironment)scenario.environment).toroidal);
+                                                                        ((ConfigECSEnvironment)scenario.environment).NumGridPts).WithConstructorArgument("gridStep",
+                                                                        ((ConfigECSEnvironment)scenario.environment).gridstep).WithConstructorArgument("toroidal",
+                                                                        ((ConfigECSEnvironment)scenario.environment).toroidal);
             }
             Bind<CollisionManager>().ToSelf();
 
