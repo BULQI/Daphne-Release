@@ -214,9 +214,6 @@
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pushing\PushByLevel.xaml.cs">
-      <DependentUpon>PushByLevel.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pushing\PushCell.xaml.cs">
       <DependentUpon>PushCell.xaml</DependentUpon>
     </Compile>
@@ -315,10 +312,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pushing\PushBetweenLevels.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pushing\PushByLevel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
