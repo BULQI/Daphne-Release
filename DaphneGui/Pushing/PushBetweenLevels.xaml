@@ -37,8 +37,6 @@
                     <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" 
                               ItemsSource="{Binding}" 
                               >
-
-
                         <DataGrid.CommandBindings>
                             <!--<CommandBinding Command="push:MyCommands.PushCommand"
                                             Executed="PushCommandExecuted"
@@ -82,6 +80,13 @@
                 <StackPanel>
                     <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" 
                               ItemsSource="{Binding}">
+
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -111,6 +116,13 @@
                 <StackPanel>
                     <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False"
                                 ItemsSource="{Binding}"  >
+                        
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colRate" Header="Rate Constant" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -137,6 +149,13 @@
                 <StackPanel>
                     <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False"
                                 ItemsSource="{Binding}"  >
+
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colCellName" Header="Name" Width="200" IsReadOnly="True" TextOptions.TextFormattingMode="Display"
                                  Binding="{Binding Path=CellName, Mode=OneWay}" />
@@ -203,13 +222,14 @@
                         HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                         VerticalAlignment="Top" VerticalContentAlignment="Top"
                         Command="ApplicationCommands.Save"
+                        FocusManager.IsFocusScope="True"
                         >
                 
-                <Button.CommandBindings>
+                <!--<Button.CommandBindings>
                     <CommandBinding   Command="ApplicationCommands.Save"
                                       Executed="PushCommandExecuted"
                                       CanExecute="PushCommandCanExecute"/>
-                </Button.CommandBindings>
+                </Button.CommandBindings>-->
                 
             </Button>
 
