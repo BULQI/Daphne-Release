@@ -1801,7 +1801,7 @@ namespace Daphne
             {
                 if (cs.cellPopDist.DistType == CellPopDistributionType.Gaussian)
                 {
-                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).box_guid];
+                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).gauss_spec_guid_ref];
                     ((CellPopGaussian)cs.cellPopDist).ParamReset(box);
                     box.PropertyChanged += new PropertyChangedEventHandler(((CellPopGaussian)cs.cellPopDist).CellPopGaussChanged);
                 }
@@ -4932,20 +4932,7 @@ namespace Daphne
                 }
             }
         }
-        private string _box_guid;
-        public string box_guid
-        {
-            get { return _box_guid; }
-            set
-            {
-                if (_box_guid == value)
-                    return;
-                else
-                {
-                    _box_guid = value;
-                }
-            }
-        }
+
         // The standard deviations of the distribution
         private double[] sigma;
 
@@ -4956,24 +4943,12 @@ namespace Daphne
                                                     new double[]{0.0, 0.0, 1.0, 0.0},
                                                     new double[]{0.0, 0.0, 0.0, 1.0} };
 
-        public CellPopGaussian(double[] extents, double minDisSquared, BoxSpecification _box, CellPopulation _cellPop)
+        public CellPopGaussian(double[] extents, double minDisSquared, CellPopulation _cellPop)
             : base(extents, minDisSquared, _cellPop)  
         {
             DistType = CellPopDistributionType.Gaussian;
             gauss_spec_guid_ref = "";
 
-            if (_box != null)
-            {
-                _box_guid = _box.box_guid;
-                _box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
-                sigma = new double[3] { _box.x_scale / 2, _box.y_scale / 2, _box.z_scale / 2 };
-                setRotationMatrix(_box);
-            }
-            else
-            {
-                // We get here when deserializing from json
-                sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4};
-            }
             if (_cellPop != null)
             {
                 AddByDistr(_cellPop.number);
@@ -4985,6 +4960,26 @@ namespace Daphne
             //}
  
             //OnPropertyChanged("CellStates");
+        }
+
+        /// <summary>
+        /// set the box handler, sigma, and rotation matrix
+        /// </summary>
+        /// <param name="extents"></param>
+        /// <param name="box"></param>
+        public void Initialize(double[] extents, BoxSpecification box)
+        {
+            if (box != null)
+            {
+                box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
+                sigma = new double[3] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
+                setRotationMatrix(box);
+            }
+            else
+            {
+                // We get here when deserializing from json
+                sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
+            }
         }
 
         public override void Resize(double[] newExtents)

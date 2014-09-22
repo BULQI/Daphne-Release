@@ -1135,8 +1135,9 @@ namespace DaphneGui
                 gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
                 AddGaussianSpecification(gg, box);
 
-                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);
+                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
                 ((CellPopGaussian)cellPop.cellPopDist).gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+                ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
 
                 // Connect the VTK callback
                 MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
