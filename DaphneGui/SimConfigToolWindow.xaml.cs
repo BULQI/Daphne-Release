@@ -2562,7 +2562,8 @@ namespace DaphneGui
                 return;
 
             ConfigMolecule mol = molpop.molecule;
-            MainWindow.GenericPush(mol);
+            ConfigMolecule newmol = mol.Clone(null);
+            MainWindow.GenericPush(newmol);
 
             ////////if (mol == null)
             ////////    return;
@@ -2612,7 +2613,8 @@ namespace DaphneGui
                 return;
 
             ConfigCell cell = cellpop.Cell;
-            MainWindow.GenericPush(cell);
+            ConfigCell newcell = cell.Clone(true);
+            MainWindow.GenericPush(newcell);
         }
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -2624,7 +2626,8 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
-            MainWindow.GenericPush(reac);
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
 
             ////////PushReaction pr = new PushReaction();
             ////////pr.EntityLevelReactionDetails.DataContext = reac;
@@ -2656,87 +2659,87 @@ namespace DaphneGui
             ////////}
         }
 
-        private void GenericPush(ConfigEntity source)
-        {
-            if (source == null)
-            {
-                MessageBox.Show("Nothing to push");
-                return;
-            }
+        //private void GenericPush(ConfigEntity source)
+        //{
+        //    if (source == null)
+        //    {
+        //        MessageBox.Show("Nothing to push");
+        //        return;
+        //    }
 
-            if (source is ConfigMolecule)
-            {
-                //LET'S TRY A GENERIC PUSHER
-                PushEntity pm = new PushEntity();
-                pm.DataContext = MainWindow.SOP;
-                pm.EntityLevelDetails.DataContext = source;
+        //    if (source is ConfigMolecule)
+        //    {
+        //        //LET'S TRY A GENERIC PUSHER
+        //        PushEntity pm = new PushEntity();
+        //        pm.DataContext = MainWindow.SOP;
+        //        pm.EntityLevelDetails.DataContext = source;
 
-                ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
-                if (erMol != null)
-                    pm.ComponentLevelDetails.DataContext = erMol;
+        //        ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+        //        if (erMol != null)
+        //            pm.ComponentLevelDetails.DataContext = erMol;
 
-                //Show the confirmation dialog
-                if (pm.ShowDialog() == false)
-                    return;
+        //        //Show the confirmation dialog
+        //        if (pm.ShowDialog() == false)
+        //            return;
 
-            }
-            else if (source is ConfigReaction)
-            {
-                //Use generic pusher
-                PushEntity pr = new PushEntity();
-                pr.EntityLevelDetails.DataContext = source;
+        //    }
+        //    else if (source is ConfigReaction)
+        //    {
+        //        //Use generic pusher
+        //        PushEntity pr = new PushEntity();
+        //        pr.EntityLevelDetails.DataContext = source;
 
-                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
-                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+        //        if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+        //            pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
 
-                if (pr.ShowDialog() == false)
-                    return;
+        //        if (pr.ShowDialog() == false)
+        //            return;
 
-            }
-            else if (source is ConfigCell)
-            {
-                //Use generic pusher - not yet done for cells
-
-
-                //This works
-                PushCell pc = new PushCell();
-                pc.DataContext = MainWindow.SOP;
-                pc.EntityLevelCellDetails.DataContext = source;
-
-                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
-                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-
-                //Show the confirmation dialog
-                if (pc.ShowDialog() == false)
-                    return;
-            }
-            else
-            {
-                MessageBox.Show("Entity type 'save' operation not supported.");
-                return;
-            }
+        //    }
+        //    else if (source is ConfigCell)
+        //    {
+        //        //Use generic pusher - not yet done for cells
 
 
-            //If we get here, then the user confirmed a PUSH
+        //        //This works
+        //        PushCell pc = new PushCell();
+        //        pc.DataContext = MainWindow.SOP;
+        //        pc.EntityLevelCellDetails.DataContext = source;
 
-            //Push the entity
-            Protocol B = MainWindow.SOP.Protocol;
-            Level.PushStatus status = B.pushStatus(source);
-            if (status == Level.PushStatus.PUSH_INVALID)
-            {
-                MessageBox.Show("Entity not pushable.");
-                return;
-            }
+        //        if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+        //            pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
 
-            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            {
-                B.repositoryPush(source, status); // push into B, inserts as new
-            }
-            else // the item exists; could be newer or older
-            {
-                B.repositoryPush(source, status); // push into B
-            }
-        }
+        //        //Show the confirmation dialog
+        //        if (pc.ShowDialog() == false)
+        //            return;
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Entity type 'save' operation not supported.");
+        //        return;
+        //    }
+
+
+        //    //If we get here, then the user confirmed a PUSH
+
+        //    //Push the entity
+        //    Protocol B = MainWindow.SOP.Protocol;
+        //    Level.PushStatus status = B.pushStatus(source);
+        //    if (status == Level.PushStatus.PUSH_INVALID)
+        //    {
+        //        MessageBox.Show("Entity not pushable.");
+        //        return;
+        //    }
+
+        //    if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+        //    {
+        //        B.repositoryPush(source, status); // push into B, inserts as new
+        //    }
+        //    else // the item exists; could be newer or older
+        //    {
+        //        B.repositoryPush(source, status); // push into B
+        //    }
+        //}
 
     }
 

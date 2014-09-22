@@ -416,17 +416,7 @@ namespace DaphneGui.Pushing
         /// <param name="e"></param>
         public void PushCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            //e.CanExecute = false;
-            List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);
-            int count = grids.Count;
-
-            if (count <= 0)
-            {
-                e.CanExecute = false;
-                return;
-            }
-                
-            var grid = grids[0];
+            DataGrid grid = sender as DataGrid;
 
             if (grid != null)
             {
