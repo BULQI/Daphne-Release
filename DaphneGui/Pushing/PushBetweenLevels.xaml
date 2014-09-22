@@ -8,8 +8,13 @@
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"
         >
-<!--
-        xmlns:local="clr-namespace:DaphneGui"-->
+
+    <Window.CommandBindings>
+        <!--<CommandBinding Command=    "push:MyCommands.PushCommand"
+                        Executed=   "PushCommandExecuted"
+                        CanExecute= "PushCommandCanExecute"/>-->
+        
+    </Window.CommandBindings>
 
     <Window.Resources>
 
@@ -28,8 +33,23 @@
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
+                    
                     <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" 
-                              ItemsSource="{Binding}">
+                              ItemsSource="{Binding}" 
+                              >
+
+
+                        <DataGrid.CommandBindings>
+                            <!--<CommandBinding Command="push:MyCommands.PushCommand"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>-->
+                            
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -53,6 +73,7 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
+                    
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -146,7 +167,7 @@
     
     
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <Grid>
+        <Grid x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -169,19 +190,27 @@
                           SelectedIndex="0"
                           SelectionChanged="LevelAComboBox_SelectionChanged"
                     />
-                    <ContentControl Name="LeftContent"
-                        Content="{Binding}"
-                        ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
-                        Margin="6"/>
+                    <StackPanel x:Name="LeftGridStackPanel">
+                        <ContentControl Name="LeftContent"
+                            Content="{Binding}"
+                            ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
+                            Margin="6"/>
+                    </StackPanel>
                 </StackPanel>
             </GroupBox>
 
-            
             <Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push -->" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
                         HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                         VerticalAlignment="Top" VerticalContentAlignment="Top"
-                        Click="PushButton_Click"
+                        Command="ApplicationCommands.Save"
                         >
+                
+                <Button.CommandBindings>
+                    <CommandBinding   Command="ApplicationCommands.Save"
+                                      Executed="PushCommandExecuted"
+                                      CanExecute="PushCommandCanExecute"/>
+                </Button.CommandBindings>
+                
             </Button>
 
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
@@ -195,9 +224,6 @@
                           SelectionChanged="LevelBComboBox_SelectionChanged"
                     />
 
-                    <!--ItemsSource="{Binding Source={StaticResource pushLevelsList}}"-->
-                    
-                    
                     <ContentControl Name="RightContent" 
                         Content="{Binding}" 
                         ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"

@@ -109,16 +109,10 @@ namespace DaphneGui.Pushing
                     break;
             }
 
-            
             RightGroup.DataContext = LevelB.entity_repository;
             RightContent.DataContext = RightList;   //must do this first
             LeftGroup.DataContext = LevelA.entity_repository;
             LeftContent.DataContext = FilteredList(LeftList);
-
-            //string[] TestItems = Enum.GetNames(typeof(PushLevel)));
-            //var list = from item in TestItems where item != (string)(PushLevel.DaphneStore) select item;
-            //LevelBComboBox.ItemsSource = list; 
-
         }
 
         private object FilteredList(object LeftList)
@@ -143,7 +137,6 @@ namespace DaphneGui.Pushing
                         }
                     }
                     return filtered_mol_list;
-                    break;
                 case PushLevelEntityType.Gene:
                     ObservableCollection<ConfigGene> left2 = (ObservableCollection<ConfigGene>)LeftList;
                     ObservableCollection<ConfigGene> right2 = (ObservableCollection<ConfigGene>)RightList;
@@ -285,34 +278,6 @@ namespace DaphneGui.Pushing
             }
         }
 
-        private void PushButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (PushLevelA == PushLevelB)
-            {
-                MessageBox.Show("The destination level must be different from the source level.");
-                return;
-            }
-            else if (((ObservableCollection<object>)(LeftList)).Count == 0) 
-            {
-                MessageBox.Show("There is nothing to push.");
-                return;
-            }
-
-            switch (PushEntityType)
-            {
-                case PushLevelEntityType.Molecule:
-                    ObservableCollection<ConfigMolecule> mols = (ObservableCollection<ConfigMolecule>)(LeftContent.DataContext);
-                    break;
-                case PushLevelEntityType.Gene:
-                    ObservableCollection<ConfigGene> genes = (ObservableCollection<ConfigGene>)(LeftContent.DataContext);
-                    break;
-                default:
-                    break;
-            }
-
-
-        }
-
         private void LevelAComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
@@ -418,6 +383,157 @@ namespace DaphneGui.Pushing
 
             RightContent.DataContext = RightList;  
         }
+
+        public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            string messageBoxText = "Are you sure you want to save the selected entities to the target library?";
+            string caption = "Save Entities";
+            MessageBoxButton button = MessageBoxButton.YesNo;
+            MessageBoxImage icon = MessageBoxImage.Question;
+
+            // Display message box
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+            // Process message box results
+            if (result == MessageBoxResult.Yes)
+            {
+                //Get the datagrid
+                //Push each item that is in SelectedItems list
+                List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);                
+                var grid = grids[0];
+                foreach (ConfigEntity ent in grid.SelectedItems)
+                {
+                    GenericPusher(ent, LevelA, LevelB);
+                }
+                CollectionViewSource.GetDefaultView(grid.ItemsSource).Refresh();
+            }
+        }
+
+        /// <summary>
+        /// can execute command handler for delete db - enables/disables the Push button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void PushCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            //e.CanExecute = false;
+            List<DataGrid> grids = DataGridBehavior.GetVisualChildCollection<DataGrid>(LeftGridStackPanel);
+            int count = grids.Count;
+
+            if (count <= 0)
+            {
+                e.CanExecute = false;
+                return;
+            }
+                
+            var grid = grids[0];
+
+            if (grid != null)
+            {
+                if (grid.SelectedItems.Count <= 0)
+                {
+                    e.CanExecute = false;
+                }
+                else
+                {
+                    e.CanExecute = true;
+                }
+            }
+            else
+            {
+                e.CanExecute = false;
+            }
+        }
+
+        private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
+        {
+            bool UserWantsNewEntity = false;
+            Level.PushStatus status = levelB.pushStatus(entity);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                return;
+            }
+
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                levelB.repositoryPush(entity, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                if (UserWantsNewEntity == false)
+                {
+                    levelB.repositoryPush(entity, status); // push into B - overwrites existing entity's properties
+                }
+                else //push as new
+                {
+                    //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
+                }
+            }
+        }
+
+
+    }  //End of PushBetweenLevels class
+
+
+    public class DataGridBehavior
+    {
+        #region Get Visuals
+
+        private static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = v as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(v);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+
+        public static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
+        {
+            List<T> visualCollection = new List<T>();
+            GetVisualChildCollection(parent as DependencyObject, visualCollection);
+            return visualCollection;
+        }
+
+        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
+        {
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T)
+                {
+                    visualCollection.Add(child as T);
+                }
+                if (child != null)
+                {
+                    GetVisualChildCollection(child, visualCollection);
+                }
+            }
+        }
+
+        #endregion // Get Visuals
+    }
+
+    public static class MyCommands
+    {
+        //public static RoutedCommand PushCommand { get; set; }
+
+        public static readonly RoutedCommand PushCommand = new RoutedCommand("PushCommand", typeof(MyCommands));
+                        
+
 
     }
 
