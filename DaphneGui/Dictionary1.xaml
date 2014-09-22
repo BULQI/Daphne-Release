@@ -1,40 +1,28 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+                    xmlns:local="clr-namespace:DaphneGui"
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
                     >
-
-    
-
-    <!--<daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
-    <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
-
-    <CollectionViewSource x:Key="ecmReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  />
-    <CollectionViewSource x:Key="ecmReactionComplexesListView"  
-                                  Source="{Binding Path=entity_repository.reaction_complexes}"
-                                  />-->
 
     <CollectionViewSource x:Key="testMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   />
-
 
     <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="moleculeTemplate">
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Width="150" Text="Name"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
-                <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                <TextBlock Width="80" Margin="10,0" Text="Diff Coeff"></TextBlock>
+                <TextBlock Width="60" Margin="10,0" Text="Weight"></TextBlock>
+                <TextBlock Width="60" Margin="10,0" Text="Radius"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" ></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="10,0" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" Width="60" Margin="10,0" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" Width="60" Margin="10,0" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -50,9 +38,9 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="20,0" Number="{Binding Path=DiffusionCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="20,0" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="20,0" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -68,7 +56,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" ></TextBox>
                 <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="20,0" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -84,7 +72,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
                 <TextBox Width="80" Margin="20,0" Text="{Binding Path=CopyNumber, Mode=TwoWay}"></TextBox>
-                <TextBox Width="80" Margin="20,0" Text="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <uc:DoublesBox SliderEnabled="False" Width="80" Margin="20,0" Number="{Binding Path=ActivationLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -94,10 +82,18 @@
         <StackPanel Orientation="Vertical">
             <Label Height="24" Width="80" HorizontalAlignment="Left">Reaction:</Label>
             <StackPanel Orientation="Horizontal">
-                <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding rate_const, Mode=TwoWay}"></uc:DoublesBox>
+                <uc:DoublesBox SliderEnabled="False" Width="100" Number="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                 <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding TotalReactionString}"></TextBox>
             </StackPanel>
         </StackPanel>
     </DataTemplate>
+
+    <DataTemplate x:Key="editCellTemplate">
+        <StackPanel>
+            <local:CellPropertiesControl DataContext="{Binding}"/>
+            <local:CellDetailsControl DataContext="{Binding}"/>
+        </StackPanel>
+    </DataTemplate>
+
 
 </ResourceDictionary>

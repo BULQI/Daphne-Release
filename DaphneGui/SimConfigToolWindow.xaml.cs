@@ -2612,7 +2612,7 @@ namespace DaphneGui
                 return;
 
             ConfigCell cell = cellpop.Cell;
-            GenericPush(cell);
+            MainWindow.GenericPush(cell);
         }
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -2624,7 +2624,7 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
-            GenericPush(reac);
+            MainWindow.GenericPush(reac);
 
             ////////PushReaction pr = new PushReaction();
             ////////pr.EntityLevelReactionDetails.DataContext = reac;

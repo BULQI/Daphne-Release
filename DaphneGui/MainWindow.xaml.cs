@@ -1909,6 +1909,7 @@ namespace DaphneGui
 
                     //skg testing
                     sop.UserStore = sop.UserStore.DeserializeFromString(orig_content);
+                    sop.DaphneStore = sop.DaphneStore.DeserializeFromString(orig_content);
                 }
               
             }
@@ -2779,34 +2780,42 @@ namespace DaphneGui
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Molecule);
-            pushWindow.DataContext = SOP.Protocol;
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
+            pushWindow.DataContext = SOP;
             pushWindow.ShowDialog();
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Gene);
-            pushWindow.DataContext = SOP.Protocol;
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
+            pushWindow.DataContext = SOP;
             pushWindow.ShowDialog();
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Reaction);
-            pushWindow.DataContext = SOP.Protocol;
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
+            pushWindow.DataContext = SOP;
             pushWindow.ShowDialog();
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            PushByLevel pushWindow = new PushByLevel(PushByLevel.PushLevelEntityType.Cell);
-            pushWindow.DataContext = SOP.Protocol;
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
+            pushWindow.DataContext = SOP;
             pushWindow.ShowDialog();
         }
 
+        /// <summary>
+        /// This GenericPush method is called for pushing entities into the Protocol level.
+        ///
+        /// </summary>
+        /// <param name="source"></param>
         public static void GenericPush(ConfigEntity source)
         {
+            bool UserWantsNewEntity = false;    //true if user wants to create a new entity instead of overwriting existing entity
+            ConfigEntity newEntity = null;      //potential new entity if user wants to create a new one instead of overwriting existing entity
+
             if (source == null)
             {
                 MessageBox.Show("Nothing to push");
@@ -2819,14 +2828,20 @@ namespace DaphneGui
                 PushEntity pm = new PushEntity();
                 pm.DataContext = MainWindow.SOP;
                 pm.EntityLevelDetails.DataContext = source;
+                pm.ComponentLevelDetails.DataContext = null;
 
                 ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
                 if (erMol != null)
+                {
                     pm.ComponentLevelDetails.DataContext = erMol;
+                    newEntity = erMol.Clone(MainWindow.SOP.Protocol);
+                }
 
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
                     return;
+
+                UserWantsNewEntity = pm.UserWantsNewEntity; 
 
             }
             else if (source is ConfigReaction)
@@ -2834,44 +2849,83 @@ namespace DaphneGui
                 //Use generic pusher
                 PushEntity pr = new PushEntity();
                 pr.EntityLevelDetails.DataContext = source;
+                pr.ComponentLevelDetails.DataContext = null;
 
                 if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                {
                     pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
-
+                    newEntity = ((ConfigReaction)source).Clone(false);
+                    ConfigReaction tempReac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+                    //((ConfigReaction)newEntity).Name = tempReac.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                }
+                
                 if (pr.ShowDialog() == false)
                     return;
 
+                UserWantsNewEntity = pr.UserWantsNewEntity;
             }
             else if (source is ConfigCell)
             {
                 //Use generic pusher - not yet done for cells
-
-
-                //This works
-                PushCell pc = new PushCell();
-                pc.DataContext = MainWindow.SOP;
-                pc.EntityLevelCellDetails.DataContext = source;
+                PushEntity pcell = new PushEntity();
+                pcell.EntityLevelDetails.DataContext = source;
+                pcell.ComponentLevelDetails.DataContext = null;
 
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
-                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                {
+                    pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                    newEntity = ((ConfigCell)source).Clone(false);
+                    ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                    ((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                }
 
-                //Show the confirmation dialog
-                if (pc.ShowDialog() == false)
+                if (pcell.ShowDialog() == false)
                     return;
+
+                UserWantsNewEntity = pcell.UserWantsNewEntity;
+
+                //////This works
+                ////PushCell pc = new PushCell();
+                ////pc.DataContext = MainWindow.SOP;
+                ////pc.EntityLevelCellDetails.DataContext = source;
+
+                ////if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+                ////{
+                ////    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                ////    ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+                ////    newEntity = ((ConfigCell)source).Clone(false);
+                ////    ((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                ////}
+
+                //////Show the confirmation dialog
+                ////if (pc.ShowDialog() == false)
+                ////{
+                ////    return;
+                ////}
+
             }
             else if (source is ConfigGene) 
             {
                 PushEntity pm = new PushEntity();
                 pm.DataContext = MainWindow.SOP;
                 pm.EntityLevelDetails.DataContext = source;
+                pm.ComponentLevelDetails.DataContext = null;
 
                 ConfigGene erGene = MainWindow.SOP.Protocol.FindGene( ((ConfigGene)source).Name );
                 if (erGene != null)
+                {
                     pm.ComponentLevelDetails.DataContext = erGene;
-
+                    newEntity = erGene.Clone(MainWindow.SOP.Protocol);
+                    ((ConfigGene)newEntity).Name = erGene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                }
+                
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
+                {
                     return;
+                }
+
+                UserWantsNewEntity = pm.UserWantsNewEntity;
             }
             else
             {
@@ -2897,7 +2951,19 @@ namespace DaphneGui
             }
             else // the item exists; could be newer or older
             {
-                B.repositoryPush(source, status); // push into B
+                
+                //MessageBoxResult msgResult = MessageBox.Show("This will overwrite the properties of the existing entity. If that is okay, please click 'Yes'. If you wish to create a new entity instead, please click 'No'.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                //if (msgResult == MessageBoxResult.Yes)
+                if (UserWantsNewEntity == false)
+                {
+                    B.repositoryPush(source, status); // push into B - overwrites existing entity's properties
+                }
+                else //push as new
+                {
+                    B.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
+                }
+
+                
             }
         }
     }

@@ -71,6 +71,7 @@ namespace DaphneGui.Pushing
                 case PushLevelEntityType.Molecule:
                     cc.Tag = level.entity_repository.molecules;
                     //cc.Tag = FindResource("pushMoleculesListView");
+                    
                     break;
                 case PushLevelEntityType.Gene:
                     cc.Tag = level.entity_repository.genes;
@@ -104,7 +105,7 @@ namespace DaphneGui.Pushing
             {
                 case PushLevel.Component:
                     SetContentTag(LevelAContent, MainWindow.SOP.Protocol);
-                    LevelA = MainWindow.SOP.Protocol;
+                    LevelA = MainWindow.SOP.Protocol;                    
                     break;
                 case PushLevel.DaphneStore:
                     SetContentTag(LevelAContent, MainWindow.SOP.DaphneStore);
@@ -179,17 +180,21 @@ namespace DaphneGui.Pushing
                 case PushLevel.Component:
                     SetContentTag(LevelBContent, MainWindow.SOP.Protocol);
                     LevelB = MainWindow.SOP.Protocol;
+                    //RightGroupBox.DataContext = ((SystemOfPersistence)(this.DataContext)).Protocol;
                     break;
                 case PushLevel.DaphneStore:
                     SetContentTag(LevelBContent, MainWindow.SOP.DaphneStore);
                     LevelB = MainWindow.SOP.DaphneStore;
+                    //RightGroupBox.DataContext = ((SystemOfPersistence)(this.DataContext)).DaphneStore;
                     break;
                 case PushLevel.UserStore:
                     SetContentTag(LevelBContent, MainWindow.SOP.UserStore);
                     LevelB = MainWindow.SOP.UserStore;
+                    //RightGroupBox.DataContext = ((SystemOfPersistence)(this.DataContext)).UserStore;
                     break;
             }
             LevelBContent.DataContext = LevelB;
+
         }
 
         private void pushMoleculesListView_Filter(object sender, FilterEventArgs e)
