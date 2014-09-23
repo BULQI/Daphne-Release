@@ -2561,57 +2561,21 @@ namespace DaphneGui
             if (molpop == null)
                 return;
 
+            //Do the push
             ConfigMolecule mol = molpop.molecule;
             ConfigMolecule newmol = mol.Clone(null);
             MainWindow.GenericPush(newmol);
-
-            ////////if (mol == null)
-            ////////    return;
-
-            //Really, this can never be a newly created molecule
-            //All we want to do is to push the molecule but should
-            //show a confirmation dialog that shows current and new values.
-
-            ////////PushMolecule pm = new PushMolecule();
-            ////////pm.DataContext = MainWindow.SOP;
-            ////////pm.EntityLevelMolDetails.DataContext = mol;
-
-            ////////ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
-
-
-            ////////if (erMol != null)
-            ////////{
-            ////////    pm.ComponentLevelMolDetails.DataContext = erMol;
-            ////////}
-
-            //////////Here show the confirmation dialog
-            ////////if (pm.ShowDialog() == false)
-            ////////{
-            ////////    //User clicked Cancel
-            ////////    return;
-            ////////}
-
-            //////////If we get here, then the user confirmed a PUSH
-
-            ////////Protocol B = MainWindow.SOP.Protocol;
-            ////////Level.PushStatus status = B.pushStatus(mol);
-            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            ////////{
-            ////////    B.repositoryPush(mol, status); // push into B, inserts as new
-            ////////}
-            ////////else // the item exists; could be newer or older
-            ////////{
-            ////////    B.repositoryPush(mol, status); // push into B
-            ////////}
-
         }
 
         private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
         {
             CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
+
+            //Error case
             if (cellpop == null)
                 return;
 
+            //Push cell
             ConfigCell cell = cellpop.Cell;
             ConfigCell newcell = cell.Clone(true);
             MainWindow.GenericPush(newcell);
@@ -2628,35 +2592,6 @@ namespace DaphneGui
             ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
-
-            ////////PushReaction pr = new PushReaction();
-            ////////pr.EntityLevelReactionDetails.DataContext = reac;
-
-            ////////if (!MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
-            ////////    return;
-
-            ////////GenericPush(reac, MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid]);
-
-
-            ////////pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
-
-            ////////if (pr.ShowDialog() == false)
-            ////////{
-            ////////    return;
-            ////////}
-
-            //////////If we get here, then the user confirmed a PUSH
-
-            ////////Protocol B = MainWindow.SOP.Protocol;
-            ////////Level.PushStatus status = B.pushStatus(reac);
-            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            ////////{
-            ////////    B.repositoryPush(reac, status); // push into B, inserts as new
-            ////////}
-            ////////else // the item exists; could be newer or older
-            ////////{
-            ////////    B.repositoryPush(reac, status); // push into B
-            ////////}
         }
 
         //private void GenericPush(ConfigEntity source)
@@ -2783,8 +2718,6 @@ namespace DaphneGui
             return value;
         }
     }
-
-
 
     public class DataGridBehavior
     {

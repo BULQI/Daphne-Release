@@ -248,14 +248,14 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            try
+            {
+                CreateAndSerializeDaphneProtocols();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -574,6 +574,15 @@ namespace DaphneGui
             ProtocolCreators.CreateBlankProtocol(protocol);
             //serialize to json
             protocol.SerializeToFile();
+
+            //skg - Code to create userstore and daphnestore - may change this later 
+            //////HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES
+            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            ProtocolCreators.CreateDaphneStore(protocol, daphnestore);
+            ProtocolCreators.CreateUserStore(protocol, userstore);
+            //END CREATE
+            //end skg 
 
             //DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json");
@@ -1907,9 +1916,13 @@ namespace DaphneGui
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
-                    //skg testing
-                    sop.UserStore = sop.UserStore.DeserializeFromString(orig_content);
-                    sop.DaphneStore = sop.DaphneStore.DeserializeFromString(orig_content);
+                    ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
+                    sop.UserStore.FileName   = "Config\\daphne_userstore.json";
+                    sop.UserStore.TempFile   = "Config\\temp_userstore.json";
+                    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
+                    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
+                    sop.DaphneStore = sop.DaphneStore.Deserialize();
+                    sop.UserStore = sop.UserStore.Deserialize();
                 }
               
             }
