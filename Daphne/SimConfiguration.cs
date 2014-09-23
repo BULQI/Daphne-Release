@@ -1576,13 +1576,6 @@ namespace Daphne
         public ScenarioBase()
         {
             time_config = new TimeConfig();
-
-            gaussian_specifications = new ObservableCollection<GaussianSpecification>();
-            box_specifications = new ObservableCollection<BoxSpecification>();
-
-            // utility storage
-            box_guid_box_dict = new Dictionary<string, BoxSpecification>();
-            gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
         }
 
         /// <summary>
@@ -1629,78 +1622,21 @@ namespace Daphne
             return false;
         }
 
-        private void box_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        /// <summary>
+        /// reset the Gaussian retrieve counter
+        /// </summary>
+        public virtual void resetGaussRetrieve()
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    BoxSpecification bs = nn as BoxSpecification;
-                    box_guid_box_dict.Add(bs.box_guid, bs);
-#if USE_BOX_LIMITS
-                    // Piggyback on this callback to set extents from environment for new box specifications
-                    if (environment is ConfigECSEnvironment)
-                    {
-                        bs.SetBoxSpecExtents((ConfigECSEnvironment)environment);
-                    }
-#endif
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    BoxSpecification bs = dd as BoxSpecification;
-                    box_guid_box_dict.Remove(bs.box_guid);
-                }
-            }
+            environment.comp.resetGaussRetrieve();
         }
 
-        private void gaussian_specifications_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        /// <summary>
+        /// get the next Gaussian spec
+        /// </summary>
+        /// <returns></returns>
+        public virtual GaussianSpecification nextGaussSpec()
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    GaussianSpecification gs = nn as GaussianSpecification;
-                    gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    GaussianSpecification gs = dd as GaussianSpecification;
-                    gauss_guid_gauss_dict.Remove(gs.gaussian_spec_box_guid_ref);
-                }
-            }
-        }
-
-        public void InitBoxExtentsAndGuidBoxDict()
-        {
-            box_guid_box_dict.Clear();
-            foreach (BoxSpecification bs in box_specifications)
-            {
-                box_guid_box_dict.Add(bs.box_guid, bs);
-#if USE_BOX_LIMITS
-                // Piggyback on this routine to set initial extents from environment values
-                if (environment is ConfigECSEnvironment)
-                {
-                    bs.SetBoxSpecExtents((ConfigECSEnvironment)environment);
-                }
-#endif
-            }
-            box_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(box_specifications_CollectionChanged);
-        }
-
-        public void InitGaussSpecsAndGuidGaussDict()
-        {
-            gauss_guid_gauss_dict.Clear();
-            foreach (GaussianSpecification gs in gaussian_specifications)
-            {
-                gauss_guid_gauss_dict.Add(gs.gaussian_spec_box_guid_ref, gs);
-            }
-            gaussian_specifications.CollectionChanged += new NotifyCollectionChangedEventHandler(gaussian_specifications_CollectionChanged);
+            return environment.comp.nextGaussSpec();
         }
 
         /// <summary>
@@ -1708,23 +1644,10 @@ namespace Daphne
         /// </summary>
         public abstract void InitializeStorageClasses();
 
-        public abstract void DisconnectHandlers(PropertyChangedEventHandler[] funcs);
-        public abstract void ConnectHandlers(PropertyChangedEventHandler[] funcs);
-
         public TimeConfig time_config { get; set; }
         public SimStates simInterpolate { get; set; }
         public SimStates simCellSize { get; set; }
         public ConfigEnvironmentBase environment { get; set; }
-
-        public ObservableCollection<BoxSpecification> box_specifications { get; set; }
-        public ObservableCollection<GaussianSpecification> gaussian_specifications { get; set; }
-
-        // Convenience utility storage (not serialized)
-        [JsonIgnore]
-        public Dictionary<string, BoxSpecification> box_guid_box_dict;
-
-        [JsonIgnore]
-        public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
     }
     
     public class TissueScenario : ScenarioBase
@@ -1735,6 +1658,7 @@ namespace Daphne
         [JsonIgnore]
         public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
         
+        private int gaussRetrieve, originCounter;
 
         public TissueScenario()
         {
@@ -1748,6 +1672,51 @@ namespace Daphne
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
             // Set callback to update box specification extents when environment extents change
             environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
+        }
+
+        /// <summary>
+        /// override this function to handle the base version and for the tissue scenario
+        /// </summary>
+        public override void resetGaussRetrieve()
+        {
+            base.resetGaussRetrieve();
+            gaussRetrieve = 0;
+            originCounter = 0;
+        }
+
+        /// <summary>
+        /// retrieve the next Gaussian spec
+        /// </summary>
+        /// <returns>the Gaussian found or null when done</returns>
+        public override GaussianSpecification nextGaussSpec()
+        {
+            GaussianSpecification next;
+
+            if (originCounter == 0)
+            {
+                next = base.nextGaussSpec();
+                if (next != null)
+                {
+                    return next;
+                }
+                originCounter++;
+            }
+            if (originCounter == 1)
+            {
+                while (gaussRetrieve < cellpopulations.Count && cellpopulations[gaussRetrieve].cellPopDist is CellPopGaussian == false)
+                {
+                    gaussRetrieve++;
+                }
+                // it's a Gaussian
+                if (gaussRetrieve < cellpopulations.Count)
+                {
+                    next = ((CellPopGaussian)cellpopulations[gaussRetrieve].cellPopDist).gauss_spec;
+                    gaussRetrieve++;
+                    return next;
+                }
+                originCounter++;
+            }
+            return null;
         }
 
         private void cellsets_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -1801,7 +1770,7 @@ namespace Daphne
             {
                 if (cs.cellPopDist.DistType == CellPopDistributionType.Gaussian)
                 {
-                    BoxSpecification box = box_guid_box_dict[((CellPopGaussian)cs.cellPopDist).gauss_spec_guid_ref];
+                    BoxSpecification box = ((CellPopGaussian)cs.cellPopDist).gauss_spec.box_spec;
                     ((CellPopGaussian)cs.cellPopDist).ParamReset(box);
                     box.PropertyChanged += new PropertyChangedEventHandler(((CellPopGaussian)cs.cellPopDist).CellPopGaussChanged);
                 }
@@ -2028,8 +1997,6 @@ namespace Daphne
         public override void InitializeStorageClasses()
         {
             FindNextSafeCellPopulationID();
-            InitBoxExtentsAndGuidBoxDict();
-            InitGaussSpecsAndGuidGaussDict();
             InitCellPopulationIDCellPopulationDict();
             InitGaussCellPopulationUpdates();
             InitECMProbeDict();
@@ -2045,40 +2012,6 @@ namespace Daphne
             {
                 if (guid == cell_pop.Cell.entity_guid)
                     cellpopulations.Remove(cell_pop);
-            }
-        }
-
-        public override void DisconnectHandlers(PropertyChangedEventHandler[] funcs)
-        {
-            if (funcs.Length != 2)
-            {
-                throw new ArgumentException();
-            }
-
-            for (int i = 0; i < box_specifications.Count; i++)
-            {
-                box_specifications[i].PropertyChanged -= funcs[0];
-            }
-            for (int i = 0; i < gaussian_specifications.Count; i++)
-            {
-                gaussian_specifications[i].PropertyChanged -= funcs[1];
-            }
-        }
-
-        public override void ConnectHandlers(PropertyChangedEventHandler[] funcs)
-        {
-            if (funcs.Length != 2)
-            {
-                throw new ArgumentException();
-            }
-
-            for (int i = 0; i < box_specifications.Count; i++)
-            {
-                box_specifications[i].PropertyChanged += funcs[0];
-            }
-            for (int i = 0; i < gaussian_specifications.Count; i++)
-            {
-                gaussian_specifications[i].PropertyChanged += funcs[1];
             }
         }
     }
@@ -3605,6 +3538,8 @@ namespace Daphne
         [JsonIgnore]
         public Dictionary<string, ConfigReaction> reactions_dict;
 
+        private int gaussRetrieve;
+
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> Reactions
         {
@@ -3634,6 +3569,35 @@ namespace Daphne
 
             molpops.CollectionChanged += new NotifyCollectionChangedEventHandler(molpops_CollectionChanged);
             _reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+        }
+
+        /// <summary>
+        /// reset the counter
+        /// </summary>
+        public void resetGaussRetrieve()
+        {
+            gaussRetrieve = 0;
+        }
+
+        /// <summary>
+        /// grab the next Gaussian spec
+        /// </summary>
+        /// <returns>the spec or null when done</returns>
+        public GaussianSpecification nextGaussSpec()
+        {
+            while (gaussRetrieve < molpops.Count && molpops[gaussRetrieve].mp_distribution is MolPopGaussian == false)
+            {
+                gaussRetrieve++;
+            }
+            // it's a Gaussian
+            if (gaussRetrieve < molpops.Count)
+            {
+                GaussianSpecification next = ((MolPopGaussian)molpops[gaussRetrieve].mp_distribution).gauss_spec;
+
+                gaussRetrieve++;
+                return next;
+            }
+            return null;
         }
 
         /// <summary>
@@ -4918,21 +4882,7 @@ namespace Daphne
     /// </summary>
     public class CellPopGaussian : CellPopDistribution
     {
-        private string _gauss_spec_guid_ref;
-        public string gauss_spec_guid_ref
-        {
-            get { return _gauss_spec_guid_ref; }
-            set
-            {
-                if (_gauss_spec_guid_ref == value)
-                    return;
-                else
-                {
-                    _gauss_spec_guid_ref = value;
-                }
-            }
-        }
-
+        public GaussianSpecification gauss_spec { get; set; }
         // The standard deviations of the distribution
         private double[] sigma;
 
@@ -4947,7 +4897,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)  
         {
             DistType = CellPopDistributionType.Gaussian;
-            gauss_spec_guid_ref = "";
 
             if (_cellPop != null)
             {
@@ -6050,27 +5999,12 @@ namespace Daphne
     public class MolPopGaussian : MolPopDistribution
     {
         public double peak_concentration { get; set; }
-        private string _gaussgrad_gauss_spec_guid_ref;
-        public string gaussgrad_gauss_spec_guid_ref
-        {
-            get { return _gaussgrad_gauss_spec_guid_ref; }
-            set
-            {
-                if (_gaussgrad_gauss_spec_guid_ref == value)
-                    return;
-                else
-                {
-                    _gaussgrad_gauss_spec_guid_ref = value;
-                    //OnPropertyChanged("gaussgrad_gauss_spec_guid_ref");
-                }
-            }
-        }
+        public GaussianSpecification gauss_spec { get; set; }
 
         public MolPopGaussian()
         {
             mp_distribution_type = MolPopDistributionType.Gaussian;
             peak_concentration = 1.0;
-            gaussgrad_gauss_spec_guid_ref = "";
         }
     }
 
@@ -6104,7 +6038,7 @@ namespace Daphne
                 }
             }
         }
-        public string gaussian_spec_box_guid_ref { get; set; }
+        public BoxSpecification box_spec { get; set; }
         private bool _gaussian_region_visibity = true;
         public bool gaussian_region_visibility 
         {
@@ -6142,7 +6076,6 @@ namespace Daphne
         public GaussianSpecification()
         {
             gaussian_spec_name = "";
-            gaussian_spec_box_guid_ref = "";
             gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
             gaussian_spec_color = System.Windows.Media.Color.FromRgb(255, 255, 255);

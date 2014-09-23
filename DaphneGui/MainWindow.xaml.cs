@@ -901,18 +901,20 @@ namespace DaphneGui
                     // hide the regions used to control Gaussians
                     if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                     {
-                        foreach (GaussianSpecification gg in ((TissueScenario)sop.Protocol.scenario).gaussian_specifications)
+                        GaussianSpecification next;
+
+                        ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
+                        while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
                         {
-                            // Use the utility dict to find the box associated with this region
-                            BoxSpecification bb = ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+                            BoxSpecification box = next.box_spec;
 
                             // Save current visibility statuses
-                            bb.current_box_visibility = bb.box_visibility;
-                            bb.current_blob_visibility = gg.gaussian_region_visibility;
+                            box.current_box_visibility = box.box_visibility;
+                            box.current_blob_visibility = next.gaussian_region_visibility;
 
                             // Property changed notifications will take care of turning off the Widgets and Actors
-                            bb.box_visibility = false;
-                            gg.gaussian_region_visibility = false;
+                            box.box_visibility = false;
+                            next.gaussian_region_visibility = false;
                         }
                     }
 
@@ -1797,7 +1799,7 @@ namespace DaphneGui
             }
 
             // Catch-all for other scale / translation manipulations
-            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) && MainWindow.GC.Regions.ContainsKey(box.box_guid))
+            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) == true && MainWindow.GC.Regions.ContainsKey(box.box_guid) == true)
             {
                 MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                 MainWindow.GC.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
@@ -1816,13 +1818,13 @@ namespace DaphneGui
 
             if (e.PropertyName == "gaussian_region_visibility")
             {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
                 MainWindow.GC.Rwc.Invalidate();
             }
             if (e.PropertyName == "gaussian_spec_color")
             {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetOpacity(gauss.gaussian_spec_color.ScA);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetOpacity(gauss.gaussian_spec_color.ScA);
                 MainWindow.GC.Rwc.Invalidate();
             }
             return;
@@ -1882,12 +1884,6 @@ namespace DaphneGui
             {
                 if (sop != null)
                 {
-                    // if we configured a simulation prior to this call, remove all property changed event handlers
-                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-                    {
-                        sop.Protocol.scenario.DisconnectHandlers(new PropertyChangedEventHandler[] { GUIInteractionToWidgetCallback, GUIGaussianSurfaceVisibilityToggle });
-                    }
-
                     if (protocol != null)
                     {
                         //sop = new SystemOfPersistence();
@@ -1896,12 +1892,6 @@ namespace DaphneGui
                         orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                     }
 
-                }
-
-                // (re)connect the handlers for the property changed event
-                if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-                {
-                    sop.Protocol.scenario.ConnectHandlers(new PropertyChangedEventHandler[] { GUIInteractionToWidgetCallback, GUIGaussianSurfaceVisibilityToggle });
                 }
             }
 
@@ -2218,8 +2208,9 @@ namespace DaphneGui
                 if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true && molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
-                    ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
-                    ((TissueScenario)sop.Protocol.scenario).gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
+
+                    mpg.gauss_spec.box_spec.box_visibility = mpg.gauss_spec.box_spec.current_box_visibility;
+                    mpg.gauss_spec.gaussian_region_visibility = mpg.gauss_spec.box_spec.current_blob_visibility;
                 }
             }
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
@@ -2229,8 +2220,9 @@ namespace DaphneGui
                     if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
                     {
                         CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
-                        ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
-                        ((TissueScenario)sop.Protocol.scenario).gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = ((TissueScenario)sop.Protocol.scenario).box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
+
+                        cpg.gauss_spec.box_spec.box_visibility = cpg.gauss_spec.box_spec.current_box_visibility;
+                        cpg.gauss_spec.gaussian_region_visibility = cpg.gauss_spec.box_spec.current_blob_visibility;
                     }
                 }
             }

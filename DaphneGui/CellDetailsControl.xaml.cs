@@ -545,15 +545,24 @@ namespace DaphneGui
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
+            {
                 return;
+            }
 
             string guid = cb.CommandParameter as string;
+
             if (guid.Length > 0)
             {
-                if (((TissueScenario)MainWindow.SOP.Protocol.scenario).gauss_guid_gauss_dict.ContainsKey(guid))
+                GaussianSpecification next;
+
+                ((TissueScenario)MainWindow.SOP.Protocol.scenario).resetGaussRetrieve();
+                while ((next = ((TissueScenario)MainWindow.SOP.Protocol.scenario).nextGaussSpec()) != null)
                 {
-                    GaussianSpecification gs = ((TissueScenario)MainWindow.SOP.Protocol.scenario).gauss_guid_gauss_dict[guid];
-                    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
+                    if (next.box_spec.box_guid == guid)
+                    {
+                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
+                        break;
+                    }
                 }
             }
         }

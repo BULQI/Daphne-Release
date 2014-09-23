@@ -115,7 +115,7 @@ namespace DaphneGui
             {
                 DeleteGaussianSpecification(current_item.cellPopDist);
                 CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
-                cpg.gauss_spec_guid_ref = "";
+                cpg.gauss_spec = null;
             }
             MainWindow.GC.Rwc.Invalidate();
 
@@ -163,16 +163,14 @@ namespace DaphneGui
             box.z_scale = 100;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            scenario.box_specifications.Add(box);
 
             GaussianSpecification gg = new GaussianSpecification();
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.box_spec = box;
             gg.gaussian_spec_name = "New on-center gradient";
             gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            scenario.gaussian_specifications.Add(gg);
-            mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+            mpg.gauss_spec = gg;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -198,19 +196,16 @@ namespace DaphneGui
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
             MolPopGaussian mpg = dist as MolPopGaussian;
-            string guid = mpg.gaussgrad_gauss_spec_guid_ref;
 
-            if (guid == "")
-                return;
-
-            if (scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+            if (mpg.gauss_spec == null || mpg.gauss_spec.box_spec == null)
             {
-                GaussianSpecification gs = scenario.gauss_guid_gauss_dict[guid];
-                scenario.gaussian_specifications.Remove(gs);
-                scenario.gauss_guid_gauss_dict.Remove(guid);
-                MainWindow.GC.RemoveRegionWidget(guid);
+                return;
             }
 
+            if (MainWindow.GC.Regions.ContainsKey(mpg.gauss_spec.box_spec.box_guid) == true)
+            {
+                MainWindow.GC.RemoveRegionWidget(mpg.gauss_spec.box_spec.box_guid);
+            }
         }
 
         /// <summary>
@@ -239,7 +234,6 @@ namespace DaphneGui
             box.z_scale = envHandle.extent_x / 4; ;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            scenario.box_specifications.Add(box);
         }
 
         // Used to specify Gaussian distibution for cell positions
@@ -255,12 +249,11 @@ namespace DaphneGui
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.box_spec = box;
             gg.gaussian_spec_name = "";
             //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            scenario.gaussian_specifications.Add(gg);
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -289,24 +282,15 @@ namespace DaphneGui
                 return;
 
             CellPopGaussian cpg = dist as CellPopGaussian;
-            string guid = cpg.gauss_spec_guid_ref;
 
-            if (guid == "")
-                return;
-
-            if (scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+            if (cpg.gauss_spec == null || cpg.gauss_spec.box_spec == null)
             {
-                GaussianSpecification gs = scenario.gauss_guid_gauss_dict[guid];
-                scenario.gaussian_specifications.Remove(gs);
-                scenario.gauss_guid_gauss_dict.Remove(guid);
-                MainWindow.GC.RemoveRegionWidget(guid);
+                return;
+            }
 
-                //// Remove box
-                //BoxSpecification box = MainWindow.SOP.Protocol.box_guid_box_dict[gs.gaussian_spec_box_guid_ref];
-                //MainWindow.SOP.Protocol.entity_repository.box_specifications.Remove(box);
-                //MainWindow.SOP.Protocol.box_guid_box_dict.Remove(gs.gaussian_spec_box_guid_ref);
-                //// box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-                //MainWindow.SOP.Protocol.entity_repository.box_specifications.Remove(box);
+            if (MainWindow.GC.Regions.ContainsKey(cpg.gauss_spec.box_spec.box_guid) == true)
+            {
+                MainWindow.GC.RemoveRegionWidget(cpg.gauss_spec.box_spec.box_guid);
             }
         }
 
@@ -354,7 +338,7 @@ namespace DaphneGui
                     {
                         DeleteGaussianSpecification(current_mol.mp_distribution);
                         MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
-                        mpg.gaussgrad_gauss_spec_guid_ref = "";
+                        mpg.gauss_spec = null;
                         MainWindow.GC.Rwc.Invalidate();
                     }
                 }
@@ -631,7 +615,7 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(cmp.mp_distribution);
                     MolPopGaussian mpg = cmp.mp_distribution as MolPopGaussian;
-                    mpg.gaussgrad_gauss_spec_guid_ref = "";
+                    mpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
 
@@ -1110,7 +1094,7 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
-                    cpg.gauss_spec_guid_ref = "";
+                    cpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
@@ -1136,7 +1120,7 @@ namespace DaphneGui
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
                 ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
 
                 // Connect the VTK callback
@@ -1163,7 +1147,7 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
-                    cpg.gauss_spec_guid_ref = "";
+                    cpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
             }
@@ -1183,18 +1167,18 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
             bool isBoxInCell = false;
 
             foreach (CellPopulation cp in scenario.cellpopulations)
             {
                 CellPopDistribution cpd = cp.cellPopDist;
+
                 if (cpd.DistType == CellPopDistributionType.Gaussian)
                 {
                     CellPopGaussian cpg = cpd as CellPopGaussian;
-                    if (cpg.gauss_spec_guid_ref == guid)
+
+                    if (cpg.gauss_spec.box_spec.box_guid == guid)
                     {
-                        //BoxSpecification box = MainWindow.SOP.Protocol.box_guid_box_dict[guid];
                         //cpg.Reset();
                         isBoxInCell = true;
                         break;
@@ -1251,7 +1235,7 @@ namespace DaphneGui
                         {
                             // We'll just be picking the first one that uses 
                             if (MainWindow.SOP.Protocol.scenario.environment.comp.molpops[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
-                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.comp.molpops[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
+                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.comp.molpops[r].mp_distribution).gauss_spec.box_spec.box_guid == key)
                             {
                                 SelectSolfacInGUI(r);
                                 //gui_spot_found = true;
@@ -1261,16 +1245,19 @@ namespace DaphneGui
                     }
                     if (!gui_spot_found)
                     {
-                        // Last check the gaussian_specs for this box guid
-                        for (int r = 0; r < scenario.gaussian_specifications.Count; r++)
+                        GaussianSpecification next;
+                        int count = 0;
+
+                        scenario.resetGaussRetrieve();
+                        while((next = scenario.nextGaussSpec()) != null)
                         {
-                            // We'll just be picking the first one that uses 
-                            if (scenario.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
+                            if (next.box_spec.box_guid == key)
                             {
-                                SelectGaussSpecInGUI(r, key);
+                                SelectGaussSpecInGUI(count, key);
                                 //gui_spot_found = true;
                                 break;
                             }
+                            count++;
                         }
                     }
                 }
@@ -1569,15 +1556,24 @@ namespace DaphneGui
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
+            {
                 return;
+            }
 
             string guid = cb.CommandParameter as string;
+
             if (guid.Length > 0)
             {
-                if (scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+                GaussianSpecification next;
+
+                scenario.resetGaussRetrieve();
+                while ((next = scenario.nextGaussSpec()) != null)
                 {
-                    GaussianSpecification gs = scenario.gauss_guid_gauss_dict[guid];
-                    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
+                    if (next.box_spec.box_guid == guid)
+                    {
+                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
+                        break;
+                    }
                 }
             }
         }
@@ -2594,13 +2590,7 @@ namespace DaphneGui
 
             MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
-            string gauss_guid = mpg.gaussgrad_gauss_spec_guid_ref;
-
-            if (scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
-            {
-                GaussianSpecification gs = scenario.gauss_guid_gauss_dict[gauss_guid];
-                gs.gaussian_spec_color = mol_pop.mp_color;
-            }
+            mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
         }
 
         private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2622,17 +2612,11 @@ namespace DaphneGui
             CellPopDistribution current_dist = cellPop.cellPopDist;
 
             if (current_dist.DistType != CellPopDistributionType.Gaussian)
-                return;
-
-            string gauss_guid = ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec_guid_ref;
-
-            if (scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
             {
-                GaussianSpecification gg = scenario.gauss_guid_gauss_dict[gauss_guid];
-                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
-                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+                return;
             }
 
+            ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
         }
 
         //LIBRARIES REACTION COMPLEXES HANDLERS

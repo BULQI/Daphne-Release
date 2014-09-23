@@ -419,25 +419,14 @@ namespace Daphne
                 {
                     MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
 
-                    // find the box associated with this gaussian
-                    int box_id = -1;
-
-                    for (int j = 0; j < scenarioHandle.box_specifications.Count; j++)
-                    {
-                        if (scenarioHandle.box_specifications[j].box_guid == mpgg.gaussgrad_gauss_spec_guid_ref)
-                        {
-                            box_id = j;
-                            break;
-                        }
-                    }
-                    if (box_id == -1)
+                    if (mpgg.gauss_spec == null || mpgg.gauss_spec.box_spec == null)
                     {
                         // Should never reach here... pop up notice
-                        MessageBoxResult tmp = MessageBox.Show("Problem: Box spec for that gaussian spec can't be found...");
+                        MessageBoxResult tmp = MessageBox.Show("Problem: Invalid Gaussian or box spec...");
                         return;
                     }
 
-                    BoxSpecification box = scenarioHandle.box_specifications[box_id];
+                    BoxSpecification box = mpgg.gauss_spec.box_spec;
 
                     double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
 

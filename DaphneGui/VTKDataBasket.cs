@@ -306,7 +306,7 @@ namespace DaphneGui
             if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
                 molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
-                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
+                                                                 ((MolPopGaussian)molpop.mp_distribution).gauss_spec.box_spec.box_guid);
             }
             else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
@@ -1200,7 +1200,7 @@ namespace DaphneGui
 
                     if (protocol.scenario.environment.comp.molpops[i].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                     {
-                        region = regions[((MolPopGaussian)protocol.scenario.environment.comp.molpops[i].mp_distribution).gaussgrad_gauss_spec_guid_ref];
+                        region = regions[((MolPopGaussian)protocol.scenario.environment.comp.molpops[i].mp_distribution).gauss_spec.box_spec.box_guid];
                     }
 
                     // 3D gradient
@@ -1261,9 +1261,8 @@ namespace DaphneGui
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)scenario.environment;
-            string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = scenario.box_guid_box_dict[box_guid];
+            BoxSpecification bs = gs.box_spec;
 
             RegionControl rc = new RegionControl(RegionShape.Ellipsoid);
 
@@ -1276,7 +1275,7 @@ namespace DaphneGui
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
-            regions.Add(box_guid, rc);
+            regions.Add(bs.box_guid, rc);
         }
 #if ALL_VTK
         public void AddRegionRegionControl(Region rr)
@@ -1308,10 +1307,12 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-            // Gaussian specs
-            foreach (GaussianSpecification gs in scenario.gaussian_specifications)
+            GaussianSpecification next;
+
+            scenario.resetGaussRetrieve();
+            while ((next = scenario.nextGaussSpec()) != null)
             {
-                AddGaussSpecRegionControl(gs);
+                AddGaussSpecRegionControl(next);
             }
 #if ALL_VTK
             // Regions

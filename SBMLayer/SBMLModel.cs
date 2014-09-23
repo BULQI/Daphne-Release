@@ -633,19 +633,14 @@ namespace SBMLayer
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
                 attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
-                foreach (BoxSpecification box in scenario.box_specifications)
-                {
-                    //Only select appropriate box
-                    if ((scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
-                    {
-                        attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
-                        attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
-                        attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
-                        attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
-                        attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
-                        attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
-                    }
-                }
+                BoxSpecification box = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
+
+                attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
+                attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
+                attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
+                attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
+                attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
+                attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
             }
             else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
@@ -777,7 +772,7 @@ namespace SBMLayer
                 confMolPopName = confMolPop.Name;
                 if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    spec = scenario.box_guid_box_dict[(scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
+                    spec = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
                     species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, CalculateGaussianConcentration(spec, confMolPop), "");
                 }
                 else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
@@ -2474,8 +2469,7 @@ namespace SBMLayer
                     box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
                     box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
 
-                    scenario.box_specifications.Add(box);
-                    gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+                    gaussSpec.box_spec = box;
                     //gg.gaussian_spec_name = "gaussian";
                     gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
                     // Rotate the box by 45 degrees about the box's y-axis.
@@ -2488,7 +2482,6 @@ namespace SBMLayer
                     trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
-                    scenario.gaussian_specifications.Add(gaussSpec);
 
                     configMolPop.mp_dist_name = "Gaussian";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2498,7 +2491,7 @@ namespace SBMLayer
                     molPopGaussian.peak_concentration = peakConc;
 
                     //double check this is the correct GUIid for this box
-                    molPopGaussian.gaussgrad_gauss_spec_guid_ref = gaussSpec.gaussian_spec_box_guid_ref;
+                    molPopGaussian.gauss_spec = gaussSpec;
                     configMolPop.mp_distribution = molPopGaussian;
 
                     isDistributionSet = true;

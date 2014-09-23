@@ -1463,25 +1463,14 @@ namespace DaphneGui
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
-            // identify the widget's key
-            string key = "";
-
             // NOTE: This callback specific to this GC (referencing Regions). 
             //   Not sure what will happen with mutiple GCs...
-            if (rw != null && Regions.ContainsValue(rw) == true)
+            if (rw != null)
             {
-                foreach (KeyValuePair<string, RegionWidget> kvp in Regions)
+                if (rw.Gaussian != null && rw.Gaussian.box_spec != null)
                 {
-                    if (kvp.Value == rw)
-                    {
-                        key = kvp.Key;
-                        break;
-                    }
-                }
+                    BoxSpecification box = rw.Gaussian.box_spec;
 
-                // found?
-                if (key != "")
-                {
                     if (transferMatrix == true)
                     {
                         double[] r = null, t = null, s = null;
@@ -1492,9 +1481,9 @@ namespace DaphneGui
                         if (s[0] < 0 && s[1] < 0 && s[2] < 0)
                         {
                             // restore the box matrix; the latter is known to be good
-                            rw.SetTransform(scenario.box_guid_box_dict[key].transform_matrix, RegionControl.PARAM_SCALE);
+                            rw.SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                             // transfer transform to VTKDataBasket
-                            MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                            MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
 #if USE_BOX_LIMITS
@@ -1569,9 +1558,9 @@ namespace DaphneGui
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
 #endif
-                        WidgetTransformToBoxMatrix(rw, scenario.box_guid_box_dict[key]);
+                        WidgetTransformToBoxMatrix(rw, box);
                         // Transfer transform to VTKDataBasket
-                        MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                        MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                     }
                 }
             }
@@ -1927,11 +1916,10 @@ namespace DaphneGui
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
-            string box_guid = gs.gaussian_spec_box_guid_ref;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = scenario.box_guid_box_dict[box_guid];
+            BoxSpecification bs = gs.box_spec;
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid, gs);
+            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, gs, RegionShape.Ellipsoid);
 
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,
@@ -1947,7 +1935,7 @@ namespace DaphneGui
             rw.ShowActor(Rwc.RenderWindow, gs.gaussian_region_visibility);
             // NOTE: Callback being added afterwards in MainWindow for now...
 
-            Regions.Add(box_guid, rw);
+            Regions.Add(gs.box_spec.box_guid, rw);
         }
 
         public void RemoveRegionWidget(string current_guid)
@@ -1966,11 +1954,13 @@ namespace DaphneGui
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
             // Gaussian specs
-            foreach (GaussianSpecification gs in scenario.gaussian_specifications)
+            GaussianSpecification next;
+
+            scenario.resetGaussRetrieve();
+            while((next = scenario.nextGaussSpec()) != null)
             {
-                AddGaussSpecRegionWidget(gs);
+                AddGaussSpecRegionWidget(next);
             }
         }
 

@@ -326,8 +326,7 @@ namespace Daphne
             box.x_scale = envHandle.extent_x / 2;
             box.y_scale = envHandle.extent_y / 4;
             box.z_scale = envHandle.extent_z / 5;
-            ((TissueScenario)protocol.scenario).box_specifications.Add(box);
-            gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+            gaussSpec.box_spec = box;
             //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Rotate the box by 45 degrees about the box's y-axis.
@@ -340,7 +339,6 @@ namespace Daphne
             trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
             trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
             box.SetMatrix(trans_matrix);
-            ((TissueScenario)protocol.scenario).gaussian_specifications.Add(gaussSpec);
 
             var query =
                 from mol in protocol.entity_repository.molecules
@@ -360,7 +358,7 @@ namespace Daphne
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
-                molPopGaussian.gaussgrad_gauss_spec_guid_ref = ((TissueScenario)protocol.scenario).gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                molPopGaussian.gauss_spec = gaussSpec;
                 configMolPop.mp_distribution = molPopGaussian;
 
                 // Reporting
