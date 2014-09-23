@@ -14,7 +14,8 @@ namespace Daphne
     {
         /// <summary>
         /// Populates the DaphneStore with the given protocol's entity repository
-        /// Call this after blank scenario is created
+        /// Call this after blank scenario is created to copy entities from blank scenario
+        /// But after this, to generate other scenarios, use DaphneStore
         /// </summary>
         /// <param name="daphneStore"></param>
         public static void CreateDaphneStore(Protocol protocol, Level daphneStore)
