@@ -712,8 +712,8 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=blob_visibility}"
-                                      Click="blob_actor_checkbox_clicked"
+                                    IsChecked="{Binding Path=gaussian_region_visibility}"
+                                      Click="gaussian_region_actor_checkbox_clicked"
                                       CommandParameter="{Binding Path=box_guid}"
                                     />
                         </Grid>

@@ -534,7 +534,7 @@ namespace DaphneGui
             }
         }
 
-        private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             // this only makes sense if the scenario is the tissue scenario
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)

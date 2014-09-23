@@ -919,7 +919,7 @@ namespace DaphneGui
 
                             // Save current visibility statuses
                             box.current_box_visibility = box.box_visibility;
-                            box.current_blob_visibility = next.gaussian_region_visibility;
+                            next.current_gaussian_region_visibility = next.gaussian_region_visibility;
 
                             // Property changed notifications will take care of turning off the Widgets and Actors
                             box.box_visibility = false;
@@ -2226,7 +2226,7 @@ namespace DaphneGui
                     MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
 
                     mpg.gauss_spec.box_spec.box_visibility = mpg.gauss_spec.box_spec.current_box_visibility;
-                    mpg.gauss_spec.gaussian_region_visibility = mpg.gauss_spec.box_spec.current_blob_visibility;
+                    mpg.gauss_spec.gaussian_region_visibility = mpg.gauss_spec.current_gaussian_region_visibility;
                 }
             }
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
@@ -2238,7 +2238,7 @@ namespace DaphneGui
                         CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
 
                         cpg.gauss_spec.box_spec.box_visibility = cpg.gauss_spec.box_spec.current_box_visibility;
-                        cpg.gauss_spec.gaussian_region_visibility = cpg.gauss_spec.box_spec.current_blob_visibility;
+                        cpg.gauss_spec.gaussian_region_visibility = cpg.gauss_spec.current_gaussian_region_visibility;
                     }
                 }
             }
