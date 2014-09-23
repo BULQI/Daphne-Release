@@ -52,7 +52,7 @@ namespace Daphne
         {
             Protocol = new Protocol();
             skin = new RenderSkin();
-            //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
+            DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             UserStore = new Level("", "Config\\temp_userstore.json");
         }
 
@@ -1174,6 +1174,21 @@ namespace Daphne
                 }
             }
             return gm;
+        }
+
+        public ConfigGene FindGene(string name)
+        {
+            ConfigGene cg = null;
+
+            foreach (ConfigGene g in entity_repository.genes)
+            {
+                if (g.Name == name)
+                {
+                    cg = g;
+                    break;
+                }
+            }
+            return cg;
         }
 
         // given a gene name, find its guid
@@ -2797,6 +2812,8 @@ namespace Daphne
             change_stamp = SystemOfPersistence.changesCounter++;
         }
 
+        public abstract string GenerateNewName(Protocol protocol, string ending);
+
         public string entity_guid { get; set; }
         public ulong change_stamp { get; set; }
     }
@@ -2901,7 +2918,7 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public string GenerateNewName(Protocol protocol, string ending)
+        public override string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = Name;
 
@@ -2995,8 +3012,42 @@ namespace Daphne
     public class ConfigGene : ConfigEntity
     {
         public string Name { get; set; }
-        public int CopyNumber { get; set; }
-        public double ActivationLevel { get; set; }
+
+        private int copyNumber;
+        public int CopyNumber
+        {
+            get
+            {
+                return copyNumber;
+            }
+            set
+            {
+                if (copyNumber != value)
+                {
+                    copyNumber = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("CopyNumber");
+                }
+            }
+        }
+
+        private double activationLevel;
+        public double ActivationLevel
+        {
+            get
+            {
+                return activationLevel;
+            }
+            set
+            {
+                if (activationLevel != value)
+                {
+                    activationLevel = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("ActivationLevel");
+                }
+            }
+        }
 
         public ConfigGene(string name, int copynum, double actlevel) : base()
         {
@@ -3024,7 +3075,7 @@ namespace Daphne
             return newgene;
         }
 
-        public string GenerateNewName(Protocol protocol, string ending)
+        public override string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = Name;
 
@@ -3146,6 +3197,11 @@ namespace Daphne
 
             return new_ctd;
         }
+
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -3203,6 +3259,11 @@ namespace Daphne
         private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("genes");
+        }
+
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
         }
 
         public void RemoveActivationRow(ConfigActivationRow row)
@@ -3921,6 +3982,11 @@ namespace Daphne
             return newreaction;
         }
 
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
         public void GetTotalReactionString(EntityRepository repos)
         {
             string s = "";
@@ -4047,6 +4113,7 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("rate_const");
             } 
         }
@@ -4078,6 +4145,11 @@ namespace Daphne
             products_stoichiometric_const = new ObservableCollection<int>();
             modifiers_stoichiometric_const = new ObservableCollection<int>();
             isBoundary = false;
+        }
+
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -4112,6 +4184,11 @@ namespace Daphne
                 reactionComplexRate = value;
                 OnPropertyChanged("ReactionComplexRate");
             }
+        }
+
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -4168,6 +4245,11 @@ namespace Daphne
             newrc.Name = "NewRC";
 
             return newrc;
+        }
+
+        public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
         }
 
         private bool HasMolecule(string guid) 
@@ -4508,7 +4590,7 @@ namespace Daphne
             }
         }
 
-        public string GenerateNewName(Protocol protocol, string ending)
+        public override string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = CellName;
 

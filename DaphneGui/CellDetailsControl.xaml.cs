@@ -950,7 +950,6 @@ namespace DaphneGui
 
         private void btnDelDeathDriver_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
             ConfigCell cell = DataContext as ConfigCell;
 
             if (cell == null)
@@ -1058,7 +1057,6 @@ namespace DaphneGui
                 return;
             }
         }
-
 
         /// <summary>
         /// This method adds a differentiation state given a name 
@@ -1185,7 +1183,6 @@ namespace DaphneGui
 
         }
 
-
         /// <summary>
         /// This method is called when the user clicks on a different row in the differentiation grid.
         /// </summary>
@@ -1230,7 +1227,6 @@ namespace DaphneGui
 
         private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-
         }
 
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
@@ -1268,7 +1264,6 @@ namespace DaphneGui
                 e.Accepted = true;
             }
         }
-
 
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {
@@ -1341,42 +1336,8 @@ namespace DaphneGui
 
             if (gene == null)
                 return;
-
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
-
-            if (res == MessageBoxResult.No)
-                return;
-
-            ////PushGene pg = new PushGene();
-            ////pg.DataContext = cell;
-            ////pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
-
-            //////Here show the confirmation dialog
-            ////if (pg.ShowDialog() == false)
-            ////{
-            ////    //User clicked Cancel
-            ////    return;
-            ////}
-
-            //Here do the processing
-            //Push the entity
-            Protocol B = MainWindow.SOP.Protocol;
-            Level.PushStatus status = B.pushStatus(gene);
-            if (status == Level.PushStatus.PUSH_INVALID)
-            {
-                MessageBox.Show("Entity not pushable.");
-                return;
-            }
-
-            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            {
-                B.repositoryPush(gene, status); // push into B, inserts as new
-            }
-            else // the item exists; could be newer or older
-            {
-                B.repositoryPush(gene, status); // push into B, overwrite
-            }
-
+            ConfigGene newgene = gene.Clone(null);
+            MainWindow.GenericPush(newgene);
         }
 
         private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
@@ -1387,7 +1348,8 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigMolecule mol = ((ConfigMolecularPopulation)(CellCytosolMolPopsListBox.SelectedItem)).molecule;
 
-            MainWindow.GenericPush(mol);
+            ConfigMolecule newmol = mol.Clone(null);
+            MainWindow.GenericPush(newmol);
         }
 
         private void PushMembMoleculeButton_Click(object sender, RoutedEventArgs e)
@@ -1398,7 +1360,8 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
 
-            MainWindow.GenericPush(mol);
+            ConfigMolecule newmol = mol.Clone(null);
+            MainWindow.GenericPush(newmol);
         }
 
         private void PushMembReacButton_Click(object sender, RoutedEventArgs e)
@@ -1410,7 +1373,8 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            MainWindow.GenericPush(reac);
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
 
         private void PushCytoReacButton_Click(object sender, RoutedEventArgs e)
@@ -1422,7 +1386,8 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-            MainWindow.GenericPush(reac);
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
     }
 

@@ -19,8 +19,15 @@ namespace DaphneGui.Pushing
     /// </summary>
     public partial class PushEntity : Window
     {
+        public enum ChangeStamp { Newer = 0, Older, Same };
+
+        public bool UserWantsNewEntity { get; set; }
+
+
         public PushEntity()
         {
+            Tag = ChangeStamp.Newer;
+            UserWantsNewEntity = false;
             InitializeComponent();
         }
 
@@ -29,16 +36,46 @@ namespace DaphneGui.Pushing
             DialogResult = true;
         }
 
+
+        private void btnSave_Click_1(object sender, RoutedEventArgs e)
+        {
+            UserWantsNewEntity = true;
+            DialogResult = true;
+        }
+
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ConfigEntity left = (ConfigEntity)EntityLevelDetails.DataContext;
+            ConfigEntity right = (ConfigEntity)ComponentLevelDetails.DataContext;
+
+            if (left.change_stamp > right.change_stamp)
+            {
+                Tag = ChangeStamp.Newer;
+            }
+            else if (left.change_stamp < right.change_stamp)
+            {
+                Tag = ChangeStamp.Older;
+            }
+            else 
+            {
+                Tag = ChangeStamp.Same;
+            }
+
+        }
+
     }
 
     public class EntityTemplateSelector : DataTemplateSelector
     {
         public DataTemplate ReactionTemplate { get; set; }
         public DataTemplate MoleculeTemplate { get; set; }
+        public DataTemplate GeneTemplate     { get; set; }
+        public DataTemplate CellTemplate     { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -49,6 +86,10 @@ namespace DaphneGui.Pushing
 
             if (item is ConfigMolecule)
                 return MoleculeTemplate;
+            else if (item is ConfigGene)
+                return GeneTemplate;
+            else if (item is ConfigCell)
+                return CellTemplate;
 
             return ReactionTemplate;
         }

@@ -12,6 +12,32 @@ namespace Daphne
 {
     public class ProtocolCreators
     {
+        /// <summary>
+        /// Populates the DaphneStore with the given protocol's entity repository
+        /// Call this after blank scenario is created
+        /// </summary>
+        /// <param name="daphneStore"></param>
+        public static void CreateDaphneStore(Protocol protocol, Level daphneStore)
+        {
+            string scenario_content = protocol.SerializeToString();
+            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            daphnestore = daphnestore.DeserializeFromString(scenario_content);
+            daphnestore.SerializeToFile();
+        }
+
+        /// <summary>
+        /// Populates the UserStore with the given protocol's entity repository
+        /// Call this after blank scenario is created
+        /// </summary>
+        /// <param name="userStore"></param>
+        public static void CreateUserStore(Protocol protocol, Level userStore)
+        {
+            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            string scenario_content = protocol.SerializeToString();
+            userstore = userstore.DeserializeFromString(scenario_content);
+            userstore.SerializeToFile();
+        }
+
         public static void LoadDefaultGlobalParameters(Protocol protocol)
         {
             // genes
