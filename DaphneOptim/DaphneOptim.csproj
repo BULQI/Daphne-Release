@@ -98,6 +98,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="TBKMath">
+      <HintPath>..\dependencies\TBKMath.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -138,10 +141,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Config\daphne_blank_scenario.json" />
-    <None Include="Config\daphne_diffusion_scenario.json" />
-    <None Include="Config\daphne_driver_locomotion_scenario.json" />
-    <None Include="Config\daphne_ligand_receptor_scenario.json" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

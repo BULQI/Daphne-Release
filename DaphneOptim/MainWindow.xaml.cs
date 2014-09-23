@@ -21,6 +21,7 @@ using ManifoldRing;
 using Newtonsoft;
 using Ninject;
 using Ninject.Parameters;
+using TBKMath;
 
 namespace DaphneOptim
 {
@@ -114,6 +115,33 @@ namespace DaphneOptim
 
             postConstruction = true;
 
+            //// modify scenario
+            //sop.Protocol.scenario.time_config.duration = 1.0;
+
+            //// save scenario
+            //sop.Protocol.SerializeToFile(false);
+
+            //// run scenario
+            //string processArgs = @"-d -b -f:daphne_driver_locomotion_scenario.json";
+            //string processName = @"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneGui\bin\x64\Debug\DaphneGui.exe";
+            //ProcessStartInfo info = new ProcessStartInfo(processName, processArgs);
+            //Process process = new Process();
+            //process.StartInfo = info;
+            //process.StartInfo.ErrorDialog = true;
+            ////process.StartInfo.CreateNoWindow = true;
+            //process.Start();
+            //process.WaitForExit();
+
+            //// analyze results
+
+
+            Console.WriteLine("Process ended.");
+        }
+
+        private void Run_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("Hello World?");
+
             // modify scenario
             sop.Protocol.scenario.time_config.duration = 1.0;
 
@@ -133,15 +161,18 @@ namespace DaphneOptim
 
             // analyze results
 
+            Console.WriteLine("Goodbye cruel world!");
 
-            Console.WriteLine("Process ended.");
         }
 
-        private void Run_Click(object sender, RoutedEventArgs e)
+        private double CostFunction()
         {
-            Console.WriteLine("Hello World?");
+            double cost = 0;
+            return cost;
+        }
 
-            Console.WriteLine("Goodbye cruel world!");
+        private void ModifyScenario(double[] paramVals)
+        {
 
         }
 
