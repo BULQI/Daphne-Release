@@ -1538,10 +1538,9 @@ namespace DaphneGui
                     cp.cellPopDist.AddByPosition(pos);
                 }
             }
-
         }
 
-        private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,

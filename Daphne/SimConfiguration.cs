@@ -6121,6 +6121,23 @@ namespace Daphne
             }
         }
         public BoxSpecification box_spec { get; set; }
+
+        private bool _current_gaussian_region_visibility = true;
+        public bool current_gaussian_region_visibility
+        {
+            get { return _current_gaussian_region_visibility; }
+            set
+            {
+                if (_current_gaussian_region_visibility == value)
+                    return;
+                else
+                {
+                    _current_gaussian_region_visibility = value;
+                    OnPropertyChanged("current_gaussian_region_visibility");
+                }
+            }
+        }
+
         private bool _gaussian_region_visibity = true;
         public bool gaussian_region_visibility 
         {
@@ -6159,6 +6176,7 @@ namespace Daphne
         {
             gaussian_spec_name = "";
             gaussian_region_visibility = true;
+            current_gaussian_region_visibility = true;
             gaussian_spec_color = new System.Windows.Media.Color();
             gaussian_spec_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
 
@@ -6250,8 +6268,6 @@ namespace Daphne
         public string box_guid { get; set; }
         public double[][] transform_matrix { get; set; }
         private bool _box_visibility = true;
-        private bool _blob_visibility = true;
-        private bool _current_blob_visibility = true;
         private bool _current_box_visibility = true;
         
         // Range values calculated based on environment extents
@@ -6492,20 +6508,6 @@ namespace Daphne
                 }
             }
         }
-        public bool blob_visibility
-        {
-            get { return _blob_visibility; }
-            set
-            {
-                if (_blob_visibility == value)
-                    return;
-                else
-                {
-                    _blob_visibility = value;
-                    OnPropertyChanged("blob_visibility");
-                }
-            }
-        }
         public bool current_box_visibility
         {
             get { return _current_box_visibility; }
@@ -6517,20 +6519,6 @@ namespace Daphne
                 {
                     _current_box_visibility = value;
                     OnPropertyChanged("current_box_visibility");
-                }
-            }
-        }
-        public bool current_blob_visibility
-        {
-            get { return _current_blob_visibility; }
-            set
-            {
-                if (_current_blob_visibility == value)
-                    return;
-                else
-                {
-                    _current_blob_visibility = value;
-                    OnPropertyChanged("current_blob_visibility");
                 }
             }
         }
@@ -6720,9 +6708,7 @@ namespace Daphne
 
             box_guid = id.ToString();
             box_visibility = true;
-            blob_visibility = true;
             current_box_visibility = true;
-            current_blob_visibility = true;
             transform_matrix = new double[][] { new double[]{1.0, 0.0, 0.0, 0.0},
                                                 new double[]{0.0, 1.0, 0.0, 0.0},
                                                 new double[]{0.0, 0.0, 1.0, 0.0},
