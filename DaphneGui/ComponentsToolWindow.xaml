@@ -382,7 +382,7 @@
 
                         <!--</Expander>-->
                         <Expander 
-                                    Padding="10" ExpandDirection="Down"
+                                    Padding="5" ExpandDirection="Down"
                                     IsExpanded="False"
                                     Header="New Reaction"                                                  
                                     x:Name="AddReaction"

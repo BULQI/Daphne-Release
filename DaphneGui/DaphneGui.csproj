@@ -211,8 +211,8 @@
     <Compile Include="MoleculeGridControl.xaml.cs">
       <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pushing\PushByLevel.xaml.cs">
-      <DependentUpon>PushByLevel.xaml</DependentUpon>
+    <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
+      <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushCell.xaml.cs">
       <DependentUpon>PushCell.xaml</DependentUpon>
@@ -311,7 +311,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pushing\PushByLevel.xaml">
+    <Page Include="Pushing\PushBetweenLevels.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

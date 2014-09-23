@@ -1,35 +1,53 @@
-﻿<Window x:Class="DaphneGui.Pushing.PushByLevel"
+﻿<Window x:Class="DaphneGui.Pushing.PushBetweenLevels"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
-        Title="Save Entities Between Levels" 
+        Title="Push Between Levels"
         SizeToContent="WidthAndHeight"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        >
+
+    <Window.CommandBindings>
+        <!--<CommandBinding Command=    "push:MyCommands.PushCommand"
+                        Executed=   "PushCommandExecuted"
+                        CanExecute= "PushCommandCanExecute"/>-->
+        
+    </Window.CommandBindings>
 
     <Window.Resources>
-        <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
+
+        <CollectionViewSource x:Key="pushMoleculesListView"
+                Source="{Binding Path=LeftList}"
+                Filter="pushMoleculesListView_Filter"/>
 
         <ObjectDataProvider x:Key="pushLevelsList"
-                    MethodName="GetValues" 
-                    ObjectType="{x:Type sys:Enum}">
+            MethodName="GetValues" 
+            ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="daph:PushLevel" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
-            <DataTemplate.Resources>
-                <!--<CollectionViewSource x:Key="pushMoleculesListView"  
-                                  Source="{Binding Path=Tag}"/>-->
-            </DataTemplate.Resources>
-            
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgMol" MaxHeight="600" AutoGenerateColumns="False"
-                                ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                               >
+                    
+                    <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding}" 
+                              >
+                        <DataGrid.CommandBindings>
+                            <!--<CommandBinding Command="push:MyCommands.PushCommand"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>-->
+                            
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -39,11 +57,11 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=DiffusionCoefficient, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=MolecularWeight, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="90" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=EffectiveRadius, Mode=OneWay}" 
                             />
@@ -52,27 +70,29 @@
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
                         </DataGrid.Columns>
-
-                            <!--ItemsSource="{Binding Source={StaticResource pushMoleculesListView}}"-->
-                    <!--ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"-->
-
                     </DataGrid>
-
+                    
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Name="templGenes" x:Key="pushLevelGeneTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgGene" MaxHeight="600" AutoGenerateColumns="False"
-                               ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                    <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding}">
 
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colGeneName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="100" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colCopy" Header="Copy Number" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=CopyNumber, Mode=OneWay}" 
                             />
@@ -80,23 +100,29 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=ActivationLevel, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
-                            
-                        </DataGrid.Columns>
 
+                        </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
-       
+
         <DataTemplate x:Name="templReactions" x:Key="pushLevelReactionTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False"
-                                ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"  >
+                                ItemsSource="{Binding}"  >
+                        
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colRate" Header="Rate Constant" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
@@ -122,11 +148,18 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False"
-                                ItemsSource="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ContentControl}}"  >
+                                ItemsSource="{Binding}"  >
+
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colCellName" Header="Name" Width="200" IsReadOnly="True" TextOptions.TextFormattingMode="Display"
                                  Binding="{Binding Path=CellName, Mode=OneWay}" />
-                            <DataGridTextColumn x:Name="colCellRadius" Header="Radius" Width="100" IsReadOnly="True"
+                            <DataGridTextColumn x:Name="colCellRadius" Header="Radius" Width="50" IsReadOnly="True"
                                  Binding="{Binding Path=CellRadius, Mode=OneWay}" />
                             <DataGridTextColumn x:Name="colCellTrans" Header="Transduction Constant" Width="100" IsReadOnly="True"
                                  Binding="{Binding Path=TransductionConstant, Mode=OneWay}" />
@@ -142,49 +175,82 @@
         </DataTemplate>
 
 
-
-
-
-        <push:PushLevelTemplateSelector x:Key="pushLevelTemplateSelector"
-                PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
-                PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
-                PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
-                PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
-             />
-
+        <push:PushLevelEntityTemplateSelector x:Key="pushLevelEntityTemplateSelector"
+            PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
+            PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
+            PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
+            PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
+            />
+        
     </Window.Resources>
+    
+    
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Grid x:Name="MainGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-    <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Orientation="Horizontal">
-                <StackPanel MaxWidth="500" HorizontalAlignment="Left">
-                    <Label FontWeight="Bold">Level (From)</Label>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <GroupBox x:Name="LeftGroup" Grid.Row="0" Grid.Column="0" >
+                <GroupBox.Header>
+                    <TextBlock Text="Level (from)" FontWeight="Bold" FontSize="16"/>
+                </GroupBox.Header>
+                <StackPanel>
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
+                          SelectedIndex="0"
                           SelectionChanged="LevelAComboBox_SelectionChanged"
                     />
-                    <ContentControl Name="LevelAContent"
-                        Content="{Binding Path=PushEntityType}" 
-                        ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
-                        Margin="6"/>
+                    <StackPanel x:Name="LeftGridStackPanel">
+                        <ContentControl Name="LeftContent"
+                            Content="{Binding}"
+                            ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
+                            Margin="6"/>
+                    </StackPanel>
                 </StackPanel>
-                <!--<StackPanel>-->
-                <Button x:Name="PushButton" Content="-->" Height="24" Width="60" HorizontalAlignment="Center" 
-                        Click="PushButton_Click">
-                </Button>
-                <!--</StackPanel>-->
-                <StackPanel MaxWidth="500" HorizontalAlignment="Right">
-                    <Label FontWeight="Bold" Content="Level (To)" />
+            </GroupBox>
+
+            <Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push -->" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
+                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                        VerticalAlignment="Top" VerticalContentAlignment="Top"
+                        Command="ApplicationCommands.Save"
+                        FocusManager.IsFocusScope="True"
+                        >
+                
+                <!--<Button.CommandBindings>
+                    <CommandBinding   Command="ApplicationCommands.Save"
+                                      Executed="PushCommandExecuted"
+                                      CanExecute="PushCommandCanExecute"/>
+                </Button.CommandBindings>-->
+                
+            </Button>
+
+            <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
+                <GroupBox.Header>
+                    <TextBlock Text="Level (to)" FontWeight="Bold" FontSize="16"/>
+                </GroupBox.Header>
+                <StackPanel>
                     <ComboBox x:Name="LevelBComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
-                          SelectionChanged="LevelBComboBox_SelectionChanged"/>
+                          SelectedIndex="1"
+                          SelectionChanged="LevelBComboBox_SelectionChanged"
+                    />
 
-                    <ContentControl Name="LevelBContent"
-                        Content="{Binding Path=PushEntityType}" 
-                        ContentTemplateSelector="{StaticResource pushLevelTemplateSelector}"
+                    <ContentControl Name="RightContent" 
+                        Content="{Binding}" 
+                        ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
                         Margin="6"/>
                 </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
-    </Grid>
+            </GroupBox>
+
+        </Grid>
+    </ScrollViewer>
 </Window>
