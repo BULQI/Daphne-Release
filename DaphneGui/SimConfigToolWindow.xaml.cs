@@ -72,10 +72,20 @@ namespace DaphneGui
                 MessageBox.Show("Please create a cell type first.");
                 return;
             }
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
 
-            double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
-                                               MainWindow.SOP.Protocol.scenario.environment.extent_y, 
-                                               MainWindow.SOP.Protocol.scenario.environment.extent_z };
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+
+            double[] extents = new double[3] { envHandle.extent_x, 
+                                               envHandle.extent_y, 
+                                               envHandle.extent_z };
             //guid to object changes
             //double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             double minDisSquared = 2 * cp.Cell.CellRadius;
@@ -85,7 +95,7 @@ namespace DaphneGui
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cp);
+            scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
 
@@ -105,12 +115,22 @@ namespace DaphneGui
             {
                 DeleteGaussianSpecification(current_item.cellPopDist);
                 CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
-                cpg.gauss_spec_guid_ref = "";
+                cpg.gauss_spec = null;
             }
             MainWindow.GC.Rwc.Invalidate();
 
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             //Remove the cell population
-            MainWindow.SOP.Protocol.scenario.cellpopulations.Remove(current_item);
+            scenario.cellpopulations.Remove(current_item);
 
             CellPopsListBox.SelectedIndex = index;
 
@@ -124,6 +144,16 @@ namespace DaphneGui
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
         private void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             BoxSpecification box = new BoxSpecification();
             box.x_trans = 100;
             box.y_trans = 100;
@@ -133,16 +163,14 @@ namespace DaphneGui
             box.z_scale = 100;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            MainWindow.SOP.Protocol.scenario.box_specifications.Add(box);
 
             GaussianSpecification gg = new GaussianSpecification();
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            gg.box_spec = box;
             gg.gaussian_spec_name = "New on-center gradient";
             gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
-            mpg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+            mpg.gauss_spec = gg;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -157,20 +185,27 @@ namespace DaphneGui
 
         private void DeleteGaussianSpecification(MolPopDistribution dist)
         {
-            MolPopGaussian mpg = dist as MolPopGaussian;
-            string guid = mpg.gaussgrad_gauss_spec_guid_ref;
-
-            if (guid == "")
-                return;
-
-            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[guid];
-                MainWindow.SOP.Protocol.scenario.gaussian_specifications.Remove(gs);
-                MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.Remove(guid);
-                MainWindow.GC.RemoveRegionWidget(guid);
+                throw new InvalidCastException();
             }
 
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+            MolPopGaussian mpg = dist as MolPopGaussian;
+
+            if (mpg.gauss_spec == null || mpg.gauss_spec.box_spec == null)
+            {
+                return;
+            }
+
+            if (MainWindow.GC.Regions.ContainsKey(mpg.gauss_spec.box_spec.box_guid) == true)
+            {
+                MainWindow.GC.RemoveRegionWidget(mpg.gauss_spec.box_spec.box_guid);
+            }
         }
 
         /// <summary>
@@ -180,26 +215,45 @@ namespace DaphneGui
         /// <param name="box"></param>
         private void AddDefaultBoxSpec(BoxSpecification box)
         {
-            box.x_trans = MainWindow.SOP.Protocol.scenario.environment.extent_x / 2;
-            box.y_trans = MainWindow.SOP.Protocol.scenario.environment.extent_y / 2;
-            box.z_trans = MainWindow.SOP.Protocol.scenario.environment.extent_z / 2; ;
-            box.x_scale = MainWindow.SOP.Protocol.scenario.environment.extent_x / 4; ;
-            box.y_scale = MainWindow.SOP.Protocol.scenario.environment.extent_x / 4; ;
-            box.z_scale = MainWindow.SOP.Protocol.scenario.environment.extent_x / 4; ;
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+
+            box.x_trans = envHandle.extent_x / 2;
+            box.y_trans = envHandle.extent_y / 2;
+            box.z_trans = envHandle.extent_z / 2; ;
+            box.x_scale = envHandle.extent_x / 4; ;
+            box.y_scale = envHandle.extent_x / 4; ;
+            box.z_scale = envHandle.extent_x / 4; ;
             // Add box GUI property changed to VTK callback
             box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-            MainWindow.SOP.Protocol.scenario.box_specifications.Add(box);
         }
 
         // Used to specify Gaussian distibution for cell positions
         private void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
         {
-            gg.gaussian_spec_box_guid_ref = box.box_guid;
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+            gg.box_spec = box;
             gg.gaussian_spec_name = "";
             //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-            MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
 
             // Add RegionControl & RegionWidget for the new gauss_spec
             MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
@@ -214,30 +268,30 @@ namespace DaphneGui
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             if (dist.DistType != CellPopDistributionType.Gaussian)
                 return;
 
             CellPopGaussian cpg = dist as CellPopGaussian;
-            string guid = cpg.gauss_spec_guid_ref;
 
-            if (guid == "")
-                return;
-
-            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+            if (cpg.gauss_spec == null || cpg.gauss_spec.box_spec == null)
             {
-                GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[guid];
-                MainWindow.SOP.Protocol.scenario.gaussian_specifications.Remove(gs);
-                MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.Remove(guid);
-                MainWindow.GC.RemoveRegionWidget(guid);
-
-                //// Remove box
-                //BoxSpecification box = MainWindow.SOP.Protocol.box_guid_box_dict[gs.gaussian_spec_box_guid_ref];
-                //MainWindow.SOP.Protocol.entity_repository.box_specifications.Remove(box);
-                //MainWindow.SOP.Protocol.box_guid_box_dict.Remove(gs.gaussian_spec_box_guid_ref);
-                //// box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-                //MainWindow.SOP.Protocol.entity_repository.box_specifications.Remove(box);
+                return;
             }
 
+            if (MainWindow.GC.Regions.ContainsKey(cpg.gauss_spec.box_spec.box_guid) == true)
+            {
+                MainWindow.GC.RemoveRegionWidget(cpg.gauss_spec.box_spec.box_guid);
+            }
         }
 
 
@@ -284,7 +338,7 @@ namespace DaphneGui
                     {
                         DeleteGaussianSpecification(current_mol.mp_distribution);
                         MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
-                        mpg.gaussgrad_gauss_spec_guid_ref = "";
+                        mpg.gauss_spec = null;
                         MainWindow.GC.Rwc.Invalidate();
                     }
                 }
@@ -525,7 +579,7 @@ namespace DaphneGui
             if (cvs == null) return;
             foreach (ConfigMolecule item in cvs.View)
             {
-                if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
                 gmp.molecule = item.Clone(null);
                 gmp.Name = item.Name;
                 break;
@@ -533,7 +587,7 @@ namespace DaphneGui
             if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Add(gmp);
+            MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
 
@@ -548,11 +602,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                     return;
 
-                foreach (ConfigReaction cr in MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.ToList())
+                foreach (ConfigReaction cr in MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.ToList())
                 {
                     if (MainWindow.SOP.Protocol.entity_repository.reactions_dict[cr.entity_guid].HasMolecule(cmp.molecule.entity_guid))
                     {
-                        MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(cr);
+                        MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(cr);
                     }
                 }
 
@@ -561,12 +615,12 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(cmp.mp_distribution);
                     MolPopGaussian mpg = cmp.mp_distribution as MolPopGaussian;
-                    mpg.gaussgrad_gauss_spec_guid_ref = "";
+                    mpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
 
                 //Delete the molecular population
-                MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Remove(cmp);
+                MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
 
@@ -583,7 +637,7 @@ namespace DaphneGui
 
         private bool EcmHasMolecule(string molguid)
         {
-            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 if (molpop.molecule.entity_guid == molguid)
                     return true;
@@ -592,8 +646,18 @@ namespace DaphneGui
         }
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in scenario.cellpopulations)
             {
                 ConfigCell cell = cell_pop.Cell;
                 if (MembraneHasMolecule(cell, molguid))
@@ -604,8 +668,18 @@ namespace DaphneGui
         }
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in scenario.cellpopulations)
             {
                 ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (CytosolHasMolecule(cell, molguid))
@@ -623,9 +697,9 @@ namespace DaphneGui
             {
                 ConfigReaction reac = (ConfigReaction)item;
 
-                if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_dict.ContainsKey(reac.entity_guid) == false)
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid) == false)
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
+                    MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                     needRefresh = true;
                 }
             }
@@ -642,9 +716,9 @@ namespace DaphneGui
                 return;
 
             ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_dict.ContainsKey(reac.entity_guid))
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid))
             {
-                MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Remove(reac);
+                MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(reac);
             }
         }
 
@@ -653,9 +727,9 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
             if (crc != null)
             {
-                if (!MainWindow.SOP.Protocol.scenario.environment.ecs.reaction_complexes_guid_ref.Contains(crc.entity_guid))
+                if (!MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Contains(crc.entity_guid))
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.ecs.reaction_complexes_guid_ref.Add(crc.entity_guid);
+                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Add(crc.entity_guid);
                 }
             }
         }
@@ -666,7 +740,7 @@ namespace DaphneGui
             if (nIndex >= 0)
             {
                 string guid = (string)ReactionComplexListBox.SelectedValue;
-                MainWindow.SOP.Protocol.scenario.environment.ecs.reaction_complexes_guid_ref.Remove(guid);
+                MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Remove(guid);
             }
         }
 
@@ -958,6 +1032,16 @@ namespace DaphneGui
 
         private void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+
             ComboBox cb = sender as ComboBox;
             if (cb.SelectedIndex == -1)
                 return;
@@ -989,9 +1073,9 @@ namespace DaphneGui
                 return;
             }
 
-            double[] extents = new double[3] { MainWindow.SOP.Protocol.scenario.environment.extent_x, 
-                                               MainWindow.SOP.Protocol.scenario.environment.extent_y, 
-                                               MainWindow.SOP.Protocol.scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, 
+                                               envHandle.extent_y, 
+                                               envHandle.extent_z };
             double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
 
@@ -1010,7 +1094,7 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
-                    cpg.gauss_spec_guid_ref = "";
+                    cpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
@@ -1035,8 +1119,9 @@ namespace DaphneGui
                 gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
                 AddGaussianSpecification(gg, box);
 
-                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
+                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
+                ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
 
                 // Connect the VTK callback
                 MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
@@ -1062,7 +1147,7 @@ namespace DaphneGui
                 {
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
-                    cpg.gauss_spec_guid_ref = "";
+                    cpg.gauss_spec = null;
                     MainWindow.GC.Rwc.Invalidate();
                 }
             }
@@ -1073,17 +1158,27 @@ namespace DaphneGui
 
         public void SelectGaussSpecInGUI(int index, string guid)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             bool isBoxInCell = false;
 
-            foreach (CellPopulation cp in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cp in scenario.cellpopulations)
             {
                 CellPopDistribution cpd = cp.cellPopDist;
+
                 if (cpd.DistType == CellPopDistributionType.Gaussian)
                 {
                     CellPopGaussian cpg = cpd as CellPopGaussian;
-                    if (cpg.gauss_spec_guid_ref == guid)
+
+                    if (cpg.gauss_spec.box_spec.box_guid == guid)
                     {
-                        //BoxSpecification box = MainWindow.SOP.Protocol.box_guid_box_dict[guid];
                         //cpg.Reset();
                         isBoxInCell = true;
                         break;
@@ -1103,6 +1198,16 @@ namespace DaphneGui
 
         public void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             // identify the widget's key
             string key = "";
 
@@ -1126,11 +1231,11 @@ namespace DaphneGui
                     if (!gui_spot_found)
                     {
                         // Next check whether any Solfacs use this right gaussian_spec for this box
-                        for (int r = 0; r < MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Count; r++)
+                        for (int r = 0; r < MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Count; r++)
                         {
                             // We'll just be picking the first one that uses 
-                            if (MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
-                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.ecs.molpops[r].mp_distribution).gaussgrad_gauss_spec_guid_ref == key)
+                            if (MainWindow.SOP.Protocol.scenario.environment.comp.molpops[r].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian &&
+                                ((MolPopGaussian)MainWindow.SOP.Protocol.scenario.environment.comp.molpops[r].mp_distribution).gauss_spec.box_spec.box_guid == key)
                             {
                                 SelectSolfacInGUI(r);
                                 //gui_spot_found = true;
@@ -1140,16 +1245,19 @@ namespace DaphneGui
                     }
                     if (!gui_spot_found)
                     {
-                        // Last check the gaussian_specs for this box guid
-                        for (int r = 0; r < MainWindow.SOP.Protocol.scenario.gaussian_specifications.Count; r++)
+                        GaussianSpecification next;
+                        int count = 0;
+
+                        scenario.resetGaussRetrieve();
+                        while((next = scenario.nextGaussSpec()) != null)
                         {
-                            // We'll just be picking the first one that uses 
-                            if (MainWindow.SOP.Protocol.scenario.gaussian_specifications[r].gaussian_spec_box_guid_ref == key)
+                            if (next.box_spec.box_guid == key)
                             {
-                                SelectGaussSpecInGUI(r, key);
+                                SelectGaussSpecInGUI(count, key);
                                 //gui_spot_found = true;
                                 break;
                             }
+                            count++;
                         }
                     }
                 }
@@ -1435,18 +1543,37 @@ namespace DaphneGui
 
         private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
+            {
                 return;
+            }
 
             string guid = cb.CommandParameter as string;
+
             if (guid.Length > 0)
             {
-                if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+                GaussianSpecification next;
+
+                scenario.resetGaussRetrieve();
+                while ((next = scenario.nextGaussSpec()) != null)
                 {
-                    GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[guid];
-                    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
+                    if (next.box_spec.box_guid == guid)
+                    {
+                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
+                        break;
+                    }
                 }
             }
         }
@@ -1731,7 +1858,7 @@ namespace DaphneGui
                     return;
                 }
 
-                foreach (ConfigMolecularPopulation cmp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
+                foreach (ConfigMolecularPopulation cmp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
                 {
                     if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                     {
@@ -2443,6 +2570,16 @@ namespace DaphneGui
 
         private void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
             if (mol_pop == null || mol_pop.mp_distribution == null)
@@ -2453,17 +2590,21 @@ namespace DaphneGui
 
             MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
-            string gauss_guid = mpg.gaussgrad_gauss_spec_guid_ref;
-
-            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
-            {
-                GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[gauss_guid];
-                gs.gaussian_spec_color = mol_pop.mp_color;
-            }
+            mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
         }
 
         private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cellPop == null)
                 return;
@@ -2471,17 +2612,11 @@ namespace DaphneGui
             CellPopDistribution current_dist = cellPop.cellPopDist;
 
             if (current_dist.DistType != CellPopDistributionType.Gaussian)
-                return;
-
-            string gauss_guid = ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec_guid_ref;
-
-            if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(gauss_guid))
             {
-                GaussianSpecification gg = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[gauss_guid];
-                //gg.gaussian_spec_color = cellPop.cellpopulation_color;
-                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+                return;
             }
 
+            ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
         }
 
         //LIBRARIES REACTION COMPLEXES HANDLERS

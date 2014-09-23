@@ -38,7 +38,7 @@ namespace Daphne
                 dz = Math.Abs(p.Cell(0).GridIndex[2] - p.Cell(1).GridIndex[2]);
 
             // correction for periodic boundary conditions
-            if (Simulation.dataBasket.ECS.toroidal == true)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
                 if (dx > 0.5 * gridPts[0])
                 {
@@ -75,7 +75,7 @@ namespace Daphne
             if (legalIndex(idx) == false)
             {
                 // correction for periodic boundary conditions
-                if (Simulation.dataBasket.ECS.toroidal == true)
+                if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
                 {
                     if (idx[0] < 0 || idx[0] >= gridPts[0])
                     {
@@ -118,7 +118,7 @@ namespace Daphne
         {
             if (pairs != null && pairs.Count > 0 && del != null)
             {
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                 {
                     // no self-pairing
                     if (del.Cell_id == kvp.Value.Cell_id)
@@ -146,7 +146,7 @@ namespace Daphne
         {
             if (pairs != null && pairs.Count > 0 && cell != null)
             {
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                 {
                     // no self-pairing
                     if (oldKey == kvp.Value.Cell_id)
@@ -279,7 +279,7 @@ namespace Daphne
             }
 
             // look at all cells to see if they changed in the grid
-            foreach (KeyValuePair<int, Cell> kvpc in Simulation.dataBasket.Cells)
+            foreach (KeyValuePair<int, Cell> kvpc in SimulationBase.dataBasket.Cells)
             {
                 int[] idx = findGridIndex(kvpc.Value.SpatialState.X);
 

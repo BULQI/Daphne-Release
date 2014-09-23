@@ -53,7 +53,7 @@ namespace Daphne
             tmp -= b.SpatialState.X;
 
             // correction for periodic boundary conditions
-            if (Simulation.dataBasket.ECS.toroidal == true)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
                 double dx = Math.Abs(tmp[0]),
                        dy = Math.Abs(tmp[1]),

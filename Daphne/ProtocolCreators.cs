@@ -71,10 +71,17 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             // Global Paramters
             LoadDefaultGlobalParameters(protocol);
@@ -115,7 +122,7 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = true;
 
-                    protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
             }
 
@@ -129,17 +136,13 @@ namespace Daphne
             cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
-            double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
-                                               protocol.scenario.environment.extent_y, 
-                                               protocol.scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
-                                                                protocol.scenario.environment.extent_y / 2,
-                                                                protocol.scenario.environment.extent_z / 2);
+            cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            protocol.scenario.cellpopulations.Add(cellPop);
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
 
             // Cell reporting
             cellPop.report_xvf.position = false;
@@ -150,7 +153,7 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.LEAN;
             }
-            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
@@ -170,7 +173,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
+                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -180,13 +183,20 @@ namespace Daphne
         /// </summary>
         public static void CreateDriverLocomotionProtocol(Protocol protocol)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
             // Experiment
             protocol.experiment_name = "Cell locomotion with driver molecule.";
             protocol.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             protocol.scenario.time_config.duration = 30;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
@@ -240,7 +250,7 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = false;
 
-                    protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
             }
 
@@ -254,18 +264,16 @@ namespace Daphne
             cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
-            double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
-                                               protocol.scenario.environment.extent_y, 
-                                               protocol.scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
-            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * configCell.CellRadius - protocol.scenario.environment.gridstep / 2,
-                                                                protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
-                                                                protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
+            cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * configCell.CellRadius - envHandle.gridstep / 2,
+                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
+                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            protocol.scenario.cellpopulations.Add(cellPop);
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
             cellPop.report_xvf.position = true;
             cellPop.report_xvf.velocity = true;
             cellPop.report_xvf.force = true;
@@ -280,7 +288,7 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             }
-            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
@@ -300,7 +308,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
+                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -317,10 +325,17 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
 
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             // Global Paramters
             LoadDefaultGlobalParameters(protocol);
@@ -331,14 +346,13 @@ namespace Daphne
             // box x,y,z_scale parameters are 2*sigma
             GaussianSpecification gaussSpec = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
-            box.x_trans = protocol.scenario.environment.extent_x / 2;
-            box.y_trans = protocol.scenario.environment.extent_y / 2;
-            box.z_trans = protocol.scenario.environment.extent_z / 2;
-            box.x_scale = protocol.scenario.environment.extent_x / 2;
-            box.y_scale = protocol.scenario.environment.extent_y / 4;
-            box.z_scale = protocol.scenario.environment.extent_z / 5;
-            protocol.scenario.box_specifications.Add(box);
-            gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+            box.x_trans = envHandle.extent_x / 2;
+            box.y_trans = envHandle.extent_y / 2;
+            box.z_trans = envHandle.extent_z / 2;
+            box.x_scale = envHandle.extent_x / 2;
+            box.y_scale = envHandle.extent_y / 4;
+            box.z_scale = envHandle.extent_z / 5;
+            gaussSpec.box_spec = box;
             //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Rotate the box by 45 degrees about the box's y-axis.
@@ -351,7 +365,6 @@ namespace Daphne
             trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
             trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
             box.SetMatrix(trans_matrix);
-            protocol.scenario.gaussian_specifications.Add(gaussSpec);
 
             var query =
                 from mol in protocol.entity_repository.molecules
@@ -371,7 +384,7 @@ namespace Daphne
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
-                molPopGaussian.gaussgrad_gauss_spec_guid_ref = protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                molPopGaussian.gauss_spec = gaussSpec;
                 configMolPop.mp_distribution = molPopGaussian;
 
                 // Reporting
@@ -381,7 +394,7 @@ namespace Daphne
 
                 protocol.reporter_file_name = "Diffusion_test";
 
-                protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                protocol.scenario.environment.comp.molpops.Add(configMolPop);
             }
         }
 

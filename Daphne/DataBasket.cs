@@ -18,9 +18,9 @@ namespace Daphne
     public class DataBasket
     {
         /// <summary>
-        /// cell environment data object
+        /// environment data object
         /// </summary>
-        private ExtraCellularSpace ecs;
+        private EnvironmentBase environment;
         /// <summary>
         /// dictionary of cells
         /// </summary>
@@ -40,7 +40,7 @@ namespace Daphne
         /// <summary>
         /// handle to the simulation
         /// </summary>
-        private Simulation hSim;
+        private SimulationBase hSim;
 #if ALL_DATA
         /// <summary>
         /// dictionary of raw cell track sets data
@@ -61,7 +61,7 @@ namespace Daphne
         /// <summary>
         /// constructor
         /// </summary>
-        public DataBasket(Simulation s)
+        public DataBasket(SimulationBase s)
         {
             hSim = s;
             cells = new Dictionary<int,Cell>();
@@ -86,12 +86,12 @@ namespace Daphne
         }
 
         /// <summary>
-        /// accessor for the cell environment
+        /// accessor for the environment
         /// </summary>
-        public ExtraCellularSpace ECS
+        public EnvironmentBase Environment
         {
-            get { return ecs; }
-            set { ecs = value; }
+            get { return environment; }
+            set { environment = value; }
         }
 
         /// <summary>

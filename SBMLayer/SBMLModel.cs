@@ -65,6 +65,9 @@ namespace SBMLayer
 
         private Boolean isSpatialModel;
 
+        private TissueScenario scenario;
+        private ConfigECSEnvironment envHandle;
+
         /// <summary>
         /// Sets Paths for SBMLDocument - Level 3 Version 1 format
         /// </summary>
@@ -75,6 +78,14 @@ namespace SBMLayer
             // Creates a template SBML model
             this.appPath = appPath;
             this.protocol = protocol;
+
+            // for now, restrict to the tissue scenario
+            if(protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+            scenario = (TissueScenario)protocol.scenario;
+            envHandle = (ConfigECSEnvironment)scenario.environment;
         }
 
         /// <summary>
@@ -553,14 +564,14 @@ namespace SBMLayer
                 attr.add("duration", Convert.ToString(protocol.scenario.time_config.duration), annotNamespace, annotprefix);
                 attr.add("rendering_interval", Convert.ToString(protocol.scenario.time_config.rendering_interval), annotNamespace, annotprefix);
                 attr.add("sampling_interval", Convert.ToString(protocol.scenario.time_config.sampling_interval), annotNamespace, annotprefix);
-                attr.add("gridstep", Convert.ToString(protocol.scenario.environment.gridstep), annotNamespace, annotprefix);
+                attr.add("gridstep", Convert.ToString(envHandle.gridstep), annotNamespace, annotprefix);
 
                 //Spatial Geometry params
 
-                attr.add("toroidal", Convert.ToString(protocol.scenario.environment.toroidal), annotNamespace, annotprefix);
-                attr.add("extent_x", Convert.ToString(protocol.scenario.environment.extent_x), annotNamespace, annotprefix);
-                attr.add("extent_y", Convert.ToString(protocol.scenario.environment.extent_y), annotNamespace, annotprefix);
-                attr.add("extent_z", Convert.ToString(protocol.scenario.environment.extent_z), annotNamespace, annotprefix);
+                attr.add("toroidal", Convert.ToString(envHandle.toroidal), annotNamespace, annotprefix);
+                attr.add("extent_x", Convert.ToString(envHandle.extent_x), annotNamespace, annotprefix);
+                attr.add("extent_y", Convert.ToString(envHandle.extent_y), annotNamespace, annotprefix);
+                attr.add("extent_z", Convert.ToString(envHandle.extent_z), annotNamespace, annotprefix);
             }
             else
             {
@@ -572,7 +583,6 @@ namespace SBMLayer
             names.add(annotNamespace, annotprefix);
             XMLNode Childnode = new XMLNode(new XMLTriple("daphnemodel", annotNamespace, annotprefix), attr, names);
             model.setAnnotation(Childnode);
-
         }
 
         /// <summary>
@@ -623,19 +633,14 @@ namespace SBMLayer
                 attr.add("distribution", "Gaussian", annotNamespace, annotprefix);
                 attr.add("peak_conc", Convert.ToString(((MolPopGaussian)confMolPop.mp_distribution).peak_concentration), annotNamespace, annotprefix);
 
-                foreach (BoxSpecification box in protocol.scenario.box_specifications)
-                {
-                    //Only select appropriate box
-                    if ((protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref == box.box_guid)
-                    {
-                        attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
-                        attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
-                        attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
-                        attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
-                        attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
-                        attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
-                    }
-                }
+                BoxSpecification box = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
+
+                attr.add("x_trans", Convert.ToString(box.x_trans), annotNamespace, annotprefix);
+                attr.add("x_scale", Convert.ToString(box.x_scale), annotNamespace, annotprefix);
+                attr.add("y_trans", Convert.ToString(box.y_trans), annotNamespace, annotprefix);
+                attr.add("y_scale", Convert.ToString(box.y_scale), annotNamespace, annotprefix);
+                attr.add("z_trans", Convert.ToString(box.z_trans), annotNamespace, annotprefix);
+                attr.add("z_scale", Convert.ToString(box.z_scale), annotNamespace, annotprefix);
             }
             else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
@@ -749,25 +754,25 @@ namespace SBMLayer
             AddModelUnits();
 
             //adds ECS compartment
-            double ecsVol = (protocol.scenario.environment.extent_x) * (protocol.scenario.environment.extent_y) * (protocol.scenario.environment.extent_z);
-            libsbmlcs.Compartment backgComp= AddCompartment("ECS", "ECS", true, ecsVol, protocol.scenario.environment.NumGridPts.Length, "");
+            double ecsVol = (envHandle.extent_x) * (envHandle.extent_y) * (envHandle.extent_z);
+            libsbmlcs.Compartment backgComp = AddCompartment("ECS", "ECS", true, ecsVol, envHandle.NumGridPts.Length, "");
             Domain backgDomain=null;
             if (isSpatialModel)
             {
-                backgDomain= world.AddBackground(backgComp, protocol.scenario.cellpopulations.Count);
+                backgDomain= world.AddBackground(backgComp, scenario.cellpopulations.Count);
             }
             //adds species in the ECS
             BoxSpecification spec;
             string confMolPopName = string.Empty;
             Species species = null;
-            foreach (ConfigMolecularPopulation confMolPop in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation confMolPop in protocol.scenario.environment.comp.molpops)
             {
                 //We need to create SBML species with the type of the molecular population and not with the name as the latter is user defined.
                 //confMolPopName = protocol.entity_repository.molecules_dict[confMolPop.molecule_guid_ref].Name;
                 confMolPopName = confMolPop.Name;
                 if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
-                    spec = protocol.scenario.box_guid_box_dict[(protocol.scenario.gauss_guid_gauss_dict[((MolPopGaussian)confMolPop.mp_distribution).gaussgrad_gauss_spec_guid_ref]).gaussian_spec_box_guid_ref];
+                    spec = ((MolPopGaussian)confMolPop.mp_distribution).gauss_spec.box_spec;
                     species = AddSpecies(confMolPopName + "_ECS", confMolPopName, "ECS", false, false, false, CalculateGaussianConcentration(spec, confMolPop), "");
                 }
                 else if (confMolPop.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
@@ -802,7 +807,7 @@ namespace SBMLayer
             }
 
             //adds reactions in the ECS
-            foreach (ConfigReaction cr in protocol.scenario.environment.ecs.Reactions)
+            foreach (ConfigReaction cr in protocol.scenario.environment.comp.Reactions)
             {
                 AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, "ECS", string.Empty);
 
@@ -820,7 +825,7 @@ namespace SBMLayer
             int ordinal = 0;
             Domain membraneDomain=null, cytoDomain=null;
             DomainType membraneDomainType=null, cytoDomainType=null;
-            foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+            foreach (CellPopulation cellPop in scenario.cellpopulations)
             {
                 //Name added to compartment includes cell type
                 //Membrane
@@ -972,8 +977,9 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
-            double volume = (protocol.rc_scenario.environment.extent_x) * (protocol.rc_scenario.environment.extent_y) * (protocol.rc_scenario.environment.extent_z);
-            AddCompartment(compName, compName, true, volume, protocol.scenario.environment.NumGridPts.Length, "");
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
+            double volume = envHandle.extent_x * envHandle.extent_y * envHandle.extent_z;
+            AddCompartment(compName, compName, true, volume, envHandle.NumGridPts.Length, "");
 
             //Adds molecular populations
             Species specAnnot;
@@ -1029,7 +1035,7 @@ namespace SBMLayer
             }
             else if (compartment.Equals("ECS"))
             {
-                configComp = protocol.scenario.environment.ecs.molpops;
+                configComp = protocol.scenario.environment.comp.molpops;
             }
             else if (compartment.ToLower().Contains("complex"))//Reaction Complex
             {
@@ -1094,7 +1100,13 @@ namespace SBMLayer
         /// <param name="compartment"></param>
         private void AddSBMLReactions(ConfigReaction cr, double rateConstant, ReactionType type, string compartment, string cellId)
         {
+            if(protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             string receptor, ligand, complex, reactant, product, membrane, bulk, bulkActivated, modifier, rid, gene;
+            TissueScenario scenario = (TissueScenario)protocol.scenario;
 
             if (type == ReactionType.BoundaryAssociation)
             {
@@ -1104,7 +1116,7 @@ namespace SBMLayer
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
                         AddBoundaryAssociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
@@ -1122,7 +1134,7 @@ namespace SBMLayer
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
                         AddBoundaryDissociation(cellPop.Cell.entity_guid, receptor, ligand, complex, compartment, rateConstant);
                     }
@@ -1140,7 +1152,7 @@ namespace SBMLayer
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
                         AddBoundaryTransportFromReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
@@ -1158,7 +1170,7 @@ namespace SBMLayer
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
                         AddBoundaryTransportToReaction(cellPop.Cell.entity_guid, bulk, membrane, compartment, rateConstant);
                     }
@@ -1177,7 +1189,7 @@ namespace SBMLayer
 
                 if (compartment.Equals("ECS"))
                 {
-                    foreach (CellPopulation cellPop in protocol.scenario.cellpopulations)
+                    foreach (CellPopulation cellPop in scenario.cellpopulations)
                     {
                         AddCatalyzedBoundaryActivation(cellPop.Cell.entity_guid, bulk, bulkActivated, modifier, compartment, rateConstant);
                     }
@@ -1675,6 +1687,13 @@ namespace SBMLayer
         /// </summary>
         private void GetModelAnnotation()
         {
+            if (protocol.scenario.environment is ConfigECSEnvironment == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
             //If there is a Daphne annotation
             if (model.isSetAnnotation())
             {
@@ -1687,11 +1706,11 @@ namespace SBMLayer
                 protocol.scenario.time_config.rendering_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("rendering_interval")));
                 protocol.scenario.time_config.sampling_interval = Convert.ToDouble(attributes.getValue(attributes.getIndex("sampling_interval")));
 
-                protocol.scenario.environment.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
-                protocol.scenario.environment.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
-                protocol.scenario.environment.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
-                protocol.scenario.environment.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
-                protocol.scenario.environment.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
+                envHandle.gridstep = Convert.ToDouble(attributes.getValue(attributes.getIndex("gridstep")));
+                envHandle.toroidal = Convert.ToBoolean(attributes.getValue(attributes.getIndex("toroidal")));
+                envHandle.extent_x = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_x")));
+                envHandle.extent_y = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_y")));
+                envHandle.extent_z = Convert.ToInt32(attributes.getValue(attributes.getIndex("extent_z")));
             }
             else
             {
@@ -1700,11 +1719,11 @@ namespace SBMLayer
                 protocol.scenario.time_config.duration = 100;
                 protocol.scenario.time_config.rendering_interval = 1;
                 protocol.scenario.time_config.sampling_interval = 1;
-                protocol.scenario.environment.gridstep = 50;
+                envHandle.gridstep = 50;
                 //Replace with spatial package constructs at some point
-                protocol.scenario.environment.extent_x = 200;
-                protocol.scenario.environment.extent_y = 200;
-                protocol.scenario.environment.extent_z = 200;
+                envHandle.extent_x = 200;
+                envHandle.extent_y = 200;
+                envHandle.extent_z = 200;
             }
         }
 
@@ -1871,14 +1890,21 @@ namespace SBMLayer
             //If # of compartments==1, then build as a reaction complex. If not, build as a spatial simulation scenario.
             if (IsReactionComplex())
             {
+                if (protocol.rc_scenario.environment is ConfigECSEnvironment == false)
+                {
+                    throw new InvalidCastException();
+                }
+
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
+
                 ConfigReactionComplex crc = new ConfigReactionComplex(model.getId());
 
                 libsbmlcs.Compartment reactionComplexCompartment = compartments.get(0);
                 if (reactionComplexCompartment.isSetSize())
                 {
-                    protocol.rc_scenario.environment.extent_x = (int)reactionComplexCompartment.getSize() / 3;
-                    protocol.rc_scenario.environment.extent_y = (int)reactionComplexCompartment.getSize() / 3;
-                    protocol.rc_scenario.environment.extent_z = (int)reactionComplexCompartment.getSize() / 3;
+                    envHandle.extent_x = (int)reactionComplexCompartment.getSize() / 3;
+                    envHandle.extent_y = (int)reactionComplexCompartment.getSize() / 3;
+                    envHandle.extent_z = (int)reactionComplexCompartment.getSize() / 3;
                 }
                 //Add all molecular populations
                 Species crcSpec;
@@ -1930,6 +1956,13 @@ namespace SBMLayer
             }
             else
             {
+                if(protocol.scenario.environment is ConfigECSEnvironment == false)
+                {
+                    throw new InvalidCastException();
+                }
+
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
                 //Populate experiment
                 protocol.experiment_name = model.getId();
                 protocol.reporter_file_name = protocol.experiment_name;
@@ -1960,7 +1993,7 @@ namespace SBMLayer
                     tempSpecies = speciesList.get(i);
                     if (tempSpecies.getCompartment().Equals(largestCompID))
                     {
-                        protocol.scenario.environment.ecs.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
+                        protocol.scenario.environment.comp.molpops.Add(PreparePopulation(tempSpecies, MoleculeLocation.Bulk, true));
                     }
                 }
 
@@ -2075,20 +2108,23 @@ namespace SBMLayer
                     cellPop.cellpopulation_name = gc.CellName;
                     cellPop.number = (int)compartAttributes[2];
 
-                    double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
-                                                protocol.scenario.environment.extent_y, 
-                                                protocol.scenario.environment.extent_z };
+                    double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
                     double minDisSquared = 2 * gc.CellRadius;
                     minDisSquared *= minDisSquared;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
                     // Don't start the cell on a lattice point, until gradient interpolation method improves.
-                    cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * gc.CellRadius - protocol.scenario.environment.gridstep / 2,
-                                                                        protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
-                                                                        protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
+                    cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * gc.CellRadius - envHandle.gridstep / 2,
+                                                          envHandle.extent_y / 2 - envHandle.gridstep / 2,
+                                                          envHandle.extent_z / 2 - envHandle.gridstep / 2);
                     cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
 
+                    if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+                    {
+                        throw new InvalidCastException();
+                    }
+
                     //Add cell population to scenario
-                    protocol.scenario.cellpopulations.Add(cellPop);
+                    ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
                     cellPop.report_xvf.position = true;
                     cellPop.report_xvf.velocity = true;
                     cellPop.report_xvf.force = true;
@@ -2104,7 +2140,7 @@ namespace SBMLayer
                         // Mean only
                         cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
                     }
-                    foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
+                    foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
                     {
                         ReportECM reportECM = new ReportECM();
                         reportECM.molpop_guid_ref = mpECM.molpop_guid;
@@ -2130,7 +2166,7 @@ namespace SBMLayer
 
                         //Add the reaction to repository collection
                         protocol.entity_repository.reactions.Add(cr);
-                        protocol.scenario.environment.ecs.Reactions.Add(cr.Clone(true));
+                        protocol.scenario.environment.comp.Reactions.Add(cr.Clone(true));
                     }
                 }
             }
@@ -2400,6 +2436,13 @@ namespace SBMLayer
         /// <returns></returns>
         private void SetSpeciesDistribution(Species species, ref ConfigMolecularPopulation configMolPop)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)protocol.scenario;
+
             Boolean isDistributionSet = false;
 
             if (species.isSetAnnotation())
@@ -2426,8 +2469,7 @@ namespace SBMLayer
                     box.y_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("y_scale")));
                     box.z_scale = Convert.ToDouble(attributes.getValue(attributes.getIndex("z_scale")));
 
-                    protocol.scenario.box_specifications.Add(box);
-                    gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+                    gaussSpec.box_spec = box;
                     //gg.gaussian_spec_name = "gaussian";
                     gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
                     // Rotate the box by 45 degrees about the box's y-axis.
@@ -2440,7 +2482,6 @@ namespace SBMLayer
                     trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
-                    protocol.scenario.gaussian_specifications.Add(gaussSpec);
 
                     configMolPop.mp_dist_name = "Gaussian";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -2450,7 +2491,7 @@ namespace SBMLayer
                     molPopGaussian.peak_concentration = peakConc;
 
                     //double check this is the correct GUIid for this box
-                    molPopGaussian.gaussgrad_gauss_spec_guid_ref = gaussSpec.gaussian_spec_box_guid_ref;
+                    molPopGaussian.gauss_spec = gaussSpec;
                     configMolPop.mp_distribution = molPopGaussian;
 
                     isDistributionSet = true;

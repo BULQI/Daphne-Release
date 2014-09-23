@@ -45,6 +45,7 @@ using Newtonsoft.Json;
 using DaphneGui.Pushing;
 
 using SBMLayer;
+
 namespace DaphneGui
 {
     /// <summary>
@@ -69,14 +70,13 @@ namespace DaphneGui
         public static Object cellFitLock = new Object();
         public static double cellOpacity = 1.0;
 
-        private static Simulation sim;
-        public static Simulation Sim
+        private static SimulationBase sim;
+        public static SimulationBase Sim
         {
             get { return sim; }
             set { sim = value; }
         }
 
-        private Reporter reporter;
         private Process devHelpProc;
         private static SystemOfPersistence sop = null;
         private static int repetition;
@@ -477,12 +477,6 @@ namespace DaphneGui
             this.menu_ActivateAnalysisChart.IsEnabled = false;
 #endif
 
-            // create the simulation
-            sim = new Simulation();
-            // reporter
-            reporter = new Reporter();
-            reporter.AppPath = orig_path + @"\" ;
-
             // vtk data basket to hold vtk data for entities with graphical representation
             vtkDataBasket = new VTKDataBasket();
             // graphics controller to manage vtk objects
@@ -490,8 +484,6 @@ namespace DaphneGui
             // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
             vtkDisplay_DockPanel.DataContext = gc;
             // this.ProtocolSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
-            // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
-            saveState.DataContext = sim;
 
             if (file_exists)
             {
@@ -569,7 +561,7 @@ namespace DaphneGui
         public void CreateAndSerializeDaphneProtocols()
         {
             //BLANK SCENARIO
-            var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json");
+            var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             
             ProtocolCreators.CreateBlankProtocol(protocol);
             //serialize to json
@@ -585,21 +577,21 @@ namespace DaphneGui
             //end skg 
 
             //DRIVER-LOCOMOTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json");
+            protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             // serialize to json
             protocol.SerializeToFile();
 
             //DIFFUSIION SCENARIO
-            protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json");
+            protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
             
             ProtocolCreators.CreateDiffusionProtocol(protocol);
             //Serialize to json
             protocol.SerializeToFile();
 
             //LIGAND-RECEPTOR SCENARIO
-            protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json");
+            protocol = new Protocol("Config\\daphne_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
 
             ProtocolCreators.CreateLigandReceptorProtocol(protocol);
             //serialize to json
@@ -898,7 +890,7 @@ namespace DaphneGui
                 lock (sim)
                 {
                     // re-initialize; if there are no cells, always do a full reset
-                    initialState(false, Simulation.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
+                    initialState(false, SimulationBase.dataBasket.Cells.Count < 1 || completeReset == true, ReadJson(""));
                     enableCritical(loadSuccess);
                     if (loadSuccess == false)
                     {
@@ -916,19 +908,23 @@ namespace DaphneGui
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, true);
 
                     // hide the regions used to control Gaussians
-                    foreach (GaussianSpecification gg in sop.Protocol.scenario.gaussian_specifications)
+                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                     {
-                        // Use the utility dict to find the box associated with this region
-                        BoxSpecification bb = sop.Protocol.scenario.box_guid_box_dict[gg.gaussian_spec_box_guid_ref];
+                        GaussianSpecification next;
 
-                        // Save current visibility statuses
-                        bb.current_box_visibility = bb.box_visibility;
-                        bb.current_blob_visibility = gg.gaussian_region_visibility;
+                        ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
+                        while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
+                        {
+                            BoxSpecification box = next.box_spec;
 
-                        // Property changed notifications will take care of turning off the Widgets and Actors
-                        bb.box_visibility = false;
-                        gg.gaussian_region_visibility = false;
+                            // Save current visibility statuses
+                            box.current_box_visibility = box.box_visibility;
+                            box.current_blob_visibility = next.gaussian_region_visibility;
 
+                            // Property changed notifications will take care of turning off the Widgets and Actors
+                            box.box_visibility = false;
+                            next.gaussian_region_visibility = false;
+                        }
                     }
 
                     //// always reset the simulation for now to start at the beginning
@@ -1253,11 +1249,11 @@ namespace DaphneGui
             dlg.SelectedPath = appPath;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                reporter.ReportFolder = dlg.SelectedPath;
+                sim.Reporter.ReportFolder = dlg.SelectedPath;
             }
             else
             {
-                reporter.ReportFolder = appPath;
+                sim.Reporter.ReportFolder = appPath;
             }
         }
 
@@ -1812,7 +1808,7 @@ namespace DaphneGui
             }
 
             // Catch-all for other scale / translation manipulations
-            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) && MainWindow.GC.Regions.ContainsKey(box.box_guid))
+            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) == true && MainWindow.GC.Regions.ContainsKey(box.box_guid) == true)
             {
                 MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                 MainWindow.GC.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
@@ -1831,13 +1827,13 @@ namespace DaphneGui
 
             if (e.PropertyName == "gaussian_region_visibility")
             {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
                 MainWindow.GC.Rwc.Invalidate();
             }
             if (e.PropertyName == "gaussian_spec_color")
             {
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
-                MainWindow.GC.Regions[gauss.gaussian_spec_box_guid_ref].SetOpacity(gauss.gaussian_spec_color.ScA);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
+                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetOpacity(gauss.gaussian_spec_color.ScA);
                 MainWindow.GC.Rwc.Invalidate();
             }
             return;
@@ -1897,24 +1893,13 @@ namespace DaphneGui
             {
                 if (sop != null)
                 {
-                    // if we configured a simulation prior to this call, remove all property changed event handlers
-
-                    for (int i = 0; i < sop.Protocol.scenario.box_specifications.Count; i++)
+                    if (protocol != null)
                     {
-                        sop.Protocol.scenario.box_specifications[i].PropertyChanged -= GUIInteractionToWidgetCallback;
+                        //sop = new SystemOfPersistence();
+                        sop.Protocol = protocol;
+                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                     }
-                    for (int i = 0; i < sop.Protocol.scenario.gaussian_specifications.Count; i++)
-                    {
-                        sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged -= GUIGaussianSurfaceVisibilityToggle;
-                    }
-                }
-
-                if (protocol != null)
-                {
-                    //sop = new SystemOfPersistence();
-                    sop.Protocol = protocol;
-                    orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                    orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
 
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
                     sop.UserStore.FileName   = "Config\\daphne_userstore.json";
@@ -1924,17 +1909,6 @@ namespace DaphneGui
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
                 }
-              
-            }
-
-            // (re)connect the handlers for the property changed event
-            for (int i = 0; i < sop.Protocol.scenario.box_specifications.Count; i++)
-            {
-                sop.Protocol.scenario.box_specifications[i].PropertyChanged += GUIInteractionToWidgetCallback;
-            }
-            for (int i = 0; i < sop.Protocol.scenario.gaussian_specifications.Count; i++)
-            {
-                sop.Protocol.scenario.gaussian_specifications[i].PropertyChanged += GUIGaussianSurfaceVisibilityToggle;
             }
 
             // GUI Resources
@@ -1942,6 +1916,24 @@ namespace DaphneGui
             this.ProtocolToolWindow.DataContext = sop.Protocol;
             this.CellStudioToolWindow.DataContext = sop.Protocol;
             this.ComponentsToolWindow.DataContext = sop.Protocol;
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                // only create during construction or when the type changes
+                if(sim == null || sim is TissueSimulation == false)
+                {
+                    // create the simulation
+                    sim = new TissueSimulation();
+                    // set the reporter's path
+                    sim.Reporter.AppPath = orig_path + @"\";
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+            // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
+            saveState.DataContext = sim;
 
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
@@ -1962,7 +1954,7 @@ namespace DaphneGui
             }
 
             // reporter file name
-            reporter.FileName = sop.Protocol.reporter_file_name;
+            sim.Reporter.FileName = sop.Protocol.reporter_file_name;
 
             // temporary solution to avoid popup resaving states -axin
             if (true)
@@ -2075,7 +2067,7 @@ namespace DaphneGui
             {
                 lock (sim)
                 {
-                    if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+                    if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
                         // run the simulation forward to the next task
                         if (postConstruction == true && AssumeIDE() == true)
@@ -2091,30 +2083,30 @@ namespace DaphneGui
                             catch (Exception e)
                             {
                                 showExceptionBox(exceptionMessage(e));
-                                sim.RunStatus = Simulation.RUNSTAT_ABORT;
+                                sim.RunStatus = SimulationBase.RUNSTAT_ABORT;
                             }
                         }
 
-                        if (sim.RunStatus != Simulation.RUNSTAT_ABORT)
+                        if (sim.RunStatus != SimulationBase.RUNSTAT_ABORT)
                         {
                             // check for flags and execute applicable task(s)
-                            if (sim.CheckFlag(Simulation.SIMFLAG_RENDER) == true)
+                            if (sim.CheckFlag(SimulationBase.SIMFLAG_RENDER) == true)
                             {
                                 UpdateGraphics();
                             }
-                            if (sim.CheckFlag(Simulation.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
+                            if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
                             {
-                                reporter.AppendReporter(sop.Protocol, sim);
+                                sim.Reporter.AppendReporter(sop.Protocol, sim);
                             }
 
-                            if (sim.RunStatus != Simulation.RUNSTAT_RUN)
+                            if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
                             {
                                 // never rerun the simulation if the simulation was aborted
-                                if (sim.RunStatus != Simulation.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
+                                if (sim.RunStatus != SimulationBase.RUNSTAT_PAUSE && repetition < sop.Protocol.experiment_reps)
                                 {
                                     runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(RerunSimulation));
                                 }
-                                else if (sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+                                else if (sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
                                 {
                                     // autosave the state
                                     if (argSave == true)
@@ -2124,7 +2116,7 @@ namespace DaphneGui
                                     // close the reporter
                                     if (Properties.Settings.Default.skipDataBaseWrites == false)
                                     {
-                                        reporter.CloseReporter();
+                                        sim.Reporter.CloseReporter();
                                     }
                                     // for profiling: close the application after a completed experiment
                                     if (ControlledProfiling() == true && repetition >= sop.Protocol.experiment_reps)
@@ -2139,14 +2131,14 @@ namespace DaphneGui
                             }
                         }
                     }
-                    else if (sim.RunStatus == Simulation.RUNSTAT_ABORT)
+                    else if (sim.RunStatus == SimulationBase.RUNSTAT_ABORT)
                     {
                         if (Properties.Settings.Default.skipDataBaseWrites == false)
                         {
-                            reporter.CloseReporter();
+                            sim.Reporter.CloseReporter();
                         }
                         runButton.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.SystemIdle, new GUIDelegateNoArgs(updateGraphicsAndGUI));
-                        sim.RunStatus = Simulation.RUNSTAT_OFF;
+                        sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                     }
                     //else if (vcrControl != null && vcrControl.IsActive() == true)
                     //{
@@ -2195,7 +2187,7 @@ namespace DaphneGui
             //}
 
             // only allow fitting and other analysis that needs the database if database writing is on
-            if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == Simulation.RUNSTAT_FINISHED)
+            if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
             {
                 analysisMenu.IsEnabled = true;
                 // NOTE: Uncomment this to open the LP Fitting ToolWindow after a run has completed
@@ -2227,22 +2219,27 @@ namespace DaphneGui
             gc.ToolsToolbarEnableAllIcons();            
 
             //Set the box and blob visibilities to how they were pre-run
-            foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.comp.molpops)
             {
-                if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true && molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
                 {
                     MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
-                    SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_box_visibility;
-                    SOP.Protocol.scenario.gauss_guid_gauss_dict[mpg.gaussgrad_gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[mpg.gaussgrad_gauss_spec_guid_ref].current_blob_visibility;
+
+                    mpg.gauss_spec.box_spec.box_visibility = mpg.gauss_spec.box_spec.current_box_visibility;
+                    mpg.gauss_spec.gaussian_region_visibility = mpg.gauss_spec.box_spec.current_blob_visibility;
                 }
             }
-            foreach (CellPopulation cellpop in SOP.Protocol.scenario.cellpopulations)
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+                foreach (CellPopulation cellpop in ((TissueScenario)sop.Protocol.scenario).cellpopulations)
                 {
-                    CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
-                    SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].box_visibility = SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_box_visibility;
-                    SOP.Protocol.scenario.gauss_guid_gauss_dict[cpg.gauss_spec_guid_ref].gaussian_region_visibility = SOP.Protocol.scenario.box_guid_box_dict[cpg.gauss_spec_guid_ref].current_blob_visibility;
+                    if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
+                    {
+                        CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
+
+                        cpg.gauss_spec.box_spec.box_visibility = cpg.gauss_spec.box_spec.current_box_visibility;
+                        cpg.gauss_spec.gaussian_region_visibility = cpg.gauss_spec.box_spec.current_blob_visibility;
+                    }
                 }
             }
 
@@ -2342,10 +2339,10 @@ namespace DaphneGui
             //TestStepperLigandReceptor(nSteps, 0.01);
 
             //sim.refreshDatabaseBufferRows();
-            if (sim.RunStatus == Simulation.RUNSTAT_RUN)
+            if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
             {
                 abortButton.IsEnabled = true;
-                sim.RunStatus = Simulation.RUNSTAT_PAUSE;
+                sim.RunStatus = SimulationBase.RUNSTAT_PAUSE;
 
                 //AT THIS POINT, THE WHOLE TOOL BAR IS GREYED OUT.  
                 //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
@@ -2357,10 +2354,10 @@ namespace DaphneGui
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
             }
-            else if (sim.RunStatus == Simulation.RUNSTAT_PAUSE)
+            else if (sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
                 abortButton.IsEnabled = true;
-                sim.RunStatus = Simulation.RUNSTAT_RUN;
+                sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 runButton.Content = "Pause";
                 statusBarMessagePanel.Content = "Running...";
 
@@ -2448,17 +2445,17 @@ namespace DaphneGui
                     }
                 }
 
-                if (sim.RunStatus == Simulation.RUNSTAT_READY)
+                if (sim.RunStatus == SimulationBase.RUNSTAT_READY)
                 {
                     if(Properties.Settings.Default.skipDataBaseWrites == false)
                     {
-                        reporter.StartReporter(sop.Protocol);
+                        sim.Reporter.StartReporter(sop.Protocol);
                     }
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";
                     statusBarMessagePanel.Content = "Running...";
                     abortButton.IsEnabled = true;
-                    sim.RunStatus = Simulation.RUNSTAT_RUN;
+                    sim.RunStatus = SimulationBase.RUNSTAT_RUN;
                 }
             }
         }
@@ -2477,7 +2474,7 @@ namespace DaphneGui
 
         public void DisplayCellInfo(int cellID)
         {
-            Cell selectedCell = Simulation.dataBasket.Cells[cellID];
+            Cell selectedCell = SimulationBase.dataBasket.Cells[cellID];
             List<CellMolecularInfo> currConcs = new List<CellMolecularInfo>();
 
             txtCellId.Content = cellID.ToString();
@@ -2514,10 +2511,10 @@ namespace DaphneGui
             lvCellXVF.ItemsSource = SelectedCellInfo.ciList;
 
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
+                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc;  
@@ -2527,10 +2524,10 @@ namespace DaphneGui
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi); 
             }
-            foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
                 string mol_name = er.molecules_dict[kvp.Key].Name;
-                double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
+                double conc = SimulationBase.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
                 cmi.Concentration = conc; 
@@ -2542,15 +2539,16 @@ namespace DaphneGui
             }
 
             //need the ecm probe concentrations for this purpose
-            foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 string name = MainWindow.SOP.Protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
-                double conc = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
+                double conc = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(selectedCell.SpatialState.X);
                 CellMolecularInfo cmi = new CellMolecularInfo();
+
                 cmi.Molecule = "ECM: " + name;
                 cmi.Concentration = conc;
-                cmi.Gradient = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
-                cmi.AddMoleculaInfo_gradient(Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
+                cmi.Gradient = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X);
+                cmi.AddMoleculaInfo_gradient(SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(selectedCell.SpatialState.X));
                 currConcs.Add(cmi);
                 currentConcs.Add(cmi);
             }
@@ -2774,9 +2772,9 @@ namespace DaphneGui
         {
             runButton.IsEnabled = false;
             mutex = true;
-            if (sim.RunStatus == Simulation.RUNSTAT_RUN || sim.RunStatus == Simulation.RUNSTAT_PAUSE)
+            if (sim.RunStatus == SimulationBase.RUNSTAT_RUN || sim.RunStatus == SimulationBase.RUNSTAT_PAUSE)
             {
-                sim.RunStatus = Simulation.RUNSTAT_ABORT;
+                sim.RunStatus = SimulationBase.RUNSTAT_ABORT;
             }
             else
             {
