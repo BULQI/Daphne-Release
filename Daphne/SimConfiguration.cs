@@ -2002,7 +2002,8 @@ namespace Daphne
                 cp.ecm_probe_dict.Clear();
                 foreach (ReportECM recm in cp.ecm_probe)
                 {
-                    cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
+                    if (cp.ecm_probe_dict.ContainsKey(recm.molpop_guid_ref) == false)
+                        cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
                 }
             }
 

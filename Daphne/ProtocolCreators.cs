@@ -63,6 +63,37 @@ namespace Daphne
             PredefinedReactionComplexesCreator(protocol);
         }
 
+        //
+        public static void LoadEntitiesFromDaphneStore(Protocol protocol)
+        {
+            if (protocol == null)
+                return;
+
+            Level store = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            store.Deserialize();
+
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
+            protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            protocol.InitializeStorageClasses();
+        }
+
+
+        //public static void LoadEntitiesFromStore(Protocol protocol, Level store)
+        //{
+        //    if (protocol == null || store == null) {
+        //        return;
+        //    }
+        //    var Settings = new JsonSerializerSettings();
+        //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        //    Settings.TypeNameHandling = TypeNameHandling.Auto;
+        //    string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
+        //    protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+        //    protocol.InitializeStorageClasses();
+        //}
+
         public static void CreateLigandReceptorProtocol(Protocol protocol)
         {
             // Experiment
@@ -85,7 +116,8 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            //LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
 
             // ECM MOLECULES
 
@@ -129,7 +161,7 @@ namespace Daphne
 
             // Add cell type
             ConfigCell configCell = findCell("Leukocyte_staticReceptor", protocol);
-            protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
+            //protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             // Add cell population
@@ -160,7 +192,7 @@ namespace Daphne
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
                 reportECM.mp_extended = ExtendedReport.LEAN;
                 cellPop.ecm_probe.Add(reportECM);
-                cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
+                //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
 
             protocol.reporter_file_name = "lig-rec_test";
@@ -204,7 +236,8 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            //LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
 
             // ECS
 
@@ -258,7 +291,7 @@ namespace Daphne
             // Add cell
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
             ConfigCell configCell = findCell("Leukocyte_staticReceptor_motile", protocol);
-            protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
+            //protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
@@ -295,7 +328,7 @@ namespace Daphne
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
                 reportECM.mp_extended = ExtendedReport.COMPLETE;
                 cellPop.ecm_probe.Add(reportECM);
-                cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
+                //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
 
             protocol.reporter_file_name = "Loco_test";
@@ -339,7 +372,8 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            //LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
             //ChartWindow = ReacComplexChartWindow;
 
             // Gaussian Distrtibution
@@ -412,7 +446,9 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            //LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
+
         }
 
         private static void PredefinedCellsCreator(Protocol protocol)
