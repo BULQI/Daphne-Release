@@ -21,9 +21,8 @@ namespace Daphne
         public static void CreateDaphneStore(Protocol protocol, Level daphneStore)
         {
             string scenario_content = protocol.SerializeToString();
-            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
-            daphnestore = daphnestore.DeserializeFromString(scenario_content);
-            daphnestore.SerializeToFile();
+            daphneStore = daphneStore.DeserializeFromString(scenario_content);
+            daphneStore.SerializeToFile();
         }
 
         /// <summary>
@@ -31,9 +30,8 @@ namespace Daphne
         /// Call this after blank scenario is created
         /// </summary>
         /// <param name="userStore"></param>
-        public static void CreateUserStore(Protocol protocol, Level userStore)
+        public static void CreateUserStore(Protocol protocol, Level userstore)
         {
-            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             string scenario_content = protocol.SerializeToString();
             userstore = userstore.DeserializeFromString(scenario_content);
             userstore.SerializeToFile();
@@ -70,7 +68,7 @@ namespace Daphne
                 return;
 
             Level store = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
-            store.Deserialize();
+            store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -433,7 +431,7 @@ namespace Daphne
             }
         }
 
-         /// <summary>
+        /// <summary>
         /// New default scenario for first pass of Daphne
         /// </summary>
         public static void CreateBlankProtocol(Protocol protocol)
@@ -446,8 +444,24 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
-            //LoadDefaultGlobalParameters(protocol);
             LoadEntitiesFromDaphneStore(protocol);
+
+        }
+
+        /// <summary>
+        /// New default scenario for first pass of Daphne
+        /// </summary>
+        public static void OriginalCreateBlankProtocol(Protocol protocol)
+        {
+            // Experiment
+            protocol.experiment_name = "Blank Scenario";
+            protocol.experiment_description = "Libraries only.";
+            protocol.scenario.time_config.duration = 100;
+            protocol.scenario.time_config.rendering_interval = 1.0;
+            protocol.scenario.time_config.sampling_interval = 100;
+
+            // Global Paramters
+            LoadDefaultGlobalParameters(protocol);
 
         }
 
