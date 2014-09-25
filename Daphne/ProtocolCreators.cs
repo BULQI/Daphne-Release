@@ -14,52 +14,68 @@ namespace Daphne
     {
         /// <summary>
         /// Populates the DaphneStore with the given protocol's entity repository
-        /// Call this after blank scenario is created
+        /// Call this after blank scenario is created to copy entities from blank scenario
+        /// But after this, to generate other scenarios, use DaphneStore
         /// </summary>
         /// <param name="daphneStore"></param>
-        public static void CreateDaphneStore(Protocol protocol, Level daphneStore)
+        public static void CreateDaphneAndUserStores(Level daphneStore, Level userStore)
         {
-            string scenario_content = protocol.SerializeToString();
-            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
-            daphnestore = daphnestore.DeserializeFromString(scenario_content);
-            daphnestore.SerializeToFile();
+            //Create DaphneStore
+            LoadDefaultGlobalParameters(daphneStore);
+            daphneStore.SerializeToFile();
+
+            //Clone UserStore from DaphneStore
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
+            userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            userStore.SerializeToFile();
+        }
+
+        public static void LoadDefaultGlobalParameters(Level store)
+        {
+            // genes
+            PredefinedGenesCreator(store);
+
+            // molecules
+            PredefinedMoleculesCreator(store);
+
+            // differentiation schemes
+            PredefinedDiffSchemesCreator(store);
+
+            // template reactions
+            PredefinedReactionTemplatesCreator(store);
+
+            //code to create reactions
+            PredefinedReactionsCreator(store);
+
+            //cells
+            PredefinedCellsCreator(store);
+
+            //reaction complexes
+            PredefinedReactionComplexesCreator(store);
         }
 
         /// <summary>
-        /// Populates the UserStore with the given protocol's entity repository
-        /// Call this after blank scenario is created
+        /// User DaphneStore for loading entity_repository into the given protocol.
+        /// This way every protocol will have the same entity guids.
         /// </summary>
-        /// <param name="userStore"></param>
-        public static void CreateUserStore(Protocol protocol, Level userStore)
+        /// <param name="protocol"></param>
+        public static void LoadEntitiesFromDaphneStore(Protocol protocol)
         {
-            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            string scenario_content = protocol.SerializeToString();
-            userstore = userstore.DeserializeFromString(scenario_content);
-            userstore.SerializeToFile();
-        }
+            if (protocol == null)
+                return;
 
-        public static void LoadDefaultGlobalParameters(Protocol protocol)
-        {
-            // genes
-            PredefinedGenesCreator(protocol);
+            Level store = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            store = store.Deserialize();
 
-            // molecules
-            PredefinedMoleculesCreator(protocol);
-
-            // differentiation schemes
-            PredefinedDiffSchemesCreator(protocol);
-
-            // template reactions
-            PredefinedReactionTemplatesCreator(protocol);
-
-            //code to create reactions
-            PredefinedReactionsCreator(protocol);
-
-            //cells
-            PredefinedCellsCreator(protocol);
-
-            //reaction complexes
-            PredefinedReactionComplexesCreator(protocol);
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
+            protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            protocol.InitializeStorageClasses();
         }
 
         public static void CreateLigandReceptorProtocol(Protocol protocol)
@@ -71,13 +87,20 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
 
             // ECM MOLECULES
 
@@ -115,13 +138,13 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = true;
 
-                    protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
             }
 
             // Add cell type
             ConfigCell configCell = findCell("Leukocyte_staticReceptor", protocol);
-            protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
+            //protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             // Add cell population
@@ -129,17 +152,13 @@ namespace Daphne
             cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
-            double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
-                                               protocol.scenario.environment.extent_y, 
-                                               protocol.scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x / 2,
-                                                                protocol.scenario.environment.extent_y / 2,
-                                                                protocol.scenario.environment.extent_z / 2);
+            cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            protocol.scenario.cellpopulations.Add(cellPop);
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
 
             // Cell reporting
             cellPop.report_xvf.position = false;
@@ -150,13 +169,13 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.LEAN;
             }
-            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
                 reportECM.mp_extended = ExtendedReport.LEAN;
                 cellPop.ecm_probe.Add(reportECM);
-                cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
+                //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
 
             protocol.reporter_file_name = "lig-rec_test";
@@ -170,7 +189,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
+                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -180,20 +199,27 @@ namespace Daphne
         /// </summary>
         public static void CreateDriverLocomotionProtocol(Protocol protocol)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
             // Experiment
             protocol.experiment_name = "Cell locomotion with driver molecule.";
             protocol.experiment_description = "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.";
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             protocol.scenario.time_config.duration = 30;
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
 
             // ECS
 
@@ -240,32 +266,30 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = false;
 
-                    protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                    protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
             }
 
             // Add cell
             //This code will add the cell and the predefined ConfigCell already has the molecules needed
             ConfigCell configCell = findCell("Leukocyte_staticReceptor_motile", protocol);
-            protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
+            //protocol.entity_repository.cells_dict.Add(configCell.entity_guid, configCell);
 
             // Add cell population
             CellPopulation cellPop = new CellPopulation();
             cellPop.Cell = configCell.Clone(true);
             cellPop.cellpopulation_name = configCell.CellName;
             cellPop.number = 1;
-            double[] extents = new double[3] { protocol.scenario.environment.extent_x, 
-                                               protocol.scenario.environment.extent_y, 
-                                               protocol.scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * protocol.entity_repository.cells_dict[cellPop.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             // Don't start the cell on a lattice point, until gradient interpolation method improves.
-            cellPop.CellStates[0] = new CellState(protocol.scenario.environment.extent_x - 2 * configCell.CellRadius - protocol.scenario.environment.gridstep / 2,
-                                                                protocol.scenario.environment.extent_y / 2 - protocol.scenario.environment.gridstep / 2,
-                                                                protocol.scenario.environment.extent_z / 2 - protocol.scenario.environment.gridstep / 2);
+            cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * configCell.CellRadius - envHandle.gridstep / 2,
+                                                  envHandle.extent_y / 2 - envHandle.gridstep / 2,
+                                                  envHandle.extent_z / 2 - envHandle.gridstep / 2);
             cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            protocol.scenario.cellpopulations.Add(cellPop);
+            ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
             cellPop.report_xvf.position = true;
             cellPop.report_xvf.velocity = true;
             cellPop.report_xvf.force = true;
@@ -280,13 +304,13 @@ namespace Daphne
                 // Mean only
                 cmp.report_mp.mp_extended = ExtendedReport.COMPLETE;
             }
-            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation mpECM in protocol.scenario.environment.comp.molpops)
             {
                 ReportECM reportECM = new ReportECM();
                 reportECM.molpop_guid_ref = mpECM.molpop_guid;
                 reportECM.mp_extended = ExtendedReport.COMPLETE;
                 cellPop.ecm_probe.Add(reportECM);
-                cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
+                //cellPop.ecm_probe_dict.Add(mpECM.molpop_guid, reportECM);
             }
 
             protocol.reporter_file_name = "Loco_test";
@@ -300,7 +324,7 @@ namespace Daphne
                 reac = findReaction(type[i], protocol);
                 if (reac != null)
                 {
-                    protocol.scenario.environment.ecs.Reactions.Add(reac.Clone(true));
+                    protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                 }
             }
         }
@@ -317,28 +341,33 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
 
-            protocol.scenario.environment.extent_x = 200;
-            protocol.scenario.environment.extent_y = 200;
-            protocol.scenario.environment.extent_z = 200;
-            protocol.scenario.environment.gridstep = 10;
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            envHandle.extent_x = 200;
+            envHandle.extent_y = 200;
+            envHandle.extent_z = 200;
+            envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
-            //ChartWindow = ReacComplexChartWindow;
+            LoadEntitiesFromDaphneStore(protocol);
 
             // Gaussian Distrtibution
             // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
             // box x,y,z_scale parameters are 2*sigma
             GaussianSpecification gaussSpec = new GaussianSpecification();
             BoxSpecification box = new BoxSpecification();
-            box.x_trans = protocol.scenario.environment.extent_x / 2;
-            box.y_trans = protocol.scenario.environment.extent_y / 2;
-            box.z_trans = protocol.scenario.environment.extent_z / 2;
-            box.x_scale = protocol.scenario.environment.extent_x / 2;
-            box.y_scale = protocol.scenario.environment.extent_y / 4;
-            box.z_scale = protocol.scenario.environment.extent_z / 5;
-            protocol.scenario.box_specifications.Add(box);
-            gaussSpec.gaussian_spec_box_guid_ref = box.box_guid;
+            box.x_trans = envHandle.extent_x / 2;
+            box.y_trans = envHandle.extent_y / 2;
+            box.z_trans = envHandle.extent_z / 2;
+            box.x_scale = envHandle.extent_x / 2;
+            box.y_scale = envHandle.extent_y / 4;
+            box.z_scale = envHandle.extent_z / 5;
+            gaussSpec.box_spec = box;
             //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Rotate the box by 45 degrees about the box's y-axis.
@@ -351,7 +380,6 @@ namespace Daphne
             trans_matrix[2] = new double[4] { -box.x_scale * sin, 0, box.z_scale * cos, box.z_trans };
             trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
             box.SetMatrix(trans_matrix);
-            protocol.scenario.gaussian_specifications.Add(gaussSpec);
 
             var query =
                 from mol in protocol.entity_repository.molecules
@@ -371,7 +399,7 @@ namespace Daphne
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
-                molPopGaussian.gaussgrad_gauss_spec_guid_ref = protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+                molPopGaussian.gauss_spec = gaussSpec;
                 configMolPop.mp_distribution = molPopGaussian;
 
                 // Reporting
@@ -381,11 +409,11 @@ namespace Daphne
 
                 protocol.reporter_file_name = "Diffusion_test";
 
-                protocol.scenario.environment.ecs.molpops.Add(configMolPop);
+                protocol.scenario.environment.comp.molpops.Add(configMolPop);
             }
         }
 
-         /// <summary>
+        /// <summary>
         /// New default scenario for first pass of Daphne
         /// </summary>
         public static void CreateBlankProtocol(Protocol protocol)
@@ -398,10 +426,11 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
-            LoadDefaultGlobalParameters(protocol);
+            LoadEntitiesFromDaphneStore(protocol);
+
         }
 
-        private static void PredefinedCellsCreator(Protocol protocol)
+        private static void PredefinedCellsCreator(Level store)
         {
             // Generic death transition driver - move to PredefinedTransitionDriversCreator() ?
             // Cell cytoplasm must contain sApop molecular population
@@ -411,11 +440,11 @@ namespace Daphne
             string[,] signal = new string[,] { { "", "sApop" }, { "", "" } };
             double[,] alpha = new double[,] { { 0, 0 }, { 0, 0 } };
             double[,] beta = new double[,] { { 0, 0.002}, { 0, 0 } };
-            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, protocol);
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
             config_td.CurrentState = 0;
             config_td.StateName = config_td.states[config_td.CurrentState];
-            protocol.entity_repository.transition_drivers.Add(config_td);
-            protocol.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
+            store.entity_repository.transition_drivers.Add(config_td);
+            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
             // generic division driver
             config_td = new ConfigTransitionDriver();
@@ -424,11 +453,11 @@ namespace Daphne
             signal = new string[,] { { "", "sDiv" }, { "", "" } };
             alpha = new double[,] { { 0, 0 }, { 0, 0 } };
             beta = new double[,] { { 0, 0.002 }, { 0, 0 } };
-            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, protocol);
+            LoadConfigTransitionDriverElements(config_td, signal, alpha, beta, stateName, store);
             config_td.CurrentState = 0;
             config_td.StateName = config_td.states[config_td.CurrentState];
-            protocol.entity_repository.transition_drivers.Add(config_td);
-            protocol.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
+            store.entity_repository.transition_drivers.Add(config_td);
+            store.entity_repository.transition_drivers_dict.Add(config_td.entity_guid, config_td);
 
             ConfigCell gc;
             double[] conc;
@@ -457,7 +486,7 @@ namespace Daphne
                                               {0.3f, 0.2f, 0.9f, 0.1f} };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -514,7 +543,7 @@ namespace Daphne
 #endif
 
             gc.DragCoefficient = 1.0;
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
             //////////////////////////////////////////////
             // Leukocyte_staticReceptor_motile
@@ -529,7 +558,7 @@ namespace Daphne
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -551,7 +580,7 @@ namespace Daphne
             type = new string[3] { "A", "A*", "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -567,13 +596,13 @@ namespace Daphne
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Add genes
             type = new string[1] { "gApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
@@ -581,7 +610,7 @@ namespace Daphne
                                           "A* -> A", "gApop -> sApop + gApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -591,7 +620,7 @@ namespace Daphne
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 100;
 
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
             /////////////////////////////////////////////
             // Leukocyte_dynamicReceptor_motile
@@ -606,7 +635,7 @@ namespace Daphne
             type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -628,7 +657,7 @@ namespace Daphne
             type = new string[5] { "A", "A*", "CXCR5", "CXCL13:CXCR5", "sApop" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -644,13 +673,13 @@ namespace Daphne
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Add genes
             type = new string[2] { "gApop", "gCXCR5" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
@@ -666,7 +695,7 @@ namespace Daphne
                                 };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -676,7 +705,7 @@ namespace Daphne
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 1e2;
 
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
 
             ///////////////////////////////////
@@ -693,7 +722,7 @@ namespace Daphne
             type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -718,7 +747,7 @@ namespace Daphne
 
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -734,14 +763,14 @@ namespace Daphne
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Genes
             type = new string[17] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
                                     "gDif1", "gDif2", "gDif3", "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
@@ -756,7 +785,7 @@ namespace Daphne
                                   };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -768,24 +797,24 @@ namespace Daphne
 
             // Add differentiatior
             // Assumes all genes and signal molecules are present
-            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", protocol);
+            string diff_scheme_guid = findDiffSchemeGuid("B cell 7 state", store);
 
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
+            string death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
 
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
+            if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
+                gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
 
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
             ///////////////////////////////////
             // GC B cell
@@ -802,7 +831,7 @@ namespace Daphne
             type = new string[4] { "CXCR5|", "CXCL13:CXCR5|", "CXCR4|", "CXCL12:CXCR4|" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -827,7 +856,7 @@ namespace Daphne
 
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -843,14 +872,14 @@ namespace Daphne
                     gc.cytosol.molpops.Add(gmp);
                 }
             }
-            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol);
+            gc.locomotor_mol_guid_ref = findMoleculeGuid("A*", MoleculeLocation.Bulk, store);
 
             // Genes
             type = new string[14] { "gCXCR4", "gCXCR5", "gIgH", "gIgL", "gIgS", "gAID", "gBL1", "gMHCII", "gApop",
                                     "gDif4", "gDif5", "gDif6", "gDif7", "gDiv" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
@@ -864,7 +893,7 @@ namespace Daphne
                                   };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -876,23 +905,23 @@ namespace Daphne
 
             // Add differentiator
             // Assumes all genes and signal molecules are present
-            diff_scheme_guid = findDiffSchemeGuid("GC B cell", protocol);
-            if (protocol.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
+            diff_scheme_guid = findDiffSchemeGuid("GC B cell", store);
+            if (store.entity_repository.diff_schemes_dict.ContainsKey(diff_scheme_guid) == true)
             {
-                gc.diff_scheme = protocol.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
+                gc.diff_scheme = store.entity_repository.diff_schemes_dict[diff_scheme_guid].Clone(true);
             }
 
             // Add apoptosis
-            death_driver_guid = findTransitionDriverGuid("generic apoptosis", protocol);
-            if (protocol.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
+            death_driver_guid = findTransitionDriverGuid("generic apoptosis", store);
+            if (store.entity_repository.transition_drivers_dict.ContainsKey(death_driver_guid) == true)
             {
-                gc.death_driver = protocol.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
+                gc.death_driver = store.entity_repository.transition_drivers_dict[death_driver_guid].Clone(true);
             }
 
             // add division
             //div_driver changed to div_scheme now, need to add div_scheme for this part?
 
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
             ////////////////////////
             // Stromal CXCL12-secreting
@@ -908,7 +937,7 @@ namespace Daphne
             //                                  {0.3f, 0.2f, 0.9f, 0.1f} };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -931,7 +960,7 @@ namespace Daphne
             type = new string[1] { "CXCL12" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -952,14 +981,14 @@ namespace Daphne
             type = new string[1] { "gCXCL12" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
             type = new string[2] {"gCXCL12 -> CXCL12 + gCXCL12", "CXCL12 -> CXCL12|" };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -968,7 +997,7 @@ namespace Daphne
 
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 0.0;
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
             ////////////////////////////////
             // Stromal CXCL13-secreting
@@ -984,7 +1013,7 @@ namespace Daphne
                                               {0.3f, 0.2f, 0.9f, 0.1f} };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Boundary, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -1007,7 +1036,7 @@ namespace Daphne
             type = new string[1] { "CXCL13" };
             for (int i = 0; i < type.Length; i++)
             {
-                cm = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                cm = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (cm != null)
                 {
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -1028,14 +1057,14 @@ namespace Daphne
             type = new string[1] { "gCXCL13" };
             for (int i = 0; i < type.Length; i++)
             {
-                gc.genes.Add(findGene(type[i], protocol));
+                gc.genes.Add(findGene(type[i], store));
             }
 
             // Reactions in Cytosol
             type = new string[2] { "gCXCL13 -> CXCL13 + gCXCL13", "CXCL13 -> CXCL13|" };
             for (int i = 0; i < type.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     gc.cytosol.Reactions.Add(reac.Clone(true));
@@ -1044,11 +1073,11 @@ namespace Daphne
             
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 0.0;
-            protocol.entity_repository.cells.Add(gc);
+            store.entity_repository.cells.Add(gc);
 
         }
 
-        private static void PredefinedDiffSchemesCreator(Protocol protocol)
+        private static void PredefinedDiffSchemesCreator(Level store)
         {
             // These can be reused to create other differentiation schemes
             ConfigTransitionDriver driver;
@@ -1114,7 +1143,7 @@ namespace Daphne
             diffScheme.genes = new ObservableCollection<string>();
             for (int j = 0; j < activations.GetLength(1); j++)
             {
-                diffScheme.genes.Add(findGeneGuid(geneNames[j], protocol));
+                diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
             }
 
             // Add epigenetic map of genes and activations
@@ -1130,13 +1159,13 @@ namespace Daphne
             }
 
             // Add DriverElements to TransitionDriver
-            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, protocol);
+            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
 
             // Add to Entity Repository
-            protocol.entity_repository.transition_drivers.Add(driver);
-            protocol.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
-            protocol.entity_repository.diff_schemes.Add(diffScheme);
-            protocol.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+            store.entity_repository.transition_drivers.Add(driver);
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
+            store.entity_repository.diff_schemes.Add(diffScheme);
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
 
             ////////////////////////////
             // GC B cell differentiatior 
@@ -1182,7 +1211,7 @@ namespace Daphne
             diffScheme.genes = new ObservableCollection<string>();
             for (int j = 0; j < activations.GetLength(1); j++)
             {
-                diffScheme.genes.Add(findGeneGuid(geneNames[j], protocol));
+                diffScheme.genes.Add(findGeneGuid(geneNames[j], store));
             }
 
             // Add epigenetic map of genes and activations
@@ -1198,94 +1227,89 @@ namespace Daphne
             }
 
             // Add DriverElements to TransitionDriver
-            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, protocol);
+            LoadConfigTransitionDriverElements(driver, signal, alpha, beta, stateNames, store);
 
             // Add to Entity Repository
-            protocol.entity_repository.transition_drivers.Add(driver);
-            protocol.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
-            protocol.entity_repository.diff_schemes.Add(diffScheme);
-            protocol.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
+            store.entity_repository.transition_drivers.Add(driver);
+            store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
+            store.entity_repository.diff_schemes.Add(diffScheme);
+            store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
 
 
 
         }
 
-        private static void PredefinedGenesCreator(Protocol protocol)
+        private static void PredefinedGenesCreator(Level store)
         {
-            //
-            // Copy Number int
-            // Activation Level double
-            //
-
             ConfigGene gene;
 
             gene = new ConfigGene("gCXCR5", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCR4", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCL12", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gCXCL13", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gIgH", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
            
             gene = new ConfigGene("gIgL", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gIgS", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gAID", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gBL1", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gMHCII", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gApop", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gDiv", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gResc1", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             gene = new ConfigGene("gResc2", 2, 1.0);
-            protocol.entity_repository.genes.Add(gene);
-            protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+            store.entity_repository.genes.Add(gene);
+            store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
 
             // generic genes for differentiation signal molecules
             for (int i = 1; i < 8; i++)
             {
                 gene = new ConfigGene("gDif" + i, 2, 1.0);
-                protocol.entity_repository.genes.Add(gene);
-                protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
+                store.entity_repository.genes.Add(gene);
+                store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
             }
 
         }
 
-        private static void PredefinedMoleculesCreator(Protocol protocol)
+        private static void PredefinedMoleculesCreator(Level store)
         {
             // Molecular weight in kDa
             // Effective radius in micrometers (um)
@@ -1299,13 +1323,13 @@ namespace Daphne
             // Wang2011, CXCL12:  MWt = 7.96 kDa, D = 4.5e3
             double MWt_CXCL12 = 7.96;
             cm = new ConfigMolecule("CXCL12", MWt_CXCL12, 1.0, 4.5e3);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Use CXCL13 values for CXCL13, for now
             cm = new ConfigMolecule("CXCL13", MWt_CXCL12, 1.0, 4.5e3);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             //
             // Membrane bound
@@ -1318,37 +1342,37 @@ namespace Daphne
             double MWt_CXCR4 = 43;
             cm = new ConfigMolecule("CXCR4|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Use CXCR4 value for CXCR5
             cm = new ConfigMolecule("CXCR5|", MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Add values for CXCL12 and CXCR4
             cm = new ConfigMolecule("CXCL12:CXCR4|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             
             // Use CXCL12:CXCR4 values, for now
             cm = new ConfigMolecule("CXCL13:CXCR5|", MWt_CXCL12 + MWt_CXCR4, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Molecules for secretion
             cm = new ConfigMolecule("CXCL12|", MWt_CXCL12, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL13|", MWt_CXCL12, 1.0, membraneDiffCoeff);
             cm.molecule_location = MoleculeLocation.Boundary;
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
 
             //
@@ -1361,92 +1385,92 @@ namespace Daphne
             double cytoDiffCoeff = 750;
 
             cm = new ConfigMolecule("CXCR5", MWt_CXCR4, 1.0, cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCR4", MWt_CXCR4, 1.0, cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL13:CXCR5", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("CXCL12:CXCR4", MWt_CXCR4 + MWt_CXCL12, 1.0, cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // These are pseudo cytoplasmic molecules
             //
             // Set diffusion coefficient for A to same as other cytoplasmic proteins
             cm = new ConfigMolecule("A", 1.0, 1.0, cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             // Make the diffusion coefficient for A* much less than A
             // A* encompasses the tubulin structure and polarity of the cell 
             // If the diffusion coefficient is too large, the polarity will not be maintained and the cell will not move
             double f = 1e-2;
             cm = new ConfigMolecule("A*", 1.0, 1.0, f * cytoDiffCoeff);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // Signaling (pseudo) molecules
 
             // generic cell division
             cm = new ConfigMolecule("sDiv", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // generic cell differentiation
             for (int i = 1; i < 8; i++)
             {
                 cm = new ConfigMolecule("sDif" + i, 1.0, 1.0, 1.0);
-                protocol.entity_repository.molecules.Add(cm);
-                protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+                store.entity_repository.molecules.Add(cm);
+                store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
             }
 
             // generic cell apoptosis
             cm = new ConfigMolecule("sApop", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             // generic t cell rescue
             cm = new ConfigMolecule("sResc1", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("sResc2", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgL", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgS", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("IgH", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("AID", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("BL1", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
             cm = new ConfigMolecule("MHCII", 1.0, 1.0, 1.0);
-            protocol.entity_repository.molecules.Add(cm);
-            protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            store.entity_repository.molecules.Add(cm);
+            store.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
 
         }
 
         //Following function needs to be called only once
-        private static void PredefinedReactionTemplatesCreator(Protocol protocol)
+        private static void PredefinedReactionTemplatesCreator(Level store)
         {
             //Test code to read in json containing object "PredefinedReactions"
             //string readText = File.ReadAllText("TESTER.TXT");
@@ -1463,8 +1487,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Annihilation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
             
             //Association
             // a + b -> c
@@ -1477,8 +1501,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Association;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Dimerization
             // 2a -> b
@@ -1490,8 +1514,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Dimerization;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Dimer Dissociation
             // b -> 2a
@@ -1503,8 +1527,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.DimerDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //Dissociation
             // c -> a + b
@@ -1517,8 +1541,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Dissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Transformation
             // a -> b
@@ -1530,8 +1554,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Transformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // CatalyzedBoundaryActivation
             // a + E -> E + b
@@ -1546,8 +1570,8 @@ namespace Daphne
             crt.reac_type = ReactionType.CatalyzedBoundaryActivation;
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //BoundaryAssociation
             // a + B -> C
@@ -1561,8 +1585,8 @@ namespace Daphne
             crt.reac_type = ReactionType.BoundaryAssociation;
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             //BoundaryDissociation
             // C -> a + B
@@ -1576,8 +1600,8 @@ namespace Daphne
             crt.reac_type = ReactionType.BoundaryDissociation;
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // BoundaryTransportFrom
             // A -> a
@@ -1590,8 +1614,8 @@ namespace Daphne
             crt.reac_type = ReactionType.BoundaryTransportFrom;
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // BoundaryTransportTo
             // a -> A
@@ -1604,8 +1628,8 @@ namespace Daphne
             crt.reac_type = ReactionType.BoundaryTransportTo;
             crt.isBoundary = true;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Autocatalytic Transformation
             // Not a catalyzed reaction in the strict sense needed in the Config class
@@ -1619,8 +1643,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.AutocatalyticTransformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Annihilation
             // a + e -> e
@@ -1633,8 +1657,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedAnnihilation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Association
             // a + b + e -> c + e
@@ -1649,8 +1673,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedAssociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Creation
             // e -> e + a
@@ -1663,8 +1687,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedCreation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dimerization
             // e + 2a -> b + e
@@ -1678,8 +1702,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedDimerization;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dimer Dissociation
             // e + b -> 2a + e
@@ -1693,8 +1717,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedDimerDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Dissociation
             // c + e -> a + b + e
@@ -1709,8 +1733,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedDissociation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Catalyzed Transformation
             // a + e -> b + e
@@ -1724,8 +1748,8 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.CatalyzedTransformation;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
 
             // Transcription
             // gA -> A + gA
@@ -1737,16 +1761,14 @@ namespace Daphne
             // type
             crt.reac_type = ReactionType.Transcription;
             crt.name = (string)new ReactionTypeToShortStringConverter().Convert(crt.reac_type, typeof(string), null, System.Globalization.CultureInfo.CurrentCulture);
-            protocol.entity_repository.reaction_templates.Add(crt);
-            protocol.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
-
-        
+            store.entity_repository.reaction_templates.Add(crt);
+            store.entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);        
         }
 
         // given a transition driver name, find its guid
-        public static string findTransitionDriverGuid(string name, Protocol protocol)
+        public static string findTransitionDriverGuid(string name, Level store)
         {
-            foreach (ConfigTransitionDriver s in protocol.entity_repository.transition_drivers)
+            foreach (ConfigTransitionDriver s in store.entity_repository.transition_drivers)
             {
                 if (s.Name == name)
                 {
@@ -1757,9 +1779,9 @@ namespace Daphne
         }
 
         // given a diff scheme name, find its guid
-        public static string findDiffSchemeGuid(string name, Protocol protocol)
+        public static string findDiffSchemeGuid(string name, Level store)
         {
-            foreach (ConfigDiffScheme s in protocol.entity_repository.diff_schemes)
+            foreach (ConfigDiffScheme s in store.entity_repository.diff_schemes)
             {
                 if (s.Name == name)
                 {
@@ -1770,9 +1792,9 @@ namespace Daphne
         }
 
         // given a gene name, find its guid
-        public static string findGeneGuid(string name, Protocol protocol)
+        public static string findGeneGuid(string name, Level store)
         {
-            foreach (ConfigGene gene in protocol.entity_repository.genes)
+            foreach (ConfigGene gene in store.entity_repository.genes)
             {
                 if (gene.Name == name)
                 {
@@ -1783,9 +1805,9 @@ namespace Daphne
         }
 
         // given a gene name, find its gene
-        public static ConfigGene findGene(string name, Protocol protocol)
+        public static ConfigGene findGene(string name, Level store)
         {
-            foreach (ConfigGene gene in protocol.entity_repository.genes)
+            foreach (ConfigGene gene in store.entity_repository.genes)
             {
                 if (gene.Name == name)
                 {
@@ -1796,9 +1818,9 @@ namespace Daphne
         }
 
         // given a molecule name and location, find its guid
-        public static string findMoleculeGuid(string name, MoleculeLocation ml, Protocol protocol)
+        public static string findMoleculeGuid(string name, MoleculeLocation ml, Level store)
         {
-            foreach (ConfigMolecule cm in protocol.entity_repository.molecules)
+            foreach (ConfigMolecule cm in store.entity_repository.molecules)
             {
                 if (cm.Name == name && cm.molecule_location == ml)
                 {
@@ -1822,7 +1844,7 @@ namespace Daphne
         }
 
         //Following function needs to be called only once
-        private static void PredefinedReactionsCreator(Protocol protocol)
+        private static void PredefinedReactionsCreator(Level store)
         {
             // NOTE: Whenever there are two or more reactants (or products or modifiers) in a boundary reaction,
             // the bulk molecules must be added first, then the boundary molecules.
@@ -1843,57 +1865,57 @@ namespace Daphne
 
             // Annihiliation: CXCR5 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCL13:CXCR5 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCR4 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCL12:CXCR4 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants 
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCL12 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
             cr.rate_const = ecsDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Annihiliation: CXCL13 -> 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
             cr.rate_const = ecsDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
 
             ////////////////////////////////////////////////////////////////////////////////////
@@ -1915,27 +1937,27 @@ namespace Daphne
             //
             // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // BoundaryDissociation:  CXCL13:CXCR5| ->  CXCR5| + CXCL13
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             cr.rate_const = kr;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //////////////////////////////////////////////////////////////////////////////////
             
 
@@ -1962,40 +1984,40 @@ namespace Daphne
             //
             // CatalyzedBoundaryActivation: CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // Transformation: A* -> A
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transformation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
             cr.rate_const = kr;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////////////////
 
             ///////////////////////////////////////////////////////////////////////////////////
@@ -2023,27 +2045,27 @@ namespace Daphne
             //
             // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, protocol));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, protocol));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             cr.rate_const = kr;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             ///////////////////////////////////////////////////////////////////////////////////////////////////
 
             // Internalization of bound receptor
@@ -2056,14 +2078,14 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = k1_CXCL13_CXCR5;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // Hesselgesser et al.,  Identification and Characterization of the CXCR4 Chemokine, J Immunol 1998; 160:877-883.
             // Fit of curve on pg 880, SDF-1alpha(CXCL12):CXCR4 internalization:
@@ -2072,14 +2094,14 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
             cr.rate_const = k1_CXCL12_CXCR4;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
             // Arbitrarily choose a factor of 100
@@ -2087,25 +2109,25 @@ namespace Daphne
             //
             // BoundaryTransportFrom: CXCR5| -> CXCR5
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = f2 * k1_CXCL13_CXCR5;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             //
             // BoundaryTransportFrom: CXCR4| -> CXCR4
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
             cr.rate_const = f2 * k1_CXCL12_CXCR4;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             //
             // Secretion reactions
@@ -2117,27 +2139,27 @@ namespace Daphne
             for (int i = 0; i < mol_name.Length; i++ )
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
                 // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, protocol));
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
                 // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, protocol));
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
                 cr.rate_const = k_cytosol_to_pm[i];
-                cr.GetTotalReactionString(protocol.entity_repository);
-                protocol.entity_repository.reactions.Add(cr);
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
             }
             // BoundaryTransportFrom: plasma membrane to ECS
             for (int i = 0; i < mol_name.Length; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
                 // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, protocol));
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
                 // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, protocol));
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
                 cr.rate_const = k_pm_to_ecs[i];
-                cr.GetTotalReactionString(protocol.entity_repository);
-                protocol.entity_repository.reactions.Add(cr);
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
             }
 
             //
@@ -2146,25 +2168,25 @@ namespace Daphne
 
             // BoundaryTransportTo: CXCR5 -> CXCR5|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
             cr.rate_const = 1.0;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // BoundaryTransportTo: CXCR4 -> CXCR4|
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
             cr.rate_const = 1.0;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // Transcription
 
@@ -2175,157 +2197,157 @@ namespace Daphne
             kf = 2 * 100.0 / (2*60);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
             // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", protocol));
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             // generic transcription for differentiation signaling genes
             for (int i = 1; i < 8; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transcription);
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
                 // modifiers
-                cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, protocol));
+                cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, store));
                 // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, protocol));
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
                 cr.rate_const = kf;
-                cr.GetTotalReactionString(protocol.entity_repository);
-                protocol.entity_repository.reactions.Add(cr); 
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr); 
             }
 
             // degradation of signalling molecules 
@@ -2333,93 +2355,93 @@ namespace Daphne
             for (int i = 1; i < 8; i++)
             {
                 cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
                 // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, protocol));
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
                 cr.rate_const = cytoDefaultDegradRate;
-                cr.GetTotalReactionString(protocol.entity_repository);
-                protocol.entity_repository.reactions.Add(cr);
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
             }
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Annihilation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
             cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
 
             ///////////////////////////////////////////////
             // NOTE: These reactions may not be biologically meaningful for bulk molecules, 
@@ -2430,31 +2452,31 @@ namespace Daphne
             kf = 16.25;
             //
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = kf;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Dissociation);
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
             // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
             // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, protocol));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
             cr.rate_const = kr;
-            cr.GetTotalReactionString(protocol.entity_repository);
-            protocol.entity_repository.reactions.Add(cr);
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
 
         }
 
-        private static void PredefinedReactionComplexesCreator(Protocol protocol)
+        private static void PredefinedReactionComplexesCreator(Level store)
         {
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
@@ -2464,7 +2486,7 @@ namespace Daphne
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
             for (int i = 0; i < type.Length; i++)
             {
-                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
@@ -2490,7 +2512,7 @@ namespace Daphne
             
             for (int i = 0; i < type.Length; i++)
             {
-                ConfigReaction reac = findReaction(type[i], protocol);
+                ConfigReaction reac = findReaction(type[i], store);
                 if (reac != null)
                 {
                     ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
@@ -2503,14 +2525,14 @@ namespace Daphne
                 }
             }
 
-            protocol.entity_repository.reaction_complexes.Add(crc);
+            store.entity_repository.reaction_complexes.Add(crc);
 
         }
 
         // given a string description of a reaction, return the ConfigReaction that matches
-        public static ConfigReaction findReaction(string rt, Protocol protocol)
+        public static ConfigReaction findReaction(string rt, Level store)
         {
-            foreach (ConfigReaction cr in protocol.entity_repository.reactions)
+            foreach (ConfigReaction cr in store.entity_repository.reactions)
             {
                 if (cr.TotalReactionString == rt) //cr.reaction_template_guid_ref == template_guid)
                 {
@@ -2542,7 +2564,7 @@ namespace Daphne
         /// <param name="alpha">Square array of Alpha values</param>
         /// <param name="beta">Square array of Beta values</param>
         /// <param name="stateName"></param>
-        public static void LoadConfigTransitionDriverElements(ConfigTransitionDriver driver, string[,] signal, double[,] alpha, double[,] beta,string[] stateName, Protocol protocol)
+        public static void LoadConfigTransitionDriverElements(ConfigTransitionDriver driver, string[,] signal, double[,] alpha, double[,] beta,string[] stateName, Level store)
         {
             ConfigTransitionDriverRow row;
             driver.DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
@@ -2565,7 +2587,7 @@ namespace Daphne
                     {
                         driverElement.Alpha = alpha[i, j];
                         driverElement.Beta = beta[i, j];
-                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, protocol);
+                        driverElement.driver_mol_guid_ref = findMoleculeGuid(signal[i, j], MoleculeLocation.Bulk, store);
                     }
                     row.elements.Add(driverElement);
                 }

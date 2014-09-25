@@ -113,7 +113,7 @@ namespace DaphneGui
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
 
             MessageBoxResult res;
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.HasMolecule(gm))
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.HasMolecule(gm))
             {
                 res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
             }
@@ -126,7 +126,7 @@ namespace DaphneGui
                 return;
 
             int index = dgLibMolecules.SelectedIndex;
-            MainWindow.SOP.Protocol.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
+            MainWindow.SOP.Protocol.scenario.environment.comp.RemoveMolecularPopulation(gm.entity_guid);
             MainWindow.SOP.Protocol.entity_repository.molecules.Remove(gm);
             dgLibMolecules.SelectedIndex = index;
 
@@ -309,16 +309,13 @@ namespace DaphneGui
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.rc_scenario.environment;
             // Add cell population distribution information
-            double[] extents = new double[3] { MainWindow.SOP.Protocol.rc_scenario.environment.extent_x, 
-                                               MainWindow.SOP.Protocol.rc_scenario.environment.extent_y, 
-                                               MainWindow.SOP.Protocol.rc_scenario.environment.extent_z };
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
             double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
-            cp.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
-                                                            MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
-                                                            MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
+            cp.CellStates[0] = new CellState(envHandle.extent_x, envHandle.extent_y / 2, envHandle.extent_z / 2);
 
 
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
@@ -327,7 +324,7 @@ namespace DaphneGui
             ReactionComplexProcessor Processor = new ReactionComplexProcessor();
             MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
 
-            Processor.Initialize(MainWindow.SOP.Protocol, crc, MainWindow.Sim);
+            Processor.Initialize(MainWindow.SOP.Protocol, crc, (TissueSimulation)MainWindow.Sim);
             Processor.Go();
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
