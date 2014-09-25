@@ -200,6 +200,20 @@ namespace Daphne
             entity_repository = new EntityRepository();
         }
 
+        // given a reaction template type, find its guid
+        public string findReactionTemplateGuid(ReactionType rt)
+        {
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                if (crt.reac_type == rt)
+                {
+                    return crt.entity_guid;
+                }
+            }
+            return null;
+        }
+
+
         /// <summary>
         /// enum for push status
         /// </summary>
@@ -1352,20 +1366,7 @@ namespace Daphne
 
             return config_reacs;
         }
-
-        // given a reaction template type, find its guid
-        public string findReactionTemplateGuid(ReactionType rt)
-        {
-            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
-            {
-                if (crt.reac_type == rt)
-                {
-                    return crt.entity_guid;
-                }
-            }
-            return null;
-        }
-
+        
         public string findMoleculeGuidByName(string inputMolName)
         {
             string guid = "";

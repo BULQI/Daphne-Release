@@ -557,25 +557,35 @@ namespace DaphneGui
             gc.DrawFrame(sim.GetProgressPercent());
         }
 
+
+        /// <summary>
+        /// Code to create userstore and daphnestore 
+        /// HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES.
+        /// ONCE CREATED, DON'T NEED THIS CODE EVER AGAIN!
+        /// </summary>
+        public void CreateDaphneAndUserStores()
+        {
+            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
+        }
+
         /// <summary>
         /// Create and serialize all scenarios
         /// </summary>
         public void CreateAndSerializeDaphneProtocols()
         {
-            //Code to create userstore and daphnestore 
-            //HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES.
-            //ONCE CREATED, DON'T NEED THIS CODE AGAIN!
-
-            //var blank_prot = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            //ProtocolCreators.OriginalCreateBlankProtocol(blank_prot);
-            ////serialize to json
-            //blank_prot.SerializeToFile();
-
-            //var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            //var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
-            //ProtocolCreators.CreateDaphneStore(blank_prot, daphnestore);
-            //ProtocolCreators.CreateUserStore(blank_prot, userstore);
-            //END CREATE
+            ////This code is to create DaphneStore and UserStore.
+            ////It should not be needed ever again! 
+            ////Any editing of DaphneStore should be done through application (GUI).
+            //try
+            //{
+            //    CreateDaphneAndUserStores();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
 
             //BLANK SCENARIO
             var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
