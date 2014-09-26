@@ -612,7 +612,7 @@ namespace Daphne
     /// </summary>
     public class Protocol : Level
     {
-        public enum ScenarioType { UNASSIGNED, TISSUE_SCENARIO };
+        public enum ScenarioType { UNASSIGNED, TISSUE_SCENARIO, VAT_REACTION_COMPLEX };
 
         public static int SafeCellPopulationID = 0;
         public int experiment_db_id { get; set; }
@@ -654,6 +654,10 @@ namespace Daphne
             {
                 scenario = new TissueScenario();
             }
+            else if (type == ScenarioType.VAT_REACTION_COMPLEX)
+            {
+                scenario = new VatReactionComplexScenario();
+            }
             else if (type != ScenarioType.UNASSIGNED)
             {
                 throw new NotImplementedException();
@@ -682,6 +686,10 @@ namespace Daphne
             else if(scenario is TissueScenario)
             {
                 return ScenarioType.TISSUE_SCENARIO;
+            }
+            else if (scenario is VatReactionComplexScenario)
+            {
+                return ScenarioType.VAT_REACTION_COMPLEX;
             }
             else
             {
@@ -1664,6 +1672,21 @@ namespace Daphne
         public SimStates simCellSize { get; set; }
         public ConfigEnvironmentBase environment { get; set; }
     }
+
+    public class VatReactionComplexScenario : ScenarioBase
+    {
+        public ConfigCompartment comp { get; set; }
+
+        public VatReactionComplexScenario()
+        {
+            environment = new ConfigRectEnvironment();
+            comp = new ConfigCompartment();
+        }
+
+        public override void InitializeStorageClasses()
+        {
+        }
+    }
     
     public class TissueScenario : ScenarioBase
     {
@@ -2120,6 +2143,150 @@ namespace Daphne
         }
 
         public ConfigCompartment comp { get; set; }
+    }
+
+    public class ConfigRectEnvironment : ConfigEnvironmentBase
+    {
+        private int _extent_x;
+        private int _extent_y;
+        private double _gridstep;
+
+        public int extent_x
+        {
+            get { return _extent_x; }
+            set
+            {
+                if (_extent_x == value)
+                    return;
+                else
+                {
+                    int saveValue = _extent_x;
+                    _extent_x = value;
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("extent_x");
+                    }
+                    else
+                    {
+                        _extent_x = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
+                }
+            }
+        }
+        public int extent_y
+        {
+            get { return _extent_y; }
+            set
+            {
+                if (_extent_y == value)
+                    return;
+                else
+                {
+                    int saveValue = _extent_y;
+                    _extent_y = value;
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("extent_y");
+                    }
+                    else
+                    {
+                        _extent_y = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
+                }
+            }
+        }
+        public double gridstep
+        {
+            get { return _gridstep; }
+            set
+            {
+                if (_gridstep == value)
+                    return;
+                else
+                {
+                    double saveValue = _gridstep;
+                    _gridstep = value;
+                    if (CalculateNumGridPts())
+                    {
+                        OnPropertyChanged("gridstep");
+                    }
+                    else
+                    {
+                        _gridstep = saveValue;
+                        System.Windows.MessageBox.Show("System must have at least 3 grid points on a side.");
+                    }
+                }
+            }
+        }
+        public int[] NumGridPts { get; set; }
+
+        [JsonIgnore]
+        public int extent_min { get; set; }
+        [JsonIgnore]
+        public int extent_max { get; set; }
+        [JsonIgnore]
+        public int gridstep_min { get; set; }
+        [JsonIgnore]
+        public int gridstep_max { get; set; }
+
+        private bool _toroidal;
+        public bool toroidal
+        {
+            get { return _toroidal; }
+            set
+            {
+                if (_toroidal == value)
+                    return;
+                else
+                {
+                    _toroidal = value;
+                    OnPropertyChanged("toroidal");
+                }
+            }
+        }
+
+        public ConfigRectEnvironment()
+        {
+            gridstep = 10;
+            extent_x = 200;
+            extent_y = 200;
+            extent_min = 5;
+            extent_max = 1000;
+            gridstep_min = 1;
+            gridstep_max = 100;
+            initialized = true;
+            toroidal = false;
+
+            // Don't need to check the boolean returned, since we know these values are okay.
+            CalculateNumGridPts();
+        }
+
+        private bool initialized = false;
+
+        private bool CalculateNumGridPts()
+        {
+            if (initialized == false)
+            {
+                return true;
+            }
+
+            int[] pt = new int[2];
+
+            pt[0] = (int)Math.Ceiling((decimal)(extent_x / gridstep)) + 1;
+            pt[1] = (int)Math.Ceiling((decimal)(extent_y / gridstep)) + 1;
+
+            // Must have at least 3 grid points for gradient routines at boundary points
+            if ((pt[0] < 3) || (pt[1] < 3))
+            {
+                return false;
+            }
+
+            NumGridPts = pt;
+
+            return true;
+        }
     }
     
     public class ConfigECSEnvironment : ConfigEnvironmentBase

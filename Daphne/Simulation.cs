@@ -99,6 +99,111 @@ namespace Daphne
             return percent;
         }
 
+        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        {
+            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            {
+                Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
+                                                                     new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
+                                                                     new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
+                                                                     new ConstructorArgument("diffCoeff", cmp.molecule.DiffusionCoefficient));
+
+                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                {
+                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
+
+                    if (mpgg.gauss_spec == null || mpgg.gauss_spec.box_spec == null)
+                    {
+                        // Should never reach here... pop up notice
+                        MessageBoxResult tmp = MessageBox.Show("Problem: Invalid Gaussian or box spec...");
+                        return;
+                    }
+
+                    BoxSpecification box = mpgg.gauss_spec.box_spec;
+
+                    double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
+
+                    // compute rotation matrix from box data
+                    // R is vtk's rotation matrix (transpose of traditional definition)
+                    double[,] R = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        R[i, 0] = box.transform_matrix[i][0] / box.getScale((byte)0);
+                        R[i, 1] = box.transform_matrix[i][1] / box.getScale((byte)1);
+                        R[i, 2] = box.transform_matrix[i][2] / box.getScale((byte)2);
+                    }
+
+                    // Rotate diagonal covariance (Sigma) matrix: D[i,j] = delta_ij sigma[i]^(-2)
+                    // Given vtk format where R is the transpose of the usual definition of the rotation matrix:  
+                    //      S = R' D R
+                    //      S is the rotated covariance matrix
+                    //      R is vtk's rotation matrix (tranpose of traditional definition)
+                    //      R' is the transpose of R
+
+                    // T = R D
+                    double[,] S = new double[3, 3];
+                    double[,] T = new double[3, 3];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        T[i, 0] = R[i, 0] / (sigma[0] * sigma[0]);
+                        T[i, 1] = R[i, 1] / (sigma[1] * sigma[1]);
+                        T[i, 2] = R[i, 2] / (sigma[2] * sigma[2]);
+                    }
+
+                    // S = T R'
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            for (int k = 0; k < 3; k++)
+                            {
+                                S[i, j] += T[i, k] * R[j, k];
+                            }
+                        }
+                    }
+
+                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
+                    // box x,y,z_scale parameters are 2*sigma
+                    double[] initArray = new double[] { box.x_trans, box.y_trans, box.z_trans,
+                                                        S[0,0], S[1,0], S[2,0],
+                                                        S[0,1], S[1,1], S[2,1],
+                                                        S[0,2], S[1,2], S[2,2],
+                                                        mpgg.peak_concentration };
+
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "gauss", initArray);
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
+                {
+                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
+                {
+                    MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "explicit", mpc.conc);
+                }
+                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                {
+                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
+                    double c1 = mpl.boundaryCondition[0].concVal;
+                    double c2 = mpl.boundaryCondition[1].concVal;
+                    double x2;
+
+                    x2 = linearDistributionCase(mpl.dim);
+                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "linear", new double[] {       
+                                c1, 
+                                c2,
+                                mpl.x1, 
+                                x2, 
+                                mpl.dim});
+                }
+                else
+                {
+                    throw new Exception("Molecular population distribution type not implemented.");
+                }
+            }
+        }
+
         public virtual void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
         {
             ProtocolHandle = protocol;
@@ -358,9 +463,9 @@ namespace Daphne
             dataBasket.Cells.Remove(c.Cell_id);
         }
 
-        protected abstract void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp);
         public abstract void Step(double dt);
         public abstract void RunForward();
+        protected abstract int linearDistributionCase(int dim);
 
         /// <summary>
         /// constants used to set the run status
@@ -406,123 +511,18 @@ namespace Daphne
             reset();
         }
 
-        protected override void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        protected override int linearDistributionCase(int dim)
         {
-            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            switch (dim)
             {
-                Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
-                                                                     new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
-                                                                     new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
-                                                                     new ConstructorArgument("diffCoeff", cmp.molecule.DiffusionCoefficient));
-
-                if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                {
-                    MolPopGaussian mpgg = (MolPopGaussian)cmp.mp_distribution;
-
-                    if (mpgg.gauss_spec == null || mpgg.gauss_spec.box_spec == null)
-                    {
-                        // Should never reach here... pop up notice
-                        MessageBoxResult tmp = MessageBox.Show("Problem: Invalid Gaussian or box spec...");
-                        return;
-                    }
-
-                    BoxSpecification box = mpgg.gauss_spec.box_spec;
-
-                    double[] sigma = new double[] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
-
-                    // compute rotation matrix from box data
-                    // R is vtk's rotation matrix (tranpose of traditional definition)
-                    double[,] R = new double[3, 3];
-                    for (int i = 0; i < 3; i++)
-                    {
-                        R[i, 0] = box.transform_matrix[i][0] / box.getScale((byte)0);
-                        R[i, 1] = box.transform_matrix[i][1] / box.getScale((byte)1);
-                        R[i, 2] = box.transform_matrix[i][2] / box.getScale((byte)2);
-                    }
-
-                    // Rotate diagonal covariance (Sigma) matrix: D[i,j] = delta_ij sigma[i]^(-2)
-                    // Given vtk format where R is the transpose of the usual definition of the rotation matrix:  
-                    //      S = R' D R
-                    //      S is the rotated covariance matrix
-                    //      R is vtk's rotation matrix (tranpose of traditional definition)
-                    //      R' is the transpose of R
-
-                    // T = R D
-                    double[,] S = new double[3, 3];
-                    double[,] T = new double[3, 3];
-                    for (int i = 0; i < 3; i++)
-                    {
-                        T[i, 0] = R[i, 0] / (sigma[0] * sigma[0]);
-                        T[i, 1] = R[i, 1] / (sigma[1] * sigma[1]);
-                        T[i, 2] = R[i, 2] / (sigma[2] * sigma[2]);
-                    }
-
-                    // S = T R'
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            for (int k = 0; k < 3; k++)
-                            {
-                                S[i, j] += T[i, k] * R[j,k];
-                            }
-                         }
-                    }
-
-                    // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
-                    // box x,y,z_scale parameters are 2*sigma
-                    double[] initArray = new double[] { box.x_trans, box.y_trans, box.z_trans,
-                                                        S[0,0], S[1,0], S[2,0],
-                                                        S[0,1], S[1,1], S[2,1],
-                                                        S[0,2], S[1,2], S[2,2],
-                                                        mpgg.peak_concentration };
-
-                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "gauss", initArray);
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Homogeneous)
-                {
-                    MolPopHomogeneousLevel mphl = (MolPopHomogeneousLevel)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "const", new double[] { mphl.concentration });
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Explicit)
-                {
-                    MolPopExplicit mpc = (MolPopExplicit)cmp.mp_distribution;
-                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "explicit", mpc.conc);
-                }
-                else if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
-                {
-                    MolPopLinear mpl = cmp.mp_distribution as MolPopLinear;
-
-                    double c1 = mpl.boundaryCondition[0].concVal;
-                    double c2 = mpl.boundaryCondition[1].concVal;
-                    double x2;
-                    switch (mpl.dim)
-                    {
-                        case 0:
-                            x2 = envHandle.extent_x;
-                            break;
-                        case 1:
-                            x2 = envHandle.extent_y;
-                            break;
-                        case 2:
-                            x2 = envHandle.extent_z;
-                            break;
-                        default:
-                            x2 = envHandle.extent_x; 
-                            break;
-                    }
-
-                    simComp.AddMolecularPopulation(mol, cmp.molecule.entity_guid, "linear", new double[] {       
-                                c1, 
-                                c2,
-                                mpl.x1, 
-                                x2, 
-                                mpl.dim});
-                }
-                else
-                {
-                    throw new Exception("Molecular population distribution type not implemented.");
-                }
+                case 0:
+                    return envHandle.extent_x;
+                case 1:
+                    return envHandle.extent_y;
+                case 2:
+                    return envHandle.extent_z;
+                default:
+                    return envHandle.extent_x;
             }
         }
 
@@ -570,7 +570,7 @@ namespace Daphne
 
             // ADD CELLS            
             double[] state = new double[CellSpatialState.Dim];
-            // convenience arrays to save code length
+            // convenience arrays to reduce code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             Compartment[] simComp = new Compartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
@@ -907,5 +907,65 @@ namespace Daphne
                 RunStatus = RUNSTAT_FINISHED;
             }
         }
+    }
+
+    public class VatReactionComplex : SimulationBase
+    {
+        public VatReactionComplex()
+        {
+            dataBasket = new DataBasket(this);
+            integratorStep = 0.001;
+            reporter = new VatReactionComplexReporter();
+            reset();
+        }
+
+        public override void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+            scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
+            envHandle = (ConfigRectEnvironment)protocol.scenario.environment;
+
+            // call the base
+            base.Load(protocol, completeReset, is_reaction_complex);
+
+            // exit if no reset required
+            if (completeReset == false)
+            {
+                return;
+            }
+
+            //INSTANTIATE EXTRA CELLULAR MEDIUM
+            dataBasket.Environment = SimulationModule.kernel.Get<RectEnvironment>();
+
+            // clear the databasket dictionaries
+            dataBasket.Clear();
+        }
+
+        public override void Step(double dt)
+        {
+        }
+
+        public override void RunForward()
+        {
+        }
+
+        protected override int linearDistributionCase(int dim)
+        {
+            switch (dim)
+            {
+                case 0:
+                    return envHandle.extent_x;
+                case 1:
+                    return envHandle.extent_y;
+                default:
+                    return envHandle.extent_x;
+            }
+        }
+
+        private ConfigRectEnvironment envHandle;
+        private VatReactionComplexScenario scenarioHandle;
     }
 }

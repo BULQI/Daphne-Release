@@ -410,4 +410,23 @@ namespace Daphne
             }
         }
     }
+
+    public class VatReactionComplexReporter : ReporterBase
+    {
+        public VatReactionComplexReporter()
+        {
+        }
+
+        public override void StartReporter(Protocol protocol)
+        {
+        }
+
+        public override void AppendReporter(Protocol protocol, SimulationBase sim)
+        {
+        }
+
+        public override void CloseReporter()
+        {
+        }
+    }
 }

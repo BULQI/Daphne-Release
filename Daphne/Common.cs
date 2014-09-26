@@ -85,10 +85,19 @@ namespace Daphne
             Bind<Cell>().ToSelf();
             if (scenario.environment is ConfigECSEnvironment)
             {
-                Bind<ECSEnvironment>().ToSelf().WithConstructorArgument("numGridPts",
-                                                                        ((ConfigECSEnvironment)scenario.environment).NumGridPts).WithConstructorArgument("gridStep",
-                                                                        ((ConfigECSEnvironment)scenario.environment).gridstep).WithConstructorArgument("toroidal",
-                                                                        ((ConfigECSEnvironment)scenario.environment).toroidal);
+                Bind<ECSEnvironment>().ToSelf().WithConstructorArgument("numGridPts", ((ConfigECSEnvironment)scenario.environment).NumGridPts).
+                                                WithConstructorArgument("gridStep", ((ConfigECSEnvironment)scenario.environment).gridstep).
+                                                WithConstructorArgument("toroidal", ((ConfigECSEnvironment)scenario.environment).toroidal);
+            }
+            else if (scenario.environment is ConfigRectEnvironment)
+            {
+                Bind<RectEnvironment>().ToSelf().WithConstructorArgument("numGridPts", ((ConfigRectEnvironment)scenario.environment).NumGridPts).
+                                                 WithConstructorArgument("gridStep", ((ConfigRectEnvironment)scenario.environment).gridstep).
+                                                 WithConstructorArgument("toroidal", ((ConfigRectEnvironment)scenario.environment).toroidal);
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
             Bind<CollisionManager>().ToSelf();
 
