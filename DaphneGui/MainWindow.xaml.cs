@@ -45,6 +45,7 @@ using Newtonsoft.Json;
 using DaphneGui.Pushing;
 
 using SBMLayer;
+using System.Security.Principal;
 
 namespace DaphneGui
 {
@@ -2009,6 +2010,8 @@ namespace DaphneGui
                 kvp.Value.ClearCallbacks();
                 kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
                 kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWindow.RegionFocusToGUISection));
+                kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
+                kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
             }
 
             //////////VCR_Toolbar.IsEnabled = false;
@@ -2233,7 +2236,7 @@ namespace DaphneGui
             resetButton.IsEnabled = true;
             abortButton.IsEnabled = false;
             runButton.Content = "Run";
-            statusBarMessagePanel.Content = "Ready";
+            statusBarMessagePanel.Content = "Ready:  Protocol";
             enableFileMenu(true);
             saveButton.IsEnabled = true;
             optionsMenu.IsEnabled = true;
@@ -2885,7 +2888,7 @@ namespace DaphneGui
                 if (erMol != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erMol;
-                    newEntity = erMol.Clone(MainWindow.SOP.Protocol);
+                    newEntity = ((ConfigMolecule)source).Clone(MainWindow.SOP.Protocol);
                 }
 
                 //Show the confirmation dialog
@@ -2927,7 +2930,7 @@ namespace DaphneGui
                     pcell.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
                     newEntity = ((ConfigCell)source).Clone(false);
                     ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                    ((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    //((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 }
 
                 if (pcell.ShowDialog() == false)
@@ -2966,8 +2969,8 @@ namespace DaphneGui
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
-                    newEntity = erGene.Clone(MainWindow.SOP.Protocol);
-                    ((ConfigGene)newEntity).Name = erGene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                    newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);
+                    //((ConfigGene)newEntity).Name = newEntity.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 }
                 
                 //Show the confirmation dialog
@@ -3011,11 +3014,75 @@ namespace DaphneGui
                 }
                 else //push as new
                 {
+                    source.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                     B.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
                 }
 
                 
             }
         }
+
+        private void menuUserStore_Click(object sender, RoutedEventArgs e)
+        {
+            statusBarMessagePanel.Content = "Ready:  User Store";
+            ProtocolToolWindow.Close();
+            VTKDisplayDocWindow.Close();
+            ReacComplexChartWindow.Close();
+            ComponentsToolWindow.DataContext = SOP.UserStore;
+            CellStudioToolWindow.DataContext = SOP.UserStore;
+        }
+
+        private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
+        {
+            statusBarMessagePanel.Content = "Ready:  Daphne Store";
+            ProtocolToolWindow.Close();
+            VTKDisplayDocWindow.Close();
+            ReacComplexChartWindow.Close();
+            ComponentsToolWindow.DataContext = SOP.DaphneStore;
+            CellStudioToolWindow.DataContext = SOP.DaphneStore;
+        }
+
+        private void menuProtocolStore_Click(object sender, RoutedEventArgs e)
+        {
+            ProtocolToolWindow.Open();
+            VTKDisplayDocWindow.Open();
+            ComponentsToolWindow.DataContext = SOP.Protocol;
+            CellStudioToolWindow.DataContext = SOP.Protocol;
+        }
+
+        public bool IsUserAdministrator()
+        {
+            //bool value to hold our return value
+            bool isAdmin;
+            try
+            {
+                //get the currently logged in user
+                WindowsIdentity user = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(user);
+                isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                isAdmin = false;
+            }
+            catch (Exception ex)
+            {
+                isAdmin = false;
+            }
+            return isAdmin;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            
+            if (IsUserAdministrator() == false)
+                MainMenu.Items.Remove(AdminMenu);
+
+            //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        
     }
+
+    
 }

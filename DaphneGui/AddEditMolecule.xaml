@@ -1,15 +1,17 @@
 ﻿<Window x:Class="DaphneGui.AddEditMolecule"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add/Edit a Molecule" Height="174" Width="535">
+        Title="Add/Edit a Molecule"
+        SizeToContent="WidthAndHeight">
     <Grid>
         <ContentControl Name="ecmMolpopMolDetails"
                                         Content="{Binding Path=Mol}" 
                                         ContentTemplate="{StaticResource moleculeTemplate}" 
                                         Margin="6"/>
-        <StackPanel Orientation="Horizontal">
-            <Button Content="Save" Height="23" HorizontalAlignment="Left" Margin="338,80,0,0" Name="btnSave" VerticalAlignment="Top" Width="75" Click="btnSave_Click" />
-            <Button Content="Cancel" Height="23" HorizontalAlignment="Right" Margin="0,80,12,0" Name="btnCancel" VerticalAlignment="Top" Width="83" Click="btnCancel_Click" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,80,20,20">
+            <Button Content="Save" Height="24"  Name="btnSave" VerticalAlignment="Top" Width="60" Click="btnSave_Click" IsDefault="True" />
+            <Button Content="Cancel" Height="24" Name="btnCancel" VerticalAlignment="Top" Width="60" Click="btnCancel_Click" />
+            
         </StackPanel>
     </Grid>
 </Window>

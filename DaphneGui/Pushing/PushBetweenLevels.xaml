@@ -6,7 +6,7 @@
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         Title="Push Between Levels"
         SizeToContent="WidthAndHeight"
-        Loaded="Window_Loaded"
+        Loaded="Window_Loaded"        
         >
 
     <Window.CommandBindings>
@@ -226,20 +226,32 @@
                 </StackPanel>
             </GroupBox>
 
-            <Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push -->" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
+            <!--<Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push >" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
                         HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                         VerticalAlignment="Top" VerticalContentAlignment="Top"
                         Command="ApplicationCommands.Save"
                         FocusManager.IsFocusScope="True"
-                        >
-                
+                        >-->
+
+            <Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Height="48" Width="48" Margin="0,22"
+                    HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                        VerticalAlignment="Top" VerticalContentAlignment="Top"
+                        Command="ApplicationCommands.Save"
+                        FocusManager.IsFocusScope="True"
+                    >
+                <StackPanel>
+                    <Image Source="../Images/RightArrow_48x48.png" />
+                    <TextBlock>Push</TextBlock>
+                </StackPanel>
+            </Button>
+
                 <!--<Button.CommandBindings>
                     <CommandBinding   Command="ApplicationCommands.Save"
                                       Executed="PushCommandExecuted"
                                       CanExecute="PushCommandCanExecute"/>
                 </Button.CommandBindings>-->
                 
-            </Button>
+            <!--</Button>-->
 
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
                 <GroupBox.Header>

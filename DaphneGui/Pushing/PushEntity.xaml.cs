@@ -20,14 +20,17 @@ namespace DaphneGui.Pushing
     public partial class PushEntity : Window
     {
         public enum ChangeStamp { Newer = 0, Older, Same };
+        public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell };
 
         public bool UserWantsNewEntity { get; set; }
-
+        public bool IsReaction { get; set; }    //Need to disable 'save as new' button if Reaction
 
         public PushEntity()
         {
             Tag = ChangeStamp.Newer;
             UserWantsNewEntity = false;
+            IsReaction = false;
+            
             InitializeComponent();
         }
 
@@ -64,6 +67,12 @@ namespace DaphneGui.Pushing
             else 
             {
                 Tag = ChangeStamp.Same;
+            }
+
+            if (left is ConfigReaction)
+            {
+                IsReaction = true;
+                btnSaveAsNew.IsEnabled = false;
             }
 
         }

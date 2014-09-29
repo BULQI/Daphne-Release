@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Data;
 using System.Windows;
 using System.Windows.Markup;
+using System.Security.Principal;
 
 namespace Daphne
 {
@@ -2031,6 +2032,17 @@ namespace Daphne
                     cellpopulations.Remove(cell_pop);
             }
         }
+
+        public bool HasMoleculeInSomeCellMembrane(string mol_guid)
+        {
+            foreach (CellPopulation pop in cellpopulations)
+            {
+                if (pop.Cell.membrane.molecules_dict.ContainsKey(mol_guid))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public class SimulationParams
@@ -2290,6 +2302,56 @@ namespace Daphne
             NumGridPts = pt;
 
             return true;
+        }
+
+        public bool ValidateReaction(ConfigReaction cr, TissueScenario scenario)
+        {
+            bool bOK = false;
+            
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                {
+                    bOK = true;
+                }
+                else
+                {
+                    bOK = false;
+                    break;
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.products_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+
+            return bOK;
         }
     }
 
@@ -2972,7 +3034,7 @@ namespace Daphne
             bool ret = false;
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
-                if (mol.Name == tempMolName)
+                if (mol.Name.ToLower() == tempMolName.ToLower())
                 {
                     ret = true;
                     break;
@@ -5798,8 +5860,63 @@ namespace Daphne
             // so I'm not sure what the value and parameter objects would be...
             return "y";
         }
+
+
     }
 
+    /// <summary>
+    /// Figure out if user is Admin and return Visibility true
+    /// </summary>
+    [ValueConversion(typeof(string), typeof(bool))]
+    public class AdminUserBooleanToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            //Visibility vis = Visibility.Hidden;
+            bool enabled = false;
+
+            try
+            {
+                enabled = IsUserAdministrator();
+                //{
+                //    vis = Visibility.Visible;
+                //}
+            }
+            catch
+            {
+                //vis = Visibility.Hidden;
+            }
+
+            return enabled;   // vis;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return true;
+        }
+
+        public bool IsUserAdministrator()
+        {
+            //bool value to hold our return value
+            bool isAdmin;
+            try
+            {
+                //get the currently logged in user
+                WindowsIdentity user = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(user);
+                isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                isAdmin = false;
+            }
+            catch (Exception ex)
+            {
+                isAdmin = false;
+            }
+            return isAdmin;
+        }
+    }
     /// <summary>
     /// Converter to go between molecule GUID references in MolPops
     /// and molecule names kept in the repository of molecules.
