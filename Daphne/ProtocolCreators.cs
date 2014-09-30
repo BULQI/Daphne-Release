@@ -426,7 +426,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            ConfigRectEnvironment envHandle = (ConfigRectEnvironment)protocol.scenario.environment;
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
             protocol.experiment_name = "Blank Vat Reaction Complex Scenario";
@@ -443,7 +443,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
 
-            ConfigRectEnvironment envHandle = (ConfigRectEnvironment)protocol.scenario.environment;
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
             protocol.experiment_name = "Vat Reaction Complex Scenario";
@@ -452,9 +452,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
 
-            envHandle.extent_x = 200;
-            envHandle.extent_y = 200;
-            envHandle.gridstep = 10;
         }
 
         private static void PredefinedCellsCreator(Protocol protocol)
@@ -733,7 +730,6 @@ namespace Daphne
             gc.TransductionConstant = 1e2;
 
             protocol.entity_repository.cells.Add(gc);
-
 
             ///////////////////////////////////
             // B cell
@@ -1101,7 +1097,6 @@ namespace Daphne
             gc.DragCoefficient = 1.0;
             gc.TransductionConstant = 0.0;
             protocol.entity_repository.cells.Add(gc);
-
         }
 
         private static void PredefinedDiffSchemesCreator(Protocol protocol)
@@ -1261,9 +1256,6 @@ namespace Daphne
             protocol.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             protocol.entity_repository.diff_schemes.Add(diffScheme);
             protocol.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
-
-
-
         }
 
         private static void PredefinedGenesCreator(Protocol protocol)
@@ -1338,7 +1330,6 @@ namespace Daphne
                 protocol.entity_repository.genes.Add(gene);
                 protocol.entity_repository.genes_dict.Add(gene.entity_guid, gene);
             }
-
         }
 
         private static void PredefinedMoleculesCreator(Protocol protocol)

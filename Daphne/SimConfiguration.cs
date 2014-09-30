@@ -1675,12 +1675,9 @@ namespace Daphne
 
     public class VatReactionComplexScenario : ScenarioBase
     {
-        public ConfigCompartment comp { get; set; }
-
         public VatReactionComplexScenario()
         {
-            environment = new ConfigRectEnvironment();
-            comp = new ConfigCompartment();
+            environment = new ConfigPointEnvironment();
         }
 
         public override void InitializeStorageClasses()
@@ -2143,6 +2140,17 @@ namespace Daphne
         }
 
         public ConfigCompartment comp { get; set; }
+    }
+
+    public class ConfigPointEnvironment : ConfigEnvironmentBase
+    {
+        // extents, gridstep, numGridPts, toroidal do not apply
+        // no initialization required?
+
+        public ConfigPointEnvironment()
+        {
+            // Nothing to do here, I think.
+        }
     }
 
     public class ConfigRectEnvironment : ConfigEnvironmentBase

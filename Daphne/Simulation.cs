@@ -926,7 +926,7 @@ namespace Daphne
                 throw new InvalidCastException();
             }
             scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
-            envHandle = (ConfigRectEnvironment)protocol.scenario.environment;
+            envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // call the base
             base.Load(protocol, completeReset, is_reaction_complex);
@@ -938,7 +938,7 @@ namespace Daphne
             }
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
-            dataBasket.Environment = SimulationModule.kernel.Get<RectEnvironment>();
+            dataBasket.Environment = SimulationModule.kernel.Get<PointEnvironment>();
 
             // clear the databasket dictionaries
             dataBasket.Clear();
@@ -954,18 +954,10 @@ namespace Daphne
 
         protected override int linearDistributionCase(int dim)
         {
-            switch (dim)
-            {
-                case 0:
-                    return envHandle.extent_x;
-                case 1:
-                    return envHandle.extent_y;
-                default:
-                    return envHandle.extent_x;
-            }
+            return 0;
         }
 
-        private ConfigRectEnvironment envHandle;
+        private ConfigPointEnvironment envHandle;
         private VatReactionComplexScenario scenarioHandle;
     }
 }

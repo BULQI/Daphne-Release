@@ -122,6 +122,16 @@ namespace Daphne
         }
     }
 
+    public class PointEnvironment : EnvironmentBase
+    {
+ 	    public PointEnvironment()
+	    {
+            PointManifold p = SimulationModule.kernel.Get <PointManifold>();
+
+		    comp = new Compartment(p);
+        }
+    }
+
     public class RectEnvironment : EnvironmentBase
     {
         private Dictionary<string, int> sides;

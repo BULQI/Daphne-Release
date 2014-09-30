@@ -89,6 +89,10 @@ namespace Daphne
                                                 WithConstructorArgument("gridStep", ((ConfigECSEnvironment)scenario.environment).gridstep).
                                                 WithConstructorArgument("toroidal", ((ConfigECSEnvironment)scenario.environment).toroidal);
             }
+            else if (scenario.environment is ConfigPointEnvironment)
+            {
+                Bind<PointEnvironment>().ToSelf();
+            }
             else if (scenario.environment is ConfigRectEnvironment)
             {
                 Bind<RectEnvironment>().ToSelf().WithConstructorArgument("numGridPts", ((ConfigRectEnvironment)scenario.environment).NumGridPts).
