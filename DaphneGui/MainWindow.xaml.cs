@@ -91,6 +91,8 @@ namespace DaphneGui
         private string orig_content, orig_path, SBMLFolderPath;
         private bool tempFileContent = false, postConstruction = false;
 
+        private string orig_daphne_store_content, orig_user_store_content;
+
         private bool exportAllFlag = false;
         private string igGeneFolderName = "";
 
@@ -555,37 +557,53 @@ namespace DaphneGui
             gc.DrawFrame(sim.GetProgressPercent());
         }
 
+
+        /// <summary>
+        /// Code to create userstore and daphnestore 
+        /// HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES.
+        /// ONCE CREATED, DON'T NEED THIS CODE EVER AGAIN!
+        /// </summary>
+        public void CreateDaphneAndUserStores()
+        {
+            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            ProtocolCreators.CreateDaphneAndUserStores(daphnestore, userstore);
+        }
+
         /// <summary>
         /// Create and serialize all scenarios
         /// </summary>
         public void CreateAndSerializeDaphneProtocols()
         {
+            ////This code is to create DaphneStore and UserStore.
+            ////It should not be needed ever again! 
+            ////Any editing of DaphneStore should be done through application (GUI).
+            //try
+            //{
+            //    CreateDaphneAndUserStores();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
+
             //BLANK SCENARIO
             var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            
+
             ProtocolCreators.CreateBlankProtocol(protocol);
             //serialize to json
             protocol.SerializeToFile();
 
-            //skg - Code to create userstore and daphnestore - may change this later 
-            //////HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES
-            var userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            var daphnestore = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
-            ProtocolCreators.CreateDaphneStore(protocol, daphnestore);
-            ProtocolCreators.CreateUserStore(protocol, userstore);
-            //END CREATE
-            //end skg 
-
             //DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            
+
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             // serialize to json
             protocol.SerializeToFile();
 
             //DIFFUSIION SCENARIO
             protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
-            
+
             ProtocolCreators.CreateDiffusionProtocol(protocol);
             //Serialize to json
             protocol.SerializeToFile();
@@ -672,6 +690,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void ImportSBML_Click(object sender, RoutedEventArgs e)
         {
+            saveStoreFiles();
+
             //Check that previous changes are saved before loading new Protocol
             if (tempFileContent == true || saveTempFiles() == true)
             {
@@ -1616,6 +1636,7 @@ namespace DaphneGui
             runButton.IsEnabled = false;
             mutex = true;
 
+            saveStoreFiles();
             saveTempFiles();
             updateGraphicsAndGUI();
 
@@ -1914,12 +1935,14 @@ namespace DaphneGui
                     }
 
                     ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
-                    sop.UserStore.FileName   = "Config\\daphne_userstore.json";
-                    sop.UserStore.TempFile   = "Config\\temp_userstore.json";
+                    sop.UserStore.FileName = "Config\\daphne_userstore.json";
+                    sop.UserStore.TempFile = "Config\\temp_userstore.json";
                     sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
                     sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
                     sop.DaphneStore = sop.DaphneStore.Deserialize();
                     sop.UserStore = sop.UserStore.Deserialize();
+                    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+                    orig_user_store_content = sop.UserStore.SerializeToString();
                 }
             }
 
@@ -2280,6 +2303,19 @@ namespace DaphneGui
                 return true;
             }
             return false;
+        }
+
+        private void saveStoreFiles()
+        {
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
+            {
+                sop.DaphneStore.SerializeToFile(false);
+            }
+
+            if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
+            {
+                sop.UserStore.SerializeToFile(false);
+            }
         }
 
         private bool applyTempFilesAndSave(bool discard)
@@ -2672,6 +2708,8 @@ namespace DaphneGui
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            saveStoreFiles();
+
             if ((tempFileContent == true || saveTempFiles() == true) && applyTempFilesAndSave(false) == false)
             {
                 // Note: this is a cute idea, canceling the exit, but we'd need a 'discard' button in addition
@@ -2746,6 +2784,8 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void newScenario_Click(object sender, RoutedEventArgs e)
         {
+            saveStoreFiles();
+
             if (tempFileContent == true || saveTempFiles() == true)
             {
                 applyTempFilesAndSave(true);

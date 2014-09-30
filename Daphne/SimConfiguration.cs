@@ -200,6 +200,20 @@ namespace Daphne
             entity_repository = new EntityRepository();
         }
 
+        // given a reaction template type, find its guid
+        public string findReactionTemplateGuid(ReactionType rt)
+        {
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                if (crt.reac_type == rt)
+                {
+                    return crt.entity_guid;
+                }
+            }
+            return null;
+        }
+
+
         /// <summary>
         /// enum for push status
         /// </summary>
@@ -1360,20 +1374,7 @@ namespace Daphne
 
             return config_reacs;
         }
-
-        // given a reaction template type, find its guid
-        public string findReactionTemplateGuid(ReactionType rt)
-        {
-            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
-            {
-                if (crt.reac_type == rt)
-                {
-                    return crt.entity_guid;
-                }
-            }
-            return null;
-        }
-
+        
         public string findMoleculeGuidByName(string inputMolName)
         {
             string guid = "";
@@ -2022,7 +2023,8 @@ namespace Daphne
                 cp.ecm_probe_dict.Clear();
                 foreach (ReportECM recm in cp.ecm_probe)
                 {
-                    cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
+                    if (cp.ecm_probe_dict.ContainsKey(recm.molpop_guid_ref) == false)
+                        cp.ecm_probe_dict.Add(recm.molpop_guid_ref, recm);
                 }
             }
 

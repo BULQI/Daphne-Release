@@ -69,6 +69,10 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
+                            <DataGridTextColumn x:Name="colMolGuid" Header="GUID" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=entity_guid, Mode=OneWay}" 
+                            />
                         </DataGrid.Columns>
                     </DataGrid>
                     
@@ -103,6 +107,10 @@
                             <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colGeneGuid" Header="GUID" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=entity_guid, Mode=OneWay}" 
                             />
 
                         </DataGrid.Columns>
