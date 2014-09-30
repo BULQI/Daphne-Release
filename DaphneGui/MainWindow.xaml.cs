@@ -614,6 +614,18 @@ namespace DaphneGui
             ProtocolCreators.CreateLigandReceptorProtocol(protocol);
             //serialize to json
             protocol.SerializeToFile();
+
+            // BLANK VAT-REACTION-COMPLEX SCENARIO
+            protocol = new Protocol("Config\\daphne_blank_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateBlankVatReactionComplexProtocol(protocol);
+            // serialize
+            protocol.SerializeToFile();
+
+            // VAT-REACTION-COMPLEX SCENARIO
+            protocol = new Protocol("Config\\daphne_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateVatReactionComplexProtocol(protocol);
+            // serialize
+            protocol.SerializeToFile();
         }
 
         private void showScenarioInitial()
@@ -1951,6 +1963,17 @@ namespace DaphneGui
                     sim.Reporter.AppPath = orig_path + @"\";
                 }
             }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                // only create during construction or when the type changes
+                if (sim == null || sim is VatReactionComplex == false)
+                {
+                    // create the simulation
+                    sim = new VatReactionComplex();
+                    // set the reporter's path
+                    sim.Reporter.AppPath = orig_path + @"\";
+                }
+            }
             else
             {
                 throw new NotImplementedException();
@@ -2239,30 +2262,21 @@ namespace DaphneGui
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
-            gc.ToolsToolbarEnableAllIcons();            
+            gc.ToolsToolbarEnableAllIcons();
 
             //Set the box and blob visibilities to how they were pre-run
-            foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.comp.molpops)
-            {
-                if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true && molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
-                {
-                    MolPopGaussian mpg = molpop.mp_distribution as MolPopGaussian;
-
-                    mpg.gauss_spec.box_spec.box_visibility = mpg.gauss_spec.box_spec.current_box_visibility;
-                    mpg.gauss_spec.gaussian_region_visibility = mpg.gauss_spec.current_gaussian_region_visibility;
-                }
-            }
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                foreach (CellPopulation cellpop in ((TissueScenario)sop.Protocol.scenario).cellpopulations)
-                {
-                    if (cellpop.cellPopDist.DistType == CellPopDistributionType.Gaussian)
-                    {
-                        CellPopGaussian cpg = cellpop.cellPopDist as CellPopGaussian;
+                GaussianSpecification next;
 
-                        cpg.gauss_spec.box_spec.box_visibility = cpg.gauss_spec.box_spec.current_box_visibility;
-                        cpg.gauss_spec.gaussian_region_visibility = cpg.gauss_spec.current_gaussian_region_visibility;
-                    }
+                ((TissueScenario)sop.Protocol.scenario).resetGaussRetrieve();
+                while ((next = ((TissueScenario)sop.Protocol.scenario).nextGaussSpec()) != null)
+                {
+                    BoxSpecification box = next.box_spec;
+
+                    // Save current visibility statuses
+                    box.box_visibility = box.current_box_visibility;
+                    next.gaussian_region_visibility = next.current_gaussian_region_visibility;
                 }
             }
 

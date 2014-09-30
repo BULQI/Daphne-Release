@@ -80,19 +80,19 @@ namespace Daphne
 
         public static void CreateLigandReceptorProtocol(Protocol protocol)
         {
-            // Experiment
-            protocol.experiment_name = "Ligand Receptor Scenario";
-            protocol.experiment_description = "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.";
-            protocol.scenario.time_config.duration = 15;
-            protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
-            protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
-
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
                 throw new InvalidCastException();
             }
 
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "Ligand Receptor Scenario";
+            protocol.experiment_description = "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.";
+            protocol.scenario.time_config.duration = 15;
+            protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 10;
+            protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -334,19 +334,19 @@ namespace Daphne
         /// </summary>
         public static void CreateDiffusionProtocol(Protocol protocol)
         {
-            // Experiment
-            protocol.experiment_name = "Diffusion Scenario";
-            protocol.experiment_description = "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.";
-            protocol.scenario.time_config.duration = 2.0;
-            protocol.scenario.time_config.rendering_interval = 0.2;
-            protocol.scenario.time_config.sampling_interval = 0.2;
-
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
                 throw new InvalidCastException();
             }
 
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "Diffusion Scenario";
+            protocol.experiment_description = "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.";
+            protocol.scenario.time_config.duration = 2.0;
+            protocol.scenario.time_config.rendering_interval = 0.2;
+            protocol.scenario.time_config.sampling_interval = 0.2;
 
             envHandle.extent_x = 200;
             envHandle.extent_y = 200;
@@ -418,8 +418,13 @@ namespace Daphne
         /// </summary>
         public static void CreateBlankProtocol(Protocol protocol)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             // Experiment
-            protocol.experiment_name = "Blank Scenario";
+            protocol.experiment_name = "Blank Tissue Simulation Scenario";
             protocol.experiment_description = "Libraries only.";
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
@@ -427,6 +432,41 @@ namespace Daphne
 
             // Global Paramters
             LoadEntitiesFromDaphneStore(protocol);
+
+        }
+
+        public static void CreateBlankVatReactionComplexProtocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "Blank Vat Reaction Complex Scenario";
+            protocol.experiment_description = "...";
+            protocol.scenario.time_config.duration = 2.0;
+            protocol.scenario.time_config.rendering_interval = 0.2;
+            protocol.scenario.time_config.sampling_interval = 0.2;
+        }
+
+        public static void CreateVatReactionComplexProtocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "Vat Reaction Complex Scenario";
+            protocol.experiment_description = "...";
+            protocol.scenario.time_config.duration = 2.0;
+            protocol.scenario.time_config.rendering_interval = 0.2;
+            protocol.scenario.time_config.sampling_interval = 0.2;
 
         }
 
@@ -706,7 +746,6 @@ namespace Daphne
             gc.TransductionConstant = 1e2;
 
             store.entity_repository.cells.Add(gc);
-
 
             ///////////////////////////////////
             // B cell
@@ -1234,9 +1273,6 @@ namespace Daphne
             store.entity_repository.transition_drivers_dict.Add(driver.entity_guid, driver);
             store.entity_repository.diff_schemes.Add(diffScheme);
             store.entity_repository.diff_schemes_dict.Add(diffScheme.entity_guid, diffScheme);
-
-
-
         }
 
         private static void PredefinedGenesCreator(Level store)
@@ -1306,7 +1342,6 @@ namespace Daphne
                 store.entity_repository.genes.Add(gene);
                 store.entity_repository.genes_dict.Add(gene.entity_guid, gene);
             }
-
         }
 
         private static void PredefinedMoleculesCreator(Level store)
@@ -2526,7 +2561,6 @@ namespace Daphne
             }
 
             store.entity_repository.reaction_complexes.Add(crc);
-
         }
 
         // given a string description of a reaction, return the ConfigReaction that matches
