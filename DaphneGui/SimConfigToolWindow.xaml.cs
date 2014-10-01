@@ -49,32 +49,6 @@ namespace DaphneGui
 
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
-            CellPopsDetailsExpander.IsExpanded = true;
-
-            // Some relevant CellPopulation constructor defaults: 
-            //      number = 1
-            //      no instantiation of cellPopDist
-            CellPopulation cp = new CellPopulation();
-
-            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-
-            // Default cell type and name to first entry in the cell repository
-            if (MainWindow.SOP.Protocol.entity_repository.cells.Count > 0)
-            {
-                //guid to object changes
-                ConfigCell cell_to_clone = er.cells.First();
-
-                cp.Cell = cell_to_clone.Clone(false);
-                cp.cellpopulation_name = cp.Cell.CellName;
-            }
-            else
-            {
-                MessageBox.Show("Please create a cell type first.");
-                return;
-            }
-            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
-            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
-            // but I don't know for sure; we can discuss
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
                 throw new InvalidCastException();
@@ -83,11 +57,44 @@ namespace DaphneGui
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
 
+            CellPopsDetailsExpander.IsExpanded = true;
+
+            // Some relevant CellPopulation constructor defaults: 
+            //      number = 1
+            //      no instantiation of cellPopDist
+            CellPopulation cp = new CellPopulation();
+
+            EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("cellTypesListView"));
+            if (cvs == null) return;
+            foreach (ConfigCell item in cvs.View)
+            {
+                if (scenario.cellpopulations.Where(m => m.Cell.CellName == item.CellName).Any()) continue;
+                cp.Cell = item.Clone(true);
+                cp.cellpopulation_name = item.CellName;
+                break;
+            }
+
+            //If all cell types are used up already, then just get the first one
+            if (cp.Cell == null)
+            {
+                // Default cell type and name to first entry in the cell repository
+                if (er.cells.Count > 0)
+                {
+                    ConfigCell cell_to_clone = er.cells.First();
+                    cp.Cell = cell_to_clone.Clone(true);
+                    cp.cellpopulation_name = cp.Cell.CellName;
+                }
+                else
+                {
+                    MessageBox.Show("Please create a cell type first.");
+                    return;
+                }
+            }
+
             double[] extents = new double[3] { envHandle.extent_x, 
                                                envHandle.extent_y, 
                                                envHandle.extent_z };
-            //guid to object changes
-            //double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             double minDisSquared = 2 * cp.Cell.CellRadius;
             minDisSquared *= minDisSquared;
 
@@ -1559,22 +1566,30 @@ namespace DaphneGui
                 return;
             }
 
-            string guid = cb.CommandParameter as string;
+            //string guid = cb.CommandParameter as string;
 
-            if (guid.Length > 0)
-            {
-                GaussianSpecification next;
+            //if (guid.Length > 0)
+            //{
+            //    GaussianSpecification next;
 
-                scenario.resetGaussRetrieve();
-                while ((next = scenario.nextGaussSpec()) != null)
-                {
-                    if (next.box_spec.box_guid == guid)
-                    {
-                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
-                        break;
-                    }
-                }
-            }
+            //    scenario.resetGaussRetrieve();
+            //    while ((next = scenario.nextGaussSpec()) != null)
+            //    {
+            //        if (next.box_spec.box_guid == guid)
+            //        {
+            //            next.gaussian_region_visibility = (bool)(cb.IsChecked);
+            //            break;
+            //        }
+            //    }
+            //}
+
+            //GaussianSpecification gs = cb.CommandParameter as GaussianSpecification;
+            //if (gs != null)
+            //{
+            //    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
+            //}
+
+
         }
 
         private void btnTesterClicked(object sender, RoutedEventArgs e)
@@ -1771,11 +1786,29 @@ namespace DaphneGui
                     }
                     return;
                 }
+                else
+                {
+                    while (ConfigMolecule.FindMoleculeByName(MainWindow.SOP.Protocol, newLibMol.Name) == true)
+                    {
+                        string entered_name = newLibMol.Name;
+                        newLibMol.ValidateName(MainWindow.SOP.Protocol);
+                        MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
+                        aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
 
-                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
-                //molpop.molecule = newLibMol.Clone(null);
-                //molpop.Name = newLibMol.Name;
-                //cb.SelectedItem = newLibMol;
+                        if (aem.ShowDialog() == false)
+                        {
+                            if (e.RemovedItems.Count > 0)
+                            {
+                                cb.SelectedItem = e.RemovedItems[0];
+                            }
+                            else
+                            {
+                                cb.SelectedIndex = 0;
+                            }
+                            return;
+                        }
+                    }
+                }
 
                 Protocol B = MainWindow.SOP.Protocol;
                 newLibMol.incrementChangeStamp();

@@ -281,13 +281,24 @@ namespace DaphneGui
             //Add the reaction to repository collection
             if (!MainWindow.SOP.Protocol.findReactionByTotalString(cr.TotalReactionString, MainWindow.SOP.Protocol))
             {
+                //Add to repository
                 MainWindow.SOP.Protocol.entity_repository.reactions.Add(cr);
             }
             else
             {
                 string msg = string.Format("Reaction '{0}' already exists in reactions library.", cr.TotalReactionString);
                 MessageBox.Show(msg);
-                return;
+                //return;
+            }
+
+            //Add also to the ECS if all the needed molecules are in the ECS or any cell membrane if boundary molecule
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+            if (envHandle.ValidateReaction(cr, scenario))
+            {
+                if (envHandle.comp.reactions_dict.ContainsKey(cr.entity_guid) == false)
+                    envHandle.comp.Reactions.Add(cr);
             }
 
             txtReac.Text = "";

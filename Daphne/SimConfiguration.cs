@@ -2051,6 +2051,17 @@ namespace Daphne
                     cellpopulations.Remove(cell_pop);
             }
         }
+
+        public bool HasMoleculeInSomeCellMembrane(string mol_guid)
+        {
+            foreach (CellPopulation pop in cellpopulations)
+            {
+                if (pop.Cell.membrane.molecules_dict.ContainsKey(mol_guid))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public class SimulationParams
@@ -2465,6 +2476,56 @@ namespace Daphne
             NumGridPts = pt;
 
             return true;
+        }
+
+        public bool ValidateReaction(ConfigReaction cr, TissueScenario scenario)
+        {
+            bool bOK = false;
+            
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                {
+                    bOK = true;
+                }
+                else
+                {
+                    bOK = false;
+                    break;
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.products_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+
+            return bOK;
         }
     }
 
@@ -3147,7 +3208,7 @@ namespace Daphne
             bool ret = false;
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
-                if (mol.Name == tempMolName)
+                if (mol.Name.ToLower() == tempMolName.ToLower())
                 {
                     ret = true;
                     break;
@@ -3922,7 +3983,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
-                    mp.PropertyChanged += mp_PropertyChanged;
+                    //mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)

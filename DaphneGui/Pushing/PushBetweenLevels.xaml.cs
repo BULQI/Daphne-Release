@@ -489,13 +489,23 @@ namespace DaphneGui.Pushing
 
             if (grid != null)
             {
-                if (grid.SelectedItems.Count <= 0)
+                if (grid.Items.Count == 0)
+                {
+                    grid.Items.Clear();
+                    e.CanExecute = false;
+                }
+                else if (grid.SelectedItems.Count <= 0)
                 {
                     e.CanExecute = false;
                 }
                 else
                 {
-                    e.CanExecute = true;
+                    object obj = grid.SelectedItems[0];
+                    if ( !(obj is ConfigEntity) ) {
+                        e.CanExecute = false;
+                    }
+                    else
+                        e.CanExecute = true;
                 }
             }
             else
