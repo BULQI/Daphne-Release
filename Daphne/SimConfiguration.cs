@@ -4557,6 +4557,7 @@ namespace Daphne
             set
             {
                 cellName = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("CellName");
             }
         }
@@ -4571,6 +4572,7 @@ namespace Daphne
             set
             {
                 cellRadius = value ;
+                this.incrementChangeStamp();
                 OnPropertyChanged("CellRadius");
             }
         }
@@ -4605,6 +4607,7 @@ namespace Daphne
             set
             {
                 transductionConstant = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("TransductionConstant");
             }
         }
@@ -4619,6 +4622,7 @@ namespace Daphne
             set
             {
                 dragCoefficient = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("DragCoefficient");
             }
         }
@@ -4636,6 +4640,7 @@ namespace Daphne
             set
             {
                 sigma = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("Sigma");
             }
         }
@@ -4657,6 +4662,7 @@ namespace Daphne
             set
             {
                 _diff_scheme = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("diff_scheme");
             }
         }
@@ -4675,6 +4681,7 @@ namespace Daphne
             set
             {
                 _death_driver = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("death_driver");
             }
         }
@@ -4707,6 +4714,7 @@ namespace Daphne
             set
             {
                 _div_scheme = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("div_scheme");
             }
         }
