@@ -110,12 +110,12 @@ namespace DaphneGui.Pushing
             }
 
             RightGroup.DataContext = LevelB.entity_repository;
-            RightContent.DataContext = RightList;   //must do this first
+            RightContent.DataContext = FilteredRightList();          //RightList;   //must do this first (??)
             LeftGroup.DataContext = LevelA.entity_repository;
-            LeftContent.DataContext = FilteredList(LeftList);
+            LeftContent.DataContext = FilteredLeftList();
         }
 
-        private object FilteredList(object LeftList)
+        private object FilteredLeftList()
         {
             switch (PushEntityType)
             {
@@ -194,6 +194,74 @@ namespace DaphneGui.Pushing
                                 filtered_cell_list.Add(cell);
                             }
                         }
+                    }
+                    return filtered_cell_list;
+                default:
+                    return null;
+            }
+        }
+
+        private object FilteredRightList()
+        {
+            switch (PushEntityType)
+            {
+                case PushLevelEntityType.Molecule:
+                    ObservableCollection<ConfigMolecule> left = (ObservableCollection<ConfigMolecule>)LeftList;
+                    ObservableCollection<ConfigMolecule> right = (ObservableCollection<ConfigMolecule>)RightList;
+                    ObservableCollection<ConfigMolecule> filtered_mol_list = new ObservableCollection<ConfigMolecule>();
+
+                    foreach (ConfigMolecule mol in right)
+                    {
+                        ConfigMolecule mol2 = FindMolInList(left, mol);
+                        if (mol2 != null)
+                        {
+                            if (mol.change_stamp != mol2.change_stamp)
+                            {
+                                filtered_mol_list.Add(mol);
+                            }
+                        }
+                    }
+                    return filtered_mol_list;
+                case PushLevelEntityType.Gene:
+                    ObservableCollection<ConfigGene> left2 = (ObservableCollection<ConfigGene>)LeftList;
+                    ObservableCollection<ConfigGene> right2 = (ObservableCollection<ConfigGene>)RightList;
+                    ObservableCollection<ConfigGene> filtered_gene_list = new ObservableCollection<ConfigGene>();
+
+                    foreach (ConfigGene gene in right2)
+                    {
+                        ConfigGene gene2 = FindGeneInList(left2, gene);
+                        if (gene.change_stamp != gene2.change_stamp)
+                            {
+                                filtered_gene_list.Add(gene);
+                            }
+                    }
+                    return filtered_gene_list;
+                case PushLevelEntityType.Reaction:
+                    ObservableCollection<ConfigReaction> left3 = (ObservableCollection<ConfigReaction>)LeftList;
+                    ObservableCollection<ConfigReaction> right3 = (ObservableCollection<ConfigReaction>)RightList;
+                    ObservableCollection<ConfigReaction> filtered_reac_list = new ObservableCollection<ConfigReaction>();
+
+                    foreach (ConfigReaction reac in right3)
+                    {
+                        ConfigReaction reac2 = FindReactionInList(left3, reac);
+                        if (reac.change_stamp != reac2.change_stamp)
+                            {
+                                filtered_reac_list.Add(reac);
+                            }
+                    }
+                    return filtered_reac_list;
+                case PushLevelEntityType.Cell:
+                    ObservableCollection<ConfigCell> left4 = (ObservableCollection<ConfigCell>)LeftList;
+                    ObservableCollection<ConfigCell> right4 = (ObservableCollection<ConfigCell>)RightList;
+                    ObservableCollection<ConfigCell> filtered_cell_list = new ObservableCollection<ConfigCell>();
+
+                    foreach (ConfigCell cell in right4)
+                    {
+                        ConfigCell cell2 = FindCellInList(left4, cell);
+                        if (cell.change_stamp != cell2.change_stamp)
+                            {
+                                filtered_cell_list.Add(cell);
+                            }
                     }
                     return filtered_cell_list;
                 default:
@@ -330,7 +398,7 @@ namespace DaphneGui.Pushing
             }
             else
             {
-                LeftContent.DataContext = FilteredList(LeftList);
+                LeftContent.DataContext = FilteredLeftList();
             }
 
         }
@@ -381,7 +449,7 @@ namespace DaphneGui.Pushing
             if (RightContent == null)
                 return;
 
-            RightContent.DataContext = RightList;  
+            RightContent.DataContext = FilteredRightList();     //RightList;  
         }
 
         public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
@@ -437,6 +505,7 @@ namespace DaphneGui.Pushing
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
         {
+            ConfigEntity newEntity = null;
             bool UserWantsNewEntity = false;
             Level.PushStatus status = levelB.pushStatus(entity);
             if (status == Level.PushStatus.PUSH_INVALID)
@@ -445,21 +514,44 @@ namespace DaphneGui.Pushing
                 return;
             }
 
-            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            {
-                levelB.repositoryPush(entity, status); // push into B, inserts as new
-            }
-            else // the item exists; could be newer or older
-            {
-                if (UserWantsNewEntity == false)
+            ////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////{
+                //If the entity is new, must clone it here and then push
+                switch (PushEntityType)
                 {
-                    levelB.repositoryPush(entity, status); // push into B - overwrites existing entity's properties
+                    case PushLevelEntityType.Molecule:
+                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
+                        levelB.repositoryPush(newmol, status);
+                        break;
+                    case PushLevelEntityType.Gene:
+                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
+                        levelB.repositoryPush(newgene, status);
+                        break;
+                    case PushLevelEntityType.Reaction:
+                        ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
+                        levelB.repositoryPush(newreac, status);
+                        break;
+                    case PushLevelEntityType.Cell:
+                        ConfigCell newcell = ((ConfigCell)entity).Clone(true);
+                        levelB.repositoryPush(newcell, status);
+                        break;
+                    default:
+                        break;
                 }
-                else //push as new
-                {
-                    //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
-                }
-            }
+            ////}
+
+
+            //else // the item exists; could be newer or older
+            //{
+            //    if (UserWantsNewEntity == false)
+            //    {
+            //        levelB.repositoryPush(entity, status); // push into B - overwrites existing entity's properties
+            //    }
+            //    else //push as new
+            //    {
+            //        //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
+            //    }
+            //}
         }
 
 
