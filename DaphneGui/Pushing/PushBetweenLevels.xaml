@@ -4,6 +4,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
+        xmlns:local="clr-namespace:DaphneGui"
         Title="Push Between Levels"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"        
@@ -173,6 +174,11 @@
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <StackPanel>
+                        <local:CellPropertiesControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                        <local:CellDetailsControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
+                    </StackPanel>
 
                 </StackPanel>
             </StackPanel>

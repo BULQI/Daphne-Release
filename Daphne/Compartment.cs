@@ -122,6 +122,102 @@ namespace Daphne
         }
     }
 
+    public class PointEnvironment : EnvironmentBase
+    {
+ 	    public PointEnvironment()
+	    {
+            PointManifold p = SimulationModule.kernel.Get <PointManifold>();
+
+		    comp = new Compartment(p);
+        }
+    }
+
+    public class RectEnvironment : EnvironmentBase
+    {
+        private Dictionary<string, int> sides;
+        public bool toroidal { get; private set; }
+
+        public RectEnvironment(int[] numGridPts, double gridStep, bool toroidal)
+        {
+            InterpolatedRectangle r = SimulationModule.kernel.Get<InterpolatedRectangle>();
+            double[] data = new double[] { numGridPts[0], numGridPts[1], gridStep, Convert.ToDouble(toroidal) };
+
+            // boundary condition
+            this.toroidal = toroidal;
+
+            r.Initialize(data);
+            comp = new Compartment(r);
+            sides = new Dictionary<string, int>();
+
+            // add the sides and transforms
+
+            InterpolatedLine l;
+            Transform t;
+            double[] axis = new double[Transform.Dim];
+
+            data = new double[comp.Interior.Dim + 1];
+            data[1] = comp.Interior.StepSize();
+            // Toroidal BCs are not relevant for sides
+            data[3] = Convert.ToDouble(false);
+
+            // right: rotate by pi/2 about z, translate +x
+            data[0] = comp.Interior.NodesPerSide(1);
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
+            t = new Transform();
+            axis[2] = 1;
+            t.rotate(axis, Math.PI / 2.0);
+            t.translate(new double[] { comp.Interior.Extent(0), 0, 0 });
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("right", l.Id);
+
+            // left: rotate by pi/2 about z, no translation
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
+            t = new Transform();
+            t.rotate(axis, Math.PI / 2.0);
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("left", l.Id);
+
+            // top: no rotation, translate +y
+            data[0] = comp.Interior.NodesPerSide(0);
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
+            t = new Transform();
+            t.translate(new double[] { 0, comp.Interior.Extent(1), 0 });
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("top", l.Id);
+
+            // bottom: no rotation, no translation
+            l = SimulationModule.kernel.Get<InterpolatedLine>();
+            l.Initialize(data);
+            t = new Transform();
+            comp.NaturalBoundaries.Add(l.Id, l);
+            comp.NaturalBoundaryTransforms.Add(l.Id, t);
+            sides.Add("bottom", l.Id);
+        }
+
+        public Dictionary<string, int> Sides
+        {
+            get { return sides; }
+        }
+
+        /// <summary>
+        /// add a boundary manifold, i.e. insert it to each ecs molecular population's boundary and flux dictionary
+        /// </summary>
+        /// <param name="m">the manifold</param>
+        public void AddBoundaryManifold(Manifold m)
+        {
+            foreach (MolecularPopulation mp in comp.Populations.Values)
+            {
+                mp.AddBoundaryFluxConc(m.Id, m);
+            }
+        }
+    }
+
     public class ECSEnvironment : EnvironmentBase
     {
         private Dictionary<string, int> sides;

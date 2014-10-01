@@ -124,6 +124,11 @@ namespace ManifoldRing
         /// <returns>integral value</returns>
         public abstract double Integrate(ScalarField sf);
         /// <summary>
+        /// manifold length
+        /// </summary>
+        /// <returns>length as double</returns>
+        public abstract double Length();
+        /// <summary>
         /// manifold area
         /// </summary>
         /// <returns>area as double</returns>
@@ -305,6 +310,15 @@ namespace ManifoldRing
         /// <param name="i">direction index</param>
         /// <returns>number of nodes as int</returns>
         public override int NodesPerSide(int i)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// TinySphere manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
         {
             return 0;
         }
@@ -496,6 +510,15 @@ namespace ManifoldRing
         /// <param name="i">direction index</param>
         /// <returns>number of nodes as int</returns>
         public override int NodesPerSide(int i)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// TinyBall manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
         {
             return 0;
         }
@@ -985,6 +1008,79 @@ namespace ManifoldRing
     }
 
     /// <summary>
+    /// IL line
+    /// </summary>
+    public class InterpolatedLine : InterpolatedNodes
+    {
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="interpolator">handle to the interpolator instance used</param>
+        public InterpolatedLine(Interpolator interpolator)
+            : base(1, interpolator)
+        {
+        }
+
+        /// <summary>
+        /// IL line manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return extent[0];
+        }
+
+        /// <summary>
+        /// IL line manifold area
+        /// </summary>
+        /// <returns>area as double</returns>
+        public override double Area()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line manifold volume
+        /// </summary>
+        /// <returns>volume as double</returns>
+        public override double Volume()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line manifold voxel volume
+        /// </summary>
+        /// <returns>voxel volume as double</returns>
+        public override double VoxelVolume()
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// IL line integrate over the whole field
+        /// </summary>
+        /// <param name="sf">field parameter</param>
+        /// <returns>integral value</returns>
+        public override double Integrate(ScalarField sf)
+        {
+            double[] point = new double[] { 0, 0, 0 };
+            double sum = 0,
+                   voxel = stepSize;
+
+                for (int i = 0; i < nNodesPerSide[0] - 1; i++)
+                {
+                    point[0] = (i + 0.5) * stepSize;
+
+                    // The value at the center of the voxel
+                    sum += sf.Value(point);
+                }
+
+            return sum * voxel;
+        }
+    }
+
+    /// <summary>
     /// IL rectangle
     /// </summary>
     public class InterpolatedRectangle : InterpolatedNodes
@@ -996,6 +1092,15 @@ namespace ManifoldRing
         public InterpolatedRectangle(Interpolator interpolator)
             : base(2, interpolator)
         {
+        }
+
+        /// <summary>
+        /// IL rectangle manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -1064,6 +1169,15 @@ namespace ManifoldRing
         public InterpolatedRectangularPrism(Interpolator interpolator)
             : base(3, interpolator)
         {
+        }
+
+        /// <summary>
+        /// IL prism manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -1284,6 +1398,15 @@ namespace ManifoldRing
         public override double Integrate(ScalarField sf)
         {
             return sf.array[0];
+        }
+
+        /// <summary>
+        /// manifold length
+        /// </summary>
+        /// <returns></returns>
+        public override double Length()
+        {
+            return 0;
         }
 
         /// <summary>
