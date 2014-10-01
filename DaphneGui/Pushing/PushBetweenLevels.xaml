@@ -38,10 +38,6 @@
                               ItemsSource="{Binding}" 
                               >
                         <DataGrid.CommandBindings>
-                            <!--<CommandBinding Command="push:MyCommands.PushCommand"
-                                            Executed="PushCommandExecuted"
-                                            CanExecute="PushCommandCanExecute"/>-->
-                            
                             <CommandBinding Command="ApplicationCommands.Save"
                                             Executed="PushCommandExecuted"
                                             CanExecute="PushCommandCanExecute"/>
@@ -240,7 +236,16 @@
                         FocusManager.IsFocusScope="True"
                     >
                 <StackPanel>
-                    <Image Source="../Images/RightArrow_48x48.png" />
+                    <StackPanel.Resources>
+                        <Style x:Key="ImageEnabled" TargetType="Image">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.4"></Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Resources>
+                    <Image Source="../Images/RightArrow_48x48.png" Style="{StaticResource ImageEnabled}" />
                     <TextBlock>Push</TextBlock>
                 </StackPanel>
             </Button>

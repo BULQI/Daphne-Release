@@ -3809,7 +3809,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
-                    mp.PropertyChanged += mp_PropertyChanged;
+                    //mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
