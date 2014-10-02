@@ -5454,20 +5454,8 @@ namespace Daphne
 
     public class ReportStates
     {
-        bool division_state = false;
         public bool Death { get; set; }
-        public bool Division 
-        {
-            get
-            {
-                return division_state == true;
-                //return division_state;
-            }
-            set
-            {
-                division_state = value;
-            }
-        }
+        public bool Division { get; set; }
         public bool Differentiation { get; set; }
     }
 
