@@ -129,7 +129,7 @@ namespace Daphne
         }
     }
 
-    public enum PushLevel { Component = 0, UserStore, DaphneStore }
+    public enum PushLevel { Protocol = 0, UserStore, DaphneStore }
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
@@ -140,7 +140,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Component",
+                                    "Protocol",
                                     "User Store",
                                     "Daphne Store"
                                 };

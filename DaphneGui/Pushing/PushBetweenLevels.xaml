@@ -7,7 +7,8 @@
         xmlns:local="clr-namespace:DaphneGui"
         Title="Push Between Levels"
         SizeToContent="WidthAndHeight"
-        Loaded="Window_Loaded"        
+        Loaded="Window_Loaded"  
+        MinHeight="120"
         >
 
     <Window.CommandBindings>
@@ -31,11 +32,13 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <daph:PushLevelToStringConverter x:Key="PushLevelToStringConv" />
+
         <DataTemplate x:Name="templMols" x:Key="pushLevelMoleculeTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     
-                    <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" 
+                    <DataGrid x:Name="dgMols" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               ItemsSource="{Binding}" 
                               >
                         <DataGrid.CommandBindings>
@@ -72,14 +75,27 @@
                             />
                         </DataGrid.Columns>
                     </DataGrid>
-                    
+
+                    <TextBlock Text="No molecules exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                        <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=dgMols, Path=Items.Count}" Value="0">
+                                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                        </DataTrigger>        
+                                    </Style.Triggers>
+                                </Style>
+                         </TextBlock.Style>
+                    </TextBlock>
+
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Name="templGenes" x:Key="pushLevelGeneTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" 
+                    <DataGrid x:Name="dgGenes" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                               ItemsSource="{Binding}">
 
                         <DataGrid.CommandBindings>
@@ -112,6 +128,18 @@
 
                         </DataGrid.Columns>
                     </DataGrid>
+                    <TextBlock Text="No genes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                        <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=dgGenes, Path=Items.Count}" Value="0">
+                                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                        </DataTrigger>        
+                                    </Style.Triggers>
+                                </Style>
+                         </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -119,7 +147,7 @@
         <DataTemplate x:Name="templReactions" x:Key="pushLevelReactionTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False"
+                    <DataGrid x:Name="dgReac" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                                 ItemsSource="{Binding}"  >
                         
                         <DataGrid.CommandBindings>
@@ -144,6 +172,18 @@
 
                         </DataGrid.Columns>
                     </DataGrid>
+                    <TextBlock Text="No reactions exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                        <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=dgReac, Path=Items.Count}" Value="0">
+                                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                        </DataTrigger>        
+                                    </Style.Triggers>
+                                </Style>
+                         </TextBlock.Style>
+                    </TextBlock>
 
                 </StackPanel>
             </StackPanel>
@@ -152,7 +192,7 @@
         <DataTemplate x:Name="templCells" x:Key="pushLevelCellTemplate">
             <StackPanel Orientation="Vertical">
                 <StackPanel>
-                    <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False"
+                    <DataGrid x:Name="dgCell" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
                                 ItemsSource="{Binding}"  >
 
                         <DataGrid.CommandBindings>
@@ -174,6 +214,19 @@
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <TextBlock Text="No cells exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                        <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=dgCell, Path=Items.Count}" Value="0">
+                                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                        </DataTrigger>        
+                                    </Style.Triggers>
+                                </Style>
+                         </TextBlock.Style>
+                    </TextBlock>
 
                     <StackPanel>
                         <local:CellPropertiesControl DataContext="{Binding ElementName=dgCell, Path=SelectedItem}"/>
@@ -208,24 +261,37 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+            
+            <Grid.Resources>
+                <DataTemplate x:Key="pushLevelTemplate">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Converter={StaticResource PushLevelToStringConv}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </Grid.Resources>
 
-            <GroupBox x:Name="LeftGroup" Grid.Row="0" Grid.Column="0" >
+            <GroupBox x:Name="LeftGroup" Grid.Row="0" Grid.Column="0">
                 <GroupBox.Header>
-                    <TextBlock Text="Level (from)" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="From" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
                 <StackPanel>
                     <ComboBox x:Name="LevelAComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
-                          SelectedIndex="0"
+                          ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
+                          SelectedIndex="1"
                           SelectionChanged="LevelAComboBox_SelectionChanged"
                     />
                     <StackPanel x:Name="LeftGridStackPanel">
                         <ContentControl Name="LeftContent"
                             Content="{Binding}"
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
-                            Margin="6"/>
+                            Margin="6"/>                        
                     </StackPanel>
+
+                    
                 </StackPanel>
+
+                
             </GroupBox>
 
             <!--<Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push >" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
@@ -234,44 +300,48 @@
                         Command="ApplicationCommands.Save"
                         FocusManager.IsFocusScope="True"
                         >-->
-
-            <Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Height="48" Width="48" Margin="0,22"
-                    HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top" VerticalContentAlignment="Top"
-                        Command="ApplicationCommands.Save"
-                        FocusManager.IsFocusScope="True"
-                    >
-                <StackPanel>
-                    <StackPanel.Resources>
-                        <Style x:Key="ImageEnabled" TargetType="Image">
-                            <Style.Triggers>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Opacity" Value="0.4"></Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Resources>
-                    <Image Source="../Images/RightArrow_48x48.png" Style="{StaticResource ImageEnabled}" />
-                    <TextBlock>Push</TextBlock>
-                </StackPanel>
-            </Button>
-
-                <!--<Button.CommandBindings>
-                    <CommandBinding   Command="ApplicationCommands.Save"
-                                      Executed="PushCommandExecuted"
-                                      CanExecute="PushCommandCanExecute"/>
-                </Button.CommandBindings>-->
-                
-            <!--</Button>-->
-
+            
+                <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel">
+                    
+                    <Button x:Name="PushButtonArrow" Height="48" Width="48" 
+                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                VerticalAlignment="Top" VerticalContentAlignment="Top"
+                            Click="PushButtonArrow_Click" Tag="Right"
+                                >
+                        <StackPanel>
+                            <StackPanel.Resources>
+                                <Style x:Key="ImageEnabled" TargetType="Image">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.4"></Setter>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Resources>
+                            <Image x:Name="LeftImage" Margin="200,0" Visibility="Hidden" Source="../Images/LeftArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../Images/LeftArrow_48x48.png" />
+                            <Image x:Name="RightImage" Margin="200,0" Visibility="Hidden" Source="../Images/RightArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../ImagesRightArrow_48x48.png" />
+                            <Image x:Name="ActualButtonImage" Style="{StaticResource ImageEnabled}"/>
+                            <TextBlock>Left</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="PushButton" Height="24" Width="48" Content="Apply..."
+                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                VerticalAlignment="Top" VerticalContentAlignment="Top"
+                                Command="ApplicationCommands.Save"
+                                FocusManager.IsFocusScope="True" >
+                    
+                    </Button>
+            </StackPanel>
+           
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
                 <GroupBox.Header>
-                    <TextBlock Text="Level (to)" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="To" FontWeight="Bold" FontSize="16"/>
                 </GroupBox.Header>
                 <StackPanel>
                     <ComboBox x:Name="LevelBComboBox" 
                           ItemsSource="{Binding Source={StaticResource pushLevelsList}}" 
-                          SelectedIndex="1"
+                          ItemTemplate="{Binding Source={StaticResource pushLevelTemplate}}"
+                          SelectedIndex="0"
                           SelectionChanged="LevelBComboBox_SelectionChanged"
                     />
 

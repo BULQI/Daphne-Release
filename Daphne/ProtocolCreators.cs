@@ -58,16 +58,16 @@ namespace Daphne
         }
 
         /// <summary>
-        /// User DaphneStore for loading entity_repository into the given protocol.
+        /// Use UserStore for loading entity_repository into the given protocol.
         /// This way every protocol will have the same entity guids.
         /// </summary>
         /// <param name="protocol"></param>
-        public static void LoadEntitiesFromDaphneStore(Protocol protocol)
+        public static void LoadEntitiesFromUserStore(Protocol protocol)
         {
             if (protocol == null)
                 return;
 
-            Level store = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
@@ -100,7 +100,7 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            LoadEntitiesFromUserStore(protocol);
 
             // ECM MOLECULES
 
@@ -219,7 +219,7 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            LoadEntitiesFromUserStore(protocol);
 
             // ECS
 
@@ -354,7 +354,7 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            LoadEntitiesFromUserStore(protocol);
 
             // Gaussian Distrtibution
             // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
@@ -431,7 +431,7 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            LoadEntitiesFromUserStore(protocol);
 
         }
 
