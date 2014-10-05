@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using Daphne;
+using System.Reflection;
+using System.IO;
 
 namespace DaphneGui.Pushing
 {
@@ -34,8 +36,8 @@ namespace DaphneGui.Pushing
         public PushBetweenLevels(PushLevelEntityType type)
         {
             PushEntityType = type;
-            PushLevelA = PushLevel.Component;
-            PushLevelB = PushLevel.UserStore;
+            PushLevelA = PushLevel.UserStore;
+            PushLevelB = PushLevel.Protocol;
             LeftList = null;
             RightList = null;
             InitializeComponent();
@@ -61,9 +63,16 @@ namespace DaphneGui.Pushing
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            ResetGrids();
+            ActualButtonImage.Source = RightImage.Source;
+            
+        }
+
+        private void ResetGrids()
+        {
             switch (PushLevelA)
             {
-                case PushLevel.Component:
+                case PushLevel.Protocol:
                     LevelA = MainWindow.SOP.Protocol;
                     break;
                 case PushLevel.DaphneStore:
@@ -76,7 +85,7 @@ namespace DaphneGui.Pushing
 
             switch (PushLevelB)
             {
-                case PushLevel.Component:
+                case PushLevel.Protocol:
                     LevelB = MainWindow.SOP.Protocol;
                     break;
                 case PushLevel.DaphneStore:
@@ -107,6 +116,12 @@ namespace DaphneGui.Pushing
                     break;
                 default:
                     break;
+            }
+
+            //If window not yet loaded, controls are null so return;
+            if (RightGroup == null || RightContent == null || LeftGroup == null || LeftContent == null)
+            {
+                return;
             }
 
             RightGroup.DataContext = LevelB.entity_repository;
@@ -269,6 +284,7 @@ namespace DaphneGui.Pushing
             }
         }
 
+        //Helper methods
         private ConfigMolecule FindMolInList(ObservableCollection<ConfigMolecule> list, ConfigMolecule mol)
         {
             foreach (ConfigMolecule m in list)
@@ -353,54 +369,16 @@ namespace DaphneGui.Pushing
 
             PushLevelA = level;
 
-            switch (PushLevelA)
+            if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
             {
-                case PushLevel.Component:
-                    LevelA = MainWindow.SOP.Protocol;
-                    break;
-                case PushLevel.DaphneStore:
-                    LevelA = MainWindow.SOP.DaphneStore;
-                    break;
-                case PushLevel.UserStore:
-                    LevelA = MainWindow.SOP.UserStore;
-                    break;
-            }
-
-            switch (PushEntityType)
-            {
-                case PushLevelEntityType.Molecule:
-                    LeftList = LevelA.entity_repository.molecules;
-                    break;
-                case PushLevelEntityType.Gene:
-                    LeftList = LevelA.entity_repository.genes;
-                    break;
-                case PushLevelEntityType.Reaction:
-                    LeftList = LevelA.entity_repository.reactions;
-                    break;
-                case PushLevelEntityType.Cell:
-                    LeftList = LevelA.entity_repository.cells;
-                    break;
-                default:
-                    break;
+                PushLevelB = PushLevel.UserStore;
+                LevelBComboBox.SelectedIndex = 1;
             }
 
             if (LeftGroup == null)
-                return;            
-
-            LeftGroup.DataContext = LevelA.entity_repository;
-
-            if (LeftContent == null)
                 return;
 
-            if (RightList == null)
-            {
-                LeftContent.DataContext = LeftList;
-            }
-            else
-            {
-                LeftContent.DataContext = FilteredLeftList();
-            }
-
+            ResetGrids();
         }
 
         private void LevelBComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -410,50 +388,24 @@ namespace DaphneGui.Pushing
 
             PushLevelB = level;
 
-            switch (PushLevelB)
-            {
-                case PushLevel.Component:
-                    LevelB = MainWindow.SOP.Protocol;
-                    break;
-                case PushLevel.DaphneStore:
-                    LevelB = MainWindow.SOP.DaphneStore;
-                    break;
-                case PushLevel.UserStore:
-                    LevelB = MainWindow.SOP.UserStore;
-                    break;
-            }
-
-            switch (PushEntityType)
-            {
-                case PushLevelEntityType.Molecule:
-                    RightList = LevelB.entity_repository.molecules;
-                    break;
-                case PushLevelEntityType.Gene:
-                    RightList = LevelB.entity_repository.genes;
-                    break;
-                case PushLevelEntityType.Reaction:
-                    RightList = LevelB.entity_repository.reactions;
-                    break;
-                case PushLevelEntityType.Cell:
-                    RightList = LevelB.entity_repository.cells;
-                    break;
-                default:
-                    break;
-            }
+            //if (PushLevelB == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Left")
+            //{
+            //    PushLevelA = PushLevel.UserStore;
+            //}
 
             if (RightGroup == null)
                 return;
 
-            RightGroup.DataContext = LevelB.entity_repository;
-
-            if (RightContent == null)
-                return;
-
-            RightContent.DataContext = FilteredRightList();     //RightList;  
+            ResetGrids();
         }
 
         public void PushCommandExecuted(object sender, ExecutedRoutedEventArgs e)
         {
+            if (PushLevelA == PushLevelB) {
+                MessageBox.Show("The target library must be different from the source library");
+                return;
+            }
+
             string messageBoxText = "Are you sure you want to save the selected entities to the target library?";
             string caption = "Save Entities";
             MessageBoxButton button = MessageBoxButton.YesNo;
@@ -473,9 +425,8 @@ namespace DaphneGui.Pushing
                 {
                     GenericPusher(ent, LevelA, LevelB);
                 }
-                //CollectionViewSource.GetDefaultView(grid.ItemsSource).Refresh();
-                this.InvalidateVisual();
             }
+            ResetGrids();
         }
 
         /// <summary>
@@ -485,7 +436,10 @@ namespace DaphneGui.Pushing
         /// <param name="e"></param>
         public void PushCommandCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
+            
             DataGrid grid = sender as DataGrid;
+            e.CanExecute = true;
+            return;
 
             if (grid != null)
             {
@@ -589,6 +543,22 @@ namespace DaphneGui.Pushing
             //}
         }
 
+        private void PushButtonArrow_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = sender as Button;
+            if ((string)btn.Tag == "Right")
+            {
+                btn.Tag = "Left";
+                ActualButtonImage.Source = LeftImage.Source;
+            }
+            else
+            {
+                btn.Tag = "Right";
+                ActualButtonImage.Source = RightImage.Source;
+            }
+            
+            ResetGrids();
+        }
 
     }  //End of PushBetweenLevels class
 
@@ -646,12 +616,7 @@ namespace DaphneGui.Pushing
 
     public static class MyCommands
     {
-        //public static RoutedCommand PushCommand { get; set; }
-
         public static readonly RoutedCommand PushCommand = new RoutedCommand("PushCommand", typeof(MyCommands));
-                        
-
-
     }
 
     public class PushLevelEntityTemplateSelector : DataTemplateSelector

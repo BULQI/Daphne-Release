@@ -251,6 +251,20 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
+            ////DO NOT DELETE THIS
+            ////This code is to create DaphneStore and UserStore.
+            ////It should not be needed ever again! 
+            ////Any editing of DaphneStore should be done through application (GUI).
+            //try
+            //{
+            //    CreateDaphneAndUserStores();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
+
+            ////This code re-generates the scenarios - DO NOT DELETE
             //try
             //{
             //    CreateAndSerializeDaphneProtocols();
@@ -576,18 +590,6 @@ namespace DaphneGui
         /// </summary>
         public void CreateAndSerializeDaphneProtocols()
         {
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
-            //try
-            //{
-            //    CreateDaphneAndUserStores();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
-
             //BLANK SCENARIO
             var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.TISSUE_SCENARIO);
 
@@ -3088,9 +3090,8 @@ namespace DaphneGui
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            
-            if (IsUserAdministrator() == false)
-                MainMenu.Items.Remove(AdminMenu);
+            //if (IsUserAdministrator() == false)
+            //    MainMenu.Items.Remove(AdminMenu);
 
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
         }

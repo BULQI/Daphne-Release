@@ -58,16 +58,16 @@ namespace Daphne
         }
 
         /// <summary>
-        /// User DaphneStore for loading entity_repository into the given protocol.
+        /// Use UserStore for loading entity_repository into the given protocol.
         /// This way every protocol will have the same entity guids.
         /// </summary>
         /// <param name="protocol"></param>
-        public static void LoadEntitiesFromDaphneStore(Protocol protocol)
+        public static void LoadEntitiesFromUserStore(Protocol protocol)
         {
             if (protocol == null)
                 return;
 
-            Level store = new Level("Config\\daphne_daphnestore.json", "Config\\temp_daphnestore.json");
+            Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             store = store.Deserialize();
 
             var Settings = new JsonSerializerSettings();
@@ -78,6 +78,222 @@ namespace Daphne
             protocol.InitializeStorageClasses();
         }
 
+        //------------------------------------------------
+
+        private static void LoadLigandReceptorEntities(Protocol protocol)
+        {
+            //Load from User Store so open it
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            //MOLECULES
+            string[] type = new string[1] { "CXCL13" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = null;
+                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                {
+                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        configMolecule = mol;
+                        break;
+                    }
+                }
+                if (configMolecule != null)
+                {
+                    ConfigMolecule newmol = configMolecule.Clone(null);
+                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = null;
+                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                {
+                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        configMolecule = mol;
+                        break;
+                    }
+                }
+                if (configMolecule != null)
+                {
+                    ConfigMolecule newmol = configMolecule.Clone(null);
+                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            //REACTION TEMPLATES
+            AddReactionTemplate(userstore, ReactionType.BoundaryAssociation, protocol);
+            AddReactionTemplate(userstore, ReactionType.BoundaryDissociation, protocol);
+
+            //CELLS
+            type = new string[1] { "Leukocyte_staticReceptor" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigCell configCell = findCell(type[i], userstore);
+                if (configCell != null)
+                {
+                    ConfigCell newcell = configCell.Clone(true);
+                    protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
+            type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                  "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
+            ConfigReaction reac;
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], userstore);
+                if (reac != null)
+                {
+                    ConfigReaction newReac = reac.Clone(true);
+                    protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+        }
+
+        private static void LoadDriverLocomotionEntities(Protocol protocol)
+        {
+            //Load from User Store so open it
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            //GENES
+            string[] type = new string[1] { "gApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigGene configEntity = null;
+                foreach (ConfigGene ent in userstore.entity_repository.genes)
+                {
+                    if (ent.Name == type[i])
+                    {
+                        configEntity = ent;
+                        break;
+                    }
+                }
+                if (configEntity != null)
+                {
+                    ConfigGene newentity = configEntity.Clone(null);
+                    protocol.repositoryPush(newentity, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            //MOLECULES
+            type = new string[4] { "CXCL13", "A", "A*", "sApop" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = null;
+                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                {
+                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        configMolecule = mol;
+                        break;
+                    }
+                }
+                if (configMolecule != null)
+                {
+                    ConfigMolecule newmol = configMolecule.Clone(null);
+                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = null;
+                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                {
+                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        configMolecule = mol;
+                        break;
+                    }
+                }
+                if (configMolecule != null)
+                {
+                    ConfigMolecule newmol = configMolecule.Clone(null);
+                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            //CELLS
+            type = new string[1] { "Leukocyte_staticReceptor_motile" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigCell configCell = findCell(type[i], userstore);
+                if (configCell != null)
+                {
+                    ConfigCell newcell = configCell.Clone(true);
+                    protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+            //REACTION TEMPLATES
+            AddReactionTemplate(userstore, ReactionType.BoundaryAssociation, protocol);
+            AddReactionTemplate(userstore, ReactionType.BoundaryDissociation, protocol);
+            AddReactionTemplate(userstore, ReactionType.Transformation, protocol);
+            AddReactionTemplate(userstore, ReactionType.CatalyzedBoundaryActivation, protocol);
+            AddReactionTemplate(userstore, ReactionType.Transcription, protocol);
+            AddReactionTemplate(userstore, ReactionType.Annihilation, protocol);
+
+            //REACTIONS
+            type = new string[6] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
+                                    "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+                                    "A* -> A",
+                                    "gApop -> sApop + gApop",
+                                    "sApop ->"};
+
+            ConfigReaction reac;
+            for (int i = 0; i < type.Length; i++)
+            {
+                reac = findReaction(type[i], userstore);
+                if (reac != null)
+                {
+                    ConfigReaction newReac = reac.Clone(true);
+                    protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+        }
+
+        //-------------------------------------------------
+
+
+        /// <summary>
+        /// Helper method for creating a reaction template from the given store, 
+        /// to the given protocol, given a reaction type.
+        /// </summary>
+        /// <param name="store"></param>
+        /// <param name="type"></param>
+        /// <param name="protocol"></param>
+        private static void AddReactionTemplate(Level store, ReactionType type, Protocol protocol)
+        {
+            ConfigReactionTemplate crtUser = null;
+            foreach (ConfigReactionTemplate crt in store.entity_repository.reaction_templates)
+            {
+                if (crt.reac_type == type)
+                {
+                    crtUser = crt;
+                    break;
+                }
+            }
+            if (crtUser != null)
+            {
+                ConfigReactionTemplate crtnew = crtUser.Clone(null);
+                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+            }
+        }
+
+        
+
+        
         public static void CreateLigandReceptorProtocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -100,7 +316,8 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            //LoadEntitiesFromUserStore(protocol);
+            LoadLigandReceptorEntities(protocol);
 
             // ECM MOLECULES
 
@@ -194,6 +411,9 @@ namespace Daphne
             }
         }
 
+
+
+        
         /// <summary>
         /// 
         /// </summary>
@@ -219,7 +439,8 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            //LoadEntitiesFromUserStore(protocol);
+            LoadDriverLocomotionEntities(protocol);
 
             // ECS
 
@@ -329,6 +550,35 @@ namespace Daphne
             }
         }
 
+        private static void LoadDiffusionEntities(Protocol protocol)
+        {
+            //Load from User Store so open it
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            //MOLECULES
+            string[] type = new string[1] { "CXCL13" };
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = null;
+                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                {
+                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
+                    {
+                        configMolecule = mol;
+                        break;
+                    }
+                }
+                if (configMolecule != null)
+                {
+                    ConfigMolecule newmol = configMolecule.Clone(null);
+                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                }
+            }
+
+        }
+
+
         /// <summary>
         /// New default scenario for first pass of Daphne
         /// </summary>
@@ -354,7 +604,8 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            //LoadEntitiesFromUserStore(protocol);
+            LoadDiffusionEntities(protocol);
 
             // Gaussian Distrtibution
             // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
@@ -431,7 +682,7 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 100;
 
             // Global Paramters
-            LoadEntitiesFromDaphneStore(protocol);
+            //LoadEntitiesFromUserStore(protocol);
 
         }
 
@@ -1866,9 +2117,9 @@ namespace Daphne
         }
 
         // given a cell type name like BCell, find the ConfigCell object
-        public static ConfigCell findCell(string name, Protocol protocol)
+        public static ConfigCell findCell(string name, Level level)
         {
-            foreach (ConfigCell cc in protocol.entity_repository.cells)
+            foreach (ConfigCell cc in level.entity_repository.cells)
             {
                 if (cc.CellName == name)
                 {
