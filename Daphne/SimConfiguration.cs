@@ -4389,6 +4389,23 @@ namespace Daphne
         {
             throw new NotImplementedException();
         }
+
+        public ConfigReactionTemplate Clone(Protocol protocol)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
+
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
+                newRT.entity_guid = id.ToString();
+            }
+
+            return newRT;
+        }       
     }
 
     public class ConfigReactionGuidRatePair : ConfigEntity
