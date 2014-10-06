@@ -129,7 +129,7 @@ namespace Daphne
         }
     }
 
-    public enum PushLevel { Component = 0, UserStore, DaphneStore }
+    public enum PushLevel { Protocol = 0, UserStore, DaphneStore }
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
@@ -140,7 +140,7 @@ namespace Daphne
         // correspond in length and index with the BoundaryFace enum...
         private List<string> _push_level_strings = new List<string>()
                                 {
-                                    "Component",
+                                    "Protocol",
                                     "User Store",
                                     "Daphne Store"
                                 };
@@ -2051,6 +2051,17 @@ namespace Daphne
                     cellpopulations.Remove(cell_pop);
             }
         }
+
+        public bool HasMoleculeInSomeCellMembrane(string mol_guid)
+        {
+            foreach (CellPopulation pop in cellpopulations)
+            {
+                if (pop.Cell.membrane.molecules_dict.ContainsKey(mol_guid))
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public class SimulationParams
@@ -2465,6 +2476,56 @@ namespace Daphne
             NumGridPts = pt;
 
             return true;
+        }
+
+        public bool ValidateReaction(ConfigReaction cr, TissueScenario scenario)
+        {
+            bool bOK = false;
+            
+            foreach (string molguid in cr.reactants_molecule_guid_ref)
+            {
+                if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                {
+                    bOK = true;
+                }
+                else
+                {
+                    bOK = false;
+                    break;
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.products_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+            if (bOK)
+            {
+                foreach (string molguid in cr.modifiers_molecule_guid_ref)
+                {
+                    if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
+                    {
+                        bOK = true;
+                    }
+                    else
+                    {
+                        bOK = false;
+                        break;
+                    }
+                }
+            }
+
+            return bOK;
         }
     }
 
@@ -3147,7 +3208,7 @@ namespace Daphne
             bool ret = false;
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
             {
-                if (mol.Name == tempMolName)
+                if (mol.Name.ToLower() == tempMolName.ToLower())
                 {
                     ret = true;
                     break;
@@ -3922,7 +3983,7 @@ namespace Daphne
                 foreach (var nn in e.NewItems)
                 {
                     ConfigMolecularPopulation mp = nn as ConfigMolecularPopulation;
-                    mp.PropertyChanged += mp_PropertyChanged;
+                    //mp.PropertyChanged += mp_PropertyChanged;
 
                     // add molpop into molpops_dict
                     if (molpops_dict.ContainsKey(mp.molpop_guid) == false)
@@ -4328,6 +4389,23 @@ namespace Daphne
         {
             throw new NotImplementedException();
         }
+
+        public ConfigReactionTemplate Clone(Protocol protocol)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
+
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
+                newRT.entity_guid = id.ToString();
+            }
+
+            return newRT;
+        }       
     }
 
     public class ConfigReactionGuidRatePair : ConfigEntity
@@ -4557,6 +4635,7 @@ namespace Daphne
             set
             {
                 cellName = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("CellName");
             }
         }
@@ -4571,6 +4650,7 @@ namespace Daphne
             set
             {
                 cellRadius = value ;
+                this.incrementChangeStamp();
                 OnPropertyChanged("CellRadius");
             }
         }
@@ -4605,6 +4685,7 @@ namespace Daphne
             set
             {
                 transductionConstant = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("TransductionConstant");
             }
         }
@@ -4619,6 +4700,7 @@ namespace Daphne
             set
             {
                 dragCoefficient = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("DragCoefficient");
             }
         }
@@ -4636,6 +4718,7 @@ namespace Daphne
             set
             {
                 sigma = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("Sigma");
             }
         }
@@ -4657,6 +4740,7 @@ namespace Daphne
             set
             {
                 _diff_scheme = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("diff_scheme");
             }
         }
@@ -4675,6 +4759,7 @@ namespace Daphne
             set
             {
                 _death_driver = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("death_driver");
             }
         }
@@ -4707,6 +4792,7 @@ namespace Daphne
             set
             {
                 _div_scheme = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("div_scheme");
             }
         }
@@ -5385,20 +5471,8 @@ namespace Daphne
 
     public class ReportStates
     {
-        bool division_state = false;
         public bool Death { get; set; }
-        public bool Division 
-        {
-            get
-            {
-                return division_state == true;
-                //return division_state;
-            }
-            set
-            {
-                division_state = value;
-            }
-        }
+        public bool Division { get; set; }
         public bool Differentiation { get; set; }
     }
 

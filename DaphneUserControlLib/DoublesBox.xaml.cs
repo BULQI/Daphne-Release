@@ -653,6 +653,36 @@ namespace DaphneUserControlLib
             uc.SliderWidth = (int)(e.NewValue);
         }
 
+        //TEXTBORDERTHICKNESS          
+        public static DependencyProperty TextBorderThicknessProperty = DependencyProperty.Register("TextBorderThickness", typeof(int), typeof(DoublesBox), new FrameworkPropertyMetadata(1, TextBorderThicknessPropertyChanged));
+        public int TextBorderThickness
+        {
+            get { return (int)GetValue(TextBorderThicknessProperty); }
+            set
+            {
+                SetValue(TextBorderThicknessProperty, value);
+
+                if (SliderEnabled)
+                {
+                    stpControl.Width = value;
+                    stpControl.Width += tbFNumber.Width;
+                    stpMainPanel.Width = stpControl.Width + 10;
+                }
+                else
+                {
+                    stpControl.Width = tbFNumber.Width;
+                    stpMainPanel.Width = stpControl.Width + 10;
+                }
+                OnPropertyChanged("TextBorderThickness");
+            }
+        }
+        private static void TextBorderThicknessPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // insert your code here
+            DoublesBox uc = d as DoublesBox;
+            uc.TextBorderThickness = (int)(e.NewValue);
+        }
+
         //ISREADONLY          
         public static DependencyProperty IsReadOnlyProperty = DependencyProperty.Register("IsReadOnly", typeof(bool), typeof(DoublesBox), new FrameworkPropertyMetadata(false, IsReadOnlyPropertyChanged));
         public bool IsReadOnly

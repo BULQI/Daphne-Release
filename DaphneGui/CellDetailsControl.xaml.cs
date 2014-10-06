@@ -723,8 +723,11 @@ namespace DaphneGui
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
+                    bOK = false;
+            }
 
             e.Accepted = bOK;
         }
@@ -760,8 +763,11 @@ namespace DaphneGui
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
             //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
+                    bOK = false;
+            }
 
             e.Accepted = bOK;
         }
@@ -815,8 +821,11 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid))
+                    bOK = false;
+            }
 
             e.Accepted = bOK;
         }
