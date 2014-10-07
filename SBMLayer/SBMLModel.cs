@@ -977,10 +977,12 @@ namespace SBMLayer
 
             //Adds cytosol compartment
             string compName = "RComplex";
+#if OLD_RC
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
             double volume = envHandle.extent_x * envHandle.extent_y * envHandle.extent_z;
-            AddCompartment(compName, compName, true, volume, envHandle.NumGridPts.Length, "");
 
+            AddCompartment(compName, compName, true, volume, envHandle.NumGridPts.Length, "");
+#endif
             //Adds molecular populations
             Species specAnnot;
             foreach (ConfigMolecularPopulation confMolPop in crc.molpops)
@@ -988,21 +990,20 @@ namespace SBMLayer
                 AddSpecies(confMolPop.Name + "_" + compName, confMolPop.Name, compName, false, false, false, ((MolPopHomogeneousLevel)confMolPop.mp_distribution).concentration, "");
             }
 
-            foreach (ConfigGene confGenPop in crc.genes)
+#if OLD_RC
+           foreach (ConfigGene confGenPop in crc.genes)
             {
                 specAnnot= AddSpecies(confGenPop.Name + "_" + compName, confGenPop.Name, compName, false, false, false,confGenPop.ActivationLevel , "");
                 SetGeneAnnotation(confGenPop, specAnnot);
             }
-
-            //Adds reactions
-            ConfigReaction cr;
-            foreach (string rguid in crc.reactions_guid_ref)
+#endif
+            // Adds reactions
+            foreach (ConfigReaction cr in crc.reactions)
             {
-                cr = protocol.entity_repository.reactions_dict[rguid];
                 AddSBMLReactions(cr, cr.rate_const, protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type, compName, string.Empty);
             }
 
-            //Check for model consistency and serialize to file (provide output stream for log)
+            // Check for model consistency and serialize to file (provide output stream for log)
             CheckModelConsistency(true, outputLogFile);
             WriteSBMLModel();
         }
@@ -1890,15 +1891,16 @@ namespace SBMLayer
             //If # of compartments==1, then build as a reaction complex. If not, build as a spatial simulation scenario.
             if (IsReactionComplex())
             {
+#if OLD_RC
                 if (protocol.rc_scenario.environment is ConfigECSEnvironment == false)
                 {
                     throw new InvalidCastException();
                 }
 
                 ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.rc_scenario.environment;
-
+#endif
                 ConfigReactionComplex crc = new ConfigReactionComplex(model.getId());
-
+#if OLD_RC
                 libsbmlcs.Compartment reactionComplexCompartment = compartments.get(0);
                 if (reactionComplexCompartment.isSetSize())
                 {
@@ -1906,25 +1908,30 @@ namespace SBMLayer
                     envHandle.extent_y = (int)reactionComplexCompartment.getSize() / 3;
                     envHandle.extent_z = (int)reactionComplexCompartment.getSize() / 3;
                 }
+#endif
                 //Add all molecular populations
                 Species crcSpec;
+
                 for (int i = 0; i < speciesList.size(); i++)
                 {
-                    crcSpec=speciesList.get(i);
+                    crcSpec = speciesList.get(i);
                  
                     if(TestSpecies(crcSpec))
                     {
                         // protocol.rc_scenario.environment.ecs.molpops.Add(PreparePopulation(speciesList.get(i), MoleculeLocation.Bulk, true));
                         crc.molpops.Add(PreparePopulation(crcSpec, MoleculeLocation.Bulk, true));
                     }
-                    else
+#if OLD_RC
+                   else
 	                {
                         crc.genes.Add(PrepareGenes(crcSpec));    
 	                }
+#endif
                 }
 
                 libsbmlcs.Reaction sbmlReaction;
                 ConfigReaction complexConfigReaction;
+
                 for (int i = 0; i < model.getListOfReactions().size(); i++)
                 {
                     sbmlReaction = model.getReaction(i);
@@ -1940,17 +1947,20 @@ namespace SBMLayer
 
                         if (complexConfigReaction != null)
                         {
+#if OLD_RC
                             ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
                             grp.entity_guid = complexConfigReaction.entity_guid;
                             grp.OriginalRate = complexConfigReaction.rate_const;
                             grp.ReactionComplexRate = complexConfigReaction.rate_const;
-
-                            crc.reactions_guid_ref.Add(complexConfigReaction.entity_guid);
+#endif
+                            crc.reactions.Add(complexConfigReaction);
+#if OLD_RC
                             crc.ReactionRates.Add(grp);
+#endif
                         }
                     }
                 }
-                //Add the reaction to repository collection
+                // add the reaction complex to repository collection
                 protocol.entity_repository.reaction_complexes.Add(crc);
                 reactionComplexFlag = true;
             }

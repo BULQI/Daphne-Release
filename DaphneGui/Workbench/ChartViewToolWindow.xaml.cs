@@ -86,7 +86,9 @@ namespace Workbench
                 cm.DrawChart();
 
                 dgInitConcs.ItemsSource = RC.initConcs;
+#if OLD_RC
                 dgReactionRates.ItemsSource = RC.CRC.ReactionRates;
+#endif
 
             }
         }
@@ -222,7 +224,7 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 RC.UpdateRateConstants();
-                RC.Sim.Load(MainWindow.SOP.Protocol, true, true);
+                RC.Sim.Load(MainWindow.SOP.Protocol, true);
                 cm.RedrawSeries();
                 cm.RecalculateYMax();
             }

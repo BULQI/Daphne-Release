@@ -741,7 +741,6 @@ namespace DaphneGui
         /// <param name="protocol"></param>
         private void LoadReactionComplex(Protocol protocol)
         {
-
             //ReactionComplex that was added
             ConfigReactionComplex crc = protocol.entity_repository.reaction_complexes.Last();
 
@@ -752,28 +751,33 @@ namespace DaphneGui
                 sop.Protocol.entity_repository.reaction_complexes.Add(crc);
             }
 
-            foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
+#if OLD_RC
+           foreach (ConfigMolecularPopulation configMolPop in crc.molpops)
             {
                 ConfigMolecule configMol = protocol.entity_repository.molecules_dict[configMolPop.molecule.entity_guid];
                 sop.Protocol.entity_repository.molecules.Add(configMol);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
-
             foreach (ConfigGene configGenePop in crc.genes)
             {
                 ConfigGene configGen = protocol.entity_repository.genes_dict[configGenePop.entity_guid];
+
                 sop.Protocol.entity_repository.genes.Add(configGen);
                 //There is no need to add this to the molecules_dict manually. After adding to the molecules Collection an event takes care of updating the dictionary 
             }
+#else
+            foreach (ConfigMolecule cm in crc.molecules_dict.Values)
+            {
+                sop.Protocol.entity_repository.molecules.Add(cm.Clone(null));
+            }
+#endif
 
             //Reactions in the reaction complex
-            ConfigReaction cr;
-            foreach (string rguid in crc.reactions_guid_ref)
+            foreach (ConfigReaction cr in crc.reactions)
             {
-                cr = protocol.entity_repository.reactions_dict[rguid];
                 int index = protocol.entity_repository.reaction_templates.IndexOf(protocol.entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref]);
-                cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
 
+                cr.reaction_template_guid_ref = sop.Protocol.entity_repository.reaction_templates[index].entity_guid;
                 sop.Protocol.entity_repository.reactions.Add(cr);
             }
 
@@ -1951,9 +1955,9 @@ namespace DaphneGui
 
             // GUI Resources
             // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.DataContext = sop.Protocol;
-            this.CellStudioToolWindow.DataContext = sop.Protocol;
-            this.ComponentsToolWindow.DataContext = sop.Protocol;
+            ProtocolToolWindow.DataContext = sop.Protocol;
+            CellStudioToolWindow.DataContext = sop.Protocol;
+            ComponentsToolWindow.DataContext = sop.Protocol;
 
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
@@ -2147,7 +2151,7 @@ namespace DaphneGui
                             }
                             if (sim.CheckFlag(SimulationBase.SIMFLAG_SAMPLE) == true && Properties.Settings.Default.skipDataBaseWrites == false)
                             {
-                                sim.Reporter.AppendReporter(sop.Protocol, sim);
+                                sim.Reporter.AppendReporter();
                             }
 
                             if (sim.RunStatus != SimulationBase.RUNSTAT_RUN)
@@ -2504,7 +2508,7 @@ namespace DaphneGui
                 {
                     if(Properties.Settings.Default.skipDataBaseWrites == false)
                     {
-                        sim.Reporter.StartReporter(sop.Protocol);
+                        sim.Reporter.StartReporter(sim);
                     }
                     runButton.Content = "Pause";
                     runButton.ToolTip = "Pause the Simulation.";
