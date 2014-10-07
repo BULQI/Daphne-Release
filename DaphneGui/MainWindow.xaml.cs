@@ -1949,14 +1949,16 @@ namespace DaphneGui
                 }
             }
 
-            // GUI Resources
-            // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.DataContext = sop.Protocol;
-            this.CellStudioToolWindow.DataContext = sop.Protocol;
-            this.ComponentsToolWindow.DataContext = sop.Protocol;
+            
 
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
+                // GUI Resources
+                // Set the data context for the main tab control config GUI
+                this.ProtocolToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
+
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
@@ -1968,6 +1970,12 @@ namespace DaphneGui
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
+                this.ProtocolToolWindow.Close();
+                this.VTKDisplayDocWindow.Close();
+                this.ComponentsToolWindow.Close();
+                this.CellStudioToolWindow.Close();
+                this.ReacComplexChartWindow.Close();
+
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -2011,9 +2019,13 @@ namespace DaphneGui
                 orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
 
-            vtkDataBasket.SetupVTKData(sop.Protocol);
-            // Create all VTK visualization pipelines and elements
-            gc.CreatePipelines();
+            //skg
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                vtkDataBasket.SetupVTKData(sop.Protocol);
+                // Create all VTK visualization pipelines and elements
+                gc.CreatePipelines();
+            }
 
             // clear the vcr cache
             if (vcrControl != null)
@@ -3094,6 +3106,21 @@ namespace DaphneGui
             //    MainMenu.Items.Remove(AdminMenu);
 
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushTransDriver_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushReacTemp_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         

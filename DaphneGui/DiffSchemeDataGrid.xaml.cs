@@ -179,6 +179,9 @@ namespace DaphneGui
                 dataGrid.Columns.Clear();
                 foreach (var gene_guid in diffScheme.genes)
                 {
+                    if (!er.genes_dict.ContainsKey(gene_guid))
+                        continue;
+
                     ConfigGene gene = er.genes_dict[gene_guid];
 
                     DataGridTextColumn col = new DataGridTextColumn();

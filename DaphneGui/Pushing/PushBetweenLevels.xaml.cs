@@ -492,6 +492,16 @@ namespace DaphneGui.Pushing
                             MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                             return;
                         }
+
+                        while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
+                        {
+                            string entered_name = newmol.Name;
+                            newmol.ValidateName(MainWindow.SOP.Protocol);
+                            MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
+                            AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
+
+                        }
+
                         levelB.repositoryPush(newmol, status);
                         break;
                     case PushLevelEntityType.Gene:
@@ -512,7 +522,7 @@ namespace DaphneGui.Pushing
                             MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                             return;
                         }
-                        levelB.repositoryPush(newreac, status);
+                        levelB.repositoryPush(newreac, status, levelA, true);
                         break;
                     case PushLevelEntityType.Cell:
                         ConfigCell newcell = ((ConfigCell)entity).Clone(true);
@@ -522,7 +532,7 @@ namespace DaphneGui.Pushing
                             MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                             return;
                         }
-                        levelB.repositoryPush(newcell, status);
+                        levelB.repositoryPush(newcell, status, levelA, true);
                         break;
                     default:
                         break;
