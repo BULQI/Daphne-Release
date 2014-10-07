@@ -732,11 +732,12 @@ namespace DaphneGui
         private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
+
             if (crc != null)
             {
-                if (!MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Contains(crc.entity_guid))
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Contains(crc) == false)
                 {
-                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Add(crc.entity_guid);
+                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
                 }
             }
         }
@@ -744,10 +745,16 @@ namespace DaphneGui
         private void RemoveEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = ReactionComplexListBox.SelectedIndex;
+
             if (nIndex >= 0)
             {
                 string guid = (string)ReactionComplexListBox.SelectedValue;
-                MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_guid_ref.Remove(guid);
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(guid) == true)
+                {
+                    ConfigReactionComplex rc = MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict[guid];
+
+                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
+                }
             }
         }
 

@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "7b47aaac-74e5-4d25-bc7a-16e5ab96480c",
+  "experiment_guid": "9ce5efa1-1775-4805-9656-55e83ce474a5",
   "experiment_description": "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -80,12 +80,12 @@
               }
             ],
             "Reactions": [],
-            "reaction_complexes_guid_ref": []
+            "reaction_complexes": []
           },
           "cytosol": {
             "molpops": [],
             "Reactions": [],
-            "reaction_complexes_guid_ref": []
+            "reaction_complexes": []
           },
           "genes": [],
           "diff_scheme": null,
@@ -95,7 +95,7 @@
           "change_stamp": 293
         },
         "cellpopulation_name": "Leukocyte_staticReceptor",
-        "cellpopulation_guid": "0bfd1f8a-8f9d-4c20-9d98-121a81ef8714",
+        "cellpopulation_guid": "56f6b855-de81-48ad-a85b-1aa4c361a2ad",
         "cellpopulation_id": 1,
         "report_xvf": {
           "position": false,
@@ -111,7 +111,7 @@
           {
             "mean": false,
             "mp_extended": 1,
-            "molpop_guid_ref": "25c1e05e-6d4c-4a9c-9ffb-59bde1584062"
+            "molpop_guid_ref": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe"
           }
         ],
         "number": 1,
@@ -185,7 +185,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "25c1e05e-6d4c-4a9c-9ffb-59bde1584062",
+            "molpop_guid": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -201,7 +201,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 0,
-              "molpop_guid_ref": "25c1e05e-6d4c-4a9c-9ffb-59bde1584062"
+              "molpop_guid_ref": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe"
             },
             "mp_dist_name": "Uniform",
             "mp_distribution": {
@@ -248,35 +248,7 @@
             "change_stamp": 163
           }
         ],
-        "reaction_complexes_guid_ref": []
-      }
-    }
-  },
-  "rc_scenario": {
-    "cellpopulations": [],
-    "time_config": {
-      "duration": 100.0,
-      "rendering_interval": 1.0,
-      "sampling_interval": 1.0
-    },
-    "simInterpolate": 1,
-    "simCellSize": 3,
-    "environment": {
-      "$type": "Daphne.ConfigECSEnvironment, Daphne",
-      "extent_x": 200,
-      "extent_y": 200,
-      "extent_z": 200,
-      "gridstep": 10.0,
-      "NumGridPts": [
-        21,
-        21,
-        21
-      ],
-      "toroidal": false,
-      "comp": {
-        "molpops": [],
-        "Reactions": [],
-        "reaction_complexes_guid_ref": []
+        "reaction_complexes": []
       }
     }
   },
@@ -366,12 +338,12 @@
             }
           ],
           "Reactions": [],
-          "reaction_complexes_guid_ref": []
+          "reaction_complexes": []
         },
         "cytosol": {
           "molpops": [],
           "Reactions": [],
-          "reaction_complexes_guid_ref": []
+          "reaction_complexes": []
         },
         "genes": [],
         "diff_scheme": null,

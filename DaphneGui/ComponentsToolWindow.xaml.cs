@@ -199,7 +199,7 @@ namespace DaphneGui
             }
 
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            ConfigReactionComplex crcNew = crcCurr.Clone();
+            ConfigReactionComplex crcNew = crcCurr.Clone(false);
 
             Level level = this.DataContext as Level;
             level.entity_repository.reaction_complexes.Add(crcNew);
@@ -328,6 +328,7 @@ namespace DaphneGui
             //Cleanup any previous RC stuff
             Protocol p = null;
             Level level = this.DataContext as Level;
+
             if (level is Protocol)
             {
                 p = level as Protocol;
@@ -349,37 +350,36 @@ namespace DaphneGui
             //}
             //crc.RCSim.reset();
             //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
-
+#if OLD_RC
             p.rc_scenario.cellpopulations.Clear();
 
+#endif
             // end of cleanup
 
             ConfigCell cc = new ConfigCell();
+
             cc.CellName = "RCCell";
             foreach (ConfigMolecularPopulation cmp in crc.molpops)
             {
                 cc.cytosol.molpops.Add(cmp);
             }
-            foreach (ConfigGene configGene in crc.genes)
+#if OLD_RC
+           foreach (ConfigGene configGene in crc.genes)
             {
                 cc.genes.Add(configGene);
                 
             }
-            foreach (string rguid in crc.reactions_guid_ref)
+#endif
+            foreach (ConfigReaction cr in crc.reactions)
             {
-                //if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
-                if (p.entity_repository.reactions_dict.ContainsKey(rguid) == true)
-                {
-                    //ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
-                    ConfigReaction cr = p.entity_repository.reactions_dict[rguid];
-
-                    cc.cytosol.Reactions.Add(cr.Clone(true));
-                }
+                cc.cytosol.Reactions.Add(cr.Clone(true));
             }
             //MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
             //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
             p.entity_repository.cells.Add(cc);
+#if OLD_RC
             p.rc_scenario.cellpopulations.Clear();
+#endif
 
             CellPopulation cp = new CellPopulation();
             cp.Cell = cc;
@@ -387,6 +387,7 @@ namespace DaphneGui
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
+#if OLD_RC
             //ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.rc_scenario.environment;
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)p.rc_scenario.environment;
 
@@ -402,9 +403,10 @@ namespace DaphneGui
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             p.rc_scenario.cellpopulations.Add(cp);
             //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
-
+#endif
             ReactionComplexProcessor Processor = new ReactionComplexProcessor();
-            MainWindow.Sim.Load(p, true, true);
+
+            MainWindow.Sim.Load(p, true);
             //MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
 
             //Processor.Initialize(MainWindow.SOP.Protocol, crc, (TissueSimulation)MainWindow.Sim);

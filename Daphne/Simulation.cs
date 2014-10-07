@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
+
 
 using MathNet.Numerics.LinearAlgebra;
 
@@ -48,7 +51,7 @@ namespace Daphne
             simFlags |= flag;
         }
 
-        public void reset()
+        public virtual void reset()
         {
             RunStatus = RUNSTAT_OFF;
             accumulatedTime = 0.0;
@@ -97,6 +100,220 @@ namespace Daphne
             }
 
             return percent;
+        }
+
+        private void LoadTransitionDriverElements(ConfigTransitionDriver config_td, Dictionary<string, MolecularPopulation> population, ITransitionDriver behavior)
+        {
+            foreach (ConfigTransitionDriverRow row in config_td.DriverElements)
+            {
+                foreach (ConfigTransitionDriverElement config_tde in row.elements)
+                {
+                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
+                    {
+                        TransitionDriverElement tde = new TransitionDriverElement();
+                        tde.Alpha = config_tde.Alpha;
+                        tde.Beta = config_tde.Beta;
+                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
+                        behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
+                    }
+                }
+            }
+        }
+
+        private void addCellMolpops(CellState cellState, ConfigCompartment[] configComp, Compartment[] simComp)
+        {
+            for (int comp = 0; comp < 2; comp++)
+            {
+                foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
+                {
+                    //config_comp's distribution changed. may need to keep 
+                    //it for not customized cell later(?)
+
+                    if (cellState.cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid) == false)
+                    {
+                        continue;
+                    }
+
+                    MolPopExplicit mp_explicit = new MolPopExplicit();
+
+                    mp_explicit.conc = cellState.cmState.molPopDict[cmp.molecule.entity_guid];
+                    cmp.mp_distribution = mp_explicit;
+                }
+                addCompartmentMolpops(simComp[comp], configComp[comp]);
+            }
+        }
+
+        protected void instantiateCell(Protocol protocol, ConfigCell cell, int cellpop_id,
+                                       ConfigCompartment[] configComp, CellState cellState,
+                                       List<ConfigReaction>[] bulk_reacs,
+                                       List<ConfigReaction> boundary_reacs,
+                                       List<ConfigReaction> transcription_reacs)
+        {
+            Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
+            Compartment[] simComp = new Compartment[2];
+
+            simComp[0] = simCell.Cytosol;
+            simComp[1] = simCell.PlasmaMembrane;
+
+            // cell population id
+            simCell.Population_id = cellpop_id;
+            // state
+            simCell.setState(cellState.spState);
+
+            // modify molpop information before setting
+            addCellMolpops(cellState, configComp, simComp);
+            /*for (int comp = 0; comp < 2; comp++)
+            {
+                foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
+                {
+                    //config_comp's distribution changed. may need to keep 
+                    //it for not customized cell later(?)
+
+                    if (cellState.cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid) == false)
+                    {
+                        continue;
+                    }
+
+                    MolPopExplicit mp_explicit = new MolPopExplicit();
+
+                    mp_explicit.conc = cellState.cmState.molPopDict[cmp.molecule.entity_guid];
+                    cmp.mp_distribution = mp_explicit;            
+                }
+                addCompartmentMolpops(simComp[comp], configComp[comp]);
+            }*/
+
+            // cell genes
+            foreach (ConfigGene cg in cell.genes)
+            {
+                //ConfigGene cg = protocol.entity_repository.genes_dict[s];
+                double geneActivationLevel = cg.ActivationLevel;
+
+                if (cellState.cgState.geneDict.ContainsKey(cg.entity_guid) == true)
+                {
+                    geneActivationLevel = cellState.cgState.geneDict[cg.entity_guid];
+                }
+
+                Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
+                                             new ConstructorArgument("copyNumber", cg.CopyNumber),
+                                             new ConstructorArgument("actLevel", geneActivationLevel));
+                simCell.AddGene(cg.entity_guid, gene);
+            }
+
+            //CELL REACTIONS
+            AddCompartmentBulkReactions(simCell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
+            AddCompartmentBulkReactions(simCell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
+            // membrane; no boundary
+            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
+            AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
+
+            // locomotion - merged from release-dev
+            if (simCell.Cytosol.Populations.ContainsKey(cell.locomotor_mol_guid_ref) == true)
+            {
+                MolecularPopulation driver = simCell.Cytosol.Populations[cell.locomotor_mol_guid_ref];
+
+                simCell.Locomotor = new Locomotor(driver, cell.TransductionConstant);
+                simCell.IsChemotactic = true;
+            }
+            else
+            {
+                simCell.IsChemotactic = false;
+            }
+            if (cell.Sigma > 0)
+            {
+                simCell.IsStochastic = true;
+                simCell.StochLocomotor = new StochLocomotor(cell.Sigma);
+            }
+            else
+            {
+                simCell.IsStochastic = false;
+            }
+            if (simCell.IsChemotactic || simCell.IsStochastic)
+            {
+                simCell.IsMotile = true;
+                simCell.DragCoefficient = cell.DragCoefficient;
+            }
+            else
+            {
+                simCell.IsMotile = false;
+            }
+
+            //TRANSITION DRIVERS
+            // death behavior
+            if (cell.death_driver != null)
+            {
+                if (cellState.cbState.deathDriveState != -1)
+                {
+                    simCell.DeathBehavior.CurrentState = cellState.cbState.deathDriveState;
+                }
+                ConfigTransitionDriver config_td = cell.death_driver;
+                LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.DeathBehavior);
+            }
+
+            // Division before differentiation
+            if (cell.div_scheme != null)
+            {
+                ConfigDiffScheme config_divScheme = cell.div_scheme;
+                ConfigTransitionDriver config_td = config_divScheme.Driver;
+
+                simCell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
+                LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.Divider.Behavior);
+
+                // Epigenetic information
+                for (int ii = 0; ii < simCell.Divider.nGenes; ii++)
+                {
+                    simCell.Divider.AddGene(ii, config_divScheme.genes[ii]);
+
+                    for (int j = 0; j < simCell.Divider.nStates; j++)
+                    {
+                        simCell.Divider.AddActivity(j, ii, config_divScheme.activationRows[j].activations[ii]);
+                        simCell.Divider.AddState(j, config_divScheme.Driver.states[j]);
+                    }
+                }
+
+                // Set cell state and corresponding gene activity levels
+                simCell.DividerState = simCell.Divider.CurrentState;
+                simCell.SetGeneActivities(simCell.Divider);
+            }
+
+            // Differentiation
+            if (cell.diff_scheme != null)
+            {
+                ConfigDiffScheme config_diffScheme = cell.diff_scheme;
+                ConfigTransitionDriver config_td = config_diffScheme.Driver;
+
+                simCell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
+                LoadTransitionDriverElements(config_td, simCell.Cytosol.Populations, simCell.Differentiator.Behavior);
+
+                // Epigenetic information
+                for (int ii = 0; ii < simCell.Differentiator.nGenes; ii++)
+                {
+                    simCell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
+
+                    for (int j = 0; j < simCell.Differentiator.nStates; j++)
+                    {
+                        simCell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
+                        simCell.Differentiator.AddState(j, config_diffScheme.Driver.states[j]);
+                    }
+                }
+                // Set cell state and corresponding gene activity levels
+                if (cellState.cbState.differentiationDriverState != -1)
+                {
+                    simCell.Differentiator.CurrentState = cellState.cbState.differentiationDriverState;
+                }
+                simCell.DifferentiationState = simCell.Differentiator.CurrentState;
+                //saving from saved states
+                if (cellState.cgState.geneDict.Count > 0)
+                {
+                    simCell.SetGeneActivities(cellState.cgState.geneDict);
+                }
+                else
+                {
+                    simCell.SetGeneActivities(simCell.Differentiator);
+                }
+            }
+
+            // add the cell
+            AddCell(simCell);
         }
 
         protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
@@ -204,7 +421,7 @@ namespace Daphne
             }
         }
 
-        public virtual void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
+        public virtual void Load(Protocol protocol, bool completeReset)
         {
             ProtocolHandle = protocol;
 
@@ -463,8 +680,58 @@ namespace Daphne
             dataBasket.Cells.Remove(c.Cell_id);
         }
 
+        public virtual void RunForward()
+        {
+            if (RunStatus == RUNSTAT_RUN)
+            {
+                // render and sample the initial state
+                if (renderCount == 0 && sampleCount == 0)
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    renderCount++;
+                    sampleCount++;
+                    return;
+                }
+                // clear all flags
+                clearFlag(SIMFLAG_ALL);
+
+                // find the maximum allowable step (time until the next event occurs)
+                double dt;
+
+                // render to happen next
+                if (renderCount * renderStep < sampleCount * sampleStep)
+                {
+                    setFlag(SIMFLAG_RENDER);
+                    dt = renderCount * renderStep - accumulatedTime;
+                    renderCount++;
+                }
+                // sample to happen next
+                else if (renderCount * renderStep > sampleCount * sampleStep)
+                {
+                    setFlag(SIMFLAG_SAMPLE);
+                    dt = sampleCount * sampleStep - accumulatedTime;
+                    sampleCount++;
+                }
+                // both to happen simultaneously
+                else
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                    dt = renderCount * renderStep - accumulatedTime;
+                    renderCount++;
+                    sampleCount++;
+                }
+                // take the step
+                Step(dt);
+
+                // render and sample the final state upon completion
+                if (RunStatus == RUNSTAT_FINISHED)
+                {
+                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
+                }
+            }
+        }
+
         public abstract void Step(double dt);
-        public abstract void RunForward();
         protected abstract int linearDistributionCase(int dim);
 
         /// <summary>
@@ -526,7 +793,7 @@ namespace Daphne
             }
         }
 
-        public override void Load(Protocol protocol, bool completeReset, bool is_reaction_complex)
+        public override void Load(Protocol protocol, bool completeReset)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
@@ -536,18 +803,19 @@ namespace Daphne
             envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
 
             // call the base
-            base.Load(protocol, completeReset, is_reaction_complex);
+            base.Load(protocol, completeReset);
 
             // exit if no reset required
             if (completeReset == false)
             {
                 return;
             }
-
+#if OLD_RC
             if (is_reaction_complex == true)
             {
                 scenarioHandle = protocol.rc_scenario;
             }
+#endif
 
             //INSTANTIATE EXTRA CELLULAR MEDIUM
             dataBasket.Environment = SimulationModule.kernel.Get<ECSEnvironment>();
@@ -572,7 +840,6 @@ namespace Daphne
             double[] state = new double[CellSpatialState.Dim];
             // convenience arrays to reduce code length
             ConfigCompartment[] configComp = new ConfigCompartment[2];
-            Compartment[] simComp = new Compartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
@@ -583,8 +850,6 @@ namespace Daphne
                 // if this is a new cell population, add it
                 dataBasket.AddPopulation(cp.cellpopulation_id);
 
-                //configComp[0] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
-                //configComp[1] = protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
                 configComp[0] = cp.Cell.cytosol;
                 configComp[1] = cp.Cell.membrane;
 
@@ -595,165 +860,8 @@ namespace Daphne
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
-                    // cell population id
-                    cell.Population_id = cp.cellpopulation_id;
-                    cell.setState(cp.CellStates[i].spState);
-
-                    simComp[0] = cell.Cytosol;
-                    simComp[1] = cell.PlasmaMembrane;
-
-                    //modify molpop information before setting
-                    for (int comp = 0; comp < 2; comp++)
-                    {
-                        foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
-                        {
-                            //config_comp's distribution changed. may need to keep 
-                            //it for not customized cell later(?)
-
-                            // if (!cp.cell_list[i].configMolPop.ContainsKey(cmp.molecule_guid_ref)) continue;
-                            if (!cp.CellStates[i].cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid)) continue;
-
-                            MolPopExplicit mp_explicit = new MolPopExplicit();
-                            mp_explicit.conc = cp.CellStates[i].cmState.molPopDict[cmp.molecule.entity_guid];
-                            cmp.mp_distribution = mp_explicit;            
-                        }
-                        addCompartmentMolpops(simComp[comp], configComp[comp]);
-                    }
-
-                    // cell genes
-                    //foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
-                    foreach (ConfigGene cg in cp.Cell.genes)
-                    {
-                        //ConfigGene cg = protocol.entity_repository.genes_dict[s];
-
-                        double geneActivationLevel = cg.ActivationLevel;
-                        if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)
-                        {
-                            geneActivationLevel = cp.CellStates[i].cgState.geneDict[cg.entity_guid];
-                        }
-
-                        Gene gene = SimulationModule.kernel.Get<Gene>(new ConstructorArgument("name", cg.Name),
-                                                     new ConstructorArgument("copyNumber", cg.CopyNumber),
-                                                     new ConstructorArgument("actLevel", geneActivationLevel));
-                        cell.AddGene(cg.entity_guid, gene);
-                    }
-
-                    //CELL REACTIONS
-                    AddCompartmentBulkReactions(cell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
-                    AddCompartmentBulkReactions(cell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
-                    // membrane; no boundary
-                    AddCompartmentBoundaryReactions(cell.Cytosol, cell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
-                    AddCellTranscriptionReactions(cell, protocol.entity_repository, transcription_reacs);
-
-
-                    // locomotion - merged from release-dev
-                    if (cell.Cytosol.Populations.ContainsKey(cp.Cell.locomotor_mol_guid_ref) == true)
-                    {
-                        MolecularPopulation driver = cell.Cytosol.Populations[cp.Cell.locomotor_mol_guid_ref];
-
-                        cell.Locomotor = new Locomotor(driver, cp.Cell.TransductionConstant);
-                        cell.IsChemotactic = true;
-                    }
-                    else
-                    {
-                        cell.IsChemotactic = false;
-                    }
-                    if (cp.Cell.Sigma > 0)
-                    {
-                        cell.IsStochastic = true;
-                        cell.StochLocomotor = new StochLocomotor(cp.Cell.Sigma);
-                    }
-                    else
-                    {
-                        cell.IsStochastic = false;
-                    }
-                    if (cell.IsChemotactic || cell.IsStochastic)
-                    {
-                        cell.IsMotile = true;
-                        cell.DragCoefficient = cp.Cell.DragCoefficient;
-                    }
-                    else
-                    {
-                        cell.IsMotile = false;
-                    }
-
-                    //TRANSITION DRIVERS
-                    // death behavior
-                    if (cp.Cell.death_driver != null)
-                    {
-                        if (cp.CellStates[i].cbState.deathDriveState != -1)
-                        {
-                            cell.DeathBehavior.CurrentState = cp.CellStates[i].cbState.deathDriveState;
-                        }
-                        ConfigTransitionDriver config_td = cp.Cell.death_driver;
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.DeathBehavior);
-                    }
-
-                    // Division before differentiation
-                    if (cp.Cell.div_scheme != null)
-                    {
-                        ConfigDiffScheme config_divScheme = cp.Cell.div_scheme;
-                        ConfigTransitionDriver config_td = config_divScheme.Driver;
-
-                        cell.Divider.Initialize(config_divScheme.activationRows.Count, config_divScheme.genes.Count);
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Divider.Behavior);
-
-                        // Epigenetic information
-                        for (int ii = 0; ii < cell.Divider.nGenes; ii++)
-                        {
-                            cell.Divider.AddGene(ii, config_divScheme.genes[ii]);
-
-                            for (int j = 0; j < cell.Divider.nStates; j++)
-                            {
-                                cell.Divider.AddActivity(j, ii, config_divScheme.activationRows[j].activations[ii]);
-                                cell.Divider.AddState(j, config_divScheme.Driver.states[j]);
-                            }
-                        }
-
-                        // Set cell state and corresponding gene activity levels
-                        cell.DividerState = cell.Divider.CurrentState;
-                        cell.SetGeneActivities(cell.Divider);
-                    }
-
-                    // Differentiation
-                    if (cp.Cell.diff_scheme != null)
-                    {
-                        ConfigDiffScheme config_diffScheme = cp.Cell.diff_scheme;
-                        ConfigTransitionDriver config_td = config_diffScheme.Driver;
-
-                        cell.Differentiator.Initialize(config_diffScheme.activationRows.Count, config_diffScheme.genes.Count);
-                        LoadTransitionDriverElements(config_td, cell.Cytosol.Populations, cell.Differentiator.Behavior);
-
-                        // Epigenetic information
-                        for (int ii = 0; ii < cell.Differentiator.nGenes; ii++)
-                        {
-                            cell.Differentiator.AddGene(ii, config_diffScheme.genes[ii]);
-
-                            for (int j = 0; j < cell.Differentiator.nStates; j++)
-                            {
-                                cell.Differentiator.AddActivity(j, ii, config_diffScheme.activationRows[j].activations[ii]);
-                                cell.Differentiator.AddState(j, config_diffScheme.Driver.states[j]);
-                            }
-                        }
-                        // Set cell state and corresponding gene activity levels
-                        if (cp.CellStates[i].cbState.differentiationDriverState != -1)
-                        {
-                            cell.Differentiator.CurrentState = cp.CellStates[i].cbState.differentiationDriverState;
-                        }
-                        cell.DifferentiationState = cell.Differentiator.CurrentState;
-                        //saving from saved states
-                        if (cp.CellStates[i].cgState.geneDict.Count > 0)
-                        {
-                            cell.SetGeneActivities(cp.CellStates[i].cgState.geneDict);
-                        }
-                        else
-                        {
-                            cell.SetGeneActivities(cell.Differentiator);
-                        }
-                    }
-
-                    AddCell(cell);
+                    instantiateCell(protocol, cp.Cell, cp.cellpopulation_id, configComp,
+                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs);
                 }
             }
 
@@ -794,8 +902,9 @@ namespace Daphne
 
             //// ADD ECS REACTIONS
             List<ConfigReaction> reacs = new List<ConfigReaction>();
+
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository,reacs);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
@@ -809,77 +918,6 @@ namespace Daphne
             cellManager.deathTimeConstant = 1.0 / protocol.sim_params.deathConstant;
             cellManager.deathOrder = (int)protocol.sim_params.deathOrder;
             cellManager.deathFactor = (cellManager.deathOrder + 1) * cellManager.deathTimeConstant;
-
-        }
-
-        public void LoadTransitionDriverElements(ConfigTransitionDriver config_td, Dictionary<string,MolecularPopulation> population, ITransitionDriver behavior)
-        {
-            foreach (ConfigTransitionDriverRow row in config_td.DriverElements)
-            {
-                foreach (ConfigTransitionDriverElement config_tde in row.elements)
-                {
-                    if (population.ContainsKey(config_tde.driver_mol_guid_ref) == true)
-                    {
-                        TransitionDriverElement tde = new TransitionDriverElement();
-                        tde.Alpha = config_tde.Alpha;
-                        tde.Beta = config_tde.Beta;
-                        tde.DriverPop = population[config_tde.driver_mol_guid_ref];
-                        behavior.AddDriverElement(config_tde.CurrentState, config_tde.DestState, tde);
-                    }
-                }                        
-            }
-
-        }
-        
-        public override void RunForward()
-        {
-            if (RunStatus == RUNSTAT_RUN)
-            {
-                // render and sample the initial state
-                if (renderCount == 0 && sampleCount == 0)
-                {
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
-                    renderCount++;
-                    sampleCount++;
-                    return;
-                }
-                // clear all flags
-                clearFlag(SIMFLAG_ALL);
-                
-                // find the maximum allowable step (time until the next event occurs)
-                double dt;
-
-                // render to happen next
-                if (renderCount * renderStep < sampleCount * sampleStep)
-                {
-                    setFlag(SIMFLAG_RENDER);
-                    dt = renderCount * renderStep - accumulatedTime;
-                    renderCount++;
-                }
-                // sample to happen next
-                else if (renderCount * renderStep > sampleCount * sampleStep)
-                {
-                    setFlag(SIMFLAG_SAMPLE);
-                    dt = sampleCount * sampleStep - accumulatedTime;
-                    sampleCount++;
-                }
-                // both to happen simultaneously
-                else
-                {
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
-                    dt = renderCount * renderStep - accumulatedTime;
-                    renderCount++;
-                    sampleCount++;
-                }
-                // take the step
-                Step(dt);
-
-                // render and sample the final state upon completion
-                if (RunStatus == RUNSTAT_FINISHED)
-                {
-                    setFlag((byte)(SIMFLAG_RENDER | SIMFLAG_SAMPLE));
-                }
-            }
         }
 
         public override void Step(double dt)
@@ -911,15 +949,208 @@ namespace Daphne
 
     public class VatReactionComplex : SimulationBase
     {
+        // variables used in graphing
+        public int MaxTime { get; set; }
+
+        private double dmaxtime;
+        public double dMaxTime
+        {
+            get
+            {
+                return dmaxtime;
+            }
+            set
+            {
+                if (dmaxtime != value)
+                {
+                    dmaxtime = value;
+                    OnPropertyChanged("dMaxTime");
+                }
+            }
+        }
+
+        private double dinittime;
+        public double dInitialTime
+        {
+            get
+            {
+                return dinittime;
+            }
+            set
+            {
+                if (dinittime != value)
+                {
+                    dinittime = value;
+                    OnPropertyChanged("dInitialTime");
+                }
+            }
+        }
+
+        //List of times that will be graphed on x-axis. There is only one times list no matter how many molecules
+        private List<double> listTimes;
+        public List<double> ListTimes
+        {
+            get
+            {
+                return listTimes;
+            }
+            set
+            {
+                listTimes = value;
+            }
+        }
+
+        //This dict is used by chart view to plot the points and draw the graph
+        private Dictionary<string, List<double>> dictGraphConcs;
+        public Dictionary<string, List<double>> DictGraphConcs
+        {
+            get
+            {
+                return dictGraphConcs;
+            }
+            set
+            {
+                dictGraphConcs = value;
+            }
+        }
+
+        //save the original concentrations
+        private Dictionary<string, double> dictOriginalConcs;
+
+        //Initial concentrations - user can change initial concentrations of molecules
+        private Dictionary<string, double> dictInitialConcs;
+
+        //for wpf binding
+        private ObservableCollection<MolConcInfo> _initConcs;
+        public ObservableCollection<MolConcInfo> initConcs
+        {
+            get
+            {
+                return _initConcs;
+            }
+            set
+            {
+                _initConcs = value;
+            }
+        }
+
+        //Convenience dictionary of initial concs and mol info
+        public Dictionary<string, MolConcInfo> initConcsDict { get; set; }
+
+
         public VatReactionComplex()
         {
             dataBasket = new DataBasket(this);
             integratorStep = 0.001;
             reporter = new VatReactionComplexReporter();
             reset();
+            listTimes = new List<double>();
+            dictGraphConcs = new Dictionary<string, List<double>>();
+            dictOriginalConcs = new Dictionary<string, double>();
+            dictInitialConcs = new Dictionary<string, double>();
+            initConcs = new ObservableCollection<MolConcInfo>();
+            initConcsDict = new Dictionary<string, MolConcInfo>();
+
+            initConcs.CollectionChanged += new NotifyCollectionChangedEventHandler(initConcs_CollectionChanged);
         }
 
-        public override void Load(Protocol protocol, bool completeReset, bool is_reaction_complex = false)
+        private void initConcs_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //if (e.Action == NotifyCollectionChangedAction.Add)
+            //{
+            //    foreach (var nn in e.NewItems)
+            //    {
+            //    }
+            //}            
+            OnPropertyChanged("initConcs");
+        }
+
+        //Save the original concs in a temp array in case user wants to discard the changes
+        public void SaveOriginalConcs()
+        {
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            if (comp == null)
+            {
+                return;
+            }
+
+            dictOriginalConcs.Clear();
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                string molguid = kvp.Key;
+                double conc = kvp.Value.Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+
+                dictOriginalConcs[molguid] = conc;
+            }
+        }
+
+        //Restores original concs
+        //If user made changes by dragging initial concs and wants to discard the changes, do that here
+        //by copying the original concs back to mol pops
+        public void RestoreOriginalConcs()
+        {
+            foreach (KeyValuePair<string, double> kvp in dictOriginalConcs)
+            {
+                dictInitialConcs[kvp.Key] = kvp.Value;
+            }
+            OnPropertyChanged("initConcs");
+        }
+
+        public void OverwriteOriginalConcs()
+        {
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            ConfigReactionComplex crc = envHandle.comp.reaction_complexes.First();
+            double[] initArray = new double[1];
+
+            if (comp == null || crc == null)
+            {
+                return;
+            }
+
+            dictOriginalConcs.Clear();
+            //Copy current (may have changed) initial concs to Originals dict
+            foreach (KeyValuePair<string, double> kvp in dictInitialConcs)
+            {
+                dictOriginalConcs[kvp.Key] = kvp.Value;
+
+                //Now overwrite the concs in Protocoluration
+                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(crc.molpops.First());
+                MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
+
+                homo.concentration = kvp.Value;
+            }
+        }
+
+        //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
+        public void SaveInitialConcs()
+        {
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            if (comp == null)
+            {
+                return;
+            }
+
+            dictInitialConcs.Clear();
+            initConcs.Clear();
+            initConcsDict.Clear();
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                string molguid = kvp.Key;
+                //double conc = 0.0;
+                double conc = comp.Populations[molguid].Conc.Value(new double[] { 0.0, 0.0, 0.0 });
+
+                dictInitialConcs[molguid] = conc;
+
+                MolConcInfo mci = new MolConcInfo(molguid, conc, ProtocolHandle);
+
+                initConcs.Add(mci);
+                initConcsDict.Add(molguid, mci);
+            }
+        }
+
+        public override void Load(Protocol protocol, bool completeReset)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
             {
@@ -929,7 +1160,7 @@ namespace Daphne
             envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // call the base
-            base.Load(protocol, completeReset, is_reaction_complex);
+            base.Load(protocol, completeReset);
 
             // exit if no reset required
             if (completeReset == false)
@@ -937,19 +1168,74 @@ namespace Daphne
                 return;
             }
 
-            //INSTANTIATE EXTRA CELLULAR MEDIUM
+            // instantiate the environment
             dataBasket.Environment = SimulationModule.kernel.Get<PointEnvironment>();
 
             // clear the databasket dictionaries
             dataBasket.Clear();
+
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
+        }
+
+        public override void reset()
+        {
+            base.reset();
+
+            double minVal = 1e7;
+
+            dInitialTime = 1 / minVal;
+            dMaxTime = 2 * dInitialTime;
+            MaxTime = (int)dMaxTime;
+
+            if (SimulationBase.dataBasket.Environment == null || SimulationBase.dataBasket.Environment.Comp == null)
+            {
+                return;
+            }
+
+            SaveOriginalConcs();
+            SaveInitialConcs();
+
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            double[] initArray = new double[1];
+            ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                string molguid = kvp.Key;
+                double conc = dictInitialConcs[molguid];
+
+                initArray[0] = conc;
+                sf.Initialize("const", initArray);
+                comp.Populations[molguid].Conc *= 0;
+                comp.Populations[molguid].Conc += sf;
+            }
         }
 
         public override void Step(double dt)
         {
+            double t = 0, localStep;
+
+            while (t < dt)
+            {
+                localStep = Math.Min(integratorStep, dt - t);
+                dataBasket.Environment.Comp.Step(localStep);
+                t += localStep;
+            }
+            accumulatedTime += dt;
+            if (accumulatedTime >= duration)
+            {
+                RunStatus = RUNSTAT_FINISHED;
+            }
         }
 
         public override void RunForward()
         {
+            base.RunForward();
+            // no rendering in the vat rc
+            clearFlag(SIMFLAG_RENDER);
         }
 
         protected override int linearDistributionCase(int dim)
