@@ -440,7 +440,7 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (cc.membrane.Reactions.Contains(cr) == false)
+                    if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         cc.membrane.Reactions.Add(cr.Clone(true));
 
@@ -486,8 +486,8 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    //Add to reactions list only if the cell does not already contain this reaction
-                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
+                    // Add to reactions list only if the cell does not already contain this reaction
+                    if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         cc.cytosol.Reactions.Add(cr.Clone(true));
 
@@ -496,9 +496,11 @@ namespace DaphneGui
                 }
             }
 
-            //Refresh the filter
+            // Refresh the filter
             if (needRefresh && lvCytosolAvailableReacs.ItemsSource != null)
+            {
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            }
         }
 
         private void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
@@ -534,20 +536,35 @@ namespace DaphneGui
             }
         }
 
-        private void blob_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
+            {
                 return;
+            }
 
             string guid = cb.CommandParameter as string;
+
             if (guid.Length > 0)
             {
-                if (MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict.ContainsKey(guid))
+                GaussianSpecification next;
+
+                ((TissueScenario)MainWindow.SOP.Protocol.scenario).resetGaussRetrieve();
+                while ((next = ((TissueScenario)MainWindow.SOP.Protocol.scenario).nextGaussSpec()) != null)
                 {
-                    GaussianSpecification gs = MainWindow.SOP.Protocol.scenario.gauss_guid_gauss_dict[guid];
-                    gs.gaussian_region_visibility = (bool)(cb.IsChecked);
+                    if (next.box_spec.box_guid == guid)
+                    {
+                        next.gaussian_region_visibility = (bool)(cb.IsChecked);
+                        break;
+                    }
                 }
             }
         }
@@ -708,8 +725,13 @@ namespace DaphneGui
             }
 
             //Finally, if the cell cytosol already contains this reaction, exclude it from the available reactions list
-            if (cc.cytosol.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    bOK = false;
+                }
+            }
 
             e.Accepted = bOK;
         }
@@ -745,8 +767,13 @@ namespace DaphneGui
                 bOK = cc.membrane.HasMolecules(cr.modifiers_molecule_guid_ref);
 
             //Finally, if the cell membrane already contains this reaction, exclude it from the available reactions list
-            if (cc.membrane.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    bOK = false;
+                }
+            }
 
             e.Accepted = bOK;
         }
@@ -800,8 +827,13 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
-                bOK = false;
+            if (bOK == true)
+            {
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid))
+                {
+                    bOK = false;
+                }
+            }
 
             e.Accepted = bOK;
         }
@@ -809,6 +841,7 @@ namespace DaphneGui
         private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigMolecule mol = e.Item as ConfigMolecule;
+
             if (mol != null)
             {
                 // Filter out mol if membrane bound 
@@ -825,7 +858,7 @@ namespace DaphneGui
 
         private bool EcmHasMolecule(string molguid)
         {
-            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
                 if (molpop.molecule.entity_guid == molguid)
                     return true;
@@ -858,8 +891,14 @@ namespace DaphneGui
 
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(cell_pop.Cell.entity_guid))
                 {
@@ -877,8 +916,14 @@ namespace DaphneGui
         }
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
+            // this only makes sense if the scenario is the tissue scenario
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             bool ret = false;
-            foreach (CellPopulation cell_pop in MainWindow.SOP.Protocol.scenario.cellpopulations)
+            foreach (CellPopulation cell_pop in ((TissueScenario)MainWindow.SOP.Protocol.scenario).cellpopulations)
             {
                 ConfigCell cell = MainWindow.SOP.Protocol.entity_repository.cells_dict[cell_pop.Cell.entity_guid];
                 if (CytosolHasMolecule(cell, molguid))
@@ -923,7 +968,6 @@ namespace DaphneGui
 
         private void btnDelDeathDriver_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
             ConfigCell cell = DataContext as ConfigCell;
 
             if (cell == null)
@@ -1031,7 +1075,6 @@ namespace DaphneGui
                 return;
             }
         }
-
 
         /// <summary>
         /// This method adds a differentiation state given a name 
@@ -1158,7 +1201,6 @@ namespace DaphneGui
 
         }
 
-
         /// <summary>
         /// This method is called when the user clicks on a different row in the differentiation grid.
         /// </summary>
@@ -1203,7 +1245,6 @@ namespace DaphneGui
 
         private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
-
         }
 
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
@@ -1241,7 +1282,6 @@ namespace DaphneGui
                 e.Accepted = true;
             }
         }
-
 
         public static T FindChild<T>(DependencyObject parent, string childName) where T : DependencyObject
         {
@@ -1314,42 +1354,8 @@ namespace DaphneGui
 
             if (gene == null)
                 return;
-
-            MessageBoxResult res = MessageBox.Show("Are you sure you would like to save this gene to the components library?", "Warning", MessageBoxButton.YesNo);
-
-            if (res == MessageBoxResult.No)
-                return;
-
-            ////PushGene pg = new PushGene();
-            ////pg.DataContext = cell;
-            ////pg.EntityLevelGeneDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.genes_dict[gene_guid];
-
-            //////Here show the confirmation dialog
-            ////if (pg.ShowDialog() == false)
-            ////{
-            ////    //User clicked Cancel
-            ////    return;
-            ////}
-
-            //Here do the processing
-            //Push the entity
-            Protocol B = MainWindow.SOP.Protocol;
-            Level.PushStatus status = B.pushStatus(gene);
-            if (status == Level.PushStatus.PUSH_INVALID)
-            {
-                MessageBox.Show("Entity not pushable.");
-                return;
-            }
-
-            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            {
-                B.repositoryPush(gene, status); // push into B, inserts as new
-            }
-            else // the item exists; could be newer or older
-            {
-                B.repositoryPush(gene, status); // push into B, overwrite
-            }
-
+            ConfigGene newgene = gene.Clone(null);
+            MainWindow.GenericPush(newgene);
         }
 
         private void PushCytoMoleculeButton_Click(object sender, RoutedEventArgs e)
@@ -1360,7 +1366,8 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigMolecule mol = ((ConfigMolecularPopulation)(CellCytosolMolPopsListBox.SelectedItem)).molecule;
 
-            MainWindow.GenericPush(mol);
+            ConfigMolecule newmol = mol.Clone(null);
+            MainWindow.GenericPush(newmol);
         }
 
         private void PushMembMoleculeButton_Click(object sender, RoutedEventArgs e)
@@ -1371,7 +1378,8 @@ namespace DaphneGui
             ConfigCell cell = DataContext as ConfigCell;
             ConfigMolecule mol = ((ConfigMolecularPopulation)(CellMembraneMolPopsListBox.SelectedItem)).molecule;
 
-            MainWindow.GenericPush(mol);
+            ConfigMolecule newmol = mol.Clone(null);
+            MainWindow.GenericPush(newmol);
         }
 
         private void PushMembReacButton_Click(object sender, RoutedEventArgs e)
@@ -1383,7 +1391,8 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)MembReacListBox.SelectedValue;
-            MainWindow.GenericPush(reac);
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
 
         private void PushCytoReacButton_Click(object sender, RoutedEventArgs e)
@@ -1395,7 +1404,8 @@ namespace DaphneGui
             }
 
             ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
-            MainWindow.GenericPush(reac);
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
         }
     }
 

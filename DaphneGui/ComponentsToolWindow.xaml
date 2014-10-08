@@ -76,7 +76,7 @@
                                 AutoGenerateColumns="False" 
                                 Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="100"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
-                                CanUserSortColumns="False" RowHeaderWidth="0"
+                                CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
                                 CanUserAddRows="False"
                                 BorderThickness="1"
@@ -103,7 +103,7 @@
 
                             <DataGrid.Columns>
 
-                                <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200">
+                                <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200" SortMemberPath="Name">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBox Width="200"  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -115,7 +115,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Copy Number" Width="100">
+                                <DataGridTemplateColumn Header="Copy Number" Width="100" SortMemberPath="CopyNumber">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBox Width="100" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=CopyNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
@@ -123,10 +123,11 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Activation Level" Width="100">
+                                <DataGridTemplateColumn Header="Activation Level" Width="100" SortMemberPath="ActivationLevel">
                                     <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBox Width="100" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    <DataTemplate>
+                                        <!--<TextBox Width="100" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>-->
+                                        <uc:DoublesBox TextFieldWidth="100" SliderEnabled="False" TextBorderThickness="0" HorizontalAlignment="Center" Number="{Binding Path=ActivationLevel, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>                                        
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -160,7 +161,7 @@
                                 ItemsSource="{Binding Path=entity_repository.molecules}" AutoGenerateColumns="False" 
                                 Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
-                                CanUserSortColumns="False" RowHeaderWidth="0"
+                                CanUserSortColumns="True" RowHeaderWidth="0"
                                 VerticalContentAlignment="Center"
                                 CanUserAddRows="False"
                                 BorderThickness="1"
@@ -168,8 +169,8 @@
                                 >
 
                             <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader" >
-                                    <Setter Property="FontSize" Value="12" />
+                                <Style TargetType="DataGridColumnHeader" >                                
+                                <Setter Property="FontSize" Value="12" />
                                     <Setter Property="Height" Value="24" />
                                     <Setter Property="HorizontalContentAlignment" Value="Center" />
                                     <Setter Property="BorderThickness" Value="1" />
@@ -187,87 +188,46 @@
 
                             <DataGrid.Columns>
 
-                                <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200">
+                                <DataGridTemplateColumn Header="Name"  Width="150" MinWidth="100" MaxWidth="200" SortMemberPath="Name"  >
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <!--<TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>-->
-
-                                            <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        <TextBox Width="200" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                                           LostFocus="MolTextBox_LostFocus">
-                                                <!--<TextBox.Style>
-                                                        <Style TargetType="{x:Type TextBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                    <Setter Property="IsEnabled" Value="False" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                    <Setter Property="IsEnabled" Value="True" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>-->
-                                            </TextBox>
-
-
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiff" Width="90">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-
-                                                <!--<TextBox.Style>
-                                                        <Style TargetType="{x:Type TextBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                    <Setter Property="IsEnabled" Value="False" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                    <Setter Property="IsEnabled" Value="True" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>-->
-
                                             </TextBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Weight">
-                                    <DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiff" Width="90" MaxWidth="150" SortMemberPath="DiffusionCoefficient">
+                                    <DataGridTemplateColumn.CellTemplate >
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        </DataTemplate>
+                                        <!--<TextBox Width="80" TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" Text="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiff, Path=Width-8}"  SliderEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                                    </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Radius">
+                                <DataGridTemplateColumn Header="Weight" SortMemberPath="MolecularWeight">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
+                                        <uc:DoublesBox SliderEnabled="False" TextBorderThickness="0" HorizontalAlignment="Center" IsEnabled="True" Number="{Binding Path=MolecularWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Radius" SortMemberPath="EffectiveRadius">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <!--<TextBlock HorizontalAlignment="Center" IsEnabled="True" Text="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>-->
+                                        <uc:DoublesBox SliderEnabled="False" TextBorderThickness="0" HorizontalAlignment="Center" IsEnabled="True" Number="{Binding Path=EffectiveRadius, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>                                            
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="Membrane Bound" Width="120" MinWidth="100" MaxWidth="150" >
+                                <DataGridTemplateColumn Header="Membrane Bound" Width="120" MinWidth="100" MaxWidth="150" SortMemberPath="molecule_location">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
-                                                <!--<CheckBox.Style>
-                                                        <Style TargetType="{x:Type CheckBox}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="True">
-                                                                    <Setter Property="IsEnabled" Value="False" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Path=ReadOnly}" Value="False">
-                                                                    <Setter Property="IsEnabled" Value="True" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </CheckBox.Style>-->
-
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center"  IsChecked="{Binding Path=molecule_location, Mode=TwoWay, Converter={StaticResource MolPopLocationBoolConv}, UpdateSourceTrigger=PropertyChanged}">
                                             </CheckBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -382,7 +342,7 @@
 
                         <!--</Expander>-->
                         <Expander 
-                                    Padding="10" ExpandDirection="Down"
+                                    Padding="5" ExpandDirection="Down"
                                     IsExpanded="False"
                                     Header="New Reaction"                                                  
                                     x:Name="AddReaction"

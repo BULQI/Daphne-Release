@@ -349,24 +349,35 @@ namespace Daphne
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
-            CellPopulation cp = Simulation.ProtocolHandle.scenario.GetCellPopulation(daughter.Population_id);
+            string cell_guid;
 
-            configComp[0] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol;
-            configComp[1] = Simulation.ProtocolHandle.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
+            if (SimulationBase.ProtocolHandle.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                // only the TissueScenario has cell populations
+                cell_guid = ((TissueScenario)SimulationBase.ProtocolHandle.scenario).GetCellPopulation(daughter.Population_id).Cell.entity_guid;
+            }
+            else
+            {
+                // for now
+                throw new NotImplementedException();
+            }
 
-            bulk_reacs[0] = Simulation.ProtocolHandle.GetReactions(configComp[0], false);
-            bulk_reacs[1] = Simulation.ProtocolHandle.GetReactions(configComp[1], false);
-            boundary_reacs = Simulation.ProtocolHandle.GetReactions(configComp[0], true);
-            transcription_reacs = Simulation.ProtocolHandle.GetTranscriptionReactions(configComp[0]);
+            configComp[0] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].cytosol;
+            configComp[1] = SimulationBase.ProtocolHandle.entity_repository.cells_dict[cell_guid].membrane;
+
+            bulk_reacs[0] = SimulationBase.ProtocolHandle.GetReactions(configComp[0], false);
+            bulk_reacs[1] = SimulationBase.ProtocolHandle.GetReactions(configComp[1], false);
+            boundary_reacs = SimulationBase.ProtocolHandle.GetReactions(configComp[0], true);
+            transcription_reacs = SimulationBase.ProtocolHandle.GetTranscriptionReactions(configComp[0]);
 
             // cytosol bulk reactions
-            Simulation.AddCompartmentBulkReactions(daughter.Cytosol, Simulation.ProtocolHandle.entity_repository, bulk_reacs[0]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0]);
             // membrane bulk reactions
-            Simulation.AddCompartmentBulkReactions(daughter.PlasmaMembrane, Simulation.ProtocolHandle.entity_repository, bulk_reacs[1]);
+            SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1]);
             // boundary reactions
-            Simulation.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, Simulation.ProtocolHandle.entity_repository, boundary_reacs);
+            SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs);
             // transcription reactions
-            Simulation.AddCellTranscriptionReactions(daughter, Simulation.ProtocolHandle.entity_repository, transcription_reacs);
+            SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
 
             // behaviors
 
@@ -566,7 +577,7 @@ namespace Daphne
         public void BoundaryForce()
         {
             // boundary force
-            if (Simulation.dataBasket.ECS.toroidal == false)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == false)
             {
                 double dist = 0.0;
 
@@ -577,7 +588,7 @@ namespace Daphne
                     applyBoundaryForce(new double[] { 1, 0, 0 }, dist);
                 }
                 // right
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(0) - SpatialState.X[0]) < radius)
+                else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(0) - SpatialState.X[0]) < radius)
                 {
                     applyBoundaryForce(new double[] { -1, 0, 0 }, dist);
                 }
@@ -589,7 +600,7 @@ namespace Daphne
                     applyBoundaryForce(new double[] { 0, 1, 0 }, dist);
                 }
                 // top
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(1) - SpatialState.X[1]) < radius)
+                else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(1) - SpatialState.X[1]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, -1, 0 }, dist);
                 }
@@ -601,7 +612,7 @@ namespace Daphne
                     applyBoundaryForce(new double[] { 0, 0, 1 }, dist);
                 }
                 // near
-                else if ((dist = Simulation.dataBasket.ECS.Space.Interior.Extent(2) - SpatialState.X[2]) < radius)
+                else if ((dist = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(2) - SpatialState.X[2]) < radius)
                 {
                     applyBoundaryForce(new double[] { 0, 0, -1 }, dist);
                 }
@@ -615,9 +626,9 @@ namespace Daphne
         {
             // toroidal boundary conditions, wrap around
             // NOTE: this assumes the environment has a lower bound of (0, 0, 0)
-            if (Simulation.dataBasket.ECS.toroidal == true)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment && ((ECSEnvironment)SimulationBase.dataBasket.Environment).toroidal == true)
             {
-                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
+                for (int i = 0; i < SimulationBase.dataBasket.Environment.Comp.Interior.Dim; i++)
                 {
                     double safetySlab = 1e-3;
 
@@ -625,9 +636,9 @@ namespace Daphne
                     if (SpatialState.X[i] < 0.0)
                     {
                         // use a small fudge factor to displace the cell just back into the grid
-                        SpatialState.X[i] = Simulation.dataBasket.ECS.Space.Interior.Extent(i) - safetySlab;
+                        SpatialState.X[i] = SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i) - safetySlab;
                     }
-                    else if (SpatialState.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    else if (SpatialState.X[i] > SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i))
                     {
                         SpatialState.X[i] = 0.0;
                     }
@@ -635,10 +646,10 @@ namespace Daphne
             }
             else
             {
-                for (int i = 0; i < Simulation.dataBasket.ECS.Space.Interior.Dim; i++)
+                for (int i = 0; i < SimulationBase.dataBasket.Environment.Comp.Interior.Dim; i++)
                 {
                     // detect out of bounds cells
-                    if (SpatialState.X[i] < 0.0 || SpatialState.X[i] > Simulation.dataBasket.ECS.Space.Interior.Extent(i))
+                    if (SpatialState.X[i] < 0.0 || SpatialState.X[i] > SimulationBase.dataBasket.Environment.Comp.Interior.Extent(i))
                     {
                         // cell exits
                         exiting = true;

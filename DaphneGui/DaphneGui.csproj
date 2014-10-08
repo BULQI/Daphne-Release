@@ -211,8 +211,8 @@
     <Compile Include="MoleculeGridControl.xaml.cs">
       <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pushing\PushByLevel.xaml.cs">
-      <DependentUpon>PushByLevel.xaml</DependentUpon>
+    <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
+      <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pushing\PushCell.xaml.cs">
       <DependentUpon>PushCell.xaml</DependentUpon>
@@ -311,7 +311,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pushing\PushByLevel.xaml">
+    <Page Include="Pushing\PushBetweenLevels.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -386,6 +386,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Images\LeftArrow_48x48.png" />
+    <Resource Include="Images\RightArrow_48x48.png" />
+    <Resource Include="Images\arrow-32x32.png" />
     <Resource Include="Daphne.ico" />
     <Content Include="help\DaphneDevHelp.shfbproj" />
     <EmbeddedResource Include="Licences.licx" />
@@ -404,6 +407,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Config\daphne_ligand_receptor_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\daphne_daphnestore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\daphne_userstore.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\daphne_blank_vat_reaction_complex_scenario.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Config\daphne_vat_reaction_complex_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="help\Documentation.chm">

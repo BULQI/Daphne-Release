@@ -24,7 +24,7 @@ namespace Daphne
             List<int> removalList = null;
             List<Cell> daughterList = null;
 
-            foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+            foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
             {
                 // cell takes a step
                 if (kvp.Value.Alive == true)
@@ -99,7 +99,7 @@ namespace Daphne
             {
                 foreach (int key in removalList)
                 {
-                    Simulation.dataBasket.RemoveCell(key);
+                    SimulationBase.dataBasket.RemoveCell(key);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace Daphne
                     deadDict[key] = deadDict[key] + dt;
                     if (Rand.TroschuetzCUD.NextDouble() < deathFactor * Math.Pow(deadDict[key] * deathTimeConstant, deathOrder) * dt)
                     {
-                        Simulation.dataBasket.RemoveCell(key);
+                        SimulationBase.dataBasket.RemoveCell(key);
                         deadDict.Remove(key);
                     }
                 }
@@ -125,9 +125,12 @@ namespace Daphne
                 foreach (Cell c in daughterList)
                 {
                     // add the cell
-                    Simulation.AddCell(c);
+                    SimulationBase.AddCell(c);
                     // add the cell's membrane to the ecs boundary
-                    Simulation.dataBasket.ECS.AddBoundaryManifold(c.PlasmaMembrane.Interior);
+                    if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+                    {
+                        ((ECSEnvironment)SimulationBase.dataBasket.Environment).AddBoundaryManifold(c.PlasmaMembrane.Interior);
+                    }
                 }
             }
         }
@@ -137,7 +140,7 @@ namespace Daphne
         /// </summary>
         public void ResetCellForces()
         {
-            foreach (Cell c in Simulation.dataBasket.Cells.Values)
+            foreach (Cell c in SimulationBase.dataBasket.Cells.Values)
             {
                 c.resetForce();
             }

@@ -15,7 +15,7 @@ namespace Daphne
 {
     public class ReactionComplexProcessor : EntityModelBase
     {
-        public Simulation Sim { get; set; }
+        public TissueSimulation Sim { get; set; }
         public Protocol SC { get; set; }
         public ConfigReactionComplex CRC { get; set; }
 
@@ -112,20 +112,6 @@ namespace Daphne
         //Convenience dictionary of initial concs and mol info
         public Dictionary<string, MolConcInfo> initConcsDict; 
 
-        //The following collection may not be needed any more
-        private ObservableCollection<ConfigReaction> reacs = new ObservableCollection<ConfigReaction>();
-        public ObservableCollection<ConfigReaction> ReactionsInComplex
-        {
-            get
-            {
-                return reacs;
-            }
-            set
-            {
-                reacs = value;
-            }
-        }
-
         public ReactionComplexProcessor() : base()
         {
             nTestVariable = 199;
@@ -146,37 +132,38 @@ namespace Daphne
             OnPropertyChanged("initConcs");
         }
 
-        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, Simulation sim )
+        public void Initialize(Protocol mainSC, ConfigReactionComplex crc, TissueSimulation sim)
         {
             Sim = sim;
             SC = mainSC;
             CRC = crc;
 
             double minVal = 1e7;
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in crc.ReactionRates)
             {
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
-
+#endif
             dInitialTime = 1 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
 
             SaveOriginalConcs();
             SaveInitialConcs();
-            SaveReactions(crc);
         }
 
         public void Reinitialize()
         {
-            Sim.Load(SC, true, true);
+            Sim.Load(SC, true);
 
             double minVal = 1e7;
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
-
+#endif
             dInitialTime = 1 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
@@ -185,11 +172,12 @@ namespace Daphne
         private void SetTimeValues()
         {
             double minVal = 1e7;
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
-
+#endif
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
             MaxTime = (int)dMaxTime;
@@ -202,10 +190,10 @@ namespace Daphne
             dictGraphConcs.Clear();
             listTimes.Clear();
 
-            if (Simulation.dataBasket.Cells.Count == 0)
+            if (SimulationBase.dataBasket.Cells.Count == 0)
                 return;
                 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
 
             foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
             {
@@ -288,10 +276,12 @@ namespace Daphne
         public void SetTimeMinMax()
         {
             double minVal = 1e7;
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
                 minVal = Math.Min(minVal, grp.ReactionComplexRate);
             }
+#endif
             //MaxTime = (int)dMaxTime;
             dInitialTime = 5 / minVal;
             dMaxTime = 2 * dInitialTime;
@@ -312,10 +302,10 @@ namespace Daphne
         {
             dictOriginalConcs.Clear();
 
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
 
             if (comp == null)
                 return;
@@ -342,10 +332,10 @@ namespace Daphne
 
         public void OverwriteOriginalConcs()
         {
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -359,7 +349,7 @@ namespace Daphne
                 dictOriginalConcs[kvp.Key] = kvp.Value;
 
                 //Now overwrite the concs in Protocoluration
-                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops[0]);
+                ConfigMolecularPopulation mol_pop = (ConfigMolecularPopulation)(CRC.molpops.First());
                 MolPopHomogeneousLevel homo = (MolPopHomogeneousLevel)mol_pop.mp_distribution;
                 homo.concentration = kvp.Value;                
             }           
@@ -372,10 +362,10 @@ namespace Daphne
             initConcs.Clear();
             initConcsDict.Clear();
 
-            if (Simulation.dataBasket.Cells.Count <= 0)
+            if (SimulationBase.dataBasket.Cells.Count <= 0)
                 return;
 
-            Compartment comp = Simulation.dataBasket.Cells.First().Value.Cytosol;
+            Compartment comp = SimulationBase.dataBasket.Cells.First().Value.Cytosol;
             if (comp == null)
                 return;
 
@@ -389,37 +379,32 @@ namespace Daphne
                 MolConcInfo mci = new MolConcInfo(molguid, conc, SC);
                 initConcs.Add(mci);
                 initConcsDict.Add(molguid, mci);
-
             }
         }
 
-        public void SaveReactions(ConfigReactionComplex crc)
-        {
-            foreach (string rguid in crc.reactions_guid_ref) 
-            {
-                ReactionsInComplex.Add(SC.entity_repository.reactions_dict[rguid]);
-            }
-        }        
-
         public void UpdateRateConstants()
         {
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
                 string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.ReactionComplexRate;
             }
+#endif
         }
 
         public void RestoreOriginalRateConstants()
         {
+#if OLD_RC
             foreach (ConfigReactionGuidRatePair grp in CRC.ReactionRates)
             {
                 string guid = grp.entity_guid;
                 ConfigReaction cr = SC.entity_repository.reactions_dict[guid];
                 cr.rate_const = grp.OriginalRate;
                 grp.ReactionComplexRate = grp.OriginalRate;
-            }            
+            }
+#endif
         }
     }
 
