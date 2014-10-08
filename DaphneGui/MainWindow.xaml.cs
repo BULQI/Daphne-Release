@@ -1953,14 +1953,16 @@ namespace DaphneGui
                 }
             }
 
-            // GUI Resources
-            // Set the data context for the main tab control config GUI
+            
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                // GUI Resources
+                // Set the data context for the main tab control config GUI
             ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
             ComponentsToolWindow.DataContext = sop.Protocol;
 
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-            {
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
@@ -3098,6 +3100,21 @@ namespace DaphneGui
             //    MainMenu.Items.Remove(AdminMenu);
 
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushTransDriver_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushReacTemp_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         
