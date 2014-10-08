@@ -591,9 +591,10 @@ namespace Daphne
                     SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
                 }
             }
-
-            //Now push the entity itself
-            //repositoryPush(e, s);
+            else
+            {
+                repositoryPush(e, s);
+            }
         }
 
         private void CellPusher(ConfigCell cell, Level sourceLevel, PushStatus s)
@@ -602,7 +603,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
                 PushStatus s2 =  pushStatus(molpop.molecule);
-                if (s2 == PushStatus.PUSH_CREATE_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
                 {
                     ConfigMolecule newmol = molpop.molecule.Clone(null);
                     repositoryPush(newmol, s2);
@@ -613,7 +614,7 @@ namespace Daphne
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
                 PushStatus s2 = pushStatus(molpop.molecule);
-                if (s2 == PushStatus.PUSH_CREATE_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
                 {
                     ConfigMolecule newmol = molpop.molecule.Clone(null);
                     repositoryPush(newmol, s2);
@@ -624,7 +625,7 @@ namespace Daphne
             foreach (ConfigGene gene in cell.genes)
             {
                 PushStatus s2 = pushStatus(gene);
-                if (s2 == PushStatus.PUSH_CREATE_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
                 {
                     ConfigGene newgene = gene.Clone(null);
                     repositoryPush(newgene, s2);
@@ -650,7 +651,7 @@ namespace Daphne
             SchemePusher(cell.div_scheme, sourceLevel, s);
 
             //Now push the cell itself
-            if (s == PushStatus.PUSH_CREATE_ITEM)
+            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
             {
                 repositoryPush(cell, s);
             }
@@ -694,7 +695,7 @@ namespace Daphne
 
             //Now push the reaction itself
             PushStatus s2 = pushStatus(reac);
-            if (s2 == PushStatus.PUSH_CREATE_ITEM)
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
             {
                 ConfigReaction newreac = reac.Clone(true);
                 repositoryPush(newreac, s2);
@@ -731,17 +732,17 @@ namespace Daphne
             if (entity != null)
             {
                 PushStatus s2 = this.pushStatus(entity);
-                if (s2 == PushStatus.PUSH_CREATE_ITEM)
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
                 {
                     if (entity is ConfigGene)
                     {
                         ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                        repositoryPush(newgene, PushStatus.PUSH_CREATE_ITEM);
+                        repositoryPush(newgene, s2);
                     }
                     else
                     {
                         ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                        repositoryPush(newmol, PushStatus.PUSH_CREATE_ITEM);
+                        repositoryPush(newmol, s2);
                     }
                 }
             }
@@ -758,7 +759,7 @@ namespace Daphne
                 if (gene != null)
                 {
                     PushStatus s2 = pushStatus(gene);
-                    if (s2 == PushStatus.PUSH_CREATE_ITEM)
+                    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
                     {
                         ConfigGene newgene = gene.Clone(null);
                         repositoryPush(newgene, s2);
@@ -768,7 +769,7 @@ namespace Daphne
 
             //Now push the scheme itself
             PushStatus s3 = pushStatus(scheme);
-            if (s3 == PushStatus.PUSH_CREATE_ITEM)
+            if (s3 != PushStatus.PUSH_INVALID && s3 != PushStatus.PUSH_OLDER_ITEM)
             {
                 ConfigDiffScheme newscheme = scheme.Clone(true);
                 repositoryPush(newscheme, s3);
@@ -778,7 +779,7 @@ namespace Daphne
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
-            if (s2 == PushStatus.PUSH_CREATE_ITEM)
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
             {
                 ConfigReactionTemplate newcrt = crt.Clone(null);
                 repositoryPush(newcrt, s2);
