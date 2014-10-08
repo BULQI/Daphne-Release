@@ -440,7 +440,7 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    if (cc.membrane.Reactions.Contains(cr) == false)
+                    if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         cc.membrane.Reactions.Add(cr.Clone(true));
 
@@ -486,8 +486,8 @@ namespace DaphneGui
                 ConfigReaction cr = (ConfigReaction)item;
                 if (cc != null && cr != null)
                 {
-                    //Add to reactions list only if the cell does not already contain this reaction
-                    if (cc.cytosol.reaction_complexes_guid_ref.Contains(cr.entity_guid) == false)
+                    // Add to reactions list only if the cell does not already contain this reaction
+                    if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         cc.cytosol.Reactions.Add(cr.Clone(true));
 
@@ -496,9 +496,11 @@ namespace DaphneGui
                 }
             }
 
-            //Refresh the filter
+            // Refresh the filter
             if (needRefresh && lvCytosolAvailableReacs.ItemsSource != null)
+            {
                 CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+            }
         }
 
         private void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
@@ -726,7 +728,9 @@ namespace DaphneGui
             if (bOK == true)
             {
                 if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid))
+                {
                     bOK = false;
+                }
             }
 
             e.Accepted = bOK;
@@ -766,7 +770,9 @@ namespace DaphneGui
             if (bOK == true)
             {
                 if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid))
+                {
                     bOK = false;
+                }
             }
 
             e.Accepted = bOK;
@@ -824,7 +830,9 @@ namespace DaphneGui
             if (bOK == true)
             {
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid))
+                {
                     bOK = false;
+                }
             }
 
             e.Accepted = bOK;
@@ -833,6 +841,7 @@ namespace DaphneGui
         private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigMolecule mol = e.Item as ConfigMolecule;
+
             if (mol != null)
             {
                 // Filter out mol if membrane bound 

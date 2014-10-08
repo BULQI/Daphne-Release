@@ -703,6 +703,28 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = 0.2;
         }
 
+        private static void LoadVatReactionComplexEntities(Protocol protocol)
+        {
+            //Load from User Store so open it
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // RC
+            string[] type = new string[1] { "Ligand/Receptor" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                foreach (ConfigReactionComplex ent in userstore.entity_repository.reaction_complexes)
+                {
+                    if (ent.Name == type[i])
+                    {
+                        protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
+                        break;
+                    }
+                }
+            }
+        }
+
         public static void CreateVatReactionComplexProtocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
@@ -719,6 +741,22 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
 
+            LoadVatReactionComplexEntities(protocol);
+
+            // add the reaction complex
+            string[] type = new string[1] { "Ligand/Receptor" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                foreach (ConfigReactionComplex ent in protocol.entity_repository.reaction_complexes)
+                {
+                    if (ent.Name == type[i])
+                    {
+                        envHandle.comp.reaction_complexes.Add(ent.Clone(true));
+                        break;
+                    }
+                }
+            }
         }
 
         private static void PredefinedCellsCreator(Level store)
@@ -2767,21 +2805,25 @@ namespace Daphne
             ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
 
             //MOLECULES
-
             double[] conc = new double[3] { 0.0304, 1, 0 };
             string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     configMolPop.mp_render_blending_weight = 2.0;
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
                     crc.molpops.Add(configMolPop);
@@ -2793,21 +2835,25 @@ namespace Daphne
             //string guid = findReactionGuid(ReactionType.Association, sc);
 
             // Reaction strings
-            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5",
-                                            "CXCL13 + CXCR5 -> CXCL13:CXCR5"}; 
+            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5"}; 
             
             for (int i = 0; i < type.Length; i++)
             {
                 ConfigReaction reac = findReaction(type[i], store);
+
                 if (reac != null)
                 {
+#if OLD_RC
                     ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
                     grp.entity_guid = reac.entity_guid;
                     grp.OriginalRate = reac.rate_const;
                     grp.ReactionComplexRate = reac.rate_const;
+#endif
 
-                    crc.reactions_guid_ref.Add(reac.entity_guid);
+                    crc.reactions.Add(reac.Clone(true));
+#if OLD_RC
                     crc.ReactionRates.Add(grp);
+#endif
                 }
             }
 

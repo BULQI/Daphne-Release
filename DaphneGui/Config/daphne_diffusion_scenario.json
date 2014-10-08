@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Diffusion Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "6a9dd014-99c7-4909-af5c-fc23cc36d8a1",
+  "experiment_guid": "160a0a24-8428-4392-9d09-09f3ca28c2cf",
   "experiment_description": "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -29,7 +29,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "af03a6bf-fb72-4f71-abea-8e97b0daf40e",
+            "molpop_guid": "4cb977b5-1b75-4a91-9e2d-556458dae4b1",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -45,7 +45,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 2,
-              "molpop_guid_ref": "af03a6bf-fb72-4f71-abea-8e97b0daf40e"
+              "molpop_guid_ref": "4cb977b5-1b75-4a91-9e2d-556458dae4b1"
             },
             "mp_dist_name": "Gaussian",
             "mp_distribution": {
@@ -54,7 +54,7 @@
               "gauss_spec": {
                 "gaussian_spec_name": "",
                 "box_spec": {
-                  "box_guid": "ae77f1c6-b671-4ef4-8b94-99184a7913e4",
+                  "box_guid": "9e835ed6-8d02-4c10-a0ff-e8355e5a2982",
                   "transform_matrix": [
                     [
                       70.710678118654755,
@@ -104,35 +104,7 @@
           }
         ],
         "Reactions": [],
-        "reaction_complexes_guid_ref": []
-      }
-    }
-  },
-  "rc_scenario": {
-    "cellpopulations": [],
-    "time_config": {
-      "duration": 100.0,
-      "rendering_interval": 1.0,
-      "sampling_interval": 1.0
-    },
-    "simInterpolate": 1,
-    "simCellSize": 3,
-    "environment": {
-      "$type": "Daphne.ConfigECSEnvironment, Daphne",
-      "extent_x": 200,
-      "extent_y": 200,
-      "extent_z": 200,
-      "gridstep": 10.0,
-      "NumGridPts": [
-        21,
-        21,
-        21
-      ],
-      "toroidal": false,
-      "comp": {
-        "molpops": [],
-        "Reactions": [],
-        "reaction_complexes_guid_ref": []
+        "reaction_complexes": []
       }
     }
   },
