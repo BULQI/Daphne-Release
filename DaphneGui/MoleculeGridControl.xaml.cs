@@ -9,28 +9,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Rendering
+namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for RenderDrawing.xaml
+    /// Interaction logic for MoleculeGridControl.xaml
     /// </summary>
-    public partial class RenderDrawingDlg : Window
+    public partial class MoleculeGridControl : UserControl
     {
-        public RenderDrawingDlg()
+        public MoleculeGridControl()
         {
             InitializeComponent();
-        }
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = true;
-        }
-
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
         }
     }
 }

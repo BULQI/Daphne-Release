@@ -208,16 +208,29 @@
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GraphicsController.cs" />
+    <Compile Include="MoleculeGridControl.xaml.cs">
+      <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushCell.xaml.cs">
+      <DependentUpon>PushCell.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushEntity.xaml.cs">
+      <DependentUpon>PushEntity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pushing\PushGene.xaml.cs">
+      <DependentUpon>PushGene.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PushWindow.xaml.cs">
+      <DependentUpon>PushWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
-    <Compile Include="Rendering\RenderCell.xaml.cs">
-      <DependentUpon>RenderCell.xaml</DependentUpon>
+    <Compile Include="Rendering\BindingList.cs" />
+    <Compile Include="RenderSkinEditor.xaml.cs">
+      <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Rendering\RenderDrawing.xaml.cs">
-      <DependentUpon>RenderDrawing.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Rendering\RenderMolPop.xaml.cs">
-      <DependentUpon>RenderMolPop.xaml</DependentUpon>
+    <Compile Include="RenderSkinWindow.xaml.cs">
+      <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
@@ -292,15 +305,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Rendering\RenderCell.xaml">
+    <Page Include="MoleculeGridControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Rendering\RenderDrawing.xaml">
+    <Page Include="Pushing\PushCell.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Rendering\RenderMolPop.xaml">
+    <Page Include="Pushing\PushEntity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pushing\PushGene.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PushWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenderSkinEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenderSkinWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -429,6 +458,7 @@
       <Name>Daphne</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

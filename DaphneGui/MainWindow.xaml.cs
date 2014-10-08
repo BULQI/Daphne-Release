@@ -42,6 +42,8 @@ using Workbench;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
+using DaphneGui.Pushing;
+
 using SBMLayer;
 namespace DaphneGui
 {
@@ -59,7 +61,7 @@ namespace DaphneGui
         /// Path of the executable file in installation folder
         /// </summary>
         public string execPath = string.Empty;
-   
+
         private DocWindow dw;
         private Thread simThread;
         private VCRControl vcrControl = null;
@@ -231,6 +233,7 @@ namespace DaphneGui
         }
 
         public static ChartViewToolWindow ST_ReacComplexChartWindow;
+        public static RenderSkinWindow ST_RenderSkinWindow;
         [DllImport("kernel32.dll")]
         static extern bool AttachConsole(int dwProcessId);
         private const int ATTACH_PARENT_PROCESS = -1;
@@ -240,6 +243,7 @@ namespace DaphneGui
             InitializeComponent();
 
             ST_ReacComplexChartWindow = ReacComplexChartWindow;
+            ST_RenderSkinWindow = renderSkinWindow;
 
             this.ToolWinCellInfo.Close();
 
@@ -479,7 +483,7 @@ namespace DaphneGui
             sim = new Simulation();
             // reporter
             reporter = new Reporter();
-            reporter.AppPath = orig_path + @"\" ;
+            reporter.AppPath = orig_path + @"\";
 
             // vtk data basket to hold vtk data for entities with graphical representation
             vtkDataBasket = new VTKDataBasket();
@@ -494,6 +498,31 @@ namespace DaphneGui
             if (file_exists)
             {
                 sop = new SystemOfPersistence();
+
+                //need to load renderskin before loading protocol
+                {
+                    //setup render skin 
+                    string SkinFolderPath = new Uri(appPath + @"\Config\RenderSkin\").LocalPath;
+                    if (!Directory.Exists(SkinFolderPath))
+                    {
+                        Directory.CreateDirectory(SkinFolderPath);
+                    }
+
+                    string[] files = Directory.GetFiles(SkinFolderPath, "*.json");
+                    foreach (string skfile in files)
+                    {
+                        try
+                        {
+                            RenderSkin sk = RenderSkin.DeserializeFromFile(skfile);
+                            sop.SkinList.Add(sk);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Loading RenderSkin file {0} failed: {1}", skfile, e.ToString());
+                        }
+                    }
+                }
+
                 initialState(true, true, ReadJson(""));
                 enableCritical(loadSuccess);
                 if (loadSuccess == true)
@@ -516,6 +545,31 @@ namespace DaphneGui
                     openLastScenarioMenu.IsChecked = false;
                 }
             }
+
+
+            //setup render skin 
+            /*
+            string SkinFolderPath = new Uri(appPath + @"\Config\RenderSkin\").LocalPath;
+            if (!Directory.Exists(SkinFolderPath))
+            {
+                Directory.CreateDirectory(SkinFolderPath);
+            }
+            try
+            {
+                string[] files = Directory.GetFiles(SkinFolderPath, "*.json");
+                foreach (string skfile in files)
+                {
+                    RenderSkin sk = RenderSkin.DeserializeFromFile(skfile);
+                    sop.SkinList.Add(sk);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Loading RenderSkin failed: {0}", e.ToString());
+            }
+            */
+
+
 
             //we need to check for database connection
 
@@ -568,21 +622,21 @@ namespace DaphneGui
         {
             //BLANK SCENARIO
             var protocol = new Protocol("Config\\daphne_blank_scenario.json", "Config\\temp_protocol.json");
-            
+
             ProtocolCreators.CreateBlankProtocol(protocol);
             //serialize to json
             protocol.SerializeToFile();
 
             //DRIVER-LOCOMOTOR SCENARIO
             protocol = new Protocol("Config\\daphne_driver_locomotion_scenario.json", "Config\\temp_protocol.json");
-            
+
             ProtocolCreators.CreateDriverLocomotionProtocol(protocol);
             // serialize to json
             protocol.SerializeToFile();
 
             //DIFFUSIION SCENARIO
             protocol = new Protocol("Config\\daphne_diffusion_scenario.json", "Config\\temp_protocol.json");
-            
+
             ProtocolCreators.CreateDiffusionProtocol(protocol);
             //Serialize to json
             protocol.SerializeToFile();
@@ -756,7 +810,7 @@ namespace DaphneGui
             protocol.FileName = Uri.UnescapeDataString(new Uri(appPath).LocalPath) + @"\Config\" + "scenario.json";
             protocol.TempFile = orig_path + @"\temp_scenario.json";
 
-            protocol_path = new Uri(protocol.FileName);   
+            protocol_path = new Uri(protocol.FileName);
 
             prepareProtocol(protocol);
             protocol.SerializeToFile(false);
@@ -774,7 +828,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.InitialDirectory =SBMLFolderPath;
+            dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             //|SBML format <Level3,Version1>Spatial<Version1> (.xml)|*.xml Add this for spatial models
@@ -789,7 +843,7 @@ namespace DaphneGui
                 encodedSBML = new SBMLModel(dlg.FileName, sop.Protocol);
                 encodedSBML.ConvertDaphneToSBML(dlg.FilterIndex);
             }
-            
+
         }
 
         /// <summary>
@@ -803,7 +857,7 @@ namespace DaphneGui
             //
             //Configure open file dialog box
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.InitialDirectory =SBMLFolderPath;
+            dlg.InitialDirectory = SBMLFolderPath;
             dlg.DefaultExt = ".xml"; // Default file extension
             dlg.Filter = "SBML format <Level3,Version1>Core (.xml)|*.xml"; // Filter files by extension
             dlg.FileName = "SBMLReactionComplex";
@@ -1635,7 +1689,7 @@ namespace DaphneGui
 
             runSim();
         }
-       
+
         /// <summary>
         /// save when simulation is paused state
         /// </summary>
@@ -1837,7 +1891,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="jsonScenarioString"></param>
         /// <returns></returns>
-        private Protocol ReadJson(string jsonScenarioString) 
+        private Protocol ReadJson(string jsonScenarioString)
         {
             Protocol protocol;
 
@@ -1905,7 +1959,7 @@ namespace DaphneGui
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
                     orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                 }
-              
+
             }
 
             // (re)connect the handlers for the property changed event
@@ -1920,6 +1974,7 @@ namespace DaphneGui
 
             // GUI Resources
             // Set the data context for the main tab control config GUI
+            this.ProtocolToolWindow.Tag = sop;
             this.ProtocolToolWindow.DataContext = sop.Protocol;
             this.CellStudioToolWindow.DataContext = sop.Protocol;
             this.ComponentsToolWindow.DataContext = sop.Protocol;
@@ -2027,6 +2082,8 @@ namespace DaphneGui
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
             ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
+
+
             ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();
             //////////gc.Rwc.Invalidate();
@@ -2205,7 +2262,7 @@ namespace DaphneGui
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
-            gc.ToolsToolbarEnableAllIcons();            
+            gc.ToolsToolbarEnableAllIcons();
 
             //Set the box and blob visibilities to how they were pre-run
             foreach (ConfigMolecularPopulation molpop in SOP.Protocol.scenario.environment.ecs.molpops)
@@ -2333,7 +2390,7 @@ namespace DaphneGui
 
                 //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
                 gc.ToolsToolbarEnableOnlyHand();
-                
+
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
                 runButton.ToolTip = "Continue the Simulation.";
@@ -2431,7 +2488,7 @@ namespace DaphneGui
 
                 if (sim.RunStatus == Simulation.RUNSTAT_READY)
                 {
-                    if(Properties.Settings.Default.skipDataBaseWrites == false)
+                    if (Properties.Settings.Default.skipDataBaseWrites == false)
                     {
                         reporter.StartReporter(sop.Protocol);
                     }
@@ -2501,12 +2558,12 @@ namespace DaphneGui
                 double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].PlasmaMembrane.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc;  
+                cmi.Concentration = conc;
                 // Passing zero vector to plasma membrane (TinySphere) returns the first moment of the moment-expansion field
                 //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
                 currConcs.Add(cmi);
-                currentConcs.Add(cmi); 
+                currentConcs.Add(cmi);
             }
             foreach (KeyValuePair<string, MolecularPopulation> kvp in Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations)
             {
@@ -2514,7 +2571,7 @@ namespace DaphneGui
                 double conc = Simulation.dataBasket.Cells[selectedCell.Cell_id].Cytosol.Populations[kvp.Key].Conc.MeanValue();
                 CellMolecularInfo cmi = new CellMolecularInfo();
                 cmi.Molecule = "Cell: " + mol_name;
-                cmi.Concentration = conc; 
+                cmi.Concentration = conc;
                 // Passing zero vector to cytosol (TinyBall) returns the first moment of the moment-expansion field
                 //cmi.Gradient = kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 });
                 cmi.AddMoleculaInfo_gradient(kvp.Value.Conc.Gradient(new double[3] { 0, 0, 0 }));
@@ -2555,7 +2612,7 @@ namespace DaphneGui
                     gene_activations.Add(cgi);
                 }
                 //lvCellDiff.ItemsSource = activities;
-                lvCellDiff.ItemsSource = gene_activations; 
+                lvCellDiff.ItemsSource = gene_activations;
             }
 
             ToolWinCellInfo.Open();
@@ -2606,7 +2663,7 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                prepareProtocol(ReadJson(""));                 
+                prepareProtocol(ReadJson(""));
             }
         }
 
@@ -2686,7 +2743,7 @@ namespace DaphneGui
         }
 
         private void exitApp_Click(object sender, RoutedEventArgs e)
-        {            
+        {
             CloseApp();
         }
 
@@ -2733,7 +2790,7 @@ namespace DaphneGui
             }
 
             setScenarioPaths(filename);
-            prepareProtocol(ReadJson(""));            
+            prepareProtocol(ReadJson(""));
         }
 
         private void prepareProtocol(Protocol protocol)
@@ -2770,6 +2827,114 @@ namespace DaphneGui
         {
             About about = new About();
             about.ShowDialog();
+        }
+
+        private void pushMol_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+
+            pw.LevelADataGrid.ItemsSource = SOP.Protocol.entity_repository.molecules;
+            pw.ShowDialog();
+        }
+
+        private void pushGene_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
+
+        private void pushReac_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
+
+        private void pushCell_Click(object sender, RoutedEventArgs e)
+        {
+            PushWindow pw = new PushWindow();
+            pw.ShowDialog();
+        }
+
+        public static void GenericPush(ConfigEntity source)
+        {
+            if (source == null)
+            {
+                MessageBox.Show("Nothing to push");
+                return;
+            }
+
+            if (source is ConfigMolecule)
+            {
+                //LET'S TRY A GENERIC PUSHER
+                PushEntity pm = new PushEntity();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelDetails.DataContext = source;
+
+                ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+                if (erMol != null)
+                    pm.ComponentLevelDetails.DataContext = erMol;
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigReaction)
+            {
+                //Use generic pusher
+                PushEntity pr = new PushEntity();
+                pr.EntityLevelDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+
+                if (pr.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigCell)
+            {
+                //Use generic pusher - not yet done for cells
+
+
+                //This works
+                PushCell pc = new PushCell();
+                pc.DataContext = MainWindow.SOP;
+                pc.EntityLevelCellDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+
+                //Show the confirmation dialog
+                if (pc.ShowDialog() == false)
+                    return;
+            }
+            else
+            {
+                MessageBox.Show("Entity type 'save' operation not supported.");
+                return;
+            }
+
+
+            //If we get here, then the user confirmed a PUSH
+
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(source);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show("Entity not pushable.");
+                return;
+            }
+
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(source, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(source, status); // push into B
+            }
         }
     }
 }

@@ -11,16 +11,26 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace DaphneGui.Rendering
+namespace DaphneGui.Pushing
 {
     /// <summary>
-    /// Interaction logic for RenderCell.xaml
+    /// Interaction logic for PushCell.xaml
     /// </summary>
-    public partial class RenderCell : Window
+    public partial class PushCell : Window
     {
-        public RenderCell()
+        public PushCell()
         {
             InitializeComponent();
+        }
+
+        private void CellCancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
+
+        private void CellPushButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
         }
     }
 }

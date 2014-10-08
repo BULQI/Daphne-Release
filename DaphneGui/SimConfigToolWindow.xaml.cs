@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
+using DaphneGui.Pushing;
 using System.Diagnostics;
 
 namespace DaphneGui
@@ -34,7 +35,7 @@ namespace DaphneGui
     /// Interaction logic for ProtocolToolWindow.xaml
     /// </summary>
     public partial class ProtocolToolWindow : ToolWindow
-    {                
+    {
         //private static bool newCellPopSelected = true;
         public ProtocolToolWindow()
         {
@@ -63,7 +64,7 @@ namespace DaphneGui
                 //guid to object changes
                 ConfigCell cell_to_clone = er.cells.First();
 
-                cp.Cell = cell_to_clone.Clone(false);
+                cp.Cell = cell_to_clone.Clone(true);
                 cp.cellpopulation_name = cp.Cell.CellName;
             }
             else
@@ -83,7 +84,20 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
+            //if about rendering...
+            //for now, use name as label
+            cp.label = cp.Cell.entity_guid;
+
+            //add rendering options to scenario
+            MainWindow.SOP.Protocol.scenario.popOptions.AddRenderOptions(cp.label, cp.Cell.CellName, true);
+
+            //add lable to skin if not exist, to all skins, probably just to the current skin.
+            //that is little messy, you load another skin, the entry may not there!
+            //then need to check and make default entries
+
+            //to be removed....
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+
             MainWindow.SOP.Protocol.scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
@@ -108,8 +122,17 @@ namespace DaphneGui
             }
             MainWindow.GC.Rwc.Invalidate();
 
+
             //Remove the cell population
             MainWindow.SOP.Protocol.scenario.cellpopulations.Remove(current_item);
+
+            //remove rendering option if no other refernece
+            string label = current_item.label;
+            bool safe_to_remove = MainWindow.SOP.Protocol.scenario.RenderPopReferenceCount(label, true) == 0;
+            if (safe_to_remove)
+            {
+                MainWindow.SOP.Protocol.scenario.popOptions.RemoveRenderOptions(label, true);
+            }
 
             CellPopsListBox.SelectedIndex = index;
 
@@ -313,7 +336,7 @@ namespace DaphneGui
                         current_mol.mp_distribution = mpg;
 
                         break;
-                    
+
                     case MolPopDistributionType.Explicit:
                         break;
 
@@ -323,159 +346,159 @@ namespace DaphneGui
             }
         }
 
-//        private void MembraneMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-//        {
-//            // Only want to respond to purposeful user interaction, not just population and depopulation
-//            // of solfacs list
-//            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-//            ////////    return;
+        //        private void MembraneMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //        {
+        //            // Only want to respond to purposeful user interaction, not just population and depopulation
+        //            // of solfacs list
+        //            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+        //            ////////    return;
 
 
-//            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
+        //            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellMembraneMolPopsListBox.SelectedItem;
 
-//            if (current_mol != null)
-//            {
-//                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
-//                if (e.AddedItems.Count > 0)
-//                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
-
-
-//                // Only want to change distribution type if the combo box isn't just selecting 
-//                // the type of current item in the solfacs list box (e.g. when list selection is changed)
-
-//                if (current_mol.mp_distribution == null)
-//                {
-//                }
-//                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
-//                {
-//                    return;
-//                }
-//                switch (new_dist_type)
-//                {
-//                    case MolPopDistributionType.Homogeneous:
-//                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-//                        current_mol.mp_distribution = shl;
-//                        break;
-//                    case MolPopDistributionType.Linear:
-//                        MolPopLinear slg = new MolPopLinear();
-//                        current_mol.mp_distribution = slg;
-//                        break;
-//                    case MolPopDistributionType.Gaussian:
-//                        // Make sure there is at least one gauss_spec in repository
-//                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
-//                        ////{
-//                        ////    this.AddGaussianSpecification();
-//                        ////}
-//                        MolPopGaussian sgg = new MolPopGaussian();
-//                        GaussianSpecification gg = new GaussianSpecification();
-//                        BoxSpecification box = new BoxSpecification();
-//                        box.x_scale = 200;
-//                        box.y_scale = 200;
-//                        box.z_scale = 200;
-//                        box.x_trans = 500;
-//                        box.y_trans = 500;
-//                        box.z_trans = 500;
-//                        MainWindow.SOP.Protocol.scenario.box_specifications.Add(box);
-//                        gg.gaussian_spec_box_guid_ref = box.box_guid;
-//                        gg.gaussian_spec_name = "Off-center gaussian";
-//                        gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-//                        MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
-//                        sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
-//                        current_mol.mp_distribution = sgg;
-//                        break;
-//                    default:
-//                        throw new ArgumentException("MolPop distribution type out of range");
-//                }
-//            }
-//        }
-
-//        private void CytosolMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-//        {
-//            // Only want to respond to purposeful user interaction, not just population and depopulation
-//            // of solfacs list
-//            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
-//            ////////    return;
+        //            if (current_mol != null)
+        //            {
+        //                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+        //                if (e.AddedItems.Count > 0)
+        //                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
 
-//            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
+        //                // Only want to change distribution type if the combo box isn't just selecting 
+        //                // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
-//            if (current_mol != null)
-//            {
+        //                if (current_mol.mp_distribution == null)
+        //                {
+        //                }
+        //                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
+        //                {
+        //                    return;
+        //                }
+        //                switch (new_dist_type)
+        //                {
+        //                    case MolPopDistributionType.Homogeneous:
+        //                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+        //                        current_mol.mp_distribution = shl;
+        //                        break;
+        //                    case MolPopDistributionType.Linear:
+        //                        MolPopLinear slg = new MolPopLinear();
+        //                        current_mol.mp_distribution = slg;
+        //                        break;
+        //                    case MolPopDistributionType.Gaussian:
+        //                        // Make sure there is at least one gauss_spec in repository
+        //                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
+        //                        ////{
+        //                        ////    this.AddGaussianSpecification();
+        //                        ////}
+        //                        MolPopGaussian sgg = new MolPopGaussian();
+        //                        GaussianSpecification gg = new GaussianSpecification();
+        //                        BoxSpecification box = new BoxSpecification();
+        //                        box.x_scale = 200;
+        //                        box.y_scale = 200;
+        //                        box.z_scale = 200;
+        //                        box.x_trans = 500;
+        //                        box.y_trans = 500;
+        //                        box.z_trans = 500;
+        //                        MainWindow.SOP.Protocol.scenario.box_specifications.Add(box);
+        //                        gg.gaussian_spec_box_guid_ref = box.box_guid;
+        //                        gg.gaussian_spec_name = "Off-center gaussian";
+        //                        gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+        //                        MainWindow.SOP.Protocol.scenario.gaussian_specifications.Add(gg);
+        //                        sgg.gaussgrad_gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
+        //                        current_mol.mp_distribution = sgg;
+        //                        break;
+        //                    default:
+        //                        throw new ArgumentException("MolPop distribution type out of range");
+        //                }
+        //            }
+        //        }
 
-//                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
-//                if (e.AddedItems.Count > 0)
-//                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
+        //        private void CytosolMolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //        {
+        //            // Only want to respond to purposeful user interaction, not just population and depopulation
+        //            // of solfacs list
+        //            ////////if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+        //            ////////    return;
 
 
-//                // Only want to change distribution type if the combo box isn't just selecting 
-//                // the type of current item in the solfacs list box (e.g. when list selection is changed)
+        //            ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
 
-//                if (current_mol.mp_distribution == null)
-//                {
-//                }
-//                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
-//                {
-//                    return;
-//                }
-//                //else
-//                //{
-//                switch (new_dist_type)
-//                {
-//                    case MolPopDistributionType.Homogeneous:
-//                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
-//                        current_mol.mp_distribution = shl;
-//                        break;
-//                    case MolPopDistributionType.Linear:
-//                        MolPopLinear slg = new MolPopLinear();
-//                        current_mol.mp_distribution = slg;
-//                        break;
-//                    case MolPopDistributionType.Gaussian:
-//                        // Make sure there is at least one gauss_spec in repository
-//                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
-//                        ////{
-//                        ////    this.AddGaussianSpecification();
-//                        ////}
-//                        MolPopGaussian sgg = new MolPopGaussian();
-//                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SOP.Protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
-//                        current_mol.mp_distribution = sgg;
-//                        break;
+        //            if (current_mol != null)
+        //            {
 
-//#if allow_dist_from_file
-//                    //case MolPopDistributionType.Custom:
+        //                MolPopDistributionType new_dist_type = MolPopDistributionType.Gaussian;
+        //                if (e.AddedItems.Count > 0)
+        //                    new_dist_type = (MolPopDistributionType)e.AddedItems[0];
 
-//                    //    var prev_distribution = current_mol.mp_distribution;
-//                    //    MolPopCustom scg = new MolPopCustom();
-//                    //    current_mol.mp_distribution = scg;
 
-//                    //    // Configure open file dialog box
-//                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-//                    //    dlg.InitialDirectory = MainWindow.appPath;
-//                    //    dlg.DefaultExt = ".txt"; // Default file extension
-//                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+        //                // Only want to change distribution type if the combo box isn't just selecting 
+        //                // the type of current item in the solfacs list box (e.g. when list selection is changed)
 
-//                    //    // Show open file dialog box
-//                    //    Nullable<bool> result = dlg.ShowDialog();
+        //                if (current_mol.mp_distribution == null)
+        //                {
+        //                }
+        //                else if (current_mol.mp_distribution.mp_distribution_type == new_dist_type)
+        //                {
+        //                    return;
+        //                }
+        //                //else
+        //                //{
+        //                switch (new_dist_type)
+        //                {
+        //                    case MolPopDistributionType.Homogeneous:
+        //                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+        //                        current_mol.mp_distribution = shl;
+        //                        break;
+        //                    case MolPopDistributionType.Linear:
+        //                        MolPopLinear slg = new MolPopLinear();
+        //                        current_mol.mp_distribution = slg;
+        //                        break;
+        //                    case MolPopDistributionType.Gaussian:
+        //                        // Make sure there is at least one gauss_spec in repository
+        //                        ////if (MainWindow.SOP.Protocol.entity_repository.gaussian_specifications.Count == 0)
+        //                        ////{
+        //                        ////    this.AddGaussianSpecification();
+        //                        ////}
+        //                        MolPopGaussian sgg = new MolPopGaussian();
+        //                        sgg.gaussgrad_gauss_spec_guid_ref = MainWindow.SOP.Protocol.scenario.gaussian_specifications[0].gaussian_spec_box_guid_ref;
+        //                        current_mol.mp_distribution = sgg;
+        //                        break;
 
-//                    //    // Process open file dialog box results
-//                    //    if (result == true)
-//                    //    {
-//                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
-//                    //        string filename = dlg.FileName;
-//                    //        scg.custom_gradient_file_string = filename;
-//                    //    }
-//                    //    else
-//                    //    {
-//                    //        current_mol.mp_distribution = prev_distribution;
-//                    //    }
-//                    //    break;  
-//#endif
+        //#if allow_dist_from_file
+        //                    //case MolPopDistributionType.Custom:
 
-//                    default:
-//                        throw new ArgumentException("MolPop distribution type out of range");
-//                }
-//                //}
-//            }
-//        }
+        //                    //    var prev_distribution = current_mol.mp_distribution;
+        //                    //    MolPopCustom scg = new MolPopCustom();
+        //                    //    current_mol.mp_distribution = scg;
+
+        //                    //    // Configure open file dialog box
+        //                    //    Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+        //                    //    dlg.InitialDirectory = MainWindow.appPath;
+        //                    //    dlg.DefaultExt = ".txt"; // Default file extension
+        //                    //    dlg.Filter = "Custom chemokine field files (.txt)|*.txt"; // Filter files by extension
+
+        //                    //    // Show open file dialog box
+        //                    //    Nullable<bool> result = dlg.ShowDialog();
+
+        //                    //    // Process open file dialog box results
+        //                    //    if (result == true)
+        //                    //    {
+        //                    //        // Save filename here, but deserialization will happen in lockAndResetSim->initialState call
+        //                    //        string filename = dlg.FileName;
+        //                    //        scg.custom_gradient_file_string = filename;
+        //                    //    }
+        //                    //    else
+        //                    //    {
+        //                    //        current_mol.mp_distribution = prev_distribution;
+        //                    //    }
+        //                    //    break;  
+        //#endif
+
+        //                    default:
+        //                        throw new ArgumentException("MolPop distribution type out of range");
+        //                }
+        //                //}
+        //            }
+        //        }
 
 
         /// <summary>
@@ -504,7 +527,7 @@ namespace DaphneGui
             //ConfigTabControl.SelectedIndex = 1;
             // Use list index here since not all solfacs.mp_distribution have this guid field
             lbEcsMolPops.SelectedIndex = index;
-        }        
+        }
 
         //ECM TAB EVENT HANDLERS
         private void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
@@ -517,7 +540,7 @@ namespace DaphneGui
                 MessageBox.Show("There are no molecules to choose from. Please start with a blank scenario or other scenario that contains molecules.");
                 return;
             }
-            
+
             //add a moleculepop that is not already added
             ConfigMolecularPopulation gmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
@@ -543,7 +566,7 @@ namespace DaphneGui
             {
                 ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)lbEcsMolPops.SelectedValue;
 
-                MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove ECM reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);                
+                MessageBoxResult res = MessageBox.Show("Removing this molecular population will remove ECM reactions that use this molecule. Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
                 if (res == MessageBoxResult.No)
                     return;
 
@@ -568,7 +591,7 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.scenario.environment.ecs.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-                
+
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -663,7 +686,7 @@ namespace DaphneGui
         {
             int nIndex = ReactionComplexListBox.SelectedIndex;
             if (nIndex >= 0)
-            {                
+            {
                 string guid = (string)ReactionComplexListBox.SelectedValue;
                 MainWindow.SOP.Protocol.scenario.environment.ecs.reaction_complexes_guid_ref.Remove(guid);
             }
@@ -702,7 +725,7 @@ namespace DaphneGui
 
         //    AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
         //    arc.ShowDialog();
-            
+
         //}
 
         //private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
@@ -725,13 +748,13 @@ namespace DaphneGui
 
         //        if (lbComplexes.Items.Count == 0)
         //            lbComplexes.SelectedIndex = -1;
-                
+
         //    }
 
         //    //btnGraphReactionComplex.IsChecked = true;
         //}
 
-        
+
 
         ////LIBRARIES TAB EVENT HANDLERS
         ////MOLECULES        
@@ -765,7 +788,7 @@ namespace DaphneGui
         //private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
         //{
         //    ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
-            
+
         //    MessageBoxResult res;
         //    if (MainWindow.SOP.Protocol.scenario.environment.ecs.HasMolecule(gm))
         //    {
@@ -791,7 +814,7 @@ namespace DaphneGui
         //        dgLibMolecules.SelectedIndex = -1;
 
         //}
-        
+
         //LIBRARY REACTIONS EVENT HANDLERS        
         //private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
         //{
@@ -800,7 +823,7 @@ namespace DaphneGui
         //    {
         //        return;
         //    }
-            
+
         //    MainWindow.SOP.Protocol.entity_repository.reactions.Remove(cr);
         //}
 
@@ -814,7 +837,7 @@ namespace DaphneGui
                 {
                     return true;
                 }
-            }                   
+            }
             return false;
         }
         private bool CytosolHasMolecule(ConfigCell cell, string molguid)
@@ -825,7 +848,7 @@ namespace DaphneGui
                 {
                     return true;
                 }
-            }           
+            }
             return false;
         }
 
@@ -942,7 +965,7 @@ namespace DaphneGui
 
 
 
-        
+
         private void CollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
         }
@@ -960,7 +983,7 @@ namespace DaphneGui
             ComboBox cb = sender as ComboBox;
             if (cb.SelectedIndex == -1)
                 return;
-  
+
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of cell population distribution type list
             if (e.AddedItems.Count <= 0 || e.RemovedItems.Count == 0)
@@ -974,7 +997,7 @@ namespace DaphneGui
             }
             // current_dist points to the current distribution in cellPop
             CellPopDistribution current_dist = cellPop.cellPopDist;
-            
+
             // The new Distribtuion TYPE 
             CellPopDistributionType new_dist_type = (CellPopDistributionType)e.AddedItems[0];
 
@@ -1034,7 +1057,7 @@ namespace DaphneGui
                 gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
                 AddGaussianSpecification(gg, box);
 
-                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);             
+                cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, box, cellPop);
                 ((CellPopGaussian)cellPop.cellPopDist).gauss_spec_guid_ref = gg.gaussian_spec_box_guid_ref;
 
                 // Connect the VTK callback
@@ -1042,7 +1065,7 @@ namespace DaphneGui
                 MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
             }
-            else  if (cpdt == CellPopDistributionType.Specific)
+            else if (cpdt == CellPopDistributionType.Specific)
             {
                 res = MessageBox.Show("Keep current cell locations?", "", MessageBoxButton.YesNo);
                 if (res == MessageBoxResult.No)
@@ -1096,7 +1119,7 @@ namespace DaphneGui
             }
             else
             {
-                ConfigTabControl.SelectedItem = tabECM;                
+                ConfigTabControl.SelectedItem = tabECM;
             }
         }
 
@@ -1154,7 +1177,7 @@ namespace DaphneGui
                 }
             }
         }
-        
+
         private void cell_type_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //ConfigCell cc 
@@ -1185,22 +1208,61 @@ namespace DaphneGui
             if (nIndex < 0)
                 return;
 
-            //guid to object changes
-            //cp.Cell.entity_guid = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].entity_guid;
-            ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
-            //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
-            //of configCell, it will has its own entity_guid - only the name stays the same ---
-            if (cell_to_clone.entity_guid != curr_cell_type_guid)
+            //if user picked 'new cell type' then create new configcell in ER
+            if (nIndex == (cb.Items.Count - 1))
             {
-                cp.Cell = cell_to_clone.Clone(false);
+                ConfigCell newLibCell = new ConfigCell();
+                newLibCell.CellName = newLibCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+                ////AddEditMolecule aem = new AddEditMolecule(newLibCell, MoleculeDialogType.NEW);
 
-                string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
-                if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                //////if user cancels out of new cell dialog, set selected cell back to what it was
+                ////if (aem.ShowDialog() == false)
+                ////{
+                ////    if (e.RemovedItems.Count > 0)
+                ////    {
+                ////        cb.SelectedItem = e.RemovedItems[0];
+                ////    }
+                ////    else
+                ////    {
+                ////        cb.SelectedIndex = 0;
+                ////    }
+                ////    return;
+                ////}
+
+                Protocol B = MainWindow.SOP.Protocol;
+                newLibCell.incrementChangeStamp();
+                Level.PushStatus status = B.pushStatus(newLibCell);
+                if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                 {
-                    cp.cellpopulation_name = new_cell_name;
+                    B.repositoryPush(newLibCell, status); // push into B, inserts as new
                 }
+
+                cp.Cell = newLibCell.Clone(true);
+                cp.Cell.CellName = newLibCell.CellName;
+                cb.SelectedItem = newLibCell;
             }
-            //ucCellPopCellDetails.DataContext = cp.Cell;
+            //user picked existing cell type 
+            else
+            {
+                ConfigCell cell_to_clone = MainWindow.SOP.Protocol.entity_repository.cells[nIndex];
+                //thid entity_guid will already be different, since "cell" in cellpopulation is an instance
+                //of configCell, it will has its own entity_guid - only the name stays the same ---
+                if (cell_to_clone.entity_guid != curr_cell_type_guid)
+                {
+                cp.Cell = cell_to_clone.Clone(true);
+
+                    string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
+                    if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
+                    {
+                        cp.cellpopulation_name = new_cell_name;
+                    }
+                }
+                //ucCellPopCellDetails.DataContext = cp.Cell;
+            }
+
+            //add/change rendering info
+            cp.label = cp.Cell.entity_guid;
+            MainWindow.SOP.Protocol.scenario.popOptions.AddRenderOptions(cp.label, cp.Cell.CellName, true);
         }
 
         /// <summary>
@@ -1328,7 +1390,7 @@ namespace DaphneGui
             //    CellPopSpecific cps = cp.cellPopDist as CellPopSpecific;
             //    //cps.CopyLocations(cp);
             //}
-        }        
+        }
 
         /// <summary>
         /// Call after focus lost from selected cell in the data grid.
@@ -1348,20 +1410,20 @@ namespace DaphneGui
             {
                 double[] pos = new double[3] { cp.CellStates[i].X, cp.CellStates[i].Y, cp.CellStates[i].Z };
                 // X
-                if (cp.CellStates[i].X < 0) 
+                if (cp.CellStates[i].X < 0)
                 {
                     // cp.cellPopDist.CellStates[i].X = 0;
                     pos[0] = 0;
                     changed = true;
                 }
-                if (cp.CellStates[i].X > cp.cellPopDist.Extents[0]) 
+                if (cp.CellStates[i].X > cp.cellPopDist.Extents[0])
                 {
                     // cp.cellPopDist.CellStates[i].X = cp.cellPopDist.Extents[0];
                     pos[0] = cp.cellPopDist.Extents[0];
                     changed = true;
                 }
                 // Y
-                if (cp.CellStates[i].Y < 0) 
+                if (cp.CellStates[i].Y < 0)
                 {
                     //cp.cellPopDist.CellStates[i].Y = 0;
                     pos[1] = 0;
@@ -1483,7 +1545,7 @@ namespace DaphneGui
                     return;
                 if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
                 {
-                    ((MolPopLinear) cmp.mp_distribution).Initalize((BoundaryFace) cb.SelectedItem);
+                    ((MolPopLinear)cmp.mp_distribution).Initalize((BoundaryFace)cb.SelectedItem);
                 }
             }
         }
@@ -1544,6 +1606,26 @@ namespace DaphneGui
             int n = ColorComboBox.SelectedIndex;
         }
 
+        private void genericRepositoryPush(ConfigEntity e)
+        {
+            //-get status
+            //-make sure it’s pushable at all, not all entities are
+            //-(A)if it’s pushable, they may want to push it even if it is older (to reset or such), and you have to ask for that
+            //-(B) if it’s a new item there is no further choice, execute the push
+            //-(C)if it’s an existing item they may want to override the original or insert as new; to insert as new, regenerate the guid; execute the push
+
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(e);
+
+            //Is pushable
+            if (e is ConfigMolecule)
+            {
+                B.repositoryPush(e, status); // push into B, inserts as new
+            }
+
+        }
+
+
         private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -1571,10 +1653,10 @@ namespace DaphneGui
                 newLibMol.Name = newLibMol.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 AddEditMolecule aem = new AddEditMolecule(newLibMol, MoleculeDialogType.NEW);
 
-                Point position = cb.PointToScreen(new Point(0d, 0d));
-                double wid = cb.Width;
-                aem.Top = position.Y;
-                aem.Left = position.X + wid;
+                //Point position = cb.PointToScreen(new Point(0d, 0d));
+                //double wid = cb.Width;
+                //aem.Top = position.Y;
+                //aem.Left = position.X + wid;
 
                 //if user cancels out of new molecule dialog, set selected molecule back to what it was
                 if (aem.ShowDialog() == false)
@@ -1589,8 +1671,20 @@ namespace DaphneGui
                     }
                     return;
                 }
-                
-                MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+
+                //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newLibMol);
+                //molpop.molecule = newLibMol.Clone(null);
+                //molpop.Name = newLibMol.Name;
+                //cb.SelectedItem = newLibMol;
+
+                Protocol B = MainWindow.SOP.Protocol;
+                newLibMol.incrementChangeStamp();
+                Level.PushStatus status = B.pushStatus(newLibMol);
+                if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+                {
+                    B.repositoryPush(newLibMol, status); // push into B, inserts as new
+                }
+
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
@@ -1674,7 +1768,7 @@ namespace DaphneGui
             }
         }
 
-        
+
         //private void DrawSelectedReactionComplex()
         //{
         //    ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
@@ -1834,7 +1928,7 @@ namespace DaphneGui
                 temp_samp = sampling_interval_slider.Maximum;
             sampling_interval_slider.Value = temp_samp;
             MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
-            
+
             time_step_slider.Maximum = time_duration_slider.Value;
             if (temp_rand > time_step_slider.Maximum)
                 temp_rand = time_step_slider.Maximum;
@@ -1885,7 +1979,7 @@ namespace DaphneGui
             // current_dist points to the current distribution in cellPop
             CellPopDistribution current_dist = cellPop.cellPopDist;
 
-            if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform) 
+            if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
                 MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
@@ -2062,7 +2156,7 @@ namespace DaphneGui
             return foundChild;
         }
 
-        public static T FindChild<T>(DependencyObject parent)  where T : DependencyObject
+        public static T FindChild<T>(DependencyObject parent) where T : DependencyObject
         {
             // Confirm parent is valid. 
             if (parent == null) return null;
@@ -2140,7 +2234,7 @@ namespace DaphneGui
         ////    CellsListBox.SelectedIndex = -1;
         ////    CellsListBox.SelectedIndex = nIndex;
         ////}
-        
+
         ////private void chkHasDivDriver_Click(object sender, RoutedEventArgs e)
         ////{
         ////    ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
@@ -2242,7 +2336,7 @@ namespace DaphneGui
         ////    ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
         ////    if (cell == null)
         ////        return;
-            
+
         ////    if (cell.death_driver == null)
         ////    {
         ////        ////EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
@@ -2287,7 +2381,7 @@ namespace DaphneGui
 
         ////    //delete driver
         ////    cell.death_driver = null;
-            
+
         ////}
 
         ////private void btnNewDivDriver_Click(object sender, RoutedEventArgs e)
@@ -2312,7 +2406,7 @@ namespace DaphneGui
         ////        ////{
         ////        ////    cell.div_driver = er.transition_drivers_dict[driver.entity_guid].Clone(false);
         ////        ////}
-                
+
         ////        //I think this is what we want
         ////        ConfigTransitionDriver config_td = new ConfigTransitionDriver();
         ////        config_td.Name = "generic division";
@@ -2355,7 +2449,7 @@ namespace DaphneGui
         //    gene.ValidateName(MainWindow.SOP.Protocol);
 
         //    dgLibGenes.InvalidateVisual();
-            
+
         //    dgLibGenes.Items.Refresh();
         //    dgLibGenes.SelectedIndex = index;
         //    gene = (ConfigGene)dgLibGenes.SelectedItem;
@@ -2478,13 +2572,250 @@ namespace DaphneGui
         //    //btnGraphReactionComplex.IsChecked = true;
         //}
 
-        
 
-        
+
+
         private void ecm_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
         }
+
+        private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Error case
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            if (molpop == null)
+                return;
+
+            ConfigMolecule mol = molpop.molecule;
+            GenericPush(mol);
+
+            ////////if (mol == null)
+            ////////    return;
+
+            //Really, this can never be a newly created molecule
+            //All we want to do is to push the molecule but should
+            //show a confirmation dialog that shows current and new values.
+
+            ////////PushMolecule pm = new PushMolecule();
+            ////////pm.DataContext = MainWindow.SOP;
+            ////////pm.EntityLevelMolDetails.DataContext = mol;
+
+            ////////ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(mol.Name);
+
+
+            ////////if (erMol != null)
+            ////////{
+            ////////    pm.ComponentLevelMolDetails.DataContext = erMol;
+            ////////}
+
+            //////////Here show the confirmation dialog
+            ////////if (pm.ShowDialog() == false)
+            ////////{
+            ////////    //User clicked Cancel
+            ////////    return;
+            ////////}
+
+            //////////If we get here, then the user confirmed a PUSH
+
+            ////////Protocol B = MainWindow.SOP.Protocol;
+            ////////Level.PushStatus status = B.pushStatus(mol);
+            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////////{
+            ////////    B.repositoryPush(mol, status); // push into B, inserts as new
+            ////////}
+            ////////else // the item exists; could be newer or older
+            ////////{
+            ////////    B.repositoryPush(mol, status); // push into B
+            ////////}
+
+        }
+
+        ////private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        ////{
+        ////    CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
+        ////    if (cellpop == null)
+        ////        return;
+
+        ////    ConfigCell cell = cellpop.Cell;
+        ////    GenericPush(cell);
+        ////}
+
+        private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (lvEcsReactions.SelectedIndex < 0)
+            {
+                MessageBox.Show("Please select a reaction.");
+                return;
+            }
+
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            GenericPush(reac);
+
+            ////////PushReaction pr = new PushReaction();
+            ////////pr.EntityLevelReactionDetails.DataContext = reac;
+
+            ////////if (!MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(reac.entity_guid))
+            ////////    return;
+
+            ////////GenericPush(reac, MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid]);
+
+
+            ////////pr.ComponentLevelReactionDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[reac.entity_guid];
+
+            ////////if (pr.ShowDialog() == false)
+            ////////{
+            ////////    return;
+            ////////}
+
+            //////////If we get here, then the user confirmed a PUSH
+
+            ////////Protocol B = MainWindow.SOP.Protocol;
+            ////////Level.PushStatus status = B.pushStatus(reac);
+            ////////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            ////////{
+            ////////    B.repositoryPush(reac, status); // push into B, inserts as new
+            ////////}
+            ////////else // the item exists; could be newer or older
+            ////////{
+            ////////    B.repositoryPush(reac, status); // push into B
+            ////////}
+        }
+
+        private void GenericPush(ConfigEntity source)
+        {
+            if (source == null)
+            {
+                MessageBox.Show("Nothing to push");
+                return;
+            }
+
+            if (source is ConfigMolecule)
+            {
+                //LET'S TRY A GENERIC PUSHER
+                PushEntity pm = new PushEntity();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelDetails.DataContext = source;
+
+                ConfigMolecule erMol = MainWindow.SOP.Protocol.FindMolecule(((ConfigMolecule)source).Name);
+                if (erMol != null)
+                    pm.ComponentLevelDetails.DataContext = erMol;
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigReaction)
+            {
+                //Use generic pusher
+                PushEntity pr = new PushEntity();
+                pr.EntityLevelDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(source.entity_guid))
+                    pr.ComponentLevelDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
+
+                if (pr.ShowDialog() == false)
+                    return;
+
+            }
+            else if (source is ConfigCell)
+            {
+                //Use generic pusher - not yet done for cells
+
+
+                //This works
+                PushCell pc = new PushCell();
+                pc.DataContext = MainWindow.SOP;
+                pc.EntityLevelCellDetails.DataContext = source;
+
+                if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
+                    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
+
+                //Show the confirmation dialog
+                if (pc.ShowDialog() == false)
+                    return;
+            }
+            else
+            {
+                MessageBox.Show("Entity type 'save' operation not supported.");
+                return;
+            }
+
+
+            //If we get here, then the user confirmed a PUSH
+
+            //Push the entity
+            Protocol B = MainWindow.SOP.Protocol;
+            Level.PushStatus status = B.pushStatus(source);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show("Entity not pushable.");
+                return;
+            }
+
+            if (status == Level.PushStatus.PUSH_CREATE_ITEM)
+            {
+                B.repositoryPush(source, status); // push into B, inserts as new
+            }
+            else // the item exists; could be newer or older
+            {
+                B.repositoryPush(source, status); // push into B
+            }
+        }
+
+        private void btnNewSkinClick(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (skinNameTextBox.Visibility == System.Windows.Visibility.Collapsed)
+            {
+                skinLabel.Visibility = System.Windows.Visibility.Visible;
+                skinNameTextBox.Visibility = System.Windows.Visibility.Visible;
+                button.Content = "Create";
+                return;
+            }
+            //get a name for the new skin
+            string skinName = skinNameTextBox.Text;
+            skinNameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+            skinLabel.Visibility = System.Windows.Visibility.Collapsed;
+            skinNameTextBox.Text = "";
+            button.Content = "New Skin";
+            if (skinName == null || skinName.Length == 0)
+            {
+                skinNote.Text = "No Name Given";
+                return;
+            }
+            else
+            {
+                skinNote.Text = "New Skin created";
+            }
+
+            var er = MainWindow.SOP.Protocol.entity_repository;
+            RenderSkin newrs = new RenderSkin(skinName, er);
+            //serialize to file
+            string SkinFilePath = new Uri(MainWindow.appPath + @"\Config\RenderSkin\" + skinName + ".json").LocalPath;
+            newrs.SerializeToFile(SkinFilePath);
+            newrs.FileName = SkinFilePath;
+            MainWindow.SOP.SkinList.Add(newrs);
+        }
+
+        private void Button_Click_Edit_RenderSkin(object sender, RoutedEventArgs e)
+        {
+            var item = skinChoiceComboBox.SelectedItem;
+
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            MainWindow.ST_RenderSkinWindow.Visibility = System.Windows.Visibility.Visible;
+            MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
+        private void skinChoiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MainWindow.ST_RenderSkinWindow.Visibility != System.Windows.Visibility.Visible) return;
+            var item = skinChoiceComboBox.SelectedItem;
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            //MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
     }
 
     public class DatabindingDebugConverter : IValueConverter
@@ -2493,15 +2824,6 @@ namespace DaphneGui
             object parameter, CultureInfo culture)
         {
             //Debugger.Break();
-            //double newvalue = (double)value - 1.0;
-            //if (value == null)
-            //{
-            //    var tmp = parameter as ObjectDataProvider;
-            //    ConfigMolecularPopulation mp = tmp.ObjectInstance as ConfigMolecularPopulation;
-            //    mp.mp_distribution = new MolPopHomogeneousLevel();
-            //    return mp;
-            //}
-            //return newvalue;
             return value;
         }
 
@@ -2512,6 +2834,7 @@ namespace DaphneGui
             return value;
         }
     }
+
 
     public class diffSchemeValueConverter : IValueConverter
     {
@@ -2594,7 +2917,7 @@ namespace DaphneGui
         public static void SetHighlightColumn(DependencyObject obj, bool value)
         {
             bool oldvalue = GetHighlightColumn(obj);
-            
+
             obj.SetValue(HighlightColumnProperty, !oldvalue);
         }
 
@@ -2643,7 +2966,7 @@ namespace DaphneGui
                 DataGridColumn col = sender as DataGridColumn;
                 if (col == null)
                     return;
-                
+
                 DataGrid dg = GetDataGridFromColumn(col);
                 for (int i = 0; i < dg.Items.Count; i++)
                 {
@@ -2813,6 +3136,7 @@ namespace DaphneGui
             }
         }
     }
+}
 
 
     ///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER
@@ -2849,6 +3173,6 @@ namespace DaphneGui
     //        show7(null, EventArgs.Empty);
     //    }
     //}
-}
+
 
 

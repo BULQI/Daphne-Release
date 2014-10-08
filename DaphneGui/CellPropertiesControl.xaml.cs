@@ -101,7 +101,18 @@ namespace DaphneGui
         {
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("diffSchemesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
+
+            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
         }
 
+        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            if (cell == null)
+                return;
+
+            MainWindow.GenericPush(cell);
+        }
     }
 }

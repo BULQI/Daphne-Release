@@ -19,7 +19,7 @@
         <daph:ManyToBooleanConverter x:Key="ManyConv" />
         <daph:TextToColorConverter x:Key="textToColorConv" />
         <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
-        <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+        <!--<daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />-->
 
         <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />
         <daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />
@@ -68,8 +68,8 @@
 
                     <StackPanel>
 
-                    <TextBlock Text="checking datacontext" />
-                    <TextBlock Text="{Binding}" />
+                    <!--<TextBlock Text="checking datacontext" />
+                    <TextBlock Text="{Binding}" />-->
 
                         <DataGrid x:Name="dgLibGenes" 
                                 ItemsSource="{Binding Source={StaticResource GenesListView}}" 

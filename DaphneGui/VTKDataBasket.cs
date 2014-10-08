@@ -13,6 +13,8 @@ using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra;
 //using Meta.Numerics.Matrices;
 using Kitware.VTK;
+using System.Diagnostics;
+using System.Windows.Media;
 
 namespace DaphneGui
 {
@@ -643,16 +645,38 @@ namespace DaphneGui
         // data related to the cells
         private vtkPolyData poly;
         private vtkPoints points;
-        private vtkIntArray cellID, cellSet, cellGeneration;
+
+        /// <summary>
+        /// mapping cell index to color table entry
+        /// </summary>
+        private vtkIntArray cellColorMapper;
+
+        private vtkIntArray cellID; //, cellSet, cellGeneration;
 #if ALL_DATA
         private Dictionary<string, vtkDoubleArray> cellReceptorArrays;
         private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable, bivariateColorTable;
 #else
-        private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable;
+
+        //obsolate
+        //private vtkLookupTable cellSetColorTable, cellGenerationColorTable, cellGenericColorTable;
+        private vtkLookupTable cellGenericColorTable;
+
+
+        private vtkLookupTable cellColorTable;
 #endif
 
-        // colormap
+        // colormap - changed meaning in rendering scheme
+        //now means <population_id, color_index>
         private Dictionary<int, int> colorMap;
+
+
+        //record assigned cells index, incremented in AssignCell
+        private long assignCellIndex = 0;
+        
+        //Dictionary<string, RenderCell> RenderCellDict;
+
+        public Dictionary<string, RenderPop> RenderPopDict;
+
 
 #if WRITE_VTK_DATA
         // data writer
@@ -679,23 +703,23 @@ namespace DaphneGui
             cellReceptorArrays = new Dictionary<string, vtkDoubleArray>();
 #endif
             // ColorBrewer YlOrBr5
-            List<uint[]> colorVals = new List<uint[]>();
-            colorVals.Add(new uint[3] { 153, 52, 4 });
-            colorVals.Add(new uint[3] { 217, 95, 14 });
-            colorVals.Add(new uint[3] { 254, 153, 41 });
-            colorVals.Add(new uint[3] { 254, 217, 142 });
-            colorVals.Add(new uint[3] { 255, 255, 212 });
+            //List<uint[]> colorVals = new List<uint[]>();
+            //colorVals.Add(new uint[3] { 153, 52, 4 });
+            //colorVals.Add(new uint[3] { 217, 95, 14 });
+            //colorVals.Add(new uint[3] { 254, 153, 41 });
+            //colorVals.Add(new uint[3] { 254, 217, 142 });
+            //colorVals.Add(new uint[3] { 255, 255, 212 });
 
             // cell generation vtkLookupTable
-            cellGenerationColorTable = vtkLookupTable.New();
-            cellGenerationColorTable.SetNumberOfTableValues(colorVals.Count);
-            cellGenerationColorTable.Build();
-            for (int ii = 0; ii < colorVals.Count; ii++ )
-            {
-                cellGenerationColorTable.SetTableValue(ii, (float)colorVals[ii][0]/255f, (float)colorVals[ii][1]/255f, (float)colorVals[ii][2]/255f, 1.0f);
-            }
-            cellGenerationColorTable.SetRange(0, colorVals.Count - 1);
-            cellGenerationColorTable.Build();
+            //cellGenerationColorTable = vtkLookupTable.New();
+            //cellGenerationColorTable.SetNumberOfTableValues(colorVals.Count);
+            //cellGenerationColorTable.Build();
+            //for (int ii = 0; ii < colorVals.Count; ii++ )
+            //{
+            //    cellGenerationColorTable.SetTableValue(ii, (float)colorVals[ii][0]/255f, (float)colorVals[ii][1]/255f, (float)colorVals[ii][2]/255f, 1.0f);
+            //}
+            //cellGenerationColorTable.SetRange(0, colorVals.Count - 1);
+            //cellGenerationColorTable.Build();
 
             // ColorBrewer RdPu5, but going from white (low) to RdPu (high, ending at 2nd to darkest color)
             List<uint[]> colorVals2 = new List<uint[]>();
@@ -704,7 +728,7 @@ namespace DaphneGui
             colorVals2.Add(new uint[3] { 247, 104, 161 });
             colorVals2.Add(new uint[3] { 197, 27, 138 });
 
-            // generic "other attributes" vtkLookupTable
+            //generic "other attributes" vtkLookupTable
             int numColors = 256;
             cellGenericColorTable = vtkLookupTable.New();
             cellGenericColorTable.SetNumberOfTableValues(numColors);
@@ -722,6 +746,12 @@ namespace DaphneGui
                 cv = ctf.GetColor(vv);
                 cellGenericColorTable.SetTableValue(jj, cv[0], cv[1], cv[2], 1.0f);
             }
+
+
+            //RenderCellDict = new Dictionary<string, RenderCell>();
+            RenderPopDict = new Dictionary<string, RenderPop>();
+
+
 #if ALL_DATA
             // Red-Cyan 4 x 4 bivariate colormap
             List<uint[]> bvColors = new List<uint[]>();
@@ -765,18 +795,18 @@ namespace DaphneGui
         /// <summary>
         /// accessor for the color table
         /// </summary>
-        public vtkLookupTable CellSetColorTable
-        {
-            get { return cellSetColorTable; }
-        }
+        //public vtkLookupTable CellSetColorTable
+        //{
+        //    get { return cellSetColorTable; }
+        //}
 
         /// <summary>
         /// accessor for the color table
         /// </summary>
-        public vtkLookupTable CellGenerationColorTable
-        {
-            get { return cellGenerationColorTable; }
-        }
+        //public vtkLookupTable CellGenerationColorTable
+        //{
+        //    get { return cellGenerationColorTable; }
+        //}
 
         /// <summary>
         /// accessor for the color table
@@ -784,6 +814,11 @@ namespace DaphneGui
         public vtkLookupTable CellGenericColorTable
         {
             get { return cellGenericColorTable; }
+        }
+
+        public vtkLookupTable CellColorTable
+        {
+            get { return cellColorTable; }
         }
 #if ALL_DATA
         /// <summary>
@@ -810,8 +845,12 @@ namespace DaphneGui
         public void CreateCellColorTable(long num)
         {
             // color table
-            cellSetColorTable = vtkLookupTable.New();
-            cellSetColorTable.SetNumberOfTableValues(num);
+            //cellSetColorTable = vtkLookupTable.New();
+            //cellSetColorTable.SetNumberOfTableValues(num);
+
+            cellColorTable = vtkLookupTable.New();
+            cellColorTable.SetNumberOfTableValues(num);
+
         }
 
         /// <summary>
@@ -822,10 +861,16 @@ namespace DaphneGui
         /// <param name="g">green</param>
         /// <param name="b">blue</param>
         /// <param name="a">opacity/alpha</param>
-        public void AddCellSetColor(long idx, double r, double g, double b, double a)
+        //public void AddCellSetColor(long idx, double r, double g, double b, double a)
+        //{
+        //    cellSetColorTable.SetTableValue(idx, r, g, b, a);
+        //}
+
+        public void AddToCellColorTable(long idx, double r, double g, double b, double a)
         {
-            cellSetColorTable.SetTableValue(idx, r, g, b, a);
+            cellColorTable.SetTableValue(idx, r, g, b, a);
         }
+
 
         /// <summary>
         /// retrieve the cell poly data
@@ -856,15 +901,21 @@ namespace DaphneGui
             cellID.SetNumberOfValues(numCells);
             cellID.SetName("cellID");
 
-            cellSet = vtkIntArray.New();
-            cellSet.SetNumberOfComponents(1);
-            cellSet.SetNumberOfValues(numCells);
-            cellSet.SetName("cellSet");
+            //cellSet = vtkIntArray.New();
+            //cellSet.SetNumberOfComponents(1);
+            //cellSet.SetNumberOfValues(numCells);
+            //cellSet.SetName("cellSet");
 
-            cellGeneration = vtkIntArray.New();
-            cellGeneration.SetNumberOfComponents(1);
-            cellGeneration.SetNumberOfValues(numCells);
-            cellGeneration.SetName("generation");
+            //cellGeneration = vtkIntArray.New();
+            //cellGeneration.SetNumberOfComponents(1);
+            //cellGeneration.SetNumberOfValues(numCells);
+            //cellGeneration.SetName("generation");
+
+            cellColorMapper = vtkIntArray.New();
+            cellColorMapper.SetNumberOfComponents(1);
+            cellColorMapper.SetNumberOfValues(numCells);
+            cellColorMapper.SetName("cellColorMapper");
+
 #if ALL_DATA
             foreach (KeyValuePair<string, string> kvp in receptorInfo)
             {
@@ -880,6 +931,17 @@ namespace DaphneGui
             allocateArrays(numCells, 2, true);
         }
 
+
+        public void resetAssignCellIndex()
+        {
+            assignCellIndex = 0;
+        }
+
+        public long getAssignCellIndex()
+        {
+            return assignCellIndex;
+        }
+
         /// <summary>
         /// assign the attributes to a cell where the arrays have already been pre-allocated
         /// using StartAllocatedCells(int numCells)
@@ -889,17 +951,45 @@ namespace DaphneGui
         /// <param name="id">cell id</param>
         /// <param name="color">cell color index (already mapped through ColorMap)</param>
         /// <param name="generation">division generation number</param>
-        public void AssignCell(long idx, Cell cell)
+        public void AssignCell(Cell cell)
         {
-            double[] pos = cell.SpatialState.X;
-            int id = cell.Cell_id;
-            int color = ColorMap[cell.Population_id];
-            int generation = 0;
 
+            int color_index = colorMap[cell.Population_id];
+            if (color_index == -1) return;
+
+            long idx = assignCellIndex;
+            assignCellIndex++;
+
+            cellID.SetValue(idx, cell.Cell_id);
+
+            double[] pos = cell.SpatialState.X;
             points.SetPoint(idx, pos[0], pos[1], pos[2]);
-            cellID.SetValue(idx, id);
-            cellSet.SetValue(idx, color);
-            cellGeneration.SetValue(idx, generation);
+
+            if (RenderPopDict.ContainsKey(cell.label) == false)
+            {
+                return;
+            }
+            RenderPop render_pop = RenderPopDict[cell.label];
+            switch (render_pop.renderMethod)
+            {
+                case RenderMethod.CELL_TYPE:
+                case RenderMethod.CELL_POP:
+                    cellColorMapper.SetValue(idx, color_index);
+                    break;
+                case RenderMethod.CELL_DIV_STATE:
+                    cellColorMapper.SetValue(idx, color_index + cell.DividerState);
+                    break;
+                case RenderMethod.CELL_DIFF_STATE:
+                    cellColorMapper.SetValue(idx, color_index + cell.DifferentiationState);
+                    break;
+                case RenderMethod.CELL_DEATH_STATE:
+                    cellColorMapper.SetValue(idx, color_index + (cell.Alive ? 0 : 1));
+                    break;
+                case RenderMethod.CELL_GEN:
+                    cellColorMapper.SetValue(idx, color_index + cell.generation);
+                    break;
+            }
+
 #if ALL_VTK
             // NOTE: there may be other cells in the future that have chemokine receptors besides motile cells
             if (motile == true)
@@ -924,11 +1014,27 @@ namespace DaphneGui
         /// </summary>
         public void FinishCells()
         {
-            cellSetColorTable.Build();
+            //cellSetColorTable.Build();
+            //cellColorTable.Build();
+
+            //todo change pont allocation to points needed.
+            var nPoints = points.GetNumberOfPoints();
+            if (nPoints != this.assignCellIndex)
+            {
+                vtkPoints vp = vtkPoints.New();
+                vp.SetNumberOfPoints(this.assignCellIndex);
+                for (int i = 0; i < this.assignCellIndex; i++)
+                {
+                    double[] p = points.GetPoint((long)i);
+                    vp.SetPoint(i, p[0], p[1], p[2]);
+                }
+                this.points = vp;
+            }
             poly.SetPoints(points);
+            poly.GetPointData().AddArray(cellColorMapper);
             poly.GetPointData().AddArray(cellID);
-            poly.GetPointData().AddArray(cellSet);
-            poly.GetPointData().AddArray(cellGeneration);
+            //poly.GetPointData().AddArray(cellSet);
+            //poly.GetPointData().AddArray(cellGeneration);
 #if ALL_DATA
             foreach (KeyValuePair<string, vtkDoubleArray> kvp in cellReceptorArrays)
             {
@@ -948,8 +1054,9 @@ namespace DaphneGui
 
                     points.SetNumberOfPoints(size * factor);
                     cellID.SetNumberOfValues(size * factor);
-                    cellSet.SetNumberOfValues(size * factor);
-                    cellGeneration.SetNumberOfValues(size * factor);
+                    //cellSet.SetNumberOfValues(size * factor);
+                    //cellGeneration.SetNumberOfValues(size * factor);
+                    cellColorMapper.SetNumberOfValues(size * factor);
 #if ALL_DATA
                     foreach (KeyValuePair<string, vtkDoubleArray> kvp in cellReceptorArrays)
                     {
@@ -962,8 +1069,9 @@ namespace DaphneGui
                 {
                     points.SetNumberOfPoints(size);
                     cellID.SetNumberOfValues(size);
-                    cellSet.SetNumberOfValues(size);
-                    cellGeneration.SetNumberOfValues(size);
+                    //cellSet.SetNumberOfValues(size);
+                    //cellGeneration.SetNumberOfValues(size);
+                    cellColorMapper.SetNumberOfValues(size);
 #if ALL_DATA
                     foreach (KeyValuePair<string, vtkDoubleArray> kvp in cellReceptorArrays)
                     {
@@ -985,11 +1093,11 @@ namespace DaphneGui
                 // NOTE: Make sure that all arrays get updated or there will be memory problems.
                 allocateArrays(Simulation.dataBasket.Cells.Count, 2);
 
-                long i = 0;
 
+                resetAssignCellIndex();
                 foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                 {
-                    AssignCell(i++, kvp.Value);
+                    AssignCell(kvp.Value);
                 }
                 if (points != null)
                 {
@@ -1041,15 +1149,20 @@ namespace DaphneGui
                 cellID.Dispose();
                 cellID = null;
             }
-            if (cellSet != null)
+            //if (cellSet != null)
+            //{
+            //    cellSet.Dispose();
+            //    cellSet = null;
+            //}
+            //if (cellGeneration != null)
+            //{
+            //    cellGeneration.Dispose();
+            //    cellGeneration = null;
+            //}
+            if (cellColorTable != null)
             {
-                cellSet.Dispose();
-                cellSet = null;
-            }
-            if (cellGeneration != null)
-            {
-                cellGeneration.Dispose();
-                cellGeneration = null;
+                cellColorTable.Dispose();
+                cellColorTable = null;
             }
 #if ALL_DATA
             List<string> list = new List<string>();
@@ -1076,6 +1189,7 @@ namespace DaphneGui
         {
             CleanupCells();
             colorMap.Clear();
+            RenderPopDict.Clear();
 #if ALL_DATA
             cellReceptorArrays.Clear();
 #endif
@@ -1158,19 +1272,114 @@ namespace DaphneGui
             }
             environmentDataController.setupBox(protocol.scenario.environment.extent_x, protocol.scenario.environment.extent_y, useThisZValue);
 
-            cellDataController.CreateCellColorTable(protocol.scenario.cellpopulations.Count);
+            //compute how many color entries we need
+            int nColor = 0;
+            Dictionary<int, int> colorMap = new Dictionary<int,int>();
             for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
             {
-                // add the cell set's color to the color table
-                cellDataController.AddCellSetColor(i,
-                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScR,
-                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScG,
-                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScB,
-                                               protocol.scenario.cellpopulations[i].cellpopulation_color.ScA);
-                // create the color map entry
-                if (cellDataController.ColorMap.ContainsKey(protocol.scenario.cellpopulations[i].cellpopulation_id) == false)
+                string label = protocol.scenario.cellpopulations[i].label;
+                RenderPop rp = protocol.scenario.popOptions.GetCellRenderPop(label);
+                if (cellDataController.RenderPopDict.ContainsKey(label) == false)
                 {
-                    cellDataController.ColorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, i);
+                    cellDataController.RenderPopDict.Add(label, rp);
+                }
+                if (rp == null || rp.renderOn == false)
+                {
+                    colorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, -1);
+                    continue;
+                }
+                colorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, nColor);
+                RenderCell rc = MainWindow.SOP.GetRenderCell(label);
+                switch (rp.renderMethod)
+                {
+                    case RenderMethod.CELL_TYPE:
+                        nColor++;
+                        break;
+                    case RenderMethod.CELL_POP:
+                        nColor++;
+                        break;
+                    case RenderMethod.CELL_DIV_STATE:
+                        nColor += rc.div_state_colors.Count;
+                        break;
+                    case RenderMethod.CELL_DIFF_STATE:
+                        nColor += rc.diff_state_colors.Count;
+                        break;
+                    case RenderMethod.CELL_DEATH_STATE:
+                        nColor += rc.death_state_colors.Count;
+                        break;
+                    case RenderMethod.CELL_GEN:
+                        nColor += rc.gen_colors.Count;
+                        break;
+                }
+            }
+            foreach( var item in colorMap)
+            {
+                cellDataController.ColorMap.Add(item.Key, item.Value);
+            }
+            cellDataController.CreateCellColorTable(nColor);
+
+            //add color
+            Color color = Colors.Transparent;
+            //cell pops index for sample type
+            Dictionary<string, int> cellPopIndex = new Dictionary<string, int>();
+            for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
+            {
+                string label = protocol.scenario.cellpopulations[i].label;
+                RenderPop rp = protocol.scenario.popOptions.GetCellRenderPop(label);
+                if (rp == null || rp.renderOn == false) continue; //old senario may have rp =null
+                RenderCell rc = MainWindow.SOP.GetRenderCell(label);
+                if (rc == null) continue; //skin color for this missing?
+                int color_index = colorMap[protocol.scenario.cellpopulations[i].cellpopulation_id];
+
+                //for diffrent cell populaiton of same type
+                int pop_index = 0;
+                if (cellPopIndex.ContainsKey(label) == false)
+                {
+                    cellPopIndex.Add(label, 1);
+                }
+                else
+                {
+                    pop_index = cellPopIndex[label];
+                    cellPopIndex[label]++;
+                }
+                switch (rp.renderMethod)
+                {
+                    case RenderMethod.CELL_TYPE:
+                        color = rc.base_color.EntityColor;
+                        cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        break;
+                    case RenderMethod.CELL_POP:
+                        color = rc.cell_pop_colors[pop_index].EntityColor;
+                        cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        break;
+                    case RenderMethod.CELL_DIV_STATE:
+                        for (int j = 0; j < rc.div_state_colors.Count; j++, color_index++)
+                        {
+                            color = rc.div_state_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+                    case RenderMethod.CELL_DIFF_STATE:
+                        for (int j = 0; j < rc.diff_state_colors.Count; j++, color_index++)
+                        {
+                            color = rc.diff_state_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+                    case RenderMethod.CELL_DEATH_STATE:
+                        for (int j = 0; j < rc.death_state_colors.Count; j++, color_index++)
+                        {
+                            color = rc.death_state_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+                    case RenderMethod.CELL_GEN:
+                        for (int j = 0; j < rc.gen_colors.Count; j++, color_index++)
+                        {
+                            color = rc.gen_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
                 }
             }
             CreateAllocatedCells();
@@ -1402,14 +1611,14 @@ namespace DaphneGui
                     }
                     cellController.StartAllocatedCells(Simulation.dataBasket.Cells.Count, this.cellReceptorGuidNames);
 #else
+
                     cellDataController.StartAllocatedCells(Simulation.dataBasket.Cells.Count);
 #endif
 
-                    long i = 0;
-
+                    cellDataController.resetAssignCellIndex();
                     foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
                     {
-                        cellDataController.AssignCell(i++, kvp.Value);
+                        cellDataController.AssignCell(kvp.Value);
                     }
                     cellDataController.FinishCells();
                 }

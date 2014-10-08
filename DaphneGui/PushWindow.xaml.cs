@@ -10,17 +10,23 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Daphne;
 
-namespace DaphneGui.Rendering
+namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for RenderMolPop.xaml
+    /// Interaction logic for PushWindow.xaml
     /// </summary>
-    public partial class RenderMolPop : Window
+    public partial class PushWindow : Window
     {
-        public RenderMolPop()
+        public PushWindow()
         {
             InitializeComponent();
+        }
+
+        private void PushButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

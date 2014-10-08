@@ -1144,24 +1144,35 @@ namespace DaphneGui
                 rr = this.CellController.GlyphData.GetPointData().GetArray(this.cellColorArrayName).GetRange();
                 // TODO: Change this so that lookup tables are indexed by array name...
                 //   Hard-coding names for now...
-                if (this.cellColorArrayName == "cellID")
+                bool test_new = true;
+                if (test_new)
+                {
+                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellColorTable);
+                    this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
+                    //this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
+                    int tmp = (int)MainWindow.VTKBasket.CellController.CellColorTable.GetNumberOfTableValues();
+                    this.CellController.CellMapper.SetScalarRange(0, tmp-1);
+                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
+
+                }
+                else if (this.cellColorArrayName == "cellID")
                 {
                     this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
                     this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
                     this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 }
-                else if (this.cellColorArrayName == "cellSet")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellSetColorTable);
-                    this.CellController.CellMapper.SetScalarRange(0, MainWindow.VTKBasket.CellController.CellSetColorTable.GetNumberOfTableValues() - 1);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
-                else if (this.cellColorArrayName == "generation")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenerationColorTable);
-                    this.CellController.CellMapper.SetScalarRange(0, 4);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
+                //else if (this.cellColorArrayName == "cellSet")
+                //{
+                //    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellSetColorTable);
+                //    this.CellController.CellMapper.SetScalarRange(0, MainWindow.VTKBasket.CellController.CellSetColorTable.GetNumberOfTableValues() - 1);
+                //    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
+                //}
+                //else if (this.cellColorArrayName == "generation")
+                //{
+                //    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenerationColorTable);
+                //    this.CellController.CellMapper.SetScalarRange(0, 4);
+                //    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
+                //}
 #if ALL_GRAPHICS
                 else if (this.cellColorArrayName == "receptorComp")
                 {
@@ -1841,7 +1852,7 @@ namespace DaphneGui
             // Regions
             CreateRegionWidgets();
             // Cells
-            if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null)
+            if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null && MainWindow.VTKBasket.CellController.getAssignCellIndex() > 0)
             {
                 // Finish VTK pipeline by glyphing cells
                 cellController.GlyphCells();
@@ -1856,12 +1867,18 @@ namespace DaphneGui
                         this.CellAttributeArrayNames.Add(array_name);
                     }
                 }
-                
-                if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellSet"))
+
+
+                if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellColorMapper"))
                 {
                     // Make "cellSet" a hard-coded first-pass default for now when it's available
-                    this.CellColorArrayName = "cellSet";
+                    this.CellColorArrayName = "cellColorMapper";
                 }
+                //else if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellSet"))
+                //{
+                //    // Make "cellSet" a hard-coded first-pass default for now when it's available
+                //    this.CellColorArrayName = "cellSet";
+                //}
                 else if (this.CellAttributeArrayNames.Contains(this.CellColorArrayName))
                 {
                     // Pull a background switcheroo to force color map to be applied and property change notice to be fired
@@ -1870,11 +1887,11 @@ namespace DaphneGui
                     this.cellColorArrayName = "";
                     this.CellColorArrayName = tmp;
                 }
-                else if (!this.CellAttributeArrayNames.Contains(this.CellColorArrayName) && this.CellAttributeArrayNames.Contains("cellSet"))
-                {
-                    // If CellColorArrayName isn't null, but the existing name isn't in the current list (after reset) then default to cellSet if can
-                    this.CellColorArrayName = "cellSet";
-                }
+                //else if (!this.CellAttributeArrayNames.Contains(this.CellColorArrayName) && this.CellAttributeArrayNames.Contains("cellSet"))
+                //{
+                //    // If CellColorArrayName isn't null, but the existing name isn't in the current list (after reset) then default to cellSet if can
+                //    this.CellColorArrayName = "cellSet";
+                //}
                 else
                 {
                     this.CellColorArrayName = this.CellAttributeArrayNames[0];

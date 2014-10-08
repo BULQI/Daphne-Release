@@ -539,12 +539,15 @@ namespace Daphne
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
                 boundary_reacs = protocol.GetReactions(configComp[0], true);
                 transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
+                //need to figure out how to set the lable.
+                if (cp.label == null) cp.label = cp.Cell.entity_guid;
                 
                 for (int i = 0; i < cp.number; i++)
                 {
                     Cell cell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cp.Cell.CellRadius));
                     // cell population id
                     cell.Population_id = cp.cellpopulation_id;
+                    cell.label = cp.label;
                     cell.setState(cp.CellStates[i].spState);
 
                     simComp[0] = cell.Cytosol;
@@ -570,9 +573,9 @@ namespace Daphne
 
                     // cell genes
                     //foreach (string s in protocol.entity_repository.cells_dict[cp.Cell.entity_guid].genes_guid_ref)
-                    foreach (string s in cp.Cell.genes_guid_ref)
+                    foreach (ConfigGene cg in cp.Cell.genes)
                     {
-                        ConfigGene cg = protocol.entity_repository.genes_dict[s];
+                        //ConfigGene cg = protocol.entity_repository.genes_dict[s];
 
                         double geneActivationLevel = cg.ActivationLevel;
                         if (cp.CellStates[i].cgState.geneDict.ContainsKey(cg.entity_guid) == true)

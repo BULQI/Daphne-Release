@@ -40,10 +40,32 @@ namespace Daphne
         /// </summary>
         public static ulong changesCounter;
 
+
+        public ObservableCollection<RenderSkin> SkinList { get; set; }
         /// <summary>
         /// The main palette containing graphics properties used to render various objects (i.e. colors, etc)
         /// </summary>
-        public RenderSkin skin { get; set; }
+        private RenderSkin _selectedRenderSkin;
+        public RenderSkin SelectedRenderSkin
+        {
+            get 
+            {
+                if (_selectedRenderSkin == null && SkinList.Count > 0)
+                {
+                    _selectedRenderSkin = SkinList.Where(x => x.Name == "default").SingleOrDefault();
+                    if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList[0];
+                }
+                return _selectedRenderSkin; 
+            }
+            set
+            {
+                if (value != _selectedRenderSkin)
+                {
+                    _selectedRenderSkin = value;
+                }
+            }
+                    
+        }
 
         /// <summary>
         /// constructor
@@ -51,7 +73,10 @@ namespace Daphne
         public SystemOfPersistence()
         {
             Protocol = new Protocol("", "Config\\temp_protocol.json");
-            skin = new RenderSkin();
+
+
+            SkinList = new ObservableCollection<RenderSkin>();
+
             //DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             //UserStore = new Level("", "Config\\temp_userstore.json");
         }
@@ -127,8 +152,70 @@ namespace Daphne
         {
             protocol = (Protocol)protocol.DeserializeFromString(jsonFile);
         }
+
+        public RenderCell GetRenderCell(string label)
+        {
+            if (SelectedRenderSkin == null)
+            {
+                SelectedRenderSkin = SkinList.Count > 0 ? SkinList[0] : null;
+            }
+            if (SelectedRenderSkin == null)return null;
+            return SelectedRenderSkin.renderCells.Where(x => x.renderLabel == label).SingleOrDefault();
+        }
+
+        public RenderMol GetRenderMol(string label)
+        {
+            if (SelectedRenderSkin == null) SelectedRenderSkin = SkinList.Count > 0 ? SkinList[0] : null;
+            if (SelectedRenderSkin == null) return null;
+            return SelectedRenderSkin.renderMols.Where(x => x.renderLabel == label).SingleOrDefault();
+        }
+
+
     }
 
+    public enum PushType { Entity = 0, Protocol, UserStore, DaphneStore }
+    /// <summary>
+    /// Converter to go between enum values and "human readable" strings for GUI
+    /// </summary>
+    [ValueConversion(typeof(PushType), typeof(string))]
+    public class PushTypeToStringConverter : IValueConverter
+    {
+        // NOTE: This method is a bit fragile since the list of strings needs to 
+        // correspond in length and index with the BoundaryFace enum...
+        private List<string> _push_type_strings = new List<string>()
+                                {
+                                    "Entity",
+                                    "Protocol",
+                                    "User Store",
+                                    "Daphne Store"
+                                };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                int index = (int)value;
+                return _push_type_strings[index];
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string str = (string)value;
+            int idx = _push_type_strings.FindIndex(item => item == str);
+            return (PushType)Enum.ToObject(typeof(PushType), (int)idx);
+        }
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+
+    
     /// <summary>
     /// base for all levels
     /// </summary>
@@ -288,13 +375,42 @@ namespace Daphne
         /// <param name="s">the push status of e</param>
         public void repositoryPush(ConfigEntity e, PushStatus s)
         {
-            if (e is ConfigMolecule)
+            if (e is ConfigGene)
+            {
+                // insert
+                if (s == PushStatus.PUSH_CREATE_ITEM)
+                {
+                    entity_repository.genes.Add(e as ConfigGene);
+                    if (!entity_repository.genes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.genes_dict.Add(e.entity_guid, e as ConfigGene);
+                    }
+                }
+                // update
+                else
+                {
+                    // list update
+                    for (int i = 0; i < entity_repository.genes.Count; i++)
+                    {
+                        if (entity_repository.genes[i].entity_guid == e.entity_guid)
+                        {
+                            entity_repository.genes[i] = e as ConfigGene;
+                        }
+                    }
+                    // dict update
+                    entity_repository.genes_dict[e.entity_guid] = e as ConfigGene;
+                }
+            }
+            else if (e is ConfigMolecule)
             {
                 // insert
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.molecules.Add(e as ConfigMolecule);
-                    entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    if (!entity_repository.molecules_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.molecules_dict.Add(e.entity_guid, e as ConfigMolecule);
+                    }
                 }
                 // update
                 else
@@ -317,7 +433,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.transition_drivers.Add(e as ConfigTransitionDriver);
-                    entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    if (!entity_repository.transition_drivers_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.transition_drivers_dict.Add(e.entity_guid, e as ConfigTransitionDriver);
+                    }
                 }
                 // update
                 else
@@ -340,7 +459,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.diff_schemes.Add(e as ConfigDiffScheme);
-                    entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    if (!entity_repository.diff_schemes_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.diff_schemes_dict.Add(e.entity_guid, e as ConfigDiffScheme);
+                    }
                 }
                 // update
                 else
@@ -363,7 +485,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reactions.Add(e as ConfigReaction);
-                    entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    if (!entity_repository.reactions_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reactions_dict.Add(e.entity_guid, e as ConfigReaction);
+                    }
                 }
                 // update
                 else
@@ -386,7 +511,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.reaction_templates.Add(e as ConfigReactionTemplate);
-                    entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    if (!entity_repository.reaction_templates_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.reaction_templates_dict.Add(e.entity_guid, e as ConfigReactionTemplate);
+                    }
                 }
                 // update
                 else
@@ -409,7 +537,10 @@ namespace Daphne
                 if (s == PushStatus.PUSH_CREATE_ITEM)
                 {
                     entity_repository.cells.Add(e as ConfigCell);
-                    entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    if (!entity_repository.cells_dict.ContainsKey(e.entity_guid))
+                    {
+                        entity_repository.cells_dict.Add(e.entity_guid, e as ConfigCell);
+                    }
                 }
                 // update
                 else
@@ -537,8 +668,6 @@ namespace Daphne
         public SimulationParams sim_params { get; set; }
         public string reporter_file_name { get; set; }
 
-        public RenderPopOptions popOptions { get; set; }
-        //public ChartViewToolWindow ChartWindow;
 
         /// <summary>
         /// constructor
@@ -568,8 +697,6 @@ namespace Daphne
             //////LoadDefaultGlobalParameters();
 
             reporter_file_name = "";
-
-            popOptions = new RenderPopOptions();
         }
 
         /// <summary>
@@ -1673,7 +1800,11 @@ namespace Daphne
 
         [XmlIgnore]
         public Dictionary<string, GaussianSpecification> gauss_guid_gauss_dict;
-        
+
+
+        public string RenderSkinName { get; set; }
+
+        public RenderPopOptions popOptions { get; set; }
 
         public Scenario()
         {
@@ -1691,6 +1822,8 @@ namespace Daphne
             box_guid_box_dict = new Dictionary<string, BoxSpecification>();
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
             gauss_guid_gauss_dict = new Dictionary<string, GaussianSpecification>();
+
+            popOptions = new RenderPopOptions();
         }
 
         private void SetBoxSpecExtents(BoxSpecification bs)
@@ -1859,6 +1992,20 @@ namespace Daphne
             }
             return res;
         }
+
+        public int RenderPopReferenceCount(string lable, bool IsCell)
+        {
+            if (IsCell == true)
+            {
+                return cellpopulations.Where(x => x.label == lable).Count();
+            }
+            else
+            {
+                //this need work
+                return environment.ecs.molecules_dict.ContainsKey(lable) ? 1 : 0;
+            }
+        }
+
     }
 
     public class SimulationParams
@@ -2237,6 +2384,9 @@ namespace Daphne
         }
     }
 
+
+
+
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
     /// </summary>
@@ -2276,6 +2426,44 @@ namespace Daphne
 
             int idx = (int)value;
             return (ColorList)Enum.ToObject(typeof(ColorList), (int)idx);
+        }
+    }
+
+
+    /// <summary>
+    /// get the index of a given color to the index of the predifined colors
+    /// </summary>
+    public class ColorToListIndexConv : IValueConverter
+    {
+
+        private static Color[] pdcolors = new Color[] { Colors.Red, Colors.Orange, Colors.Yellow, Colors.Green, Colors.Blue, Colors.Indigo, Colors.Violet };
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var color = (Color)value;
+            int index = Array.IndexOf(pdcolors, color);
+            return index == -1 ? 7 : index;
+        }
+
+
+        /// <summary>
+        /// given index, return color
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="targetType"></param>
+        /// <param name="parameter"></param>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null)return Colors.White;
+            int index = (int)value;
+            if (index >= 0 && index < 7)
+            {
+                return pdcolors[index];
+            }
+
+            return Colors.White;
         }
     }
 
@@ -2665,9 +2853,61 @@ namespace Daphne
             }
         }
 
-        public double MolecularWeight { get; set; }
-        public double EffectiveRadius { get; set; }
-        public double DiffusionCoefficient { get; set; }
+        //public double MolecularWeight { get; set; }
+        //public double EffectiveRadius { get; set; }
+        //public double DiffusionCoefficient { get; set; }
+
+        private double molWeight;
+        public double MolecularWeight 
+        { 
+            get
+            {
+                return molWeight;
+            }
+            set
+            {
+                if (molWeight != value)
+                {
+                    molWeight = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("MolecularWeight");
+                }
+            }
+        }
+        private double effRadius;
+        public double EffectiveRadius
+        {
+            get
+            {
+                return effRadius;
+            }
+            set
+            {
+                if (effRadius != value)
+                {
+                    effRadius = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("EffectiveRadius");
+                }
+            }
+        }
+        private double diffCoeff;
+        public double DiffusionCoefficient
+        {
+            get
+            {
+                return diffCoeff;
+            }
+            set
+            {
+                if (diffCoeff != value)
+                {
+                    diffCoeff = value;
+                    this.incrementChangeStamp();
+                    OnPropertyChanged("DiffusionCoefficient");
+                }
+            }
+        }
         
         public MoleculeLocation molecule_location { get; set; }
 
@@ -2800,11 +3040,15 @@ namespace Daphne
             Settings.TypeNameHandling = TypeNameHandling.Auto;
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
-            Guid id = Guid.NewGuid();
 
-            newgene.entity_guid = id.ToString();
-            newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            if (protocol != null)
+            {
+                Guid id = Guid.NewGuid();
 
+                newgene.entity_guid = id.ToString();
+                newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+            }
+                
             return newgene;
         }
 
@@ -4019,7 +4263,8 @@ namespace Daphne
             locomotor_mol_guid_ref = "";
 
             // behaviors
-            genes_guid_ref = new ObservableCollection<string>();
+            genes = new ObservableCollection<ConfigGene>();
+
         }
 
         public ConfigCell Clone(bool identical)
@@ -4137,7 +4382,7 @@ namespace Daphne
         public ConfigCompartment cytosol { get; set; }
         
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
-        public ObservableCollection<string> genes_guid_ref { get; set; }
+        public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
         public ConfigDiffScheme diff_scheme
@@ -4210,7 +4455,15 @@ namespace Daphne
         //Return true if this compartment has a molecular population with given molecule
         public bool HasGene(string gene_guid)
         {
-            return genes_guid_ref.Contains(gene_guid);
+            foreach (ConfigGene gene in genes)
+            {
+                if (gene.entity_guid == gene_guid)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         //Return true if this cell has all the genes in the given list of gene guids
@@ -5592,7 +5845,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             Color col = Color.FromRgb(255, 0, 0);
-            if (value == null)
+            if (value == null || value as string == "")
                 return col;
 
             try
@@ -5866,24 +6119,45 @@ namespace Daphne
         }
     }
 
-    //Graphics classes
-    //public enum CellRenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN }
-    //public enum MolPopRenderMethod { MP_TYPE, MP_CONC, CELL_MP }
-
-    public enum RenderMethod { CELL_TYPE, CELL_STATE_SHADE, CELL_STATE, CELL_GEN_SHADE, CELL_GEN, MP_TYPE, MP_CONC, CELL_MP }
+    public enum RenderMethod { CELL_TYPE, CELL_POP, CELL_DIFF_STATE, CELL_DIV_STATE, CELL_DEATH_STATE, CELL_GEN, CELL_GEN_SHADE, CELL_MP, MP_TYPE, MP_CONC}
 
     public class RenderColor
     {
-        public System.Windows.Media.Color EntityColor { get; set; }  // RGB plus alpha channel
+        public string hint { get; set; } //this is a hint as to what is this color being used, such as for the diff state of 
+        public Color EntityColor { get; set; }
+
+        public RenderColor() { }
+
+        public RenderColor(Color c)
+        {
+            hint = "";
+            EntityColor = c;
+        }
     }
 
     public class RenderCell
     {
-        public RenderColor base_color { get; set; }         // solid color for applicable render methods
-        public ObservableCollection<RenderColor> state_colors { get; set; }    //state colors
+        public RenderColor base_color { get; set; }         //solid color for applicable render methods
+
+        public ObservableCollection<RenderColor> cell_pop_colors { get; set; }
+        public ObservableCollection<RenderColor> diff_state_colors { get; set; }
+        public ObservableCollection<RenderColor> div_state_colors { get; set; }
+        public ObservableCollection<RenderColor> death_state_colors { get; set; }
+
         public ObservableCollection<RenderColor> gen_colors { get; set; }      //gen colors
-        public int shades { get; set; }                                      // number of shades for applicable options
-        public string label { get; set; }                                      // ConfigCell's label
+        public int shades { get; set; }                                  // number of shades for applicable options
+        public string name { get; set; }                                 // exist to facilitate eding scheme
+        public string renderLabel { get; set; }                                // ConfigCell's label
+
+        public RenderCell()
+        {
+            cell_pop_colors = new ObservableCollection<RenderColor>();
+            diff_state_colors = new ObservableCollection<RenderColor>();
+            div_state_colors = new ObservableCollection<RenderColor>();
+            death_state_colors = new ObservableCollection<RenderColor>();
+            gen_colors = new ObservableCollection<RenderColor>();
+            renderLabel = "";
+        }
     }
 
     public class RenderMol
@@ -5893,29 +6167,78 @@ namespace Daphne
         public double max { get; set; }
         public int shades { get; set; }             // number of shades for applicable options
         public double blendingWeight { get; set; }  // controls color mixing for multiple molpops
-        public string label { get; set; }           // ConfigMolecule’s label
+        public string name { get; set; }                                 // exist to facilitate eding scheme
+        public string renderLabel { get; set; }           // ConfigMolecule’s label
+
+        public RenderMol()
+        {
+            renderLabel = "";
+        }
     }
 
     public class RenderPop
     {
         public bool renderOn { get; set; }                 // toggles rendering
         public RenderMethod renderMethod { get; set; }      // indicates the render option
-        public string label { get; set; }                   // cell or mol population's label
+        public string name { get; set; }                    // exist to facilitate eding scheme
+        public string renderLabel { get; set; }                   // cell or mol population's label
+
+        public RenderPop()
+        {
+            renderLabel = "";
+        }
+            
     }
 
-    public class RenderDrawing
+    public class Render3DView
     {
-        public RenderColor bg_color { get; set; }     // the background color
+        public Color bg_color { get; set; }     // the background color
 
-        public RenderDrawing()
+        public Render3DView()
         {
-            bg_color = new RenderColor();
-            bg_color.EntityColor = Color.FromScRgb(255.0f, 255.0f, 255.0f, 255.0f);
+            bg_color = Color.FromScRgb(255.0f, 255.0f, 255.0f, 255.0f);
         }
     }
 
     public class RenderSkin
     {
+
+        private static int ColorIndex = 0;
+        //different solid colors
+        private static string[] ColorValues = new string[] { 
+        "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", 
+        "#800000", "#008000", "#000080", "#808000", "#800080", "#008080", "#808080", 
+        "#C00000", "#00C000", "#0000C0", "#C0C000", "#C000C0", "#00C0C0", "#C0C0C0", 
+        "#400000", "#004000", "#000040", "#404000", "#400040", "#004040", "#404040", 
+        "#200000", "#002000", "#000020", "#202000", "#200020", "#002020", "#202020", 
+        "#600000", "#006000", "#000060", "#606000", "#600060", "#006060", "#606060", 
+        "#A00000", "#00A000", "#0000A0", "#A0A000", "#A000A0", "#00A0A0", "#A0A0A0", 
+        "#E00000", "#00E000", "#0000E0", "#E0E000", "#E000E0", "#00E0E0", "#E0E0E0"};
+
+        string[] Cb8Accent = new string[]{"#7fc97f","#beaed4","#fdc086","#ffff99","#386cb0","#f0027f","#bf5b17","#666666"};
+        string[] Cb8Dark2 = new string[]{"#1b9e77","#d95f02","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d","#666666"};
+        string[] Cb8Paired= new string[]{"#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00"};
+        string[] Cb8Pastel1= new string[]{"#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd","#fddaec"};
+        string[] Cb8Pastel2= new string[]{"#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9","#fff2ae","#f1e2cc","#cccccc"};
+        string[] Cb8set1= new string[]{"#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00","#ffff33","#a65628","#f781bf"};
+        string[] Cb8set2= new string[]{"#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854","#ffd92f","#e5c494","#b3b3b3"};
+        string[] Cb8set3 = new string[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5"};
+
+        string[] Cb12Paried = new string[] { "#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928" };
+        string[] Cb12Set3 = new string[] { "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f" };
+
+
+
+
+
+        //the set of colorbrewer qualitive colors - number of color 8
+        private static Dictionary<string, string[]> ColorBrewerQualDict;
+
+        public string Name { get; set; }
+
+        [JsonIgnore]
+        public string FileName { get; set; }
+
         public ObservableCollection<RenderCell> renderCells { get; set; }
         public ObservableCollection<RenderMol> renderMols { get; set; }
 
@@ -5923,14 +6246,140 @@ namespace Daphne
         {
             renderCells = new ObservableCollection<RenderCell>();
             renderMols = new ObservableCollection<RenderMol>();
+        }
+
+        /// <summary>
+        /// create a new skin add add components corresponding to the content of entity repository
+        /// </summary>
+        public RenderSkin(string name, EntityRepository er)
+        {
+            this.Name = name;
+            renderCells = new ObservableCollection<RenderCell>();
+            renderMols = new ObservableCollection<RenderMol>();
+            resetColorPicker();
+            for (int i= 0; i< er.cells.Count; i++)
+            {
+                var cell = er.cells[i];
+                resetColorPicker(i);
+                AddRenderCell(cell.entity_guid, cell.CellName);
+            } 
+
+            for (int i=0; i< er.molecules.Count; i++)
+            {
+                var mol = er.molecules[i];
+                resetColorPicker(i);
+                AddRenderMol(mol.Name);
+            }
+        }
+
+        //default color
+        public void AddRenderCell(string label, string name)
+        {
             RenderCell renc = new RenderCell();
-            RenderColor rcol = new RenderColor();
-            rcol.EntityColor = Color.FromScRgb(255.0f, 255.0f, 0.0f, 0.0f);
-            renc.base_color = rcol;
+            renc.renderLabel = label;
+            renc.name = name;
+            renc.base_color = new RenderColor(pickAColor());
+
+            //cell_pop
+            resetColorPicker();
+            for (int i = 0; i < 8; i++)
+            {
+                renc.cell_pop_colors.Add(new RenderColor(pickAColor()));
+            }
+            renc.cell_pop_colors.Add(new RenderColor(Colors.White));
+
+            //diff_state
+            resetColorPicker();
+            for (int i = 0; i < 8; i++)
+            {
+                //renc.diff_state_colors.Add(new RenderColor(pickAColor()));
+                //testing from colorbrewer
+                string hexstr = Cb8set1[i];
+                Color c = (Color)ColorConverter.ConvertFromString(hexstr);
+                renc.diff_state_colors.Add(new RenderColor(c));
+            }
+            //default color if more than eight states
+            renc.diff_state_colors.Add(new RenderColor(Colors.White));
+
+            //div_state
+            resetColorPicker();
+            for (int i = 0; i < 8; i++)
+            {
+                renc.div_state_colors.Add(new RenderColor(pickAColor()));
+            }
+            renc.div_state_colors.Add(new RenderColor(Colors.White));
+
+            //death_state
+            resetColorPicker();
+            for (int i = 0; i < 2; i++)
+            {
+                renc.death_state_colors.Add(new RenderColor(pickAColor()));
+            }
+
+            //generaiton
+            resetColorPicker();
+            for (int i = 0; i < 15; i++)
+            {
+                //string hexstr = ColorBuGn9[i];
+                //Color c = (Color)ColorConverter.ConvertFromString(hexstr);
+                //renc.gen_colors.Add(new RenderColor(c));
+                renc.gen_colors.Add(new RenderColor(pickAColor()));
+            }
+            renc.gen_colors.Add(new RenderColor(Colors.White));
+
             renderCells.Add(renc);
         }
 
+        public void AddRenderMol(string label)
+        {
+            RenderMol renc = new RenderMol();
+            renc.renderLabel = label;
+            renc.color = new RenderColor(pickAColor());
+            renderMols.Add(renc);
+        }
+
+
         //Serialization method needed
+        public static RenderSkin DeserializeFromFile(string jsonFile)
+        {
+            string readText = File.ReadAllText(jsonFile);
+            RenderSkin skin = JsonConvert.DeserializeObject<RenderSkin>(readText);
+            skin.FileName = jsonFile;
+            return skin;
+        }
+
+        public void SerializeToFile(string filename = null)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+
+            //serialize Protocol
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonFile = filename == null ? FileName : filename;
+
+            try
+            {
+                File.WriteAllText(jsonFile, jsonSpec);
+            }
+            catch
+            {
+                MessageBox.Show("File.WriteAllText failed in SerializeToFile. Filename and TempFile = " + FileName + ", " + filename);
+            }
+        }
+
+        private static Color pickAColor()
+        {
+            var item = ColorValues[ColorIndex];
+            ColorIndex++;
+            if (ColorIndex >= ColorValues.Length) ColorIndex = 0;
+            return (Color)ColorConverter.ConvertFromString(item);
+        }
+
+        private static void resetColorPicker(int i=0)
+        {
+            ColorIndex = i;
+        }
     }
 
     public class RenderPopOptions
@@ -5942,6 +6391,68 @@ namespace Daphne
         {
             cellPopOptions = new ObservableCollection<RenderPop>();
             molPopOptions = new ObservableCollection<RenderPop>();
+        }
+
+        /// <summary>
+        /// add render options for a population
+        /// </summary>
+        /// <param name="lable"></param>
+        /// <param name="isCell"></param>
+        public void AddRenderOptions(string lable, string name, bool isCell)
+        {
+            if (isCell)
+            {
+                //add if not exist
+                bool entry_exist = cellPopOptions.Any(item => item.renderLabel == lable);
+                if (entry_exist) return;
+                RenderPop rp = new RenderPop();
+                rp.renderLabel = lable;
+                rp.name = name;
+                rp.renderOn = true;
+                rp.renderMethod = RenderMethod.CELL_TYPE;
+                cellPopOptions.Add(rp);
+            }
+            else
+            {
+                bool entry_exist = molPopOptions.Any(item => item.renderLabel == lable);
+                if (entry_exist) return;
+                RenderPop rp = new RenderPop();
+                rp.renderLabel = lable;
+                rp.name = name;
+                rp.renderOn = false;
+                rp.renderMethod = RenderMethod.MP_TYPE;
+                molPopOptions.Add(rp);
+            }
+        }
+
+        public void RemoveRenderOptions(string lable, bool isCell)
+        {
+            if (isCell)
+            {
+                RenderPop item = cellPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                if (item != null)
+                {
+                    cellPopOptions.Remove(item);
+                }
+            }
+            else
+            {
+                RenderPop item = molPopOptions.Where(x => x.renderLabel == lable).FirstOrDefault();
+                if (item != null)
+                {
+                    molPopOptions.Remove(item);
+                }
+            }
+        }
+
+        public RenderPop GetCellRenderPop(string label)
+        {
+            return this.cellPopOptions.Where(x => x.renderLabel == label).SingleOrDefault();
+        }
+
+        public RenderPop GetMolRenderPop(string label)
+        {
+            return this.molPopOptions.Where(x => x.renderLabel == label).SingleOrDefault();
         }
     }
 
@@ -6571,6 +7082,77 @@ namespace Daphne
         }
         #endregion
     }
+
+
+
+    [ValueConversion(typeof(RenderMethod), typeof(bool))]
+    public class CellRenderMethodConverter : IValueConverter
+    {
+        #region IValueConverter Members
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+                return DependencyProperty.UnsetValue;
+
+            object parameterValue = Enum.Parse(value.GetType(), parameterString);
+
+            bool ret = parameterValue.Equals(value);
+            return ret;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            bool chk = (bool)value;
+
+            if (chk == false)
+            {
+                //types start with MP_ is for molpops in ECS
+                if (parameterString.StartsWith("MP_"))
+                {
+                    return RenderMethod.MP_TYPE;
+                }
+                else 
+                {
+                    return RenderMethod.CELL_TYPE;
+                }
+            }
+            return Enum.Parse(targetType, parameterString);
+        }
+        #endregion
+    }
+
+
+    public class RenderMethodItemValidConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null) return true;
+            var strtype = value.ToString();
+
+            var para = parameter as string;
+            if (para == "cell" && strtype.StartsWith("CELL_") == false) return false;
+            
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
+    }
+
+
+
+
 
     /// <summary>
     /// Base class for all EntityModel classes.

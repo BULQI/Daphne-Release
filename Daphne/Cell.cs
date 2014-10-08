@@ -78,6 +78,13 @@ namespace Daphne
         private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
 
+
+        /// <summary>
+        /// info for rendering
+        /// </summary>
+        public string label;
+        public int generation;
+
         /// <summary>
         /// the genes in a cell
         /// NOTE: should these be in the cytoplasm
