@@ -23,6 +23,10 @@ using Ninject;
 using Ninject.Parameters;
 using TBKMath;
 
+using System.ComponentModel;
+using System.Runtime.InteropServices; 
+//#define NLOPT_DLL
+
 namespace DaphneOptim
 {
     /// <summary>
@@ -71,11 +75,88 @@ namespace DaphneOptim
         {
             get { return sop; }
         }
-      
-        
+
+        // parameters for batch run
+        string processName;
+        string processArgs;
+
+        long seed = 0;
+        public struct nlopt_opt
+        {
+            public double my_param;
+            public nlopt_opt(double _param)
+            {
+                my_param = _param;
+            }
+        };
+        struct foo {
+            int n; /* dimension */
+            int L; /* size of each rectangle (2n+3) */
+            double magic_eps; /* Jones' epsilon parameter (1e-4 is recommended) */
+            int which_diam; /* which measure of hyper-rectangle diam to use:
+			            0 = Jones, 1 = Gablonsky */
+            int which_div; /* which way to divide rects:
+            0: orig. Jones (divide all longest sides)
+            1: Gablonsky (cubes divide all, rects longest)
+            2: Jones Encyc. Opt.: pick random longest side */
+            int which_opt; /* which rects are considered "potentially optimal"
+            0: Jones (all pts on cvx hull, even equal pts)
+            1: Gablonsky DIRECT-L (pick one pt, if equal pts)
+            2: ~ 1, but pick points randomly if equal pts 
+            ... 2 seems to suck compared to just picking oldest pt */
+  
+            double lb, ub; // const pointers?
+            //nlopt_stopping *stop; /* stopping criteria */
+            nlopt_func f; void *f_data;
+            double *work; /* workspace, of length >= 2*n */
+            int *iwork; /* workspace, length >= n */
+            double minf, *xmin; /* minimum so far */
+     
+            /* red-black tree of hyperrects, sorted by (d,f,age) in
+            lexographical order */
+            rb_tree rtree;
+            int age; /* age for next new rect */
+            double **hull; /* array to store convex hull */
+            int hull_len; /* allocated length of hull array */
+} 
+
+        enum nlopt_result
+        {
+            NLOPT_FAILURE = -1, /* generic failure code */
+            NLOPT_INVALID_ARGS = -2,
+            NLOPT_OUT_OF_MEMORY = -3,
+            NLOPT_ROUNDOFF_LIMITED = -4,
+            NLOPT_FORCED_STOP = -5,
+            NLOPT_SUCCESS = 1, /* generic success code */
+            NLOPT_STOPVAL_REACHED = 2,
+            NLOPT_FTOL_REACHED = 3,
+            NLOPT_XTOL_REACHED = 4,
+            NLOPT_MAXEVAL_REACHED = 5,
+            NLOPT_MAXTIME_REACHED = 6
+        } ;
+
+        double nlopt_func(unsigned n, const double x, ref double gradient, ref void *func_data);
+
+        //[DllImport(@"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneOptim\bin\x64\Debug\libnolpt-0.dll", EntryPoint = "nlopt_srand")]
+        [DllImport("libnlopt-0.dll", EntryPoint = "nlopt_srand")]
+        static extern void nlopt_srand(long seed);
+        [DllImport("libnlopt-0.dll", EntryPoint = "nlopt_srand")]
+        static extern nlopt_opt nlopt_create(int algorithm, int n);
+        [DllImport("libnlopt-0.dll", EntryPoint = "nlopt_srand")]
+        static extern nlopt_result nlopt_optimize(nlopt_opt opt, ref double x, ref double opt_f);
+
         public MainWindow()
         {
             InitializeComponent();
+
+            //nlopt_srand(seed);
+            nlopt_opt opt = new nlopt_opt(1);
+            opt = nlopt_create(0, 1);
+
+            nlopt_result opt_result = nlopt_result.NLOPT_FAILURE;
+            double x = 0.0;
+            double opt_f = 0.0;
+            opt_result = nlopt_optimize(opt, ref x, ref opt_f);
 
             // Point to DaphneGui
             //appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
@@ -115,22 +196,8 @@ namespace DaphneOptim
 
             postConstruction = true;
 
-            //// modify scenario
-            //sop.Protocol.scenario.time_config.duration = 1.0;
-
-            //// save scenario
-            //sop.Protocol.SerializeToFile(false);
-
-            //// run scenario
-            //string processArgs = @"-d -b -f:daphne_driver_locomotion_scenario.json";
-            //string processName = @"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneGui\bin\x64\Debug\DaphneGui.exe";
-            //ProcessStartInfo info = new ProcessStartInfo(processName, processArgs);
-            //Process process = new Process();
-            //process.StartInfo = info;
-            //process.StartInfo.ErrorDialog = true;
-            ////process.StartInfo.CreateNoWindow = true;
-            //process.Start();
-            //process.WaitForExit();
+            processArgs = @"-d -b -f:" + file;
+            processName = @"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneGui\bin\x64\Debug\DaphneGui.exe";
 
             //// analyze results
 
@@ -142,15 +209,23 @@ namespace DaphneOptim
         {
             Console.WriteLine("Hello World?");
 
-            // modify scenario
-            sop.Protocol.scenario.time_config.duration = 1.0;
+            // user defines parameters
+            List<double> paramVal = new List<double>();
+            paramVal.Add(1.0);
 
-            // save scenario
-            sop.Protocol.SerializeToFile(false);
+            // analyze results
+            List<double> scale = new List<double>();
+            List<bool> fixt = new List<bool>();
+            Annealer annealer = new Annealer();
+            annealer.Initialize(new Annealer.ObjectiveFunctionDelegate(CostFunction), 1, scale, fixt);
+            
 
-            // run scenario
-            string processArgs = @"-d -b -f:daphne_driver_locomotion_scenario.json";
-            string processName = @"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneGui\bin\x64\Debug\DaphneGui.exe";
+            Console.WriteLine("Goodbye cruel world!");
+
+        }
+
+        private void Run()
+        {
             ProcessStartInfo info = new ProcessStartInfo(processName, processArgs);
             Process process = new Process();
             process.StartInfo = info;
@@ -158,21 +233,32 @@ namespace DaphneOptim
             //process.StartInfo.CreateNoWindow = true;
             process.Start();
             process.WaitForExit();
-
-            // analyze results
-
-            Console.WriteLine("Goodbye cruel world!");
-
         }
 
-        private double CostFunction()
+        //public delegate double CostFunction(List<double> theta);
+        public double CostFunction(ref List<double> paramVal)
         {
             double cost = 0;
+
+            // modify parameters in scenario file
+            ModifyScenario(paramVal);
+
+            // run scenario with new parameters
+            Run();
+
+            // evaluate cost
+
+
             return cost;
         }
 
-        private void ModifyScenario(double[] paramVals)
+        private void ModifyScenario(List<double> paramVal)
         {
+            // user supply code to update the scenario with new parameter values
+            sop.Protocol.scenario.time_config.duration = paramVal[0];
+
+            // save scenario
+            sop.Protocol.SerializeToFile(false);
 
         }
 
