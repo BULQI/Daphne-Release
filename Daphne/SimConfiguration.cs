@@ -565,6 +565,574 @@ namespace Daphne
             }
         }
 
+        protected virtual void InitMoleculeDict()
+        {
+            entity_repository.molecules_dict.Clear();
+            foreach (ConfigMolecule cm in entity_repository.molecules)
+            {
+                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            }
+        }
+
+        protected virtual void InitDiffSchemeDict()
+        {
+            entity_repository.diff_schemes_dict.Clear();
+            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
+            {
+                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
+            }
+        }
+
+        protected virtual void InitTransitionDriversDict()
+        {
+            entity_repository.transition_drivers_dict.Clear();
+            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
+            {
+                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+            }
+        }
+
+        protected virtual void InitGeneDict()
+        {
+            entity_repository.genes_dict.Clear();
+            foreach (ConfigGene cg in entity_repository.genes)
+            {
+                entity_repository.genes_dict.Add(cg.entity_guid, cg);
+            }
+        }
+
+        protected virtual void InitCellDict()
+        {
+            entity_repository.cells_dict.Clear();
+            foreach (ConfigCell cc in entity_repository.cells)
+            {
+                entity_repository.cells_dict.Add(cc.entity_guid, cc);
+            }
+        }
+
+        protected virtual void InitReactionDict()
+        {
+            entity_repository.reactions_dict.Clear();
+            foreach (ConfigReaction cr in entity_repository.reactions)
+            {
+                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
+                cr.GetTotalReactionString(entity_repository);
+            }
+        }
+
+        protected virtual void InitReactionComplexDict()
+        {
+            entity_repository.reaction_complexes_dict.Clear();
+            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
+            {
+                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
+            }
+        }
+
+        protected virtual void InitReactionTemplateDict()
+        {
+            entity_repository.reaction_templates_dict.Clear();
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            }
+        }
+
+        /// <summary>
+        /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
+        /// Also take care of any other post-deserialization setup.
+        /// </summary>
+        public virtual void InitializeStorageClasses()
+        {
+            // GenerateNewExperimentGUID();
+            InitMoleculeDict();
+            InitCellDict();
+            InitReactionTemplateDict();
+            InitGeneDict();
+            InitReactionDict();
+            InitReactionComplexDict();
+            InitDiffSchemeDict();
+            InitTransitionDriversDict();
+        }
+
+        /// <summary>
+        /// New repositoryPush - This is for compound entities.  
+        /// It will push the entity and its sub-entities too, into this level's entity repository.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="s"></param>
+        /// <param name="sourceLevel"></param>
+        /// <param name="recurse"></param>
+        public void repositoryPush(ConfigEntity e, PushStatus s, Level sourceLevel, bool recurse = false)
+        {
+            //First push the sub-entities
+            if (recurse == true)
+            {
+                if (e is ConfigCell)
+                {
+                    CellPusher(e as ConfigCell, sourceLevel, s);    //Or could add this in ConfigCell - cell = e as ConfigCell; cell.Pusher(sourceLevel, this);
+                }
+                else if (e is ConfigReaction)
+                {
+                    ReactionPusher(e as ConfigReaction, sourceLevel, s);
+                }
+                else if (e is ConfigDiffScheme)
+                {
+                    SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
+                }
+            }
+            else
+            {
+                repositoryPush(e, s);
+            }
+        }
+
+        private void CellPusher(ConfigCell cell, Level sourceLevel, PushStatus s)
+        {
+            //Cytosol molecules
+            foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
+            {
+                PushStatus s2 =  pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Membrane molecules
+            foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
+            {
+                PushStatus s2 = pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Genes
+            foreach (ConfigGene gene in cell.genes)
+            {
+                PushStatus s2 = pushStatus(gene);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigGene newgene = gene.Clone(null);
+                    repositoryPush(newgene, s2);
+                }
+            }
+            
+            //Cytosol reactions
+            foreach (ConfigReaction reac in cell.cytosol.Reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Membrane reactions
+            foreach (ConfigReaction reac in cell.membrane.Reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Differentiation scheme
+            SchemePusher(cell.diff_scheme, sourceLevel, s);
+
+            //Division scheme
+            SchemePusher(cell.div_scheme, sourceLevel, s);
+
+            //Now push the cell itself
+            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            {
+                repositoryPush(cell, s);
+            }
+            
+        }
+
+        private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
+        {
+            //ReactionTemplate
+            if (sourceLevel.entity_repository.reaction_templates_dict.ContainsKey(reac.reaction_template_guid_ref))
+            {
+                ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
+            }
+            else
+            {
+                foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
+                {
+                    if (crt.entity_guid == reac.reaction_template_guid_ref)
+                    {
+                        ReactionTemplatePusher(crt);
+                        break;
+                    }
+                }
+            }
+
+            //Molecules and Genes
+            foreach (string guid in reac.reactants_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            foreach (string guid in reac.products_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            foreach (string guid in reac.modifiers_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            //Now push the reaction itself
+            PushStatus s2 = pushStatus(reac);
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigReaction newreac = reac.Clone(true);
+                repositoryPush(newreac, s2);
+            }
+        }
+
+        private void MoleculeGenePusher(string guid, Level sourceLevel)
+        {
+            ConfigEntity entity = null;
+
+            //Figure out if guid is for molecule or gene in the source er
+            foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            {
+                if (mol.entity_guid == guid)
+                {
+                    entity = mol;
+                    break;
+                }
+            }
+
+            if (entity == null)
+            {
+                foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
+                {
+                    if (gene.entity_guid == guid)
+                    {
+                        entity = gene;
+                        break;
+                    }
+                }
+            }
+
+            //Now if entity is not null, we have the entity and must push it unless it is already in target ER
+            if (entity != null)
+            {
+                PushStatus s2 = this.pushStatus(entity);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    if (entity is ConfigGene)
+                    {
+                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
+                        repositoryPush(newgene, s2);
+                    }
+                    else
+                    {
+                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
+                        repositoryPush(newmol, s2);
+                    }
+                }
+            }
+        }
+
+        private void SchemePusher(ConfigDiffScheme scheme, Level sourceLevel, PushStatus s)
+        {
+            if (scheme == null)
+                return;
+
+            foreach (string guid in scheme.genes)
+            {
+                ConfigGene gene = FindGene(guid, sourceLevel);
+                if (gene != null)
+                {
+                    PushStatus s2 = pushStatus(gene);
+                    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                    {
+                        ConfigGene newgene = gene.Clone(null);
+                        repositoryPush(newgene, s2);
+                    }
+                }
+            }
+
+            //Now push the scheme itself
+            PushStatus s3 = pushStatus(scheme);
+            if (s3 != PushStatus.PUSH_INVALID && s3 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigDiffScheme newscheme = scheme.Clone(true);
+                repositoryPush(newscheme, s3);
+            }
+        }
+
+        private void ReactionTemplatePusher(ConfigReactionTemplate crt)
+        {
+            PushStatus s2 = pushStatus(crt);
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigReactionTemplate newcrt = crt.Clone(null);
+                repositoryPush(newcrt, s2);
+            }
+        }
+
+        private ConfigGene FindGene(string guid, Level level)
+        {
+            foreach (ConfigGene g in level.entity_repository.genes)
+            {
+                if (g.entity_guid == guid)
+                {
+                    return g;
+                }
+            }
+            return null;
+        }
+
+        
+
+        //-------------------------------------------------------
+
+
+
+        /// <summary>
+        /// New repositoryPush - This is for compound entities.  
+        /// It will push the entity and its sub-entities too, into this level's entity repository.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="s"></param>
+        /// <param name="sourceLevel"></param>
+        /// <param name="recurse"></param>
+        public void repositoryPush(ConfigEntity e, PushStatus s, Level sourceLevel, bool recurse = false)
+        {
+            //First push the sub-entities
+            if (recurse == true)
+            {
+                if (e is ConfigCell)
+                {
+                    CellPusher(e as ConfigCell, sourceLevel, s);    //Or could add this in ConfigCell - cell = e as ConfigCell; cell.Pusher(sourceLevel, this);
+                }
+                else if (e is ConfigReaction)
+                {
+                    ReactionPusher(e as ConfigReaction, sourceLevel, s);
+                }
+                else if (e is ConfigDiffScheme)
+                {
+                    SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
+                }
+            }
+            else
+            {
+                repositoryPush(e, s);
+            }
+        }
+
+        private void CellPusher(ConfigCell cell, Level sourceLevel, PushStatus s)
+        {
+            //Cytosol molecules
+            foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
+            {
+                PushStatus s2 =  pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Membrane molecules
+            foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
+            {
+                PushStatus s2 = pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Genes
+            foreach (ConfigGene gene in cell.genes)
+            {
+                PushStatus s2 = pushStatus(gene);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigGene newgene = gene.Clone(null);
+                    repositoryPush(newgene, s2);
+                }
+            }
+            
+            //Cytosol reactions
+            foreach (ConfigReaction reac in cell.cytosol.Reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Membrane reactions
+            foreach (ConfigReaction reac in cell.membrane.Reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Differentiation scheme
+            SchemePusher(cell.diff_scheme, sourceLevel, s);
+
+            //Division scheme
+            SchemePusher(cell.div_scheme, sourceLevel, s);
+
+            //Now push the cell itself
+            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            {
+                repositoryPush(cell, s);
+            }
+            
+        }
+
+        private void ReactionPusher(ConfigReaction reac, Level sourceLevel, PushStatus s)
+        {
+            //ReactionTemplate
+            if (sourceLevel.entity_repository.reaction_templates_dict.ContainsKey(reac.reaction_template_guid_ref))
+            {
+                ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
+            }
+            else
+            {
+                foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
+                {
+                    if (crt.entity_guid == reac.reaction_template_guid_ref)
+                    {
+                        ReactionTemplatePusher(crt);
+                        break;
+                    }
+                }
+            }
+
+            //Molecules and Genes
+            foreach (string guid in reac.reactants_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            foreach (string guid in reac.products_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            foreach (string guid in reac.modifiers_molecule_guid_ref)
+            {
+                MoleculeGenePusher(guid, sourceLevel);
+            }
+
+            //Now push the reaction itself
+            PushStatus s2 = pushStatus(reac);
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigReaction newreac = reac.Clone(true);
+                repositoryPush(newreac, s2);
+            }
+        }
+
+        private void MoleculeGenePusher(string guid, Level sourceLevel)
+        {
+            ConfigEntity entity = null;
+
+            //Figure out if guid is for molecule or gene in the source er
+            foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            {
+                if (mol.entity_guid == guid)
+                {
+                    entity = mol;
+                    break;
+                }
+            }
+
+            if (entity == null)
+            {
+                foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
+                {
+                    if (gene.entity_guid == guid)
+                    {
+                        entity = gene;
+                        break;
+                    }
+                }
+            }
+
+            //Now if entity is not null, we have the entity and must push it unless it is already in target ER
+            if (entity != null)
+            {
+                PushStatus s2 = this.pushStatus(entity);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    if (entity is ConfigGene)
+                    {
+                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
+                        repositoryPush(newgene, s2);
+                    }
+                    else
+                    {
+                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
+                        repositoryPush(newmol, s2);
+                    }
+                }
+            }
+        }
+
+        private void SchemePusher(ConfigDiffScheme scheme, Level sourceLevel, PushStatus s)
+        {
+            if (scheme == null)
+                return;
+
+            foreach (string guid in scheme.genes)
+            {
+                ConfigGene gene = FindGene(guid, sourceLevel);
+                if (gene != null)
+                {
+                    PushStatus s2 = pushStatus(gene);
+                    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                    {
+                        ConfigGene newgene = gene.Clone(null);
+                        repositoryPush(newgene, s2);
+                    }
+                }
+            }
+
+            //Now push the scheme itself
+            PushStatus s3 = pushStatus(scheme);
+            if (s3 != PushStatus.PUSH_INVALID && s3 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigDiffScheme newscheme = scheme.Clone(true);
+                repositoryPush(newscheme, s3);
+            }
+        }
+
+        private void ReactionTemplatePusher(ConfigReactionTemplate crt)
+        {
+            PushStatus s2 = pushStatus(crt);
+            if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            {
+                ConfigReactionTemplate newcrt = crt.Clone(null);
+                repositoryPush(newcrt, s2);
+            }
+        }
+
+        private ConfigGene FindGene(string guid, Level level)
+        {
+            foreach (ConfigGene g in level.entity_repository.genes)
+            {
+                if (g.entity_guid == guid)
+                {
+                    return g;
+                }
+            }
+            return null;
+        }
+
+        
+
+        //-------------------------------------------------------
+
+
+
         /// <summary>
         /// serialize the level to file
         /// </summary>
@@ -624,6 +1192,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -641,6 +1212,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -827,22 +1401,63 @@ namespace Daphne
             return local;
         }
 
+        protected override void InitMoleculeDict()
+        {
+            base.InitMoleculeDict();
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+        }
+
+        protected override void InitDiffSchemeDict()
+        {
+            base.InitDiffSchemeDict();
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+        }
+
+        protected override void InitTransitionDriversDict()
+        {
+            base.InitTransitionDriversDict();
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
+        }
+
+        protected override void InitGeneDict()
+        {
+            base.InitGeneDict();
+            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+        }
+
+        protected override void InitCellDict()
+        {
+            base.InitCellDict();
+            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
+        }
+
+        protected override void InitReactionDict()
+        {
+            base.InitReactionDict();
+            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+        }
+
+        protected override void InitReactionComplexDict()
+        {
+            base.InitReactionComplexDict();
+            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+        }
+
+        protected override void InitReactionTemplateDict()
+        {
+            base.InitReactionTemplateDict();
+            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
+        }
+
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
         /// </summary>
-        public void InitializeStorageClasses()
+        public override void InitializeStorageClasses()
         {
             // GenerateNewExperimentGUID();
             scenario.InitializeStorageClasses();
-            InitMoleculeIDConfigMoleculeDict();
-            InitCellIDConfigCellDict();
-            InitReactionTemplateIDConfigReactionTemplateDict();
-            InitGeneIDConfigGeneDict();
-            InitReactionIDConfigReactionDict();
-            InitReactionComplexIDConfigReactionComplexDict();
-            InitDiffSchemeIDConfigDiffSchemeDict();
-            InitTransitionDriversDict();
+            base.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -853,90 +1468,6 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             experiment_guid = id.ToString();
-        }
-
-        private void InitMoleculeIDConfigMoleculeDict()
-        {
-            entity_repository.molecules_dict.Clear();
-            foreach (ConfigMolecule cm in entity_repository.molecules)
-            {
-                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-            }
-            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
-        }
-
-        private void InitDiffSchemeIDConfigDiffSchemeDict()
-        {
-            entity_repository.diff_schemes_dict.Clear();
-            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
-            {
-                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
-        }
-        
-        private void InitTransitionDriversDict()
-        {
-            entity_repository.transition_drivers_dict.Clear();
-            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
-            {
-                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
-        }
-
-
-        private void InitGeneIDConfigGeneDict()
-        {
-            entity_repository.genes_dict.Clear();
-            foreach (ConfigGene cg in entity_repository.genes)
-            {
-                entity_repository.genes_dict.Add(cg.entity_guid, cg);
-            }
-            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
-        }
-
-        private void InitCellIDConfigCellDict()
-        {
-            entity_repository.cells_dict.Clear();
-            foreach (ConfigCell cc in entity_repository.cells)
-            {
-                entity_repository.cells_dict.Add(cc.entity_guid, cc);
-            }
-            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
-        }
-
-        private void InitReactionIDConfigReactionDict()
-        {
-            entity_repository.reactions_dict.Clear();
-            foreach (ConfigReaction cr in entity_repository.reactions)
-            {
-                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
-                cr.GetTotalReactionString(entity_repository);
-            }
-            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
-
-        }
-
-        private void InitReactionComplexIDConfigReactionComplexDict()
-        {
-            entity_repository.reaction_complexes_dict.Clear();
-            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
-            {
-                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
-            }
-            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
-
-        }
-
-        private void InitReactionTemplateIDConfigReactionTemplateDict()
-        {
-            entity_repository.reaction_templates_dict.Clear();
-            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
-            {
-                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
-            }
-            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
         }
 
         //genes_CollectionChanged
@@ -3120,6 +3651,7 @@ namespace Daphne
         }
 
         public abstract string GenerateNewName(Protocol protocol, string ending);
+        public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
         public ulong change_stamp { get; set; }
@@ -3247,7 +3779,30 @@ namespace Daphne
 
             return TempMolName;
         }
-       
+
+        public override string GenerateNewName(Level level, string ending)
+        {
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempMolName = OriginalName + suffix;
+            while (FindMoleculeByName(level.entity_repository, TempMolName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempMolName = OriginalName + suffix;
+            }
+
+            return TempMolName;
+        }
+
         /// <summary>
         /// create a clone of a molecule
         /// </summary>
@@ -3270,12 +3825,51 @@ namespace Daphne
             }
             
             return newmol;
-        }        
+        }
+
+        /// <summary>
+        /// Need to be able to clone for any Level, not just Protocol
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public ConfigMolecule Clone(Level level)
+        {
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
+
+            if (level != null)
+            {
+                Guid id = Guid.NewGuid();
+
+                newmol.entity_guid = id.ToString();
+                newmol.Name = newmol.GenerateNewName(level, "_Copy");
+            }
+
+            return newmol;
+        }    
 
         public static bool FindMoleculeByName(Protocol protocol, string tempMolName)
         {
             bool ret = false;
             foreach (ConfigMolecule mol in protocol.entity_repository.molecules)
+            {
+                if (mol.Name.ToLower() == tempMolName.ToLower())
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+
+        public static bool FindMoleculeByName(EntityRepository er, string tempMolName)
+        {
+            bool ret = false;
+            foreach (ConfigMolecule mol in er.molecules)
             {
                 if (mol.Name.ToLower() == tempMolName.ToLower())
                 {
@@ -3382,6 +3976,25 @@ namespace Daphne
             return newgene;
         }
 
+        //public ConfigGene Clone(Level level)
+        //{
+        //    var Settings = new JsonSerializerSettings();
+        //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        //    Settings.TypeNameHandling = TypeNameHandling.Auto;
+        //    string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+        //    ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
+
+        //    if (level != null)
+        //    {
+        //        Guid id = Guid.NewGuid();
+
+        //        newgene.entity_guid = id.ToString();
+        //        newgene.Name = newgene.GenerateNewName(level, "_Copy");
+        //    }
+
+        //    return newgene;
+        //}
+
         public override string GenerateNewName(Protocol protocol, string ending)
         {
             string OriginalName = Name;
@@ -3405,10 +4018,47 @@ namespace Daphne
             return TempMolName;
         }
 
+        public override string GenerateNewName(Level level, string ending)
+        {
+            string OriginalName = Name;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempMolName = OriginalName + suffix;
+            while (FindGeneByName(level.entity_repository, TempMolName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempMolName = OriginalName + suffix;
+            }
+
+            return TempMolName;
+        }
+        
         public static bool FindGeneByName(Protocol protocol, string geneName)
         {
             bool ret = false;
             foreach (ConfigGene gene in protocol.entity_repository.genes)
+            {
+                if (gene.Name == geneName)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+        public static bool FindGeneByName(EntityRepository er, string geneName)
+        {
+            bool ret = false;
+            foreach (ConfigGene gene in er.genes)
             {
                 if (gene.Name == geneName)
                 {
@@ -3509,6 +4159,11 @@ namespace Daphne
         {
             throw new NotImplementedException();
         }
+
+        public override string GenerateNewName(Level level, string ending)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     //A Differentiation Scheme has a name and one list of states, each state with its genes and their boolean values
@@ -3569,6 +4224,11 @@ namespace Daphne
         }
 
         public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
         }
@@ -4352,6 +5012,11 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
+        public override string GenerateNewName(Level level, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
         public void GetTotalReactionString(EntityRepository repos)
         {
             string s = "";
@@ -4517,6 +5182,11 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
+        public override string GenerateNewName(Level level, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
         public ConfigReactionTemplate Clone(Protocol protocol)
         {
             var Settings = new JsonSerializerSettings();
@@ -4570,6 +5240,11 @@ namespace Daphne
         }
 
         public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
         }
@@ -4765,6 +5440,11 @@ namespace Daphne
         }
 
         public override string GenerateNewName(Protocol protocol, string ending)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
         }
@@ -5135,10 +5815,48 @@ namespace Daphne
             return NewCellName;
         }
 
+        public override string GenerateNewName(Level level, string ending)
+        {
+            string OriginalName = CellName;
+
+            if (OriginalName.Contains(ending))
+            {
+                int index = OriginalName.IndexOf(ending);
+                OriginalName = OriginalName.Substring(0, index);
+            }
+
+            int nSuffix = 1;
+            string suffix = ending + string.Format("{0:000}", nSuffix);
+            string TempMolName = OriginalName + suffix;
+            while (FindCellByName(level, TempMolName) == true)
+            {
+                nSuffix++;
+                suffix = ending + string.Format("{0:000}", nSuffix);
+                TempMolName = OriginalName + suffix;
+            }
+
+            return TempMolName;
+        }
+
         public static bool FindCellByName(Protocol protocol, string cellName)
         {
             bool ret = false;
             foreach (ConfigCell cell in protocol.entity_repository.cells)
+            {
+                if (cell.CellName == cellName)
+                {
+                    ret = true;
+                    break;
+                }
+            }
+
+            return ret;
+        }
+
+        public static bool FindCellByName(Level level, string cellName)
+        {
+            bool ret = false;
+            foreach (ConfigCell cell in level.entity_repository.cells)
             {
                 if (cell.CellName == cellName)
                 {

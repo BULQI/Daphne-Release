@@ -251,28 +251,28 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            ////DO NOT DELETE THIS
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
-            //try
-            //{
-            //    CreateDaphneAndUserStores();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            //DO NOT DELETE THIS
+            //This code is to create DaphneStore and UserStore.
+            //It should not be needed ever again! 
+            //Any editing of DaphneStore should be done through application (GUI).
+            try
+            {
+                CreateDaphneAndUserStores();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
-            ////This code re-generates the scenarios - DO NOT DELETE
-            //try
-            //{
-            //    CreateAndSerializeDaphneProtocols();
-            //}
-            //catch (Exception e)
-            //{
-            //    showExceptionBox(exceptionMessage(e));
-            //}
+            //This code re-generates the scenarios - DO NOT DELETE
+            try
+            {
+                CreateAndSerializeDaphneProtocols();
+            }
+            catch (Exception e)
+            {
+                showExceptionBox(exceptionMessage(e));
+            }
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -574,8 +574,7 @@ namespace DaphneGui
 
 
         /// <summary>
-        /// Code to create userstore and daphnestore 
-        /// HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES.
+        /// Code to create daphnestore 
         /// ONCE CREATED, DON'T NEED THIS CODE EVER AGAIN!
         /// </summary>
         public void CreateDaphneAndUserStores()
@@ -619,13 +618,13 @@ namespace DaphneGui
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_blank_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\daphne_blank_vat_RC_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateBlankVatReactionComplexProtocol(protocol);
             // serialize
             protocol.SerializeToFile();
 
-            // VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            // VAT LIGAND RECEPTOR REACTION-COMPLEX SCENARIO
+            protocol = new Protocol("Config\\daphne_vat_ligand_receptor_RC_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateVatReactionComplexProtocol(protocol);
             // serialize
             protocol.SerializeToFile();
@@ -1953,14 +1952,16 @@ namespace DaphneGui
                 }
             }
 
-            // GUI Resources
-            // Set the data context for the main tab control config GUI
+            
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                // GUI Resources
+                // Set the data context for the main tab control config GUI
             ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
             ComponentsToolWindow.DataContext = sop.Protocol;
 
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-            {
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
@@ -3098,6 +3099,21 @@ namespace DaphneGui
             //    MainMenu.Items.Remove(AdminMenu);
 
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushTransDriver_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void pushReacTemp_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         

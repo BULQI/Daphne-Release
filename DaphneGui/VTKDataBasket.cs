@@ -1144,7 +1144,8 @@ namespace DaphneGui
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
                 // for now
-                throw new InvalidCastException();
+                //throw new InvalidCastException();\
+                return;
             }
 
             ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;

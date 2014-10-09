@@ -63,10 +63,11 @@ namespace DaphneGui
             if (gene == null)
                 return;
 
+            Level level = DataContext as Level;
             ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
             //MainWindow.SOP.Protocol.entity_repository.genes.Add(newgene);
 
-            Level level = (Level)(this.DataContext);
+            //Level level = (Level)(this.DataContext);
             level.entity_repository.genes.Add(newgene);
             
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
@@ -77,11 +78,12 @@ namespace DaphneGui
 
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
-            gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
-
             Level level = (Level)(this.DataContext);
+            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
+            //gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            gm.Name = gm.GenerateNewName(level, "_New");
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
+            
             level.entity_repository.genes.Add(gm);
 
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
@@ -96,11 +98,12 @@ namespace DaphneGui
         //MOLECULES        
         private void btnAddLibMolecule_Click(object sender, RoutedEventArgs e)
         {
+            Level level = (Level)(this.DataContext);
             ConfigMolecule gm = new ConfigMolecule();
-            gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            //gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            gm.Name = gm.GenerateNewName(level, "_New");
             //MainWindow.SOP.Protocol.entity_repository.molecules.Add(gm);
 
-            Level level = (Level)(this.DataContext);
             level.entity_repository.molecules.Add(gm);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
@@ -116,11 +119,12 @@ namespace DaphneGui
             if (cm == null)
                 return;
 
-            //ConfigMolecule gm = new ConfigMolecule(cm);
-            ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
-            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
-
             Level level = (Level)(this.DataContext);
+            //ConfigMolecule gm = new ConfigMolecule(cm);
+            //ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
+            ConfigMolecule newmol = cm.Clone(level);
+            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
+            
             level.entity_repository.molecules.Add(newmol);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;

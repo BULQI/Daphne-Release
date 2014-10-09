@@ -22,7 +22,7 @@ namespace DaphneGui.Pushing
     /// </summary>
     public partial class PushBetweenLevels : Window
     {
-        public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell };
+        public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell, DiffScheme, ReactionTemplate, ReactionComplex };
 
         public PushLevelEntityType PushEntityType { get; set; }
         public PushLevel PushLevelA { get; set; }
@@ -472,62 +472,100 @@ namespace DaphneGui.Pushing
         {
             ConfigEntity newEntity = null;
             bool UserWantsNewEntity = false;
-            //Level.PushStatus status = levelB.pushStatus(entity);
-            //if (status == Level.PushStatus.PUSH_INVALID)
-            //{
-            //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-            //    return;
-            //}
+            Level.PushStatus status = levelB.pushStatus(entity);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                return;
+            }
 
-            ////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            ////{
-                //If the entity is new, must clone it here and then push
-                switch (PushEntityType)
-                {
-                    case PushLevelEntityType.Molecule:
-                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                        Level.PushStatus status = levelB.pushStatus(newmol);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newmol, status);
-                        break;
-                    case PushLevelEntityType.Gene:
-                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                        status = levelB.pushStatus(newgene);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newgene, status);
-                        break;
-                    case PushLevelEntityType.Reaction:
-                        ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
-                        status = levelB.pushStatus(newreac);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newreac, status);
-                        break;
-                    case PushLevelEntityType.Cell:
-                        ConfigCell newcell = ((ConfigCell)entity).Clone(true);
-                        status = levelB.pushStatus(newcell);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newcell, status);
-                        break;
-                    default:
-                        break;
-                }
-            ////}
+            //If the entity is new, must clone it here and then push
+            switch (PushEntityType)
+            {
+                case PushLevelEntityType.Molecule:
+                    ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
+                    //Level.PushStatus status = levelB.pushStatus(newmol);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+
+                    while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
+                    {
+                        string entered_name = newmol.Name;
+                        newmol.ValidateName(MainWindow.SOP.Protocol);
+                        MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
+                        AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
+
+                    }
+
+                    levelB.repositoryPush(newmol, status);
+                    break;
+                case PushLevelEntityType.Gene:
+                    ConfigGene newgene = ((ConfigGene)entity).Clone(null);
+                    //status = levelB.pushStatus(newgene);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newgene, status);
+                    break;
+                case PushLevelEntityType.Reaction:
+                    ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
+                    //status = levelB.pushStatus(newreac);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newreac, status, levelA, true);
+                    break;
+                case PushLevelEntityType.Cell:
+                    ConfigCell newcell = ((ConfigCell)entity).Clone(true);
+                    //status = levelB.pushStatus(newcell);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newcell, status, levelA, true);
+                    break;
+                case PushLevelEntityType.DiffScheme:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                            
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigDiffScheme newscheme = ((ConfigDiffScheme)entity).Clone(true);
+                    levelB.repositoryPush(newscheme, status, levelA, true);
+                    break;
+                case PushLevelEntityType.ReactionTemplate:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(null);
+                    levelB.repositoryPush(newreactemp, status, levelA, true);
+                    break;
+                case PushLevelEntityType.ReactionComplex:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigReactionComplex newrc = ((ConfigReactionComplex)entity).Clone(true);
+                    levelB.repositoryPush(newrc, status, levelA, true);
+                    break;
+                default:
+                    break;
+            }
 
 
             //else // the item exists; could be newer or older
