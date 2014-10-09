@@ -91,6 +91,7 @@ namespace Daphne
                 ConfigGene configGene = null;
                 string guid = findGeneGuid(geneName[i], userstore);
 
+
                 if (guid != "")
                 {
                     configGene = userstore.entity_repository.genes_dict[guid];
