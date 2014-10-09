@@ -44,14 +44,14 @@ namespace DaphneOptim
         /// </summary>
         public string execPath = string.Empty;
 
-        private static Simulation sim;
-        public static Simulation Sim
+        private static TissueSimulation sim;
+        public static TissueSimulation Sim
         {
             get { return sim; }
             set { sim = value; }
         }
 
-        private Reporter reporter;
+        private TissueSimulationReporter reporter;
         
         /// <summary>
         /// uri for the scenario file
@@ -89,36 +89,36 @@ namespace DaphneOptim
                 my_param = _param;
             }
         };
-        struct foo {
-            int n; /* dimension */
-            int L; /* size of each rectangle (2n+3) */
-            double magic_eps; /* Jones' epsilon parameter (1e-4 is recommended) */
-            int which_diam; /* which measure of hyper-rectangle diam to use:
-			            0 = Jones, 1 = Gablonsky */
-            int which_div; /* which way to divide rects:
-            0: orig. Jones (divide all longest sides)
-            1: Gablonsky (cubes divide all, rects longest)
-            2: Jones Encyc. Opt.: pick random longest side */
-            int which_opt; /* which rects are considered "potentially optimal"
-            0: Jones (all pts on cvx hull, even equal pts)
-            1: Gablonsky DIRECT-L (pick one pt, if equal pts)
-            2: ~ 1, but pick points randomly if equal pts 
-            ... 2 seems to suck compared to just picking oldest pt */
+//        struct foo {
+//            int n; /* dimension */
+//            int L; /* size of each rectangle (2n+3) */
+//            double magic_eps; /* Jones' epsilon parameter (1e-4 is recommended) */
+//            int which_diam; /* which measure of hyper-rectangle diam to use:
+//                        0 = Jones, 1 = Gablonsky */
+//            int which_div; /* which way to divide rects:
+//            0: orig. Jones (divide all longest sides)
+//            1: Gablonsky (cubes divide all, rects longest)
+//            2: Jones Encyc. Opt.: pick random longest side */
+//            int which_opt; /* which rects are considered "potentially optimal"
+//            0: Jones (all pts on cvx hull, even equal pts)
+//            1: Gablonsky DIRECT-L (pick one pt, if equal pts)
+//            2: ~ 1, but pick points randomly if equal pts 
+//            ... 2 seems to suck compared to just picking oldest pt */
   
-            double lb, ub; // const pointers?
-            //nlopt_stopping *stop; /* stopping criteria */
-            nlopt_func f; void *f_data;
-            double *work; /* workspace, of length >= 2*n */
-            int *iwork; /* workspace, length >= n */
-            double minf, *xmin; /* minimum so far */
+//            double lb, ub; // const pointers?
+//            //nlopt_stopping *stop; /* stopping criteria */
+//            nlopt_func f; void *f_data;
+//            double *work; /* workspace, of length >= 2*n */
+//            int *iwork; /* workspace, length >= n */
+//            double minf, *xmin; /* minimum so far */
      
-            /* red-black tree of hyperrects, sorted by (d,f,age) in
-            lexographical order */
-            rb_tree rtree;
-            int age; /* age for next new rect */
-            double **hull; /* array to store convex hull */
-            int hull_len; /* allocated length of hull array */
-} 
+//            /* red-black tree of hyperrects, sorted by (d,f,age) in
+//            lexographical order */
+//            rb_tree rtree;
+//            int age; /* age for next new rect */
+//            double **hull; /* array to store convex hull */
+//            int hull_len; /* allocated length of hull array */
+//} 
 
         enum nlopt_result
         {
@@ -135,7 +135,7 @@ namespace DaphneOptim
             NLOPT_MAXTIME_REACHED = 6
         } ;
 
-        double nlopt_func(unsigned n, const double x, ref double gradient, ref void *func_data);
+        //double nlopt_func(unsigned n, const double x, ref double gradient, ref void *func_data);
 
         //[DllImport(@"C:\Users\gmkepler\Documents\Visual Studio 2010\Projects\BU-TFS\Daphne\Daphne-grace\DaphneOptim\bin\x64\Debug\libnolpt-0.dll", EntryPoint = "nlopt_srand")]
         [DllImport("libnlopt-0.dll", EntryPoint = "nlopt_srand")]
@@ -177,10 +177,10 @@ namespace DaphneOptim
             }
 
             // create the simulation
-            sim = new Simulation();
+            sim = new TissueSimulation();
 
             // reporter
-            reporter = new Reporter();
+            reporter = new TissueSimulationReporter();
             reporter.AppPath = orig_path + @"\";
 
             if (file_exists)
