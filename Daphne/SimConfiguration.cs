@@ -565,6 +565,96 @@ namespace Daphne
             }
         }
 
+        protected virtual void InitMoleculeDict()
+        {
+            entity_repository.molecules_dict.Clear();
+            foreach (ConfigMolecule cm in entity_repository.molecules)
+            {
+                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            }
+        }
+
+        protected virtual void InitDiffSchemeDict()
+        {
+            entity_repository.diff_schemes_dict.Clear();
+            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
+            {
+                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
+            }
+        }
+
+        protected virtual void InitTransitionDriversDict()
+        {
+            entity_repository.transition_drivers_dict.Clear();
+            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
+            {
+                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+            }
+        }
+
+        protected virtual void InitGeneDict()
+        {
+            entity_repository.genes_dict.Clear();
+            foreach (ConfigGene cg in entity_repository.genes)
+            {
+                entity_repository.genes_dict.Add(cg.entity_guid, cg);
+            }
+        }
+
+        protected virtual void InitCellDict()
+        {
+            entity_repository.cells_dict.Clear();
+            foreach (ConfigCell cc in entity_repository.cells)
+            {
+                entity_repository.cells_dict.Add(cc.entity_guid, cc);
+            }
+        }
+
+        protected virtual void InitReactionDict()
+        {
+            entity_repository.reactions_dict.Clear();
+            foreach (ConfigReaction cr in entity_repository.reactions)
+            {
+                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
+                cr.GetTotalReactionString(entity_repository);
+            }
+        }
+
+        protected virtual void InitReactionComplexDict()
+        {
+            entity_repository.reaction_complexes_dict.Clear();
+            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
+            {
+                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
+            }
+        }
+
+        protected virtual void InitReactionTemplateDict()
+        {
+            entity_repository.reaction_templates_dict.Clear();
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            }
+        }
+
+        /// <summary>
+        /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
+        /// Also take care of any other post-deserialization setup.
+        /// </summary>
+        public virtual void InitializeStorageClasses()
+        {
+            // GenerateNewExperimentGUID();
+            InitMoleculeDict();
+            InitCellDict();
+            InitReactionTemplateDict();
+            InitGeneDict();
+            InitReactionDict();
+            InitReactionComplexDict();
+            InitDiffSchemeDict();
+            InitTransitionDriversDict();
+        }
+
         /// <summary>
         /// New repositoryPush - This is for compound entities.  
         /// It will push the entity and its sub-entities too, into this level's entity repository.
@@ -863,6 +953,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -880,6 +973,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -1066,22 +1162,63 @@ namespace Daphne
             return local;
         }
 
+        protected override void InitMoleculeDict()
+        {
+            base.InitMoleculeDict();
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+        }
+
+        protected override void InitDiffSchemeDict()
+        {
+            base.InitDiffSchemeDict();
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+        }
+
+        protected override void InitTransitionDriversDict()
+        {
+            base.InitTransitionDriversDict();
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
+        }
+
+        protected override void InitGeneDict()
+        {
+            base.InitGeneDict();
+            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+        }
+
+        protected override void InitCellDict()
+        {
+            base.InitCellDict();
+            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
+        }
+
+        protected override void InitReactionDict()
+        {
+            base.InitReactionDict();
+            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+        }
+
+        protected override void InitReactionComplexDict()
+        {
+            base.InitReactionComplexDict();
+            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+        }
+
+        protected override void InitReactionTemplateDict()
+        {
+            base.InitReactionTemplateDict();
+            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
+        }
+
         /// <summary>
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
         /// </summary>
-        public void InitializeStorageClasses()
+        public override void InitializeStorageClasses()
         {
             // GenerateNewExperimentGUID();
             scenario.InitializeStorageClasses();
-            InitMoleculeIDConfigMoleculeDict();
-            InitCellIDConfigCellDict();
-            InitReactionTemplateIDConfigReactionTemplateDict();
-            InitGeneIDConfigGeneDict();
-            InitReactionIDConfigReactionDict();
-            InitReactionComplexIDConfigReactionComplexDict();
-            InitDiffSchemeIDConfigDiffSchemeDict();
-            InitTransitionDriversDict();
+            base.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -1092,90 +1229,6 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             experiment_guid = id.ToString();
-        }
-
-        private void InitMoleculeIDConfigMoleculeDict()
-        {
-            entity_repository.molecules_dict.Clear();
-            foreach (ConfigMolecule cm in entity_repository.molecules)
-            {
-                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-            }
-            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
-        }
-
-        private void InitDiffSchemeIDConfigDiffSchemeDict()
-        {
-            entity_repository.diff_schemes_dict.Clear();
-            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
-            {
-                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
-        }
-        
-        private void InitTransitionDriversDict()
-        {
-            entity_repository.transition_drivers_dict.Clear();
-            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
-            {
-                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
-        }
-
-
-        private void InitGeneIDConfigGeneDict()
-        {
-            entity_repository.genes_dict.Clear();
-            foreach (ConfigGene cg in entity_repository.genes)
-            {
-                entity_repository.genes_dict.Add(cg.entity_guid, cg);
-            }
-            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
-        }
-
-        private void InitCellIDConfigCellDict()
-        {
-            entity_repository.cells_dict.Clear();
-            foreach (ConfigCell cc in entity_repository.cells)
-            {
-                entity_repository.cells_dict.Add(cc.entity_guid, cc);
-            }
-            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
-        }
-
-        private void InitReactionIDConfigReactionDict()
-        {
-            entity_repository.reactions_dict.Clear();
-            foreach (ConfigReaction cr in entity_repository.reactions)
-            {
-                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
-                cr.GetTotalReactionString(entity_repository);
-            }
-            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
-
-        }
-
-        private void InitReactionComplexIDConfigReactionComplexDict()
-        {
-            entity_repository.reaction_complexes_dict.Clear();
-            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
-            {
-                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
-            }
-            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
-
-        }
-
-        private void InitReactionTemplateIDConfigReactionTemplateDict()
-        {
-            entity_repository.reaction_templates_dict.Clear();
-            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
-            {
-                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
-            }
-            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
         }
 
         //genes_CollectionChanged

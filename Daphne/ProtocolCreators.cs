@@ -57,27 +57,6 @@ namespace Daphne
             PredefinedReactionComplexesCreator(store);
         }
 
-        /// <summary>
-        /// Use UserStore for loading entity_repository into the given protocol.
-        /// This way every protocol will have the same entity guids.
-        /// </summary>
-        /// <param name="protocol"></param>
-        public static void LoadEntitiesFromUserStore(Protocol protocol)
-        {
-            if (protocol == null)
-                return;
-
-            Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            store = store.Deserialize();
-
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
-            protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
-            protocol.InitializeStorageClasses();
-        }
-
         //------------------------------------------------
 
         private static void LoadLigandReceptorEntities(Protocol protocol)
@@ -316,7 +295,6 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
             LoadLigandReceptorEntities(protocol);
 
             // ECM MOLECULES
@@ -439,7 +417,6 @@ namespace Daphne
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
             // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
             LoadDriverLocomotionEntities(protocol);
 
             // ECS
@@ -604,7 +581,6 @@ namespace Daphne
             envHandle.gridstep = 10;
 
             // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
             LoadDiffusionEntities(protocol);
 
             // Gaussian Distrtibution
@@ -680,10 +656,6 @@ namespace Daphne
             protocol.scenario.time_config.duration = 100;
             protocol.scenario.time_config.rendering_interval = 1.0;
             protocol.scenario.time_config.sampling_interval = 100;
-
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
-
         }
 
         public static void CreateBlankVatReactionComplexProtocol(Protocol protocol)
