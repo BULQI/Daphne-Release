@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "18cd691e-ab00-4528-b143-1b8ab608cb5f",
+  "experiment_guid": "088b1519-0ba9-4e12-b386-0d0b70c7b14c",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -236,7 +236,7 @@
           "change_stamp": 335
         },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "547cc235-9ed4-49d0-ae36-3a98f15ac0f7",
+        "cellpopulation_guid": "7e9ab068-d84f-4813-999c-392c6fe7ff2e",
         "cellpopulation_id": 0,
         "report_xvf": {
           "position": true,
@@ -252,7 +252,7 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "990cd8bc-86da-4e69-9ef5-b32819b482a3"
+            "molpop_guid_ref": "362046bb-cde2-488d-97d3-19f041b756ec"
           }
         ],
         "number": 1,
@@ -326,7 +326,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "990cd8bc-86da-4e69-9ef5-b32819b482a3",
+            "molpop_guid": "362046bb-cde2-488d-97d3-19f041b756ec",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -342,7 +342,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "990cd8bc-86da-4e69-9ef5-b32819b482a3"
+              "molpop_guid_ref": "362046bb-cde2-488d-97d3-19f041b756ec"
             },
             "mp_dist_name": "Linear",
             "mp_distribution": {
@@ -839,20 +839,6 @@
         "change_stamp": 0
       },
       {
-        "name": "Transformation",
-        "reactants_stoichiometric_const": [
-          1
-        ],
-        "products_stoichiometric_const": [
-          1
-        ],
-        "modifiers_stoichiometric_const": [],
-        "isBoundary": false,
-        "reac_type": 5,
-        "entity_guid": "3f92a902-b72f-4436-884b-0f2575eca344",
-        "change_stamp": 0
-      },
-      {
         "name": "CatalyzedBoundaryActivation",
         "reactants_stoichiometric_const": [
           1
@@ -866,6 +852,20 @@
         "isBoundary": true,
         "reac_type": 14,
         "entity_guid": "28307858-ec39-44dd-b81b-ad325ffcd751",
+        "change_stamp": 0
+      },
+      {
+        "name": "Transformation",
+        "reactants_stoichiometric_const": [
+          1
+        ],
+        "products_stoichiometric_const": [
+          1
+        ],
+        "modifiers_stoichiometric_const": [],
+        "isBoundary": false,
+        "reac_type": 5,
+        "entity_guid": "3f92a902-b72f-4436-884b-0f2575eca344",
         "change_stamp": 0
       },
       {
