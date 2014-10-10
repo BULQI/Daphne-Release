@@ -5074,6 +5074,7 @@ namespace Daphne
         public ConfigReactionComplex(string name)
             : base()
         {
+            Name = name;
             reactions = new ObservableCollection<ConfigReaction>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
 #if OLD_RC
