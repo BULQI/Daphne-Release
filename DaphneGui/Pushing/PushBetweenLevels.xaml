@@ -237,12 +237,57 @@
             </StackPanel>
         </DataTemplate>
 
+        <DataTemplate x:Name="templReacComplexes" x:Key="pushLevelReacComplexTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid x:Name="dgReacComp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                                ItemsSource="{Binding}"  >
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Name="templReacTemplate" x:Key="pushLeveReacTemplateTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid x:Name="dgReacTemp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                                ItemsSource="{Binding}"  >
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Name="templDiffSchemes" x:Key="pushLevelDiffSchemeTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid x:Name="dgDiff" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                                ItemsSource="{Binding}"  >
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Name="templTransDrivers" x:Key="pushLevelTransDriverTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel>
+                    <DataGrid x:Name="dgTrans" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                                ItemsSource="{Binding}"  >
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
 
         <push:PushLevelEntityTemplateSelector x:Key="pushLevelEntityTemplateSelector"
             PushLevelReactionTemplate="{StaticResource pushLevelReactionTemplate}" 
             PushLevelMoleculeTemplate="{StaticResource pushLevelMoleculeTemplate}" 
             PushLevelCellTemplate="{StaticResource pushLevelCellTemplate}"
             PushLevelGeneTemplate="{StaticResource pushLevelGeneTemplate}"
+            PushLevelReacTemplateTemplate="{StaticResource pushLeveReacTemplateTemplate}"                                           
+            PushLevelReacComplexTemplate="{StaticResource pushLevelReacComplexTemplate}"                                             
+            PushLevelDiffSchemeTemplate="{StaticResource pushLevelDiffSchemeTemplate}" 
+            PushLevelTransDriverTemplate="{StaticResource pushLevelTransDriverTemplate}"                                          
+                                              
             />
         
     </Window.Resources>

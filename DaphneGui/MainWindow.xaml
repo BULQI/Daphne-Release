@@ -167,6 +167,7 @@
                     <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" />
                     <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" />
                     <MenuItem Header="Reaction Templates..."     Name="pushReacTemp"    Click="pushReacTemp_Click" />
+                    <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />                  
                 </MenuItem>
                 
                 <MenuItem Header="Data Export" Name = "ExportMenu">
