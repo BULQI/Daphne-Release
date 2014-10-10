@@ -156,6 +156,27 @@ namespace Daphne
             return itemsLoaded;
         }
 
+        private static int LoadProtocolReactionTemplates(Protocol protocol, string[] rtName, Level userstore)
+        {
+            int itemsLoaded = 0;
+
+            for (int i = 0; i < rtName.Length; i++)
+            {
+                foreach (ConfigReactionTemplate crt in userstore.entity_repository.reaction_templates)
+                {
+                    if (crt.name == rtName[i])
+                    {
+                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[crt.entity_guid];
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+                        itemsLoaded++;
+                   }
+                }
+            }
+
+            return itemsLoaded;
+        }
+
         private static int LoadProtocolCells(Protocol protocol, string[] cellName, Level userstore)
         {
             int itemsLoaded = 0;
@@ -706,7 +727,7 @@ namespace Daphne
         //    }
         //}
 
-        public static void CreateVatReactionComplexProtocol(Protocol protocol)
+        public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
             {
@@ -718,19 +739,34 @@ namespace Daphne
             // Experiment
             protocol.experiment_name = "Ligand Receptor Vat RC";
             protocol.experiment_description = "...";
-            protocol.scenario.time_config.duration = 2.0;
-            protocol.scenario.time_config.rendering_interval = 0.2;
-            protocol.scenario.time_config.sampling_interval = 0.2;
+            protocol.scenario.time_config.duration = 10.0;
+            protocol.scenario.time_config.rendering_interval = 0.1;
+            protocol.scenario.time_config.sampling_interval = 0.1;
 
-            //LoadVatReactionComplexEntities(protocol);
-
-            //Load from User Store so open it
+            //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
 
+            // bulk molecules
+            string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
+
+            // reactions
+            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
             // RC
-            string[] item = new string[1] { "Ligand/Receptor" };
-            int itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
+            item = new string[1] { "Ligand/Receptor" };
+            itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
 
             for (int i = 0; i < item.Length; i++)
             {
@@ -744,6 +780,197 @@ namespace Daphne
                 }
             }
         }
+
+        public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "SPR Vat RC";
+            protocol.experiment_description = "...";
+            protocol.scenario.time_config.duration = 2.0;
+            protocol.scenario.time_config.rendering_interval = 0.2;
+            protocol.scenario.time_config.sampling_interval = 0.2;
+
+            ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
+
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            string[] item = new string[] { "Association", "Dissociation", "Transformation"};
+            int itemsLoaded = LoadProtocolReactionTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reaction templates.");
+            }
+
+            // Create new molecules and add to the protocol ER
+            // Don't want to make these more permanent by adding to the user store
+            //
+
+            item = new string[] { "R1", "R2", "L", "C1", "C2" };
+            //string[] molguids = new string[item.Length];
+            //int molcnt = 0;
+            foreach (string s in item)
+            {
+                ConfigMolecule cm = new ConfigMolecule(s, 1.0, 1.0, 1.0);
+                protocol.entity_repository.molecules.Add(cm);
+                protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+                //molguids[molcnt++] = cm.entity_guid;
+            }
+
+            // Create new reactions and add to the protocol ER
+            // Don't want to make these more permanent by adding to the user store
+            //
+
+            // Association
+            // R1 + L -> C1
+            ConfigReaction cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.1;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Association
+            // R2 + L -> C2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.1;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Dissociation
+            // C1 -> R1 + L
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Dissociation);
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // reactant
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Dissociation
+            // C2 -> R2 + L
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Dissociation);
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.01;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // R1 -> R2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // R2 -> R1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // C1 -> C2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // C2 -> C1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            protocol.InitializeStorageClasses();
+
+            // Push all ER reactions to Reaction Complex entity
+            foreach (ConfigReaction configReac in protocol.entity_repository.reactions)
+            {
+                configRC.reactions.Add(configReac);
+            }
+
+            // Push all ER molecules to the Reaction Complex molecules dictionary
+            foreach (KeyValuePair<string,ConfigMolecule> kvp in protocol.entity_repository.molecules_dict)
+            {
+                configRC.molecules_dict.Add(kvp.Key, kvp.Value);
+            }
+
+            // Create molecular populations and add to Reaction Complex
+            double[] conc = new double[] { 1, 1, 1, 0, 0 };
+            item = new string[] { "R1", "R2", "L", "C1", "C2" };
+
+            for (int i = 0; i < item.Length; i++)
+            {
+                //ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+                ConfigMolecule configMolecule = configRC.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+                    configMolPop.mp_dist_name = "Uniform";
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+                    configRC.molpops.Add(configMolPop);
+                }
+            }
+        }
+
 
         private static void PredefinedCellsCreator(Level store)
         {
@@ -2443,8 +2670,6 @@ namespace Daphne
             }
 
             //REACTIONS
-
-            //string guid = findReactionGuid(ReactionType.Association, sc);
 
             // Reaction strings
             type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
