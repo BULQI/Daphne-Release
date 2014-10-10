@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Diffusion Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "160a0a24-8428-4392-9d09-09f3ca28c2cf",
+  "experiment_guid": "f32de18e-6dff-499e-b6bb-19305439d05c",
   "experiment_description": "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -29,7 +29,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "4cb977b5-1b75-4a91-9e2d-556458dae4b1",
+            "molpop_guid": "ae0d8fce-a91c-41d1-8a24-2e9c67a779b7",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -45,7 +45,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 2,
-              "molpop_guid_ref": "4cb977b5-1b75-4a91-9e2d-556458dae4b1"
+              "molpop_guid_ref": "ae0d8fce-a91c-41d1-8a24-2e9c67a779b7"
             },
             "mp_dist_name": "Gaussian",
             "mp_distribution": {
@@ -54,7 +54,7 @@
               "gauss_spec": {
                 "gaussian_spec_name": "",
                 "box_spec": {
-                  "box_guid": "9e835ed6-8d02-4c10-a0ff-e8355e5a2982",
+                  "box_guid": "4d48c1ff-dd97-4475-99f8-df37a2ec9b71",
                   "transform_matrix": [
                     [
                       70.710678118654755,

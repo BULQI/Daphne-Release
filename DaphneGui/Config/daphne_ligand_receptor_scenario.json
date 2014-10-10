@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "9ce5efa1-1775-4805-9656-55e83ce474a5",
+  "experiment_guid": "3c2848ed-3fc5-4d7d-81d9-9f126238f096",
   "experiment_description": "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -95,7 +95,7 @@
           "change_stamp": 293
         },
         "cellpopulation_name": "Leukocyte_staticReceptor",
-        "cellpopulation_guid": "56f6b855-de81-48ad-a85b-1aa4c361a2ad",
+        "cellpopulation_guid": "760c379e-cae6-4e46-b0a7-a6c445dee487",
         "cellpopulation_id": 1,
         "report_xvf": {
           "position": false,
@@ -111,7 +111,7 @@
           {
             "mean": false,
             "mp_extended": 1,
-            "molpop_guid_ref": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe"
+            "molpop_guid_ref": "4156915e-b640-4581-bfcd-105cfb7dbbe5"
           }
         ],
         "number": 1,
@@ -185,7 +185,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe",
+            "molpop_guid": "4156915e-b640-4581-bfcd-105cfb7dbbe5",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -201,7 +201,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 0,
-              "molpop_guid_ref": "242c3781-f1d0-4c3e-8d9b-cf2de0f8c7fe"
+              "molpop_guid_ref": "4156915e-b640-4581-bfcd-105cfb7dbbe5"
             },
             "mp_dist_name": "Uniform",
             "mp_distribution": {
