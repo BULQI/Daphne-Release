@@ -943,6 +943,10 @@ namespace Daphne
                 {
                     SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
                 }
+                else if (e is ConfigReactionComplex)
+                {
+                    ReactionComplexPusher(e as ConfigReactionComplex, sourceLevel, s);
+                }
             }
             else
             {
@@ -1018,17 +1022,17 @@ namespace Daphne
             {
                 ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
             }
-            else
-            {
-                foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
-                {
-                    if (crt.entity_guid == reac.reaction_template_guid_ref)
-                    {
-                        ReactionTemplatePusher(crt);
-                        break;
-                    }
-                }
-            }
+            //else
+            //{
+            //    foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
+            //    {
+            //        if (crt.entity_guid == reac.reaction_template_guid_ref)
+            //        {
+            //            ReactionTemplatePusher(crt);
+            //            break;
+            //        }
+            //    }
+            //}
 
             //Molecules and Genes
             foreach (string guid in reac.reactants_molecule_guid_ref)
@@ -1060,26 +1064,35 @@ namespace Daphne
             ConfigEntity entity = null;
 
             //Figure out if guid is for molecule or gene in the source er
-            foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            if (sourceLevel.entity_repository.molecules_dict.ContainsKey(guid))
             {
-                if (mol.entity_guid == guid)
-                {
-                    entity = mol;
-                    break;
-                }
+                entity = sourceLevel.entity_repository.molecules_dict[guid];
+            }
+            else if (sourceLevel.entity_repository.genes_dict.ContainsKey(guid))
+            {
+                entity = sourceLevel.entity_repository.genes_dict[guid];
             }
 
-            if (entity == null)
-            {
-                foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
-                {
-                    if (gene.entity_guid == guid)
-                    {
-                        entity = gene;
-                        break;
-                    }
-                }
-            }
+            //foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            //{
+            //    if (mol.entity_guid == guid)
+            //    {
+            //        entity = mol;
+            //        break;
+            //    }
+            //}
+
+            //if (entity == null)
+            //{
+            //    foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
+            //    {
+            //        if (gene.entity_guid == guid)
+            //        {
+            //            entity = gene;
+            //            break;
+            //        }
+            //    }
+            //}
 
             //Now if entity is not null, we have the entity and must push it unless it is already in target ER
             if (entity != null)
@@ -1099,6 +1112,44 @@ namespace Daphne
                     }
                 }
             }
+        }
+
+        private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
+        {
+            //Genes
+            //foreach (ConfigGene gene in rc.genes)
+            //{
+            //    PushStatus s2 = pushStatus(gene);
+            //    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            //    {
+            //        ConfigGene newgene = gene.Clone(null);
+            //        repositoryPush(newgene, s2);
+            //    }
+            //}
+
+            //Reactions
+            foreach (ConfigReaction reac in rc.reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Molecules
+            foreach (ConfigMolecularPopulation molpop in rc.molpops)
+            {
+                PushStatus s2 = pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Push the reaction complex itself
+            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            {
+                repositoryPush(rc, s);
+            }
+
         }
 
         private void SchemePusher(ConfigDiffScheme scheme, Level sourceLevel, PushStatus s)
@@ -1129,6 +1180,7 @@ namespace Daphne
             }
         }
 
+
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
@@ -1141,13 +1193,17 @@ namespace Daphne
 
         private ConfigGene FindGene(string guid, Level level)
         {
-            foreach (ConfigGene g in level.entity_repository.genes)
-            {
-                if (g.entity_guid == guid)
-                {
-                    return g;
-                }
-            }
+            if (level.entity_repository.genes_dict.ContainsKey(guid))
+                return level.entity_repository.genes_dict[guid];
+
+            //foreach (ConfigGene g in level.entity_repository.genes)
+            //{
+            //    if (g.entity_guid == guid)
+            //    {
+            //        return g;
+            //    }
+            //}
+
             return null;
         }
 
