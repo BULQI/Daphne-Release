@@ -255,24 +255,24 @@ namespace DaphneGui
             //This code is to create DaphneStore and UserStore.
             //It should not be needed ever again! 
             //Any editing of DaphneStore should be done through application (GUI).
-            try
-            {
-                CreateDaphneAndUserStores();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+            //try
+            //{
+            //    CreateDaphneAndUserStores();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
 
-            //This code re-generates the scenarios - DO NOT DELETE
-            try
-            {
-                CreateAndSerializeDaphneProtocols();
-            }
-            catch (Exception e)
-            {
-                showExceptionBox(exceptionMessage(e));
-            }
+            ////This code re-generates the scenarios - DO NOT DELETE
+            //try
+            //{
+            //    CreateAndSerializeDaphneProtocols();
+            //}
+            //catch (Exception e)
+            //{
+            //    showExceptionBox(exceptionMessage(e));
+            //}
 
             // NEED TO UPDATE RECENT FILES LIST CODE FOR DAPHNE!!!!
 
@@ -618,16 +618,23 @@ namespace DaphneGui
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_blank_vat_RC_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateBlankVatReactionComplexProtocol(protocol);
             // serialize
             protocol.SerializeToFile();
 
-            // VAT LIGAND RECEPTOR REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_vat_ligand_receptor_RC_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
-            ProtocolCreators.CreateVatReactionComplexProtocol(protocol);
+            // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
+            protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             // serialize
             protocol.SerializeToFile();
+
+            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
+            protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
+            // serialize
+            protocol.SerializeToFile();
+
         }
 
         private void showScenarioInitial()
