@@ -3316,9 +3316,9 @@
 
                             </StackPanel>
 
-                            <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}"
+                            <StackPanel Margin="0,10" DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}"
                                         >
-                                <TextBlock Text="Molecular concentrations" />
+                                <TextBlock Text="Initial Molecular concentrations" />
                                 <ListView x:Name="lvReactionComplexMolecules" 
                                       ItemsSource="{Binding Path=molpops, Mode=TwoWay}"
                                       SelectedIndex="0"
@@ -3340,7 +3340,7 @@
                                                 </Style>
                                             </GridView.ColumnHeaderContainerStyle>
 
-                                            <GridViewColumn Width="200" Header="Reaction" >
+                                            <GridViewColumn Width="200" Header="Molecule" >
 
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
