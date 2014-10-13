@@ -565,6 +565,359 @@ namespace Daphne
             }
         }
 
+        private void InitMoleculeDict()
+        {
+            entity_repository.molecules_dict.Clear();
+            foreach (ConfigMolecule cm in entity_repository.molecules)
+            {
+                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+            }
+            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
+        }
+
+        private void InitDiffSchemeDict()
+        {
+            entity_repository.diff_schemes_dict.Clear();
+            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
+            {
+                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
+            }
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
+        }
+
+        private void InitTransitionDriversDict()
+        {
+            entity_repository.transition_drivers_dict.Clear();
+            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
+            {
+                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+            }
+            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
+        }
+
+        private void InitGeneDict()
+        {
+            entity_repository.genes_dict.Clear();
+            foreach (ConfigGene cg in entity_repository.genes)
+            {
+                entity_repository.genes_dict.Add(cg.entity_guid, cg);
+            }
+            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
+        }
+
+        private void InitCellDict()
+        {
+            entity_repository.cells_dict.Clear();
+            foreach (ConfigCell cc in entity_repository.cells)
+            {
+                entity_repository.cells_dict.Add(cc.entity_guid, cc);
+            }
+            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
+        }
+
+        private void InitReactionDict()
+        {
+            entity_repository.reactions_dict.Clear();
+            foreach (ConfigReaction cr in entity_repository.reactions)
+            {
+                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
+                cr.GetTotalReactionString(entity_repository);
+            }
+            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
+        }
+
+        private void InitReactionComplexDict()
+        {
+            entity_repository.reaction_complexes_dict.Clear();
+            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
+            {
+                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
+            }
+            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
+        }
+
+        private void InitReactionTemplateDict()
+        {
+            entity_repository.reaction_templates_dict.Clear();
+            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
+            {
+                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+            }
+            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
+        }
+
+        /// <summary>
+        /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
+        /// Also take care of any other post-deserialization setup.
+        /// </summary>
+        public virtual void InitializeStorageClasses()
+        {
+            // GenerateNewExperimentGUID();
+            InitMoleculeDict();
+            InitCellDict();
+            InitReactionTemplateDict();
+            InitGeneDict();
+            InitReactionDict();
+            InitReactionComplexDict();
+            InitDiffSchemeDict();
+            InitTransitionDriversDict();
+        }
+
+        //genes_CollectionChanged
+        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigGene cg = nn as ConfigGene;
+
+                    if (cg != null)
+                    {
+                        entity_repository.genes_dict.Add(cg.entity_guid, cg);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigGene cg = dd as ConfigGene;
+
+                    //Remove gene from genes_dict
+                    entity_repository.genes_dict.Remove(cg.entity_guid);
+                }
+            }
+        }
+
+        //diff_schemes_CollectionChanged
+        private void diff_schemes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigDiffScheme cds = nn as ConfigDiffScheme;
+
+                    if (cds != null)
+                    {
+                        entity_repository.diff_schemes_dict.Add(cds.entity_guid, cds);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigDiffScheme cds = dd as ConfigDiffScheme;
+
+                    //Remove gene from genes_dict
+                    entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
+                }
+            }
+        }
+
+        private void transition_drivers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigTransitionDriver tran = nn as ConfigTransitionDriver;
+
+                    if (tran != null)
+                    {
+                        entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigTransitionDriver tran = dd as ConfigTransitionDriver;
+
+                    //Remove gene from transition_drivers_dict
+                    entity_repository.transition_drivers_dict.Remove(tran.entity_guid);
+                }
+            }
+        }
+
+        protected virtual void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Need to figure out how to signal to the collection view source that the collection has changed and it should refresh
+            // This is not currently a problem because it is handled in memb_molecule_combo_box_GotFocus and cyto_molecule_combo_box_GotFocus
+            // But this may be the better place to handle it.
+
+            // Raise a CollectionChanged event with Action set to Reset to refresh the UI. 
+            // cvsBoundaryMolListView.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+            // NotifyCollectionChangedEventArgs a = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
+            // entity_repository.molecules    ///OnCollectionChanged(a);
+
+
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigMolecule cm = nn as ConfigMolecule;
+                    entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigMolecule cm = dd as ConfigMolecule;
+
+                    //Remove molecule from molecules_dict
+                    entity_repository.molecules_dict.Remove(cm.entity_guid);
+
+                    //Remove all the cell membrane molpops that have this molecule type
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        foreach (ConfigMolecularPopulation cmp in cell.membrane.molpops.ToList())
+                        {
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
+                            {
+                                cell.membrane.molpops.Remove(cmp);
+                            }
+                        }
+                    }
+
+                    //Remove all the cell cytosol molpops that have this molecule type
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
+                        {
+                            if (cmp.molecule.entity_guid == cm.entity_guid)
+                            {
+                                cell.cytosol.molpops.Remove(cmp);
+                            }
+                        }
+                    }
+
+                    //Remove all the reactions that use this molecule
+                    foreach (KeyValuePair<string, ConfigReaction> kvp in entity_repository.reactions_dict.ToList())
+                    {
+                        ConfigReaction reac = kvp.Value;
+                        if (reac.HasMolecule(cm.entity_guid))
+                        {
+                            entity_repository.reactions_dict.Remove(kvp.Key);
+                            entity_repository.reactions.Remove(kvp.Value);
+                        }
+                    }
+                }
+            }
+        }
+
+        protected virtual void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigCell cc = nn as ConfigCell;
+                    entity_repository.cells_dict.Add(cc.entity_guid, cc);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigCell cc = dd as ConfigCell;
+
+                    //Remove this guid from ER cells_dict
+                    entity_repository.cells_dict.Remove(cc.entity_guid);
+                }
+            }
+        }
+
+        protected virtual void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReaction cr = nn as ConfigReaction;
+                    entity_repository.reactions_dict.Add(cr.entity_guid, cr);
+                    cr.GetTotalReactionString(entity_repository);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReaction cr = dd as ConfigReaction;
+
+                    // Remove entry from ER reactions_dict
+                    entity_repository.reactions_dict.Remove(cr.entity_guid);
+
+                    // Remove all the ER reaction complex reactions that have this guid
+                    foreach (ConfigReactionComplex rc in entity_repository.reaction_complexes)
+                    {
+                        if (rc.reactions_dict.ContainsKey(cr.entity_guid) == true)
+                        {
+                            rc.reactions.Remove(cr);
+                        }
+                    }
+
+                    // Remove all the cell membrane/cytosol reactions that have this guid
+                    foreach (ConfigCell cell in entity_repository.cells)
+                    {
+                        if (cell.membrane.reactions_dict.ContainsKey(cr.entity_guid) == true)
+                        {
+                            cell.membrane.Reactions.Remove(cr);
+                        }
+
+                        if (cell.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == true)
+                        {
+                            cell.cytosol.Reactions.Remove(cr);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void template_reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReactionTemplate crt = nn as ConfigReactionTemplate;
+                    entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReactionTemplate crt = dd as ConfigReactionTemplate;
+                    entity_repository.reaction_templates_dict.Remove(crt.entity_guid);
+                }
+            }
+        }
+
+        private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var nn in e.NewItems)
+                {
+                    ConfigReactionComplex crc = nn as ConfigReactionComplex;
+                    entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var dd in e.OldItems)
+                {
+                    ConfigReactionComplex crt = dd as ConfigReactionComplex;
+                    entity_repository.reaction_complexes_dict.Remove(crt.entity_guid);
+                }
+            }
+        }
+
         /// <summary>
         /// New repositoryPush - This is for compound entities.  
         /// It will push the entity and its sub-entities too, into this level's entity repository.
@@ -589,6 +942,10 @@ namespace Daphne
                 else if (e is ConfigDiffScheme)
                 {
                     SchemePusher(e as ConfigDiffScheme, sourceLevel, s);
+                }
+                else if (e is ConfigReactionComplex)
+                {
+                    ReactionComplexPusher(e as ConfigReactionComplex, sourceLevel, s);
                 }
             }
             else
@@ -665,17 +1022,17 @@ namespace Daphne
             {
                 ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
             }
-            else
-            {
-                foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
-                {
-                    if (crt.entity_guid == reac.reaction_template_guid_ref)
-                    {
-                        ReactionTemplatePusher(crt);
-                        break;
-                    }
-                }
-            }
+            //else
+            //{
+            //    foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
+            //    {
+            //        if (crt.entity_guid == reac.reaction_template_guid_ref)
+            //        {
+            //            ReactionTemplatePusher(crt);
+            //            break;
+            //        }
+            //    }
+            //}
 
             //Molecules and Genes
             foreach (string guid in reac.reactants_molecule_guid_ref)
@@ -707,26 +1064,35 @@ namespace Daphne
             ConfigEntity entity = null;
 
             //Figure out if guid is for molecule or gene in the source er
-            foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            if (sourceLevel.entity_repository.molecules_dict.ContainsKey(guid))
             {
-                if (mol.entity_guid == guid)
-                {
-                    entity = mol;
-                    break;
-                }
+                entity = sourceLevel.entity_repository.molecules_dict[guid];
+            }
+            else if (sourceLevel.entity_repository.genes_dict.ContainsKey(guid))
+            {
+                entity = sourceLevel.entity_repository.genes_dict[guid];
             }
 
-            if (entity == null)
-            {
-                foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
-                {
-                    if (gene.entity_guid == guid)
-                    {
-                        entity = gene;
-                        break;
-                    }
-                }
-            }
+            //foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
+            //{
+            //    if (mol.entity_guid == guid)
+            //    {
+            //        entity = mol;
+            //        break;
+            //    }
+            //}
+
+            //if (entity == null)
+            //{
+            //    foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
+            //    {
+            //        if (gene.entity_guid == guid)
+            //        {
+            //            entity = gene;
+            //            break;
+            //        }
+            //    }
+            //}
 
             //Now if entity is not null, we have the entity and must push it unless it is already in target ER
             if (entity != null)
@@ -746,6 +1112,44 @@ namespace Daphne
                     }
                 }
             }
+        }
+
+        private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
+        {
+            //Genes
+            //foreach (ConfigGene gene in rc.genes)
+            //{
+            //    PushStatus s2 = pushStatus(gene);
+            //    if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+            //    {
+            //        ConfigGene newgene = gene.Clone(null);
+            //        repositoryPush(newgene, s2);
+            //    }
+            //}
+
+            //Reactions
+            foreach (ConfigReaction reac in rc.reactions)
+            {
+                ReactionPusher(reac, sourceLevel, s);
+            }
+
+            //Molecules
+            foreach (ConfigMolecularPopulation molpop in rc.molpops)
+            {
+                PushStatus s2 = pushStatus(molpop.molecule);
+                if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
+                {
+                    ConfigMolecule newmol = molpop.molecule.Clone(null);
+                    repositoryPush(newmol, s2);
+                }
+            }
+
+            //Push the reaction complex itself
+            if (s != PushStatus.PUSH_INVALID && s != PushStatus.PUSH_OLDER_ITEM)
+            {
+                repositoryPush(rc, s);
+            }
+
         }
 
         private void SchemePusher(ConfigDiffScheme scheme, Level sourceLevel, PushStatus s)
@@ -776,6 +1180,7 @@ namespace Daphne
             }
         }
 
+
         private void ReactionTemplatePusher(ConfigReactionTemplate crt)
         {
             PushStatus s2 = pushStatus(crt);
@@ -788,13 +1193,17 @@ namespace Daphne
 
         private ConfigGene FindGene(string guid, Level level)
         {
-            foreach (ConfigGene g in level.entity_repository.genes)
-            {
-                if (g.entity_guid == guid)
-                {
-                    return g;
-                }
-            }
+            if (level.entity_repository.genes_dict.ContainsKey(guid))
+                return level.entity_repository.genes_dict[guid];
+
+            //foreach (ConfigGene g in level.entity_repository.genes)
+            //{
+            //    if (g.entity_guid == guid)
+            //    {
+            //        return g;
+            //    }
+            //}
+
             return null;
         }
 
@@ -863,6 +1272,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -880,6 +1292,9 @@ namespace Daphne
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
             local.TempFile = TempFile;
+
+            local.InitializeStorageClasses();
+
             return local;
         }
 
@@ -1070,18 +1485,11 @@ namespace Daphne
         /// CollectionChanged not called during deserialization, so manual call to set up utility classes.
         /// Also take care of any other post-deserialization setup.
         /// </summary>
-        public void InitializeStorageClasses()
+        public override void InitializeStorageClasses()
         {
             // GenerateNewExperimentGUID();
             scenario.InitializeStorageClasses();
-            InitMoleculeIDConfigMoleculeDict();
-            InitCellIDConfigCellDict();
-            InitReactionTemplateIDConfigReactionTemplateDict();
-            InitGeneIDConfigGeneDict();
-            InitReactionIDConfigReactionDict();
-            InitReactionComplexIDConfigReactionComplexDict();
-            InitDiffSchemeIDConfigDiffSchemeDict();
-            InitTransitionDriversDict();
+            base.InitializeStorageClasses();
         }
 
         /// <summary>
@@ -1094,171 +1502,7 @@ namespace Daphne
             experiment_guid = id.ToString();
         }
 
-        private void InitMoleculeIDConfigMoleculeDict()
-        {
-            entity_repository.molecules_dict.Clear();
-            foreach (ConfigMolecule cm in entity_repository.molecules)
-            {
-                entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-            }
-            entity_repository.molecules.CollectionChanged += new NotifyCollectionChangedEventHandler(molecules_CollectionChanged);
-        }
-
-        private void InitDiffSchemeIDConfigDiffSchemeDict()
-        {
-            entity_repository.diff_schemes_dict.Clear();
-            foreach (ConfigDiffScheme ds in entity_repository.diff_schemes)
-            {
-                entity_repository.diff_schemes_dict.Add(ds.entity_guid, ds);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
-        }
-        
-        private void InitTransitionDriversDict()
-        {
-            entity_repository.transition_drivers_dict.Clear();
-            foreach (ConfigTransitionDriver tran in entity_repository.transition_drivers)
-            {
-                entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
-            }
-            entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(transition_drivers_CollectionChanged);
-        }
-
-
-        private void InitGeneIDConfigGeneDict()
-        {
-            entity_repository.genes_dict.Clear();
-            foreach (ConfigGene cg in entity_repository.genes)
-            {
-                entity_repository.genes_dict.Add(cg.entity_guid, cg);
-            }
-            entity_repository.genes.CollectionChanged += new NotifyCollectionChangedEventHandler(genes_CollectionChanged);
-        }
-
-        private void InitCellIDConfigCellDict()
-        {
-            entity_repository.cells_dict.Clear();
-            foreach (ConfigCell cc in entity_repository.cells)
-            {
-                entity_repository.cells_dict.Add(cc.entity_guid, cc);
-            }
-            entity_repository.cells.CollectionChanged += new NotifyCollectionChangedEventHandler(cells_CollectionChanged);
-        }
-
-        private void InitReactionIDConfigReactionDict()
-        {
-            entity_repository.reactions_dict.Clear();
-            foreach (ConfigReaction cr in entity_repository.reactions)
-            {
-                entity_repository.reactions_dict.Add(cr.entity_guid, cr);
-                cr.GetTotalReactionString(entity_repository);
-            }
-            entity_repository.reactions.CollectionChanged += new NotifyCollectionChangedEventHandler(reactions_CollectionChanged);
-
-        }
-
-        private void InitReactionComplexIDConfigReactionComplexDict()
-        {
-            entity_repository.reaction_complexes_dict.Clear();
-            foreach (ConfigReactionComplex crc in entity_repository.reaction_complexes)
-            {
-                entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
-            }
-            entity_repository.reaction_complexes.CollectionChanged += new NotifyCollectionChangedEventHandler(reaction_complexes_CollectionChanged);
-
-        }
-
-        private void InitReactionTemplateIDConfigReactionTemplateDict()
-        {
-            entity_repository.reaction_templates_dict.Clear();
-            foreach (ConfigReactionTemplate crt in entity_repository.reaction_templates)
-            {
-                entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
-            }
-            entity_repository.reaction_templates.CollectionChanged += new NotifyCollectionChangedEventHandler(template_reactions_CollectionChanged);
-        }
-
-        //genes_CollectionChanged
-        private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigGene cg = nn as ConfigGene;
-
-                    if (cg != null)
-                    {
-                        entity_repository.genes_dict.Add(cg.entity_guid, cg);
-                    }
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigGene cg = dd as ConfigGene;
-
-                    //Remove gene from genes_dict
-                    entity_repository.genes_dict.Remove(cg.entity_guid);
-                }
-            }
-        }
-
-        //diff_schemes_CollectionChanged
-        private void diff_schemes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigDiffScheme cds = nn as ConfigDiffScheme;
-
-                    if (cds != null)
-                    {
-                        entity_repository.diff_schemes_dict.Add(cds.entity_guid, cds);
-                    }
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigDiffScheme cds = dd as ConfigDiffScheme;
-
-                    //Remove gene from genes_dict
-                    entity_repository.diff_schemes_dict.Remove(cds.entity_guid);
-                }
-            }
-        }
-
-        private void transition_drivers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigTransitionDriver tran = nn as ConfigTransitionDriver;
-
-                    if (tran != null)
-                    {
-                        entity_repository.transition_drivers_dict.Add(tran.entity_guid, tran);
-                    }
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigTransitionDriver tran = dd as ConfigTransitionDriver;
-
-                    //Remove gene from transition_drivers_dict
-                    entity_repository.transition_drivers_dict.Remove(tran.entity_guid);
-                }
-            }
-        }
-
-        private void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        protected override void molecules_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             // Need to figure out how to signal to the collection view source that the collection has changed and it should refresh
             // This is not currently a problem because it is handled in memb_molecule_combo_box_GotFocus and cyto_molecule_combo_box_GotFocus
@@ -1269,23 +1513,16 @@ namespace Daphne
             // NotifyCollectionChangedEventArgs a = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
             // entity_repository.molecules    ///OnCollectionChanged(a);
 
+            base.molecules_CollectionChanged(sender, e);
 
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigMolecule cm = nn as ConfigMolecule;
-                    entity_repository.molecules_dict.Add(cm.entity_guid, cm);
-                }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 foreach (var dd in e.OldItems)
                 {
                     ConfigMolecule cm = dd as ConfigMolecule;
-
-                    //Remove molecule from molecules_dict
-                    entity_repository.molecules_dict.Remove(cm.entity_guid);
 
                     foreach (ConfigMolecularPopulation cmp in scenario.environment.comp.molpops.ToList())
                     {
@@ -1294,63 +1531,22 @@ namespace Daphne
                             scenario.environment.comp.molpops.Remove(cmp);
                         }
                     }
-
-                    //Remove all the cell membrane molpops that have this molecule type
-                    foreach (ConfigCell cell in entity_repository.cells)
-                    {
-                        foreach (ConfigMolecularPopulation cmp in cell.membrane.molpops.ToList())
-                        {
-                            if (cmp.molecule.entity_guid == cm.entity_guid)
-                            {
-                                cell.membrane.molpops.Remove(cmp);
-                            }
-                        }
-                    }
-
-                    //Remove all the cell cytosol molpops that have this molecule type
-                    foreach (ConfigCell cell in entity_repository.cells)
-                    {
-                        foreach (ConfigMolecularPopulation cmp in cell.cytosol.molpops.ToList())
-                        {
-                            if (cmp.molecule.entity_guid == cm.entity_guid)
-                            {
-                                cell.cytosol.molpops.Remove(cmp);
-                            }
-                        }
-                    }
-
-                    //Remove all the reactions that use this molecule
-                    foreach (KeyValuePair<string, ConfigReaction> kvp in entity_repository.reactions_dict.ToList())
-                    {
-                        ConfigReaction reac = kvp.Value;
-                        if (reac.HasMolecule(cm.entity_guid))
-                        {
-                            entity_repository.reactions_dict.Remove(kvp.Key);
-                            entity_repository.reactions.Remove(kvp.Value);
-                        }
-                    }
                 }
             }
         }
 
-        private void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        protected override void cells_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            base.cells_CollectionChanged(sender, e);
+
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigCell cc = nn as ConfigCell;
-                    entity_repository.cells_dict.Add(cc.entity_guid, cc);
-                }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 foreach (var dd in e.OldItems)
                 {
                     ConfigCell cc = dd as ConfigCell;
-
-                    //Remove this guid from ER cells_dict
-                    entity_repository.cells_dict.Remove(cc.entity_guid);
 
                     //Remove all ECM cell populations with this cell guid in the tissue scenario
                     if (scenario is TissueScenario)
@@ -1361,34 +1557,18 @@ namespace Daphne
             }
         }
 
-        private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        protected override void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            base.reactions_CollectionChanged(sender, e);
+
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigReaction cr = nn as ConfigReaction;
-                    entity_repository.reactions_dict.Add(cr.entity_guid, cr);
-                    cr.GetTotalReactionString(entity_repository);
-                }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 foreach (var dd in e.OldItems)
                 {
                     ConfigReaction cr = dd as ConfigReaction;
-
-                    // Remove entry from ER reactions_dict
-                    entity_repository.reactions_dict.Remove(cr.entity_guid);
-
-                    // Remove all the ER reaction complex reactions that have this guid
-                    foreach (ConfigReactionComplex rc in entity_repository.reaction_complexes)
-                    {
-                        if (rc.reactions_dict.ContainsKey(cr.entity_guid) == true)
-                        {
-                            rc.reactions.Remove(cr);
-                        }
-                    }                    
 
                     // Remove all the environment reaction complex reactions that have this guid
                     foreach (ConfigReactionComplex rc in scenario.environment.comp.reaction_complexes)
@@ -1404,61 +1584,7 @@ namespace Daphne
                     {
                         scenario.environment.comp.Reactions.Remove(cr);
                     }
-
-                    // Remove all the cell membrane/cytosol reactions that have this guid
-                    foreach (ConfigCell cell in entity_repository.cells)
-                    {
-                        if (cell.membrane.reactions_dict.ContainsKey(cr.entity_guid) == true)
-                        {
-                            cell.membrane.Reactions.Remove(cr);
-                        }
-
-                        if (cell.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == true)
-                        {
-                            cell.cytosol.Reactions.Remove(cr);
-                        }
-                    }
                 }                
-            }
-        }
-
-        private void template_reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigReactionTemplate crt = nn as ConfigReactionTemplate;
-                    entity_repository.reaction_templates_dict.Add(crt.entity_guid, crt);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigReactionTemplate crt = dd as ConfigReactionTemplate;
-                    entity_repository.reaction_templates_dict.Remove(crt.entity_guid);
-                }
-            }
-        }
-
-        private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (var nn in e.NewItems)
-                {
-                    ConfigReactionComplex crc = nn as ConfigReactionComplex;
-                    entity_repository.reaction_complexes_dict.Add(crc.entity_guid, crc);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (var dd in e.OldItems)
-                {
-                    ConfigReactionComplex crt = dd as ConfigReactionComplex;
-                    entity_repository.reaction_complexes_dict.Remove(crt.entity_guid);
-                }
             }
         }
 
@@ -5007,6 +5133,7 @@ namespace Daphne
 
         public ConfigReactionComplex(string name) : base()
         {
+            Name = name;
             reactions = new ObservableCollection<ConfigReaction>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
 #if OLD_RC

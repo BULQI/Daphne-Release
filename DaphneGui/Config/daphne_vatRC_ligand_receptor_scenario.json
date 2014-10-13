@@ -1,15 +1,15 @@
 {
   "experiment_db_id": 0,
-  "experiment_name": "Vat Reaction Complex Scenario",
+  "experiment_name": "Ligand Receptor Vat RC",
   "experiment_reps": 1,
-  "experiment_guid": "7de90ee2-a76d-48c0-841a-5cdee5256961",
+  "experiment_guid": "18733cac-e53a-482e-9fd3-98403526b46b",
   "experiment_description": "...",
   "scenario": {
     "$type": "Daphne.VatReactionComplexScenario, Daphne",
     "time_config": {
-      "duration": 2.0,
-      "rendering_interval": 0.2,
-      "sampling_interval": 0.2
+      "duration": 10.0,
+      "rendering_interval": 0.1,
+      "sampling_interval": 0.1
     },
     "simInterpolate": 0,
     "simCellSize": 0,
@@ -228,10 +228,103 @@
       }
     ],
     "cells": [],
-    "molecules": [],
+    "molecules": [
+      {
+        "Name": "CXCL13",
+        "label": null,
+        "MolecularWeight": 7.96,
+        "EffectiveRadius": 1.0,
+        "DiffusionCoefficient": 4500.0,
+        "molecule_location": 0,
+        "entity_guid": "a7ca0335-7a98-4237-9e43-d7e127c29e3f",
+        "change_stamp": 59
+      },
+      {
+        "Name": "CXCR5",
+        "label": null,
+        "MolecularWeight": 43.0,
+        "EffectiveRadius": 1.0,
+        "DiffusionCoefficient": 750.0,
+        "molecule_location": 0,
+        "entity_guid": "4f8ebbfe-bbb5-4dd0-bc46-062b35de92c5",
+        "change_stamp": 80
+      },
+      {
+        "Name": "CXCL13:CXCR5",
+        "label": null,
+        "MolecularWeight": 50.96,
+        "EffectiveRadius": 1.0,
+        "DiffusionCoefficient": 750.0,
+        "molecule_location": 0,
+        "entity_guid": "507e6692-f856-4012-ba8e-77861b2cbcca",
+        "change_stamp": 86
+      }
+    ],
     "genes": [],
-    "reactions": [],
-    "reaction_templates": [],
+    "reactions": [
+      {
+        "reactants_molecule_guid_ref": [
+          "a7ca0335-7a98-4237-9e43-d7e127c29e3f",
+          "4f8ebbfe-bbb5-4dd0-bc46-062b35de92c5"
+        ],
+        "products_molecule_guid_ref": [
+          "507e6692-f856-4012-ba8e-77861b2cbcca"
+        ],
+        "modifiers_molecule_guid_ref": [],
+        "reaction_template_guid_ref": "368dbf68-c3ed-481e-b216-5c86ff91eaac",
+        "rate_const": 16.25,
+        "TotalReactionString": "CXCL13 + CXCR5 -> CXCL13:CXCR5",
+        "entity_guid": "21598736-2d80-44ef-bcab-2870b51c8a47",
+        "change_stamp": 271
+      },
+      {
+        "reactants_molecule_guid_ref": [
+          "507e6692-f856-4012-ba8e-77861b2cbcca"
+        ],
+        "products_molecule_guid_ref": [
+          "a7ca0335-7a98-4237-9e43-d7e127c29e3f",
+          "4f8ebbfe-bbb5-4dd0-bc46-062b35de92c5"
+        ],
+        "modifiers_molecule_guid_ref": [],
+        "reaction_template_guid_ref": "c2e70792-96b9-4943-9d72-7239e5194e07",
+        "rate_const": 0.494,
+        "TotalReactionString": "CXCL13:CXCR5 -> CXCL13 + CXCR5",
+        "entity_guid": "fe61494a-b057-45c2-afe7-2fb43f43338c",
+        "change_stamp": 273
+      }
+    ],
+    "reaction_templates": [
+      {
+        "name": "Association",
+        "reactants_stoichiometric_const": [
+          1,
+          1
+        ],
+        "products_stoichiometric_const": [
+          1
+        ],
+        "modifiers_stoichiometric_const": [],
+        "isBoundary": false,
+        "reac_type": 0,
+        "entity_guid": "368dbf68-c3ed-481e-b216-5c86ff91eaac",
+        "change_stamp": 0
+      },
+      {
+        "name": "Dissociation",
+        "reactants_stoichiometric_const": [
+          1
+        ],
+        "products_stoichiometric_const": [
+          1,
+          1
+        ],
+        "modifiers_stoichiometric_const": [],
+        "isBoundary": false,
+        "reac_type": 1,
+        "entity_guid": "c2e70792-96b9-4943-9d72-7239e5194e07",
+        "change_stamp": 0
+      }
+    ],
     "diff_schemes": [],
     "transition_drivers": []
   }

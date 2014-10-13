@@ -658,7 +658,8 @@ namespace DaphneGui
             // but I don't know for sure; we can discuss
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                throw new InvalidCastException();
+                return false;
+                //throw new InvalidCastException();
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;

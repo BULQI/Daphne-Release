@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Diffusion Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "160a0a24-8428-4392-9d09-09f3ca28c2cf",
+  "experiment_guid": "1dbd6417-39e9-4a1a-9b59-313d9d4a37ec",
   "experiment_description": "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -29,7 +29,7 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "4cb977b5-1b75-4a91-9e2d-556458dae4b1",
+            "molpop_guid": "5188b269-5b36-4ed7-85b0-968565f48737",
             "molecule": {
               "Name": "CXCL13",
               "label": null,
@@ -37,7 +37,7 @@
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
               "molecule_location": 0,
-              "entity_guid": "a7ca0335-7a98-4237-9e43-d7e127c29e3f",
+              "entity_guid": "fd5ad06d-0c5d-464e-ab58-22cdac964ed8",
               "change_stamp": 59
             },
             "Name": "CXCL13",
@@ -45,7 +45,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 2,
-              "molpop_guid_ref": "4cb977b5-1b75-4a91-9e2d-556458dae4b1"
+              "molpop_guid_ref": "5188b269-5b36-4ed7-85b0-968565f48737"
             },
             "mp_dist_name": "Gaussian",
             "mp_distribution": {
@@ -54,7 +54,7 @@
               "gauss_spec": {
                 "gaussian_spec_name": "",
                 "box_spec": {
-                  "box_guid": "9e835ed6-8d02-4c10-a0ff-e8355e5a2982",
+                  "box_guid": "cd1db4a8-2b82-438b-b138-b845094e4997",
                   "transform_matrix": [
                     [
                       70.710678118654755,
@@ -130,7 +130,7 @@
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
         "molecule_location": 0,
-        "entity_guid": "a7ca0335-7a98-4237-9e43-d7e127c29e3f",
+        "entity_guid": "fd5ad06d-0c5d-464e-ab58-22cdac964ed8",
         "change_stamp": 59
       }
     ],

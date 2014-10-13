@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Tissue Simulation Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "096482ed-8a48-440d-be42-6c198dcec80c",
+  "experiment_guid": "bf772ab3-6ba9-4967-bdde-a85acfd924ed",
   "experiment_description": "Libraries only.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",

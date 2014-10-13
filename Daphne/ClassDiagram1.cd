@@ -1,0 +1,790 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Daphne.SystemOfPersistence" Collapsed="true">
+    <Position X="64.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAQBEAAAAAACAABIAAIAAAAABgACAYAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.PushLevelToStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.Level" Collapsed="true">
+    <Position X="5.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIECEABAQGARAAAgCAAAMABoAARAACBRDBRAAApAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.Protocol" Collapsed="true">
+    <Position X="5.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QhoCAACAAECAAAAAQAEgIEEQEADAAABRgAAAAgoQhwA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ScenarioBase" Collapsed="true">
+    <Position X="1.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQgAAAAAEEgAAAAAAAABAAAAAAAAAAAAAEAgAACA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.VatReactionComplexScenario" Collapsed="true">
+    <Position X="0.5" Y="5.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.TissueScenario" Collapsed="true">
+    <Position X="3" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAogAAAAABAAAACAAEABAJAAChAAAAAAAEAgQADA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.SimulationParams" Collapsed="true">
+    <Position X="61.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAACABAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.EntityRepository" Collapsed="true">
+    <Position X="70" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAEAAhAAAAACCIAAAAAACgACABAAAAAgCggAAgAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.TimeConfig" Collapsed="true">
+    <Position X="68.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAIAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigEnvironmentBase" Collapsed="true">
+    <Position X="5.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigPointEnvironment" Collapsed="true">
+    <Position X="3" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigRectEnvironment" Collapsed="true">
+    <Position X="5.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ghQAAAACABAABAAAAAAAAACAAAAAAAAQgBQgAAAAAAE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigECSEnvironment" Collapsed="true">
+    <Position X="7.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ghQAAAACABAABAAAAAAAAACAAACAAAAQgFQgAAAAAAE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.Region" Collapsed="true">
+    <Position X="41.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAABAACAAAAAAAAAAAAAFAAAAAQAAEAAAAAAgI=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ColorListToIntConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ColorListToStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="71.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ColorListToColorConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.TextToColorConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="66.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ObjectToVisibilityConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.DiffSchemeToBoolConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.DivDeathDriverToBoolConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="66.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.DiffSchemeToDiffNameConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="64.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MoleculeLocationToBoolConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="64.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.EnumBooleanConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="71.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.BoolToIndexConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="59.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.BoundaryFaceToShortStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.BoundaryFaceToVisStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="64.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ConfigEntity" Collapsed="true">
+    <Position X="26.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEgAAAAAAAAAAAAAAAAAEAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigMolecule" Collapsed="true">
+    <Position X="25.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAABAAAAIACAQAAAABAgEAAAQEAAAAApA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigGene" Collapsed="true">
+    <Position X="27.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAUAAAQAAAAAgAAAAIAAAAQAAAAAAgAAAAAAAAAAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigTransitionDriverElement" Collapsed="true">
+    <Position X="59.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAgAAAAIAACAAAAQAABAAAAACAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigTransitionDriverRow" Collapsed="true">
+    <Position X="61.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigTransitionDriver" Collapsed="true">
+    <Position X="30" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAgAAAAAACQAAAAAAAAEAAAAAAEAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigDiffScheme" Collapsed="true">
+    <Position X="32.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAEAAAAAAAAAAAAAgAAAAAQgIAAAgAAAAAAAAAAAiBE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Daphne.ConfigActivationRow" Collapsed="true">
+    <Position X="57" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ReportMP" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAACAEAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ReportECM" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.BoundaryCondition" Collapsed="true">
+    <Position X="61.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAIAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigMolecularPopulation" Collapsed="true">
+    <Position X="43.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAgQEABAQBAAAAEAoAQAAAAAAABQCAIAABAAAIA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigCompartment" Collapsed="true">
+    <Position X="54.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AANAABAAAEAAAIARAAAEgABAAAAABAAAAAQAOgIAAIE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ReactionTypeToShortStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAEAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ConfigReaction" Collapsed="true">
+    <Position X="34.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEgAAAIAEgAQAAAAAAAAAQABAAAAAAAAAQAAACAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigReactionTemplate" Collapsed="true">
+    <Position X="18.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAIAAAAAAAAEAAAgAAAAAwABABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigReactionComplex" Collapsed="true">
+    <Position X="21" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAFAAAAAAEAAAIARAAAAAIQAAAAAAAAgAAQACgAAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ConfigCell" Collapsed="true">
+    <Position X="23.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAGBCBAKAEASABBAAEAAgABQABIEBkAQAQBAQAEAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellPopDistributionTypeToStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.CellPopDistribution" Collapsed="true">
+    <Position X="48" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAICAAADgAAAAAAIAAAAAAAAAgAIAFQAAEDAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Daphne.CellPopSpecific" Collapsed="true">
+    <Position X="45.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellPopUniform" Collapsed="true">
+    <Position X="48" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellPopGaussian" Collapsed="true">
+    <Position X="50.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAIAACCAAAQAAAAAAAAIAAAAAAAAQAAAAABEAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellMolPopState" Collapsed="true">
+    <Position X="61.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellBehaviorState" Collapsed="true">
+    <Position X="66.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAgAAAAABAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellGeneState" Collapsed="true">
+    <Position X="68.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellState" Collapsed="true">
+    <Position X="64.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAIAAAEAAAAAACAAAAAAAAIAAQABAAAAAAgAAAAZAE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ReportXVF" Collapsed="true">
+    <Position X="71.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ReportStates" Collapsed="true">
+    <Position X="70" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAAAAAAABAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.CellPopulation" Collapsed="true">
+    <Position X="39" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIGAkAgAAEUBACAAjAIAAiBAIAAABAEBAAAgBAAAk=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.MolGUIDtoMolNameConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="66.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MolPopGUIDtoMolPopNameConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="59.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.GeneGUIDtoNameConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.GeneGUIDtoConfigGeneConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="59.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MolGuidToMolPopForDiffConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MolGuidToMolPopForDiffMultiValueConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.DriverElementToBoolConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.CellGUIDtoCellNameConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="59.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.CellGuidToCellMembMolPopsConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="71.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.CellGuidToCellCytoMolPopsConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ReactionGUIDtoReactionStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ReactionComplexGUIDtoReactionComplexStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="66.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ReacComplexGUIDtoReactionComplexConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="64.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.SWMColorToSolidBrushConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.ColorListToBrushConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="66.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MolPopDistributionTypeToStringConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="71.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.MolPopDistribution" Collapsed="true">
+    <Position X="13.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.MolPopHomogeneousLevel" Collapsed="true">
+    <Position X="9.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.MolPopLinear" Collapsed="true">
+    <Position X="12" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQCAAAAAAAAAAAAAAAAAAAACEAAAAgAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.MolPopGaussian" Collapsed="true">
+    <Position X="14.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAABA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.MolPopExplicit" Collapsed="true">
+    <Position X="16.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.GaussianSpecification" Collapsed="true">
+    <Position X="52.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAIAAAAAAAAEAAAAAAAAAAEAAACAAgAAABAAgAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderColor" Collapsed="true">
+    <Position X="59.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderCell" Collapsed="true">
+    <Position X="71.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgABBAAEAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderMol" Collapsed="true">
+    <Position X="63" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAQABAAAAAAAAAAAAAAAACAAAAAIEAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderPop" Collapsed="true">
+    <Position X="64.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAIgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderDrawing" Collapsed="true">
+    <Position X="61.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderSkin" Collapsed="true">
+    <Position X="68.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.RenderPopOptions" Collapsed="true">
+    <Position X="66.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.BoxSpecification" Collapsed="true">
+    <Position X="36.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAEAIAAABAAAAgAAABiAABAkAIAAAEABAABAAEA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Daphne.ManyToBooleanConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.RptEnumBooleanConverter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="59.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Daphne.EntityModelBase" Collapsed="true">
+    <Position X="30" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAIAAAAQAQgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Daphne.ProbDistribution3D" Collapsed="true">
+    <Position X="59.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Daphne.PushLevel" Collapsed="true">
+    <Position X="61.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABAAAAAAAAAABAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.SimStates" Collapsed="true">
+    <Position X="70" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAEAAAAAgAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.RegionShape" Collapsed="true">
+    <Position X="64.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAIAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.ColorList" Collapsed="true">
+    <Position X="66.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAgAAAAAhAAAAAAAAAAEAAAAAAAAAAAADAAAIA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.MoleculeLocation" Collapsed="true">
+    <Position X="71.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.BoundaryType" Collapsed="true">
+    <Position X="63" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.BoundaryFace" Collapsed="true">
+    <Position X="61.25" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAYAE=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.ExtendedReport" Collapsed="true">
+    <Position X="68.25" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAQAAAAAAAACAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.ReportType" Collapsed="true">
+    <Position X="68.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.MolBoundaryType" Collapsed="true">
+    <Position X="70" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEACAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.Boundary" Collapsed="true">
+    <Position X="59.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAABAAABAAAAAAAAgAAAAIAAAAAAAAAAEAgAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.ReactionType" Collapsed="true">
+    <Position X="63" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EQAAAAAAgAgAIAAAAAqAAgoAAAGAAAAEAAABAAEAoQQ=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.CellPopDistributionType" Collapsed="true">
+    <Position X="64.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAgA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.MolPopDistributionType" Collapsed="true">
+    <Position X="59.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAQAAAAAAAAAAAAAAICAAAAAAAAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Daphne.RenderMethod" Collapsed="true">
+    <Position X="66.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAEAAAABAAAEAAAAAAAAAAAAAAAAAAgAASAIAA=</HashCode>
+      <FileName>SimConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

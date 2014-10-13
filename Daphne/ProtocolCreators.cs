@@ -57,6 +57,10 @@ namespace Daphne
             PredefinedReactionComplexesCreator(store);
         }
 
+ 
+        //------------------------------------------------
+        // Accessory methods for building protocols
+
         /// <summary>
         /// Use UserStore for loading entity_repository into the given protocol.
         /// This way every protocol will have the same entity guids.
@@ -77,192 +81,140 @@ namespace Daphne
             protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
             protocol.InitializeStorageClasses();
         }
-
-        //------------------------------------------------
-
-        private static void LoadLigandReceptorEntities(Protocol protocol)
+        
+        private static int LoadProtocolGenes(Protocol protocol, string[] geneName, Level userstore)
         {
-            //Load from User Store so open it
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
+            int itemsLoaded = 0;
 
-            //MOLECULES
-            string[] type = new string[1] { "CXCL13" };
-            for (int i = 0; i < type.Length; i++)
+            for (int i = 0; i < geneName.Length; i++)
             {
-                ConfigMolecule configMolecule = null;
-                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                ConfigGene configGene = null;
+                string guid = findGeneGuid(geneName[i], userstore);
+
+
+                if (guid != "")
                 {
-                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
+                    configGene = userstore.entity_repository.genes_dict[guid];
+                    if (configGene != null)
                     {
-                        configMolecule = mol;
-                        break;
+                        ConfigGene newgene = configGene.Clone(null);
+                        protocol.repositoryPush(newgene, Level.PushStatus.PUSH_CREATE_ITEM);
+                        itemsLoaded++;
                     }
-                }
-                if (configMolecule != null)
-                {
-                    ConfigMolecule newmol = configMolecule.Clone(null);
-                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
                 }
             }
 
-            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
-            for (int i = 0; i < type.Length; i++)
+            return itemsLoaded;
+        }
+
+        private static int LoadProtocolMolecules(Protocol protocol, string[] moleculeName, MoleculeLocation molLoc, Level userstore)
+        {
+            int itemsLoaded = 0;
+
+            for (int i = 0; i < moleculeName.Length; i++)
             {
                 ConfigMolecule configMolecule = null;
-                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
+                string guid = findMoleculeGuid(moleculeName[i], molLoc, userstore);
+
+                if (guid != "")
                 {
-                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Boundary)
+                    configMolecule = userstore.entity_repository.molecules_dict[guid];
+                    if (configMolecule != null)
                     {
-                        configMolecule = mol;
-                        break;
+                        ConfigMolecule newmol = configMolecule.Clone(null);
+                        protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
+                        itemsLoaded++;
                     }
-                }
-                if (configMolecule != null)
-                {
-                    ConfigMolecule newmol = configMolecule.Clone(null);
-                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
                 }
             }
 
-            //REACTION TEMPLATES
-            AddReactionTemplate(userstore, ReactionType.BoundaryAssociation, protocol);
-            AddReactionTemplate(userstore, ReactionType.BoundaryDissociation, protocol);
+            return itemsLoaded;
+        }
 
-            //CELLS
-            type = new string[1] { "Leukocyte_staticReceptor" };
-            for (int i = 0; i < type.Length; i++)
+        private static int LoadProtocolReactionsAndTemplates(Protocol protocol, string[] totalReactionString, Level userstore)
+        {
+            int itemsLoaded = 0;
+
+            for (int i = 0; i < totalReactionString.Length; i++)
             {
-                ConfigCell configCell = findCell(type[i], userstore);
+                ConfigReaction configReaction = findReaction(totalReactionString[i], userstore);
+    
+                    if (configReaction != null)
+                    {
+                        ConfigReaction newReac = configReaction.Clone(true);
+                        protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
+
+                        string reacTemplateGuid = newReac.reaction_template_guid_ref;
+                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+
+                        itemsLoaded++;
+                    }
+            }
+
+            return itemsLoaded;
+        }
+
+        private static int LoadProtocolReactionTemplates(Protocol protocol, string[] rtName, Level userstore)
+        {
+            int itemsLoaded = 0;
+
+            for (int i = 0; i < rtName.Length; i++)
+            {
+                foreach (ConfigReactionTemplate crt in userstore.entity_repository.reaction_templates)
+                {
+                    if (crt.name == rtName[i])
+                    {
+                        ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[crt.entity_guid];
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+                        itemsLoaded++;
+                   }
+                }
+            }
+
+            return itemsLoaded;
+        }
+
+        private static int LoadProtocolCells(Protocol protocol, string[] cellName, Level userstore)
+        {
+            int itemsLoaded = 0;
+
+            for (int i = 0; i < cellName.Length; i++)
+            {
+                ConfigCell configCell = findCell(cellName[i], userstore);
                 if (configCell != null)
                 {
                     ConfigCell newcell = configCell.Clone(true);
                     protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM);
+                    itemsLoaded++;
                 }
             }
 
-            //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-                                  "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
-            ConfigReaction reac;
-            for (int i = 0; i < type.Length; i++)
-            {
-                reac = findReaction(type[i], userstore);
-                if (reac != null)
-                {
-                    ConfigReaction newReac = reac.Clone(true);
-                    protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
+            return itemsLoaded;
         }
 
-        private static void LoadDriverLocomotionEntities(Protocol protocol)
+        private static int LoadProtocolRCs(Protocol protocol, string[] RCName, Level userstore)
         {
-            //Load from User Store so open it
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
+            int itemsLoaded = 0;
 
-            //GENES
-            string[] type = new string[1] { "gApop" };
-            for (int i = 0; i < type.Length; i++)
+            for (int i = 0; i < RCName.Length; i++)
             {
-                ConfigGene configEntity = null;
-                foreach (ConfigGene ent in userstore.entity_repository.genes)
+                foreach (ConfigReactionComplex ent in userstore.entity_repository.reaction_complexes)
                 {
-                    if (ent.Name == type[i])
+                    if (ent.Name == RCName[i])
                     {
-                        configEntity = ent;
+                        protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
+                        itemsLoaded++;
                         break;
                     }
                 }
-                if (configEntity != null)
-                {
-                    ConfigGene newentity = configEntity.Clone(null);
-                    protocol.repositoryPush(newentity, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
             }
 
-            //MOLECULES
-            type = new string[4] { "CXCL13", "A", "A*", "sApop" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = null;
-                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
-                {
-                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
-                    {
-                        configMolecule = mol;
-                        break;
-                    }
-                }
-                if (configMolecule != null)
-                {
-                    ConfigMolecule newmol = configMolecule.Clone(null);
-                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
-            type = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = null;
-                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
-                {
-                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Boundary)
-                    {
-                        configMolecule = mol;
-                        break;
-                    }
-                }
-                if (configMolecule != null)
-                {
-                    ConfigMolecule newmol = configMolecule.Clone(null);
-                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
-            //CELLS
-            type = new string[1] { "Leukocyte_staticReceptor_motile" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigCell configCell = findCell(type[i], userstore);
-                if (configCell != null)
-                {
-                    ConfigCell newcell = configCell.Clone(true);
-                    protocol.repositoryPush(newcell, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
-            //REACTION TEMPLATES
-            AddReactionTemplate(userstore, ReactionType.BoundaryAssociation, protocol);
-            AddReactionTemplate(userstore, ReactionType.BoundaryDissociation, protocol);
-            AddReactionTemplate(userstore, ReactionType.Transformation, protocol);
-            AddReactionTemplate(userstore, ReactionType.CatalyzedBoundaryActivation, protocol);
-            AddReactionTemplate(userstore, ReactionType.Transcription, protocol);
-            AddReactionTemplate(userstore, ReactionType.Annihilation, protocol);
-
-            //REACTIONS
-            type = new string[6] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-                                    "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
-                                    "A* -> A",
-                                    "gApop -> sApop + gApop",
-                                    "sApop ->"};
-
-            ConfigReaction reac;
-            for (int i = 0; i < type.Length; i++)
-            {
-                reac = findReaction(type[i], userstore);
-                if (reac != null)
-                {
-                    ConfigReaction newReac = reac.Clone(true);
-                    protocol.repositoryPush(newReac, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
+            return itemsLoaded;
         }
-
+        
         //-------------------------------------------------
 
 
@@ -273,27 +225,24 @@ namespace Daphne
         /// <param name="store"></param>
         /// <param name="type"></param>
         /// <param name="protocol"></param>
-        private static void AddReactionTemplate(Level store, ReactionType type, Protocol protocol)
-        {
-            ConfigReactionTemplate crtUser = null;
-            foreach (ConfigReactionTemplate crt in store.entity_repository.reaction_templates)
-            {
-                if (crt.reac_type == type)
-                {
-                    crtUser = crt;
-                    break;
-                }
-            }
-            if (crtUser != null)
-            {
-                ConfigReactionTemplate crtnew = crtUser.Clone(null);
-                protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
-            }
-        }
+        //private static void AddReactionTemplate(Level store, ReactionType type, Protocol protocol)
+        //{
+        //    ConfigReactionTemplate crtUser = null;
+        //    foreach (ConfigReactionTemplate crt in store.entity_repository.reaction_templates)
+        //    {
+        //        if (crt.reac_type == type)
+        //        {
+        //            crtUser = crt;
+        //            break;
+        //        }
+        //    }
+        //    if (crtUser != null)
+        //    {
+        //        ConfigReactionTemplate crtnew = crtUser.Clone(null);
+        //        protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
+        //    }
+        //}
 
-        
-
-        
         public static void CreateLigandReceptorProtocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -315,9 +264,42 @@ namespace Daphne
             envHandle.extent_z = 200;
             envHandle.gridstep = 10;
 
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
-            LoadLigandReceptorEntities(protocol);
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            // bulk molecules
+            string[] item = new string[1] { "CXCL13" };
+            int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
+
+            // boundary molecules
+            item = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+            }
+
+            // reactions
+            item = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                  "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
+            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
+            // cells
+            item = new string[1] { "Leukocyte_staticReceptor" };
+            itemsLoaded = LoadProtocolCells(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol cells.");
+            }
 
             // ECM MOLECULES
 
@@ -410,9 +392,6 @@ namespace Daphne
                 }
             }
         }
-
-
-
         
         /// <summary>
         /// 
@@ -438,9 +417,53 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = protocol.scenario.time_config.duration / 100;
             protocol.scenario.time_config.sampling_interval = protocol.scenario.time_config.duration / 100;
 
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
-            LoadDriverLocomotionEntities(protocol);
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            //GENES
+            string[] item = new string[1] { "gApop" };
+            int itemsLoaded = LoadProtocolGenes(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol genes.");
+            }
+
+            //MOLECULES
+            item = new string[4] { "CXCL13", "A", "A*", "sApop" };
+            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
+
+            item = new string[2] { "CXCR5|", "CXCL13:CXCR5|" };
+            itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Boundary, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol boundary molecules.");
+            } 
+
+            //CELLS
+            item = new string[1] { "Leukocyte_staticReceptor_motile" };
+            itemsLoaded = LoadProtocolCells(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol cells.");
+            } 
+
+            //REACTIONS
+            item = new string[6] {  "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+                                    "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
+                                    "A + CXCL13:CXCR5| -> A* + CXCL13:CXCR5|",
+                                    "A* -> A",
+                                    "gApop -> sApop + gApop",
+                                    "sApop ->"};
+            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            } 
 
             // ECS
 
@@ -457,10 +480,10 @@ namespace Daphne
             //
             double CXCL13conc = 50.5e-9 * 1e-18 * 6.022e23;
             double[] conc = new double[1] { CXCL13conc };
-            string[] type = new string[1] { "CXCL13" };
-            for (int i = 0; i < type.Length; i++)
+            item = new string[1] { "CXCL13" };
+            for (int i = 0; i < item.Length; i++)
             {
-                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, protocol)];
+                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
                 if (configMolecule != null)
                 {
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
@@ -537,47 +560,18 @@ namespace Daphne
             protocol.reporter_file_name = "Loco_test";
 
             //EXTERNAL REACTIONS - I.E. IN EXTRACELLULAR SPACE
-            type = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
+            item = new string[2] {"CXCL13 + CXCR5| -> CXCL13:CXCR5|",
                                   "CXCL13:CXCR5| -> CXCL13 + CXCR5|"};
             ConfigReaction reac;
-            for (int i = 0; i < type.Length; i++)
+            for (int i = 0; i < item.Length; i++)
             {
-                reac = findReaction(type[i], protocol);
+                reac = findReaction(item[i], protocol);
                 if (reac != null)
                 {
                     protocol.scenario.environment.comp.Reactions.Add(reac.Clone(true));
                 }
             }
         }
-
-        private static void LoadDiffusionEntities(Protocol protocol)
-        {
-            //Load from User Store so open it
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
-
-            //MOLECULES
-            string[] type = new string[1] { "CXCL13" };
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = null;
-                foreach (ConfigMolecule mol in userstore.entity_repository.molecules)
-                {
-                    if (mol.Name == type[i] && mol.molecule_location == MoleculeLocation.Bulk)
-                    {
-                        configMolecule = mol;
-                        break;
-                    }
-                }
-                if (configMolecule != null)
-                {
-                    ConfigMolecule newmol = configMolecule.Clone(null);
-                    protocol.repositoryPush(newmol, Level.PushStatus.PUSH_CREATE_ITEM);
-                }
-            }
-
-        }
-
 
         /// <summary>
         /// New default scenario for first pass of Daphne
@@ -603,9 +597,17 @@ namespace Daphne
             envHandle.extent_z = 200;
             envHandle.gridstep = 10;
 
-            // Global Paramters
-            //LoadEntitiesFromUserStore(protocol);
-            LoadDiffusionEntities(protocol);
+            //Load needed entities from User Store 
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            //MOLECULES
+            string[] item = new string[1] { "CXCL13" };
+            int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
 
             // Gaussian Distrtibution
             // Gaussian distribution parameters: coordinates of center, standard deviations (sigma), and peak concentrtation
@@ -696,36 +698,36 @@ namespace Daphne
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_name = "Blank Vat Reaction Complex Scenario";
+            protocol.experiment_name = "Blank Vat RC";
             protocol.experiment_description = "...";
             protocol.scenario.time_config.duration = 2.0;
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
         }
 
-        private static void LoadVatReactionComplexEntities(Protocol protocol)
-        {
-            //Load from User Store so open it
-            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-            userstore = userstore.Deserialize();
+        //private static void LoadVatReactionComplexEntities(Protocol protocol)
+        //{
+        //    //Load from User Store so open it
+        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+        //    userstore = userstore.Deserialize();
 
-            // RC
-            string[] type = new string[1] { "Ligand/Receptor" };
+        //    // RC
+        //    string[] type = new string[1] { "Ligand/Receptor" };
 
-            for (int i = 0; i < type.Length; i++)
-            {
-                foreach (ConfigReactionComplex ent in userstore.entity_repository.reaction_complexes)
-                {
-                    if (ent.Name == type[i])
-                    {
-                        protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
-                        break;
-                    }
-                }
-            }
-        }
+        //    for (int i = 0; i < type.Length; i++)
+        //    {
+        //        foreach (ConfigReactionComplex ent in userstore.entity_repository.reaction_complexes)
+        //        {
+        //            if (ent.Name == type[i])
+        //            {
+        //                protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
+        //                break;
+        //            }
+        //        }
+        //    }
+        //}
 
-        public static void CreateVatReactionComplexProtocol(Protocol protocol)
+        public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
             {
@@ -735,29 +737,289 @@ namespace Daphne
             ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
 
             // Experiment
-            protocol.experiment_name = "Vat Reaction Complex Scenario";
+            protocol.experiment_name = "Ligand Receptor Vat RC";
             protocol.experiment_description = "...";
-            protocol.scenario.time_config.duration = 2.0;
-            protocol.scenario.time_config.rendering_interval = 0.2;
-            protocol.scenario.time_config.sampling_interval = 0.2;
+            protocol.scenario.time_config.duration = 10.0;
+            protocol.scenario.time_config.rendering_interval = 0.1;
+            protocol.scenario.time_config.sampling_interval = 0.1;
 
-            LoadVatReactionComplexEntities(protocol);
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
 
-            // add the reaction complex
-            string[] type = new string[1] { "Ligand/Receptor" };
+            // bulk molecules
+            string[] item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            int itemsLoaded = LoadProtocolMolecules(protocol, item, MoleculeLocation.Bulk, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol bulk molecules.");
+            }
 
-            for (int i = 0; i < type.Length; i++)
+            // reactions
+            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+            itemsLoaded = LoadProtocolReactionsAndTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reactions.");
+            }
+
+            // RC
+            item = new string[1] { "Ligand/Receptor" };
+            itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
+            
+            //This adds RC to envHandle.comp
+            for (int i = 0; i < item.Length; i++)
             {
                 foreach (ConfigReactionComplex ent in protocol.entity_repository.reaction_complexes)
                 {
-                    if (ent.Name == type[i])
+                    if (ent.Name == item[i])
                     {
                         envHandle.comp.reaction_complexes.Add(ent.Clone(true));
                         break;
                     }
                 }
             }
+
+            //This adds molpops to envHandle.comp
+            item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            for (int i = 0; i < item.Length; i++)
+            {
+                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel molpophomo = new MolPopHomogeneousLevel();
+                    molpophomo.concentration = 1.0;
+                    molpophomo.boundaryCondition = new List<BoundaryCondition>();
+                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * molpophomo.concentration);
+                    molpophomo.boundaryCondition.Add(bc);
+                    bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+                    molpophomo.boundaryCondition.Add(bc);
+                    configMolPop.mp_distribution = molpophomo;
+                    configMolPop.mp_dist_name = "Homogeneous";
+
+                    // graphics colors etc
+                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mp_render_blending_weight = 2.0;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    ((ReportECM)configMolPop.report_mp).mean = false;
+
+                    envHandle.comp.molpops.Add(configMolPop);
+                }
+            }
+
+            //This adds reactions to envHandle.comp
+            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+
+            for (int i = 0; i < item.Length; i++)
+            {
+                ConfigReaction configReaction = findReaction(item[i], protocol);
+
+                if (configReaction != null)
+                {
+                    ConfigReaction newReac = configReaction.Clone(true);
+                    envHandle.comp.Reactions.Add(newReac);
+                }
+            }
         }
+
+        public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
+        {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            ConfigPointEnvironment envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            // Experiment
+            protocol.experiment_name = "SPR Vat RC";
+            protocol.experiment_description = "...";
+            protocol.scenario.time_config.duration = 2.0;
+            protocol.scenario.time_config.rendering_interval = 0.2;
+            protocol.scenario.time_config.sampling_interval = 0.2;
+
+            ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
+
+            //Load needed entities from User Store
+            Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
+            userstore = userstore.Deserialize();
+
+            string[] item = new string[] { "Association", "Dissociation", "Transformation"};
+            int itemsLoaded = LoadProtocolReactionTemplates(protocol, item, userstore);
+            if (itemsLoaded != item.Length)
+            {
+                System.Windows.MessageBox.Show("Unable to load all protocol reaction templates.");
+            }
+
+            // Create new molecules and add to the protocol ER
+            // Don't want to make these more permanent by adding to the user store
+            //
+
+            item = new string[] { "R1", "R2", "L", "C1", "C2" };
+            //string[] molguids = new string[item.Length];
+            //int molcnt = 0;
+            foreach (string s in item)
+            {
+                ConfigMolecule cm = new ConfigMolecule(s, 1.0, 1.0, 1.0);
+                protocol.entity_repository.molecules.Add(cm);
+                protocol.entity_repository.molecules_dict.Add(cm.entity_guid, cm);
+                //molguids[molcnt++] = cm.entity_guid;
+            }
+
+            // Create new reactions and add to the protocol ER
+            // Don't want to make these more permanent by adding to the user store
+            //
+
+            // Association
+            // R1 + L -> C1
+            ConfigReaction cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.1;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Association
+            // R2 + L -> C2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.1;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Dissociation
+            // C1 -> R1 + L
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Dissociation);
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // reactant
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Dissociation
+            // C2 -> R2 + L
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Dissociation);
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("L", MoleculeLocation.Bulk, protocol));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.01;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // R1 -> R2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // R2 -> R1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // C1 -> C2
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            // Transformation
+            // C2 -> C1
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
+            // product
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
+            cr.rate_const = 0.001;
+            cr.GetTotalReactionString(protocol.entity_repository);
+            protocol.entity_repository.reactions.Add(cr);
+
+            protocol.InitializeStorageClasses();
+
+            // Push all ER reactions to Reaction Complex entity
+            foreach (ConfigReaction configReac in protocol.entity_repository.reactions)
+            {
+                configRC.reactions.Add(configReac);
+            }
+
+            // Push all ER molecules to the Reaction Complex molecules dictionary
+            foreach (KeyValuePair<string,ConfigMolecule> kvp in protocol.entity_repository.molecules_dict)
+            {
+                configRC.molecules_dict.Add(kvp.Key, kvp.Value);
+            }
+
+            // Create molecular populations and add to Reaction Complex
+            double[] conc = new double[] { 1, 1, 1, 0, 0 };
+            item = new string[] { "R1", "R2", "L", "C1", "C2" };
+
+            for (int i = 0; i < item.Length; i++)
+            {
+                //ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+                ConfigMolecule configMolecule = configRC.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+                    configMolPop.mp_dist_name = "Uniform";
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+                    configRC.molpops.Add(configMolPop);
+                }
+            }
+        }
+
 
         private static void PredefinedCellsCreator(Level store)
         {
@@ -1794,6 +2056,697 @@ namespace Daphne
         }
 
         //Following function needs to be called only once
+        private static void PredefinedReactionsCreator(Level store)
+        {
+            // NOTE: Whenever there are two or more reactants (or products or modifiers) in a boundary reaction,
+            // the bulk molecules must be added first, then the boundary molecules.
+
+            double kr, kf;
+
+            // These values are waiting for more informed choices:
+            //
+            // Default degradation rate for ECS proteins  (min)
+            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
+            double ecsDefaultDegradRate = 0.1;
+            //
+            // Default degradation rate for cytoplasm proteins  (min)
+            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
+            double cytoDefaultDegradRate = 0.1;
+
+            ConfigReaction cr = new ConfigReaction();
+
+            // Annihiliation: CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13:CXCR5 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCR4 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL12:CXCR4 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants 
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL12 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.rate_const = ecsDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Annihiliation: CXCL13 -> 
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.rate_const = ecsDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            // CXCL13 + CXCR5| <-> CXCL13:CXCR5|
+            //
+            // Barroso, Munoz, et al.
+            // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
+            // The FASEB Journal vol. 26 no. 12 4841-485
+            // CXCL13/CXCR5 binding affinity:  KD = 5.05e-8 M  = (50.5e-9)*(1e-18)*(6.022e23) molec/um^3 = 0.0304 molec/um^3
+            //
+            // KD = k_reverse / k_forward
+            // Use k_reverse from CXCL12/CXCR4| binding/unbinding.
+            // Vega2011 k_off = 8.24e-3/s = 0.494/min
+            // Use same for CXCL13:CXCR5| unbinding k_reverse = 0.494 min^{-1}
+            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 1.625 um^3/(molec-min)
+            //
+            kr = 0.494;
+            kf = 16.25;
+            //
+            // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // BoundaryDissociation:  CXCL13:CXCR5| ->  CXCR5| + CXCL13
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //////////////////////////////////////////////////////////////////////////////////
+
+
+            /////////////////////////////////////////////////////////////////////////////
+            // CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
+            // A* -> A
+            // CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
+            //
+            // The A* gradient drives the locomotion force.
+            // The rate constant has units min^{-1}, similar to the units for off rate for receptor/ligand binding,
+            // but this reaction encompasses many processes, including tubulin network growth. Therefore, we expect
+            // this pseudo-reaction to occur at a slower rate, and we will choose a rate constant (activation rate) 
+            // that is significantly less than simple off rates.
+            // 
+            // For simple unbinding k_off ~ 0.5 min^{-1} (CXCL12:CXCR4, Vega2011), so arbitrarily, choose a reduction factor 
+            double f1 = 1e-2;
+            // Then  k_activation ~ 0.5 * f = 5e-3 min^{-1}
+            //
+            // Choose a slower deactivation (A* -> A) rate   k_deactivation = k_activation / 100;
+            double f2 = 1e-1;
+            // 
+            kf = 0.5 * f1;
+            kr = kf * f2;
+            //
+            // CatalyzedBoundaryActivation: CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // Transformation: A* -> A
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transformation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            ////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // CXCL12 + CXCR4| -> CXCL12:CXCR4|
+            //
+            ////// Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
+            ////// CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
+            //////
+            ////// KD = k_reverse / k_forward
+            ////// Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
+            ////// k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
+            //////
+            ///////////////////////////////////////////////////////////////////////////////////
+            // Vega et al., Technical Advance: Surface plasmon resonance-based analysis of CXCL12 binding 
+            // using immobilized lentiviral particles. Journal of Leukocyte Biology Vol 90, 1-10, 2011. 
+            // 
+            // CXCL12/CXCR4 binding affinity:  KD = 2.09e-2 molec/um^3
+            // k_reverse (k_off) = 0.494/min
+            //
+            // KD = k_reverse / k_forward
+            // k_forward = k_reverse / KD = 0.494 / 2.09e-2  um^3/(molec-min) = 23.6 um^3/(molec-min)
+            //
+            kr = 0.494;
+            kf = 23.6;
+            //
+            // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // Internalization of bound receptor
+            // 
+            // Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
+            // heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
+            // Fit of fig. S3b:
+            //          k = 0.010 min(-1)
+            double k1_CXCL13_CXCR5 = 0.010;
+            //
+            // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = k1_CXCL13_CXCR5;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // Hesselgesser et al.,  Identification and Characterization of the CXCR4 Chemokine, J Immunol 1998; 160:877-883.
+            // Fit of curve on pg 880, SDF-1alpha(CXCL12):CXCR4 internalization:
+            //          k = 0.027 min(-1)
+            double k1_CXCL12_CXCR4 = 0.027;
+            //
+            // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = k1_CXCL12_CXCR4;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
+            // Arbitrarily choose a factor of 100
+            f2 = 1e-2;
+            //
+            // BoundaryTransportFrom: CXCR5| -> CXCR5
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = f2 * k1_CXCL13_CXCR5;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            //
+            // BoundaryTransportFrom: CXCR4| -> CXCR4
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = f2 * k1_CXCL12_CXCR4;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            //
+            // Secretion reactions
+            //
+            string[] mol_name = { "CXCL12", "CXCL13" };
+            double[] k_cytosol_to_pm = { 1.0, 1.0 };
+            double[] k_pm_to_ecs = { 1.0, 1.0 };
+            // BoundaryTransportTo: cytosol to plasma membrane
+            for (int i = 0; i < mol_name.Length; i++)
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+                // reactants
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
+                // products
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
+                cr.rate_const = k_cytosol_to_pm[i];
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
+            }
+            // BoundaryTransportFrom: plasma membrane to ECS
+            for (int i = 0; i < mol_name.Length; i++)
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
+                // reactants
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
+                // products
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
+                cr.rate_const = k_pm_to_ecs[i];
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
+            }
+
+            //
+            // These next reactions are in need of more informed reaction rates
+            //
+
+            // BoundaryTransportTo: CXCR5 -> CXCR5|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // BoundaryTransportTo: CXCR4 -> CXCR4|
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
+            cr.rate_const = 1.0;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // Transcription
+
+            // Schwanhausser et al, Nature 2011 (473), 337-342
+            // average mRNAs per hour:  ~ 2
+            // average proteins per mRNA per hour: ~ 100
+            // Default: 2 gene copies per cell
+            kf = 2 * 100.0 / (2 * 60);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+            // modifiers
+            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            // generic transcription for differentiation signaling genes
+            for (int i = 1; i < 8; i++)
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
+                // modifiers
+                cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, store));
+                // products
+                cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
+                cr.rate_const = kf;
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
+            }
+
+            // degradation of signalling molecules 
+
+            for (int i = 1; i < 8; i++)
+            {
+                cr = new ConfigReaction();
+                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+                // reactants
+                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
+                cr.rate_const = cytoDefaultDegradRate;
+                cr.GetTotalReactionString(store.entity_repository);
+                store.entity_repository.reactions.Add(cr);
+            }
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
+            cr.rate_const = cytoDefaultDegradRate;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+
+            ///////////////////////////////////////////////
+            // NOTE: These reactions may not be biologically meaningful for bulk molecules, 
+            // but are used for reaction complexes
+            //
+            // Association: CXCR5 + CXCL13 -> CXCL13:CXCR5
+            kr = 0.494;
+            kf = 16.25;
+            //
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            ////////////////////////////////////////////////////
+
+        }
+
+        private static void PredefinedReactionComplexesCreator(Level store)
+        {
+            ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
+
+            //MOLECULES
+            double[] conc = new double[3] { 0.0304, 1, 0 };
+            string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+                    configMolPop.mp_dist_name = "Uniform";
+                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mp_render_blending_weight = 2.0;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+
+            //REACTIONS
+
+            // Reaction strings
+            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+#if OLD_RC
+                    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
+                    grp.entity_guid = reac.entity_guid;
+                    grp.OriginalRate = reac.rate_const;
+                    grp.ReactionComplexRate = reac.rate_const;
+#endif
+
+                    crc.reactions.Add(reac.Clone(true));
+#if OLD_RC
+                    crc.ReactionRates.Add(grp);
+#endif
+                }
+            }
+
+            store.entity_repository.reaction_complexes.Add(crc);
+        }
+
+        //Following function needs to be called only once
         private static void PredefinedReactionTemplatesCreator(Level store)
         {
             //Test code to read in json containing object "PredefinedReactions"
@@ -2165,699 +3118,6 @@ namespace Daphne
                 }
             }
             return null;
-        }
-
-        //Following function needs to be called only once
-        private static void PredefinedReactionsCreator(Level store)
-        {
-            // NOTE: Whenever there are two or more reactants (or products or modifiers) in a boundary reaction,
-            // the bulk molecules must be added first, then the boundary molecules.
-
-            double kr, kf;
-
-            // These values are waiting for more informed choices:
-            //
-            // Default degradation rate for ECS proteins  (min)
-            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
-            double ecsDefaultDegradRate = 0.1; 
-            //
-            // Default degradation rate for cytoplasm proteins  (min)
-            // Arbitraritly, assume half life lambda=7 min, then rate constant k=ln(2)/lambda=0.6931/7
-            double cytoDefaultDegradRate = 0.1;
-
-            ConfigReaction cr = new ConfigReaction();
-
-            // Annihiliation: CXCR5 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCL13:CXCR5 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCR4 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCL12:CXCR4 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants 
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCL12 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.rate_const = ecsDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Annihiliation: CXCL13 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.rate_const = ecsDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            // CXCL13 + CXCR5| <-> CXCL13:CXCR5|
-            //
-            // Barroso, Munoz, et al.
-            // EBI2 regulates CXCL13-mediated responses by heterodimerization with CXCR5
-            // The FASEB Journal vol. 26 no. 12 4841-485
-            // CXCL13/CXCR5 binding affinity:  KD = 5.05e-8 M  = (50.5e-9)*(1e-18)*(6.022e23) molec/um^3 = 0.0304 molec/um^3
-            //
-            // KD = k_reverse / k_forward
-            // Use k_reverse from CXCL12/CXCR4| binding/unbinding.
-            // Vega2011 k_off = 8.24e-3/s = 0.494/min
-            // Use same for CXCL13:CXCR5| unbinding k_reverse = 0.494 min^{-1}
-            // k_forward = k_reverse / 0.0304 um^3/(molec-min) = 1.625 um^3/(molec-min)
-            //
-            kr = 0.494;
-            kf = 16.25;
-            //
-            // BoundaryAssociation: CXCL13 + CXCR5| -> CXCL13:CXCR5|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // BoundaryDissociation:  CXCL13:CXCR5| ->  CXCR5| + CXCL13
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //////////////////////////////////////////////////////////////////////////////////
-            
-
-            /////////////////////////////////////////////////////////////////////////////
-            // CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
-            // A* -> A
-            // CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
-            //
-            // The A* gradient drives the locomotion force.
-            // The rate constant has units min^{-1}, similar to the units for off rate for receptor/ligand binding,
-            // but this reaction encompasses many processes, including tubulin network growth. Therefore, we expect
-            // this pseudo-reaction to occur at a slower rate, and we will choose a rate constant (activation rate) 
-            // that is significantly less than simple off rates.
-            // 
-            // For simple unbinding k_off ~ 0.5 min^{-1} (CXCL12:CXCR4, Vega2011), so arbitrarily, choose a reduction factor 
-            double f1 = 1e-2;
-            // Then  k_activation ~ 0.5 * f = 5e-3 min^{-1}
-            //
-            // Choose a slower deactivation (A* -> A) rate   k_deactivation = k_activation / 100;
-            double f2 = 1e-1;
-            // 
-            kf = 0.5 * f1;
-            kr = kf * f2;
-            //
-            // CatalyzedBoundaryActivation: CXCL13:CXCR5| + A -> CXCL13:CXCR5| + A*
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // Transformation: A* -> A
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transformation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // CatalyzedBoundaryActivation: CXCL12:CXCR4| + A -> CXCL12:CXCR4| + A*
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.CatalyzedBoundaryActivation);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("A", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("A*", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            ////////////////////////////////////////////////////////////////
-
-            ///////////////////////////////////////////////////////////////////////////////////
-            // CXCL12 + CXCR4| -> CXCL12:CXCR4|
-            //
-            ////// Crump, M. P., Gong, J. H., Loetscher, et al., (1997) EMBO J. 16, 6996–7007.
-            ////// CXCL12/CXCR4 binding affinity:  KD = 3.6e-9 M  = (3.6e-9)*(1e-18)*(6.022e23) molec/um^3 = 2.2e-3 molec/um^3
-            //////
-            ////// KD = k_reverse / k_forward
-            ////// Arbitrarily, choose k_reverse = 1/0.1   min^{-1} = 10 min^{-1}
-            ////// k_forward = k_reverse / 2.2e-3 um^3/(molec-min) = 455 um^3/(molec-min)
-            //////
-            ///////////////////////////////////////////////////////////////////////////////////
-            // Vega et al., Technical Advance: Surface plasmon resonance-based analysis of CXCL12 binding 
-            // using immobilized lentiviral particles. Journal of Leukocyte Biology Vol 90, 1-10, 2011. 
-            // 
-            // CXCL12/CXCR4 binding affinity:  KD = 2.09e-2 molec/um^3
-            // k_reverse (k_off) = 0.494/min
-            //
-            // KD = k_reverse / k_forward
-            // k_forward = k_reverse / KD = 0.494 / 2.09e-2  um^3/(molec-min) = 23.6 um^3/(molec-min)
-            //
-            kr = 0.494;
-            kf = 23.6;
-            //
-            // BoundaryAssociation: CXCL12 + CXCR4| -> CXCL12:CXCR4|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryAssociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // BoundaryDissociation:  CXCL12:CXCR4| ->  CXCR4| + CXCL12
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryDissociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-            // Internalization of bound receptor
-            // 
-            // Barroso R, Munoz LM, Barrondo S, et al., EBI2 regulates CXCL13-mediated responses by 
-            // heterodimerization with CXCR5. The FASEB Journal Vol. 26, pp 4841-4854, December 2012.
-            // Fit of fig. S3b:
-            //          k = 0.010 min(-1)
-            double k1_CXCL13_CXCR5 = 0.010;
-            //
-            // BoundaryTransportFrom: CXCL13:CXCR5| -> CXCL13:CXCR5
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = k1_CXCL13_CXCR5;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // Hesselgesser et al.,  Identification and Characterization of the CXCR4 Chemokine, J Immunol 1998; 160:877-883.
-            // Fit of curve on pg 880, SDF-1alpha(CXCL12):CXCR4 internalization:
-            //          k = 0.027 min(-1)
-            double k1_CXCL12_CXCR4 = 0.027;
-            //
-            // BoundaryTransportFrom: CXCL12:CXCR4| -> CXCL12:CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = k1_CXCL12_CXCR4;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // Assume that internalization of the unactivated receptor is slower than internalization of bound(activated) receptor
-            // Arbitrarily choose a factor of 100
-            f2 = 1e-2;
-            //
-            // BoundaryTransportFrom: CXCR5| -> CXCR5
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL13_CXCR5;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            //
-            // BoundaryTransportFrom: CXCR4| -> CXCR4
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = f2 * k1_CXCL12_CXCR4;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            //
-            // Secretion reactions
-            //
-            string[] mol_name =        { "CXCL12", "CXCL13" };
-            double[] k_cytosol_to_pm =  {   1.0,      1.0 };
-            double[] k_pm_to_ecs =      {   1.0,      1.0 };
-            // BoundaryTransportTo: cytosol to plasma membrane
-            for (int i = 0; i < mol_name.Length; i++ )
-            {
-                cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-                // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
-                // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
-                cr.rate_const = k_cytosol_to_pm[i];
-                cr.GetTotalReactionString(store.entity_repository);
-                store.entity_repository.reactions.Add(cr);
-            }
-            // BoundaryTransportFrom: plasma membrane to ECS
-            for (int i = 0; i < mol_name.Length; i++)
-            {
-                cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportFrom);
-                // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i] + "|", MoleculeLocation.Boundary, store));
-                // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid(mol_name[i], MoleculeLocation.Bulk, store));
-                cr.rate_const = k_pm_to_ecs[i];
-                cr.GetTotalReactionString(store.entity_repository);
-                store.entity_repository.reactions.Add(cr);
-            }
-
-            //
-            // These next reactions are in need of more informed reaction rates
-            //
-
-            // BoundaryTransportTo: CXCR5 -> CXCR5|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5|", MoleculeLocation.Boundary, store));
-            cr.rate_const = 1.0;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // BoundaryTransportTo: CXCR4 -> CXCR4|
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.BoundaryTransportTo);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4|", MoleculeLocation.Boundary, store));
-            cr.rate_const = 1.0;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // Transcription
-
-            // Schwanhausser et al, Nature 2011 (473), 337-342
-            // average mRNAs per hour:  ~ 2
-            // average proteins per mRNA per hour: ~ 100
-            // Default: 2 gene copies per cell
-            kf = 2 * 100.0 / (2*60);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR4", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCR5", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL12", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gCXCL13", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgH", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgL", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gIgS", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gAID", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gBL1", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gMHCII", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gApop", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDiv", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc1", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-            // modifiers
-            cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gResc2", store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            // generic transcription for differentiation signaling genes
-            for (int i = 1; i < 8; i++)
-            {
-                cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Transcription);
-                // modifiers
-                cr.modifiers_molecule_guid_ref.Add(findGeneGuid("gDif" + i, store));
-                // products
-                cr.products_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
-                cr.rate_const = kf;
-                cr.GetTotalReactionString(store.entity_repository);
-                store.entity_repository.reactions.Add(cr); 
-            }
-
-            // degradation of signalling molecules 
-
-            for (int i = 1; i < 8; i++)
-            {
-                cr = new ConfigReaction();
-                cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-                // reactants
-                cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDif" + i, MoleculeLocation.Bulk, store));
-                cr.rate_const = cytoDefaultDegradRate;
-                cr.GetTotalReactionString(store.entity_repository);
-                store.entity_repository.reactions.Add(cr);
-            }
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sDiv", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sApop", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc1", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("sResc2", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgH", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgL", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("IgS", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("AID", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("BL1", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("MHCII", MoleculeLocation.Bulk, store));
-            cr.rate_const = cytoDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-            ///////////////////////////////////////////////
-            // NOTE: These reactions may not be biologically meaningful for bulk molecules, 
-            // but are used for reaction complexes
-            //
-            // Association: CXCR5 + CXCL13 -> CXCL13:CXCR5
-            kr = 0.494;
-            kf = 16.25;
-            //
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = kf;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13:CXCR5", MoleculeLocation.Bulk, store));
-            // products
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR5", MoleculeLocation.Bulk, store));
-            cr.rate_const = kr;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-            ////////////////////////////////////////////////////
-
-        }
-
-        private static void PredefinedReactionComplexesCreator(Level store)
-        {
-            ConfigReactionComplex crc = new ConfigReactionComplex("Ligand/Receptor");
-
-            //MOLECULES
-            double[] conc = new double[3] { 0.0304, 1, 0 };
-            string[] type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
-
-                if (configMolecule != null)
-                {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-
-                    configMolPop.molecule = configMolecule.Clone(null);
-                    configMolPop.Name = configMolecule.Name;
-                    configMolPop.mp_dist_name = "Uniform";
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
-
-                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-
-                    hl.concentration = conc[i];
-                    configMolPop.mp_distribution = hl;
-                    crc.molpops.Add(configMolPop);
-                }
-            }
-
-            //REACTIONS
-
-            //string guid = findReactionGuid(ReactionType.Association, sc);
-
-            // Reaction strings
-            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5"}; 
-            
-            for (int i = 0; i < type.Length; i++)
-            {
-                ConfigReaction reac = findReaction(type[i], store);
-
-                if (reac != null)
-                {
-#if OLD_RC
-                    ConfigReactionGuidRatePair grp = new ConfigReactionGuidRatePair();
-                    grp.entity_guid = reac.entity_guid;
-                    grp.OriginalRate = reac.rate_const;
-                    grp.ReactionComplexRate = reac.rate_const;
-#endif
-
-                    crc.reactions.Add(reac.Clone(true));
-#if OLD_RC
-                    crc.ReactionRates.Add(grp);
-#endif
-                }
-            }
-
-            store.entity_repository.reaction_complexes.Add(crc);
         }
 
         // given a string description of a reaction, return the ConfigReaction that matches

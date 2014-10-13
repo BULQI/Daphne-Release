@@ -647,8 +647,6 @@ namespace DaphneGui.Pushing
         {
             
             DataGrid grid = sender as DataGrid;
-            e.CanExecute = true;
-            return;
 
             if (grid != null)
             {
@@ -664,7 +662,8 @@ namespace DaphneGui.Pushing
                 else
                 {
                     object obj = grid.SelectedItems[0];
-                    if ( !(obj is ConfigEntity) ) {
+                    if (!(obj is ConfigEntity))
+                    {
                         e.CanExecute = false;
                     }
                     else
@@ -679,8 +678,8 @@ namespace DaphneGui.Pushing
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
         {
-            ConfigEntity newEntity = null;
-            bool UserWantsNewEntity = false;
+            //ConfigEntity newEntity = null;
+            //bool UserWantsNewEntity = false;
             Level.PushStatus status = levelB.pushStatus(entity);
             if (status == Level.PushStatus.PUSH_INVALID)
             {
