@@ -3286,7 +3286,7 @@
                                             <GridViewColumn Width="80" Header="Rate constant">
                                                 <GridViewColumn.CellTemplate>
                                                     <DataTemplate>
-                                                        <uc:DoublesBox SliderEnabled="False" IsReadOnly="True" Number="{Binding rate_const}"/>
+                                                        <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const}"/>
                                                     </DataTemplate>
                                                 </GridViewColumn.CellTemplate>
                                             </GridViewColumn>
