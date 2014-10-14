@@ -767,7 +767,8 @@ namespace Daphne
             // RC
             item = new string[1] { "Ligand/Receptor" };
             itemsLoaded = LoadProtocolRCs(protocol, item, userstore);
-
+            
+            //This adds RC to envHandle.comp
             for (int i = 0; i < item.Length; i++)
             {
                 foreach (ConfigReactionComplex ent in protocol.entity_repository.reaction_complexes)
@@ -777,6 +778,54 @@ namespace Daphne
                         envHandle.comp.reaction_complexes.Add(ent.Clone(true));
                         break;
                     }
+                }
+            }
+
+            //This adds molpops to envHandle.comp
+            item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            for (int i = 0; i < item.Length; i++)
+            {
+                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel molpophomo = new MolPopHomogeneousLevel();
+                    molpophomo.concentration = 1.0;
+                    molpophomo.boundaryCondition = new List<BoundaryCondition>();
+                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * molpophomo.concentration);
+                    molpophomo.boundaryCondition.Add(bc);
+                    bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+                    molpophomo.boundaryCondition.Add(bc);
+                    configMolPop.mp_distribution = molpophomo;
+                    configMolPop.mp_dist_name = "Homogeneous";
+
+                    // graphics colors etc
+                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    configMolPop.mp_render_blending_weight = 2.0;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+                    ((ReportECM)configMolPop.report_mp).mean = false;
+
+                    envHandle.comp.molpops.Add(configMolPop);
+                }
+            }
+
+            //This adds reactions to envHandle.comp
+            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+
+            for (int i = 0; i < item.Length; i++)
+            {
+                ConfigReaction configReaction = findReaction(item[i], protocol);
+
+                if (configReaction != null)
+                {
+                    ConfigReaction newReac = configReaction.Clone(true);
+                    envHandle.comp.Reactions.Add(newReac);
                 }
             }
         }
