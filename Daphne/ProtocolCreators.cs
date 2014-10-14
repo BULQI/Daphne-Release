@@ -146,7 +146,8 @@ namespace Daphne
 
                         string reacTemplateGuid = newReac.reaction_template_guid_ref;
                         ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        //ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
                         protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
 
                         itemsLoaded++;
@@ -167,7 +168,8 @@ namespace Daphne
                     if (crt.name == rtName[i])
                     {
                         ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[crt.entity_guid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+//                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(false);
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
                         protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
                         itemsLoaded++;
                    }
