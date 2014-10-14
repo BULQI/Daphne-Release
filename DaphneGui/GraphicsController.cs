@@ -131,12 +131,12 @@ namespace DaphneGui
         /// <summary>
         /// set up the graphics pipeline for the environment box
         /// </summary>
-        public void setupPipeline()
+        public void SetupPipeline()
         {
             // a simple box for quick and non-occluding indication of a volume
             vtkActor box = vtkActor.New();
             vtkOutlineFilter outlineFilter = vtkOutlineFilter.New();
-            outlineFilter.SetInput(MainWindow.VTKBasket.EnvironmentController.BoxSource.GetOutput());
+            outlineFilter.SetInput(((VTKFullDataBasket)MainWindow.VTKBasket).EnvironmentController.BoxSource.GetOutput());
             vtkPolyDataMapper mapper = vtkPolyDataMapper.New();
             mapper.SetInputConnection(outlineFilter.GetOutputPort());
             box.SetMapper(mapper);
@@ -205,7 +205,7 @@ namespace DaphneGui
         /// <summary>
         /// finish the pipelines for all molpop in the ecs
         /// </summary>
-        public void finish3DPipelines()
+        public void Finish3DPipelines()
         {
             Compartment ecs = SimulationBase.dataBasket.Environment.Comp;
             // create a transfer function mapping scalar value to opacity
@@ -257,7 +257,7 @@ namespace DaphneGui
 
             vtkSmartVolumeMapper vmSmart = vtkSmartVolumeMapper.New();
             vmSmart.SetRequestedRenderModeToDefault();
-            vmSmart.SetInput(MainWindow.VTKBasket.ECSController.ImageGrid);
+            vmSmart.SetInput(((VTKFullDataBasket)MainWindow.VTKBasket).ECSController.ImageGrid);
 
             // the actual volume
             vtkVolume volume = vtkVolume.New();
@@ -662,7 +662,7 @@ namespace DaphneGui
                 GlyphFilter.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
             }
 #else
-            GlyphFilter.SetInputConnection(MainWindow.VTKBasket.CellController.Poly.GetProducerPort());
+            GlyphFilter.SetInputConnection(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.Poly.GetProducerPort());
 #endif
             GlyphFilter.Update();   // so glyphData will be valid right away
             glyphData = GlyphFilter.GetOutput();
@@ -803,11 +803,42 @@ namespace DaphneGui
             CleanupCells();
         }
     }
+
+    public class VTKNullGraphicsController : EntityModelBase, IVTKGraphicsController
+    {
+        public VTKNullGraphicsController()
+        {
+        }
+
+        public void Cleanup()
+        {
+        }
+
+        public void CreatePipelines()
+        {
+        }
+
+        public void DrawFrame(int progress)
+        {
+        }
+
+        public void DisableComponents()
+        {
+        }
+
+        public void EnableComponents(bool finished)
+        {
+        }
+
+        public void ResetGraphics()
+        {
+        }
+    }
    
     /// <summary>
     /// entity encapsulating the control of a simulation's 3D VTK graphics
     /// </summary>
-    public class VTKGraphicsController : EntityModelBase
+    public class VTKFullGraphicsController : EntityModelBase, IVTKGraphicsController
     {
         // the environment outline box controller
         private VTKEnvironmentController environmentController;
@@ -881,7 +912,7 @@ namespace DaphneGui
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKGraphicsController(MainWindow mw)
+        public VTKFullGraphicsController(MainWindow mw)
         {
             // Trying to get a link to the main window so can activate toolwindow from a callback here...
             MW = mw;
@@ -994,6 +1025,26 @@ namespace DaphneGui
 #endif
             CellAttributeArrayNames.Clear();
             // ColorScaleMaxFactor = 1.0;
+        }
+
+        public void DisableComponents()
+        {
+            ToolsToolbar_IsEnabled = false;
+            DisablePickingButtons();
+        }
+
+        public void EnableComponents(bool finished)
+        {
+            if (finished == true)
+            {
+                EnablePickingButtons();
+            }
+            ToolsToolbarEnableAllIcons();
+        }
+
+        public void ResetGraphics()
+        {
+            CellController.SetCellOpacities(1.0);
         }
 
         /// <summary>
@@ -1146,19 +1197,19 @@ namespace DaphneGui
                 //   Hard-coding names for now...
                 if (this.cellColorArrayName == "cellID")
                 {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
+                    this.CellController.CellMapper.SetLookupTable(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellGenericColorTable);
                     this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
                     this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 }
                 else if (this.cellColorArrayName == "cellSet")
                 {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellSetColorTable);
-                    this.CellController.CellMapper.SetScalarRange(0, MainWindow.VTKBasket.CellController.CellSetColorTable.GetNumberOfTableValues() - 1);
+                    this.CellController.CellMapper.SetLookupTable(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellSetColorTable);
+                    this.CellController.CellMapper.SetScalarRange(0, ((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellSetColorTable.GetNumberOfTableValues() - 1);
                     this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 }
                 else if (this.cellColorArrayName == "generation")
                 {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenerationColorTable);
+                    this.CellController.CellMapper.SetLookupTable(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellGenerationColorTable);
                     this.CellController.CellMapper.SetScalarRange(0, 4);
                     this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 }
@@ -1181,7 +1232,7 @@ namespace DaphneGui
 #endif
                 else
                 {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
+                    this.CellController.CellMapper.SetLookupTable(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellGenericColorTable);
                     this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
                     this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
                 }
@@ -1483,7 +1534,7 @@ namespace DaphneGui
                             // restore the box matrix; the latter is known to be good
                             rw.SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                             // transfer transform to VTKDataBasket
-                            MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
+                            ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
 #if USE_BOX_LIMITS
@@ -1560,7 +1611,7 @@ namespace DaphneGui
 #endif
                         WidgetTransformToBoxMatrix(rw, box);
                         // Transfer transform to VTKDataBasket
-                        MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
+                        ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                     }
                 }
             }
@@ -1839,7 +1890,7 @@ namespace DaphneGui
             // Regions
             CreateRegionWidgets();
             // Cells
-            if (SimulationBase.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null)
+            if (SimulationBase.dataBasket.Cells != null && ((VTKFullDataBasket)MainWindow.VTKBasket).CellController.Poly != null)
             {
                 // Finish VTK pipeline by glyphing cells
                 cellController.GlyphCells();
@@ -1891,14 +1942,14 @@ namespace DaphneGui
             }
 
             // environment
-            EnvironmentController.setupPipeline();
+            EnvironmentController.SetupPipeline();
 
             // ecs
             if (SimulationBase.dataBasket.Environment != null &&
                 SimulationBase.dataBasket.Environment is ECSEnvironment &&
-                MainWindow.VTKBasket.ECSController.ImageGrid != null)
+                ((VTKFullDataBasket)MainWindow.VTKBasket).ECSController.ImageGrid != null)
             {
-                ecsController.finish3DPipelines();
+                ecsController.Finish3DPipelines();
                 // Make "Outline" a hard-coded first-pass default for now, otherwise keep old value
                 if (ECSRenderingMethod == null)
                 {
