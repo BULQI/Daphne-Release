@@ -2056,19 +2056,17 @@ namespace DaphneGui
                 orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
 
-            //skg
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            // Create all VTK visualization pipelines and elements
+            gc.CreatePipelines();
+
+
+            // clear the vcr cache
+            if (vcrControl != null)
             {
-                vtkDataBasket.SetupVTKData(sop.Protocol);
-                // Create all VTK visualization pipelines and elements
-                gc.CreatePipelines();
-
-
-                // clear the vcr cache
-                if (vcrControl != null)
-                {
-                    vcrControl.ReleaseVCR();
-                }
+                vcrControl.ReleaseVCR();
+            }
 
             if (gc is VTKFullGraphicsController)
             {
@@ -2093,14 +2091,14 @@ namespace DaphneGui
                 }
             }
 
-                //////////VCR_Toolbar.IsEnabled = false;
-                //////////gc.ToolsToolbar_IsEnabled = true;
-                //////////gc.DisablePickingButtons();
+            //////////VCR_Toolbar.IsEnabled = false;
+            //////////gc.ToolsToolbar_IsEnabled = true;
+            //////////gc.DisablePickingButtons();
 
 #if LANGEVIN_TIMING
             gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
 #endif
-            }
+            //}
 
             loadSuccess = true;
         }
@@ -2442,17 +2440,7 @@ namespace DaphneGui
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
         private void runSim()
-        {
-            //skg
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            {
-                MessageBox.Show("Running reaction complex, in method 'runSim().'");
-            }
-            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) != true)
-            {
-                return;
-            }
-            
+        {            
             VTKDisplayDocWindow.Activate();
 
             //MessageBox.Show("In runSim()");

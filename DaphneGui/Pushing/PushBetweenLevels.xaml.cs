@@ -81,7 +81,6 @@ namespace DaphneGui.Pushing
         {
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
-            
         }
 
         private void ResetGrids()
@@ -157,7 +156,8 @@ namespace DaphneGui.Pushing
             }
 
             RightGroup.DataContext = LevelB.entity_repository;
-            RightContent.DataContext = FilteredRightList();          //RightList;   //must do this first (??)
+            //RightContent.DataContext = FilteredRightList();          //RightList;   //must do this first (??)
+            RightContent.DataContext = RightList;   //must do this first (??)
             LeftGroup.DataContext = LevelA.entity_repository;
             LeftContent.DataContext = FilteredLeftList();
         }
@@ -578,11 +578,17 @@ namespace DaphneGui.Pushing
 
             PushLevelA = level;
 
-            if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
+            //if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
+            if (PushLevelA == PushLevel.Protocol)
             {
                 PushLevelB = PushLevel.UserStore;
                 LevelBComboBox.SelectedIndex = 1;
             }
+            //else if (PushLevelA == PushLevel.UserStore)
+            //{
+            //    PushLevelB = PushLevel.Protocol;
+            //    LevelBComboBox.SelectedIndex = 0;
+            //}
 
             if (LeftGroup == null)
                 return;
@@ -787,23 +793,6 @@ namespace DaphneGui.Pushing
             //        //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
             //    }
             //}
-        }
-
-        private void PushButtonArrow_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = sender as Button;
-            if ((string)btn.Tag == "Right")
-            {
-                btn.Tag = "Left";
-                ActualButtonImage.Source = LeftImage.Source;
-            }
-            else
-            {
-                btn.Tag = "Right";
-                ActualButtonImage.Source = RightImage.Source;
-            }
-            
-            ResetGrids();
         }
 
     }  //End of PushBetweenLevels class

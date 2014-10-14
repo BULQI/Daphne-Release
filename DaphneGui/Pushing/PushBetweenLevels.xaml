@@ -350,10 +350,11 @@
                     
                     <Button x:Name="PushButtonArrow" Height="48" Width="48" 
                             HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                                VerticalAlignment="Top" VerticalContentAlignment="Top"
-                            Click="PushButtonArrow_Click" Tag="Right"
-                                >
-                        <StackPanel>
+                            Command="ApplicationCommands.Save"
+                            FocusManager.IsFocusScope="True"    
+                            >
+                    <!--Click="PushButtonArrow_Click" Tag="Right"-->
+                    <StackPanel>
                             <StackPanel.Resources>
                                 <Style x:Key="ImageEnabled" TargetType="Image">
                                     <Style.Triggers>
@@ -369,13 +370,13 @@
                             <TextBlock>Left</TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="PushButton" Height="24" Width="48" Content="Apply..."
+                    <!--<Button x:Name="PushButton" Height="24" Width="48" Content="Apply..."
                             HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                                 VerticalAlignment="Top" VerticalContentAlignment="Top"
                                 Command="ApplicationCommands.Save"
                                 FocusManager.IsFocusScope="True" >
                     
-                    </Button>
+                    </Button>-->
             </StackPanel>
            
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
