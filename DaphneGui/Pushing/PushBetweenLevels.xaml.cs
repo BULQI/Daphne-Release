@@ -758,7 +758,7 @@ namespace DaphneGui.Pushing
                     //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
                     //    return;
                     //}
-                    ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(null);
+                    ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(true);
                     levelB.repositoryPush(newreactemp, status, levelA, true);
                     break;
                 case PushLevelEntityType.ReactionComplex:
