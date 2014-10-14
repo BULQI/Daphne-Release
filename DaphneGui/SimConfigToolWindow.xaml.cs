@@ -109,6 +109,16 @@ namespace DaphneGui
         //This method is called when the user clicks the Remove Cell button
         private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
             int index = CellPopsListBox.SelectedIndex;
             CellPopulation current_item = (CellPopulation)CellPopsListBox.SelectedItem;
 
@@ -124,17 +134,7 @@ namespace DaphneGui
                 CellPopGaussian cpg = current_item.cellPopDist as CellPopGaussian;
                 cpg.gauss_spec = null;
             }
-            MainWindow.GC.Rwc.Invalidate();
-
-            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
-            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
-            // but I don't know for sure; we can discuss
-            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            {
-                throw new InvalidCastException();
-            }
-
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
 
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);
@@ -180,14 +180,14 @@ namespace DaphneGui
             mpg.gauss_spec = gg;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
-            MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-            MainWindow.GC.AddGaussSpecRegionWidget(gg);
+            ((VTKFullDataBasket)MainWindow.VTKBasket).AddGaussSpecRegionControl(gg);
+            ((VTKFullGraphicsController)MainWindow.GC).AddGaussSpecRegionWidget(gg);
             // Connect the VTK callback
             // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
+            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
-            MainWindow.GC.Rwc.Invalidate();
+            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
         private void DeleteGaussianSpecification(MolPopDistribution dist)
@@ -209,9 +209,9 @@ namespace DaphneGui
                 return;
             }
 
-            if (MainWindow.GC.Regions.ContainsKey(mpg.gauss_spec.box_spec.box_guid) == true)
+            if (((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsKey(mpg.gauss_spec.box_spec.box_guid) == true)
             {
-                MainWindow.GC.RemoveRegionWidget(mpg.gauss_spec.box_spec.box_guid);
+                ((VTKFullGraphicsController)MainWindow.GC).RemoveRegionWidget(mpg.gauss_spec.box_spec.box_guid);
             }
         }
 
@@ -263,14 +263,14 @@ namespace DaphneGui
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
 
             // Add RegionControl & RegionWidget for the new gauss_spec
-            MainWindow.VTKBasket.AddGaussSpecRegionControl(gg);
-            MainWindow.GC.AddGaussSpecRegionWidget(gg);
+            ((VTKFullDataBasket)MainWindow.VTKBasket).AddGaussSpecRegionControl(gg);
+            ((VTKFullGraphicsController)MainWindow.GC).AddGaussSpecRegionWidget(gg);
             // Connect the VTK callback
             // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-            MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
+            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
+            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
 
-            MainWindow.GC.Rwc.Invalidate();
+            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
         private void DeleteGaussianSpecification(CellPopDistribution dist)
@@ -283,8 +283,6 @@ namespace DaphneGui
                 throw new InvalidCastException();
             }
 
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
             if (dist.DistType != CellPopDistributionType.Gaussian)
                 return;
 
@@ -295,9 +293,9 @@ namespace DaphneGui
                 return;
             }
 
-            if (MainWindow.GC.Regions.ContainsKey(cpg.gauss_spec.box_spec.box_guid) == true)
+            if (((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsKey(cpg.gauss_spec.box_spec.box_guid) == true)
             {
-                MainWindow.GC.RemoveRegionWidget(cpg.gauss_spec.box_spec.box_guid);
+                ((VTKFullGraphicsController)MainWindow.GC).RemoveRegionWidget(cpg.gauss_spec.box_spec.box_guid);
             }
         }
 
@@ -310,11 +308,20 @@ namespace DaphneGui
 
         private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             // Only want to respond to purposeful user interaction, not just population and depopulation
             // of solfacs list
             if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
+            {
                 return;
-
+            }
 
             ConfigMolecularPopulation current_mol = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
 
@@ -346,7 +353,7 @@ namespace DaphneGui
                         DeleteGaussianSpecification(current_mol.mp_distribution);
                         MolPopGaussian mpg = current_mol.mp_distribution as MolPopGaussian;
                         mpg.gauss_spec = null;
-                        MainWindow.GC.Rwc.Invalidate();
+                        ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                     }
                 }
                 switch (new_dist_type)
@@ -600,6 +607,14 @@ namespace DaphneGui
 
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             int index = lbEcsMolPops.SelectedIndex;
             if (index >= 0)
             {
@@ -623,14 +638,13 @@ namespace DaphneGui
                     DeleteGaussianSpecification(cmp.mp_distribution);
                     MolPopGaussian mpg = cmp.mp_distribution as MolPopGaussian;
                     mpg.gauss_spec = null;
-                    MainWindow.GC.Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
 
                 //Delete the molecular population
                 MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -1110,7 +1124,7 @@ namespace DaphneGui
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
                     cpg.gauss_spec = null;
-                    MainWindow.GC.Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
             }
@@ -1139,9 +1153,8 @@ namespace DaphneGui
                 ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
 
                 // Connect the VTK callback
-                MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(MainWindow.GC.WidgetInteractionToGUICallback));
-                MainWindow.GC.Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
-
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
             }
             else if (cpdt == CellPopDistributionType.Specific)
             {
@@ -1163,7 +1176,7 @@ namespace DaphneGui
                     DeleteGaussianSpecification(current_dist);
                     CellPopGaussian cpg = current_dist as CellPopGaussian;
                     cpg.gauss_spec = null;
-                    MainWindow.GC.Rwc.Invalidate();
+                    ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
             }
             //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
@@ -1226,9 +1239,9 @@ namespace DaphneGui
             // identify the widget's key
             string key = "";
 
-            if (rw != null && MainWindow.GC.Regions.ContainsValue(rw) == true)
+            if (rw != null && ((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsValue(rw) == true)
             {
-                foreach (KeyValuePair<string, RegionWidget> kvp in MainWindow.GC.Regions)
+                foreach (KeyValuePair<string, RegionWidget> kvp in ((VTKFullGraphicsController)MainWindow.GC).Regions)
                 {
                     if (kvp.Value == rw)
                     {
@@ -1644,6 +1657,14 @@ namespace DaphneGui
 
         private void cbBoundFace_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
+            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
+            // but I don't know for sure; we can discuss
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             ComboBox cb = (ComboBox)sender;
 
             if (cb.SelectedIndex == -1)
@@ -1651,7 +1672,7 @@ namespace DaphneGui
 
             if (cb.SelectedIndex == 0)
             {
-                MainWindow.GC.OrientationMarker_IsChecked = false;
+                ((VTKFullGraphicsController)MainWindow.GC).OrientationMarker_IsChecked = false;
                 //if (MolPopDistComboBox != null)
                 //{
                 //    if (MolPopDistComboBox.SelectedIndex == 1)
@@ -1662,7 +1683,7 @@ namespace DaphneGui
             }
             else
             {
-                MainWindow.GC.OrientationMarker_IsChecked = true;
+                ((VTKFullGraphicsController)MainWindow.GC).OrientationMarker_IsChecked = true;
                 ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)(lbEcsMolPops.SelectedItem);
                 if (cmp == null)
                     return;

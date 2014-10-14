@@ -946,7 +946,7 @@ namespace DaphneGui
                 if (force == true || size > cellID.GetSize())
                 {
                     // sleep (in units of 1ms) until redraw is completed
-                    MainWindow.GC.WaitForRedraw(1);
+                    ((VTKFullGraphicsController)MainWindow.GC).WaitForRedraw(1);
 
                     points.SetNumberOfPoints(size * factor);
                     cellID.SetNumberOfValues(size * factor);
@@ -1085,9 +1085,31 @@ namespace DaphneGui
     }
 
     /// <summary>
+    /// no vtk graphics connected, as is the case for the VatRC
+    /// </summary>
+    public class VTKNullDataBasket : IVTKDataBasket
+    {
+        public VTKNullDataBasket()
+        {
+        }
+
+        public void SetupVTKData(Protocol protocol)
+        {
+        }
+
+        public void UpdateData()
+        {
+        }
+
+        public void Cleanup()
+        {
+        }
+    }
+
+    /// <summary>
     /// entity encapsulating the control of a simulation's graphics
     /// </summary>
-    public class VTKDataBasket
+    public class VTKFullDataBasket : IVTKDataBasket
     {
         // the environment
         private VTKEnvironmentDataController environmentDataController;
@@ -1115,7 +1137,7 @@ namespace DaphneGui
         /// <summary>
         /// constructor
         /// </summary>
-        public VTKDataBasket()
+        public VTKFullDataBasket()
         {
             // environment
             environmentDataController = new VTKEnvironmentDataController();
@@ -1183,10 +1205,10 @@ namespace DaphneGui
                     cellDataController.ColorMap.Add(scenario.cellpopulations[i].cellpopulation_id, i);
                 }
             }
-            CreateAllocatedCells();
+            createAllocatedCells();
 
             // region controls
-            MainWindow.VTKBasket.CreateRegionControls();
+            createRegionControls();
 
             // ecs rendering
             // set up the 3d image grid for the ecs
@@ -1298,7 +1320,7 @@ namespace DaphneGui
             Regions.Add(box_guid, rc);
         }
 #endif
-        public void CreateRegionControls()
+        private void createRegionControls()
         {
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
@@ -1332,7 +1354,7 @@ namespace DaphneGui
         /// <summary>
         /// create the graphics for all cells, but use pre-allocated arrays for speed
         /// </summary>
-        public void CreateAllocatedCells()
+        private void createAllocatedCells()
         {
             if (SimulationBase.dataBasket.Cells != null)
             {
@@ -1564,7 +1586,7 @@ namespace DaphneGui
             // ecs
             if (SimulationBase.dataBasket.Environment is ECSEnvironment)
             {
-                ecsDataController.updateGradients3D(MainWindow.GC.ECSController.RenderGradient, true);
+                ecsDataController.updateGradients3D(((VTKFullGraphicsController)MainWindow.GC).ECSController.RenderGradient, true);
             }
         }
     }

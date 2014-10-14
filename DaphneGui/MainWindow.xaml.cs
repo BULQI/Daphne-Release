@@ -134,13 +134,14 @@ namespace DaphneGui
         /// </summary>
         public static bool loadSuccess;
 
-        private static VTKGraphicsController gc;
-        private static VTKDataBasket vtkDataBasket;
+
+        private static IVTKGraphicsController gc;
+        private static IVTKDataBasket vtkDataBasket;
 
         /// <summary>
         /// retrieve a pointer to the (for now, singular) VTK graphics actors
         /// </summary>
-        public static VTKGraphicsController GC
+        public static IVTKGraphicsController GC
         {
             get { return gc; }
         }
@@ -148,7 +149,7 @@ namespace DaphneGui
         /// <summary>
         /// retrieve a pointer to the VTK data basket object
         /// </summary>
-        public static VTKDataBasket VTKBasket
+        public static IVTKDataBasket VTKBasket
         {
             get { return vtkDataBasket; }
         }
@@ -382,13 +383,11 @@ namespace DaphneGui
             if (AssumeIDE() == true)
             {
                 appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
-
             }
             else
             {
                 appPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + @"\DaphneGui";
                 execPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
             }
 
             //Defines default location of SBML folder within Daphne's directory structure
@@ -494,12 +493,6 @@ namespace DaphneGui
             this.menu_ActivateAnalysisChart.IsEnabled = false;
 #endif
 
-            // vtk data basket to hold vtk data for entities with graphical representation
-            vtkDataBasket = new VTKDataBasket();
-            // graphics controller to manage vtk objects
-            gc = new VTKGraphicsController(this);
-            // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
-            vtkDisplay_DockPanel.DataContext = gc;
             // this.ProtocolSplitContainer.ResizeSlots(new double[2]{0.2, 0.8});
 
             if (file_exists)
@@ -994,8 +987,7 @@ namespace DaphneGui
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
                     optionsMenu.IsEnabled = false;
-                    gc.ToolsToolbar_IsEnabled = false;
-                    gc.DisablePickingButtons();
+                    gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
                     ProtocolToolWindow.Close();
@@ -1067,7 +1059,7 @@ namespace DaphneGui
                 sim.reset();
                 // reset cell tracks and free memory
                 //////////gc.CleanupTracks();
-                gc.CellController.SetCellOpacities(1.0);
+                gc.ResetGraphics();
                 fitCellOpacitySlider.Value = 1.0;
                 UpdateGraphics();
 
@@ -1840,6 +1832,11 @@ namespace DaphneGui
 
         public static void GUIInteractionToWidgetCallback(object sender, PropertyChangedEventArgs e)
         {
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
             BoxSpecification box = (BoxSpecification)sender;
 
             if (box == null)
@@ -1854,21 +1851,27 @@ namespace DaphneGui
 
             if (e.PropertyName == "box_visibility")
             {
-                MainWindow.GC.Regions[box.box_guid].ShowWidget(box.box_visibility);
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].ShowWidget(box.box_visibility);
             }
 
             // Catch-all for other scale / translation manipulations
-            if (MainWindow.VTKBasket.Regions.ContainsKey(box.box_guid) == true && MainWindow.GC.Regions.ContainsKey(box.box_guid) == true)
+            if (((VTKFullDataBasket)MainWindow.VTKBasket).Regions.ContainsKey(box.box_guid) == true && ((VTKFullGraphicsController)MainWindow.GC).Regions.ContainsKey(box.box_guid) == true)
             {
-                MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
-                MainWindow.GC.Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
-                MainWindow.GC.Rwc.Invalidate();
+                ((VTKFullDataBasket)MainWindow.VTKBasket).Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
+                ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
+                ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
             }
         }
 
         public static void GUIGaussianSurfaceVisibilityToggle(object sender, PropertyChangedEventArgs e)
         {
+            if (gc is VTKFullGraphicsController == false)
+            {
+                throw new InvalidCastException();
+            }
+
             GaussianSpecification gauss = (GaussianSpecification)sender;
+            VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)MainWindow.GC;
 
             if (gauss == null)
             {
@@ -1877,14 +1880,14 @@ namespace DaphneGui
 
             if (e.PropertyName == "gaussian_region_visibility")
             {
-                MainWindow.GC.Regions[gauss.box_spec.box_guid].ShowActor(MainWindow.GC.Rwc.RenderWindow, gauss.gaussian_region_visibility);
-                MainWindow.GC.Rwc.Invalidate();
+                gcHandle.Regions[gauss.box_spec.box_guid].ShowActor(gcHandle.Rwc.RenderWindow, gauss.gaussian_region_visibility);
+                gcHandle.Rwc.Invalidate();
             }
             if (e.PropertyName == "gaussian_spec_color")
             {
-                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
-                MainWindow.GC.Regions[gauss.box_spec.box_guid].SetOpacity(gauss.gaussian_spec_color.ScA);
-                MainWindow.GC.Rwc.Invalidate();
+                gcHandle.Regions[gauss.box_spec.box_guid].SetColor(gauss.gaussian_spec_color.ScR, gauss.gaussian_spec_color.ScG, gauss.gaussian_spec_color.ScB);
+                gcHandle.Regions[gauss.box_spec.box_guid].SetOpacity(gauss.gaussian_spec_color.ScA);
+                gcHandle.Rwc.Invalidate();
             }
             return;
         }
@@ -1987,6 +1990,10 @@ namespace DaphneGui
                     sim = new TissueSimulation();
                     // set the reporter's path
                     sim.Reporter.AppPath = orig_path + @"\";
+                    // vtk data basket to hold vtk data for entities with graphical representation
+                    vtkDataBasket = new VTKFullDataBasket();
+                    // graphics controller to manage vtk objects
+                    gc = new VTKFullGraphicsController(this);
                 }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
@@ -1998,6 +2005,9 @@ namespace DaphneGui
                     sim = new VatReactionComplex();
                     // set the reporter's path
                     sim.Reporter.AppPath = orig_path + @"\";
+                    // no graphics for the VatRC
+                    vtkDataBasket = new VTKNullDataBasket();
+                    gc = new VTKNullGraphicsController();
                 }
 
                 //statusBarMessagePanel.Content = "Ready:  Vat Reaction Complex";
@@ -2010,6 +2020,11 @@ namespace DaphneGui
             else
             {
                 throw new NotImplementedException();
+            }
+            // NOTE: For now, setting data context of VTK MW display grid to only instance of GraphicsController.
+            if (vtkDisplay_DockPanel.DataContext != gc)
+            {
+                vtkDisplay_DockPanel.DataContext = gc;
             }
             // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
             saveState.DataContext = sim;
@@ -2055,23 +2070,28 @@ namespace DaphneGui
                     vcrControl.ReleaseVCR();
                 }
 
+            if (gc is VTKFullGraphicsController)
+            {
+                VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
+
                 if (newFile)
                 {
-                    gc.recenterCamera();
+                    gcHandle.recenterCamera();
                 }
-                gc.Rwc.Invalidate();
+                gcHandle.Rwc.Invalidate();
 
                 // TODO: Need to do this for all GCs eventually...
                 // Add the RegionControl interaction event handlers here for easier reference to callback method
-                foreach (KeyValuePair<string, RegionWidget> kvp in gc.Regions)
+                foreach (KeyValuePair<string, RegionWidget> kvp in gcHandle.Regions)
                 {
                     // NOTE: For now not doing any callbacks on property change for RegionControls...
                     kvp.Value.ClearCallbacks();
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gc.WidgetInteractionToGUICallback));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gcHandle.WidgetInteractionToGUICallback));
                     kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWindow.RegionFocusToGUISection));
                     kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
                     kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
                 }
+            }
 
                 //////////VCR_Toolbar.IsEnabled = false;
                 //////////gc.ToolsToolbar_IsEnabled = true;
@@ -2272,6 +2292,8 @@ namespace DaphneGui
             //    VCRslider.Maximum = vcrControl.TotalFrames() - 1;
             //}
 
+            bool finished = false;
+
             // only allow fitting and other analysis that needs the database if database writing is on
             if (force || skipDataWriteMenu.IsChecked == false && sim.RunStatus == SimulationBase.RUNSTAT_FINISHED)
             {
@@ -2289,7 +2311,7 @@ namespace DaphneGui
                 //    this.ChartViewDocWindow.Open();
                 //    this.menu_ActivateAnalysisChart.IsEnabled = true;
                 //}
-                gc.EnablePickingButtons();
+                finished = true;
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
@@ -2302,7 +2324,7 @@ namespace DaphneGui
             optionsMenu.IsEnabled = true;
             // TODO: Should probably combine these...
 
-            gc.ToolsToolbarEnableAllIcons();
+            gc.EnableComponents(finished);
 
             //Set the box and blob visibilities to how they were pre-run
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
@@ -2325,7 +2347,10 @@ namespace DaphneGui
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
-            gc.Rwc.Focus();
+            if (gc is VTKFullGraphicsController == true)
+            {
+                ((VTKFullGraphicsController)gc).Rwc.Focus();
+            }
         }
 
         private void simControlUpdate()
@@ -2449,7 +2474,10 @@ namespace DaphneGui
                 //WE MUST ENABLE THE HAND TO ALLOW USER TO VIEW MOL CONCS DURING PAUSE.
 
                 //NEED TO PIECE-MEAL GREY OUT ALL ICONS EXCEPT HAND
-                gc.ToolsToolbarEnableOnlyHand();
+                if (gc is VTKFullGraphicsController == true)
+                {
+                    ((VTKFullGraphicsController)gc).ToolsToolbarEnableOnlyHand();
+                }
                 
                 runButton.Content = "Continue";
                 statusBarMessagePanel.Content = "Paused...";
@@ -2462,7 +2490,10 @@ namespace DaphneGui
                 runButton.Content = "Pause";
                 statusBarMessagePanel.Content = "Running...";
 
-                gc.ToolsToolbar_IsEnabled = false;
+                if (gc is VTKFullGraphicsController == true)
+                {
+                    ((VTKFullGraphicsController)gc).ToolsToolbar_IsEnabled = false;
+                }
             }
             else
             {
@@ -2823,17 +2854,27 @@ namespace DaphneGui
             ComboBox cb = sender as ComboBox;
 
             if (cb.SelectedIndex < 0)
+            {
                 return;
+            }
 
             byte index = (byte)(cb.SelectedIndex);
 
             SetMouseLeftState(index, true);
 
-            if (index == MOUSE_LEFT_NONE)
-                gc.HandToolButton_IsEnabled = false;
-            else
-                gc.HandToolButton_IsEnabled = true;
+            if (gc is VTKFullGraphicsController == true)
+            {
+                VTKFullGraphicsController gcHandle = (VTKFullGraphicsController)gc;
 
+                if (index == MOUSE_LEFT_NONE)
+                {
+                    gcHandle.HandToolButton_IsEnabled = false;
+                }
+                else
+                {
+                    gcHandle.HandToolButton_IsEnabled = true;
+                }
+            }
         }
 
         /// <summary>
