@@ -1186,7 +1186,7 @@ namespace Daphne
             PushStatus s2 = pushStatus(crt);
             if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
             {
-                ConfigReactionTemplate newcrt = crt.Clone(null);
+                ConfigReactionTemplate newcrt = crt.Clone(true);
                 repositoryPush(newcrt, s2);
             }
         }
@@ -3484,7 +3484,7 @@ namespace Daphne
             change_stamp = SystemOfPersistence.changesCounter++;
         }
 
-        public abstract string GenerateNewName(Protocol protocol, string ending);
+        //public abstract string GenerateNewName(Protocol protocol, string ending);
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
@@ -3591,28 +3591,28 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            string OriginalName = Name;
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    string OriginalName = Name;
 
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
+        //    if (OriginalName.Contains(ending))
+        //    {
+        //        int index = OriginalName.IndexOf(ending);
+        //        OriginalName = OriginalName.Substring(0, index);
+        //    }
 
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindMoleculeByName(protocol, TempMolName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
-            }
+        //    int nSuffix = 1;
+        //    string suffix = ending + string.Format("{0:000}", nSuffix);
+        //    string TempMolName = OriginalName + suffix;
+        //    while (FindMoleculeByName(protocol, TempMolName) == true)
+        //    {
+        //        nSuffix++;
+        //        suffix = ending + string.Format("{0:000}", nSuffix);
+        //        TempMolName = OriginalName + suffix;
+        //    }
 
-            return TempMolName;
-        }
+        //    return TempMolName;
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -3642,24 +3642,24 @@ namespace Daphne
         /// </summary>
         /// <param name="protocol">null to create a literal copy</param>
         /// <returns></returns>
-        public ConfigMolecule Clone(Protocol protocol)
-        {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
+        //public ConfigMolecule Clone(Protocol protocol)
+        //{
+        //    var Settings = new JsonSerializerSettings();
+        //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        //    Settings.TypeNameHandling = TypeNameHandling.Auto;
+        //    string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+        //    ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
 
-            if (protocol != null)
-            {
-                Guid id = Guid.NewGuid();
+        //    if (protocol != null)
+        //    {
+        //        Guid id = Guid.NewGuid();
 
-                newmol.entity_guid = id.ToString();
-                newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
-            }
+        //        newmol.entity_guid = id.ToString();
+        //        newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
+        //    }
             
-            return newmol;
-        }
+        //    return newmol;
+        //}
 
         /// <summary>
         /// Need to be able to clone for any Level, not just Protocol
@@ -3791,26 +3791,7 @@ namespace Daphne
             ActivationLevel = actlevel;
         }
 
-        public ConfigGene Clone(Protocol protocol)
-        {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
-
-            if (protocol != null)
-            {
-                Guid id = Guid.NewGuid();
-
-                newgene.entity_guid = id.ToString();
-                newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
-            }
-                
-            return newgene;
-        }
-
-        //public ConfigGene Clone(Level level)
+        //public ConfigGene Clone(Protocol protocol)
         //{
         //    var Settings = new JsonSerializerSettings();
         //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -3818,39 +3799,58 @@ namespace Daphne
         //    string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
         //    ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
 
-        //    if (level != null)
+        //    if (protocol != null)
         //    {
         //        Guid id = Guid.NewGuid();
 
         //        newgene.entity_guid = id.ToString();
-        //        newgene.Name = newgene.GenerateNewName(level, "_Copy");
+        //        newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
         //    }
-
+                
         //    return newgene;
         //}
 
-        public override string GenerateNewName(Protocol protocol, string ending)
+        public ConfigGene Clone(Level level)
         {
-            string OriginalName = Name;
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
 
-            if (OriginalName.Contains(ending))
+            if (level != null)
             {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
+                Guid id = Guid.NewGuid();
+
+                newgene.entity_guid = id.ToString();
+                newgene.Name = newgene.GenerateNewName(level, "_Copy");
             }
 
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindGeneByName(protocol, TempMolName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
-            }
-
-            return TempMolName;
+            return newgene;
         }
+
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    string OriginalName = Name;
+
+        //    if (OriginalName.Contains(ending))
+        //    {
+        //        int index = OriginalName.IndexOf(ending);
+        //        OriginalName = OriginalName.Substring(0, index);
+        //    }
+
+        //    int nSuffix = 1;
+        //    string suffix = ending + string.Format("{0:000}", nSuffix);
+        //    string TempMolName = OriginalName + suffix;
+        //    while (FindGeneByName(protocol, TempMolName) == true)
+        //    {
+        //        nSuffix++;
+        //        suffix = ending + string.Format("{0:000}", nSuffix);
+        //        TempMolName = OriginalName + suffix;
+        //    }
+
+        //    return TempMolName;
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -3989,10 +3989,10 @@ namespace Daphne
             return new_ctd;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -4057,10 +4057,10 @@ namespace Daphne
             OnPropertyChanged("genes");
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -4841,10 +4841,10 @@ namespace Daphne
             return newreaction;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -5011,17 +5011,34 @@ namespace Daphne
             isBoundary = false;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
         }
 
-        public ConfigReactionTemplate Clone(Protocol protocol)
+        //public ConfigReactionTemplate Clone(Protocol protocol)
+        //{
+        //    var Settings = new JsonSerializerSettings();
+        //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        //    Settings.TypeNameHandling = TypeNameHandling.Auto;
+        //    string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+        //    ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
+
+        //    if (protocol != null)
+        //    {
+        //        Guid id = Guid.NewGuid();
+        //        newRT.entity_guid = id.ToString();
+        //    }
+
+        //    return newRT;
+        //}
+
+        public ConfigReactionTemplate Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -5029,7 +5046,7 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
 
-            if (protocol != null)
+            if (identical == false)
             {
                 Guid id = Guid.NewGuid();
                 newRT.entity_guid = id.ToString();
@@ -5037,6 +5054,7 @@ namespace Daphne
 
             return newRT;
         }       
+
     }
 
 #if OLD_RC
@@ -5073,10 +5091,10 @@ namespace Daphne
             }
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -5274,10 +5292,10 @@ namespace Daphne
             return newrc;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
@@ -5627,28 +5645,28 @@ namespace Daphne
             }
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            string OriginalName = CellName;
+        //public override string GenerateNewName(Protocol protocol, string ending)
+        //{
+        //    string OriginalName = CellName;
 
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
+        //    if (OriginalName.Contains(ending))
+        //    {
+        //        int index = OriginalName.IndexOf(ending);
+        //        OriginalName = OriginalName.Substring(0, index);
+        //    }
 
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string NewCellName = OriginalName + suffix;
-            while (FindCellByName(protocol, NewCellName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                NewCellName = OriginalName + suffix;
-            }
+        //    int nSuffix = 1;
+        //    string suffix = ending + string.Format("{0:000}", nSuffix);
+        //    string NewCellName = OriginalName + suffix;
+        //    while (FindCellByName(protocol, NewCellName) == true)
+        //    {
+        //        nSuffix++;
+        //        suffix = ending + string.Format("{0:000}", nSuffix);
+        //        NewCellName = OriginalName + suffix;
+        //    }
 
-            return NewCellName;
-        }
+        //    return NewCellName;
+        //}
 
         public override string GenerateNewName(Level level, string ending)
         {
