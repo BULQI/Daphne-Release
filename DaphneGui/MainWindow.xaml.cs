@@ -251,10 +251,10 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            //DO NOT DELETE THIS
-            //This code is to create DaphneStore and UserStore.
-            //It should not be needed ever again! 
-            //Any editing of DaphneStore should be done through application (GUI).
+            ////DO NOT DELETE THIS
+            ////This code is to create DaphneStore and UserStore.
+            ////It should not be needed ever again! 
+            ////Any editing of DaphneStore should be done through application (GUI).
             //try
             //{
             //    CreateDaphneAndUserStores();
@@ -620,7 +620,7 @@ namespace DaphneGui
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
             protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
-            ProtocolCreators.CreateBlankVatReactionComplexProtocol(protocol);
+            ProtocolCreators.CreateVatRC_Blank_Protocol(protocol);
             // serialize
             protocol.SerializeToFile();
 
