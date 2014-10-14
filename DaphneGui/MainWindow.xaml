@@ -159,11 +159,15 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Save Entities"    Name="pushMenu">
-                    <MenuItem Header="Molecules..." Name="pushMol"  Click="pushMol_Click"></MenuItem>
-                    <MenuItem Header="Genes..."     Name="pushGene" Click="pushGene_Click" />
-                    <MenuItem Header="Reactions..." Name="pushReac" Click="pushReac_Click" />
-                    <MenuItem Header="Cells..."     Name="pushCell" Click="pushCell_Click" />
+                <MenuItem Header="Save Entities"                 Name="pushMenu">
+                    <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
+                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
+                    <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />
+                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
+                    <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" />
+                    <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" />
+                    <MenuItem Header="Reaction Templates..."     Name="pushReacTemp"    Click="pushReacTemp_Click" />
+                    <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />                  
                 </MenuItem>
                 
                 <MenuItem Header="Data Export" Name = "ExportMenu">

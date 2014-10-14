@@ -252,10 +252,10 @@ namespace DaphneGui
             SelectedCellInfo = new CellInfo();
             currentConcs = new ObservableCollection<CellMolecularInfo>();
 
-            ////DO NOT DELETE THIS
-            ////This code is to create DaphneStore and UserStore.
-            ////It should not be needed ever again! 
-            ////Any editing of DaphneStore should be done through application (GUI).
+            //DO NOT DELETE THIS
+            //This code is to create DaphneStore and UserStore.
+            //It should not be needed ever again! 
+            //Any editing of DaphneStore should be done through application (GUI).
             //try
             //{
             //    CreateDaphneAndUserStores();
@@ -506,6 +506,7 @@ namespace DaphneGui
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, false);
                     UpdateGraphics();
                     displayTitle();
+                    PrepareWindow();
                 }
                 else
                 {
@@ -567,8 +568,7 @@ namespace DaphneGui
 
 
         /// <summary>
-        /// Code to create userstore and daphnestore 
-        /// HERE CREATE USERSTORE AND DAPHNESTORE FROM BLANK SCENARIO - ALL WE NEED IS THE ENTITIES.
+        /// Code to create daphnestore 
         /// ONCE CREATED, DON'T NEED THIS CODE EVER AGAIN!
         /// </summary>
         public void CreateDaphneAndUserStores()
@@ -612,16 +612,23 @@ namespace DaphneGui
             protocol.SerializeToFile();
 
             // BLANK VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_blank_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            protocol = new Protocol("Config\\daphne_vatRC_blank_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
             ProtocolCreators.CreateBlankVatReactionComplexProtocol(protocol);
             // serialize
             protocol.SerializeToFile();
 
-            // VAT-REACTION-COMPLEX SCENARIO
-            protocol = new Protocol("Config\\daphne_vat_reaction_complex_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
-            ProtocolCreators.CreateVatReactionComplexProtocol(protocol);
+            // VAT REACTION-COMPLEX - LIGAND RECEPTOR SCENARIO
+            protocol = new Protocol("Config\\daphne_vatRC_ligand_receptor_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateVatRC_LigandReceptor_Protocol(protocol);
             // serialize
             protocol.SerializeToFile();
+
+            // VAT LIGAND REACTION-COMPLEX 2 SITE BINDING SCENARIO
+            protocol = new Protocol("Config\\daphne_vatRC_2SiteAbBinding_scenario.json", "Config\\temp_protocol.json", Protocol.ScenarioType.VAT_REACTION_COMPLEX);
+            ProtocolCreators.CreateVatRC_TwoSiteAbBinding_Protocol(protocol);
+            // serialize
+            protocol.SerializeToFile();
+
         }
 
         private void showScenarioInitial()
@@ -1028,6 +1035,10 @@ namespace DaphneGui
         /// <param name="xmlConfigString">scenario as a string</param>
         private void lockAndResetSim(bool newFile, Protocol protocol)
         {
+            //skg
+            //if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            //    return;
+
             // prevent when a fit is in progress
             lock (cellFitLock)
             {
@@ -1639,7 +1650,7 @@ namespace DaphneGui
             saveTempFiles();
             updateGraphicsAndGUI();
 
-            ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;
+            ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;            
             if (selectedTab == ProtocolToolWindow.tabCellPop)
             {
                 ProtocolToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
@@ -1671,7 +1682,6 @@ namespace DaphneGui
             resetButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
-
             runSim();
         }
        
@@ -1956,14 +1966,23 @@ namespace DaphneGui
                 }
             }
 
-            // GUI Resources
-            // Set the data context for the main tab control config GUI
-            ProtocolToolWindow.DataContext = sop.Protocol;
-            CellStudioToolWindow.DataContext = sop.Protocol;
-            ComponentsToolWindow.DataContext = sop.Protocol;
+            //PrepareWindow();
 
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
+                // GUI Resources
+                // Set the data context for the main tab control config GUI
+                //ProtocolToolWindow.DataContext = sop.Protocol;
+                //CellStudioToolWindow.DataContext = sop.Protocol;
+                //ComponentsToolWindow.DataContext = sop.Protocol;
+                //ProtocolToolWindow.Open();
+                //VTKDisplayDocWindow.Open();
+                //ReacComplexChartWindow.Close();
+                //ComponentsToolWindow.Open(); 
+                //CellStudioToolWindow.Open();
+                //ProtocolToolWindow.Activate();
+                //VTKDisplayDocWindow.Activate();
+
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
@@ -1990,6 +2009,13 @@ namespace DaphneGui
                     vtkDataBasket = new VTKNullDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
+
+                //statusBarMessagePanel.Content = "Ready:  Vat Reaction Complex";
+                //ProtocolToolWindow.Close();
+                //VTKDisplayDocWindow.Close();
+                //ReacComplexChartWindow.Open();
+                //ComponentsToolWindow.Close();  //.DataContext = SOP.Protocol;
+                //CellStudioToolWindow.Close();
             }
             else
             {
@@ -2030,15 +2056,19 @@ namespace DaphneGui
                 orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
 
-            vtkDataBasket.SetupVTKData(sop.Protocol);
-            // Create all VTK visualization pipelines and elements
-            gc.CreatePipelines();
-
-            // clear the vcr cache
-            if (vcrControl != null)
+            //skg
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
-                vcrControl.ReleaseVCR();
-            }
+                vtkDataBasket.SetupVTKData(sop.Protocol);
+                // Create all VTK visualization pipelines and elements
+                gc.CreatePipelines();
+
+
+                // clear the vcr cache
+                if (vcrControl != null)
+                {
+                    vcrControl.ReleaseVCR();
+                }
 
             if (gc is VTKFullGraphicsController)
             {
@@ -2063,13 +2093,14 @@ namespace DaphneGui
                 }
             }
 
-            //////////VCR_Toolbar.IsEnabled = false;
-            //////////gc.ToolsToolbar_IsEnabled = true;
-            //////////gc.DisablePickingButtons();
+                //////////VCR_Toolbar.IsEnabled = false;
+                //////////gc.ToolsToolbar_IsEnabled = true;
+                //////////gc.DisablePickingButtons();
 
 #if LANGEVIN_TIMING
             gc.CellRenderMethod = CellRenderMethod.CELL_RENDER_VERTS;
 #endif
+            }
 
             loadSuccess = true;
         }
@@ -2412,7 +2443,18 @@ namespace DaphneGui
         /// </summary>
         private void runSim()
         {
+            //skg
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                MessageBox.Show("Running reaction complex, in method 'runSim().'");
+            }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) != true)
+            {
+                return;
+            }
+            
             VTKDisplayDocWindow.Activate();
+
             //MessageBox.Show("In runSim()");
 
             //CALL THIS FOR TESTING - WRITES OUT CONC VALUES FOR EACH STEP
@@ -2713,8 +2755,16 @@ namespace DaphneGui
             // Process open file dialog box results
             if (result == true)
             {
-                prepareProtocol(ReadJson(""));                 
+                prepareProtocol(ReadJson(""));
             }
+
+            ////skg testing
+            //Protocol.ScenarioType st = SOP.Protocol.GetScenarioType();
+
+            //if (true)
+            //{
+            //}
+
         }
 
         // This sets whether the Save command can be executed, which enables/disables the menu item
@@ -2869,7 +2919,64 @@ namespace DaphneGui
             saveScenario.IsEnabled = true;
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            VTKDisplayDocWindow.Activate();
+
+            //skg
+            PrepareWindow();
+        }
+
+        private void PrepareWindow()
+        {
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                statusBarMessagePanel.Content = "Ready:  Tissue Scenario";
+                ProtocolToolWindow.DataContext = sop.Protocol;
+                CellStudioToolWindow.DataContext = sop.Protocol;
+                ComponentsToolWindow.DataContext = sop.Protocol;
+                ProtocolToolWindow.Open();
+                VTKDisplayDocWindow.Open();
+                ReacComplexChartWindow.Close();
+
+                //ProtocolToolWindow.tabReactionComplexes.Visibility = Visibility.Hidden;
+                //ProtocolToolWindow.tabCellPop.Visibility = Visibility.Visible;
+                //ProtocolToolWindow.tabECM.Visibility = Visibility.Visible;
+                //ProtocolToolWindow.tabReports.Visibility = Visibility.Visible;
+                //ProtocolToolWindow.tabSimSetup.Visibility = Visibility.Visible;
+
+                ProtocolToolWindow.ConfigTabControl.Items.Clear();
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabSimSetup);
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabECM);
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabCellPop);
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabReports);
+
+                ComponentsToolWindow.Open();
+                CellStudioToolWindow.Open();
+                ProtocolToolWindow.Activate();
+                VTKDisplayDocWindow.Activate();
+            }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                statusBarMessagePanel.Content = "Ready:  Vat Reaction Complex";
+                //ProtocolToolWindow.Close();
+                //ProtocolToolWindow.tabCellPop.Visibility = Visibility.Hidden;
+                //ProtocolToolWindow.tabECM.Visibility = Visibility.Hidden;
+                //ProtocolToolWindow.tabReports.Visibility = Visibility.Hidden;
+                //ProtocolToolWindow.tabSimSetup.Visibility = Visibility.Hidden;
+                //ProtocolToolWindow.tabReactionComplexes.Visibility = Visibility.Visible;
+                //ProtocolToolWindow.ConfigTabControl.SelectedIndex = 0;
+
+                ProtocolToolWindow.DataContext = sop.Protocol;
+                ProtocolToolWindow.ConfigTabControl.Items.Clear();
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabSimSetup);
+                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabReactionComplexes);
+                ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabReactionComplexes;
+
+
+
+                VTKDisplayDocWindow.Close();
+                ReacComplexChartWindow.Open();
+                ComponentsToolWindow.Close();  //.DataContext = SOP.Protocol;
+                CellStudioToolWindow.Close();
+            }
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3139,6 +3246,34 @@ namespace DaphneGui
             //    MainMenu.Items.Remove(AdminMenu);
 
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
+        {
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme);
+            pushWindow.DataContext = SOP;
+            pushWindow.ShowDialog();
+        }
+
+        private void pushTransDriver_Click(object sender, RoutedEventArgs e)
+        {
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
+            pushWindow.DataContext = SOP;
+            pushWindow.ShowDialog();
+        }
+
+        private void pushReacTemp_Click(object sender, RoutedEventArgs e)
+        {
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionTemplate);
+            pushWindow.DataContext = SOP;
+            pushWindow.ShowDialog();
+        }
+
+        private void pushReacComplex_Click(object sender, RoutedEventArgs e)
+        {
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex);
+            pushWindow.DataContext = SOP;
+            pushWindow.ShowDialog();
         }
 
         

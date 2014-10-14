@@ -672,7 +672,8 @@ namespace DaphneGui
             // but I don't know for sure; we can discuss
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                throw new InvalidCastException();
+                return false;
+                //throw new InvalidCastException();
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
@@ -2660,7 +2661,8 @@ namespace DaphneGui
             // but I don't know for sure; we can discuss
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                throw new InvalidCastException();
+                return;
+                //throw new InvalidCastException();
             }
 
             TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
@@ -2677,6 +2679,74 @@ namespace DaphneGui
             }
 
             ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+        }
+
+        //LIBRARIES REACTION COMPLEXES HANDLERS
+
+        private void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
+        {
+            if (lbComplexes.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a reaction complex to copy from.");
+                return;
+            }
+
+            ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
+            ConfigReactionComplex crcNew = crcCurr.Clone(false);
+
+            Level level = this.DataContext as Level;
+            level.entity_repository.reaction_complexes.Add(crcNew);
+            //MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcNew);
+
+            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+        }
+
+        private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
+        {
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
+            if (arc.ShowDialog() == true)
+                lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+        }
+
+        private void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
+            if (crc == null)
+                return;
+
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
+            arc.ShowDialog();
+
+        }
+
+        private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+            if (crc != null)
+            {
+                MessageBoxResult res;
+                res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                    return;
+
+                int index = lbComplexes.SelectedIndex;
+
+                Level level = this.DataContext as Level;
+                level.entity_repository.reaction_complexes.Remove(crc);
+
+                //                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Remove(crc);
+
+                lbComplexes.SelectedIndex = index;
+
+                if (index >= lbComplexes.Items.Count)
+                    lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+
+                if (lbComplexes.Items.Count == 0)
+                    lbComplexes.SelectedIndex = -1;
+
+            }
+
+            //btnGraphReactionComplex.IsChecked = true;
         }
 
         //LIBRARIES REACTION COMPLEXES HANDLERS
@@ -2878,13 +2948,6 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            //Debugger.Break();
-            //double newvalue = (double)value - 1.0;
-            if (value is ConfigCell)
-            {
-                return ((ConfigCell)value).DragCoefficient;
-            }
-            //return newvalue;
             return value;
         }
 
