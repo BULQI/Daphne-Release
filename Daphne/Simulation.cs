@@ -1175,8 +1175,9 @@ namespace Daphne
             dataBasket.Clear();
 
             List<ConfigReaction> reacs = new List<ConfigReaction>();
-
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
+
+            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 
