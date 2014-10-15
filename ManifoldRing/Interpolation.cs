@@ -150,7 +150,7 @@ namespace ManifoldRing
                 double concAdd = flux.M.Area() * flux.array[i] / m.VoxelVolume();
 
                 // Indices of nodes surround source and proportions for dividing the concentration source among them
-                LocalMatrix[] lm = interpolationMatrix(t.toContaining(flux.M.PrincipalPoints[i]));
+                LocalMatrix[] lm = interpolationMatrix(t.toContaining(flux.M.PrincipalPoints[i]).ToArray());
 
                 // Find the node in this manifold that is closest to the principal point
                 n = m.indexArrayToLinearIndex(m.localToIndexArray(t.toContaining(flux.M.PrincipalPoints[i])));

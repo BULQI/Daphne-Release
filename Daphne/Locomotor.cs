@@ -60,7 +60,7 @@ namespace Daphne
         {
             for (int i = 0; i < force.Length; i++)
             {
-                force[i] = Sigma * Rand.NormalDist.NextDouble() / Math.Sqrt(dt);
+                force[i] = Sigma * Rand.NormalDist.Sample() / Math.Sqrt(dt);
             }
 
             return force;

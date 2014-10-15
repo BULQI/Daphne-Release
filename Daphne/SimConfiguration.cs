@@ -5826,7 +5826,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
 
             if (_cellPop != null)
             {
@@ -5836,9 +5835,9 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
-                                    Extents[1] * Rand.UniformDist.NextDouble(), 
-                                    Extents[2] * Rand.UniformDist.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.Sample(), 
+                                    Extents[1] * Rand.UniformDist.Sample(), 
+                                    Extents[2] * Rand.UniformDist.Sample() };
         }
 
         public override void Resize(double[] newExtents)
@@ -5875,9 +5874,9 @@ namespace Daphne
 
         public override double[] nextPosition()
         {
-            return new double[3] {  Extents[0] * Rand.UniformDist.NextDouble(), 
-                                    Extents[1] * Rand.UniformDist.NextDouble(), 
-                                    Extents[2] * Rand.UniformDist.NextDouble() };
+            return new double[3] {  Extents[0] * Rand.UniformDist.Sample(), 
+                                    Extents[1] * Rand.UniformDist.Sample(), 
+                                    Extents[2] * Rand.UniformDist.Sample() };
         }
 
         public override void Resize(double[] newExtents)
@@ -5987,9 +5986,9 @@ namespace Daphne
         {
             // Draw three random coordinates from normal distributions centered at the origin of the simulation coordinate system.
             // normal distribution centered at zero with specified sigmas
-            double[] pos = new double[3] {  sigma[0] * Rand.NormalDist.NextDouble(), 
-                                            sigma[1] * Rand.NormalDist.NextDouble(), 
-                                            sigma[2] * Rand.NormalDist.NextDouble() };
+            double[] pos = new double[3] {  sigma[0] * Rand.NormalDist.Sample(), 
+                                            sigma[1] * Rand.NormalDist.Sample(), 
+                                            sigma[2] * Rand.NormalDist.Sample() };
 
             // The new position rotated and translated  with the box coordinate system
             double[] posRotated = new double[3];

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace ManifoldRing
 {
@@ -178,7 +178,7 @@ namespace ManifoldRing
         {
             ArraySize = 4;
             PrincipalPoints = new Vector[1];
-            PrincipalPoints[0] = new Vector(3, 0.0);
+            PrincipalPoints[0] = new DenseVector(3);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
+            double[] pos = t.Translation.ToArray();
             double[] grad = from.M.Grad(pos, from);
 
             to.array[0] = from.Value(pos);
@@ -975,8 +975,8 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-            double[] pos = t.Translation;
-            Vector x;
+            double[] pos = t.Translation.ToArray();
+            Vector x = new DenseVector(new double[3]);
 
             for (int i = 0; i < ArraySize; i++)
             {
@@ -1444,7 +1444,7 @@ namespace ManifoldRing
         /// <returns></returns>
         public override ScalarField Restrict(ScalarField from, Transform t, ScalarField to)
         {
-                double[] pos = t.Translation;
+                double[] pos = t.Translation.ToArray();
                 to.array[0] = from.Value(pos);
 
                 return to;

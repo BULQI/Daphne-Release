@@ -428,7 +428,7 @@ namespace Daphne
             // initial contact formation, create synapse if the condition is met
             if (b_ij == 0)
             {
-                if (synapse == null && FDC().AvailableArea > FDC().SynapseArea && Kappa * effectiveSurfaceArea() * dt > Utilities.SystemRandom.NextDouble())
+                if (synapse == null && FDC().AvailableArea > FDC().SynapseArea && Kappa * effectiveSurfaceArea() * dt > Utilities.SystemRandom.Sample())
                 {
                     {
                         b_ij = 1;
