@@ -214,14 +214,8 @@
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pushing\PushCell.xaml.cs">
-      <DependentUpon>PushCell.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pushing\PushEntity.xaml.cs">
       <DependentUpon>PushEntity.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pushing\PushGene.xaml.cs">
-      <DependentUpon>PushGene.xaml</DependentUpon>
     </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
@@ -315,15 +309,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pushing\PushCell.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Pushing\PushEntity.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pushing\PushGene.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

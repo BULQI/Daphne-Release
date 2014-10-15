@@ -506,7 +506,6 @@ namespace DaphneGui
                     MainWindow.SetControlFlag(MainWindow.CONTROL_FORCE_RESET, false);
                     UpdateGraphics();
                     displayTitle();
-                    PrepareWindow();
                 }
                 else
                 {
@@ -693,8 +692,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void ImportSBML_Click(object sender, RoutedEventArgs e)
         {
-            saveStoreFiles();
-
             //Check that previous changes are saved before loading new Protocol
             if (tempFileContent == true || saveTempFiles() == true)
             {
@@ -1646,7 +1643,6 @@ namespace DaphneGui
             runButton.IsEnabled = false;
             mutex = true;
 
-            saveStoreFiles();
             saveTempFiles();
             updateGraphicsAndGUI();
 
@@ -1953,35 +1949,16 @@ namespace DaphneGui
                         orig_content = sop.Protocol.SerializeToStringSkipDeco();
                         orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                     }
-
-                    ////skg - Code needed to retrieve userstore and daphnestore - deserialize from files
-                    sop.UserStore.FileName = "Config\\daphne_userstore.json";
-                    sop.UserStore.TempFile = "Config\\temp_userstore.json";
-                    sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
-                    sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
-                    sop.DaphneStore = sop.DaphneStore.Deserialize();
-                    sop.UserStore = sop.UserStore.Deserialize();
-                    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
-                    orig_user_store_content = sop.UserStore.SerializeToString();
                 }
             }
-
-            //PrepareWindow();
 
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                //ProtocolToolWindow.DataContext = sop.Protocol;
-                //CellStudioToolWindow.DataContext = sop.Protocol;
-                //ComponentsToolWindow.DataContext = sop.Protocol;
-                //ProtocolToolWindow.Open();
-                //VTKDisplayDocWindow.Open();
-                //ReacComplexChartWindow.Close();
-                //ComponentsToolWindow.Open(); 
-                //CellStudioToolWindow.Open();
-                //ProtocolToolWindow.Activate();
-                //VTKDisplayDocWindow.Activate();
+                this.ProtocolToolWindow.DataContext = sop.Protocol;
+                this.CellStudioToolWindow.DataContext = sop.Protocol;
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
@@ -2009,13 +1986,6 @@ namespace DaphneGui
                     vtkDataBasket = new VTKNullDataBasket();
                     gc = new VTKNullGraphicsController();
                 }
-
-                //statusBarMessagePanel.Content = "Ready:  Vat Reaction Complex";
-                //ProtocolToolWindow.Close();
-                //VTKDisplayDocWindow.Close();
-                //ReacComplexChartWindow.Open();
-                //ComponentsToolWindow.Close();  //.DataContext = SOP.Protocol;
-                //CellStudioToolWindow.Close();
             }
             else
             {
@@ -2786,8 +2756,6 @@ namespace DaphneGui
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            saveStoreFiles();
-
             if ((tempFileContent == true || saveTempFiles() == true) && applyTempFilesAndSave(false) == false)
             {
                 // Note: this is a cute idea, canceling the exit, but we'd need a 'discard' button in addition
@@ -2872,8 +2840,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void newScenario_Click(object sender, RoutedEventArgs e)
         {
-            saveStoreFiles();
-
             if (tempFileContent == true || saveTempFiles() == true)
             {
                 applyTempFilesAndSave(true);
@@ -2907,64 +2873,7 @@ namespace DaphneGui
             saveScenario.IsEnabled = true;
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();
-
-            //skg
-            PrepareWindow();
-        }
-
-        private void PrepareWindow()
-        {
-            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
-            {
-                statusBarMessagePanel.Content = "Ready:  Tissue Scenario";
-                ProtocolToolWindow.DataContext = sop.Protocol;
-                CellStudioToolWindow.DataContext = sop.Protocol;
-                ComponentsToolWindow.DataContext = sop.Protocol;
-                ProtocolToolWindow.Open();
-                VTKDisplayDocWindow.Open();
-                ReacComplexChartWindow.Close();
-
-                //ProtocolToolWindow.tabReactionComplexes.Visibility = Visibility.Hidden;
-                //ProtocolToolWindow.tabCellPop.Visibility = Visibility.Visible;
-                //ProtocolToolWindow.tabECM.Visibility = Visibility.Visible;
-                //ProtocolToolWindow.tabReports.Visibility = Visibility.Visible;
-                //ProtocolToolWindow.tabSimSetup.Visibility = Visibility.Visible;
-
-                ProtocolToolWindow.ConfigTabControl.Items.Clear();
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabSimSetup);
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabECM);
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabCellPop);
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabReports);
-
-                ComponentsToolWindow.Open();
-                CellStudioToolWindow.Open();
-                ProtocolToolWindow.Activate();
-                VTKDisplayDocWindow.Activate();
-            }
-            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
-            {
-                statusBarMessagePanel.Content = "Ready:  Vat Reaction Complex";
-                //ProtocolToolWindow.Close();
-                //ProtocolToolWindow.tabCellPop.Visibility = Visibility.Hidden;
-                //ProtocolToolWindow.tabECM.Visibility = Visibility.Hidden;
-                //ProtocolToolWindow.tabReports.Visibility = Visibility.Hidden;
-                //ProtocolToolWindow.tabSimSetup.Visibility = Visibility.Hidden;
-                //ProtocolToolWindow.tabReactionComplexes.Visibility = Visibility.Visible;
-                //ProtocolToolWindow.ConfigTabControl.SelectedIndex = 0;
-
-                ProtocolToolWindow.DataContext = sop.Protocol;
-                ProtocolToolWindow.ConfigTabControl.Items.Clear();
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabSimSetup);
-                ProtocolToolWindow.ConfigTabControl.Items.Add(ProtocolToolWindow.tabReactionComplexes);
-                ProtocolToolWindow.ConfigTabControl.SelectedItem = ProtocolToolWindow.tabReactionComplexes;
-
-
-
-                VTKDisplayDocWindow.Close();
-                ReacComplexChartWindow.Open();
-                ComponentsToolWindow.Close();  //.DataContext = SOP.Protocol;
-                CellStudioToolWindow.Close();
-            }
+            VTKDisplayDocWindow.Activate();
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -2987,35 +2896,7 @@ namespace DaphneGui
             About about = new About();
             about.ShowDialog();
         }
-
-        private void pushMol_Click(object sender, RoutedEventArgs e)
-        {
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
-            pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
-        }
-
-        private void pushGene_Click(object sender, RoutedEventArgs e)
-        {
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
-            pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
-        }
-
-        private void pushReac_Click(object sender, RoutedEventArgs e)
-        {
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
-            pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
-        }
-
-        private void pushCell_Click(object sender, RoutedEventArgs e)
-        {
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
-            pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
-        }
-
+        
         /// <summary>
         /// This GenericPush method is called for pushing entities into the Protocol level.
         ///
@@ -3228,40 +3109,119 @@ namespace DaphneGui
             return isAdmin;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void readStores()
         {
-            //if (IsUserAdministrator() == false)
-            //    MainMenu.Items.Remove(AdminMenu);
-
-            //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
+            //Code to retrieve userstore and daphnestore - deserialize from files
+            sop.UserStore.FileName = "Config\\daphne_userstore.json";
+            sop.UserStore.TempFile = "Config\\temp_userstore.json";
+            sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
+            sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
+            sop.DaphneStore = sop.DaphneStore.Deserialize();
+            sop.UserStore = sop.UserStore.Deserialize();
+            orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+            orig_user_store_content = sop.UserStore.SerializeToString();
         }
 
+        private void pushMol_Click(object sender, RoutedEventArgs e)
+        {
+            //load the stores only as needed
+            readStores();
+
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
+            pushWindow.DataContext = SOP;
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
+        }
+
+        private void pushGene_Click(object sender, RoutedEventArgs e)
+        {
+            //load the stores only as needed
+            readStores();
+
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
+            pushWindow.DataContext = SOP;
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
+        }
+
+        private void pushReac_Click(object sender, RoutedEventArgs e)
+        {
+            //load the stores only as needed
+            readStores();
+
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
+            pushWindow.DataContext = SOP;
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
+        }
+
+        private void pushCell_Click(object sender, RoutedEventArgs e)
+        {
+            //load the stores only as needed
+            readStores();
+
+            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
+            pushWindow.DataContext = SOP;
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
+        }
+
+        
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
+            //load the stores only as needed
+            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme);
             pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
         }
 
         private void pushTransDriver_Click(object sender, RoutedEventArgs e)
         {
+            //load the stores only as needed
+            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
             pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
+
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
         }
 
         private void pushReacTemp_Click(object sender, RoutedEventArgs e)
         {
+            //load the stores only as needed
+            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionTemplate);
             pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
         }
 
         private void pushReacComplex_Click(object sender, RoutedEventArgs e)
         {
+            //load the stores only as needed
+            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex);
             pushWindow.DataContext = SOP;
-            pushWindow.ShowDialog();
+            if (pushWindow.ShowDialog() == true)
+            {
+                saveStoreFiles();
+            }
         }
 
         
