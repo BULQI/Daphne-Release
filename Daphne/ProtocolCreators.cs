@@ -146,7 +146,7 @@ namespace Daphne
 
                         string reacTemplateGuid = newReac.reaction_template_guid_ref;
                         ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[reacTemplateGuid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
                         protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
 
                         itemsLoaded++;
@@ -167,7 +167,7 @@ namespace Daphne
                     if (crt.name == rtName[i])
                     {
                         ConfigReactionTemplate configReacTemplate = userstore.entity_repository.reaction_templates_dict[crt.entity_guid];
-                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(null);
+                        ConfigReactionTemplate crtnew = configReacTemplate.Clone(true);
                         protocol.repositoryPush(crtnew, Level.PushStatus.PUSH_CREATE_ITEM);
                         itemsLoaded++;
                    }
@@ -688,7 +688,7 @@ namespace Daphne
 
         }
 
-        public static void CreateBlankVatReactionComplexProtocol(Protocol protocol)
+        public static void CreateVatRC_Blank_Protocol(Protocol protocol)
         {
             if (protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
             {
@@ -704,28 +704,6 @@ namespace Daphne
             protocol.scenario.time_config.rendering_interval = 0.2;
             protocol.scenario.time_config.sampling_interval = 0.2;
         }
-
-        //private static void LoadVatReactionComplexEntities(Protocol protocol)
-        //{
-        //    //Load from User Store so open it
-        //    Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
-        //    userstore = userstore.Deserialize();
-
-        //    // RC
-        //    string[] type = new string[1] { "Ligand/Receptor" };
-
-        //    for (int i = 0; i < type.Length; i++)
-        //    {
-        //        foreach (ConfigReactionComplex ent in userstore.entity_repository.reaction_complexes)
-        //        {
-        //            if (ent.Name == type[i])
-        //            {
-        //                protocol.repositoryPush(ent.Clone(true), Level.PushStatus.PUSH_CREATE_ITEM);
-        //                break;
-        //            }
-        //        }
-        //    }
-        //}
 
         public static void CreateVatRC_LigandReceptor_Protocol(Protocol protocol)
         {
@@ -781,53 +759,58 @@ namespace Daphne
                 }
             }
 
-            //This adds molpops to envHandle.comp
-            item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
-            for (int i = 0; i < item.Length; i++)
+            foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
             {
-                ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
-                if (configMolecule != null)
-                {
-                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
-                    configMolPop.molecule = configMolecule.Clone(null);
-                    configMolPop.Name = configMolecule.Name;
-
-                    MolPopHomogeneousLevel molpophomo = new MolPopHomogeneousLevel();
-                    molpophomo.concentration = 1.0;
-                    molpophomo.boundaryCondition = new List<BoundaryCondition>();
-                    BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * molpophomo.concentration);
-                    molpophomo.boundaryCondition.Add(bc);
-                    bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
-                    molpophomo.boundaryCondition.Add(bc);
-                    configMolPop.mp_distribution = molpophomo;
-                    configMolPop.mp_dist_name = "Homogeneous";
-
-                    // graphics colors etc
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
-
-                    // Reporting
-                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
-                    ((ReportECM)configMolPop.report_mp).mean = false;
-
-                    envHandle.comp.molpops.Add(configMolPop);
-                }
+                envHandle.comp.molpops.Add(configMolpop);
             }
 
-            //This adds reactions to envHandle.comp
-            item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
-                                  "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+            ////This adds molpops to envHandle.comp
+            //item = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+            //for (int i = 0; i < item.Length; i++)
+            //{
+            //    ConfigMolecule configMolecule = protocol.entity_repository.molecules_dict[findMoleculeGuid(item[i], MoleculeLocation.Bulk, protocol)];
+            //    if (configMolecule != null)
+            //    {
+            //        ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
+            //        configMolPop.molecule = configMolecule.Clone(null);
+            //        configMolPop.Name = configMolecule.Name;
 
-            for (int i = 0; i < item.Length; i++)
-            {
-                ConfigReaction configReaction = findReaction(item[i], protocol);
+            //        MolPopHomogeneousLevel molpophomo = new MolPopHomogeneousLevel();
+            //        molpophomo.concentration = 1.0;
+            //        molpophomo.boundaryCondition = new List<BoundaryCondition>();
+            //        BoundaryCondition bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.left, 5 * molpophomo.concentration);
+            //        molpophomo.boundaryCondition.Add(bc);
+            //        bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
+            //        molpophomo.boundaryCondition.Add(bc);
+            //        configMolPop.mp_distribution = molpophomo;
+            //        configMolPop.mp_dist_name = "Homogeneous";
 
-                if (configReaction != null)
-                {
-                    ConfigReaction newReac = configReaction.Clone(true);
-                    envHandle.comp.Reactions.Add(newReac);
-                }
-            }
+            //        // graphics colors etc
+            //        configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+            //        configMolPop.mp_render_blending_weight = 2.0;
+
+            //        // Reporting
+            //        configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+            //        ((ReportECM)configMolPop.report_mp).mean = false;
+
+            //        envHandle.comp.molpops.Add(configMolPop);
+            //    }
+            //}
+
+            ////This adds reactions to envHandle.comp
+            //item = new string[2] {"CXCL13 + CXCR5 -> CXCL13:CXCR5",
+            //                      "CXCL13:CXCR5 -> CXCL13 + CXCR5"};
+
+            //for (int i = 0; i < item.Length; i++)
+            //{
+            //    ConfigReaction configReaction = findReaction(item[i], protocol);
+
+            //    if (configReaction != null)
+            //    {
+            //        ConfigReaction newReac = configReaction.Clone(true);
+            //        envHandle.comp.Reactions.Add(newReac);
+            //    }
+            //}
         }
 
         public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)
@@ -842,15 +825,18 @@ namespace Daphne
             // Experiment
             protocol.experiment_name = "SPR Vat RC";
             protocol.experiment_description = "...";
-            protocol.scenario.time_config.duration = 2.0;
-            protocol.scenario.time_config.rendering_interval = 0.2;
-            protocol.scenario.time_config.sampling_interval = 0.2;
+            protocol.scenario.time_config.duration = 100.0;
+            protocol.scenario.time_config.rendering_interval = 2.0;
+            protocol.scenario.time_config.sampling_interval = 1.0;
 
             ConfigReactionComplex configRC = new ConfigReactionComplex("TwoSiteAbBinding");
 
             //Load needed entities from User Store
             Level userstore = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             userstore = userstore.Deserialize();
+
+            // Add items to protocol ER
+            //
 
             string[] item = new string[] { "Association", "Dissociation", "Transformation"};
             int itemsLoaded = LoadProtocolReactionTemplates(protocol, item, userstore);
@@ -933,7 +919,7 @@ namespace Daphne
             // Transformation
             // R1 -> R2
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R1", MoleculeLocation.Bulk, protocol));
             // product
@@ -945,7 +931,7 @@ namespace Daphne
             // Transformation
             // R2 -> R1
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("R2", MoleculeLocation.Bulk, protocol));
             // product
@@ -957,7 +943,7 @@ namespace Daphne
             // Transformation
             // C1 -> C2
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C1", MoleculeLocation.Bulk, protocol));
             // product
@@ -969,7 +955,7 @@ namespace Daphne
             // Transformation
             // C2 -> C1
             cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Association);
+            cr.reaction_template_guid_ref = protocol.findReactionTemplateGuid(ReactionType.Transformation);
             // reactants
             cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("C2", MoleculeLocation.Bulk, protocol));
             // product
@@ -979,6 +965,9 @@ namespace Daphne
             protocol.entity_repository.reactions.Add(cr);
 
             protocol.InitializeStorageClasses();
+            
+            // Add ER items to config reaction complex
+            //
 
             // Push all ER reactions to Reaction Complex entity
             foreach (ConfigReaction configReac in protocol.entity_repository.reactions)
@@ -1012,12 +1001,29 @@ namespace Daphne
                     //configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+
                     configRC.molpops.Add(configMolPop);
                 }
             }
+
+            // Add items to config compartment
+            //
+
+            envHandle.comp.reaction_complexes.Add(configRC);
+            //envHandle.comp.reaction_complexes_dict.Add(configRC.entity_guid, configRC);
+
+            foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
+            {
+                envHandle.comp.molpops.Add(configMolpop);
+            }
+
+
+
         }
 
 
@@ -2707,13 +2713,14 @@ namespace Daphne
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
                     configMolPop.mp_dist_name = "Uniform";
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
-
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+
                     crc.molpops.Add(configMolPop);
                 }
             }

@@ -1174,11 +1174,17 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
-            List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
+
+            //List<ConfigReaction> reacs = new List<ConfigReaction>();
+            //reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
+            List<ConfigReaction> rcReacs = new List<ConfigReaction>();
+            rcReacs = scenarioHandle.environment.comp.reaction_complexes[0].reactions.ToList();
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, rcReacs);
+
+
+            //AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
+            
         }
 
         public override void reset()

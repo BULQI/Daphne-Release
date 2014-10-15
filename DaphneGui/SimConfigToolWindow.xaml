@@ -3193,7 +3193,7 @@
                     <Expander
                         Padding="5" 
                         ExpandDirection="Down"
-                        IsExpanded="False"
+                        IsExpanded="True"
                         Header="Reaction Complexes"                           
                         x:Name="ReacComplexExpander"
                         Margin="0,4,0,0" 
@@ -3255,7 +3255,7 @@
                             </StackPanel>
 
                             <!-- List of Reactions in selected Reaction Complex -->
-                            <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}">
+                            <StackPanel Margin="0,10" DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" >
                                 <TextBlock Text="Reactions" />
                                 <!--<ListBox 
                                     ItemsSource="{Binding ElementName=lbComplexes, Path=SelectedItem.reactions, Converter={StaticResource DebugConverter}}"
@@ -3316,8 +3316,7 @@
 
                             </StackPanel>
 
-                            <StackPanel Margin="0,10" DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}"
-                                        >
+                            <StackPanel Margin="0,10" DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" >
                                 <TextBlock Text="Initial Molecular concentrations" />
                                 <ListView x:Name="lvReactionComplexMolecules" 
                                       ItemsSource="{Binding Path=molpops, Mode=TwoWay}"
