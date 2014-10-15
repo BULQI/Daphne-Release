@@ -302,7 +302,7 @@ namespace Daphne
         /// </summary>
         /// <param name="simComp">the compartment</param>
         /// <param name="molpops">the list of molpops</param>
-        protected void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops)
+        private void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops)
         {
             foreach (ConfigMolecularPopulation cmp in molpops)
             {
@@ -1174,14 +1174,11 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
-            foreach (ConfigReactionComplex rc in scenarioHandle.environment.comp.reaction_complexes)
-            {
-                List<ConfigReaction> reacs = new List<ConfigReaction>();
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
 
-                reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-                addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp.molpops);
-                AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
-            }
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
+            addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 
         public override void reset()
