@@ -2349,6 +2349,10 @@ namespace DaphneGui
             {
                 sop.UserStore.SerializeToFile(false);
             }
+
+            sop.DaphneStore.entity_repository = new EntityRepository();
+            sop.UserStore.entity_repository = new EntityRepository();
+
         }
 
         private bool applyTempFilesAndSave(bool discard)
@@ -3061,6 +3065,7 @@ namespace DaphneGui
 
         private void menuUserStore_Click(object sender, RoutedEventArgs e)
         {
+            readStores();
             statusBarMessagePanel.Content = "Ready:  User Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3071,6 +3076,7 @@ namespace DaphneGui
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
         {
+            readStores();
             statusBarMessagePanel.Content = "Ready:  Daphne Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3194,18 +3200,6 @@ namespace DaphneGui
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
             pushWindow.DataContext = SOP;
 
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
-        }
-
-        private void pushReacTemp_Click(object sender, RoutedEventArgs e)
-        {
-            //load the stores only as needed
-            readStores();
-            PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionTemplate);
-            pushWindow.DataContext = SOP;
             if (pushWindow.ShowDialog() == true)
             {
                 saveStoreFiles();

@@ -429,8 +429,8 @@
                             <TextBlock Text="Reactions" />
 
                             <ListView x:Name="lvReacComplexReactions" 
-                                      ItemsSource="{Binding Path=ReactionRates, Mode=TwoWay}"
-                                      SelectedIndex="-1"
+                                      ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
+                                      SelectedIndex="0"
                                         >
                                 <ListView.View>
                                     <GridView>
@@ -451,17 +451,7 @@
                                         <GridViewColumn Width="80" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-
-                                                    <TextBlock Text="{Binding Path=ReactionComplexRate, StringFormat=G3}">
-                                                        <TextBlock.Style>
-                                                            <Style>
-                                                                <Setter Property="TextBlock.Foreground" 
-                                                                        Value="Black">
-                                                                </Setter>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-
+                                                    <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -469,9 +459,7 @@
 
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                                        
+                                                    <TextBlock Text="{Binding Path=TotalReactionString}">
                                                         <TextBlock.Style>
                                                             <Style>
                                                                 <Setter Property="TextBlock.Foreground" 

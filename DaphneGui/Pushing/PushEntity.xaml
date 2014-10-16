@@ -14,6 +14,9 @@
             MoleculeTemplate="{StaticResource readonlyMoleculeTemplate}" 
             GeneTemplate="{StaticResource editGeneTemplate}"
             CellTemplate="{StaticResource editCellTemplate}"
+            RCTemplate="{StaticResource reactionComplexTemplate}"
+            DiffSchemeTemplate="{StaticResource diffSchemeTemplate}"
+            TransDrivTemplate="{StaticResource transitionDriverTemplate}"
              />
     </Window.Resources>
     
