@@ -306,6 +306,12 @@ namespace Daphne
         {
             foreach (ConfigMolecularPopulation cmp in molpops)
             {
+                // avoid duplicates
+                if (simComp.Populations.ContainsKey(cmp.molecule.entity_guid) == true)
+                {
+                    continue;
+                }
+
                 Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
                                                                      new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
                                                                      new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
