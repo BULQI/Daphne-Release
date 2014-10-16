@@ -1724,6 +1724,7 @@ namespace Daphne
                     {
                         if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
                         {
+                            reac_guids.Add(cr.entity_guid);
                             config_reacs.Add(cr);
                         }
                     }
@@ -1763,6 +1764,7 @@ namespace Daphne
                     {
                         if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
                         {
+                            reac_guids.Add(cr.entity_guid);
                             config_reacs.Add(cr);
                         }
                     }
