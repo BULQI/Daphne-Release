@@ -162,25 +162,6 @@ namespace Daphne
 
             // modify molpop information before setting
             addCellMolpops(cellState, configComp, simComp);
-            /*for (int comp = 0; comp < 2; comp++)
-            {
-                foreach (ConfigMolecularPopulation cmp in configComp[comp].molpops)
-                {
-                    //config_comp's distribution changed. may need to keep 
-                    //it for not customized cell later(?)
-
-                    if (cellState.cmState.molPopDict.ContainsKey(cmp.molecule.entity_guid) == false)
-                    {
-                        continue;
-                    }
-
-                    MolPopExplicit mp_explicit = new MolPopExplicit();
-
-                    mp_explicit.conc = cellState.cmState.molPopDict[cmp.molecule.entity_guid];
-                    cmp.mp_distribution = mp_explicit;            
-                }
-                addCompartmentMolpops(simComp[comp], configComp[comp]);
-            }*/
 
             // cell genes
             foreach (ConfigGene cg in cell.genes)
@@ -316,10 +297,21 @@ namespace Daphne
             AddCell(simCell);
         }
 
-        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        /// <summary>
+        /// adds a list of molpops to the compartment
+        /// </summary>
+        /// <param name="simComp">the compartment</param>
+        /// <param name="molpops">the list of molpops</param>
+        private void addCompartmentMolpops(Compartment simComp, ObservableCollection<ConfigMolecularPopulation> molpops)
         {
-            foreach (ConfigMolecularPopulation cmp in configComp.molpops)
+            foreach (ConfigMolecularPopulation cmp in molpops)
             {
+                // avoid duplicates
+                if (simComp.Populations.ContainsKey(cmp.molecule.entity_guid) == true)
+                {
+                    continue;
+                }
+
                 Molecule mol = SimulationModule.kernel.Get<Molecule>(new ConstructorArgument("name", cmp.molecule.Name),
                                                                      new ConstructorArgument("mw", cmp.molecule.MolecularWeight),
                                                                      new ConstructorArgument("effRad", cmp.molecule.EffectiveRadius),
@@ -418,6 +410,20 @@ namespace Daphne
                 {
                     throw new Exception("Molecular population distribution type not implemented.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// add molpops for a whole compartment, includes reaction complexes
+        /// </summary>
+        /// <param name="simComp">the simlation compartment</param>
+        /// <param name="configComp">the config compartment that describes the simulation compartment</param>
+        protected void addCompartmentMolpops(Compartment simComp, ConfigCompartment configComp)
+        {
+            addCompartmentMolpops(simComp, configComp.molpops);
+            foreach (ConfigReactionComplex rc in configComp.reaction_complexes)
+            {
+                addCompartmentMolpops(simComp, rc.molpops);
             }
         }
 
@@ -1174,17 +1180,11 @@ namespace Daphne
             // clear the databasket dictionaries
             dataBasket.Clear();
 
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+
+            reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             addCompartmentMolpops(dataBasket.Environment.Comp, scenarioHandle.environment.comp);
-
-            //List<ConfigReaction> reacs = new List<ConfigReaction>();
-            //reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
-            List<ConfigReaction> rcReacs = new List<ConfigReaction>();
-            rcReacs = scenarioHandle.environment.comp.reaction_complexes[0].reactions.ToList();
-            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, rcReacs);
-
-
-            //AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
-            
+            AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
         }
 
         public override void reset()
