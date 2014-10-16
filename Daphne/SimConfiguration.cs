@@ -1702,56 +1702,14 @@ namespace Daphne
         /// <returns></returns>
         public List<ConfigReaction> GetTranscriptionReactions(ConfigCompartment configComp)
         {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+            Dictionary<string, ConfigReaction> config_reacs = new Dictionary<string, ConfigReaction>();
 
             // Compartment reactions
             foreach (ConfigReaction cr in configComp.Reactions)
             {
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription) && (config_reacs.ContainsKey(cr.entity_guid) == false))         
                 {
-                    reac_guids.Add(cr.entity_guid);
-                    config_reacs.Add(cr);
-                }
-            }
-
-            // Compartment reaction complexes
-            foreach (ConfigReactionComplex rc in configComp.reaction_complexes)
-            {
-                foreach (ConfigReaction cr in rc.reactions)
-                {
-                    if (reac_guids.Contains(cr.entity_guid) == false)
-                    {
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
-                        {
-                            reac_guids.Add(cr.entity_guid);
-                            config_reacs.Add(cr);
-                        }
-                    }
-                }
-            }
-
-            return config_reacs;
-        }
-
-        /// <summary>
-        /// Select boundary or bulk reactions in the compartment.
-        /// </summary>
-        /// <param name="configComp">the compartment</param>
-        /// <param name="boundMol">boolean: true to select boundary, false to select bulk</param>
-        /// <returns></returns>
-        public List<ConfigReaction> GetReactions(ConfigCompartment configComp, bool boundMol)
-        {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
-
-            // Compartment reactions
-            foreach (ConfigReaction cr in configComp.Reactions)
-            {
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
-                {
-                    reac_guids.Add(cr.entity_guid);
-                    config_reacs.Add(cr);
+                    config_reacs.Add(cr.entity_guid, cr);
                 }
             }
 
@@ -1760,18 +1718,51 @@ namespace Daphne
             {
                 foreach (ConfigReaction cr in crc.reactions)
                 {
-                    if (reac_guids.Contains(cr.entity_guid) == false)
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription) && (config_reacs.ContainsKey(cr.entity_guid) == false))
                     {
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
-                        {
-                            reac_guids.Add(cr.entity_guid);
-                            config_reacs.Add(cr);
-                        }
+                        config_reacs.Add(cr.entity_guid, cr);
                     }
                 }
             }
 
-            return config_reacs;
+            return config_reacs.Values.ToList();
+        }
+
+        /// <summary>
+        /// Select boundary or bulk reactions in the compartment.
+        /// Do not allow duplicate reactions.
+        /// </summary>
+        /// <param name="configComp">the compartment</param>
+        /// 
+        /// <param name="boundMol">boolean: true to select boundary, false to select bulk</param>
+        /// <returns></returns>
+        public List<ConfigReaction> GetReactions(ConfigCompartment configComp, bool boundMol)
+        {
+            Dictionary<string, ConfigReaction> config_reacs = new Dictionary<string, ConfigReaction>();
+
+            // Compartment reactions
+            foreach (ConfigReaction cr in configComp.Reactions)
+            {
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                {
+                    config_reacs.Add(cr.entity_guid, cr);
+                }
+            }
+
+            // Compartment reaction complexes
+            foreach (ConfigReactionComplex crc in configComp.reaction_complexes)
+            {
+                foreach (ConfigReaction cr in crc.reactions)
+                {
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                    {
+                        config_reacs.Add(cr.entity_guid, cr);
+                     }
+                    
+                }
+            }
+
+            return config_reacs.Values.ToList();
         }
         
         public string findMoleculeGuidByName(string inputMolName)
