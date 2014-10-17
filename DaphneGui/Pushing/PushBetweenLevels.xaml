@@ -263,6 +263,7 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReacComp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                              SelectedItem="0"
                                 ItemsSource="{Binding}"  >
                         <DataGrid.CommandBindings>
                             <CommandBinding Command="ApplicationCommands.Save"
@@ -274,6 +275,10 @@
                             <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colReacStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
                         </DataGrid.Columns>
                     </DataGrid>
@@ -311,10 +316,7 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=TotalReactionString, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colReacStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
-                            />
+                            
 
                         </DataGrid.Columns>
                     </DataGrid>

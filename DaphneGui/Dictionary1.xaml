@@ -9,6 +9,8 @@
                                   Source="{Binding Path=entity_repository.molecules}"
                                   />
 
+    <!--These templates are used for pushing entities to protocol (i.e. push from entity to protocol) and not for pushing entities between levels-->
+    
     <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="moleculeTemplate">
         <StackPanel Orientation="Vertical">
@@ -110,6 +112,36 @@
         <StackPanel>
             <local:CellPropertiesControl DataContext="{Binding}"/>
             <local:CellDetailsControl DataContext="{Binding}"/>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- ConfigReactionComplex properties template : DataContext must be ConfigReactionComplex -->
+    <DataTemplate x:Key="reactionComplexTemplate">
+        <StackPanel Orientation="Vertical">
+            <Label Height="24" Width="150" HorizontalAlignment="Left">Reaction Complex:</Label>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- ConfigDiffScheme properties template : DataContext must be ConfigDiffScheme -->
+    <DataTemplate x:Key="diffSchemeTemplate">
+        <StackPanel Orientation="Vertical">
+            <Label Height="24" Width="200" HorizontalAlignment="Left">Differentiation Scheme:</Label>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- ConfigTransitionDriver properties template : DataContext must be ConfigTransitionDriver -->
+    <DataTemplate x:Key="transitionDriverTemplate">
+        <StackPanel Orientation="Vertical">
+            <Label Height="24" Width="150" HorizontalAlignment="Left">Transition Driver:</Label>
+            <StackPanel Orientation="Horizontal">
+                <TextBox Margin="10,-2" Height="24" Width="400" IsEnabled="False" Text="{Binding Name}"></TextBox>
+            </StackPanel>
         </StackPanel>
     </DataTemplate>
 

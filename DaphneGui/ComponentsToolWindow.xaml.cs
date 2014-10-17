@@ -13,6 +13,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Linq;
 using System.Windows.Data;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -28,7 +29,6 @@ namespace DaphneGui
         public ComponentsToolWindow()
         {
             InitializeComponent();
-            
         }
 
         private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
@@ -310,20 +310,21 @@ namespace DaphneGui
             dgLibMolecules.ScrollIntoView(cm);
         }
 
-        private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
-        {
-            if (lbComplexes.SelectedIndex < 0)
-            {
-                MessageBox.Show("Select a reaction complex to process.");
-                return;
-            }
+        //OLD RC - May still need code
+        //private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (lbComplexes.SelectedIndex < 0)
+        //    {
+        //        MessageBox.Show("Select a reaction complex to process.");
+        //        return;
+        //    }
 
-            if (btnGraphReactionComplex.IsChecked == true)
-            {
-                DrawSelectedReactionComplex();
-                btnGraphReactionComplex.IsChecked = false;
-            }
-        }
+        //    if (btnGraphReactionComplex.IsChecked == true)
+        //    {
+        //        DrawSelectedReactionComplex();
+        //        btnGraphReactionComplex.IsChecked = false;
+        //    }
+        //}
 
         private void DrawSelectedReactionComplex()
         {
@@ -425,7 +426,6 @@ namespace DaphneGui
             MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
             MW.VTKDisplayDocWindow.Activate();
             MainWindow.ST_ReacComplexChartWindow.Activate();
-            MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
         }
 
         public ConfigReactionComplex GetConfigReactionComplex()
@@ -442,15 +442,40 @@ namespace DaphneGui
         {
             var dc = this.DataContext;
             //DataContext = MainWindow.SOP.Protocol;
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
+            view.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
+            view.SortDescriptions.Add(sd);
+            sd = new SortDescription("Name", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sd);
         }
 
-        
+        private void btnSaveReacToProtocol_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
+            if (crc == null)
+                return;
 
+            if (lvReacComplexReactions.SelectedItems.Count <= 0)
+                return;
 
+            ConfigReaction reac = (ConfigReaction)(lvReacComplexReactions.SelectedItem);
 
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
 
-
+        private void MoleculesExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
+            view.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
+            view.SortDescriptions.Add(sd);
+            sd = new SortDescription("Name", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sd);
+        }
 
 
     }

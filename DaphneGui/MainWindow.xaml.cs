@@ -2961,7 +2961,6 @@ namespace DaphneGui
             }
             else if (source is ConfigCell)
             {
-                //Use generic pusher - not yet done for cells
                 PushEntity pcell = new PushEntity();
                 pcell.EntityLevelDetails.DataContext = source;
                 pcell.ComponentLevelDetails.DataContext = null;
@@ -2978,25 +2977,6 @@ namespace DaphneGui
                     return;
 
                 UserWantsNewEntity = pcell.UserWantsNewEntity;
-
-                //////This works
-                ////PushCell pc = new PushCell();
-                ////pc.DataContext = MainWindow.SOP;
-                ////pc.EntityLevelCellDetails.DataContext = source;
-
-                ////if (MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(source.entity_guid))
-                ////{
-                ////    pc.ComponentLevelCellDetails.DataContext = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                ////    ConfigCell tempCell = MainWindow.SOP.Protocol.entity_repository.cells_dict[source.entity_guid];
-                ////    newEntity = ((ConfigCell)source).Clone(false);
-                ////    ((ConfigCell)newEntity).CellName = tempCell.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-                ////}
-
-                //////Show the confirmation dialog
-                ////if (pc.ShowDialog() == false)
-                ////{
-                ////    return;
-                ////}
 
             }
             else if (source is ConfigGene) 
@@ -3021,10 +3001,42 @@ namespace DaphneGui
                 }
 
                 UserWantsNewEntity = pm.UserWantsNewEntity;
+                
+            }
+            else if (source is ConfigReactionComplex)
+            {
+                PushEntity pm = new PushEntity();
+                pm.DataContext = MainWindow.SOP;
+                pm.EntityLevelDetails.DataContext = source;
+                pm.ComponentLevelDetails.DataContext = null;
+
+                if (MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(source.entity_guid)) {
+                    ConfigReactionComplex erRC = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[source.entity_guid];
+                    pm.ComponentLevelDetails.DataContext = erRC;
+                    newEntity = ((ConfigReactionComplex)source).Clone(true);
+                }
+
+                //Show the confirmation dialog
+                if (pm.ShowDialog() == false)
+                {
+                    return;
+                }
+
+                UserWantsNewEntity = pm.UserWantsNewEntity;
+            }
+            else if (source is ConfigDiffScheme)
+            {
+                MessageBox.Show(string.Format("Entity type {0} 'save' operation not yet supported.", source.GetType().ToString()));
+                return;
+            }
+            else if (source is ConfigTransitionDriver)
+            {
+                MessageBox.Show(string.Format("Entity type {0} 'save' operation not yet supported.", source.GetType().ToString()));
+                return;
             }
             else
             {
-                MessageBox.Show("Entity type 'save' operation not supported.");
+                MessageBox.Show(string.Format("Entity type {0} 'save' operation not supported.", source.GetType().ToString()));
                 return;
             }
 
@@ -3046,9 +3058,6 @@ namespace DaphneGui
             }
             else // the item exists; could be newer or older
             {
-                
-                //MessageBoxResult msgResult = MessageBox.Show("This will overwrite the properties of the existing entity. If that is okay, please click 'Yes'. If you wish to create a new entity instead, please click 'No'.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                //if (msgResult == MessageBoxResult.Yes)
                 if (UserWantsNewEntity == false)
                 {
                     B.repositoryPush(source, status); // push into B - overwrites existing entity's properties
