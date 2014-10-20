@@ -47,6 +47,7 @@ namespace DaphneGui
 
         public MainWindow MW { get; set; }
 
+        //TISSUE SPECIFIC METHOD?
         private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
@@ -496,6 +497,7 @@ namespace DaphneGui
                 lbEcsMolPops.SelectedIndex = -1;
         }
 
+        //HELPER METHOD - CANDIDATE FOR BASE CLASS
         private bool EcmHasMolecule(string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
@@ -505,6 +507,8 @@ namespace DaphneGui
             }
             return false;
         }
+
+        //HELPER METHOD - CANDIDATE FOR BASE CLASS
         private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
@@ -528,6 +532,8 @@ namespace DaphneGui
 
             return ret;
         }
+
+        //HELPER METHOD - CANDIDATE FOR BASE CLASS
         private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
@@ -581,6 +587,7 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid))
             {
                 MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(reac);
+                
             }
         }
 
@@ -593,6 +600,7 @@ namespace DaphneGui
                 if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Contains(crc) == false)
                 {
                     MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crc.Clone(true));
+                    CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
                 }
             }
         }
@@ -605,155 +613,11 @@ namespace DaphneGui
             {
                 ConfigReactionComplex rc = (ConfigReactionComplex)ReactionComplexListBox.SelectedItem;
                 MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
-
-
-                //string guid = (string)ReactionComplexListBox.SelectedValue;
-                //if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(guid) == true)
-                //{
-                //    ConfigReactionComplex rc = MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict[guid];
-
-                //    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
-                //}
+                CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
             }
         }
 
-        //LIBRARIES REACTION COMPLEXES HANDLERS
-
-        //private void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (lbComplexes.SelectedIndex < 0)
-        //    {
-        //        MessageBox.Show("Select a reaction complex to copy from.");
-        //        return;
-        //    }
-
-        //    ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-        //    ConfigReactionComplex crcNew = crcCurr.Clone();
-
-        //    MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcNew);
-
-        //    lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;            
-        //}
-
-        //private void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
-        //{
-        //    AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
-        //    if (arc.ShowDialog() == true)
-        //        lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-        //}
-
-        //private void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
-        //    if (crc == null)
-        //        return;
-
-        //    AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.EditComplex, crc);
-        //    arc.ShowDialog();
-
-        //}
-
-        //private void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
-        //    if (crc != null)
-        //    {
-        //        MessageBoxResult res;
-        //        res = MessageBox.Show("Are you sure you would like to remove this reaction complex?", "Warning", MessageBoxButton.YesNo);
-        //        if (res == MessageBoxResult.No)
-        //            return;
-
-        //        int index = lbComplexes.SelectedIndex;
-        //        MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Remove(crc);
-
-        //        lbComplexes.SelectedIndex = index;
-
-        //        if (index >= lbComplexes.Items.Count)
-        //            lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
-
-        //        if (lbComplexes.Items.Count == 0)
-        //            lbComplexes.SelectedIndex = -1;
-
-        //    }
-
-        //    //btnGraphReactionComplex.IsChecked = true;
-        //}
-
-
-
-        ////LIBRARIES TAB EVENT HANDLERS
-        ////MOLECULES        
-        //private void btnAddLibMolecule_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigMolecule gm = new ConfigMolecule();
-        //    gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-        //    MainWindow.SOP.Protocol.entity_repository.molecules.Add(gm);
-        //    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-        //    ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-        //    dgLibMolecules.ScrollIntoView(cm);
-        //}
-
-        //private void btnCopyMolecule_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-
-        //    if (cm == null)
-        //        return;
-
-        //    //ConfigMolecule gm = new ConfigMolecule(cm);
-        //    ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
-        //    MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
-        //    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-        //    cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
-        //    dgLibMolecules.ScrollIntoView(cm);
-        //}
-
-        //private void btnRemoveMolecule_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
-
-        //    MessageBoxResult res;
-        //    if (MainWindow.SOP.Protocol.scenario.environment.ecs.HasMolecule(gm))
-        //    {
-        //        res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
-        //    }
-        //    else
-        //    {
-        //        res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
-        //    }
-
-        //    if (res == MessageBoxResult.No)
-        //        return;
-
-        //    int index = dgLibMolecules.SelectedIndex;
-        //    MainWindow.SOP.Protocol.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
-        //    MainWindow.SOP.Protocol.entity_repository.molecules.Remove(gm);
-        //    dgLibMolecules.SelectedIndex = index;
-
-        //    if (index >= dgLibMolecules.Items.Count)
-        //        dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-        //    if (dgLibMolecules.Items.Count == 0)
-        //        dgLibMolecules.SelectedIndex = -1;
-
-        //}
-
-        //LIBRARY REACTIONS EVENT HANDLERS        
-        //private void btnRemoveReaction_Click(object sender, RoutedEventArgs e)
-        //{
-        //    ConfigReaction cr = (ConfigReaction)lvReactions.SelectedItem;
-        //    if (cr == null)
-        //    {
-        //        return;
-        //    }
-
-        //    MainWindow.SOP.Protocol.entity_repository.reactions.Remove(cr);
-        //}
-
-        //CELLS EVENT HANDLERS
-
+        //HELPER METHODS - CANDIDATES FOR BASE CLASS
         private bool MembraneHasMolecule(ConfigCell cell, string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)

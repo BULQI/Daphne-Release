@@ -856,6 +856,13 @@ namespace DaphneGui
                 return;
             }
 
+            //if already in cytosol, return
+            if (cc.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid))
+            {
+                e.Accepted = false;
+                return;
+            }
+
             //This filter is called for every reaction complex in the repository.
             //For current reaction complex, if all of its reactions are in the membrane, then the reaction complex should be included.
             //Otherwise, exclude it.
@@ -883,7 +890,15 @@ namespace DaphneGui
             ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
             ConfigCell cc = DataContext as ConfigCell;
 
+            //if null cell, return
             if (cc == null)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            //if already in cytosol, return
+            if (cc.cytosol.reaction_complexes_dict.ContainsKey(crc.entity_guid))
             {
                 e.Accepted = false;
                 return;
@@ -1481,10 +1496,83 @@ namespace DaphneGui
             MainWindow.GenericPush(newreac);
         }
 
+        //Membrane reaction complex handlers
+
         private void MembAddReacCxExpander_Expanded(object sender, RoutedEventArgs e)
         {
+            CollectionViewSource.GetDefaultView(lbMembAvailableReacCx.ItemsSource).Refresh();
+        }
+
+        private void MembAddReacCxButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbMembAvailableReacCx.SelectedItem;
+            ConfigCell cell = DataContext as ConfigCell;
+
+            if (crc != null)
+            {
+                if (cell.membrane.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
+                {
+                    cell.membrane.reaction_complexes.Add(crc.Clone(true));
+                    CollectionViewSource.GetDefaultView(lbMembAvailableReacCx.ItemsSource).Refresh();
+                }
+            }
+        }
+
+        private void MembRemoveReacCompButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            int nIndex = MembReactionComplexListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                ConfigReactionComplex crc = (ConfigReactionComplex)MembReactionComplexListBox.SelectedItem;
+                if (crc != null)
+                {
+                    cell.membrane.reaction_complexes.Remove(crc);
+                    CollectionViewSource.GetDefaultView(lbMembAvailableReacCx.ItemsSource).Refresh();
+                }
+            }
+        }
+
+        //Cytosol reaction complex handlers
+
+        private void CytoRCDetailsExpander_Expanded(object sender, RoutedEventArgs e)
+        {
             CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
-            //CollectionViewSource.GetDefaultView(lbMembAvailableReacCx).Refresh();
+        }
+
+        private void CytoAddReacCxButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)lbCytoAvailableReacCx.SelectedItem;
+            ConfigCell cell = DataContext as ConfigCell;
+
+            if (crc != null)
+            {
+                if (cell.cytosol.reaction_complexes_dict.ContainsKey(crc.entity_guid) == false)
+                {
+                    cell.cytosol.reaction_complexes.Add(crc.Clone(true));
+                    CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
+                }
+            }
+        }
+
+        private void CytoRemoveReacCompButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigCell cell = DataContext as ConfigCell;
+            int nIndex = CytoReactionComplexListBox.SelectedIndex;
+            if (nIndex >= 0)
+            {
+                ConfigReactionComplex crc = (ConfigReactionComplex)CytoReactionComplexListBox.SelectedItem;
+                if (crc != null)
+                {
+                    cell.cytosol.reaction_complexes.Remove(crc);
+                    CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
+                }
+            }
+        }
+
+        private void AddReacCxExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
         }
     }
 

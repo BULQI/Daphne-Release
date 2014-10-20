@@ -881,7 +881,7 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove"  />
+                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click" />
                                 </StackPanel>
 
                                 <Expander ExpandDirection="Down"
@@ -943,13 +943,13 @@
                                         </StackPanel.Resources>
 
                                         <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
-                                        <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
+                                        <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
                                             ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
                                             ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
                                             SelectedIndex="0" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add"/>
+                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click"/>
                                         </StackPanel>
 
                                         <ContentControl Name="AddReactionComplexDetails"
@@ -988,11 +988,12 @@
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
-                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove"  />
+                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click" />
                                 </StackPanel>
 
                                 <Expander ExpandDirection="Down"
                                     IsExpanded="False"
+                                    Expanded="CytoRCDetailsExpander_Expanded"
                                     Header="Details"
                                     x:Name="CytoRCDetailsExpander"
                                     Margin="0,5,0,0" 
@@ -1029,8 +1030,9 @@
 
                                 <Expander ExpandDirection="Down"
                                 IsExpanded="False"
+                                Expanded="AddReacCxExpander_Expanded"
                                 Header="Add reaction complex"
-                                x:Name="AddReacCxExpander"
+                                x:Name="CytoAddReacCxExpander"
                                 Margin="0,5,0,0" 
                                 Canvas.ZIndex="1"
                                 BorderThickness="1"
@@ -1053,7 +1055,7 @@
                                                 SelectedIndex="0" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add"/>
+                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click"  />
                                         </StackPanel>
                                         <ContentControl Name="AddCytoReactionComplexDetails"
                                             Content="{Binding ElementName=lbCytoAvailableReacCx, Path=SelectedItem}" 
