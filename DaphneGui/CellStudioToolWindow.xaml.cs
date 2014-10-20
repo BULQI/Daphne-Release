@@ -384,7 +384,7 @@ namespace DaphneGui
             if (cr != null && cc != null)
             {
                 // Filter out cr if not in cytosol reaction list 
-                if (cc.cytosol.Reactions.Contains(cr))
+                if (cc.cytosol.reactions_dict.ContainsKey(cr.entity_guid) == true)
                 {
                     e.Accepted = true;
                 }
@@ -403,11 +403,10 @@ namespace DaphneGui
             {
                 e.Accepted = false;
                 // Filter out cr if not in membrane reaction list 
-                if (cc.membrane.Reactions.Contains(cr))
+                if (cc.membrane.reactions_dict.ContainsKey(cr.entity_guid) == true)
                 {
                     e.Accepted = true;
                 }
-
             }
         }
 

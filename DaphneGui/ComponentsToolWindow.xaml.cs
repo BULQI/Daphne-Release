@@ -23,9 +23,12 @@ namespace DaphneGui
     {
         public MainWindow MW { get; set; }
 
+        public Level CurrentLevel { get; set; }
+
         public ComponentsToolWindow()
         {
             InitializeComponent();
+            
         }
 
         private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
@@ -40,7 +43,9 @@ namespace DaphneGui
 
             int index = dgLibMolecules.SelectedIndex;
             //MainWindow.SOP.Protocol.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
-            MainWindow.SOP.Protocol.entity_repository.genes.Remove(gene);
+            Level level = (Level)(this.DataContext);
+            level.entity_repository.genes.Remove(gene);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Remove(gene);
             dgLibGenes.SelectedIndex = index;
 
             if (index >= dgLibMolecules.Items.Count)
@@ -59,7 +64,11 @@ namespace DaphneGui
                 return;
 
             ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(newgene);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(newgene);
+
+            Level level = (Level)(this.DataContext);
+            level.entity_repository.genes.Add(newgene);
+            
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
             gene = (ConfigGene)dgLibGenes.SelectedItem;
@@ -70,7 +79,11 @@ namespace DaphneGui
         {
             ConfigGene gm = new ConfigGene("NewGene", 0, 0);
             gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
+
+            Level level = (Level)(this.DataContext);
+            level.entity_repository.genes.Add(gm);
+
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
 
             ConfigGene cg = (ConfigGene)dgLibGenes.SelectedItem;
@@ -85,7 +98,11 @@ namespace DaphneGui
         {
             ConfigMolecule gm = new ConfigMolecule();
             gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            MainWindow.SOP.Protocol.entity_repository.molecules.Add(gm);
+            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(gm);
+
+            Level level = (Level)(this.DataContext);
+            level.entity_repository.molecules.Add(gm);
+
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
             ConfigMolecule cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
@@ -101,7 +118,11 @@ namespace DaphneGui
 
             //ConfigMolecule gm = new ConfigMolecule(cm);
             ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
-            MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
+            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
+
+            Level level = (Level)(this.DataContext);
+            level.entity_repository.molecules.Add(newmol);
+
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
 
             cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
@@ -113,28 +134,42 @@ namespace DaphneGui
             ConfigMolecule gm = (ConfigMolecule)dgLibMolecules.SelectedValue;
 
             MessageBoxResult res;
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.HasMolecule(gm))
+            Level level = (Level)(this.DataContext);
+
+            if (level is Protocol)
             {
-                res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
+                Protocol prot = level as Protocol;
+                //level.entity_repository.molecules.Add(newmol);
+                if (prot.scenario.environment.comp.HasMolecule(gm))
+
+                //if (MainWindow.SOP.Protocol.scenario.environment.comp.HasMolecule(gm))
+                {
+                    res = MessageBox.Show("If you remove this molecule, corresponding entities that depend on this molecule will also be deleted. Would you like to continue?", "Warning", MessageBoxButton.YesNo);
+                }
+                else
+                {
+                    res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
+                }
+
+                if (res == MessageBoxResult.No)
+                    return;
+
+                int index = dgLibMolecules.SelectedIndex;
+
+                //MainWindow.SOP.Protocol.scenario.environment.comp.RemoveMolecularPopulation(gm.entity_guid);
+                //MainWindow.SOP.Protocol.entity_repository.molecules.Remove(gm);
+
+                prot.scenario.environment.comp.RemoveMolecularPopulation(gm.entity_guid);
+                prot.entity_repository.molecules.Remove(gm);
+
+                dgLibMolecules.SelectedIndex = index;
+
+                if (index >= dgLibMolecules.Items.Count)
+                    dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
+
+                if (dgLibMolecules.Items.Count == 0)
+                    dgLibMolecules.SelectedIndex = -1;
             }
-            else
-            {
-                res = MessageBox.Show("Are you sure you would like to remove this molecule?", "Warning", MessageBoxButton.YesNo);
-            }
-
-            if (res == MessageBoxResult.No)
-                return;
-
-            int index = dgLibMolecules.SelectedIndex;
-            MainWindow.SOP.Protocol.scenario.environment.ecs.RemoveMolecularPopulation(gm.entity_guid);
-            MainWindow.SOP.Protocol.entity_repository.molecules.Remove(gm);
-            dgLibMolecules.SelectedIndex = index;
-
-            if (index >= dgLibMolecules.Items.Count)
-                dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
-
-            if (dgLibMolecules.Items.Count == 0)
-                dgLibMolecules.SelectedIndex = -1;
 
         }
 
@@ -147,7 +182,10 @@ namespace DaphneGui
                 return;
             }
 
-            MainWindow.SOP.Protocol.entity_repository.reactions.Remove(cr);
+            Level level = this.DataContext as Level;
+            level.entity_repository.reactions.Remove(cr);
+
+            //MainWindow.SOP.Protocol.entity_repository.reactions.Remove(cr);
         }
 
         //LIBRARIES REACTION COMPLEXES HANDLERS
@@ -161,9 +199,11 @@ namespace DaphneGui
             }
 
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)lbComplexes.SelectedItem;
-            ConfigReactionComplex crcNew = crcCurr.Clone();
+            ConfigReactionComplex crcNew = crcCurr.Clone(false);
 
-            MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcNew);
+            Level level = this.DataContext as Level;
+            level.entity_repository.reaction_complexes.Add(crcNew);
+            //MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcNew);
 
             lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
@@ -197,7 +237,11 @@ namespace DaphneGui
                     return;
 
                 int index = lbComplexes.SelectedIndex;
-                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Remove(crc);
+
+                Level level = this.DataContext as Level;
+                level.entity_repository.reaction_complexes.Remove(crc);
+
+//                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Remove(crc);
 
                 lbComplexes.SelectedIndex = index;
 
@@ -221,7 +265,13 @@ namespace DaphneGui
 
             int index = dgLibGenes.SelectedIndex;
 
-            gene.ValidateName(MainWindow.SOP.Protocol);
+            Level level = this.DataContext as Level;
+            if (level is Protocol) {
+                Protocol p = level as Protocol;
+                gene.ValidateName(p);
+            }
+
+            //gene.ValidateName(MainWindow.SOP.Protocol);
 
             dgLibGenes.InvalidateVisual();
 
@@ -239,7 +289,14 @@ namespace DaphneGui
             if (cm == null)
                 return;
 
-            cm.ValidateName(MainWindow.SOP.Protocol);
+            Level level = this.DataContext as Level;
+            if (level is Protocol)
+            {
+                Protocol p = level as Protocol;
+                cm.ValidateName(p);
+            }
+
+            //cm.ValidateName(MainWindow.SOP.Protocol);
 
             int index = dgLibMolecules.SelectedIndex;
             dgLibMolecules.InvalidateVisual();
@@ -269,39 +326,60 @@ namespace DaphneGui
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
             //Cleanup any previous RC stuff
-            foreach (ConfigCell cell in MainWindow.SOP.Protocol.entity_repository.cells.ToList())
+            Protocol p = null;
+            Level level = this.DataContext as Level;
+
+            if (level is Protocol)
             {
-                if (cell.CellName == "RCCell")
+                p = level as Protocol;
+                foreach (ConfigCell cell in p.entity_repository.cells.ToList())
                 {
-                    MainWindow.SOP.Protocol.entity_repository.cells.Remove(cell);
+                    if (cell.CellName == "RCCell")
+                    {
+                        p.entity_repository.cells.Remove(cell);
+                    }
                 }
             }
+
+            //foreach (ConfigCell cell in MainWindow.SOP.Protocol.entity_repository.cells.ToList())
+            //{
+            //    if (cell.CellName == "RCCell")
+            //    {
+            //        MainWindow.SOP.Protocol.entity_repository.cells.Remove(cell);
+            //    }
+            //}
             //crc.RCSim.reset();
-            MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+            //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+#if OLD_RC
+            p.rc_scenario.cellpopulations.Clear();
+
+#endif
             // end of cleanup
 
             ConfigCell cc = new ConfigCell();
+
             cc.CellName = "RCCell";
             foreach (ConfigMolecularPopulation cmp in crc.molpops)
             {
                 cc.cytosol.molpops.Add(cmp);
             }
-            foreach (ConfigGene configGene in crc.genes)
+#if OLD_RC
+           foreach (ConfigGene configGene in crc.genes)
             {
                 cc.genes.Add(configGene);
                 
             }
-            foreach (string rguid in crc.reactions_guid_ref)
+#endif
+            foreach (ConfigReaction cr in crc.reactions)
             {
-                if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
-                {
-                    ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
-
-                    cc.cytosol.Reactions.Add(cr.Clone(true));
-                }
+                cc.cytosol.Reactions.Add(cr.Clone(true));
             }
-            MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
-            MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+            //MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+            //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+            p.entity_repository.cells.Add(cc);
+#if OLD_RC
+            p.rc_scenario.cellpopulations.Clear();
+#endif
 
             CellPopulation cp = new CellPopulation();
             cp.Cell = cc;
@@ -309,25 +387,30 @@ namespace DaphneGui
             cp.cellpopulation_name = "RC cell";
             cp.number = 1;
 
+#if OLD_RC
+            //ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.rc_scenario.environment;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)p.rc_scenario.environment;
+
             // Add cell population distribution information
-            double[] extents = new double[3] { MainWindow.SOP.Protocol.rc_scenario.environment.extent_x, 
-                                               MainWindow.SOP.Protocol.rc_scenario.environment.extent_y, 
-                                               MainWindow.SOP.Protocol.rc_scenario.environment.extent_z };
-            double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
+            double[] extents = new double[3] { envHandle.extent_x, envHandle.extent_y, envHandle.extent_z };
+            //double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
+            double minDisSquared = 2 * p.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
             minDisSquared *= minDisSquared;
             cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
-            cp.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
-                                                            MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
-                                                            MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
+            cp.CellStates[0] = new CellState(envHandle.extent_x, envHandle.extent_y / 2, envHandle.extent_z / 2);
 
 
             cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
-            MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
-
+            p.rc_scenario.cellpopulations.Add(cp);
+            //MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
+#endif
             ReactionComplexProcessor Processor = new ReactionComplexProcessor();
-            MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
 
-            Processor.Initialize(MainWindow.SOP.Protocol, crc, MainWindow.Sim);
+            MainWindow.Sim.Load(p, true);
+            //MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
+
+            //Processor.Initialize(MainWindow.SOP.Protocol, crc, (TissueSimulation)MainWindow.Sim);
+            Processor.Initialize(p, crc, (TissueSimulation)MainWindow.Sim);
             Processor.Go();
 
             MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;

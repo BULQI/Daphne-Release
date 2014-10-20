@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:local="clr-namespace:DaphneGui"
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="600"
@@ -11,14 +12,141 @@
 
 
     <UserControl.Resources>
-
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
+        <daph:ColorHelper x:Key="ColorHelper" />
+
+        <local:ColorStringToBrushConverter x:Key="ColorStringToBrushConverter" />
+
+        <local:RenderColorRowDetailMultiConverter x:Key="RenderColorRowDetailMultiConverter" />
+
+        <DataTemplate x:Key="CheckBoxTemplate">
+            <CheckBox Content="{Binding}" IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Mode=TwoWay}"
+                                                          Margin="10,0" MinWidth="80"></CheckBox>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ColorBoxTemplate">
+            <Rectangle Width="20" Height="20" Stroke="Black" StrokeThickness=".5" Fill="{Binding Converter={StaticResource ColorStringToBrushConverter}}" />
+        </DataTemplate>
+
+        <local:ColorItemTemplateSelector 
+            CheckBoxTemplate="{StaticResource CheckBoxTemplate}"
+            ColorBoxTemplate="{StaticResource ColorBoxTemplate}"
+            x:Key="ColorItemTemplateSelector" />
+
+        <DataTemplate x:Key="SolidColorRowDetailTemplate">
+            <Border BorderThickness="0" Background="BlanchedAlmond" Padding="10">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>Pick a color scheme:</TextBlock>
+                    <ListBox ItemsSource="{Binding Source={StaticResource ColorHelper}, Path=ColorBrewerEightList}"
+                             CheckBox.Checked="SolidColorRowDetail_Checked" 
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.CanContentScroll="False"
+                                         x:Name="lb"
+                                         >
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                IsItemsHost="True" >
+                                    <WrapPanel.Width>
+                                        <MultiBinding Converter="{StaticResource RenderColorRowDetailMultiConverter}">
+                                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type DataGrid}}"/>
+                                            <Binding Path="RowHeaderActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type DataGrid}}"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType={x:Type DataGridRow}}"/>
+                                        </MultiBinding>
+                                    </WrapPanel.Width>
+                                    
+                                    
+                                </WrapPanel>
+
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource ColorItemTemplateSelector}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5, 2" HorizontalAlignment="Left"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Width="auto" Margin="10, 15, 10, 2" MinWidth="80" HorizontalAlignment="Left"
+                                Click="Dismiss_Button_Click"
+                                >Dismiss</Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+
+        <!-- for colorbrewer 12 colors -->
+        <DataTemplate x:Key="SolidColorRowDetailTemplate12">
+            <Border BorderThickness="0" Background="BlanchedAlmond" Padding="10">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock>Pick a color scheme:</TextBlock>
+                    <ListBox ItemsSource="{Binding Source={StaticResource ColorHelper}, Path=colorBrewerTwelveList}"
+                             CheckBox.Checked="SolidColorRowDetail_Checked" 
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.CanContentScroll="False"
+                                         x:Name="lb"
+                                         >
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                IsItemsHost="True" >
+                                    <WrapPanel.Width>
+                                        <MultiBinding Converter="{StaticResource RenderColorRowDetailMultiConverter}">
+                                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type DataGrid}}"/>
+                                            <Binding Path="RowHeaderActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type DataGrid}}"/>
+                                            <Binding RelativeSource="{RelativeSource AncestorType={x:Type DataGridRow}}"/>
+                                        </MultiBinding>
+                                    </WrapPanel.Width>
+
+
+                                </WrapPanel>
+
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource ColorItemTemplateSelector}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5, 2" HorizontalAlignment="Left"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Width="auto" Margin="10, 15, 10, 2" MinWidth="80" HorizontalAlignment="Left"
+                                Click="Dismiss_Button_Click"
+                                >Dismiss</Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+
+        <local:ColorGridRowDetailTemplateSelector 
+            SolidColorListTemplate="{StaticResource SolidColorRowDetailTemplate}"
+            GenerationColorListTemplate ="{StaticResource SolidColorRowDetailTemplate12}"
+            x:Key="ColorGridRowDetailTemplateSelector" />
+
+
     </UserControl.Resources>
 
     <StackPanel x:Name="spDivRenderPanel" >
 
         <DataGrid x:Name="rendercelldg" 
-            local:RenderSkinEditor.RenderCellSource ="{Binding ElementName=skinEditor, Path=DataContext, Converter={StaticResource DebugConverter}, ConverterParameter=rcg}"
+            local:RenderSkinEditor.RenderCellSource ="{Binding ElementName=skinEditor, Path=DataContext}"
             MinHeight="150" MinWidth="360" Margin="0,10,0,0"
             AutoGenerateColumns="False"
             IsReadOnly="False"
@@ -31,6 +159,8 @@
             VirtualizingStackPanel.VirtualizationMode="Standard"
             VirtualizingStackPanel.IsVirtualizing="False"
             BeginningEdit="rendercelldg_BeginningEdit"
+            RowDetailsVisibilityMode="Collapsed"
+            RowDetailsTemplateSelector="{StaticResource ColorGridRowDetailTemplateSelector}"
             />
     </StackPanel>
     

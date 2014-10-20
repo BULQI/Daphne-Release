@@ -30,11 +30,11 @@ namespace Daphne
     public class SimulationModule : NinjectModule
     {
         public static IKernel kernel;
-        private Scenario scenario;
+        private ScenarioBase scenario;
 
         private enum MetadataValues { OneD = 1, TwoD, ThreeD, Membrane, Cytosol, ECS };
 
-        public SimulationModule(Scenario scenario)
+        public SimulationModule(ScenarioBase scenario)
             : base()
         {
             this.scenario = scenario;
@@ -83,7 +83,26 @@ namespace Daphne
 
             // bindings for simulation entities
             Bind<Cell>().ToSelf();
-            Bind<ExtraCellularSpace>().ToSelf().WithConstructorArgument("numGridPts", scenario.environment.NumGridPts).WithConstructorArgument("gridStep", scenario.environment.gridstep).WithConstructorArgument("toroidal", scenario.environment.toroidal);
+            if (scenario.environment is ConfigECSEnvironment)
+            {
+                Bind<ECSEnvironment>().ToSelf().WithConstructorArgument("numGridPts", ((ConfigECSEnvironment)scenario.environment).NumGridPts).
+                                                WithConstructorArgument("gridStep", ((ConfigECSEnvironment)scenario.environment).gridstep).
+                                                WithConstructorArgument("toroidal", ((ConfigECSEnvironment)scenario.environment).toroidal);
+            }
+            else if (scenario.environment is ConfigPointEnvironment)
+            {
+                Bind<PointEnvironment>().ToSelf();
+            }
+            else if (scenario.environment is ConfigRectEnvironment)
+            {
+                Bind<RectEnvironment>().ToSelf().WithConstructorArgument("numGridPts", ((ConfigRectEnvironment)scenario.environment).NumGridPts).
+                                                 WithConstructorArgument("gridStep", ((ConfigRectEnvironment)scenario.environment).gridstep).
+                                                 WithConstructorArgument("toroidal", ((ConfigRectEnvironment)scenario.environment).toroidal);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
             Bind<CollisionManager>().ToSelf();
 
             // factory container

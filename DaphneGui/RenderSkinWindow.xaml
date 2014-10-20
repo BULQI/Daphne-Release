@@ -19,6 +19,7 @@
 
         <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
         <daph:ColorToListIndexConv x:Key="ColorToListIndexConv" />
+        <daph:RenderColorToListIndexConv x:Key="RenderColorToListIndexConv" />
         <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
@@ -31,7 +32,9 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-
+        <CollectionViewSource x:Key="ColorListCollectionViewSource" Source="{StaticResource colorList}"
+                              Filter="ColorListCollectionViewSource_Filter" />
+        
         <DataTemplate x:Key="colorItemTemplate">
             <StackPanel Orientation="Horizontal">
 
@@ -40,7 +43,11 @@
                         <Style TargetType="Rectangle">
                             <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding}" Value="7">
+                                <DataTrigger Binding="{Binding Converter={StaticResource DebugConverter}, ConverterParameter=7}" Value="7">
+                                    <Setter Property="Fill" Value="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ComboBox}, 
+                                        Converter={StaticResource ColorToBrushConverter}, ConverterParameter=7triggered}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="8">
                                     <Setter Property="Fill" Value="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ComboBox}, Converter={StaticResource ColorToBrushConverter}}"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -48,7 +55,7 @@
                     </Rectangle.Style>
 
                 </Rectangle>
-                <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
+                <TextBlock Width="auto" Text="{Binding}" Margin="5,0,0,0"/>
             </StackPanel>
         </DataTemplate>
 
@@ -60,22 +67,28 @@
         <SolidColorBrush x:Key="defaultRenderCellColor" Color="Gray"/>
         
         <DataTemplate x:Key="RenderColorCellTemplate" DataType="{x:Type Color}">
-            <TextBlock x:Name="tb1" Background="{Binding EntityColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource defaultRenderCellColor}}">
+            <TextBlock x:Name="tb1" Padding="3" Background="{Binding EntityColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource defaultRenderCellColor}}">
             </TextBlock>            
         </DataTemplate>
         
-
-
-
         <DataTemplate x:Key="RenderColorEditingTemplate" DataType="{x:Type daph:RenderColor}">
             <StackPanel Name="CellEditStackPanel2" Orientation="Vertical">
                 <ComboBox x:Name="cbCellColor2"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
                     Tag="{Binding Path=EntityColor}"
-                    ItemsSource="{Binding Source={StaticResource colorList}}" 
+                    ItemsSource="{Binding Source={StaticResource ColorListCollectionViewSource}}" 
                     ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}" 
-                    SelectedIndex="{Binding Path=EntityColor,  Mode=TwoWay, Converter ={StaticResource ColorToListIndexConv}, UpdateSourceTrigger=PropertyChanged}"
                     SelectionChanged="cbCellColor2_SelectionChanged"
+                    IsSynchronizedWithCurrentItem="False"
+                    Loaded="cbCellColor2_Loaded"
                     >
+                    <!--SelectedIndex="{Binding Path=EntityColor, Converter={StaticResource ColorToListIndexConv}, 
+                                        Mode=TwoWay, UpdateSourceTrigger=Explicit}"-->
+                    <ComboBox.SelectedIndex>
+                        <MultiBinding UpdateSourceTrigger="Explicit" Converter="{StaticResource RenderColorToListIndexConv}">
+                            <Binding Path="EntityColor" Mode="TwoWay"/>
+                            <Binding Path="DataContext" Mode="OneWay" RelativeSource="{RelativeSource AncestorType={x:Type DataGridRow}}" />
+                        </MultiBinding> 
+                    </ComboBox.SelectedIndex>
                 </ComboBox>
 
                 <StackPanel Grid.Column="1" Grid.Row="5" >
@@ -96,10 +109,11 @@
                                         Width="140"
                                         HorizontalAlignment="Left" 
                                         Format="#rxgxbx"
-                                        Value="{Binding Path=EntityColor, UpdateSourceTrigger=PropertyChanged}"
+                                        Value="{Binding Path=EntityColor, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
                                         Margin="0,2" 
                                         DropDownClosed="cellColorEditBox_DropDownClosed"
-                                          >
+                                        SourceUpdated="cellColorEditBox_SourceUpdated"
+                                        >
                     </editors:ColorEditBox>
                 </StackPanel>
                 
@@ -107,41 +121,9 @@
         </DataTemplate>
 
 
-        <DataTemplate x:Key="RenderMethodColorDetailTemplate">
-            <Border BorderThickness="0" Background="BlanchedAlmond" Padding="10">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontSize="12" Text="Email: " VerticalAlignment="Center" />
-                        <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding EmailAddress}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontSize="12" Text="Phone: " VerticalAlignment="Center" />
-                        <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding Phone}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontSize="12" Text="Sales Person: " VerticalAlignment="Center" />
-                        <TextBlock FontSize="16" Foreground="MidnightBlue" Text="{Binding SalesPerson}" VerticalAlignment="Center" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
-
-
-        <!--<CollectionViewSource x:Key="cytosolAvailableReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="cytosolAvailableReactionsListView_Filter"/>
-
-            <CollectionViewSource x:Key="membraneAvailableReactionsListView"  
-                                  Source="{Binding Path=entity_repository.reactions}"
-                                  Filter="membraneAvailableReactionsListView_Filter"/>-->
-
         <CollectionViewSource x:Key="cellTransitionDeathDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"
                                   />
-
-        <!--<CollectionViewSource x:Key="cellTransitionDivisionDriverListView"  
-                                  Source="{Binding Path=entity_repository.transition_drivers}"
-                                  Filter="selectedCellTransitionDivisionDriverListView_Filter"/>-->
 
         <CollectionViewSource x:Key="diffSchemesListView"  
                                   Source="{Binding Path=entity_repository.diff_schemes}"/>
@@ -281,8 +263,8 @@
                     </StackPanel>
                 </Expander>
             </local:DaphneStackPanel>
-
         </DataTemplate>
+
     </docking:ToolWindow.Resources>
 
     <!-- LIBRARIES CELLS -->
@@ -303,7 +285,7 @@
                                     >
 
                 <local:DaphneStackPanel>
-                    <local:RenderSkinEditor DataContext="{Binding ElementName=CellsListBox1, Path=SelectedItem, Mode=TwoWay}" />
+                    <local:RenderSkinEditor x:Name="SkinEditor" DataContext="{Binding ElementName=CellsListBox1, Path=SelectedItem, Mode=TwoWay}" />
                 </local:DaphneStackPanel>
             </Expander>
         </StackPanel>

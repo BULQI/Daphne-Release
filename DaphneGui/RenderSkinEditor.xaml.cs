@@ -43,6 +43,14 @@ namespace DaphneGui
             }
         }
 
+        public DataGrid RenderColorHost
+        {
+            get
+            {
+                return this.rendercelldg;
+            }
+        }
+
         /// <summary>
         /// ConfigDiffScheme Attached Dependency Property
         /// </summary>
@@ -121,7 +129,6 @@ namespace DaphneGui
                 col.CanUserSort = false;
 
                 Binding b = new Binding(string.Format("[{0}]", i));
-
                 var cellTemplate = rsw.FindResource("RenderColorCellTemplate");
                 FrameworkElementFactory factory = new FrameworkElementFactory(typeof(ContentPresenter));
                 factory.SetValue(ContentPresenter.ContentTemplateProperty, cellTemplate);
@@ -146,9 +153,26 @@ namespace DaphneGui
             dataGrid.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid_CellEditEnding);
             dataGrid.LoadingRow -= new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
             dataGrid.LoadingRow += new EventHandler<DataGridRowEventArgs>(dataGrid_LoadingRow);
+            //dataGrid.SourceUpdated -= new EventHandler<DataTransferEventArgs>(dataGrid_SourceUpdated);
+            //dataGrid.SourceUpdated += new EventHandler<DataTransferEventArgs>(dataGrid_SourceUpdated);
             //dataGrid.TargetUpdated -= new EventHandler<DataTransferEventArgs>(dataGrid_TargetUpdated);
             //dataGrid.TargetUpdated += new EventHandler<DataTransferEventArgs>(dataGrid_TargetUpdated);
         }
+
+
+        //static void dataGrid_TargetUpdated(object sender, DataTransferEventArgs e)
+        //{
+        //    DataGrid dg = (DataGrid)sender;
+        //}
+        /// <summary>
+        /// called when the underline color is updated.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //static void dataGrid_SourceUpdated(object sender, DataTransferEventArgs e)
+        //{
+        //    //throw new NotImplementedException();
+        //}
 
         private static void dataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -198,6 +222,31 @@ namespace DaphneGui
             }
         }
 
+        private void SolidColorRowDetail_Checked(object sender, RoutedEventArgs e)
+        {
+
+            var listbox = sender as ListBox;
+            if (listbox == null || listbox.SelectedItem == null) return;
+
+            List<string> src_colors = listbox.SelectedItem as List<string>;
+            ObservableCollection<RenderColor> rc_list = listbox.DataContext as ObservableCollection<RenderColor>;
+
+            if (rc_list == null) return;
+            for (int i = 1, j = 0; i < src_colors.Count && j < rc_list.Count; i++, j++)
+            {
+                if (rc_list[j] == null) break;
+                Color c = (Color)ColorConverter.ConvertFromString(src_colors[i]);
+                rc_list[j].EntityColor = c;
+            }
+        }
+
+        private void Dismiss_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = sender as Button;
+            var row = DiffSchemeDataGrid.FindVisualParent<DataGridRow>(btn);
+            if (row == null) return;
+            row.DetailsVisibility = System.Windows.Visibility.Collapsed;
+        }
     }
 
     public class RenderCellEx
@@ -234,22 +283,52 @@ namespace DaphneGui
             renderCollection.Add(tmp_collection);
             RowHeaders.Add("Division states");
 
+            tmp_collection = new ObservableCollection<RenderColor>(rcell.div_shade_colors);
+            renderCollection.Add(tmp_collection);
+            RowHeaders.Add("Division state Shade");
+
+
             //renderCollection.Add(rcell.diff_state_colors);
             tmp_collection = new ObservableCollection<RenderColor>(rcell.diff_state_colors);
             renderCollection.Add(tmp_collection);
             RowHeaders.Add("Differentiation States");
 
-
+            tmp_collection = new ObservableCollection<RenderColor>(rcell.diff_shade_colors);
+            renderCollection.Add(tmp_collection);
+            RowHeaders.Add("Differentiation State Shade");
 
             //renderCollection.Add(rcell.death_state_colors);
             tmp_collection = new ObservableCollection<RenderColor>(rcell.death_state_colors);
             renderCollection.Add(tmp_collection);
             RowHeaders.Add("Death States");
 
+            tmp_collection = new ObservableCollection<RenderColor>(rcell.death_shade_colors);
+            renderCollection.Add(tmp_collection);
+            RowHeaders.Add("Death State Shade");
+
             //renderCollection.Add(rcell.gen_colors);
             tmp_collection = new ObservableCollection<RenderColor>(rcell.gen_colors);
             renderCollection.Add(tmp_collection);
             RowHeaders.Add("Generation");
+
+            //////shading
+            //tmp_collection = new ObservableCollection<RenderColor>(rcell.div_shade_colors);
+            //renderCollection.Add(tmp_collection);
+            //RowHeaders.Add("Division state Shade");
+
+            //tmp_collection = new ObservableCollection<RenderColor>(rcell.diff_shade_colors);
+            //renderCollection.Add(tmp_collection);
+            //RowHeaders.Add("Differentiation State Shade");
+
+            //tmp_collection = new ObservableCollection<RenderColor>(rcell.death_shade_colors);
+            //renderCollection.Add(tmp_collection);
+            //RowHeaders.Add("Death State Shade");
+
+            //renderCollection.Add(rcell.gen_colors);
+            tmp_collection = new ObservableCollection<RenderColor>(rcell.gen_shade_colors);
+            renderCollection.Add(tmp_collection);
+            RowHeaders.Add("Generation Shade");
+
 
             int nColumn = renderCollection.Max(x => x.Count);
             for (int i = 0; i < nColumn; i++)
@@ -269,4 +348,71 @@ namespace DaphneGui
             }
         }
     }
+
+
+    public class ColorItemTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate CheckBoxTemplate { get; set; }
+        public DataTemplate ColorBoxTemplate { get; set; }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            string itemstr = item as string;
+            if (itemstr.StartsWith("#")) return ColorBoxTemplate;
+            return CheckBoxTemplate;
+        }
+    }
+
+    public class ColorGridRowDetailTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate SolidColorListTemplate { get; set; }
+        public DataTemplate GenerationColorListTemplate { get; set; }
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            var collection = item as ObservableCollection<RenderColor>;
+            if (item != null)
+            {
+                int color_count = 0;
+                for (int i = 0; i < collection.Count; i++)
+                {
+                    if (collection[i] != null) color_count++;
+                }
+
+                return color_count == 12 ? GenerationColorListTemplate : SolidColorListTemplate;
+            }
+            return SolidColorListTemplate;
+
+        }
+    }
+
+    public class RenderColorRowDetailMultiConverter : IMultiValueConverter
+    { 
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+
+            double len1 = (double)values[0];
+            double len2 = (double)values[1];
+
+            DataGridRow row = values[2] as DataGridRow;
+            var t = row.ActualHeight;
+
+            return len1 - len2;
+        }
+
+
+        /// <summary>
+        /// given index, return color
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="targetType"></param>
+        /// <param name="parameter"></param>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

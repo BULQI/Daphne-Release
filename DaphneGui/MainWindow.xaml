@@ -9,6 +9,7 @@
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+        Loaded="Window_Loaded"
         Title="Daphne"
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
@@ -44,8 +45,8 @@
                 <!--<TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>-->
             </StackPanel>
         </DataTemplate>
+        
     </Window.Resources>
-
     
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Open" 
@@ -82,13 +83,14 @@
     
     <!-- Begin GUI layout definitions -->
     <DockPanel LastChildFill="True">
+        
         <shared:PixelSnapper DockPanel.Dock="Top">
-            <Menu>
+            <Menu x:Name="MainMenu">
                 <!--><MenuItem Header="Edit"/>-->
                 <MenuItem Header="File" Name="fileMenu">
                     <MenuItem Header="New Scenario" Name="newScenario" Click="newScenario_Click"></MenuItem>
                     <MenuItem Header="Load Scenario..." Name="loadScenario" Command="ApplicationCommands.Open" DataContext="{Binding}" />
-                    <MenuItem Header="Save Scenario..." Name="saveScenario" Command="ApplicationCommands.Save" />
+                    <MenuItem Header="Save Scenario" Name="saveScenario" Command="ApplicationCommands.Save" />
                     <MenuItem Header="Save Scenario As..." Name="saveScenarioAs" Click="saveScenarioAs_Click" />
                     <MenuItem Header="Save State..." Name="saveState" IsEnabled="{Binding Path=RunStatus, UpdateSourceTrigger=PropertyChanged, Converter={local:SimulationStateToBoolConverter}}" Click="saveState_Click" />
                     <Separator />
@@ -170,6 +172,11 @@
                     <MenuItem Header="B Cell FDC Summary" Name="bCellFDCSummaryExport" Click="bCellFDCSummaryExport_Click" />
                     <Separator />
                     <MenuItem Header="Export All" Name="allExport" Click="allExport_Click" />
+                </MenuItem>
+                <MenuItem Header="Administration" Name="AdminMenu">
+                    <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
+                    <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" />
+                    <MenuItem Header="Back to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click"  />               
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
@@ -334,7 +341,7 @@
         <!-- StatusBar -->
         <shared:PixelSnapper DockPanel.Dock="Bottom">
             <StatusBar x:Name="statusBar" Padding="0,2,0,0">
-                <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready" />
+                <StatusBarItem x:Name="statusBarMessagePanel" Content="Ready:  Protocol" />
             </StatusBar>
         </shared:PixelSnapper>
 

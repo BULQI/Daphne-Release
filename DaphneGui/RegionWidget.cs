@@ -31,10 +31,11 @@ namespace DaphneGui
         private byte dirtyFlags;
         private double red, green, blue, opacity;
         private RegionShape shape;
+        private GaussianSpecification gaussian;
 
         // NOTE: Static flags for transform options and dirty are in RegionControl
 
-        public RegionWidget(vtkRenderWindow rw, RegionShape shape = RegionShape.Rectangular, GaussianSpecification gs = null)
+        public RegionWidget(vtkRenderWindow rw, GaussianSpecification gs, RegionShape shape = RegionShape.Rectangular)
         {
             boxWidget = vtkBoxWidget2.New();
             boxWidget.SetInteractor(rw.GetInteractor());
@@ -82,6 +83,8 @@ namespace DaphneGui
             }
             this.shape = shape;
 
+            gaussian = gs;
+
             this.callbacks = new List<CallbackHandler>();
         }
 
@@ -91,6 +94,14 @@ namespace DaphneGui
         public vtkBoxWidget2 BoxWidget
         {
             get { return boxWidget; }
+        }
+
+        /// <summary>
+        /// retrieve a handle to the encapsulated Gaussian
+        /// </summary>
+        public GaussianSpecification Gaussian
+        {
+            get { return gaussian; }
         }
 
         /// <summary>

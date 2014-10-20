@@ -61,7 +61,6 @@ namespace DaphneGui
             if (e.AddedItems.Count == 0 || e.RemovedItems.Count == 0)
                 return;
 
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
                 return;
@@ -104,15 +103,6 @@ namespace DaphneGui
 
             cvs = (CollectionViewSource)(FindResource("moleculesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
-        }
-
-        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
-        {
-            ConfigCell cell = DataContext as ConfigCell;
-            if (cell == null)
-                return;
-
-            MainWindow.GenericPush(cell);
         }
     }
 }

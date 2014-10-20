@@ -40,6 +40,10 @@
         <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
+        <CollectionViewSource x:Key="cellTypesListView"  
+                                  Source="{Binding Path=entity_repository.cells}"
+                                  />
+
         <CompositeCollection x:Key="moleclueListColletion">
             <daph:ConfigMolecule Name="None" entity_guid=""/>
             <CollectionContainer Collection="{Binding Source={StaticResource moleculesListView}}" />
@@ -203,15 +207,13 @@
             <!--<CollectionViewSource x:Key="solfacSolfacTypesListView"  
                                   Source="{Binding Path=entity_repository.solfac_types}"/>-->
 
-            <CollectionViewSource x:Key="cellTypesListView"  
-                                  Source="{Binding Path=entity_repository.cells}"
-                                  />
+            
             <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="moleculesListView2"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
             <CollectionViewSource x:Key="molPopsListView"  
-                                  Source="{Binding Path=scenario.environment.ecs.molpops}"
+                                  Source="{Binding Path=scenario.environment.comp.molpops}"
                                   />
             
             <CollectionViewSource x:Key="bulkMoleculesListView"  
@@ -711,7 +713,7 @@
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"
                                         Style="{StaticResource EyeballCheckboxStyle}"
-                                        IsChecked="{Binding Path=box_visibility}"                                      
+                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
                                         />                                                
                         </Grid>
                         <Grid VerticalAlignment="Center">
@@ -725,9 +727,9 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                     Style="{StaticResource EyeballCheckboxStyle}"
-                                    IsChecked="{Binding Path=blob_visibility}"
-                                      Click="blob_actor_checkbox_clicked"
-                                      CommandParameter="{Binding Path=box_guid}"
+                                    IsChecked="{Binding Path=gaussian_region_visibility}"
+                                      Click="gaussian_region_actor_checkbox_clicked"
+                                      CommandParameter="{Binding}"
                                     />
                         </Grid>
                     </StackPanel>                    
@@ -748,7 +750,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"     
-                                   Number="{Binding Path=x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
                         
                     </uc:DoublesBox>                                        
@@ -758,7 +760,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
-                                   Number="{Binding Path=half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
@@ -770,7 +772,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
-                                   Number="{Binding Path=y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
@@ -781,7 +783,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
-                                   Number="{Binding Path=half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
@@ -793,7 +795,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
-                                   Number="{Binding Path=z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
@@ -803,7 +805,7 @@
                                    SliderWidth="40"
                                    RangeFactor="1"
                                    DecimalPlaces="2"
-                                   Number="{Binding Path=half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                    >
 
                     </uc:DoublesBox>
@@ -978,15 +980,20 @@
                         </StackPanel>                        
                     </Grid>
                     <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-                    <ListView x:Name="molpopGaussianBoxSpecsListView"
+                    <!--<ListView x:Name="molpopGaussianBoxSpecsListView" Visibility="Hidden"
                                               ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
                                               DisplayMemberPath="box_guid"
-                                              SelectedValue="{Binding Path=gaussgrad_gauss_spec_guid_ref, Mode=OneWay}"
+                                              SelectedValue="{Binding Path=gauss_spec, Mode=OneWay}"
                                               SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
-                                              />
-                    <ContentControl Name="GaussianBoxSpecDetails"
+                                              
+                                              />-->
+                    <!--<ContentControl Name="GaussianBoxSpecDetails"
                                                     Content="{Binding ElementName=molpopGaussianBoxSpecsListView, Path=SelectedItem}" 
+                                                    HorizontalAlignment="Center"
+                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
+                                                    Margin="0,2"/>-->
+                    <ContentControl Name="GaussianBoxSpecDetails"
+                                                    Content="{Binding Path=gauss_spec}" 
                                                     HorizontalAlignment="Center"
                                                     ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
                                                     Margin="0,2"/>
@@ -1530,7 +1537,7 @@
                                               DisplayMemberPath="box_guid"
                                               SelectedValue="{Binding Path=gaussian_spec_box_guid_ref, Mode=OneWay}"
                                               SelectedValuePath="box_guid"
-                                              Visibility="Collapsed"
+                                              
                                               />
                     <ContentControl Name="GGBoxSpecDetails"
                                                     Content="{Binding ElementName=ggBoxSpecsListView, Path=SelectedItem}" 
@@ -1897,7 +1904,7 @@
 
                             </StackPanel>
                             <ListBox x:Name="lbEcsMolPops" MinHeight="50"
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.molpops, Mode=TwoWay}" 
+                                    ItemsSource="{Binding Path=scenario.environment.comp.molpops, Mode=TwoWay}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsMolListItemTemplate}}"
                                     SelectedIndex="-1"
                             />
@@ -2047,10 +2054,10 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="0" Grid.Row="1">
-                                                    <ContentControl Name="SolfacDistributionDetails"
-                                        Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
-                                        Margin="6,2"/>
+                                                    <ContentControl Name="MolPopDistributionDetails"
+                                                            Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                                            ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                            Margin="6,2"/>
                                                 </StackPanel>
 
                                             </Grid>
@@ -2113,7 +2120,7 @@
                             </StackPanel>
                             
                             <ListView x:Name="lvEcsReactions" 
-                                      ItemsSource="{Binding Path=scenario.environment.ecs.Reactions}"
+                                      ItemsSource="{Binding Path=scenario.environment.comp.Reactions}"
                                       SelectedIndex="-1"
                                 >
                                 
@@ -2136,7 +2143,9 @@
                                         <GridViewColumn Width="100" Header="Rate constant">
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <TextBox Width="70" Text="{Binding rate_const, StringFormat=G5}">
+                                                    <uc:DoublesBox SliderEnabled="False" Width="70" Number="{Binding rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                    </uc:DoublesBox>
+                                                    <!--<TextBox Width="70" Text="{Binding rate_const, StringFormat=G5}">
                                                         <TextBox.Style>
                                                             <Style>
                                                                 <Setter Property="TextBox.Foreground" 
@@ -2144,7 +2153,7 @@
                                                                 </Setter>
                                                             </Style>
                                                         </TextBox.Style>
-                                                    </TextBox>
+                                                    </TextBox>-->
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -2298,7 +2307,7 @@
                                 </TextBlock>
                         
                                 <ListBox x:Name="ReactionComplexListBox" MinHeight="50" 
-                                    ItemsSource="{Binding Path=scenario.environment.ecs.reaction_complexes_guid_ref}" 
+                                    ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes_guid_ref}" 
                                     ItemTemplate="{Binding Source={StaticResource ecsReacComplexListItemTemplate}}"
                                     SelectedIndex="0"
                                  />
@@ -2495,7 +2504,11 @@
                                             DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>
 
-                                    <StackPanel Margin="10,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,0">
+                                        <Button Name="PushCellButton" VerticalAlignment="Top" Height="24" Width="200" Content="Save Cell to Cells Library..." Click="EcsPushCellButton_Click"/>
+                                    </StackPanel>
+
+                                    <StackPanel Margin="10,0">
                                         <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                                     </StackPanel>                                    
                                 </local:DaphneStackPanel>
@@ -2698,7 +2711,7 @@
                             >
                         <!--<TextBlock Text="Molecules in Extracellular Medium" FontWeight="Bold" Margin="0,5,0,0" />-->
                         <DataGrid x:Name="dgEcmMols" 
-                            ItemsSource="{Binding Path=scenario.environment.ecs.molpops}" AutoGenerateColumns="False" 
+                            ItemsSource="{Binding Path=scenario.environment.comp.molpops}" AutoGenerateColumns="False" 
                             Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
                             CanUserSortColumns="False" RowHeaderWidth="0"
@@ -3239,6 +3252,7 @@
                                 <ComboBox x:Name="skinChoiceComboBox" MinWidth="80" 
                                           ItemsSource="{Binding Tag.SkinList, ElementName=MyToolWindow}"
                                           SelectedItem="{Binding Tag.SelectedRenderSkin, ElementName=MyToolWindow}"
+                                          IsSynchronizedWithCurrentItem="True"
                                           DisplayMemberPath="Name"
                                           SelectionChanged="skinChoiceComboBox_SelectionChanged"
                                           >
@@ -3336,136 +3350,11 @@
                         </DataGrid>
                     </Expander>
 
+
                     <!-- Cell options -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Cell Options"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
-                        <!--<TextBlock Text="Cell Information" FontWeight="Bold" Margin="0,10,0,0" />-->
-                        <DataGrid x:Name="dgRenderCellDetails" AutoGenerateColumns="False" 
-                              ItemsSource="{Binding Path=scenario.popOptions.cellPopOptions, UpdateSourceTrigger=PropertyChanged}"     
-                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
-                              CanUserReorderColumns="False" CanUserResizeRows="False"
-                              CanUserSortColumns="False" RowHeaderWidth="0"
-                              VerticalContentAlignment="Center"
-                              CanUserAddRows="False"
-                              BorderThickness="1"
-                              BorderBrush="Black"
-                            >
-                            <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader" >
-                                    <Setter Property="FontSize" Value="12" />
-                                    <Setter Property="Height" Value="24" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="BorderThickness" Value="1" />
-                                    <Setter Property="BorderBrush" Value="Black" />
-                                    <Setter Property="Background">
-                                        <Setter.Value>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                <GradientStop Offset="0.0" Color="White" />
-                                                <GradientStop Offset="1.0" Color="Beige" />
-                                            </LinearGradientBrush>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>
-
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="cell population" >
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="RenderOn" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="CELL_TYPE" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_TYPE}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="CELL_POP" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_POP}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-
-                                <DataGridTemplateColumn Header="CELL_DIFF_STATE" MinWidth="60" MaxWidth="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                     IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_DIFF_STATE}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="CELL_DIV_STATE" MinWidth="60" MaxWidth="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                      IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_DIV_STATE}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="CELL_DEATH_STATE" MinWidth="60" MaxWidth="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                      IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_DEATH_STATE}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                
-                                <DataGridTemplateColumn Header="CELL_GEN" Width="60">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                      IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_GEN}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                                <DataGridTemplateColumn Header="CELL_GEN_SHADE" MinWidth="60" MaxWidth="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" 
-                                                      IsChecked="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Converter={StaticResource CellRenderMethodConverter}, ConverterParameter=CELL_GEN_SHADE}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Expander>
-
-
-
-                    <!-- Cell options -->
-                    <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="False"
-                            Header="Cell Options 1"
                             Margin="0,4,0,0" 
                             Canvas.ZIndex="1"
                             BorderThickness="1"

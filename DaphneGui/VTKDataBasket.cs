@@ -280,8 +280,8 @@ namespace DaphneGui
             imageGrid = vtkImageData.New();
 
             // set up the grid and allocate data
-            imageGrid.SetExtent(0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0), 0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1), 0, Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2));
-            imageGrid.SetSpacing(Simulation.dataBasket.ECS.Space.Interior.StepSize(), Simulation.dataBasket.ECS.Space.Interior.StepSize(), Simulation.dataBasket.ECS.Space.Interior.StepSize());
+            imageGrid.SetExtent(0, SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0), 0, SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1), 0, SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2));
+            imageGrid.SetSpacing(SimulationBase.dataBasket.Environment.Comp.Interior.StepSize(), SimulationBase.dataBasket.Environment.Comp.Interior.StepSize(), SimulationBase.dataBasket.Environment.Comp.Interior.StepSize());
             //imageGrid.SetOrigin(0.0, 0.0, 0.0);
             // the four component scalar data requires the type to be uchar
             imageGrid.SetScalarTypeToUnsignedChar();
@@ -308,21 +308,23 @@ namespace DaphneGui
             if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
             {
                 molpopControl = new MolpopTypeGaussianController(((MolPopGaussian)molpop.mp_distribution).peak_concentration,
-                                                                 ((MolPopGaussian)molpop.mp_distribution).gaussgrad_gauss_spec_guid_ref);
+                                                                 ((MolPopGaussian)molpop.mp_distribution).gauss_spec.box_spec.box_guid);
             }
             else if (molpop.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
             {
-                double x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
+                ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
+                double x2 = envHandle.extent_x;
+
                 switch (((MolPopLinear)(molpop.mp_distribution)).dim)
                 {
                     case 0:
-                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_x;
+                        x2 = envHandle.extent_x;
                         break;
                     case 1:
-                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_y;
+                        x2 = envHandle.extent_y;
                         break;
                     case 2:
-                        x2 = MainWindow.SOP.Protocol.scenario.environment.extent_z;
+                        x2 = envHandle.extent_z;
                         break;
                     default:
                         break;
@@ -431,16 +433,16 @@ namespace DaphneGui
                 }
 
                 // generate scalar data
-                for (int iz = 0; iz < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(2); iz++)
+                for (int iz = 0; iz < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2); iz++)
                 {
-                    for (int iy = 0; iy < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(1); iy++)
+                    for (int iy = 0; iy < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1); iy++)
                     {
-                        for (int ix = 0; ix < Simulation.dataBasket.ECS.Space.Interior.NodesPerSide(0); ix++)
+                        for (int ix = 0; ix < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0); ix++)
                         {
-                            double[] point = { Simulation.dataBasket.ECS.Space.Interior.StepSize() * ix, Simulation.dataBasket.ECS.Space.Interior.StepSize() * iy, Simulation.dataBasket.ECS.Space.Interior.StepSize() * iz };
+                            double[] point = { SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * ix, SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * iy, SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * iz };
 
                             double val,
-                                   conc = Simulation.dataBasket.ECS.Space.Populations[kvp.Value.TypeGUID].Conc.Value(point),//Utilities.AddDoubleValues(chemokine.getChemokineConcentrations(idx)[kvp.Value.TypeGUID]),
+                                   conc = SimulationBase.dataBasket.Environment.Comp.Populations[kvp.Value.TypeGUID].Conc.Value(point),//Utilities.AddDoubleValues(chemokine.getChemokineConcentrations(idx)[kvp.Value.TypeGUID]),
                                    scaledConcentration = kvp.Value.BlendingWeight * conc / div;
 
                             // rgba
@@ -901,16 +903,6 @@ namespace DaphneGui
             cellID.SetNumberOfValues(numCells);
             cellID.SetName("cellID");
 
-            //cellSet = vtkIntArray.New();
-            //cellSet.SetNumberOfComponents(1);
-            //cellSet.SetNumberOfValues(numCells);
-            //cellSet.SetName("cellSet");
-
-            //cellGeneration = vtkIntArray.New();
-            //cellGeneration.SetNumberOfComponents(1);
-            //cellGeneration.SetNumberOfValues(numCells);
-            //cellGeneration.SetName("generation");
-
             cellColorMapper = vtkIntArray.New();
             cellColorMapper.SetNumberOfComponents(1);
             cellColorMapper.SetNumberOfValues(numCells);
@@ -954,8 +946,10 @@ namespace DaphneGui
         public void AssignCell(Cell cell)
         {
 
-            int color_index = colorMap[cell.Population_id];
-            if (color_index == -1) return;
+            int index = colorMap[cell.Population_id];
+            if (index == -1) return;
+            int color_start_index = index >> 16;
+            int color_end_index = (index << 16) >> 16;
 
             long idx = assignCellIndex;
             assignCellIndex++;
@@ -965,28 +959,40 @@ namespace DaphneGui
             double[] pos = cell.SpatialState.X;
             points.SetPoint(idx, pos[0], pos[1], pos[2]);
 
+            //this should not happen
             if (RenderPopDict.ContainsKey(cell.label) == false)
             {
                 return;
             }
             RenderPop render_pop = RenderPopDict[cell.label];
+            int color_index;
             switch (render_pop.renderMethod)
             {
                 case RenderMethod.CELL_TYPE:
                 case RenderMethod.CELL_POP:
-                    cellColorMapper.SetValue(idx, color_index);
+                    cellColorMapper.SetValue(idx, color_start_index);
                     break;
                 case RenderMethod.CELL_DIV_STATE:
-                    cellColorMapper.SetValue(idx, color_index + cell.DividerState);
+                case RenderMethod.CELL_DIV_SHADE:
+                    color_index = color_start_index + cell.DividerState;
+                    if (color_index > color_end_index) color_index = color_end_index;
+                    cellColorMapper.SetValue(idx, color_index);
                     break;
                 case RenderMethod.CELL_DIFF_STATE:
-                    cellColorMapper.SetValue(idx, color_index + cell.DifferentiationState);
+                case RenderMethod.CELL_DIFF_SHADE:
+                    color_index = color_start_index + cell.DifferentiationState;
+                    if (color_index > color_end_index) color_index = color_end_index;
+                    cellColorMapper.SetValue(idx, color_index);
                     break;
                 case RenderMethod.CELL_DEATH_STATE:
-                    cellColorMapper.SetValue(idx, color_index + (cell.Alive ? 0 : 1));
+                case RenderMethod.CELL_DEATH_SHADE:
+                    cellColorMapper.SetValue(idx, color_start_index + (cell.Alive ? 0 : 1));
                     break;
                 case RenderMethod.CELL_GEN:
-                    cellColorMapper.SetValue(idx, color_index + cell.generation);
+                case RenderMethod.CELL_GEN_SHADE:
+                    //for generation, looping over available colors.
+                    color_index = color_start_index + (cell.generation % (color_end_index - color_start_index + 1));
+                    cellColorMapper.SetValue(idx, color_index);
                     break;
             }
 
@@ -1088,14 +1094,14 @@ namespace DaphneGui
         public void UpdateAllocatedCells()
         {
             // allow zero arrays; that's needed in order to totally clear the cells after all of them die
-            if (Simulation.dataBasket.Cells != null)// && Simulation.dataBasket.Cells.Count > 0)
+            if (SimulationBase.dataBasket.Cells != null)// && Simulation.dataBasket.Cells.Count > 0)
             {
                 // NOTE: Make sure that all arrays get updated or there will be memory problems.
-                allocateArrays(Simulation.dataBasket.Cells.Count, 2);
+                allocateArrays(SimulationBase.dataBasket.Cells.Count, 2);
 
 
                 resetAssignCellIndex();
-                foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                 {
                     AssignCell(kvp.Value);
                 }
@@ -1253,6 +1259,14 @@ namespace DaphneGui
 
         public void SetupVTKData(Protocol protocol)
         {
+            if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                // for now
+                throw new InvalidCastException();
+            }
+
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)protocol.scenario.environment;
+            TissueScenario scenario = (TissueScenario)protocol.scenario;
             double useThisZValue,
                    gridStep = Cell.defaultRadius * 2;
 
@@ -1262,33 +1276,46 @@ namespace DaphneGui
             MainWindow.Basket.ResetTrackData();
 #endif
 
-            if (protocol.scenario.environment.extent_z < gridStep)
+            if (envHandle.extent_z < gridStep)
             {
                 useThisZValue = gridStep;
             }
             else
             {
-                useThisZValue = protocol.scenario.environment.extent_z;
+                useThisZValue = envHandle.extent_z;
             }
-            environmentDataController.setupBox(protocol.scenario.environment.extent_x, protocol.scenario.environment.extent_y, useThisZValue);
+            environmentDataController.setupBox(envHandle.extent_x, envHandle.extent_y, useThisZValue);
 
             //compute how many color entries we need
             int nColor = 0;
-            Dictionary<int, int> colorMap = new Dictionary<int,int>();
-            for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
+            Dictionary<int, int> colorStartIndexMap = new Dictionary<int,int>();
+            Dictionary<int, int> colorEndIndexMap = new Dictionary<int, int>();
+            for (int i = 0; i < scenario.cellpopulations.Count; i++)
             {
-                string label = protocol.scenario.cellpopulations[i].label;
-                RenderPop rp = protocol.scenario.popOptions.GetCellRenderPop(label);
+                string label = scenario.cellpopulations[i].renderLabel;
+                //may happen for scenarios built earlier...
+                if (label == null)label = scenario.cellpopulations[i].Cell.entity_guid;
+                RenderPop rp = scenario.popOptions.GetCellRenderPop(label);
+                //if no render options specified, assign a new one.
+                if (rp == null)
+                {
+                    CellPopulation cp = scenario.cellpopulations[i];
+                    string cellname = cp.Cell.CellName;
+                    scenario.popOptions.AddRenderOptions(label, cp.Cell.CellName, true);
+                    rp = scenario.popOptions.GetCellRenderPop(label);
+                }
+
                 if (cellDataController.RenderPopDict.ContainsKey(label) == false)
                 {
                     cellDataController.RenderPopDict.Add(label, rp);
                 }
-                if (rp == null || rp.renderOn == false)
+                if (rp.renderOn == false)
                 {
-                    colorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, -1);
+                    colorStartIndexMap.Add(scenario.cellpopulations[i].cellpopulation_id, -1);
+                    colorEndIndexMap.Add(scenario.cellpopulations[i].cellpopulation_id, -1);
                     continue;
                 }
-                colorMap.Add(protocol.scenario.cellpopulations[i].cellpopulation_id, nColor);
+                colorStartIndexMap.Add(scenario.cellpopulations[i].cellpopulation_id, nColor);
                 RenderCell rc = MainWindow.SOP.GetRenderCell(label);
                 switch (rp.renderMethod)
                 {
@@ -1301,20 +1328,39 @@ namespace DaphneGui
                     case RenderMethod.CELL_DIV_STATE:
                         nColor += rc.div_state_colors.Count;
                         break;
+                    case RenderMethod.CELL_DIV_SHADE:
+                        nColor += rc.div_shade_colors.Count;
+                        break;
                     case RenderMethod.CELL_DIFF_STATE:
                         nColor += rc.diff_state_colors.Count;
+                        break;
+                    case RenderMethod.CELL_DIFF_SHADE:
+                        nColor += rc.diff_shade_colors.Count;
                         break;
                     case RenderMethod.CELL_DEATH_STATE:
                         nColor += rc.death_state_colors.Count;
                         break;
+                    case RenderMethod.CELL_DEATH_SHADE:
+                        nColor += rc.death_shade_colors.Count;
+                        break;
                     case RenderMethod.CELL_GEN:
                         nColor += rc.gen_colors.Count;
                         break;
+                    case RenderMethod.CELL_GEN_SHADE:
+                        nColor += rc.gen_shade_colors.Count;
+                        break;
                 }
+                colorEndIndexMap.Add(scenario.cellpopulations[i].cellpopulation_id, nColor-1);
             }
-            foreach( var item in colorMap)
+            //passing each cellpop's color index in color tabel to cellDataController
+            cellDataController.ColorMap.Clear();
+            foreach( var item in colorStartIndexMap)
             {
-                cellDataController.ColorMap.Add(item.Key, item.Value);
+                int start_index = item.Value;
+                int end_index = colorEndIndexMap[item.Key];
+                //the first 16 bit is the start index, the second 16 bit is the end index
+                int value = start_index == -1 ? -1 : (start_index << 16 + end_index);
+                cellDataController.ColorMap.Add(item.Key, value);
             }
             cellDataController.CreateCellColorTable(nColor);
 
@@ -1322,14 +1368,14 @@ namespace DaphneGui
             Color color = Colors.Transparent;
             //cell pops index for sample type
             Dictionary<string, int> cellPopIndex = new Dictionary<string, int>();
-            for (int i = 0; i < protocol.scenario.cellpopulations.Count; i++)
+            for (int i = 0; i < scenario.cellpopulations.Count; i++)
             {
-                string label = protocol.scenario.cellpopulations[i].label;
-                RenderPop rp = protocol.scenario.popOptions.GetCellRenderPop(label);
+                string label = scenario.cellpopulations[i].renderLabel;
+                RenderPop rp = scenario.popOptions.GetCellRenderPop(label);
                 if (rp == null || rp.renderOn == false) continue; //old senario may have rp =null
                 RenderCell rc = MainWindow.SOP.GetRenderCell(label);
                 if (rc == null) continue; //skin color for this missing?
-                int color_index = colorMap[protocol.scenario.cellpopulations[i].cellpopulation_id];
+                int color_index = colorStartIndexMap[scenario.cellpopulations[i].cellpopulation_id];
 
                 //for diffrent cell populaiton of same type
                 int pop_index = 0;
@@ -1340,6 +1386,11 @@ namespace DaphneGui
                 else
                 {
                     pop_index = cellPopIndex[label];
+                    //use last color if more cellpops of a cell type than colors specified.
+                    if (pop_index >= rc.cell_pop_colors.Count)
+                    {
+                        pop_index = rc.cell_pop_colors.Count - 1;
+                    }
                     cellPopIndex[label]++;
                 }
                 switch (rp.renderMethod)
@@ -1359,6 +1410,14 @@ namespace DaphneGui
                             cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
                         }
                         break;
+                    case RenderMethod.CELL_DIV_SHADE:
+                        for (int j = 0; j < rc.div_shade_colors.Count; j++, color_index++)
+                        {
+                            color = rc.div_shade_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+
                     case RenderMethod.CELL_DIFF_STATE:
                         for (int j = 0; j < rc.diff_state_colors.Count; j++, color_index++)
                         {
@@ -1366,6 +1425,14 @@ namespace DaphneGui
                             cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
                         }
                         break;
+                    case RenderMethod.CELL_DIFF_SHADE:
+                        for (int j = 0; j < rc.diff_shade_colors.Count; j++, color_index++)
+                        {
+                            color = rc.diff_shade_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+
                     case RenderMethod.CELL_DEATH_STATE:
                         for (int j = 0; j < rc.death_state_colors.Count; j++, color_index++)
                         {
@@ -1373,10 +1440,26 @@ namespace DaphneGui
                             cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
                         }
                         break;
+                    case RenderMethod.CELL_DEATH_SHADE:
+                        for (int j = 0; j < rc.death_shade_colors.Count; j++, color_index++)
+                        {
+                            color = rc.death_shade_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+
                     case RenderMethod.CELL_GEN:
                         for (int j = 0; j < rc.gen_colors.Count; j++, color_index++)
                         {
                             color = rc.gen_colors[j].EntityColor;
+                            cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
+                        }
+                        break;
+
+                    case RenderMethod.CELL_GEN_SHADE:
+                        for (int j = 0; j < rc.gen_shade_colors.Count; j++, color_index++)
+                        {
+                            color = rc.gen_shade_colors[j].EntityColor;
                             cellDataController.AddToCellColorTable(color_index, color.ScR, color.ScG, color.ScB, color.ScA);
                         }
                         break;
@@ -1389,25 +1472,28 @@ namespace DaphneGui
 
             // ecs rendering
             // set up the 3d image grid for the ecs
-            ecsDataController.setupGradient3D();
-
-            for (int i = 0; i < protocol.scenario.environment.ecs.molpops.Count; i++)
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
             {
-                RegionControl region = null;
+                ecsDataController.setupGradient3D();
 
-                if (protocol.scenario.environment.ecs.molpops[i].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                for (int i = 0; i < protocol.scenario.environment.comp.molpops.Count; i++)
                 {
-                    region = regions[((MolPopGaussian)protocol.scenario.environment.ecs.molpops[i].mp_distribution).gaussgrad_gauss_spec_guid_ref];
-                }
+                    RegionControl region = null;
 
-                // 3D gradient
-                ecsDataController.addGradient3D(protocol.scenario.environment.ecs.molpops[i], region);
+                    if (protocol.scenario.environment.comp.molpops[i].mp_distribution.mp_distribution_type == MolPopDistributionType.Gaussian)
+                    {
+                        region = regions[((MolPopGaussian)protocol.scenario.environment.comp.molpops[i].mp_distribution).gauss_spec.box_spec.box_guid];
+                    }
 
-                // finish 3d gradient-related graphics after processing the last molpop
-                if (i == protocol.scenario.environment.ecs.molpops.Count - 1)
-                {
-                    // update all gradients; do not cause a redraw
-                    ecsDataController.updateGradients3D(true, false);
+                    // 3D gradient
+                    ecsDataController.addGradient3D(protocol.scenario.environment.comp.molpops[i], region);
+
+                    // finish 3d gradient-related graphics after processing the last molpop
+                    if (i == protocol.scenario.environment.comp.molpops.Count - 1)
+                    {
+                        // update all gradients; do not cause a redraw
+                        ecsDataController.updateGradients3D(true, false);
+                    }
                 }
             }
         }
@@ -1449,22 +1535,29 @@ namespace DaphneGui
 #endif
         public void AddGaussSpecRegionControl(GaussianSpecification gs)
         {
-            string box_guid = gs.gaussian_spec_box_guid_ref;
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                // for now
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)scenario.environment;
             // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[box_guid];
+            BoxSpecification bs = gs.box_spec;
 
             RegionControl rc = new RegionControl(RegionShape.Ellipsoid);
 
             // box transform
             rc.SetTransform(bs.transform_matrix, RegionControl.PARAM_SCALE);
             // outer bounds of environment (not really needed for gauss_spec)
-            rc.SetExteriorBounds(new double[] { 0, MainWindow.SOP.Protocol.scenario.environment.extent_x,
-                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_y,
-                                                0, MainWindow.SOP.Protocol.scenario.environment.extent_z });
+            rc.SetExteriorBounds(new double[] { 0, envHandle.extent_x,
+                                                0, envHandle.extent_y,
+                                                0, envHandle.extent_z });
 
             // NOTE: Not doing any callbacks or property changed notifications right now...
 
-            regions.Add(box_guid, rc);
+            regions.Add(bs.box_guid, rc);
         }
 #if ALL_VTK
         public void AddRegionRegionControl(Region rr)
@@ -1489,10 +1582,19 @@ namespace DaphneGui
 #endif
         public void CreateRegionControls()
         {
-            // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SOP.Protocol.scenario.gaussian_specifications)
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                AddGaussSpecRegionControl(gs);
+                // for now
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            GaussianSpecification next;
+
+            scenario.resetGaussRetrieve();
+            while ((next = scenario.nextGaussSpec()) != null)
+            {
+                AddGaussSpecRegionControl(next);
             }
 #if ALL_VTK
             // Regions
@@ -1514,9 +1616,9 @@ namespace DaphneGui
         /// </summary>
         public void CreateAllocatedCells()
         {
-            if (Simulation.dataBasket.Cells != null)
+            if (SimulationBase.dataBasket.Cells != null)
             {
-                if (Simulation.dataBasket.Cells.Count > 0)
+                if (SimulationBase.dataBasket.Cells.Count > 0)
                 {
 #if ALL_VTK
                     // NOTE: For now take the receptor info from an example cell. Should probably use the Chemokine
@@ -1611,12 +1713,11 @@ namespace DaphneGui
                     }
                     cellController.StartAllocatedCells(Simulation.dataBasket.Cells.Count, this.cellReceptorGuidNames);
 #else
-
-                    cellDataController.StartAllocatedCells(Simulation.dataBasket.Cells.Count);
+                    cellDataController.StartAllocatedCells(SimulationBase.dataBasket.Cells.Count);
 #endif
 
                     cellDataController.resetAssignCellIndex();
-                    foreach (KeyValuePair<int, Cell> kvp in Simulation.dataBasket.Cells)
+                    foreach (KeyValuePair<int, Cell> kvp in SimulationBase.dataBasket.Cells)
                     {
                         cellDataController.AssignCell(kvp.Value);
                     }
@@ -1742,7 +1843,10 @@ namespace DaphneGui
             cellDataController.UpdateAllocatedCells();
 
             // ecs
-            ecsDataController.updateGradients3D(MainWindow.GC.ECSController.RenderGradient, true);
+            if (SimulationBase.dataBasket.Environment is ECSEnvironment)
+            {
+                ecsDataController.updateGradients3D(MainWindow.GC.ECSController.RenderGradient, true);
+            }
         }
     }
 }

@@ -22,7 +22,6 @@ namespace DaphneGui
     public enum ReactionComplexDialogType { AddComplex, EditComplex }
     public partial class AddReacComplex : Window
     {
-        protected EntityRepository er;
         protected ReactionComplexDialogType dlgType;
         protected ConfigReactionComplex selectedRC;
 
@@ -81,7 +80,6 @@ namespace DaphneGui
 
         private void Initialize()
         {
-            er = MainWindow.SOP.Protocol.entity_repository;
             LeftList.Clear();
             RightList.Clear();
 
@@ -89,38 +87,41 @@ namespace DaphneGui
             if (dlgType == ReactionComplexDialogType.AddComplex)
             {
                 //leftList is whole reactions list initially
-                foreach (ConfigReaction reac in er.reactions)
+                foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
                 {
-                    if (!reac.HasBoundaryMolecule(er))
+                    if (reac.HasBoundaryMolecule(MainWindow.SOP.Protocol.entity_repository) == false)
+                    {
                         LeftList.Add(reac);
+                    }
                 }                
                 //rightList is empty initially    
-              
             }
 
             //else edit existing rc
             else 
             {
-                //leftList is whole reactions list minus rc reactions - make a copy of it  
-                foreach (ConfigReaction reac in er.reactions)
+                // leftList is whole reactions list minus rc reactions - make a copy of it  
+                foreach (ConfigReaction reac in MainWindow.SOP.Protocol.entity_repository.reactions)
                 {
-                    if (!reac.HasBoundaryMolecule(er))
-                        leftList.Add(reac);
+                    if (reac.HasBoundaryMolecule(MainWindow.SOP.Protocol.entity_repository) == false)
+                    {
+                        LeftList.Add(reac);
+                    }
                 }
                 
-                //rightList is the reaction complex' reactions 
-                foreach (string rguid in selectedRC.reactions_guid_ref)
+                // rightList is the reaction complex' reactions 
+                foreach (ConfigReaction cr in selectedRC.reactions)
                 {
-                    rightList.Add(er.reactions_dict[rguid]);  
+                    RightList.Add(cr);  
                 }
 
-                //don't show in left list, reactions that are already in reac complex
+                // don't show in left list, reactions that are already in reac complex
                 foreach (ConfigReaction cr in rightList)
                 {
-                    leftList.Remove(cr);
+                    LeftList.Remove(cr);
                 }
                
-                //rc name
+                // rc name
                 txtRcName.Text = selectedRC.Name;
             }
 
@@ -186,33 +187,40 @@ namespace DaphneGui
 
             if (dlgType == ReactionComplexDialogType.EditComplex)
             {
-                selectedRC.reactions_guid_ref.Clear();
+                selectedRC.reactions.Clear();
+#if OLD_RC
                 selectedRC.ReactionRates.Clear();
+#endif
                 foreach (ConfigReaction reac in RightList)
                 {
-                    selectedRC.reactions_guid_ref.Add(reac.entity_guid);
+                    selectedRC.reactions.Add(reac);
+#if OLD_RC
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
                     pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
-                    selectedRC.ReactionRates.Add(pair);                    
+                    selectedRC.ReactionRates.Add(pair);
+#endif
                 }
-                selectedRC.RefreshMolPops(er);
+                selectedRC.RefreshMolPops();
             }
             else
             {
                 ConfigReactionComplex crc = new ConfigReactionComplex(txtRcName.Text);
+
                 foreach (ConfigReaction reac in RightList)
                 {
-                    crc.reactions_guid_ref.Add(reac.entity_guid);
+                    crc.reactions.Add(reac);
+#if OLD_RC
                     ConfigReactionGuidRatePair pair = new ConfigReactionGuidRatePair();
                     pair.entity_guid = reac.entity_guid;
                     pair.OriginalRate = reac.rate_const;
                     pair.ReactionComplexRate = pair.OriginalRate;
                     crc.ReactionRates.Add(pair);
+#endif
                 }
-                er.reaction_complexes.Add(crc);
-                crc.RefreshMolPops(er);
+                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crc);
+                crc.RefreshMolPops();
             }
         }
 

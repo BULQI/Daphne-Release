@@ -11,17 +11,14 @@ using System.Globalization;
 
 namespace Daphne
 {
-    public class Reporter
+    public abstract class ReporterBase
     {
-        private StreamWriter ecm_mean_file;
-        private Dictionary<int, StreamWriter> cell_files;
-        private DateTime startTime;
-        private string reportFolder, fileName;
-        public string AppPath { get; set; } //non uri
+        protected DateTime startTime;
+        protected string reportFolder, fileName;
+        public string AppPath { get; set; } // non uri
 
-        public Reporter()
+        public ReporterBase()
         {
-            cell_files = new Dictionary<int, StreamWriter>();
             reportFolder = "";
         }
 
@@ -37,34 +34,14 @@ namespace Daphne
             set { fileName = value; }
         }
 
-        public void StartReporter(Protocol protocol)
-        {
-            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
-            CloseReporter();
-            startECM(protocol);
-            startCells(protocol);
-        }
-
-        public void AppendReporter(Protocol protocol, Simulation sim)
-        {
-            appendECM(protocol, sim);
-            appendCells(protocol, sim);
-        }
-
-        public void CloseReporter()
-        {
-            closeECM();
-            closeCells();
-        }
-
-        private StreamWriter createStreamWriter(string file, string extension)
+        protected StreamWriter createStreamWriter(string file, string extension)
         {
             int version = 1;
             string rootPath = reportFolder,
                    nameStart,
                    fullPath;
-            
-            if(rootPath != "")
+
+            if (rootPath != "")
             {
                 rootPath += @"\";
             }
@@ -97,17 +74,59 @@ namespace Daphne
             } while (true);
         }
 
-        private void startECM(Protocol protocol)
+        public abstract void StartReporter(SimulationBase sim);
+        public abstract void AppendReporter();
+        public abstract void CloseReporter();
+    }
+
+    public class TissueSimulationReporter : ReporterBase
+    {
+        private StreamWriter ecm_mean_file;
+        private Dictionary<int, StreamWriter> cell_files;
+        private TissueSimulation hSim;
+
+        public TissueSimulationReporter()
+        {
+            cell_files = new Dictionary<int, StreamWriter>();
+        }
+
+        public override void StartReporter(SimulationBase sim)
+        {
+            if (sim is TissueSimulation == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as TissueSimulation;
+            startTime = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Local);
+            CloseReporter();
+            startECM();
+            startCells();
+        }
+
+        public override void AppendReporter()
+        {
+            appendECM();
+            appendCells();
+        }
+
+        public override void CloseReporter()
+        {
+            closeECM();
+            closeCells();
+        }
+
+        private void startECM()
         {
             string header = "time";
             bool create = false;
 
             // mean
-            foreach (ConfigMolecularPopulation c in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
             {
                 if (((ReportECM)c.report_mp).mean == true)
                 {
-                    header += "\t" + protocol.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    header += "\t" + SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
                     create = true;
                 }
             }
@@ -115,24 +134,24 @@ namespace Daphne
             if(create == true)
             {
                 ecm_mean_file = createStreamWriter("ecm_mean_report", "txt");
-                ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", protocol.experiment_name, startTime);
+                ecm_mean_file.WriteLine("ECM mean report from {0} run on {1}.", SimulationBase.ProtocolHandle.experiment_name, startTime);
                 ecm_mean_file.WriteLine(header);
             }
         }
 
-        private void appendECM(Protocol protocol, Simulation sim)
+        private void appendECM()
         {
             // mean
             if (ecm_mean_file != null)
             {
                 // simulation time
-                ecm_mean_file.Write(sim.AccumulatedTime);
-                foreach (ConfigMolecularPopulation c in protocol.scenario.environment.ecs.molpops)
+                ecm_mean_file.Write(hSim.AccumulatedTime);
+                foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
                     if (((ReportECM)c.report_mp).mean == true)
                     {
                         // mean concentration of this ecm molecular population
-                        ecm_mean_file.Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[c.molecule.entity_guid].Conc.MeanValue());
+                        ecm_mean_file.Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[c.molecule.entity_guid].Conc.MeanValue());
                     }
                 }
                 // terminate line
@@ -140,19 +159,19 @@ namespace Daphne
             }
 
             // extended
-            foreach (ConfigMolecularPopulation c in protocol.scenario.environment.ecs.molpops)
+            foreach (ConfigMolecularPopulation c in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
             {
                 if (c.report_mp.mp_extended > ExtendedReport.NONE)
                 {
-                    string name = protocol.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
-                    StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + sim.AccumulatedTime, "txt");
+                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[c.molecule.entity_guid].Name;
+                    StreamWriter writer = createStreamWriter("ecm_" + name + "_report_step" + hSim.AccumulatedTime, "txt");
                     string header = "x\ty\tz\tconc\tgradient_x\tgradient_y\tgradient_z";
 
-                    writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, sim.AccumulatedTime, protocol.experiment_name, startTime);
+                    writer.WriteLine("ECM {0} report at {1}min from {2} run on {3}.", name, hSim.AccumulatedTime, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
 
-                    InterpolatedRectangularPrism prism = (InterpolatedRectangularPrism)Simulation.dataBasket.ECS.Space.Interior;
-                    MolecularPopulation mp = Simulation.dataBasket.ECS.Space.Populations[c.molecule.entity_guid];
+                    InterpolatedRectangularPrism prism = (InterpolatedRectangularPrism)SimulationBase.dataBasket.Environment.Comp.Interior;
+                    MolecularPopulation mp = SimulationBase.dataBasket.Environment.Comp.Populations[c.molecule.entity_guid];
 
                     for (int i = 0; i < prism.ArraySize; i++)
                     {
@@ -183,10 +202,10 @@ namespace Daphne
             }
         }
 
-        private void startCells(Protocol protocol)
+        private void startCells()
         {
             // create a file stream for each cell population
-            foreach (CellPopulation cp in protocol.scenario.cellpopulations)
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
                 string header = "cell_id\ttime";
                 bool create = false;
@@ -238,11 +257,9 @@ namespace Daphne
                     //ConfigCompartment comp = (i == 0) ? protocol.entity_repository.cells_dict[cp.Cell.entity_guid].cytosol : protocol.entity_repository.cells_dict[cp.Cell.entity_guid].membrane;
                     ConfigCompartment comp = (i == 0) ? cp.Cell.cytosol : cp.Cell.membrane;
 
-
-
                     foreach (ConfigMolecularPopulation mp in comp.molpops)
                     {
-                        string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (mp.report_mp.mp_extended > ExtendedReport.NONE)
                         {
@@ -259,9 +276,9 @@ namespace Daphne
                 }
 
                 // ecm probe concentrations
-                foreach (ConfigMolecularPopulation mp in protocol.scenario.environment.ecs.molpops)
+                foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                 {
-                    string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                    string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                     if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                     {
@@ -281,27 +298,27 @@ namespace Daphne
                 {
                     StreamWriter writer = createStreamWriter("cell_type" + cp.cellpopulation_id + "_report", "txt");
 
-                    writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, protocol.experiment_name, startTime);
+                    writer.WriteLine("Cell {0} report from {1} run on {2}.", cp.Cell.CellName, SimulationBase.ProtocolHandle.experiment_name, startTime);
                     writer.WriteLine(header);
                     cell_files.Add(cp.cellpopulation_id, writer);
                 }
             }
         }
 
-        private void appendCells(Protocol protocol, Simulation sim)
+        private void appendCells()
         {
             // create a file stream for each cell population
-            foreach (CellPopulation cp in protocol.scenario.cellpopulations)
+            foreach (CellPopulation cp in ((TissueScenario)SimulationBase.ProtocolHandle.scenario).cellpopulations)
             {
                 if (cell_files.ContainsKey(cp.cellpopulation_id) == false)
                 {
                     continue;
                 }
 
-                foreach (Cell c in Simulation.dataBasket.Populations[cp.cellpopulation_id].Values)
+                foreach (Cell c in SimulationBase.dataBasket.Populations[cp.cellpopulation_id].Values)
                 {
                     // cell_id time
-                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, sim.AccumulatedTime);
+                    cell_files[cp.cellpopulation_id].Write("{0}\t{1}", c.Cell_id, hSim.AccumulatedTime);
 
                     if (cp.report_xvf.position == true)
                     {
@@ -358,18 +375,18 @@ namespace Daphne
                     }
 
                     // ecm probe concentrations
-                    foreach (ConfigMolecularPopulation mp in protocol.scenario.environment.ecs.molpops)
+                    foreach (ConfigMolecularPopulation mp in SimulationBase.ProtocolHandle.scenario.environment.comp.molpops)
                     {
-                        string name = protocol.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
+                        string name = SimulationBase.ProtocolHandle.entity_repository.molecules_dict[mp.molecule.entity_guid].Name;
 
                         if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended > ExtendedReport.NONE)
                         {
-                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
+                            cell_files[cp.cellpopulation_id].Write("\t{0:G4}", SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Value(c.SpatialState.X));
 
                             // gradient
                             if (cp.ecm_probe_dict[mp.molpop_guid].mp_extended == ExtendedReport.COMPLETE)
                             {
-                                double[] grad = Simulation.dataBasket.ECS.Space.Populations[mp.molecule.entity_guid].Conc.Gradient(c.SpatialState.X);
+                                double[] grad = SimulationBase.dataBasket.Environment.Comp.Populations[mp.molecule.entity_guid].Conc.Gradient(c.SpatialState.X);
 
                                 cell_files[cp.cellpopulation_id].Write("\t{0:G4}\t{1:G4}\t{2:G4}", grad[0], grad[1], grad[2]);
                             }
@@ -393,6 +410,55 @@ namespace Daphne
                 // remove the entries from the cell files dictionary
                 cell_files.Clear();
             }
+        }
+    }
+
+    public class VatReactionComplexReporter : ReporterBase
+    {
+        private VatReactionComplex hSim;
+
+        public VatReactionComplexReporter()
+        {
+        }
+
+        public override void StartReporter(SimulationBase sim)
+        {
+            if (sim is VatReactionComplex == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            hSim = sim as VatReactionComplex;
+            hSim.DictGraphConcs.Clear();
+            hSim.ListTimes.Clear();
+
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs.Add(kvp.Key, new List<double>());
+            }
+        }
+
+        private void appendTimesAndConcs()
+        {
+            double[] defaultLoc = { 0.0, 0.0, 0.0 };
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+
+            hSim.ListTimes.Add(hSim.AccumulatedTime);
+            foreach (KeyValuePair<string, MolecularPopulation> kvp in comp.Populations)
+            {
+                hSim.DictGraphConcs[kvp.Key].Add(comp.Populations[kvp.Key].Conc.Value(defaultLoc));
+            }
+        }
+
+        public override void AppendReporter()
+        {
+            appendTimesAndConcs();
+        }
+
+        public override void CloseReporter()
+        {
         }
     }
 }

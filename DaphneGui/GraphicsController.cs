@@ -207,7 +207,7 @@ namespace DaphneGui
         /// </summary>
         public void finish3DPipelines()
         {
-            Compartment ecs = Simulation.dataBasket.ECS.Space;
+            Compartment ecs = SimulationBase.dataBasket.Environment.Comp;
             // create a transfer function mapping scalar value to opacity
             vtkPiecewiseFunction fOpacity = vtkPiecewiseFunction.New();
             // set the opacity: assume it is one along the volume's diagonal
@@ -1467,29 +1467,24 @@ namespace DaphneGui
         /// <param name="transferMatrix">true if transferring the widget matrix to the gui is desired</param>
         public void WidgetInteractionToGUICallback(RegionWidget rw, bool transferMatrix)
         {
-            // identify the widget's key
-            string key = "";
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
 
             // NOTE: This callback specific to this GC (referencing Regions). 
             //   Not sure what will happen with mutiple GCs...
-            if (rw != null && Regions.ContainsValue(rw) == true)
+            if (rw != null)
             {
-                foreach (KeyValuePair<string, RegionWidget> kvp in Regions)
+                if (rw.Gaussian != null && rw.Gaussian.box_spec != null)
                 {
-                    if (kvp.Value == rw)
-                    {
-                        key = kvp.Key;
-                        break;
-                    }
-                }
+                    BoxSpecification box = rw.Gaussian.box_spec;
 
-                // found?
-                if (key != "")
-                {
                     if (transferMatrix == true)
                     {
                         double[] r = null, t = null, s = null;
-                        bool changed = false;
 
                         // get the scale, rotation, translation, check against their min/max values, and correct if needed
                         rw.GetScaleRotationTranslation(ref s, ref r, ref t);
@@ -1497,72 +1492,74 @@ namespace DaphneGui
                         if (s[0] < 0 && s[1] < 0 && s[2] < 0)
                         {
                             // restore the box matrix; the latter is known to be good
-                            rw.SetTransform(MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].transform_matrix, RegionControl.PARAM_SCALE);
+                            rw.SetTransform(box.transform_matrix, RegionControl.PARAM_SCALE);
                             // transfer transform to VTKDataBasket
-                            MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                            MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                             return;
                         }
+#if USE_BOX_LIMITS
+                        bool changed = false;
 
                         // translation
-                        if (t[0] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_min)
+                        if (t[0] < scenario.box_guid_box_dict[key].x_trans_min)
                         {
-                            t[0] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_min;
+                            t[0] = scenario.box_guid_box_dict[key].x_trans_min;
                             changed = true;
                         }
-                        if (t[0] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_max)
+                        if (t[0] > scenario.box_guid_box_dict[key].x_trans_max)
                         {
-                            t[0] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_trans_max;
+                            t[0] = scenario.box_guid_box_dict[key].x_trans_max;
                             changed = true;
                         }
-                        if (t[1] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_min)
+                        if (t[1] < scenario.box_guid_box_dict[key].y_trans_min)
                         {
-                            t[1] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_min;
+                            t[1] = scenario.box_guid_box_dict[key].y_trans_min;
                             changed = true;
                         }
-                        if (t[1] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_max)
+                        if (t[1] > scenario.box_guid_box_dict[key].y_trans_max)
                         {
-                            t[1] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_trans_max;
+                            t[1] = scenario.box_guid_box_dict[key].y_trans_max;
                             changed = true;
                         }
-                        if (t[2] < MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_min)
+                        if (t[2] < scenario.box_guid_box_dict[key].z_trans_min)
                         {
-                            t[2] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_min;
+                            t[2] = scenario.box_guid_box_dict[key].z_trans_min;
                             changed = true;
                         }
-                        if (t[2] > MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_max)
+                        if (t[2] > scenario.box_guid_box_dict[key].z_trans_max)
                         {
-                            t[2] = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_trans_max;
+                            t[2] = scenario.box_guid_box_dict[key].z_trans_max;
                             changed = true;
                         }
                         // scale
-                        if (s[0] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_min)
+                        if (s[0] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_min)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_min;
+                            s[0] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_min;
                             changed = true;
                         }
-                        if (s[0] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_max)
+                        if (s[0] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_max)
                         {
-                            s[0] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].x_scale_max;
+                            s[0] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].x_scale_max;
                             changed = true;
                         }
-                        if (s[1] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_min)
+                        if (s[1] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_min)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_min;
+                            s[1] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_min;
                             changed = true;
                         }
-                        if (s[1] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_max)
+                        if (s[1] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_max)
                         {
-                            s[1] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].y_scale_max;
+                            s[1] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].y_scale_max;
                             changed = true;
                         }
-                        if (s[2] < RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_min)
+                        if (s[2] < RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_min)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_min;
+                            s[2] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_min;
                             changed = true;
                         }
-                        if (s[2] > RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_max)
+                        if (s[2] > RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_max)
                         {
-                            s[2] = RegionControl.SCALE_CORRECTION * MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key].z_scale_max;
+                            s[2] = RegionControl.SCALE_CORRECTION * scenario.box_guid_box_dict[key].z_scale_max;
                             changed = true;
                         }
 
@@ -1571,9 +1568,10 @@ namespace DaphneGui
                         {
                             rw.SetScaleRotationTranslation(s, r, t, 0);
                         }
-                        WidgetTransformToBoxMatrix(rw, MainWindow.SOP.Protocol.scenario.box_guid_box_dict[key]);
+#endif
+                        WidgetTransformToBoxMatrix(rw, box);
                         // Transfer transform to VTKDataBasket
-                        MainWindow.VTKBasket.Regions[key].SetTransform(rw.GetTransform(), 0);
+                        MainWindow.VTKBasket.Regions[box.box_guid].SetTransform(rw.GetTransform(), 0);
                     }
                 }
             }
@@ -1852,7 +1850,7 @@ namespace DaphneGui
             // Regions
             CreateRegionWidgets();
             // Cells
-            if (Simulation.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null && MainWindow.VTKBasket.CellController.getAssignCellIndex() > 0)
+            if (SimulationBase.dataBasket.Cells != null && MainWindow.VTKBasket.CellController.Poly != null && MainWindow.VTKBasket.CellController.getAssignCellIndex() > 0)
             {
                 // Finish VTK pipeline by glyphing cells
                 cellController.GlyphCells();
@@ -1868,17 +1866,10 @@ namespace DaphneGui
                     }
                 }
 
-
                 if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellColorMapper"))
                 {
-                    // Make "cellSet" a hard-coded first-pass default for now when it's available
                     this.CellColorArrayName = "cellColorMapper";
                 }
-                //else if (this.CellColorArrayName == null && this.CellAttributeArrayNames.Contains("cellSet"))
-                //{
-                //    // Make "cellSet" a hard-coded first-pass default for now when it's available
-                //    this.CellColorArrayName = "cellSet";
-                //}
                 else if (this.CellAttributeArrayNames.Contains(this.CellColorArrayName))
                 {
                     // Pull a background switcheroo to force color map to be applied and property change notice to be fired
@@ -1887,11 +1878,6 @@ namespace DaphneGui
                     this.cellColorArrayName = "";
                     this.CellColorArrayName = tmp;
                 }
-                //else if (!this.CellAttributeArrayNames.Contains(this.CellColorArrayName) && this.CellAttributeArrayNames.Contains("cellSet"))
-                //{
-                //    // If CellColorArrayName isn't null, but the existing name isn't in the current list (after reset) then default to cellSet if can
-                //    this.CellColorArrayName = "cellSet";
-                //}
                 else
                 {
                     this.CellColorArrayName = this.CellAttributeArrayNames[0];
@@ -1913,7 +1899,9 @@ namespace DaphneGui
             EnvironmentController.setupPipeline();
 
             // ecs
-            if (Simulation.dataBasket.ECS != null && MainWindow.VTKBasket.ECSController.ImageGrid != null)
+            if (SimulationBase.dataBasket.Environment != null &&
+                SimulationBase.dataBasket.Environment is ECSEnvironment &&
+                MainWindow.VTKBasket.ECSController.ImageGrid != null)
             {
                 ecsController.finish3DPipelines();
                 // Make "Outline" a hard-coded first-pass default for now, otherwise keep old value
@@ -1926,11 +1914,17 @@ namespace DaphneGui
 
         public void AddGaussSpecRegionWidget(GaussianSpecification gs)
         {
-            string box_guid = gs.gaussian_spec_box_guid_ref;
-            // Find the box spec that goes with this gaussian spec
-            BoxSpecification bs = MainWindow.SOP.Protocol.scenario.box_guid_box_dict[box_guid];
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
+            {
+                throw new InvalidCastException();
+            }
 
-            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, RegionShape.Ellipsoid, gs);
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+
+            // Find the box spec that goes with this gaussian spec
+            BoxSpecification bs = gs.box_spec;
+
+            RegionWidget rw = new RegionWidget(Rwc.RenderWindow, gs, RegionShape.Ellipsoid);
 
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,
@@ -1946,7 +1940,7 @@ namespace DaphneGui
             rw.ShowActor(Rwc.RenderWindow, gs.gaussian_region_visibility);
             // NOTE: Callback being added afterwards in MainWindow for now...
 
-            Regions.Add(box_guid, rw);
+            Regions.Add(gs.box_spec.box_guid, rw);
         }
 
         public void RemoveRegionWidget(string current_guid)
@@ -1959,10 +1953,19 @@ namespace DaphneGui
 
         public void CreateRegionWidgets()
         {
-            // Gaussian specs
-            foreach (GaussianSpecification gs in MainWindow.SOP.Protocol.scenario.gaussian_specifications)
+            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
-                AddGaussSpecRegionWidget(gs);
+                throw new InvalidCastException();
+            }
+
+            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
+            // Gaussian specs
+            GaussianSpecification next;
+
+            scenario.resetGaussRetrieve();
+            while((next = scenario.nextGaussSpec()) != null)
+            {
+                AddGaussSpecRegionWidget(next);
             }
         }
 

@@ -152,8 +152,8 @@ namespace DaphneGui
         private void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigReaction cr = e.Item as ConfigReaction;
-
             bool bOK = false;
+
             foreach (string molguid in cr.reactants_molecule_guid_ref)
             {
                 if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
@@ -198,8 +198,10 @@ namespace DaphneGui
             }
 
             //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
+            {
                 bOK = false;
+            }
 
             e.Accepted = bOK;
         }
@@ -377,7 +379,7 @@ namespace DaphneGui
             if (cr != null)
             {
                 // Filter out cr if not in ecm reaction list 
-                if (MainWindow.SOP.Protocol.scenario.environment.ecs.Reactions.Contains(cr))
+                if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
                 {
                     e.Accepted = true;
                 }
@@ -414,12 +416,13 @@ namespace DaphneGui
 
             e.Accepted = true;
 
-            if (guidRC != null && cr != null)
+            if (guidRC != null && cr != null && MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict.ContainsKey(guidRC) == true)
             {
                 ConfigReactionComplex crc = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[guidRC];
+
                 e.Accepted = false;
                 // Filter out cr if not in ecm reaction list 
-                if (crc.reactions_guid_ref.Contains(cr.entity_guid))
+                if (crc.reactions_dict.ContainsKey(cr.entity_guid) == true)
                 {
                     e.Accepted = true;
                 }
