@@ -49,6 +49,12 @@ namespace DaphneGui
             cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
 
+            cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
+            cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
+            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+
             cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
             cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
@@ -838,6 +844,72 @@ namespace DaphneGui
             e.Accepted = bOK;
         }
 
+        //THIS METHOD NEEDS TO BE IMPLEMENTED
+        private void membraneAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
+            ConfigCell cc = DataContext as ConfigCell;
+
+            if (cc == null)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            //This filter is called for every reaction complex in the repository.
+            //For current reaction complex, if all of its reactions are in the membrane, then the reaction complex should be included.
+            //Otherwise, exclude it.
+
+            //Check if all the reactions in the reaction complex reaction list exist in the membrane
+            bool bOK = true;
+
+            foreach (ConfigReaction cr in crc.reactions)
+            {
+                string guid = cr.entity_guid;
+                if (cc.membrane.GetReaction(guid) == null)
+                {
+                    //if even one reaction is not found in cell cytosol, return false
+                    bOK = false;
+                    break;
+                }
+            }
+
+            e.Accepted = bOK;
+        }
+
+        //THIS METHOD NEEDS TO BE IMPLEMENTED
+        private void cytosolAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
+        {
+            ConfigReactionComplex crc = e.Item as ConfigReactionComplex;
+            ConfigCell cc = DataContext as ConfigCell;
+
+            if (cc == null)
+            {
+                e.Accepted = false;
+                return;
+            }
+
+            //This filter is called for every reaction complex in the repository.
+            //For current reaction complex, if all of its reactions are in the cytosol, then the reaction complex should be included.
+            //Otherwise, exclude it.
+
+            //Check if all the reactions in the reaction complex reaction list exist in the cytosol
+            bool bOK = true;
+
+            foreach (ConfigReaction cr in crc.reactions)
+            {
+                string guid = cr.entity_guid;
+                if (cc.cytosol.GetReaction(guid) == null)
+                {
+                    //if even one reaction is not found in cell cytosol, return false
+                    bOK = false;
+                    break;
+                }
+            }
+
+            e.Accepted = bOK;
+        }
+
         private void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
             ConfigMolecule mol = e.Item as ConfigMolecule;
@@ -1407,6 +1479,12 @@ namespace DaphneGui
             ConfigReaction reac = (ConfigReaction)CytosolReacListBox.SelectedValue;
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
+        }
+
+        private void MembAddReacCxExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            CollectionViewSource.GetDefaultView(lbCytoAvailableReacCx.ItemsSource).Refresh();
+            //CollectionViewSource.GetDefaultView(lbMembAvailableReacCx).Refresh();
         }
     }
 

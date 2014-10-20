@@ -603,13 +603,17 @@ namespace DaphneGui
 
             if (nIndex >= 0)
             {
-                string guid = (string)ReactionComplexListBox.SelectedValue;
-                if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(guid) == true)
-                {
-                    ConfigReactionComplex rc = MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict[guid];
+                ConfigReactionComplex rc = (ConfigReactionComplex)ReactionComplexListBox.SelectedItem;
+                MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
 
-                    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
-                }
+
+                //string guid = (string)ReactionComplexListBox.SelectedValue;
+                //if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(guid) == true)
+                //{
+                //    ConfigReactionComplex rc = MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict[guid];
+
+                //    MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
+                //}
             }
         }
 
