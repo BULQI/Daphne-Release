@@ -4991,6 +4991,7 @@ namespace Daphne
             set
             {
                 _reactions = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("reactions");
             }
         }
@@ -5029,15 +5030,17 @@ namespace Daphne
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
                 {
                     ConfigReaction cr = nn as ConfigReaction;
-
                     if (reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         reactions_dict.Add(cr.entity_guid, cr);
+                        changed = true;
+                        
                     }
                 }
             }
@@ -5050,13 +5053,21 @@ namespace Daphne
                     if (reactions_dict.ContainsKey(cr.entity_guid) == true)
                     {
                         reactions_dict.Remove(cr.entity_guid);
+                        changed = true;
                     }
                 }
             }
+
+            if (changed == true)
+            {
+                this.incrementChangeStamp();
+            }
+
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -5066,6 +5077,7 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == false)
                     {
                         molecules_dict.Add(cm.molecule.entity_guid, cm.molecule);
+                        changed = true;
                     }
                 }
             }
@@ -5078,8 +5090,14 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == true)
                     {
                         molecules_dict.Remove(cm.molecule.entity_guid);
+                        changed = true;
                     }
                 }
+            }
+
+            if (changed == true)
+            {
+                this.incrementChangeStamp();
             }
         }
 
@@ -5203,7 +5221,7 @@ namespace Daphne
 
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mp_dist_name = "Uniform";
+                        configMolPop.mp_dist_name = "Homogeneous";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                         configMolPop.mp_render_blending_weight = 2.0;
                         configMolPop.mp_render_on = true;
@@ -5212,26 +5230,20 @@ namespace Daphne
 
                         hl.concentration = 1;
                         configMolPop.mp_distribution = hl;
-                        if (HasMolecule(molguid) == false)
-                        {
-                            molpops.Add(configMolPop);
-                        }
+                        molpops.Add(configMolPop);
                     }
                 }
             }
         }
 
-        public void RefreshMolPops()
+        public void RefreshMolPops(ConfigReaction reac)
         {
-            //Clear mol pop list and regenerate it
-            molpops.Clear();
-            foreach (ConfigReaction reac in reactions)
-            {
-                CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
-                CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
-                CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
-            }
+            CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
+            CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
+            CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
         }
+
+        
     }
 
     public class ConfigCell : ConfigEntity
