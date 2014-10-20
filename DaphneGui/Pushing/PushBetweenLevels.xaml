@@ -5,6 +5,7 @@
         xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:push="clr-namespace:DaphneGui.Pushing"
         xmlns:local="clr-namespace:DaphneGui"
+        xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
         Title="Push Between Levels"
         SizeToContent="WidthAndHeight"
         Loaded="Window_Loaded"  
@@ -50,21 +51,33 @@
                         
                         <DataGrid.Columns>
                             <DataGridTextColumn x:Name="colMolName" Header="Name" Width="150" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
+                                 ScrollViewer.CanContentScroll ="False" 
+                                              
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colDiffCoeff" Header="Diff Coeff" Width="90" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=DiffusionCoefficient, Mode=OneWay}" 
-                            />
-                            <DataGridTextColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=MolecularWeight, Mode=OneWay}" 
-                            />
-                            <DataGridTextColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=EffectiveRadius, Mode=OneWay}" 
-                            />
+                            <DataGridTemplateColumn Header="Diff Coeff" x:Name="colDiffCoeff" Width="90" MaxWidth="150">
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colDiffCoeff, Path=Width-8}"  SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=DiffusionCoefficient, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn x:Name="colWeight" Header="Weight" Width="60" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colWeight, Path=Width-8}"  SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=MolecularWeight, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn x:Name="colRadius" Header="Radius" Width="60" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colRadius, Path=Width-8}"  SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=EffectiveRadius, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colMolStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
@@ -113,10 +126,15 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=CopyNumber, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colAct" Header="Activation Level" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=ActivationLevel, Mode=OneWay}" 
-                            />
+                            <DataGridTemplateColumn x:Name="colAct" Header="Weight" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colAct, Path=Width-8}" SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   
+                                                       Number="{Binding Path=ActivationLevel, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="90" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=change_stamp, Mode=OneWay}" 
@@ -157,10 +175,14 @@
                         </DataGrid.CommandBindings>
                         
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="colRate" Header="Rate Constant" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=rate_const, Mode=OneWay}" 
-                            />
+                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colRate, Path=Width-8}"  SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=rate_const, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="colTotString" Header="Reaction" Width="300" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=TotalReactionString, Mode=OneWay}" 
@@ -241,7 +263,62 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel>
                     <DataGrid x:Name="dgReacComp" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                              SelectedItem="0"
                                 ItemsSource="{Binding}"  >
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=Name, Mode=OneWay}" 
+                            />
+                            <DataGridTextColumn x:Name="colReacStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
+                            />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="No reaction complexes exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
+                        <TextBlock.Style>
+                                <Style>
+                                    <Setter Property="TextBlock.Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=dgCell, Path=Items.Count}" Value="0">
+                                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                                        </DataTrigger>        
+                                    </Style.Triggers>
+                                </Style>
+                         </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid x:Name="dgReacs" MaxHeight="600" AutoGenerateColumns="False" CanUserAddRows="False"
+                                ItemsSource="{Binding ElementName=dgReacComp, Path=SelectedItem.reactions}"  >
+                        <DataGrid.CommandBindings>
+                            <CommandBinding Command="ApplicationCommands.Save"
+                                            Executed="PushCommandExecuted"
+                                            CanExecute="PushCommandCanExecute"/>
+                        </DataGrid.CommandBindings>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn x:Name="colRate" Header="Radius" Width="100" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False" >
+                                <DataGridTemplateColumn.CellTemplate >
+                                    <DataTemplate>
+                                        <uc:DoublesBox TextFieldWidth="{Binding ElementName=colRate, Path=Width-8}"  SliderEnabled="False" IsEnabled="False" TextBorderThickness="0"   Number="{Binding Path=rate_const, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn x:Name="colTotString" Header="Reaction" Width="300" IsReadOnly="True"
+                                 ScrollViewer.CanContentScroll ="False"
+                                 Binding="{Binding Path=TotalReactionString, Mode=OneWay}" 
+                            />
+                            
+
+                        </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
             </StackPanel>
