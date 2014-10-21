@@ -1354,8 +1354,8 @@ namespace DaphneGui
             HandToolButton_IsEnabled = true;
             WhArrowToolButton_IsEnabled = false;
             PreviewButton_IsEnabled = false;
-            MW.CellRenderMethodCB.IsEnabled = false;
-            MW.CellsColorByCB.IsEnabled = false;
+            MW.CellRenderMethodCB.IsEnabled = true;
+            MW.CellsColorByCB.IsEnabled = true;
             MW.SolfacRenderingCB.IsEnabled = false;
             MW.ScalarBarMarkerButton.IsEnabled = false;
             MW.OrientationMarkerButton.IsEnabled = false;

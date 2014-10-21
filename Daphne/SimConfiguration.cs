@@ -5800,6 +5800,7 @@ namespace Daphne
         public CellMolPopState cmState;
         public CellBehaviorState cbState;
         public CellGeneState cgState;
+        public int CellGeneration;
 
         [JsonIgnore]
         public double X
@@ -5876,6 +5877,11 @@ namespace Daphne
             {
                 cgState.geneDict.Add(item.Key, item.Value.ActivationLevel);
             }
+        }
+
+        public void setCellGeneration(int generation)
+        {
+            CellGeneration = generation;
         }
 
     }
@@ -6989,6 +6995,9 @@ namespace Daphne
         public string Name { get; set; }
 
         [JsonIgnore]
+        public string originalContent {get; set;}
+
+        [JsonIgnore]
         public string FileName { get; set; }
 
         public ObservableCollection<RenderCell> renderCells { get; set; }
@@ -7117,6 +7126,7 @@ namespace Daphne
             string readText = File.ReadAllText(jsonFile);
             RenderSkin skin = JsonConvert.DeserializeObject<RenderSkin>(readText);
             skin.FileName = jsonFile;
+            skin.originalContent = readText;
             return skin;
         }
 
@@ -7126,7 +7136,7 @@ namespace Daphne
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;
 
-            //serialize Protocol
+            //serialize RenderSkin
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             string jsonFile = filename == null ? FileName : filename;
 
@@ -7138,6 +7148,24 @@ namespace Daphne
             {
                 MessageBox.Show("File.WriteAllText failed in SerializeToFile. Filename and TempFile = " + FileName + ", " + filename);
             }
+        }
+
+        /// <summary>
+        /// check if content changed
+        /// </summary>
+        public void SaveChanges()
+        {
+            //check if changed.
+            var Settings = new JsonSerializerSettings();
+            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            Settings.TypeNameHandling = TypeNameHandling.Auto;
+
+            //serialize RenderSkin
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+
+            if (jsonSpec == originalContent) return;
+            SerializeToFile();
+            this.originalContent = jsonSpec;
         }
     }
 

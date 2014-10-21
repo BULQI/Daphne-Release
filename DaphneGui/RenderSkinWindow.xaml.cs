@@ -29,23 +29,6 @@ namespace DaphneGui
         public RenderSkinWindow()
         {
             InitializeComponent();
-            this.Loaded += new RoutedEventHandler(RenderSkinWindow_Loaded);
-            //this.DockSite.WindowClosing += new EventHandler<DockingWindowEventArgs>(RenderWindowClosing);
-        }
-
-        void RenderSkinWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.DockSite.WindowClosing -= new EventHandler<DockingWindowEventArgs>(RenderWindowClosing);
-            this.DockSite.WindowClosing += new EventHandler<DockingWindowEventArgs>(RenderWindowClosing);
-        }
-
-        void RenderWindowClosing(object sender, DockingWindowEventArgs e)
-        {
-            //check if this render skin change, if yes, ask for if change....
-            //todo: do this check...
-            RenderSkin rs = this.DataContext as RenderSkin;
-            if (rs == null) return;
-            rs.SerializeToFile(rs.FileName);
         }
 
         /// <summary>

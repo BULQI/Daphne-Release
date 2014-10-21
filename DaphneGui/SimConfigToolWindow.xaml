@@ -3417,8 +3417,7 @@
                                                     <Style TargetType="ComboBoxItem">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
-                                                                <Setter Property="IsEnabled" Value="False">
-                                                                </Setter>
+                                                                <Setter Property="Visibility" Value="Collapsed" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>

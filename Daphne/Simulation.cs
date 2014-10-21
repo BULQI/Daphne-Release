@@ -150,7 +150,8 @@ namespace Daphne
                                        List<ConfigReaction> transcription_reacs)
         {
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
-            simCell.label = cell.label ?? cell.entity_guid;
+
+            simCell.renderLabel = cell.label ?? cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;
@@ -312,6 +313,8 @@ namespace Daphne
                     simCell.SetGeneActivities(simCell.Differentiator);
                 }
             }
+            //generaiton
+            simCell.generation = cellState.CellGeneration;
 
             // add the cell
             AddCell(simCell);

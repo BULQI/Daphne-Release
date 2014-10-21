@@ -960,11 +960,11 @@ namespace DaphneGui
             points.SetPoint(idx, pos[0], pos[1], pos[2]);
 
             //this should not happen
-            if (RenderPopDict.ContainsKey(cell.label) == false)
+            if (RenderPopDict.ContainsKey(cell.renderLabel) == false)
             {
                 return;
             }
-            RenderPop render_pop = RenderPopDict[cell.label];
+            RenderPop render_pop = RenderPopDict[cell.renderLabel];
             int color_index;
             switch (render_pop.renderMethod)
             {
@@ -1317,6 +1317,12 @@ namespace DaphneGui
                 }
                 colorStartIndexMap.Add(scenario.cellpopulations[i].cellpopulation_id, nColor);
                 RenderCell rc = MainWindow.SOP.GetRenderCell(label);
+                //if not renderCell Exist for this by default
+                if (rc == null)
+                {
+                    MainWindow.SOP.SelectedRenderSkin.AddRenderCell(label, scenario.cellpopulations[i].Cell.CellName);
+                    rc = MainWindow.SOP.GetRenderCell(label);
+                }
                 switch (rp.renderMethod)
                 {
                     case RenderMethod.CELL_TYPE:
@@ -1359,7 +1365,7 @@ namespace DaphneGui
                 int start_index = item.Value;
                 int end_index = colorEndIndexMap[item.Key];
                 //the first 16 bit is the start index, the second 16 bit is the end index
-                int value = start_index == -1 ? -1 : (start_index << 16 + end_index);
+                int value = start_index == -1 ? -1 : ((start_index << 16) + end_index);
                 cellDataController.ColorMap.Add(item.Key, value);
             }
             cellDataController.CreateCellColorTable(nColor);

@@ -46,6 +46,7 @@ using DaphneGui.Pushing;
 
 using SBMLayer;
 using System.Security.Principal;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -2011,6 +2012,7 @@ namespace DaphneGui
             ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
             ComponentsToolWindow.DataContext = sop.Protocol;
+            this.CellRenderMethodCB.DataContext = sop.Protocol;
 
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
@@ -2816,6 +2818,12 @@ namespace DaphneGui
             // save the preferences
             Properties.Settings.Default.Save();
 
+            //save renderSkin if changed.
+            foreach (var skin in SOP.SkinList)
+            {
+                skin.SaveChanges();
+            }
+
         }
 
         private void exitApp_Click(object sender, RoutedEventArgs e)
@@ -3155,8 +3163,47 @@ namespace DaphneGui
             //AdminMenu.Visibility = IsUserAdministrator() ? Visibility.Visible : Visibility.Hidden;
         }
 
+        /// <summary>
+        /// when user selectt another render option, then reapply
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CellsColorByCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            //reset display
+            vtkDataBasket.SetupVTKData(sop.Protocol);
+            gc.CreatePipelines();
+            UpdateGraphics();
+            gc.Rwc.Invalidate();
+
+        }
+
         
     }
 
-    
+
+    /// <summary>
+    /// exist to access renderpop options collection
+    /// </summary>
+    public class CellRenderPopFromProtocolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            var val = value as Protocol;
+            if (val != null && val.scenario is TissueScenario)
+            {
+                var ts = val.scenario as TissueScenario;
+                return ts.popOptions.cellPopOptions;
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
 }

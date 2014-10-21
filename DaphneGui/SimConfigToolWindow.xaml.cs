@@ -2957,11 +2957,13 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            DataGrid dg = value as DataGrid;
-            if (dg != null)
+            var val = value as Protocol;
+            if (val != null && val.scenario is TissueScenario)
             {
-                return dg.ActualWidth - dg.RowHeaderActualWidth;
+                var ts = val.scenario as TissueScenario;
+                return ts.cellpopulations;
             }
+
             return value;
         }
 
