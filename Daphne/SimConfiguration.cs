@@ -7018,18 +7018,21 @@ namespace Daphne
             renderCells = new ObservableCollection<RenderCell>();
             renderMols = new ObservableCollection<RenderMol>();
             ColorHelper.resetColorPicker();
-            for (int i= 0; i< er.cells.Count; i++)
+            if (er != null)
             {
-                var cell = er.cells[i];
-                ColorHelper.resetColorPicker(i);
-                AddRenderCell(cell.entity_guid, cell.CellName);
-            } 
+                for (int i = 0; i < er.cells.Count; i++)
+                {
+                    var cell = er.cells[i];
+                    ColorHelper.resetColorPicker(i);
+                    AddRenderCell(cell.entity_guid, cell.CellName);
+                }
 
-            for (int i=0; i< er.molecules.Count; i++)
-            {
-                var mol = er.molecules[i];
-                ColorHelper.resetColorPicker(i);
-                AddRenderMol(mol.Name);
+                for (int i = 0; i < er.molecules.Count; i++)
+                {
+                    var mol = er.molecules[i];
+                    ColorHelper.resetColorPicker(i);
+                    AddRenderMol(mol.Name);
+                }
             }
         }
 

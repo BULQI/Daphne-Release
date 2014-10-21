@@ -509,13 +509,16 @@ namespace DaphneGui
             {
                 sop = new SystemOfPersistence();
 
-                //need to load renderskin before loading protocol
+                //load renderskin before loading protocol
                 {
                     //setup render skin 
                     string SkinFolderPath = new Uri(appPath + @"\Config\RenderSkin\").LocalPath;
                     if (!Directory.Exists(SkinFolderPath))
                     {
                         Directory.CreateDirectory(SkinFolderPath);
+                        RenderSkin sk = new RenderSkin("default", null);
+                        sk.FileName = SkinFolderPath + "default.json";
+                        sop.SkinList.Add(sk);
                     }
 
                     string[] files = Directory.GetFiles(SkinFolderPath, "*.json");
@@ -531,6 +534,15 @@ namespace DaphneGui
                             Console.WriteLine("Loading RenderSkin file {0} failed: {1}", skfile, e.ToString());
                         }
                     }
+                    //create a default if none exxists
+                    if (sop.SkinList.Count == 0)
+                    {
+                        RenderSkin sk = new RenderSkin("default", null);
+                        sk.FileName = SkinFolderPath + "default.json";
+                        sk.SerializeToFile();
+                        sop.SkinList.Add(sk);
+                    }
+
                 }
 
                 initialState(true, true, ReadJson(""));
@@ -2017,7 +2029,7 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // only create during construction or when the type changes
-                if(sim == null || sim is TissueSimulation == false)
+                if (sim == null || sim is TissueSimulation == false)
                 {
                     // create the simulation
                     sim = new TissueSimulation();
@@ -2978,7 +2990,7 @@ namespace DaphneGui
                 if (pm.ShowDialog() == false)
                     return;
 
-                UserWantsNewEntity = pm.UserWantsNewEntity; 
+                UserWantsNewEntity = pm.UserWantsNewEntity;
 
             }
             else if (source is ConfigReaction)
@@ -2995,7 +3007,7 @@ namespace DaphneGui
                     ConfigReaction tempReac = MainWindow.SOP.Protocol.entity_repository.reactions_dict[source.entity_guid];
                     //((ConfigReaction)newEntity).Name = tempReac.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 }
-                
+
                 if (pr.ShowDialog() == false)
                     return;
 
@@ -3041,21 +3053,21 @@ namespace DaphneGui
                 ////}
 
             }
-            else if (source is ConfigGene) 
+            else if (source is ConfigGene)
             {
                 PushEntity pm = new PushEntity();
                 pm.DataContext = MainWindow.SOP;
                 pm.EntityLevelDetails.DataContext = source;
                 pm.ComponentLevelDetails.DataContext = null;
 
-                ConfigGene erGene = MainWindow.SOP.Protocol.FindGene( ((ConfigGene)source).Name );
+                ConfigGene erGene = MainWindow.SOP.Protocol.FindGene(((ConfigGene)source).Name);
                 if (erGene != null)
                 {
                     pm.ComponentLevelDetails.DataContext = erGene;
                     newEntity = ((ConfigGene)source).Clone(MainWindow.SOP.Protocol);
                     //((ConfigGene)newEntity).Name = newEntity.GenerateNewName(MainWindow.SOP.Protocol, "_New");
                 }
-                
+
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
                 {
@@ -3088,7 +3100,7 @@ namespace DaphneGui
             }
             else // the item exists; could be newer or older
             {
-                
+
                 //MessageBoxResult msgResult = MessageBox.Show("This will overwrite the properties of the existing entity. If that is okay, please click 'Yes'. If you wish to create a new entity instead, please click 'No'.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 //if (msgResult == MessageBoxResult.Yes)
                 if (UserWantsNewEntity == false)
@@ -3101,7 +3113,7 @@ namespace DaphneGui
                     B.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
                 }
 
-                
+
             }
         }
 
@@ -3179,7 +3191,7 @@ namespace DaphneGui
 
         }
 
-        
+
     }
 
 
