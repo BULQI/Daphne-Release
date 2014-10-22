@@ -12,7 +12,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Daphne;
-using DaphneUserControlLib;
 using System.Globalization;
 
 namespace DaphneGui
