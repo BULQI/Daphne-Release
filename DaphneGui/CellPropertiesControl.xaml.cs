@@ -96,13 +96,20 @@ namespace DaphneGui
             ////CellsListBox.SelectedIndex = nIndex;
         }
 
+        // QUESTION: why cell properties and diffschemes only
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("diffSchemesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
+            }
 
             cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            }
         }
     }
 }

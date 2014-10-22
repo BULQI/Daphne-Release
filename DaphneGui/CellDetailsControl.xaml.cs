@@ -32,31 +32,59 @@ namespace DaphneGui
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("cytoGenes2ListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.genes;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.genes;
+            }
 
             cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            }
 
             cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            }
 
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            }
 
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionsListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            }
 
             cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionsListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.reactions;
+            }
 
             cvs = (CollectionViewSource)(FindResource("membraneAvailableReactionComplexesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            }
 
             cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionComplexesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.reaction_complexes;
+            }
 
             cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            if (cvs.Source != null)
+            {
+                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+            }
+
             cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
         }
 
