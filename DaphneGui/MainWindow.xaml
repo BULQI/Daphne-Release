@@ -369,12 +369,17 @@
                     
                     
                     <!-- these work but we need to have a switch or if/else  -->
-                    <!--  <local:ToolWinVatRC x:Name="ProtocolToolWindow" Title="Daphne Vat Reaction Complex" /> -->
+                    <!--  
+                    <local:ToolWinVatRC x:Name="ProtocolToolWindow" Title="Daphne Vat Reaction Complex" />
+                    -->
+
+
                     <!--  -->
-                    <!-- Also, how do we bind to TitleText defined in the base class ToolWinBase? -->
+                    <!-- Also, how do we bind to TitleText defined in the base class ToolWinBase? 
+                    -->
                     <local:ToolWinTissue x:Name="ProtocolToolWindow" Title="Tissue Simulation" />
-                    
-                    
+
+
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->

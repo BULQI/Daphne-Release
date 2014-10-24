@@ -3228,8 +3228,6 @@ namespace DaphneGui
         //This helps in refreshing the available reactions for the ECM tab
         protected void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int i = 0;
-            i = 3;
             // gmk - uncomment
             //if (tabECM.IsSelected == true)
             //{
