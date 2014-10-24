@@ -15,6 +15,7 @@
         >
 
     <Window.Resources>
+        <local:SimSetupControl x:Key="simSetupControl"/>
         <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
 
         <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
@@ -359,9 +360,21 @@
 
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 
-                <!-- Sim Config Tab control -->
+                <!-- Workbench Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <local:ProtocolToolWindow x:Name="ProtocolToolWindow" Title="Daphne Protocol" />
+
+                    <!-- this doesn't work -->
+                    <!-- <local:ToolWinBase x:Name="ProtocolToolWindow" Title="{Binding ElementName=ToolWindow, Path=TitleText}"/> -->
+                    
+                    
+                    
+                    <!-- these work but we need to have a switch or if/else  -->
+                    <!--  <local:ToolWinVatRC x:Name="ProtocolToolWindow" Title="Daphne Vat Reaction Complex" /> -->
+                    <!--  -->
+                    <!-- Also, how do we bind to TitleText defined in the base class ToolWinBase? -->
+                    <local:ToolWinTissue x:Name="ProtocolToolWindow" Title="Tissue Simulation" />
+                    
+                    
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
@@ -423,7 +436,7 @@
                                                           IsChecked="{Binding HandToolButton_IsChecked}" 
                                                           IsEnabled="{Binding HandToolButton_IsEnabled}"
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" />
+                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
                                                 </ToggleButton>
                                                 <ToggleButton Name="PreviewButton" 
                                                           IsChecked="{Binding PreviewButton_IsChecked}" 
