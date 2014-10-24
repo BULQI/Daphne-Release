@@ -28,15 +28,15 @@ using System.Globalization;
 using DaphneGui.Pushing;
 using System.Diagnostics;
 
-using DaphneUserControlLib;
-
 namespace DaphneGui
 {
+
     /// <summary>
     /// Interaction logic for ProtocolToolWindow.xaml
     /// </summary>
-    public partial class ProtocolToolWindow : ToolWinBase
+    public partial class ProtocolToolWindow : ToolWindow
     {
+        //private static bool newCellPopSelected = true;
         public ProtocolToolWindow()
         {
             InitializeComponent();
@@ -48,7 +48,7 @@ namespace DaphneGui
         public MainWindow MW { get; set; }
 
         //TISSUE SPECIFIC METHOD?
-        protected void AddCellPopButton_Click(object sender, RoutedEventArgs e)
+        private void AddCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
             {
@@ -108,7 +108,7 @@ namespace DaphneGui
         }
 
         //This method is called when the user clicks the Remove Cell button
-        protected void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveCellPopButton_Click(object sender, RoutedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -150,7 +150,7 @@ namespace DaphneGui
         }
 
         // Utility function used in AddGaussSpecButton_Click() and SolfacTypeComboBox_SelectionChanged()
-        protected void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
+        private void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -191,7 +191,7 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
-        protected void DeleteGaussianSpecification(MolPopDistribution dist)
+        private void DeleteGaussianSpecification(MolPopDistribution dist)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -221,7 +221,7 @@ namespace DaphneGui
         /// Default values: box center at center of ECS, box widths are 1/4 of ECS extents
         /// </summary>
         /// <param name="box"></param>
-        protected void AddDefaultBoxSpec(BoxSpecification box)
+        private void AddDefaultBoxSpec(BoxSpecification box)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -245,7 +245,7 @@ namespace DaphneGui
         }
 
         // Used to specify Gaussian distibution for cell positions
-        protected void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
+        private void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -274,7 +274,7 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
-        protected void DeleteGaussianSpecification(CellPopDistribution dist)
+        private void DeleteGaussianSpecification(CellPopDistribution dist)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -300,12 +300,12 @@ namespace DaphneGui
             }
         }
 
-        protected void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void EcsMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
         }
 
-        protected void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MolPopDistributionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -404,13 +404,13 @@ namespace DaphneGui
         /// switch to the sim setup panel, set the experiment name, highlight it, and set the focus for the box
         /// </summary>
         /// <param name="exp_name">new name</param>
-        //public void SelectSimSetupInGUISetExpName(string exp_name)
-        //{
-        //    SelectSimSetupInGUI();
-        //    experiment_name_box.Text = exp_name;
-        //    experiment_name_box.SelectAll();
-        //    experiment_name_box.Focus();
-        //}
+        public void SelectSimSetupInGUISetExpName(string exp_name)
+        {
+            SelectSimSetupInGUI();
+            experiment_name_box.Text = exp_name;
+            experiment_name_box.SelectAll();
+            experiment_name_box.Focus();
+        }
 
         public void SelectMolpopInGUI(int index)
         {
@@ -418,7 +418,7 @@ namespace DaphneGui
         }
 
         //ECM TAB EVENT HANDLERS
-        protected void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
+        private void AddEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             // Default to HomogeneousLevel for now...
 
@@ -446,7 +446,7 @@ namespace DaphneGui
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
 
-        protected void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -498,7 +498,7 @@ namespace DaphneGui
         }
 
         //HELPER METHOD - CANDIDATE FOR BASE CLASS
-        protected bool EcmHasMolecule(string molguid)
+        private bool EcmHasMolecule(string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
             {
@@ -509,7 +509,7 @@ namespace DaphneGui
         }
 
         //HELPER METHOD - CANDIDATE FOR BASE CLASS
-        protected bool CellPopsHaveMoleculeInMemb(string molguid)
+        private bool CellPopsHaveMoleculeInMemb(string molguid)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -534,7 +534,7 @@ namespace DaphneGui
         }
 
         //HELPER METHOD - CANDIDATE FOR BASE CLASS
-        protected bool CellPopsHaveMoleculeInCytosol(string molguid)
+        private bool CellPopsHaveMoleculeInCytosol(string molguid)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -557,7 +557,7 @@ namespace DaphneGui
             return ret;
         }
 
-        protected void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
+        private void AddEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             bool needRefresh = false;
 
@@ -578,7 +578,7 @@ namespace DaphneGui
 
         }
 
-        protected void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             if (lvEcsReactions.SelectedIndex < 0)
                 return;
@@ -587,11 +587,11 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(reac.entity_guid))
             {
                 MainWindow.SOP.Protocol.scenario.environment.comp.Reactions.Remove(reac);
-                
+
             }
         }
 
-        protected void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
+        private void AddEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigReactionComplex crc = (ConfigReactionComplex)lbAvailableReacCx.SelectedItem;
 
@@ -605,7 +605,7 @@ namespace DaphneGui
             }
         }
 
-        protected void RemoveEcmReacCompButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveEcmReacCompButton_Click(object sender, RoutedEventArgs e)
         {
             int nIndex = ReactionComplexListBox.SelectedIndex;
 
@@ -618,7 +618,7 @@ namespace DaphneGui
         }
 
         //HELPER METHODS - CANDIDATES FOR BASE CLASS
-        protected bool MembraneHasMolecule(ConfigCell cell, string molguid)
+        private bool MembraneHasMolecule(ConfigCell cell, string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in cell.membrane.molpops)
             {
@@ -629,7 +629,7 @@ namespace DaphneGui
             }
             return false;
         }
-        protected bool CytosolHasMolecule(ConfigCell cell, string molguid)
+        private bool CytosolHasMolecule(ConfigCell cell, string molguid)
         {
             foreach (ConfigMolecularPopulation molpop in cell.cytosol.molpops)
             {
@@ -641,19 +641,133 @@ namespace DaphneGui
             return false;
         }
 
-        protected void CollectionViewSource_Filter(object sender, FilterEventArgs e)
+        //////private void CellsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //////{
+        //////    //if (lvCellAvailableReacs.ItemsSource != null)
+        //////    //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
+        //////    //if (lvCytosolAvailableReacs.ItemsSource != null)
+        //////    //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
+
+        //////    //DiffSchemeExpander_Expanded(null, null);
+        //////    ucCellDetails.DiffSchemeExpander_Expanded(null, null);
+
+        //////}
+
+        //****************************************************************************************************************
+
+
+
+        ////private void ecmReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    if (cr != null)
+        ////    {
+        ////        // Filter out cr if not in ecm reaction list 
+        ////        if (MainWindow.SOP.Protocol.scenario.environment.ecs.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
+
+        ////private void membReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+        ////    if (cr != null && cc != null)
+        ////    {
+        ////        e.Accepted = false;
+        ////        // Filter out cr if not in membrane reaction list 
+        ////        if (cc.membrane.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+
+        ////    }
+        ////}
+
+        ////private void ecmReactionComplexReactionCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    if (ReactionComplexListBox.SelectedIndex < 0)
+        ////        return;
+
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    string guidRC = (string)ReactionComplexListBox.SelectedItem;
+
+        ////    e.Accepted = true;
+
+        ////    if (guidRC != null && cr != null)
+        ////    {
+        ////        ConfigReactionComplex crc = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[guidRC];
+        ////        e.Accepted = false;
+        ////        // Filter out cr if not in ecm reaction list 
+        ////        if (crc.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////    }
+        ////}
+
+        ////private void cytosolReactionsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    ConfigReaction cr = e.Item as ConfigReaction;
+        ////    ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
+        ////    if (cr != null && cc != null)
+        ////    {
+        ////        // Filter out cr if not in cytosol reaction list 
+        ////        if (cc.cytosol.reactions_guid_ref.Contains(cr.entity_guid))
+        ////        {
+        ////            e.Accepted = true;
+        ////        }
+        ////        else
+        ////        {
+        ////            e.Accepted = false;
+        ////        }
+        ////    }
+        ////}
+
+        ////private void cellMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        ////{
+        ////    //if (treeCellPops.SelectedItem != null)
+        ////    //    return;
+
+        ////    //ConfigCell cc = e.Item as ConfigCell;
+        ////    //string guidCell = cc.cell_guid;
+
+        ////    //e.Accepted = true;
+
+        ////    //if (guidRC != null && cr != null)
+        ////    //{
+        ////    //    ConfigReactionComplex crc = MainWindow.SOP.Protocol.entity_repository.reaction_complexes_dict[guidRC];
+        ////    //    e.Accepted = false;
+        ////    //    // Filter out cr if not in ecm reaction list 
+        ////    //    if (crc.reactions_guid_ref.Contains(cr.reaction_guid))
+        ////    //    {
+        ////    //        e.Accepted = true;
+        ////    //    }
+        ////    //}
+        ////}
+
+
+
+
+        private void CollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
         }
 
-        protected void membraneMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        private void membraneMolPopsCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
         }
 
-        protected void cytosolMoleculesCollectionViewSource_Filter(object sender, FilterEventArgs e)
+        private void cytosolMoleculesCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
         }
 
-        protected void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cbCellLocationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -871,7 +985,7 @@ namespace DaphneGui
                         int count = 0;
 
                         scenario.resetGaussRetrieve();
-                        while((next = scenario.nextGaussSpec()) != null)
+                        while ((next = scenario.nextGaussSpec()) != null)
                         {
                             if (next.box_spec.box_guid == key)
                             {
@@ -886,7 +1000,7 @@ namespace DaphneGui
             }
         }
 
-        protected void cell_type_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cell_type_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //ConfigCell cc 
 
@@ -957,7 +1071,7 @@ namespace DaphneGui
                 //of configCell, it will has its own entity_guid - only the name stays the same ---
                 if (cell_to_clone.entity_guid != curr_cell_type_guid)
                 {
-                cp.Cell = cell_to_clone.Clone(true);
+                    cp.Cell = cell_to_clone.Clone(true);
 
                     string new_cell_name = MainWindow.SOP.Protocol.entity_repository.cells[nIndex].CellName;
                     if (curr_cell_type_guid != cp.Cell.entity_guid) // && curr_cell_pop_name.Length == 0)
@@ -974,7 +1088,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void numberBox_ValueChanged(object sender, ActiproSoftware.Windows.PropertyChangedRoutedEventArgs<int?> e)
+        private void numberBox_ValueChanged(object sender, ActiproSoftware.Windows.PropertyChangedRoutedEventArgs<int?> e)
         {
             if (e.OldValue == null || e.NewValue == null)
                 return;
@@ -1008,12 +1122,12 @@ namespace DaphneGui
             cp.number = cp.CellStates.Count;
         }
 
-        protected void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
+        private void cellPopsListBoxSelChanged(object sender, SelectionChangedEventArgs e)
         {
             //newCellPopSelected = true;
         }
 
-        protected void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
         }
@@ -1023,7 +1137,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void dgLocations_KeyDown(object sender, KeyEventArgs e)
+        private void dgLocations_KeyDown(object sender, KeyEventArgs e)
         {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
@@ -1048,7 +1162,7 @@ namespace DaphneGui
             }
         }
 
-        protected void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
+        private void menuCoordinatesPaste_Click(object sender, RoutedEventArgs e)
         {
             //CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             //if (cp == null)
@@ -1069,7 +1183,7 @@ namespace DaphneGui
             //e.Handled = true;
         }
 
-        protected void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
+        private void menuCoordinatesTester_Click(object sender, RoutedEventArgs e)
         {
         }
 
@@ -1078,7 +1192,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void dgLocations_Unloaded(Object sender, RoutedEventArgs e)
+        private void dgLocations_Unloaded(Object sender, RoutedEventArgs e)
         {
             // 11/10/2013 gmk: Don't think this is needed anymore.
             // Delete?
@@ -1102,7 +1216,7 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        protected void dgLocations_CheckPositions(Object sender, RoutedEventArgs e)
+        private void dgLocations_CheckPositions(Object sender, RoutedEventArgs e)
         {
             CellPopulation cp = (CellPopulation)CellPopsListBox.SelectedItem;
             if (cp == null)
@@ -1162,7 +1276,7 @@ namespace DaphneGui
             }
         }
 
-        protected void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
+        private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -1207,7 +1321,7 @@ namespace DaphneGui
 
         }
 
-        protected void btnTesterClicked(object sender, RoutedEventArgs e)
+        private void btnTesterClicked(object sender, RoutedEventArgs e)
         {
             int x = 1;
             x++;
@@ -1249,7 +1363,7 @@ namespace DaphneGui
             return child;
         }
 
-        protected void cbBoundFace_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cbBoundFace_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -1288,19 +1402,63 @@ namespace DaphneGui
             }
         }
 
-        protected void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
             int x = 1;
             x++;
         }
 
-        protected void cbCellColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+        ////private string GenerateNewCellName(ConfigCell cell)
+        ////{
+        ////    int nSuffix = 1;
+        ////    string sSuffix = string.Format("_Copy{0:000}", nSuffix);
+        ////    string TempCellName = cell.CellName;
+        ////    while (FindCellBySuffix(sSuffix) == true)
+        ////    {
+        ////        TempCellName = cell.CellName.Replace(sSuffix, "");
+        ////        nSuffix++;
+        ////        sSuffix = string.Format("_Copy{0:000}", nSuffix);
+        ////    }
+        ////    TempCellName += sSuffix;
+        ////    return TempCellName;
+        ////}
+
+        ////private string GenerateNewCellName(ConfigCell cell, string ending)
+        ////{
+        ////    int nSuffix = 1;
+        ////    string sSuffix = ending + string.Format("{0:000}", nSuffix);
+        ////    string TempCellName = cell.CellName;
+        ////    while (FindCellBySuffix(sSuffix) == true)
+        ////    {
+        ////        TempCellName = cell.CellName.Replace(sSuffix, "");
+        ////        nSuffix++;
+        ////        sSuffix = ending + string.Format("{0:000}", nSuffix);
+        ////    }
+        ////    TempCellName += sSuffix;
+        ////    return TempCellName;
+        ////}
+
+        ////// given a cell type name, check if it exists in repos
+        ////private static bool FindCellBySuffix(string suffix)
+        ////{
+        ////    foreach (ConfigCell cc in MainWindow.SOP.Protocol.entity_repository.cells)
+        ////    {
+        ////        if (cc.CellName.EndsWith(suffix))
+        ////        {
+        ////            return true;
+        ////        }
+        ////    }
+        ////    return false;
+        ////}
+
+        private void cbCellColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox ColorComboBox = sender as ComboBox;
             int n = ColorComboBox.SelectedIndex;
         }
 
-        protected void genericRepositoryPush(ConfigEntity e)
+        private void genericRepositoryPush(ConfigEntity e)
         {
             //-get status
             //-make sure it’s pushable at all, not all entities are
@@ -1320,7 +1478,7 @@ namespace DaphneGui
         }
 
 
-        protected void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ecs_molpop_molecule_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
             ComboBox cb = (ComboBox)e.Source;
@@ -1425,7 +1583,7 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
         }
 
-        protected void TabItem_Loaded(object sender, RoutedEventArgs e)
+        private void TabItem_Loaded(object sender, RoutedEventArgs e)
         {
             lbRptCellPops.SelectedIndex = 0;
             ICollectionView icv = CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource);
@@ -1435,7 +1593,164 @@ namespace DaphneGui
             }
         }
 
-        protected void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //private void MolTextBox_LostFocus(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigMolecule cm = dgLibMolecules.SelectedItem as ConfigMolecule;
+
+        //    if (cm == null)
+        //        return;
+
+        //    cm.ValidateName(MainWindow.SOP.Protocol);
+
+        //    int index = dgLibMolecules.SelectedIndex;
+        //    dgLibMolecules.InvalidateVisual();
+        //    dgLibMolecules.Items.Refresh();
+        //    dgLibMolecules.SelectedIndex = index;
+        //    cm = (ConfigMolecule)dgLibMolecules.SelectedItem;
+        //    dgLibMolecules.ScrollIntoView(cm);
+        //}
+
+        private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox cb = e.Source as ComboBox;
+
+            if (!cb.IsDropDownOpen)
+                return;
+
+            if (cb.SelectedIndex == (int)(BoundaryType.Toroidal))
+            {
+                MessageBoxResult res;
+                res = MessageBox.Show("If you change the boundary condition to toroidal, all molecular populations using Linear initial distribution will be changed to Homogeneous.  Are you sure you would like to proceed?", "Warning", MessageBoxButton.YesNo);
+                if (res == MessageBoxResult.No)
+                {
+                    cb.SelectedIndex = (int)(BoundaryType.Zero_Flux);
+                    return;
+                }
+
+                foreach (ConfigMolecularPopulation cmp in MainWindow.SOP.Protocol.scenario.environment.comp.molpops)
+                {
+                    if (cmp.mp_distribution.mp_distribution_type == MolPopDistributionType.Linear)
+                    {
+                        MolPopHomogeneousLevel shl = new MolPopHomogeneousLevel();
+                        cmp.mp_distribution = shl;
+                    }
+                }
+            }
+        }
+
+
+        //private void DrawSelectedReactionComplex()
+        //{
+        //    ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
+
+        //    //Cleanup any previous RC stuff
+        //    foreach (ConfigCell cell in MainWindow.SOP.Protocol.entity_repository.cells.ToList())
+        //    {
+        //        if (cell.CellName == "RCCell")
+        //        {
+        //            MainWindow.SOP.Protocol.entity_repository.cells.Remove(cell);
+        //        }
+        //    }
+        //    //crc.RCSim.reset();
+        //    MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+        //    // end of cleanup
+
+        //    ConfigCell cc = new ConfigCell();
+        //    cc.CellName = "RCCell";
+        //    foreach (ConfigMolecularPopulation cmp in crc.molpops)
+        //    {
+        //        cc.cytosol.molpops.Add(cmp);
+        //    }
+        //    foreach (ConfigGene configGene in crc.genes)
+        //    {
+        //        cc.genes_guid_ref.Add(configGene.entity_guid);
+        //    }
+        //    foreach (string rguid in crc.reactions_guid_ref)
+        //    {
+        //        if (MainWindow.SOP.Protocol.entity_repository.reactions_dict.ContainsKey(rguid) == true)
+        //        {
+        //            ConfigReaction cr = MainWindow.SOP.Protocol.entity_repository.reactions_dict[rguid];
+
+        //            cc.cytosol.Reactions.Add(cr.Clone(true));
+        //        }
+        //    }
+        //    MainWindow.SOP.Protocol.entity_repository.cells.Add(cc);
+        //    MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Clear();
+
+        //    CellPopulation cp = new CellPopulation();
+        //    cp.Cell = cc;
+        //    //cp.Cell.entity_guid = cc.entity_guid;
+        //    cp.cellpopulation_name = "RC cell";
+        //    cp.number = 1;
+
+        //    // Add cell population distribution information
+        //    double[] extents = new double[3] { MainWindow.SOP.Protocol.rc_scenario.environment.extent_x, 
+        //                                       MainWindow.SOP.Protocol.rc_scenario.environment.extent_y, 
+        //                                       MainWindow.SOP.Protocol.rc_scenario.environment.extent_z };
+        //    double minDisSquared = 2 * MainWindow.SOP.Protocol.entity_repository.cells_dict[cp.Cell.entity_guid].CellRadius;
+        //    minDisSquared *= minDisSquared;
+        //    cp.cellPopDist = new CellPopSpecific(extents, minDisSquared, cp);
+        //    cp.cellPopDist.CellStates[0] = new CellState(MainWindow.SOP.Protocol.rc_scenario.environment.extent_x,
+        //                                                    MainWindow.SOP.Protocol.rc_scenario.environment.extent_y / 2,
+        //                                                    MainWindow.SOP.Protocol.rc_scenario.environment.extent_z / 2);
+
+        //    cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+        //    MainWindow.SOP.Protocol.rc_scenario.cellpopulations.Add(cp);
+
+        //    ReactionComplexProcessor Processor = new ReactionComplexProcessor();
+        //    MainWindow.Sim.Load(MainWindow.SOP.Protocol, true, true);
+
+        //    Processor.Initialize(MainWindow.SOP.Protocol, crc, MainWindow.Sim);
+        //    Processor.Go();
+
+        //    MainWindow.ST_ReacComplexChartWindow.Title = "Reaction Complex: " + crc.Name;
+        //    MainWindow.ST_ReacComplexChartWindow.RC = Processor;  //crc.Processor;
+        //    MainWindow.ST_ReacComplexChartWindow.DataContext = Processor; //crc.Processor;
+        //    MainWindow.ST_ReacComplexChartWindow.Render();
+
+        //    MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
+        //    MW.VTKDisplayDocWindow.Activate();
+        //    MainWindow.ST_ReacComplexChartWindow.Activate();
+        //    MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
+        //}
+
+        //private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (lbComplexes.SelectedIndex < 0)
+        //    {
+        //        MessageBox.Show("Select a reaction complex to process.");
+        //        return;
+        //    }
+
+        //    if (btnGraphReactionComplex.IsChecked == true)
+        //    {
+        //        DrawSelectedReactionComplex();
+        //        btnGraphReactionComplex.IsChecked = false;
+        //    }
+        //}
+
+        //private void btnGraphReactionComplex_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (lbComplexes.SelectedIndex < 0)
+        //    {
+        //        MessageBox.Show("Select a reaction complex to process.");
+        //        return;
+        //    }
+
+        //    DrawSelectedReactionComplex();
+        //}
+
+        //public ConfigReactionComplex GetConfigReactionComplex()
+        //{
+        //    if (lbComplexes.SelectedIndex < 0)
+        //    {
+        //        MessageBox.Show("Select a reaction complex to process.");
+        //        return null;
+        //    }
+        //    return (ConfigReactionComplex)(lbComplexes.SelectedItem);
+        //}
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //if (lvCellAvailableReacs.ItemsSource != null)
             //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
@@ -1443,20 +1758,20 @@ namespace DaphneGui
             //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
-        protected void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
+        private void CellAddReacExpander_Expanded(object sender, RoutedEventArgs e)
         {
             //if (lvCellAvailableReacs.ItemsSource != null)
             //    CollectionViewSource.GetDefaultView(lvCellAvailableReacs.ItemsSource).Refresh();
         }
 
-        protected void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
+        private void CellAddReacExpander2_Expanded(object sender, RoutedEventArgs e)
         {
             //if (lvCytosolAvailableReacs.ItemsSource != null)
             //    CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         //This helps in refreshing the available reactions for the ECM tab
-        protected void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (tabECM.IsSelected == true)
             {
@@ -1465,19 +1780,65 @@ namespace DaphneGui
             }
         }
 
-        protected void memb_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        private void time_duration_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SOP == null)
+                return;
+            if (MainWindow.SOP.Protocol == null)
+                return;
+            if (MainWindow.SOP.Protocol.scenario == null)
+                return;
+
+            //Need to do this to make sure that the sampling and rendering sliders get the correct "Value"s
+            double temp_samp = MainWindow.SOP.Protocol.scenario.time_config.sampling_interval;
+            double temp_rand = MainWindow.SOP.Protocol.scenario.time_config.rendering_interval;
+
+            sampling_interval_slider.Maximum = time_duration_slider.Value;
+            if (temp_samp > sampling_interval_slider.Maximum)
+                temp_samp = sampling_interval_slider.Maximum;
+            sampling_interval_slider.Value = temp_samp;
+            MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+
+            time_step_slider.Maximum = time_duration_slider.Value;
+            if (temp_rand > time_step_slider.Maximum)
+                temp_rand = time_step_slider.Maximum;
+            time_step_slider.Value = temp_rand;
+            MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+
+        }
+
+        private void sampling_interval_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SOP == null)
+                return;
+
+            if (MainWindow.SOP.Protocol == null)
+                return;
+
+            if (MainWindow.SOP.Protocol.scenario == null)
+                return;
+
+            if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
+                MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+
+            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > time_step_slider.Maximum)
+                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+        }
+
+
+        private void memb_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
             CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
         }
 
-        protected void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
         {
             ComboBox combo = sender as ComboBox;
             CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
         }
 
-        protected void btnRegenerateCellPositions_Click(object sender, RoutedEventArgs e)
+        private void btnRegenerateCellPositions_Click(object sender, RoutedEventArgs e)
         {
             // cellPop points to the current CellPopulation
             CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
@@ -1494,6 +1855,68 @@ namespace DaphneGui
                 MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
+
+        //private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigGene gene = (ConfigGene)dgLibGenes.SelectedValue;
+        //    MessageBoxResult res;
+
+        //    res = MessageBox.Show("Are you sure you would like to remove this gene?", "Warning", MessageBoxButton.YesNo);
+
+        //    if (res == MessageBoxResult.No)
+        //        return;
+
+        //    int index = dgLibMolecules.SelectedIndex;
+        //    //MainWindow.SOP.Protocol.scenario.environment.ecs.RemoveMolecularPopulation(gm.molecule_guid);
+        //    MainWindow.SOP.Protocol.entity_repository.genes.Remove(gene);
+        //    dgLibGenes.SelectedIndex = index;
+
+        //    if (index >= dgLibMolecules.Items.Count)
+        //        dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
+
+        //    if (dgLibGenes.Items.Count == 0)
+        //        dgLibGenes.SelectedIndex = -1;
+
+        //}
+
+        //private void btnCopyGene_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigGene gene = (ConfigGene)dgLibGenes.SelectedItem;
+
+        //    if (gene == null)
+        //        return;
+
+        //    ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
+        //    MainWindow.SOP.Protocol.entity_repository.genes.Add(newgene);
+        //    dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
+
+        //    gene = (ConfigGene)dgLibGenes.SelectedItem;
+        //    dgLibGenes.ScrollIntoView(newgene);
+        //}
+
+        //private void btnAddGene_Click(object sender, RoutedEventArgs e)
+        //{
+        //    ConfigGene gm = new ConfigGene("NewGene", 0, 0);
+        //    gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+        //    MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
+        //    dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
+
+        //    ConfigGene cm = (ConfigGene)dgLibGenes.SelectedItem;
+        //    dgLibGenes.ScrollIntoView(cm);
+        //}
+
+        ////private void cyto_gene_combo_box_GotFocus(object sender, RoutedEventArgs e)
+        ////{
+        ////    ComboBox combo = sender as ComboBox;
+        ////    CollectionViewSource.GetDefaultView(combo.ItemsSource).Refresh();
+        ////}
+
+        ////private void cyto_gene_combo_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        ////{
+        ////    ComboBox cb = (ComboBox)e.Source;
+        ////    if (cb == null)
+        ////        return;
+        ////}
 
         /// <summary>
         /// This method is called when the user changes a combo box selection in a grid cell
@@ -1634,12 +2057,12 @@ namespace DaphneGui
             return foundChild;
         }
 
-        protected void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        private void EpigeneticMapGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
 
         }
 
-        protected void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
+        private void molPopColorEditBox_ValueChanged(object sender, RoutedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -1664,7 +2087,7 @@ namespace DaphneGui
             mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
         }
 
-        protected void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
             // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
@@ -1690,8 +2113,8 @@ namespace DaphneGui
 
             ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
         }
-        
-        protected void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
+
+        private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
             //Error case
             ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
@@ -1704,7 +2127,7 @@ namespace DaphneGui
             MainWindow.GenericPush(newmol);
         }
 
-        protected void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
+        private void EcsPushCellButton_Click(object sender, RoutedEventArgs e)
         {
             CellPopulation cellpop = (CellPopulation)CellPopsListBox.SelectedItem;
 
@@ -1718,7 +2141,7 @@ namespace DaphneGui
             MainWindow.GenericPush(newcell);
         }
 
-        protected void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
+        private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
         {
             if (lvEcsReactions.SelectedIndex < 0)
             {
@@ -1783,7 +2206,7 @@ namespace DaphneGui
             target.SetValue(DisplayRowNumberProperty, value);
         }
 
-        protected static void OnDisplayRowNumberChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
+        private static void OnDisplayRowNumberChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
         {
             DataGrid dataGrid = target as DataGrid;
             if ((bool)e.NewValue == true)
@@ -1851,7 +2274,7 @@ namespace DaphneGui
             DependencyProperty.RegisterAttached("IsCellHighlighted", typeof(bool), typeof(DataGridBehavior),
             new UIPropertyMetadata(false));
 
-        protected static void OnHighlightColumnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void OnHighlightColumnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             Console.WriteLine(e.NewValue);
             DataGridCell cell = sender as DataGridCell;
@@ -1890,7 +2313,7 @@ namespace DaphneGui
             }
         }
 
-        protected static DataGrid GetDataGridFromCell(DataGridCell cell)
+        private static DataGrid GetDataGridFromCell(DataGridCell cell)
         {
             DataGrid retVal = null;
             FrameworkElement fe = cell;
@@ -1904,7 +2327,7 @@ namespace DaphneGui
             return retVal;
         }
 
-        protected static DataGrid GetDataGridFromColumn(DataGridColumn col)
+        private static DataGrid GetDataGridFromColumn(DataGridColumn col)
         {
             DataGrid retVal = null;
 
@@ -1913,7 +2336,7 @@ namespace DaphneGui
             return retVal;
         }
 
-        protected static DataGridCell GetCell(DataGridRow row, DataGridColumn column)
+        private static DataGridCell GetCell(DataGridRow row, DataGridColumn column)
         {
             DataGridCell retVal = null;
             DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(row);
@@ -1938,7 +2361,7 @@ namespace DaphneGui
 
         #region Get Visuals
 
-        protected static T GetVisualChild<T>(Visual parent) where T : Visual
+        private static T GetVisualChild<T>(Visual parent) where T : Visual
         {
             T child = default(T);
             int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
@@ -1958,14 +2381,14 @@ namespace DaphneGui
             return child;
         }
 
-        protected static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
+        private static List<T> GetVisualChildCollection<T>(object parent) where T : Visual
         {
             List<T> visualCollection = new List<T>();
             GetVisualChildCollection(parent as DependencyObject, visualCollection);
             return visualCollection;
         }
 
-        protected static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
+        private static void GetVisualChildCollection<T>(DependencyObject parent, List<T> visualCollection) where T : Visual
         {
             int count = VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < count; i++)
@@ -2016,35 +2439,18 @@ namespace DaphneGui
         }
     }
 
-    public class VisibilityValueConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is bool)
-            {
-                bool visible = (bool)value;
-                if (visible == true)
-                {
-                    return System.Windows.Visibility.Visible;
-                }
-                else
-                {
-                    return System.Windows.Visibility.Hidden;
-                }
-            }
-
-            return value;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value;
-        }
-    }
-
     public class FilterFactory
     {
-        protected object Context { get; set; }
+        private object Context { get; set; }
+
+        //public static EventHandler CreateShowHandlerFor(object context)
+        //    {
+        //        CommonFilter handler = new CommonEventHandler();
+
+        //        handler.Context = context;
+
+        //        return new EventHandler(handler.HandleGenericShow);
+        //    }
 
         public static void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
@@ -2066,6 +2472,40 @@ namespace DaphneGui
 }
 
 
+///SAMPLE CODE TO INJECT OBJECT INTO A COMMON EVENT HANDLER - KEEP THIS FOR REFERENCE
+//public class CommonEventHandler
+//{
+//    private CommonEventHandler() { }
+
+//    private object Context { get; set; }
+
+//    public static EventHandler CreateShowHandlerFor(object context)
+//    {
+//        CommonEventHandler handler = new CommonEventHandler();
+
+//        handler.Context = context;
+
+//        return new EventHandler(handler.HandleGenericShow);
+//    }
+
+//    private void HandleGenericShow(object sender, EventArgs e)
+//    {
+//        Console.WriteLine(this.Context);
+//    }
+//}
+
+//class Program
+//{
+//    static void Main(string[] args)
+//    {
+//        EventHandler show5 = CommonEventHandler.CreateShowHandlerFor(5);
+//        EventHandler show7 = CommonEventHandler.CreateShowHandlerFor(7);
+
+//        show5(null, EventArgs.Empty);
+//        Console.WriteLine("===");
+//        show7(null, EventArgs.Empty);
+//    }
+//}
 
 
 
