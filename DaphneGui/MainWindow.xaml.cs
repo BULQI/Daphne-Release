@@ -54,6 +54,8 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
+        public ToolWinBase toolWin;
+
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -1600,6 +1602,7 @@ namespace DaphneGui
             dw.Show();
         }
 
+        // gmk - needs fixing. move some of the functionality to ToolWinBase method(s)?
         /// <summary>
         /// reset the simulation to a random initial state
         /// </summary>
@@ -1610,62 +1613,50 @@ namespace DaphneGui
             //Code to preserve focus to the element that was in focus before "Apply" button clicked.
             TabItem selectedTab = ProtocolToolWindow.ConfigTabControl.SelectedItem as TabItem;
 
-            int nCellPopSelIndex = -1;
-            if (selectedTab == ProtocolToolWindow.tabCellPop)
-            {
-                nCellPopSelIndex = ProtocolToolWindow.CellPopsListBox.SelectedIndex;
-            }
+            //int nCellPopSelIndex = -1;
+            //if (selectedTab == ProtocolToolWindow.tabCellPop)
+            //{
+            //    nCellPopSelIndex = ProtocolToolWindow.CellPopsListBox.SelectedIndex;
+            //}
 
-            int nMolPopSelIndex = -1;
-            if (selectedTab == ProtocolToolWindow.tabECM)
-            {
-                nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
-            }
+            //int nMolPopSelIndex = -1;
+            //if (selectedTab == ProtocolToolWindow.tabECM)
+            //{
+            //    nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
+            //}
 
-            ////////////int nLibCellSelIndex = -1;
-            ////////////int nLibRCSelIndex = -1;
-            ////////////if (selectedTab == ComponentsToolWindow.tabLibraries)
-            ////////////{
-            ////////////    nLibCellSelIndex = CellStudioToolWindow.CellsListBox.SelectedIndex;
-            ////////////    nLibRCSelIndex = ComponentsToolWindow.lbComplexes.SelectedIndex;
-            ////////////}
+            //int nRepEcmMolSelIndex = -1;
+            //int nRepCellSelIndex = -1;
+            //int nRepCellPopSelIndex = -1;
+            //if (selectedTab == ProtocolToolWindow.tabReports)
+            //{
+            //    nRepEcmMolSelIndex = reportControl.dgEcmMols.SelectedIndex;
+            //    nRepEcmMolSelIndex = ProtocolToolWindow.dgEcmMols.SelectedIndex;
+            //    nRepCellSelIndex = ProtocolToolWindow.dgCellDetails.SelectedIndex;
+            //    nRepCellPopSelIndex = ProtocolToolWindow.lbRptCellPops.SelectedIndex;
+            //}
 
-            int nRepEcmMolSelIndex = -1;
-            int nRepCellSelIndex = -1;
-            int nRepCellPopSelIndex = -1;
-            if (selectedTab == ProtocolToolWindow.tabReports)
-            {
-                nRepEcmMolSelIndex = ProtocolToolWindow.dgEcmMols.SelectedIndex;
-                nRepCellSelIndex = ProtocolToolWindow.dgCellDetails.SelectedIndex;
-                nRepCellPopSelIndex = ProtocolToolWindow.lbRptCellPops.SelectedIndex;
-            }
+            //runButton.IsEnabled = false;
+            //mutex = true;
 
-            runButton.IsEnabled = false;
-            mutex = true;
+            //saveTempFiles();
+            //updateGraphicsAndGUI();
 
-            saveTempFiles();
-            updateGraphicsAndGUI();
-
-            ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;            
-            if (selectedTab == ProtocolToolWindow.tabCellPop)
-            {
-                ProtocolToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
-            }
-            else if (selectedTab == ProtocolToolWindow.tabECM)
-            {
-                ProtocolToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
-            }
-            ////////////else if (selectedTab == ComponentsToolWindow.tabLibraries)
-            ////////////{
-            ////////////    CellStudioToolWindow.CellsListBox.SelectedIndex = nLibCellSelIndex;
-            ////////////    ComponentsToolWindow.lbComplexes.SelectedIndex = nLibRCSelIndex;
-            ////////////}
-            else if (selectedTab == ProtocolToolWindow.tabReports)
-            {
-                ProtocolToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
-                ProtocolToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
-                ProtocolToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
-            }
+            //ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;
+            //if (selectedTab == ProtocolToolWindow.tabCellPop)
+            //{
+            //    ProtocolToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
+            //}
+            //else if (selectedTab == ProtocolToolWindow.tabECM)
+            //{
+            //    ProtocolToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
+            //}
+            //else if (selectedTab == ProtocolToolWindow.tabReports)
+            //{
+            //    ProtocolToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
+            //    ProtocolToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
+            //    ProtocolToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
+            //}
         }
 
         /// <summary>
@@ -1971,10 +1962,13 @@ namespace DaphneGui
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
                     gc = new VTKFullGraphicsController(this);
+                    toolWin = new ToolWinTissue();
                 }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
+                this.ProtocolToolWindow.DataContext = sop.Protocol;
+
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -1985,6 +1979,7 @@ namespace DaphneGui
                     // no graphics for the VatRC
                     vtkDataBasket = new VTKNullDataBasket();
                     gc = new VTKNullGraphicsController();
+                    toolWin = new ToolWinVatRC();
                 }
             }
             else
@@ -3225,6 +3220,22 @@ namespace DaphneGui
             {
                 saveStoreFiles();
             }
+        }
+
+
+        // methods add by gmk for refactoring
+
+        //This helps in refreshing the available reactions for the ECM tab
+        protected void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int i = 0;
+            i = 3;
+            // gmk - uncomment
+            //if (tabECM.IsSelected == true)
+            //{
+            //    if (lvAvailableReacs.ItemsSource != null)
+            //        CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            //}
         }
 
         
