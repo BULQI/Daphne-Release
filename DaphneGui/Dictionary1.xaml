@@ -3,12 +3,13 @@
                     xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
                     xmlns:local="clr-namespace:DaphneGui"
                     xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
                     >
 
     <CollectionViewSource x:Key="testMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   />
-
+    
     <!--These templates are used for pushing entities to protocol (i.e. push from entity to protocol) and not for pushing entities between levels-->
     
     <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
@@ -197,7 +198,23 @@
         </ListView>
     </DataTemplate>
 
-
+    <!-- Report settings template : DataContext must be Protocol -->
+    <DataTemplate x:Key="reportSettingsTemplate">
+        <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="True"
+                            Header="Report Settings"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+            <StackPanel>
+                <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
+                <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>           
+            </StackPanel>
+        </Expander>
+    </DataTemplate>
 
 
 
