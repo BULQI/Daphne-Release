@@ -1,0 +1,32 @@
+﻿<local:ToolWinBase x:Class="DaphneGui.ToolWinVatRC"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:DaphneGui"
+                    xmlns:daph="clr-namespace:Daphne;assembly=Daphne"     
+                    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+                    xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+                    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
+                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"                    
+                    xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+                    ImageSource="Images/Properties16.png"
+                    x:Name="toolWinVatRC"
+                    >
+
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
+
+        <!-- SIM SETUP -->
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                <!-- -->
+                <local:SimSetupControl DataContext="{Binding}"/>
+
+
+            </ScrollViewer>
+        </TabItem>
+
+    </TabControl>
+
+
+</local:ToolWinBase>
