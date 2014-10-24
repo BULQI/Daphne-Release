@@ -18,13 +18,24 @@
         <!-- SIM SETUP -->
         <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-
-                <!-- -->
                 <local:SimSetupControl DataContext="{Binding}"/>
+            </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                <!-- Report Settings -->
+                <ContentControl Name="ReportSettings"
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource reportSettingsTemplate}" 
+                                Margin="6"
+                />
 
 
             </ScrollViewer>
         </TabItem>
+        
 
     </TabControl>
 
