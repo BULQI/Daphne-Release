@@ -212,6 +212,9 @@
     <Compile Include="Pushing\PushEntity.xaml.cs">
       <DependentUpon>PushEntity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ReactioComplexListControl.xaml.cs">
+      <DependentUpon>ReactioComplexListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
     <Compile Include="Rendering\RenderCell.xaml.cs">
@@ -318,6 +321,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pushing\PushEntity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReactioComplexListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
