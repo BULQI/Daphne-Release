@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="DaphneGui.ReactioComplexListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
+             xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
+             xmlns:local="clr-namespace:DaphneGui"
+             Loaded="UserControl_Loaded"
+             xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+             xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
+             mc:Ignorable="d"
+                    x:Name="reactionComplexListControl"
+                    >
+    <Grid>
+        <StackPanel>
+            <TextBlock Text="Reaction Complexes" Grid.Column="0" Grid.Row="0" Margin="0,0,0,0" />
+            <ListBox x:Name="lbComplexes" MinHeight="50"
+                                    ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes}"
+                                    DisplayMemberPath="Name"
+                                    SelectedIndex="0">
+            </ListBox>
+        </StackPanel>
+
+        <StackPanel>
+            <StackPanel.Resources>
+                <DataTemplate x:Key="reacComplexListItemTemplate">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Path=Name}" />
+                    </StackPanel>
+                </DataTemplate>
+
+                <DataTemplate x:Key="rcReacListItemTemplate">
+                    <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                    </TextBlock>
+                </DataTemplate>
+            </StackPanel.Resources>
+
+
+            <StackPanel DataContext="{Binding ElementName=lbComplexes, Path=SelectedItem}" Orientation="Horizontal" HorizontalAlignment="Right"  Canvas.ZIndex="10">
+                <TextBlock Text="Name  " HorizontalAlignment="Left" Margin="0,2"/>
+                <TextBox x:Name="txtCxName" Width="150" HorizontalAlignment="Left" Text="{Binding Path=Name}" ></TextBox>
+                <Button x:Name="btnEditComplex" Width="50" Click="btnEditReactionComplex_Click">Edit</Button>
+                <Button x:Name="btnCopyComplex" Width="50" Click="btnCopyReactionComplex_Click">Copy</Button>
+                <Button x:Name="btnAddComplex" Width="50" Click="btnAddReactionComplex_Click">New</Button>
+                <Button x:Name="btnRemoveComplex" Width="60" Click="btnRemoveReactionComplex_Click">Remove</Button>
+            </StackPanel>
+        </StackPanel>
+
+
+
+    </Grid>
+</UserControl>
