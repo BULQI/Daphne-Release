@@ -46,7 +46,7 @@ namespace DaphneGui
 
             Level level = this.DataContext as Level;
             level.entity_repository.reaction_complexes.Add(crcNew);
-            //MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Add(crcNew);
+            MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crcNew);
 
             lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
