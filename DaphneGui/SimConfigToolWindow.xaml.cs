@@ -616,6 +616,12 @@ namespace DaphneGui
             gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
+
+            gmp.renderLabel = gmp.molecule.renderLabel ?? gmp.molecule.entity_guid;
+
+            //add render option
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(gmp.renderLabel, gmp.Name, false);
+
         }
 
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
@@ -650,6 +656,14 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+
+                //remove rendering option if no other refernece
+                string label = cmp.renderLabel;
+                bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, false) == 0;
+                if (safe_to_remove)
+                {
+                    (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, false);
+                }
 
             }
 
@@ -1380,9 +1394,10 @@ namespace DaphneGui
                 //ucCellPopCellDetails.DataContext = cp.Cell;
             }
 
-            //add/change rendering info
+            //replace rendering info
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(cp.renderLabel, true);
             cp.renderLabel = cp.Cell.entity_guid;
-            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.cellpopulation_name, true);
         }
 
         /// <summary>
@@ -1852,6 +1867,8 @@ namespace DaphneGui
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
+
+
             }
             //user picked an existing molecule
             else
@@ -1872,6 +1889,11 @@ namespace DaphneGui
                 if (curr_mol_guid != molpop.molecule.entity_guid)
                     molpop.Name = new_mol_name;
             }
+
+            //update render informaiton
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(molpop.renderLabel, false);
+            molpop.renderLabel = molpop.molecule.entity_guid;
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
 
             if (lvAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();

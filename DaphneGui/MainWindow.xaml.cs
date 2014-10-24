@@ -3176,7 +3176,7 @@ namespace DaphneGui
         }
 
         /// <summary>
-        /// when user selectt another render option, then reapply
+        /// when user select another render option, then reapply
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

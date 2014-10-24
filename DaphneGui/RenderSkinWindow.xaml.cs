@@ -187,6 +187,12 @@ namespace DaphneGui
             }
         }
 
+
+        /// <summary>
+        /// this filter only applies to the skinEditor usercontrol for cell rendering
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ColorListCollectionViewSource_Filter(object sender, FilterEventArgs e)
         {
 
@@ -205,7 +211,7 @@ namespace DaphneGui
 
         private void cbCellColor2_Loaded(object sender, RoutedEventArgs e)
         {
-            (FindResource("ColorListCollectionViewSource") as CollectionViewSource).View.Refresh();
+            (FindResource("ColorListCollectionViewSourceWithFilter") as CollectionViewSource).View.Refresh();
         }
 
     }

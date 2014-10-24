@@ -48,14 +48,14 @@ namespace Daphne
         private RenderSkin _selectedRenderSkin;
         public RenderSkin SelectedRenderSkin
         {
-            get 
+            get
             {
                 if (_selectedRenderSkin == null && SkinList.Count > 0)
                 {
                     _selectedRenderSkin = SkinList.Where(x => x.Name == "default").SingleOrDefault();
                     if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList[0];
                 }
-                return _selectedRenderSkin; 
+                return _selectedRenderSkin;
             }
             set
             {
@@ -64,7 +64,7 @@ namespace Daphne
                     _selectedRenderSkin = value;
                 }
             }
-                    
+
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Daphne
             {
                 SelectedRenderSkin = SkinList.Count > 0 ? SkinList[0] : null;
             }
-            if (SelectedRenderSkin == null)return null;
+            if (SelectedRenderSkin == null) return null;
             return SelectedRenderSkin.renderCells.Where(x => x.renderLabel == label).SingleOrDefault();
         }
 
@@ -214,7 +214,7 @@ namespace Daphne
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    
+
     /// <summary>
     /// base for all levels
     /// </summary>
@@ -223,7 +223,8 @@ namespace Daphne
         /// <summary>
         /// constructor
         /// </summary>
-        public Level() : this("", "")
+        public Level()
+            : this("", "")
         {
         }
 
@@ -285,7 +286,7 @@ namespace Daphne
                     return PushStatus.PUSH_NEWER_ITEM;
                 }
             }
-            else if(e is ConfigGene)
+            else if (e is ConfigGene)
             {
                 // item does not exist
                 if (entity_repository.genes_dict.ContainsKey(e.entity_guid) == false)
@@ -723,7 +724,8 @@ namespace Daphne
         /// <summary>
         /// constructor
         /// </summary>
-        public Protocol() : this("", "", ScenarioType.UNASSIGNED)
+        public Protocol()
+            : this("", "", ScenarioType.UNASSIGNED)
         {
         }
 
@@ -732,7 +734,8 @@ namespace Daphne
         /// </summary>
         /// <param name="fileName">protocol file</param>
         /// <param name="tempFile">temporary file</param>
-        public Protocol(string fileName, string tempFile, ScenarioType type) : base(fileName, tempFile)
+        public Protocol(string fileName, string tempFile, ScenarioType type)
+            : base(fileName, tempFile)
         {
             Guid id = Guid.NewGuid();
 
@@ -774,7 +777,7 @@ namespace Daphne
             {
                 return ScenarioType.UNASSIGNED;
             }
-            else if(scenario is TissueScenario)
+            else if (scenario is TissueScenario)
             {
                 return ScenarioType.TISSUE_SCENARIO;
             }
@@ -914,7 +917,7 @@ namespace Daphne
             }
             entity_repository.diff_schemes.CollectionChanged += new NotifyCollectionChangedEventHandler(diff_schemes_CollectionChanged);
         }
-        
+
         private void InitTransitionDriversDict()
         {
             entity_repository.transition_drivers_dict.Clear();
@@ -1189,7 +1192,7 @@ namespace Daphne
                         {
                             rc.reactions.Remove(cr);
                         }
-                    }                    
+                    }
 
                     // Remove all the environment reaction complex reactions that have this guid
                     foreach (ConfigReactionComplex rc in scenario.environment.comp.reaction_complexes)
@@ -1219,7 +1222,7 @@ namespace Daphne
                             cell.cytosol.Reactions.Remove(cr);
                         }
                     }
-                }                
+                }
             }
         }
 
@@ -1308,9 +1311,9 @@ namespace Daphne
 
         // given a total reaction string, find the ConfigCell object
         public bool findReactionByTotalString(string total, Protocol protocol)
-        {            
+        {
             //Get left and right side molecules of new reaction
-            List<string> newReactants = getReacLeftSide(total);   
+            List<string> newReactants = getReacLeftSide(total);
             List<string> newProducts = getReacRightSide(total);
 
             //Loop through all existing reactions
@@ -1337,7 +1340,7 @@ namespace Daphne
         /// </summary>
         /// <param name="total"></param>
         /// <returns></returns>
-        private List<string> getReacLeftSide(string total) 
+        private List<string> getReacLeftSide(string total)
         {
             int len = total.Length;
             int index = total.IndexOf("->");
@@ -1446,7 +1449,7 @@ namespace Daphne
 
             return config_reacs;
         }
-        
+
         public string findMoleculeGuidByName(string inputMolName)
         {
             string guid = "";
@@ -1552,7 +1555,7 @@ namespace Daphne
                 }
             }
 
-           
+
             bool bulkProd = HasMoleculeType(inputProducts, MoleculeLocation.Bulk);
             bool boundReac = HasMoleculeType(inputReactants, MoleculeLocation.Boundary);
             bool bulkReac = HasMoleculeType(inputReactants, MoleculeLocation.Bulk);
@@ -1771,14 +1774,14 @@ namespace Daphne
         {
         }
     }
-    
+
     public class TissueScenario : ScenarioBase
     {
         public ObservableCollection<CellPopulation> cellpopulations { get; set; }
 
         // Convenience utility storage (not serialized)
         [JsonIgnore]
-        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;   
+        public Dictionary<int, CellPopulation> cellpopulation_id_cellpopulation_dict;
 
         private int gaussRetrieve, originCounter;
 
@@ -2209,7 +2212,7 @@ namespace Daphne
         public int deathOrder { get; set; }
     }
 
-    public class EntityRepository 
+    public class EntityRepository
     {
         // All molecules, reactions, cells - Combined Predefined and User defined
         public ObservableCollection<ConfigReactionComplex> reaction_complexes { get; set; }
@@ -2257,7 +2260,7 @@ namespace Daphne
             diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
             transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
-        }        
+        }
     }
 
     public class TimeConfig
@@ -2438,7 +2441,7 @@ namespace Daphne
             return true;
         }
     }
-    
+
     public class ConfigECSEnvironment : ConfigEnvironmentBase
     {
         private int _extent_x;
@@ -2582,7 +2585,7 @@ namespace Daphne
         }
 
         private bool initialized = false;
-        
+
         private bool CalculateNumGridPts()
         {
             if (initialized == false)
@@ -2610,7 +2613,7 @@ namespace Daphne
         public bool ValidateReaction(ConfigReaction cr, TissueScenario scenario)
         {
             bool bOK = false;
-            
+
             foreach (string molguid in cr.reactants_molecule_guid_ref)
             {
                 if (comp.molecules_dict.ContainsKey(molguid) || scenario.HasMoleculeInSomeCellMembrane(molguid))
@@ -2658,9 +2661,9 @@ namespace Daphne
         }
     }
 
-    
+
     public enum RegionShape { Rectangular, Ellipsoid }
-    
+
     public class Region : EntityModelBase
     {
         private string _region_name = "";
@@ -2679,7 +2682,7 @@ namespace Daphne
             }
         }
         private RegionShape _region_type = RegionShape.Ellipsoid;
-        public RegionShape region_type 
+        public RegionShape region_type
         {
             get { return _region_type; }
             set
@@ -2752,7 +2755,7 @@ namespace Daphne
     /// </summary>
     [ValueConversion(typeof(ColorList), typeof(int))]
     public class ColorListToIntConverter : IValueConverter
-    {        
+    {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value == null)
@@ -2849,7 +2852,7 @@ namespace Daphne
         /// <returns></returns>
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value == null)return Colors.White;
+            if (value == null) return Colors.White;
             int index = (int)value;
             if (index >= 0 && index < 7)
             {
@@ -2934,7 +2937,7 @@ namespace Daphne
     public class ColorListToColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {            
+        {
             Color col = Color.FromRgb(255, 0, 0);
 
             if (value == null)
@@ -3011,7 +3014,7 @@ namespace Daphne
             else if (col == Colors.Indigo)
                 ret = "Indigo";
             else if (col == Colors.Violet)
-                ret = "Violet";            
+                ret = "Violet";
             else
                 ret = "Custom";
 
@@ -3129,7 +3132,7 @@ namespace Daphne
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            
+
             int n = (int)value;
             if (n == 1)
                 return true;
@@ -3143,7 +3146,7 @@ namespace Daphne
             int idx = 0;
             if (bVal == true)
                 idx = 1;
-           
+
             return (MoleculeLocation)Enum.ToObject(typeof(MoleculeLocation), (int)idx);
         }
     }
@@ -3179,7 +3182,7 @@ namespace Daphne
 
 
     public enum BoundaryType { Zero_Flux = 0, Toroidal }
-    
+
     [ValueConversion(typeof(bool), typeof(int))]
     public class BoolToIndexConverter : IValueConverter
     {
@@ -3188,7 +3191,7 @@ namespace Daphne
             if (value == null)
                 return 0;
 
-            return ((bool)value == true) ? 1 : 0;   
+            return ((bool)value == true) ? 1 : 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -3200,7 +3203,7 @@ namespace Daphne
 
 
 
-    public enum BoundaryFace {None=0, X, Y, Z }
+    public enum BoundaryFace { None = 0, X, Y, Z }
 
     /// <summary>
     /// Converter to go between enum values and "human readable" strings for GUI
@@ -3290,16 +3293,17 @@ namespace Daphne
         public string entity_guid { get; set; }
         public ulong change_stamp { get; set; }
     }
-    
+
     /// <summary>
     /// config molecule
     /// </summary>
     public class ConfigMolecule : ConfigEntity
     {
-        public string label { get; set; }        //label to color scheme
+        public string renderLabel { get; set; }        //label to color scheme
 
         private string mol_name;
-        public string Name {
+        public string Name
+        {
             get
             {
                 return mol_name;
@@ -3309,8 +3313,8 @@ namespace Daphne
                 bool bFound = false;  // FindMolecule(value);
                 if (bFound == true)
                 {
-                } 
-                else 
+                }
+                else
                     mol_name = value;
             }
         }
@@ -3320,8 +3324,8 @@ namespace Daphne
         //public double DiffusionCoefficient { get; set; }
 
         private double molWeight;
-        public double MolecularWeight 
-        { 
+        public double MolecularWeight
+        {
             get
             {
                 return molWeight;
@@ -3370,10 +3374,11 @@ namespace Daphne
                 }
             }
         }
-        
+
         public MoleculeLocation molecule_location { get; set; }
 
-        public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff) : base()
+        public ConfigMolecule(string thisName, double thisMW, double thisEffRad, double thisDiffCoeff)
+            : base()
         {
             Name = thisName;
             MolecularWeight = thisMW;
@@ -3382,7 +3387,8 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public ConfigMolecule() : base()
+        public ConfigMolecule()
+            : base()
         {
             Name = "Molecule_New001"; // +"_" + DateTime.Now.ToString("hhmmssffff");
             MolecularWeight = 1.0;
@@ -3413,7 +3419,7 @@ namespace Daphne
 
             return TempMolName;
         }
-       
+
         /// <summary>
         /// create a clone of a molecule
         /// </summary>
@@ -3434,9 +3440,9 @@ namespace Daphne
                 newmol.entity_guid = id.ToString();
                 newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
             }
-            
+
             return newmol;
-        }        
+        }
 
         public static bool FindMoleculeByName(Protocol protocol, string tempMolName)
         {
@@ -3522,7 +3528,8 @@ namespace Daphne
             }
         }
 
-        public ConfigGene(string name, int copynum, double actlevel) : base()
+        public ConfigGene(string name, int copynum, double actlevel)
+            : base()
         {
             Name = name;
             CopyNumber = copynum;
@@ -3544,7 +3551,7 @@ namespace Daphne
                 newgene.entity_guid = id.ToString();
                 newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
             }
-                
+
             return newgene;
         }
 
@@ -3606,8 +3613,8 @@ namespace Daphne
         }
 
     }
-    
-    public class ConfigTransitionDriverElement 
+
+    public class ConfigTransitionDriverElement
     {
         //public string driver_element_guid { get; set; }
         public double Alpha { get; set; }
@@ -3627,7 +3634,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriverRow 
+    public class ConfigTransitionDriverRow
     {
         public ObservableCollection<ConfigTransitionDriverElement> elements { get; set; }
 
@@ -3642,11 +3649,12 @@ namespace Daphne
         public string Name { get; set; }
         public int CurrentState { get; set; }
         public string StateName { get; set; }
-        
+
         public ObservableCollection<ConfigTransitionDriverRow> DriverElements { get; set; }
         public ObservableCollection<string> states { get; set; }
 
-        public ConfigTransitionDriver() : base()
+        public ConfigTransitionDriver()
+            : base()
         {
             DriverElements = new ObservableCollection<ConfigTransitionDriverRow>();
             states = new ObservableCollection<string>();
@@ -3693,18 +3701,18 @@ namespace Daphne
     //    Centroblast        none         gCXCR5       gIg       
     //    Centrocyte        gsDiv          none       gsDif2        
     //    Plasmacyte        gsDif1        gsDif2       none   
-    
+
     public class ConfigDiffScheme : ConfigEntity, IEquatable<ConfigDiffScheme>
     {
         public string Name { get; set; }
 
         //For regulators
         public ConfigTransitionDriver Driver { get; set; }
-   
+
         //Epigenetic map information
         //  Genes (guids) affected by differentiation states
         private ObservableCollection<string> _genes;
-        public ObservableCollection<string> genes 
+        public ObservableCollection<string> genes
         {
             get
             {
@@ -3721,7 +3729,8 @@ namespace Daphne
         //  The order of states (rows) should match the order in Drive.states
         public ObservableCollection<ConfigActivationRow> activationRows { get; set; }
 
-        public ConfigDiffScheme() : base()
+        public ConfigDiffScheme()
+            : base()
         {
             genes = new ObservableCollection<string>();
             Name = "New diff scheme";
@@ -3765,10 +3774,10 @@ namespace Daphne
             OnPropertyChanged("activationRows");
 
             //Add a row AND a column in Differentiation Table
-            ConfigTransitionDriverRow trow; 
+            ConfigTransitionDriverRow trow;
 
             //Add a column to existing rows
-            for (int k = 0; k < Driver.states.Count-1; k++)
+            for (int k = 0; k < Driver.states.Count - 1; k++)
             {
                 trow = Driver.DriverElements[k];
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
@@ -3781,10 +3790,10 @@ namespace Daphne
                 e.DestStateName = Driver.states[Driver.states.Count - 1];
                 trow.elements.Add(e);
             }
-            
+
             //Add a row
             trow = new ConfigTransitionDriverRow();
-            for (int j = 0; j < Driver.states.Count; j++ )
+            for (int j = 0; j < Driver.states.Count; j++)
             {
                 ConfigTransitionDriverElement e = new ConfigTransitionDriverElement();
                 e.Alpha = 0;
@@ -3859,7 +3868,7 @@ namespace Daphne
         }
     }
 
-    public enum ExtendedReport { NONE, LEAN, COMPLETE }; 
+    public enum ExtendedReport { NONE, LEAN, COMPLETE };
 
     public class ReportMP
     {
@@ -3895,7 +3904,7 @@ namespace Daphne
         public double concVal { get; set; }
 
         public BoundaryCondition()
-        {            
+        {
         }
 
         public BoundaryCondition(MolBoundaryType _boundaryType, Boundary _boundary)
@@ -3939,7 +3948,7 @@ namespace Daphne
                 _Name = value;
                 OnPropertyChanged("Name");
             }
-        }       
+        }
 
         private ReportMP reportMP;
         public ReportMP report_mp
@@ -4010,13 +4019,13 @@ namespace Daphne
             }
         }
 
-        public string label { get; set; }        //label to color scheme
+        public string renderLabel { get; set; }        //label to color scheme
 
 
         public ConfigMolecularPopulation()
         {
         }
-    
+
         public ConfigMolecularPopulation(ReportType rt)
         {
             Guid id = Guid.NewGuid();
@@ -4035,7 +4044,7 @@ namespace Daphne
                 throw new Exception("Undefined report type in ConfigMolecularPopulation.");
             }
             reportMP.molpop_guid_ref = molpop_guid;
-            
+
             mp_distribution = new MolPopHomogeneousLevel();
             mp_color = new System.Windows.Media.Color();
             mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
@@ -4150,7 +4159,7 @@ namespace Daphne
                     molecules_dict[m.entity_guid] = m;
                 }
             }
-            foreach(ConfigMolecularPopulation mp in molpops)
+            foreach (ConfigMolecularPopulation mp in molpops)
             {
                 mp.pushMolecule(m, forced);
                 // should always be in the dictionary also, but check for safety
@@ -4168,7 +4177,7 @@ namespace Daphne
         /// <param name="forced">true for forced push regardless of change stamp</param>
         public void pushReaction(ConfigReaction r, bool forced)
         {
-            for(int i = 0; i < Reactions.Count; i++)
+            for (int i = 0; i < Reactions.Count; i++)
             {
                 if (Reactions[i].entity_guid == r.entity_guid)
                 {
@@ -4276,7 +4285,7 @@ namespace Daphne
                 }
             }
 
-            OnPropertyChanged("molpops");            
+            OnPropertyChanged("molpops");
         }
 
         private void reaction_complexes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -4407,7 +4416,7 @@ namespace Daphne
         Association = 0, Dissociation, Annihilation, Dimerization, DimerDissociation,
         Transformation, AutocatalyticTransformation, CatalyzedAnnihilation,
         CatalyzedAssociation, CatalyzedCreation, CatalyzedDimerization, CatalyzedDimerDissociation,
-        CatalyzedTransformation, CatalyzedDissociation, CatalyzedBoundaryActivation, BoundaryAssociation, 
+        CatalyzedTransformation, CatalyzedDissociation, CatalyzedBoundaryActivation, BoundaryAssociation,
         BoundaryDissociation, Generalized, BoundaryTransportFrom, BoundaryTransportTo,
         Transcription
     }
@@ -4467,16 +4476,18 @@ namespace Daphne
 
     public class ConfigReaction : ConfigEntity
     {
-        public ConfigReaction() : base()
+        public ConfigReaction()
+            : base()
         {
             rate_const = 0;
-            
+
             reactants_molecule_guid_ref = new ObservableCollection<string>();
             products_molecule_guid_ref = new ObservableCollection<string>();
             modifiers_molecule_guid_ref = new ObservableCollection<string>();
         }
 
-        public ConfigReaction(ConfigReaction reac) : base()
+        public ConfigReaction(ConfigReaction reac)
+            : base()
         {
             reaction_template_guid_ref = reac.reaction_template_guid_ref;
 
@@ -4635,18 +4646,18 @@ namespace Daphne
         public string reaction_template_guid_ref { get; set; }
 
         private double _rate_const;
-        public double rate_const 
-        { 
+        public double rate_const
+        {
             get
             {
                 return _rate_const;
             }
             set
-            { 
+            {
                 _rate_const = value;
                 this.incrementChangeStamp();
                 OnPropertyChanged("rate_const");
-            } 
+            }
         }
 
         // hold the molecule_guid_refs of the {reactant|product|modifier} molpops
@@ -4664,13 +4675,14 @@ namespace Daphne
         // stoichiometric constants
         public ObservableCollection<int> reactants_stoichiometric_const;
         public ObservableCollection<int> products_stoichiometric_const;
-        public ObservableCollection<int> modifiers_stoichiometric_const;      
+        public ObservableCollection<int> modifiers_stoichiometric_const;
         //reaction type
         public ReactionType reac_type { get; set; }
         // True if the reaction involves bulk and boundary molecules. Default is false.
         public bool isBoundary;
 
-        public ConfigReactionTemplate() : base()
+        public ConfigReactionTemplate()
+            : base()
         {
             reactants_stoichiometric_const = new ObservableCollection<int>();
             products_stoichiometric_const = new ObservableCollection<int>();
@@ -4698,7 +4710,7 @@ namespace Daphne
             }
 
             return newRT;
-        }       
+        }
     }
 
 #if OLD_RC
@@ -4784,11 +4796,13 @@ namespace Daphne
         [JsonIgnore]
         public Dictionary<string, ConfigMolecule> molecules_dict;
 
-        public ConfigReactionComplex() : this("NewRC")
+        public ConfigReactionComplex()
+            : this("NewRC")
         {
         }
 
-        public ConfigReactionComplex(string name) : base()
+        public ConfigReactionComplex(string name)
+            : base()
         {
             reactions = new ObservableCollection<ConfigReaction>();
             molpops = new ObservableCollection<ConfigMolecularPopulation>();
@@ -4910,7 +4924,7 @@ namespace Daphne
                 }*/
             }
         }
-        
+
         public ConfigReactionComplex Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
@@ -4935,7 +4949,7 @@ namespace Daphne
             throw new NotImplementedException();
         }
 
-        private bool HasMolecule(string guid) 
+        private bool HasMolecule(string guid)
         {
             return molecules_dict.ContainsKey(guid);
         }
@@ -4970,7 +4984,7 @@ namespace Daphne
                 }
                 else
 #endif
-                if(molecules_dict.ContainsKey(molguid) == true)
+                if (molecules_dict.ContainsKey(molguid) == true)
                 {
                     ConfigMolecule configMolecule = molecules_dict[molguid];
 
@@ -5015,7 +5029,8 @@ namespace Daphne
     {
         public string label { get; set; }        //label to color scheme
 
-        public ConfigCell() : base()
+        public ConfigCell()
+            : base()
         {
             CellName = "Default Cell";
             CellRadius = 5.0;
@@ -5066,15 +5081,15 @@ namespace Daphne
         }
 
         private double cellRadius;
-        public double CellRadius 
-        { 
+        public double CellRadius
+        {
             get
             {
                 return cellRadius;
             }
             set
             {
-                cellRadius = value ;
+                cellRadius = value;
                 this.incrementChangeStamp();
                 OnPropertyChanged("CellRadius");
             }
@@ -5092,7 +5107,7 @@ namespace Daphne
                 if (value == null)
                 {
                     _locomotor_mol_guid_ref = "";
-                }                
+                }
                 else
                 {
                     _locomotor_mol_guid_ref = value;
@@ -5150,7 +5165,7 @@ namespace Daphne
 
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
-        
+
         //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<ConfigGene> genes { get; set; }
 
@@ -5396,20 +5411,20 @@ namespace Daphne
 
         // Limits for placing cells
         private double[] extents;
-        public double[] Extents 
-        { 
+        public double[] Extents
+        {
             get { return extents; }
-            set { extents=value; }
+            set { extents = value; }
         }
         // Separation distance from boundaries
         private double wallDis;
         // Minimum separation (squared) for cells
         private double minDisSquared;
-        public double MinDisSquared 
-        { 
+        public double MinDisSquared
+        {
             get { return minDisSquared; }
-            set 
-            { 
+            set
+            {
                 minDisSquared = value;
                 //// Generally, minDisSquared is the square of the cell diameter.
                 //// Then, center of cell can be one radius from the ECS boundary.
@@ -5444,7 +5459,7 @@ namespace Daphne
                 (pos[2] < wallDis || pos[2] > Extents[2] - wallDis))
             {
                 return false;
-            } 
+            }
             return true;
         }
         /// <summary>
@@ -5458,7 +5473,7 @@ namespace Daphne
             double disSquared = 0;
             foreach (CellState cellState in this.cellPop.CellStates)
             {
-                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0]) 
+                disSquared = (cellState.X - pos[0]) * (cellState.X - pos[0])
                            + (cellState.Y - pos[1]) * (cellState.Y - pos[1])
                            + (cellState.Z - pos[2]) * (cellState.Z - pos[2]);
                 if (disSquared < minDisSquared)
@@ -5468,7 +5483,7 @@ namespace Daphne
             }
             return true;
         }
- 
+
         /// <summary>
         /// Check that position is in-bounds and doesn't overlap.
         /// If so, add to cell location list.
@@ -5495,7 +5510,7 @@ namespace Daphne
             int maxTry = 1000;
             int i = 0;
 
-            int tries = 0; 
+            int tries = 0;
             while (i < n)
             {
 
@@ -5512,7 +5527,7 @@ namespace Daphne
                     {
                         if (cellPop.CellStates.Count < 1)
                         {
-                            AddByPosition( new double[] {Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 } );
+                            AddByPosition(new double[] { Extents[0] / 2.0, Extents[1] / 2.0, Extents[2] / 2.0 });
                         }
                         System.Windows.MessageBox.Show("Exceeded max iterations for cell placement. Cell density is too high. Limiting cell count to " + cellPop.CellStates.Count + ".");
                         cellPop.number = cellPop.CellStates.Count;
@@ -5536,7 +5551,7 @@ namespace Daphne
             cellPop.CellStates.Clear();
             AddByDistr(number);
         }
- 
+
         // <summary>
         // Triggered by OnUpdate of ConfigEnvironment
         // Update distributions accordingly.
@@ -5664,7 +5679,7 @@ namespace Daphne
                                                     new double[]{0.0, 0.0, 0.0, 1.0} };
 
         public CellPopGaussian(double[] extents, double minDisSquared, CellPopulation _cellPop)
-            : base(extents, minDisSquared, _cellPop)  
+            : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Gaussian;
 
@@ -5677,7 +5692,7 @@ namespace Daphne
             //    // json deserialization puts us here
             //    AddByDistr(1);
             //}
- 
+
             //OnPropertyChanged("CellStates");
         }
 
@@ -6001,10 +6016,10 @@ namespace Daphne
             {
                 _cellpopulation_color = value;
                 OnPropertyChanged("cellpopulation_color");
-            }  
+            }
         }
         private ColorList _cellpopulation_predef_color;                         //these are predefined colors plus a "Custom" option
-        public ColorList cellpopulation_predef_color 
+        public ColorList cellpopulation_predef_color
         {
             get
             {
@@ -6082,7 +6097,7 @@ namespace Daphne
             ecmProbe = new ObservableCollection<ReportECM>();
             ecm_probe_dict = new Dictionary<string, ReportECM>();
             cellStates = new ObservableCollection<CellState>();
-        }  
+        }
     }
 
     /// <summary>
@@ -6241,7 +6256,7 @@ namespace Daphne
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string driver_mol_guid = value as string;
-            ConfigCompartment cc =parameter as ConfigCompartment;
+            ConfigCompartment cc = parameter as ConfigCompartment;
             ConfigMolecularPopulation MyMolPop = null;
 
             if (driver_mol_guid == "" || cc == null)
@@ -6279,7 +6294,7 @@ namespace Daphne
     {
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (values == null || values.Length < 2)return null;
+            if (values == null || values.Length < 2) return null;
             string driver_mol_guid = values[0] as string;
             ConfigCompartment cc = values[1] as ConfigCompartment;
             ConfigMolecularPopulation MyMolPop = null;
@@ -6326,7 +6341,7 @@ namespace Daphne
 
             if (driver_mol_guid == "")
                 enabled = false;
-            
+
             return enabled;
 
         }
@@ -6391,7 +6406,7 @@ namespace Daphne
                 {
                     if (cel.entity_guid == guid)
                     {
-                        return cel.membrane.molpops;                        
+                        return cel.membrane.molpops;
                     }
                 }
             }
@@ -6541,12 +6556,12 @@ namespace Daphne
                 {
                     if (crc.entity_guid == guid)
                     {
-                        rcReturn = crc; 
+                        rcReturn = crc;
                         break;
                     }
                 }
             }
-            return rcReturn ;
+            return rcReturn;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -6556,7 +6571,7 @@ namespace Daphne
             return "y";
         }
     }
-    
+
     /// <summary>
     /// Convert System.Windows.Media.Color to SolidBrush for rectangle fills
     /// </summary>
@@ -6689,7 +6704,7 @@ namespace Daphne
     public abstract class MolPopDistribution : EntityModelBase
     {
         public MolPopDistributionType mp_distribution_type { get; protected set; }
-        public List<BoundaryCondition> boundaryCondition { get; set; }        
+        public List<BoundaryCondition> boundaryCondition { get; set; }
 
         public MolPopDistribution()
         {
@@ -6724,7 +6739,7 @@ namespace Daphne
                 dim = (int)_boundary_face - 1;
             }
         }
-        
+
         public MolPopLinear()
         {
             mp_distribution_type = MolPopDistributionType.Linear;
@@ -6788,7 +6803,7 @@ namespace Daphne
     public class GaussianSpecification : EntityModelBase
     {
         private string _gaussian_spec_name = "";
-        public string gaussian_spec_name 
+        public string gaussian_spec_name
         {
             get { return _gaussian_spec_name; }
             set
@@ -6821,7 +6836,7 @@ namespace Daphne
         }
 
         private bool _gaussian_region_visibity = true;
-        public bool gaussian_region_visibility 
+        public bool gaussian_region_visibility
         {
             get { return _gaussian_region_visibity; }
             set
@@ -6867,8 +6882,11 @@ namespace Daphne
         }
     }
 
-    public enum RenderMethod { CELL_TYPE, CELL_POP, CELL_DIFF_STATE, CELL_DIFF_SHADE, CELL_DIV_STATE, CELL_DIV_SHADE, 
-        CELL_DEATH_STATE, CELL_DEATH_SHADE, CELL_GEN, CELL_GEN_SHADE, CELL_MP, MP_TYPE, MP_CONC}
+    public enum RenderMethod
+    {
+        CELL_TYPE, CELL_POP, CELL_DIFF_STATE, CELL_DIFF_SHADE, CELL_DIV_STATE, CELL_DIV_SHADE,
+        CELL_DEATH_STATE, CELL_DEATH_SHADE, CELL_GEN, CELL_GEN_SHADE, CELL_MP, MP_TYPE, MP_CONC
+    }
 
     public class RenderColor : INotifyPropertyChanged
     {
@@ -6877,7 +6895,7 @@ namespace Daphne
 
         private Color _entityColor;
 
-        public Color EntityColor 
+        public Color EntityColor
         {
             get { return _entityColor; }
             set
@@ -6956,8 +6974,8 @@ namespace Daphne
         public double max { get; set; }
         public int shades { get; set; }             // number of shades for applicable options
         public double blendingWeight { get; set; }  // controls color mixing for multiple molpops
-        public string name { get; set; }                                 // exist to facilitate eding scheme
-        public string renderLabel { get; set; }           // ConfigMolecule’s label
+        public string name { get; set; }            // exist to facilitate eding scheme
+        public string renderLabel { get; set; }     // ConfigMolecule’s label
 
         public RenderMol()
         {
@@ -6976,7 +6994,7 @@ namespace Daphne
         {
             renderLabel = "";
         }
-            
+
     }
 
     public class Render3DView
@@ -6995,7 +7013,7 @@ namespace Daphne
         public string Name { get; set; }
 
         [JsonIgnore]
-        public string originalContent {get; set;}
+        public string originalContent { get; set; }
 
         [JsonIgnore]
         public string FileName { get; set; }
@@ -7017,23 +7035,23 @@ namespace Daphne
             this.Name = name;
             renderCells = new ObservableCollection<RenderCell>();
             renderMols = new ObservableCollection<RenderMol>();
-            ColorHelper.resetColorPicker();
-            if (er != null)
-            {
-                for (int i = 0; i < er.cells.Count; i++)
-                {
-                    var cell = er.cells[i];
-                    ColorHelper.resetColorPicker(i);
-                    AddRenderCell(cell.entity_guid, cell.CellName);
-                }
+            if (er == null) return;
 
-                for (int i = 0; i < er.molecules.Count; i++)
-                {
-                    var mol = er.molecules[i];
-                    ColorHelper.resetColorPicker(i);
-                    AddRenderMol(mol.Name);
-                }
+            ColorHelper.resetColorPicker();
+            for (int i = 0; i < er.cells.Count; i++)
+            {
+                var cell = er.cells[i];
+                ColorHelper.resetColorPicker(i);
+                AddRenderCell(cell.entity_guid, cell.CellName);
             }
+
+            ColorHelper.resetColorPicker();
+            for (int i = 0; i < er.molecules.Count; i++)
+            {
+                var mol = er.molecules[i];
+                AddRenderMol(mol.entity_guid, mol.Name);
+            }
+
         }
 
         //default color
@@ -7051,7 +7069,7 @@ namespace Daphne
             {
                 renc.cell_pop_colors.Add(new RenderColor(color));
             }
-            
+
             //diff_state
             colorlist = ColorHelper.pickASetOfColor(8);
             foreach (Color color in colorlist)
@@ -7114,12 +7132,17 @@ namespace Daphne
             renderCells.Add(renc);
         }
 
-        public void AddRenderMol(string label)
+        public void AddRenderMol(string label, string name)
         {
-            RenderMol renc = new RenderMol();
-            renc.renderLabel = label;
-            renc.color = new RenderColor(ColorHelper.pickASolidColor());
-            renderMols.Add(renc);
+            RenderMol renm = new RenderMol();
+            renm.renderLabel = label;
+            renm.name = name;
+            renm.min = 0.0;
+            renm.max = 1.0;
+            renm.blendingWeight = 10.0;
+            renm.shades = 100;
+            renm.color = new RenderColor(ColorHelper.pickASolidColor());
+            renderMols.Add(renm);
         }
 
 
@@ -7254,7 +7277,7 @@ namespace Daphne
         public double[][] transform_matrix { get; set; }
         private bool _box_visibility = true;
         private bool _current_box_visibility = true;
-        
+
         // Range values calculated based on environment extents
 #if USE_BOX_LIMITS
         private double _x_trans_max;
@@ -7479,7 +7502,7 @@ namespace Daphne
         }
 #endif
 
-        public bool box_visibility 
+        public bool box_visibility
         {
             get { return _box_visibility; }
             set
@@ -7509,7 +7532,8 @@ namespace Daphne
         }
         public double x_scale
         {
-            get {
+            get
+            {
                 return getScale(0);
             }
             set
@@ -7657,7 +7681,7 @@ namespace Daphne
             set
             {
                 x_scale = 2 * value;
-                base.OnPropertyChanged("x_scale");                
+                base.OnPropertyChanged("x_scale");
             }
         }
         [JsonIgnore]
@@ -7725,7 +7749,7 @@ namespace Daphne
             bool x_scale_change = false,
                  y_scale_change = false,
                  z_scale_change = false,
-                 matrix_change  = false;
+                 matrix_change = false;
 
             for (int row = 0; row < 4; row++)
             {
@@ -7899,7 +7923,7 @@ namespace Daphne
                 {
                     return RenderMethod.MP_TYPE;
                 }
-                else 
+                else
                 {
                     return RenderMethod.CELL_TYPE;
                 }
@@ -7918,8 +7942,14 @@ namespace Daphne
             var strtype = value.ToString();
 
             var para = parameter as string;
-            if (para == "cell" && strtype.StartsWith("CELL_") == false) return false;
-            
+            if (para == "cell")
+            {
+                return strtype.StartsWith("CELL_");
+            }
+            else
+            {
+                return !strtype.StartsWith("CELL_");
+            }
             return true;
         }
 

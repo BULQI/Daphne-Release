@@ -23,7 +23,7 @@
         <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
-        
+
         <ObjectDataProvider x:Key="colorList"
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
@@ -32,9 +32,11 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <CollectionViewSource x:Key="ColorListCollectionViewSource" Source="{StaticResource colorList}"
+        <CollectionViewSource x:Key="ColorListCollectionViewSourceWithFilter" Source="{StaticResource colorList}"
                               Filter="ColorListCollectionViewSource_Filter" />
-        
+
+        <CollectionViewSource x:Key="ColorListCollectionViewSource" Source="{StaticResource colorList}" />
+
         <DataTemplate x:Key="colorItemTemplate">
             <StackPanel Orientation="Horizontal">
 
@@ -65,17 +67,17 @@
         </DataTemplate>-->
 
         <SolidColorBrush x:Key="defaultRenderCellColor" Color="Gray"/>
-        
+
         <DataTemplate x:Key="RenderColorCellTemplate" DataType="{x:Type Color}">
             <TextBlock x:Name="tb1" Padding="3" Background="{Binding EntityColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource defaultRenderCellColor}}">
-            </TextBlock>            
+            </TextBlock>
         </DataTemplate>
-        
+
         <DataTemplate x:Key="RenderColorEditingTemplate" DataType="{x:Type daph:RenderColor}">
             <StackPanel Name="CellEditStackPanel2" Orientation="Vertical">
                 <ComboBox x:Name="cbCellColor2"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
                     Tag="{Binding Path=EntityColor}"
-                    ItemsSource="{Binding Source={StaticResource ColorListCollectionViewSource}}" 
+                    ItemsSource="{Binding Source={StaticResource ColorListCollectionViewSourceWithFilter}}" 
                     ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}" 
                     SelectionChanged="cbCellColor2_SelectionChanged"
                     IsSynchronizedWithCurrentItem="False"
@@ -87,7 +89,7 @@
                         <MultiBinding UpdateSourceTrigger="Explicit" Converter="{StaticResource RenderColorToListIndexConv}">
                             <Binding Path="EntityColor" Mode="TwoWay"/>
                             <Binding Path="DataContext" Mode="OneWay" RelativeSource="{RelativeSource AncestorType={x:Type DataGridRow}}" />
-                        </MultiBinding> 
+                        </MultiBinding>
                     </ComboBox.SelectedIndex>
                 </ComboBox>
 
@@ -116,10 +118,51 @@
                                         >
                     </editors:ColorEditBox>
                 </StackPanel>
-                
+
             </StackPanel>
         </DataTemplate>
 
+
+        <!--template for editing colors in the RendreMol section -->
+        <DataTemplate x:Key="RenderMolColorEditingTemplate" DataType="{x:Type daph:RenderColor}">
+            <StackPanel Name="CellEditStackPanel3" Orientation="Vertical">
+                <ComboBox x:Name="cbCellColor3"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
+                    Tag="{Binding Path=color.EntityColor}"
+                    ItemsSource="{Binding Source={StaticResource ColorListCollectionViewSource}}" 
+                    ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}" 
+                    SelectedIndex="{Binding Path=color.EntityColor, Converter={StaticResource ColorToListIndexConv}}"
+                    IsSynchronizedWithCurrentItem="False"
+                    >
+                </ComboBox>
+
+                <StackPanel Grid.Column="1" Grid.Row="5" >
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=cbCellColor3, Path=SelectedIndex}" Value="7">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <editors:ColorEditBox x:Name="cellColorEditBox" 
+                                        CheckBoxVisibility="Collapsed"
+                                        SpinnerVisibility="Collapsed"
+                                        Width="140"
+                                        HorizontalAlignment="Left" 
+                                        Format="#rxgxbx"
+                                        Value="{Binding Path=color.EntityColor, UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}"
+                                        Margin="0,2" 
+                                        DropDownClosed="cellColorEditBox_DropDownClosed"
+                                        SourceUpdated="cellColorEditBox_SourceUpdated"
+                                        >
+                    </editors:ColorEditBox>
+                </StackPanel>
+
+            </StackPanel>
+        </DataTemplate>
 
         <CollectionViewSource x:Key="cellTransitionDeathDriverListView"  
                                   Source="{Binding Path=entity_repository.transition_drivers}"
@@ -131,7 +174,7 @@
         <CollectionViewSource x:Key="moleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"/>
 
-        
+
         <CompositeCollection x:Key="testCollection">
             <daph:ConfigMolecule Name="None" entity_guid=""/>
             <ComboBoxItem>None</ComboBoxItem>
@@ -288,6 +331,90 @@
                     <local:RenderSkinEditor x:Name="SkinEditor" DataContext="{Binding ElementName=CellsListBox1, Path=SelectedItem, Mode=TwoWay}" />
                 </local:DaphneStackPanel>
             </Expander>
+
+            <Expander ExpandDirection="Down" Padding="6"
+                                    IsExpanded="True"
+                                    Header="Molcular Population Rendering Details"
+                                    x:Name="MolsDetailsExpander"
+                                    Margin="0,0,0,0" 
+                                    Canvas.ZIndex="1"
+                                    >
+
+                <local:DaphneStackPanel>
+                    <DataGrid Name="SkinMolEditor" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" SelectionUnit="FullRow"
+                              RowHeaderWidth="0"
+                              ItemsSource="{Binding Path=renderMols, Converter={StaticResource DebugConverter}}">
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn Header="Name" Binding="{Binding name}" IsReadOnly="True" MinWidth="120" >
+                            </DataGridTextColumn>
+
+                            <DataGridTemplateColumn Header="Color" MinWidth="70" CellEditingTemplate="{StaticResource RenderMolColorEditingTemplate}">
+                                <DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="{x:Type DataGridColumnHeader}">
+                                        <Setter Property="HorizontalAlignment" Value="stretch"/>
+                                    </Style>
+                                </DataGridTemplateColumn.HeaderStyle>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Rectangle Width="15" Height="15" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                                            <Rectangle.Style>
+                                                <Style TargetType="Rectangle">
+                                                    <Setter Property="Fill" Value="{Binding Path=color.EntityColor,Converter={StaticResource ColorToBrushConverter}}"/>
+                                                    <!--<Style.Triggers>
+                                                        <DataTrigger Binding="{Binding}" Value="7">
+                                                            <Setter Property="Fill" Value="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>-->
+                                                </Style>
+                                            </Rectangle.Style>
+
+                                        </Rectangle>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Min Conc">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="false" 
+                                                       HorizontalAlignment ="Stretch"
+                                                       SNUpperThreshold="1000"  
+                                                       TextFieldWidth="120"
+                                                       Number="{Binding Path=min}"></uc:DoublesBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                            <DataGridTemplateColumn Header="Max Conc">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="false" 
+                                                       HorizontalAlignment ="Stretch"
+                                                       SNUpperThreshold="1000"  
+                                                       TextFieldWidth="120"
+                                                       Number="{Binding Path=max}"></uc:DoublesBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Blending Weight">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="2" IsReadOnly="false" 
+                                                       HorizontalAlignment ="Stretch"
+                                                       SNUpperThreshold="1000"  
+                                                       TextFieldWidth="120"
+                                                       Number="{Binding Path=blendingWeight}"></uc:DoublesBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </local:DaphneStackPanel>
+            </Expander>
+
         </StackPanel>
     </ScrollViewer>
     <!--</TabItem>-->

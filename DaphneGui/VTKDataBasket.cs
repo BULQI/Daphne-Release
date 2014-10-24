@@ -15,6 +15,7 @@ using MathNet.Numerics.LinearAlgebra;
 using Kitware.VTK;
 using System.Diagnostics;
 using System.Windows.Media;
+using ManifoldRing;
 
 namespace DaphneGui
 {
@@ -51,6 +52,8 @@ namespace DaphneGui
             get { return renderGradient; }
             set { renderGradient = value; }
         }
+
+        public string renderLabel { get; set; }
 
         /// <summary>
         /// retrieve the color array
@@ -237,7 +240,13 @@ namespace DaphneGui
     public class VTKECSDataController
     {
         private vtkImageData imageGrid;
+
+        public Dictionary<string, RenderMol> RenderMolDict;
+
+        public Dictionary<string, RenderPop> RenderPopDict;
+
         private Dictionary<string, MolPopTypeController> molpopTypeControllers;
+
         // TODO: Need to add repository for ecs color maps
 
         /// <summary>
@@ -246,6 +255,8 @@ namespace DaphneGui
         public VTKECSDataController()
         {
             molpopTypeControllers = new Dictionary<string, MolPopTypeController>();
+            RenderMolDict = new Dictionary<string,RenderMol>();
+            RenderPopDict = new Dictionary<string,RenderPop>();
         }
 
         /// <summary>
@@ -270,7 +281,12 @@ namespace DaphneGui
         public void Cleanup()
         {
             molpopTypeControllers.Clear();
+            RenderMolDict.Clear();
+            RenderPopDict.Clear();
         }
+
+
+
 
         /// <summary>
         /// set up the image grid and box outline for the ecs
@@ -379,6 +395,8 @@ namespace DaphneGui
             molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
             molpopControl.TypeGUID = molpop.molecule.entity_guid;
 
+            molpopControl.renderLabel = molpop.renderLabel;
+
             // add the controller to the dictionary
             molpopTypeControllers.Add(molpop.molpop_guid, molpopControl);
         }
@@ -399,62 +417,72 @@ namespace DaphneGui
 
             foreach (KeyValuePair<string, MolPopTypeController> kvp in molpopTypeControllers)
             {
-                if (kvp.Value.RenderGradient == false)
-                {
-                    continue;
-                }
 
-                double div = 0.0;
+                string renderLabel = kvp.Value.renderLabel;
+                if (RenderPopDict[renderLabel].renderOn == false)continue;
 
-                if (kvp.Value.Type == MolPopDistributionType.Homogeneous)
-                {
-                    div = ((MolpopTypeHomogeneousController)kvp.Value).level;
-                }
-                else if (kvp.Value.Type == MolPopDistributionType.Linear)
-                {
-                    div = ((MolpopTypeLinearController)kvp.Value).c2;
-                }
-                else if (kvp.Value.Type == MolPopDistributionType.Gaussian)
-                {
-                    div = ((MolpopTypeGaussianController)kvp.Value).amplitude;
-                }
-                //else if (kvp.Value.Type == MolPopDistributionType.Custom)
-                //{
-                //    div = ((MolpopTypeCustomController)kvp.Value).max;
-                //}
-                else if (kvp.Value.Type == MolPopDistributionType.Explicit)
-                {
-                    div = ((MolpopTypeExplicitController)kvp.Value).max;
-                }
+                RenderMethod render_method = RenderPopDict[renderLabel].renderMethod;
+                RenderMol render_mol = RenderMolDict[renderLabel];
+                double[] mp_color = new double[4];
+                mp_color[0] = render_mol.color.EntityColor.R;
+                mp_color[1] = render_mol.color.EntityColor.G;
+                mp_color[2] = render_mol.color.EntityColor.B;
+                mp_color[3] = render_mol.color.EntityColor.A;
+                double div = render_mol.max;
 
-                if (div == 0.0)
+                if (render_method == RenderMethod.MP_TYPE && div == 0.0)
                 {
                     continue;
                 }
 
                 // generate scalar data
-                for (int iz = 0; iz < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2); iz++)
-                {
-                    for (int iy = 0; iy < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1); iy++)
-                    {
-                        for (int ix = 0; ix < SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0); ix++)
-                        {
-                            double[] point = { SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * ix, SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * iy, SimulationBase.dataBasket.Environment.Comp.Interior.StepSize() * iz };
+                double step_size = SimulationBase.dataBasket.Environment.Comp.Interior.StepSize();
+                ScalarField molpop_sf = SimulationBase.dataBasket.Environment.Comp.Populations[kvp.Value.TypeGUID].Conc;
 
-                            double val,
-                                   conc = SimulationBase.dataBasket.Environment.Comp.Populations[kvp.Value.TypeGUID].Conc.Value(point),//Utilities.AddDoubleValues(chemokine.getChemokineConcentrations(idx)[kvp.Value.TypeGUID]),
-                                   scaledConcentration = kvp.Value.BlendingWeight * conc / div;
+                //these are pre-evalulated/allocated to improve performance - axin
+                int NodesPerSide2 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2);
+                int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
+                int NodesPerside0 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0);
+                double[] point = new double[3];
+                double blendingWeight = kvp.Value.BlendingWeight;
+                double color_scale_factor = 0;
+                double conc_scale_factor = kvp.Value.BlendingWeight / div;
+                double val, conc;
+                for (int iz = 0; iz < NodesPerSide2; iz++)
+                {
+                    for (int iy = 0; iy < NodesPerSide1; iy++)
+                    {
+                        for (int ix = 0; ix < NodesPerside0; ix++)
+                        {
+                            //double[] point = { step_size * ix, step_size * iy, step_size * iz };
+                            point[0] = step_size * ix;
+                            point[1] = step_size * iy;
+                            point[2] = step_size * iz;
+
+                            if (render_method == RenderMethod.MP_TYPE)
+                            {
+                                color_scale_factor = blendingWeight;
+                            }
+                            else if (render_method == RenderMethod.MP_CONC)
+                            {
+                                point[0] = step_size * ix;
+                                point[1] = step_size * iy;
+                                point[2] = step_size * iz;
+
+                                conc = molpop_sf.Value(point);
+                                color_scale_factor = conc_scale_factor * conc;
+                            }
 
                             // rgba
                             for (int i = 0; i < 4; i++)
                             {
                                 if (first == true)
                                 {
-                                    val = kvp.Value.Color[i] * scaledConcentration;
+                                    val = mp_color[i] * color_scale_factor;
                                 }
                                 else
                                 {
-                                    val = imageGrid.GetScalarComponentAsDouble(ix, iy, iz, i) + kvp.Value.Color[i] * scaledConcentration;
+                                    val = imageGrid.GetScalarComponentAsDouble(ix, iy, iz, i) + mp_color[i] * color_scale_factor;
                                 }
                                 // set the scalar data according to rgba
                                 imageGrid.SetScalarComponentFromDouble(ix, iy, iz, i, val > Byte.MaxValue ? Byte.MaxValue : val);
@@ -1491,8 +1519,33 @@ namespace DaphneGui
                         region = regions[((MolPopGaussian)protocol.scenario.environment.comp.molpops[i].mp_distribution).gauss_spec.box_spec.box_guid];
                     }
 
+                    string renderLabel = protocol.scenario.environment.comp.molpops[i].renderLabel;
+                    //to accommodate older senario
+                    if (renderLabel == null)
+                    {
+                        renderLabel = protocol.scenario.environment.comp.molpops[i].renderLabel = protocol.scenario.environment.comp.molpops[i].molecule.entity_guid;
+                    }
+
                     // 3D gradient
                     ecsDataController.addGradient3D(protocol.scenario.environment.comp.molpops[i], region);
+
+                    if (ecsDataController.RenderPopDict.ContainsKey(renderLabel) == false)
+                    {
+                        RenderPop rp = scenario.popOptions.GetMolRenderPop(renderLabel);
+                        if (rp == null)
+                        {
+                            scenario.popOptions.AddRenderOptions(renderLabel, protocol.scenario.environment.comp.molpops[i].Name, false);
+                            rp = scenario.popOptions.GetMolRenderPop(renderLabel);
+                        }
+                        ecsDataController.RenderPopDict.Add(renderLabel, rp);
+                        RenderMol rm = MainWindow.SOP.GetRenderMol(renderLabel);
+                        if (rm == null)
+                        {
+                            MainWindow.SOP.SelectedRenderSkin.AddRenderMol(renderLabel, protocol.scenario.environment.comp.molpops[i].Name);
+                            rm = MainWindow.SOP.GetRenderMol(renderLabel);
+                        }
+                        ecsDataController.RenderMolDict.Add(renderLabel, rm);
+                    }
 
                     // finish 3d gradient-related graphics after processing the last molpop
                     if (i == protocol.scenario.environment.comp.molpops.Count - 1)
