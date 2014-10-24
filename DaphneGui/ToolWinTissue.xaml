@@ -20,13 +20,33 @@
         <!-- SIM SETUP -->
             <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-
-                <!-- --> 
-                        <local:SimSetupControl DataContext="{Binding}"/>
-                        
-
+                        <local:SimSetupControl DataContext="{Binding}"/>                     
                 </ScrollViewer>
             </TabItem>
+
+        <!-- EXTRACELLULAR MEDIUM -->
+        <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <!-- add control -->
+
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- LIBRARY CELL POPULATIONS -->
+        <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <!-- add control -->
+
+            </ScrollViewer>
+        </TabItem>
+
+        <!-- REPORTS -->
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <!-- add control -->
+
+            </ScrollViewer>
+        </TabItem>
 
     </TabControl>
  
