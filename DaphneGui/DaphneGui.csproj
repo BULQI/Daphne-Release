@@ -112,13 +112,6 @@
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.0\lib\net40-client\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Daphne, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\Daphne.dll</HintPath>
-    </Reference>
-    <Reference Include="DaphneUserControlLib">
-      <HintPath>..\dependencies\DaphneUserControlLib.dll</HintPath>
-    </Reference>
     <Reference Include="Kitware.mummy.Runtime">
       <HintPath>..\dependencies\vtk\Kitware.mummy.Runtime.dll</HintPath>
     </Reference>
@@ -230,10 +223,23 @@
     <Compile Include="Rendering\RenderMolPop.xaml.cs">
       <DependentUpon>RenderMolPop.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Reports.xaml.cs">
+      <DependentUpon>Reports.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SimConfigToolWinFilters.cs" />
+    <Compile Include="SimSetup.xaml.cs">
+      <DependentUpon>SimSetup.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWinBase.cs" />
+    <Compile Include="ToolWinTissue.xaml.cs">
+      <DependentUpon>ToolWinTissue.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWinVatRC.xaml.cs">
+      <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
@@ -324,6 +330,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Rendering\RenderMolPop.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Reports.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimSetup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWinTissue.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWinVatRC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -465,6 +487,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DaphneUserControlLib\DaphneUserControlLib.csproj">
+      <Project>{A9C8E1DF-6FFC-49DA-BAA5-B615C63A4813}</Project>
+      <Name>DaphneUserControlLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Daphne\Daphne.csproj">
+      <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
+      <Name>Daphne</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Daphne\Daphne.csproj">
       <Project>{B88B4859-8E76-41ED-AA84-6B48A90EA338}</Project>
       <Name>Daphne</Name>
