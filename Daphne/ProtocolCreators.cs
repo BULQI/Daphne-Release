@@ -25,11 +25,8 @@ namespace Daphne
             daphneStore.SerializeToFile();
 
             //Clone UserStore from DaphneStore
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
-            userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(daphneStore.entity_repository, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            userStore.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
             userStore.SerializeToFile();
         }
 
@@ -74,11 +71,8 @@ namespace Daphne
             Level store = new Level("Config\\daphne_userstore.json", "Config\\temp_userstore.json");
             store = store.Deserialize();
 
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, Settings);
-            protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(store.entity_repository, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            protocol.entity_repository = JsonConvert.DeserializeObject<EntityRepository>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
             protocol.InitializeStorageClasses();
         }
         

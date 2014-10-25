@@ -45,6 +45,8 @@ namespace Daphne
         /// </summary>
         public RenderSkin skin { get; set; }
 
+        public static JsonSerializerSettings DefaultSerializerSettings;
+
         /// <summary>
         /// constructor
         /// </summary>
@@ -54,6 +56,9 @@ namespace Daphne
             skin = new RenderSkin();
             DaphneStore = new Level("", "Config\\temp_daphnestore.json");
             UserStore = new Level("", "Config\\temp_userstore.json");
+            DefaultSerializerSettings = new JsonSerializerSettings();
+            DefaultSerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            DefaultSerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
         }
 
         /// <summary>
@@ -1171,19 +1176,14 @@ namespace Daphne
         //-------------------------------------------------------
 
 
-
         /// <summary>
         /// serialize the level to file
         /// </summary>
         /// <param name="tempFiles">true when wanting to serialize temporary file(s)</param>
         public void SerializeToFile(bool tempFiles = false)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-
             //serialize Protocol
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
             string jsonFile = tempFiles == true ? TempFile : FileName;
 
             try
@@ -1202,11 +1202,7 @@ namespace Daphne
         /// <returns>level content as string</returns>
         public string SerializeToString()
         {
-            //skg daphne serialize to json string Wednesday, May 08, 2013
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
             return jsonSpec;
         }
 
@@ -1218,14 +1214,9 @@ namespace Daphne
         public virtual Level Deserialize(bool tempFiles = false)
         {
             //Deserialize JSON
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-            //deserialize
             string jsonFile = tempFiles == true ? TempFile : FileName;
             string readText = File.ReadAllText(jsonFile);
-            Level local = JsonConvert.DeserializeObject<Level>(readText, settings);
+            Level local = JsonConvert.DeserializeObject<Level>(readText, SystemOfPersistence.DefaultSerializerSettings);
 
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
@@ -1401,14 +1392,9 @@ namespace Daphne
         public override Level Deserialize(bool tempFiles = false)
         {
             //Deserialize JSON
-            var settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-            //deserialize
             string jsonFile = tempFiles == true ? TempFile : FileName;
             string readText = File.ReadAllText(jsonFile);
-            Protocol local = JsonConvert.DeserializeObject<Protocol>(readText, settings);
+            Protocol local = JsonConvert.DeserializeObject<Protocol>(readText, SystemOfPersistence.DefaultSerializerSettings);
 
             // after deserialization, the names are blank, restore them
             local.FileName = FileName;
@@ -3568,11 +3554,8 @@ namespace Daphne
         /// <returns></returns>
         public ConfigMolecule Clone(Level level)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (level != null)
             {
@@ -3709,11 +3692,8 @@ namespace Daphne
 
         public ConfigGene Clone(Level level)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (level != null)
             {
@@ -3860,17 +3840,12 @@ namespace Daphne
 
         public ConfigTransitionDriver Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-
-            ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigTransitionDriver new_ctd = JsonConvert.DeserializeObject<ConfigTransitionDriver>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
                 Guid id = Guid.NewGuid();
-
                 new_ctd.entity_guid = id.ToString();
             }
 
@@ -4024,12 +3999,8 @@ namespace Daphne
 
         public ConfigDiffScheme Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-
-            ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigDiffScheme new_cds = JsonConvert.DeserializeObject<ConfigDiffScheme>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
@@ -4718,11 +4689,8 @@ namespace Daphne
         /// <returns></returns>
         public ConfigReaction Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigReaction newreaction = JsonConvert.DeserializeObject<ConfigReaction>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigReaction newreaction = JsonConvert.DeserializeObject<ConfigReaction>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
@@ -4916,11 +4884,8 @@ namespace Daphne
 
         public ConfigReactionTemplate Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
@@ -5164,12 +5129,8 @@ namespace Daphne
         
         public ConfigReactionComplex Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-
-            ConfigReactionComplex newrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigReactionComplex newrc = JsonConvert.DeserializeObject<ConfigReactionComplex>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
@@ -5279,11 +5240,8 @@ namespace Daphne
 
         public ConfigCell Clone(bool identical)
         {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, Settings);
+            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, SystemOfPersistence.DefaultSerializerSettings);
+            ConfigCell newcell = JsonConvert.DeserializeObject<ConfigCell>(jsonSpec, SystemOfPersistence.DefaultSerializerSettings);
 
             if (identical == false)
             {
