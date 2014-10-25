@@ -2124,6 +2124,18 @@ namespace DaphneGui
             //Do the push
             ConfigMolecule mol = molpop.molecule;
             ConfigMolecule newmol = mol.Clone(null);
+            ConfigMolecule ermol = MainWindow.SOP.Protocol.entity_repository.molecules_dict.ContainsKey(newmol.entity_guid) ? MainWindow.SOP.Protocol.entity_repository.molecules_dict[newmol.entity_guid] : null;
+
+            //if (ermol != null)
+            //{
+            //    if (newmol.Equals(ermol))
+            //    {
+            //        MessageBox.Show("There are no differences in this molecule compared to the subcellular components version of the molecule.");
+            //        return;
+            //    }
+            //}
+
+            //newmol.incrementChangeStamp();
             MainWindow.GenericPush(newmol);
         }
 
@@ -2138,6 +2150,17 @@ namespace DaphneGui
             //Push cell
             ConfigCell cell = cellpop.Cell;
             ConfigCell newcell = cell.Clone(true);
+            //ConfigCell ercell = MainWindow.SOP.Protocol.entity_repository.cells_dict.ContainsKey(newcell.entity_guid) ? MainWindow.SOP.Protocol.entity_repository.cells_dict[newcell.entity_guid] : null;
+
+            //if (ercell != null)
+            //{
+            //    if (newcell.Equals(ercell))
+            //    {
+            //        MessageBox.Show("There are no differences in this cell compared to the subcellular components version of the cell.");
+            //        return;
+            //    }
+            //}
+            //newcell.incrementChangeStamp();
             MainWindow.GenericPush(newcell);
         }
 
@@ -2149,7 +2172,7 @@ namespace DaphneGui
                 return;
             }
 
-            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedValue;
+            ConfigReaction reac = (ConfigReaction)lvEcsReactions.SelectedItem;
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
         }

@@ -3486,7 +3486,7 @@ namespace Daphne
     /// <summary>
     /// config molecule
     /// </summary>
-    public class ConfigMolecule : ConfigEntity
+    public class ConfigMolecule : ConfigEntity, IEquatable<ConfigMolecule>
     {
         public string label { get; set; }        //label to color scheme
 
@@ -3523,7 +3523,6 @@ namespace Daphne
                 if (molWeight != value)
                 {
                     molWeight = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("MolecularWeight");
                 }
             }
@@ -3540,7 +3539,6 @@ namespace Daphne
                 if (effRadius != value)
                 {
                     effRadius = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("EffectiveRadius");
                 }
             }
@@ -3557,7 +3555,6 @@ namespace Daphne
                 if (diffCoeff != value)
                 {
                     diffCoeff = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("DiffusionCoefficient");
                 }
             }
@@ -3628,7 +3625,25 @@ namespace Daphne
             }
 
             return newmol;
-        }    
+        }
+
+        public bool Equals(ConfigMolecule mol)
+        {
+            if (this.entity_guid != mol.entity_guid)
+                return false;
+            if (this.diffCoeff != mol.diffCoeff)
+                return false;
+            if (this.effRadius != mol.effRadius)
+                return false;
+            if (this.molecule_location != mol.molecule_location)
+                return false;
+            if (this.molWeight != mol.molWeight)
+                return false;
+            if (this.Name != mol.Name)
+                return false;
+
+            return true;
+        }
 
         public static bool FindMoleculeByName(Protocol protocol, string tempMolName)
         {
@@ -3689,7 +3704,7 @@ namespace Daphne
     /// <summary>
     /// Any molecule can be a gene
     /// </summary>
-    public class ConfigGene : ConfigEntity
+    public class ConfigGene : ConfigEntity, IEquatable<ConfigGene>
     {
         public string Name { get; set; }
 
@@ -3705,7 +3720,6 @@ namespace Daphne
                 if (copyNumber != value)
                 {
                     copyNumber = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("CopyNumber");
                 }
             }
@@ -3723,7 +3737,6 @@ namespace Daphne
                 if (activationLevel != value)
                 {
                     activationLevel = value;
-                    this.incrementChangeStamp();
                     OnPropertyChanged("ActivationLevel");
                 }
             }
@@ -3777,7 +3790,21 @@ namespace Daphne
 
             return TempMolName;
         }
-        
+
+        public bool Equals(ConfigGene ent)
+        {
+            if (this.entity_guid != ent.entity_guid)
+                return false;
+            if (this.activationLevel != ent.activationLevel)
+                return false;
+            if (this.copyNumber != ent.copyNumber)
+                return false;
+            if (this.Name != ent.Name)
+                return false;
+
+            return true;
+        }
+
         public static bool FindGeneByName(Protocol protocol, string geneName)
         {
             bool ret = false;
@@ -3858,7 +3885,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigTransitionDriver : ConfigEntity
+    public class ConfigTransitionDriver : ConfigEntity, IEquatable<ConfigTransitionDriver>
     {
         public string Name { get; set; }
         public int CurrentState { get; set; }
@@ -3895,6 +3922,20 @@ namespace Daphne
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
+        }
+
+        public bool Equals(ConfigTransitionDriver ent)
+        {
+            if (this.entity_guid != ent.entity_guid)
+                return false;
+            if (this.CurrentState != ent.CurrentState)
+                return false;
+            if (this.StateName != ent.StateName)
+                return false;
+            if (this.Name != ent.Name)
+                return false;
+
+            return true;
         }
     }
 
@@ -4686,7 +4727,7 @@ namespace Daphne
         }
     }
 
-    public class ConfigReaction : ConfigEntity
+    public class ConfigReaction : ConfigEntity, IEquatable<ConfigReaction>
     {
         public ConfigReaction() : base()
         {
@@ -4820,6 +4861,18 @@ namespace Daphne
             TotalReactionString = s;
         }
 
+        public bool Equals(ConfigReaction r)
+        {            
+            if (this.entity_guid != r.entity_guid)
+                return false;
+            if (this.rate_const != r.rate_const)
+                return false;
+            if (this.TotalReactionString != r.TotalReactionString)
+                return false;            
+
+            return true;
+        }
+
         public bool HasMolecule(string molguid)
         {
             if (reactants_molecule_guid_ref.Contains(molguid) || products_molecule_guid_ref.Contains(molguid) || modifiers_molecule_guid_ref.Contains(molguid))
@@ -4865,7 +4918,6 @@ namespace Daphne
             set
             { 
                 _rate_const = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("rate_const");
             } 
         }
@@ -4879,7 +4931,7 @@ namespace Daphne
 
     }
 
-    public class ConfigReactionTemplate : ConfigEntity
+    public class ConfigReactionTemplate : ConfigEntity, IEquatable<ConfigReactionTemplate>
     {
         public string name;
         // stoichiometric constants
@@ -4919,7 +4971,18 @@ namespace Daphne
             }
 
             return newRT;
-        }       
+        }
+
+        public bool Equals(ConfigReactionTemplate crt)
+        {
+            if (this.entity_guid != crt.entity_guid)
+                return false;
+
+            if (this.reac_type != crt.reac_type)
+                return false;
+
+            return true;
+        }
 
     }
 
@@ -4991,7 +5054,6 @@ namespace Daphne
             set
             {
                 _reactions = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("reactions");
             }
         }
@@ -5057,12 +5119,6 @@ namespace Daphne
                     }
                 }
             }
-
-            if (changed == true)
-            {
-                this.incrementChangeStamp();
-            }
-
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -5094,11 +5150,7 @@ namespace Daphne
                     }
                 }
             }
-
-            if (changed == true)
-            {
-                this.incrementChangeStamp();
-            }
+            
         }
 
         /// <summary>
@@ -5246,7 +5298,7 @@ namespace Daphne
         
     }
 
-    public class ConfigCell : ConfigEntity
+    public class ConfigCell : ConfigEntity, IEquatable<ConfigCell>
     {
         public string label { get; set; }        //label to color scheme
 
@@ -5295,7 +5347,6 @@ namespace Daphne
             set
             {
                 cellName = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("CellName");
             }
         }
@@ -5310,7 +5361,6 @@ namespace Daphne
             set
             {
                 cellRadius = value ;
-                this.incrementChangeStamp();
                 OnPropertyChanged("CellRadius");
             }
         }
@@ -5345,7 +5395,6 @@ namespace Daphne
             set
             {
                 transductionConstant = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("TransductionConstant");
             }
         }
@@ -5360,7 +5409,6 @@ namespace Daphne
             set
             {
                 dragCoefficient = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("DragCoefficient");
             }
         }
@@ -5378,7 +5426,6 @@ namespace Daphne
             set
             {
                 sigma = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("Sigma");
             }
         }
@@ -5400,7 +5447,6 @@ namespace Daphne
             set
             {
                 _diff_scheme = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("diff_scheme");
             }
         }
@@ -5419,7 +5465,6 @@ namespace Daphne
             set
             {
                 _death_driver = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("death_driver");
             }
         }
@@ -5452,7 +5497,6 @@ namespace Daphne
             set
             {
                 _div_scheme = value;
-                this.incrementChangeStamp();
                 OnPropertyChanged("div_scheme");
             }
         }
@@ -5535,6 +5579,146 @@ namespace Daphne
 
             return TempMolName;
         }
+
+        public ConfigGene FindGene(string guid)
+        {
+            foreach (ConfigGene g in genes)
+            {
+                if (g.entity_guid == guid) 
+                    return g;
+            }
+
+            return null;
+        }
+
+        public bool Equals(ConfigCell cc)
+        {
+            if (this.entity_guid != cc.entity_guid)
+                return false;
+
+            if (this.CellName != cc.CellName)
+                return false;
+
+            if (this.CellRadius != cc.CellRadius)
+                return false;
+
+            if (this.DragCoefficient != cc.DragCoefficient)
+                return false;
+
+            if (this.Sigma != cc.Sigma)
+                return false;
+
+            if (this.TransductionConstant != cc.TransductionConstant)
+                return false;
+
+            if (this.locomotor_mol_guid_ref != cc.locomotor_mol_guid_ref)
+                return false;
+
+            //Check cell genes
+            foreach (ConfigGene gene in genes)
+            {
+                if (cc.HasGene(gene.entity_guid) == false)
+                    return false;
+                else
+                {
+                    ConfigGene gene2 = cc.FindGene(gene.entity_guid);
+                    if (gene.Equals(gene2) == false)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            //Check cytosol molecules
+            foreach (ConfigMolecule mol in cytosol.molecules_dict.Values)
+            {
+                bool bFound = cc.cytosol.HasMolecule(mol);
+                if (bFound)
+                {
+                    ConfigMolecule mol2 = cc.cytosol.molecules_dict[mol.entity_guid];
+                    if (mol.Equals(mol2) == false)
+                        return false;
+                }
+            }
+
+            //Check membrane molecules
+            foreach (ConfigMolecule mol in membrane.molecules_dict.Values)
+            {
+                bool bFound = cc.membrane.HasMolecule(mol);
+                if (bFound)
+                {
+                    ConfigMolecule mol2 = cc.membrane.molecules_dict[mol.entity_guid];
+                    if (mol.Equals(mol2) == false)
+                        return false;
+                }
+            }
+
+            //Check cytosol reactions
+            foreach (ConfigReaction reac in cytosol.Reactions)
+            {
+                if (cc.cytosol.reactions_dict.ContainsKey(reac.entity_guid) == false)
+                {
+                    return false;
+                }
+                else
+                {
+                    ConfigReaction reac2 = cc.cytosol.reactions_dict[reac.entity_guid];
+                    if (reac.Equals(reac2) == false)
+                        return false;
+                }
+            }
+
+            //Check membrane reactions
+            foreach (ConfigReaction reac in membrane.Reactions)
+            {
+                if (cc.membrane.reactions_dict.ContainsKey(reac.entity_guid) == false)
+                {
+                    return false;
+                }
+                else
+                {
+                    ConfigReaction reac2 = cc.membrane.reactions_dict[reac.entity_guid];
+                    if (reac.Equals(reac2) == false)
+                        return false;
+                }
+            }
+
+            //Check diff scheme
+            if (this.diff_scheme == null && cc.diff_scheme != null)
+                return false;
+            else if (this.diff_scheme != null && cc.diff_scheme == null)
+                return false;
+            else if (this.diff_scheme == null && cc.diff_scheme == null)
+            {
+            }
+            else if (this.diff_scheme.Equals(cc.diff_scheme) == false)
+                return false;
+
+            //Check div scheme
+            if (this.div_scheme == null && cc.div_scheme != null)
+                return false;
+            else if (this.div_scheme != null && cc.div_scheme == null)
+                return false;
+            else if (this.div_scheme == null && cc.div_scheme == null)
+            {
+            }
+            else if (this.div_scheme.Equals(cc.div_scheme) == false)
+                return false;
+
+            //Check death driver
+            if (this.death_driver == null && cc.death_driver != null)
+                return false;
+            else if (this.death_driver != null && cc.death_driver == null)
+                return false;
+            else if (this.death_driver == null && cc.death_driver == null)
+            {
+            }
+            else if (this.death_driver.Equals(cc.death_driver) == false)
+                return false;
+            
+            return true;
+        }
+
 
         public static bool FindCellByName(Protocol protocol, string cellName)
         {

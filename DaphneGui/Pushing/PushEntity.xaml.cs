@@ -72,7 +72,6 @@ namespace DaphneGui.Pushing
             if (left is ConfigReaction)
             {
                 IsReaction = true;
-                btnSaveAsNew.IsEnabled = false;
             }
 
         }
