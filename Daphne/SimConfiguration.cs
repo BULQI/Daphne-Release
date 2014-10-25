@@ -1022,18 +1022,7 @@ namespace Daphne
             {
                 ReactionTemplatePusher(sourceLevel.entity_repository.reaction_templates_dict[reac.reaction_template_guid_ref]);
             }
-            //else
-            //{
-            //    foreach (ConfigReactionTemplate crt in sourceLevel.entity_repository.reaction_templates)
-            //    {
-            //        if (crt.entity_guid == reac.reaction_template_guid_ref)
-            //        {
-            //            ReactionTemplatePusher(crt);
-            //            break;
-            //        }
-            //    }
-            //}
-
+            
             //Molecules and Genes
             foreach (string guid in reac.reactants_molecule_guid_ref)
             {
@@ -1073,27 +1062,6 @@ namespace Daphne
                 entity = sourceLevel.entity_repository.genes_dict[guid];
             }
 
-            //foreach (ConfigMolecule mol in sourceLevel.entity_repository.molecules)
-            //{
-            //    if (mol.entity_guid == guid)
-            //    {
-            //        entity = mol;
-            //        break;
-            //    }
-            //}
-
-            //if (entity == null)
-            //{
-            //    foreach (ConfigGene gene in sourceLevel.entity_repository.genes)
-            //    {
-            //        if (gene.entity_guid == guid)
-            //        {
-            //            entity = gene;
-            //            break;
-            //        }
-            //    }
-            //}
-
             //Now if entity is not null, we have the entity and must push it unless it is already in target ER
             if (entity != null)
             {
@@ -1116,7 +1084,7 @@ namespace Daphne
 
         private void ReactionComplexPusher(ConfigReactionComplex rc, Level sourceLevel, PushStatus s)
         {
-            //Genes
+            //Genes - Not needed for VatRC but we will need them for CellRC
             //foreach (ConfigGene gene in rc.genes)
             //{
             //    PushStatus s2 = pushStatus(gene);
@@ -1196,18 +1164,9 @@ namespace Daphne
             if (level.entity_repository.genes_dict.ContainsKey(guid))
                 return level.entity_repository.genes_dict[guid];
 
-            //foreach (ConfigGene g in level.entity_repository.genes)
-            //{
-            //    if (g.entity_guid == guid)
-            //    {
-            //        return g;
-            //    }
-            //}
-
             return null;
         }
 
-        
 
         //-------------------------------------------------------
 
@@ -1219,7 +1178,6 @@ namespace Daphne
         /// <param name="tempFiles">true when wanting to serialize temporary file(s)</param>
         public void SerializeToFile(bool tempFiles = false)
         {
-            //skg daphne serialize to json Thursday, April 18, 2013
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             Settings.TypeNameHandling = TypeNameHandling.Auto;

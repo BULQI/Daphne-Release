@@ -705,13 +705,16 @@ namespace DaphneGui.Pushing
                     //    return;
                     //}
 
-                    while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
+                    if (status == Level.PushStatus.PUSH_CREATE_ITEM)
                     {
-                        string entered_name = newmol.Name;
-                        newmol.ValidateName(MainWindow.SOP.Protocol);
-                        MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
-                        AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
+                        while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
+                        {
+                            string entered_name = newmol.Name;
+                            newmol.ValidateName(MainWindow.SOP.Protocol);
+                            MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
+                            AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
 
+                        }
                     }
 
                     levelB.repositoryPush(newmol, status);

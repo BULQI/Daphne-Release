@@ -403,7 +403,7 @@ namespace DaphneGui
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
             skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
             SystemOfPersistence.changesCounter = Properties.Settings.Default.changesCounter;
-
+            
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -2001,6 +2001,9 @@ namespace DaphneGui
             // set the save state menu's context to the simulation so we can change its enabled property based on values of the simulation
             saveState.DataContext = sim;
 
+            //Load the stores up front
+            readStores();
+
             // set up the simulation
             if (postConstruction == true && AssumeIDE() == true)
             {
@@ -2340,21 +2343,55 @@ namespace DaphneGui
             return false;
         }
 
+        private MessageBoxResult SaveStoreDialog(Level store)
+        {
+            string filename = store.FileName;
+            string storename = "User store";
+            if (filename.Contains("DaphneStore"))
+            {
+                storename = "Daphne store";
+            }
+
+            string messageBoxText = string.Format("{0} parameters have changed. Do you want to overwrite the information in ", storename) + filename + "?";
+            string caption = "Store Changed";
+            MessageBoxButton button = MessageBoxButton.YesNoCancel;
+            MessageBoxImage icon = MessageBoxImage.Warning;
+
+            // Display message box
+            return MessageBox.Show(messageBoxText, caption, button, icon);
+        }
+
         private void saveStoreFiles()
         {
-            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
-            {
-                sop.DaphneStore.SerializeToFile(false);
-            }
-
             if (sop != null && sop.UserStore.SerializeToString() != orig_user_store_content)
             {
-                sop.UserStore.SerializeToFile(false);
+                MessageBoxResult result = SaveStoreDialog(sop.UserStore);
+
+                // save changes
+                if (result == MessageBoxResult.Yes)
+                {
+                    sop.UserStore.SerializeToFile(false);
+                    orig_user_store_content = sop.UserStore.SerializeToString();
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                }
             }
 
-            sop.DaphneStore.entity_repository = new EntityRepository();
-            sop.UserStore.entity_repository = new EntityRepository();
+            if (sop != null && sop.DaphneStore.SerializeToString() != orig_daphne_store_content)
+            {
+                MessageBoxResult result = SaveStoreDialog(sop.UserStore);
 
+                // save changes
+                if (result == MessageBoxResult.Yes)
+                {
+                    sop.DaphneStore.SerializeToFile(false);
+                    orig_daphne_store_content = sop.DaphneStore.SerializeToString();
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                }
+            }
         }
 
         private bool applyTempFilesAndSave(bool discard)
@@ -2714,6 +2751,9 @@ namespace DaphneGui
                 applyTempFilesAndSave(true);
             }
 
+            //Save the stores if they have changed
+            saveStoreFiles();
+
             Nullable<bool> result = loadScenarioUsingDialog();
 
             // Process open file dialog box results
@@ -2769,6 +2809,9 @@ namespace DaphneGui
                 //e.Cancel = true;
                 //return;
             }
+
+            //Save the stores if they have changed
+            saveStoreFiles();
 
             // terminate the simulation thread first
             if (simThread != null && simThread.IsAlive)
@@ -3082,7 +3125,6 @@ namespace DaphneGui
 
         private void menuUserStore_Click(object sender, RoutedEventArgs e)
         {
-            readStores();
             statusBarMessagePanel.Content = "Ready:  User Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3093,7 +3135,6 @@ namespace DaphneGui
 
         private void menuDaphneStore_Click(object sender, RoutedEventArgs e)
         {
-            readStores();
             statusBarMessagePanel.Content = "Ready:  Daphne Store";
             ProtocolToolWindow.Close();
             VTKDisplayDocWindow.Close();
@@ -3139,100 +3180,67 @@ namespace DaphneGui
             sop.UserStore.TempFile = "Config\\temp_userstore.json";
             sop.DaphneStore.FileName = "Config\\daphne_daphnestore.json";
             sop.DaphneStore.TempFile = "Config\\temp_daphnestore.json";
-            sop.DaphneStore = sop.DaphneStore.Deserialize();
-            sop.UserStore = sop.UserStore.Deserialize();
+
+            bool file_exists = File.Exists(sop.UserStore.FileName);
+            if (file_exists)
+                sop.UserStore = sop.UserStore.Deserialize();
+
+            file_exists = File.Exists(sop.DaphneStore.FileName);
+            if (file_exists)
+                sop.DaphneStore = sop.DaphneStore.Deserialize();
+            
             orig_daphne_store_content = sop.DaphneStore.SerializeToString();
             orig_user_store_content = sop.UserStore.SerializeToString();
         }
 
         private void pushMol_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Molecule);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();            
         }
 
         private void pushGene_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Gene);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         private void pushReac_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Reaction);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         private void pushCell_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
-
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.Cell);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         
         private void pushDiffScheme_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.DiffScheme);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         private void pushTransDriver_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.TransDriver);
             pushWindow.DataContext = SOP;
-
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         private void pushReacComplex_Click(object sender, RoutedEventArgs e)
         {
-            //load the stores only as needed
-            readStores();
             PushBetweenLevels pushWindow = new PushBetweenLevels(PushBetweenLevels.PushLevelEntityType.ReactionComplex);
             pushWindow.DataContext = SOP;
-            if (pushWindow.ShowDialog() == true)
-            {
-                saveStoreFiles();
-            }
+            pushWindow.ShowDialog();
         }
 
         
