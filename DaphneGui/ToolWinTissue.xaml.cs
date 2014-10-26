@@ -84,7 +84,7 @@ namespace DaphneGui
 
         }
 
-        protected virtual void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        protected override void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (tabECM.IsSelected == true)
             {
