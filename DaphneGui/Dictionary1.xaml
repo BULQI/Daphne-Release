@@ -216,6 +216,19 @@
         </Expander>
     </DataTemplate>
 
-
-
+    <!-- Display a list of ReactionComplexes  - not sure if this is a keeper -->
+    <DataTemplate x:Key="RCListItemTemplate">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Name}" />
+        </StackPanel>
+    </DataTemplate>
+    
+    <!--
+    <DataTemplate x:Key="ecsReacComplexListItemTemplate">
+        <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
+                                    ConverterParameter={StaticResource ecmReactionComplexesListView}}">
+        </TextBlock>
+    </DataTemplate>
+-->
+    
 </ResourceDictionary>

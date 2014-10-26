@@ -28,13 +28,18 @@ namespace DaphneGui
 
         protected void btnAddReactionComplex_Click(object sender, RoutedEventArgs e)
         {
-            //AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
-            //if (arc.ShowDialog() == true)
-            //    lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
+            // This data context should be the list of reactions
+            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
+            // Will AddReacComplex need to access the ER for available reactions?
+            AddReacComplex arc = new AddReacComplex(ReactionComplexDialogType.AddComplex);
+            if (arc.ShowDialog() == true)
+                lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
 
         protected void btnCopyReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            // This data context should be the list of reactions
+            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
             if (lbComplexes.SelectedIndex < 0)
             {
                 MessageBox.Show("Select a reaction complex to copy from.");
@@ -46,13 +51,15 @@ namespace DaphneGui
 
             Level level = this.DataContext as Level;
             level.entity_repository.reaction_complexes.Add(crcNew);
-            MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crcNew);
+            // gmk - this needs to be fixed. Compartment could be in environment or cell
+            //MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Add(crcNew);
 
             lbComplexes.SelectedIndex = lbComplexes.Items.Count - 1;
         }
 
         protected void btnEditReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            // Data context: compartment's list of reactions, need access to ER?
             ConfigReactionComplex crc = (ConfigReactionComplex)lbComplexes.SelectedItem;
             
             if (crc == null)
@@ -64,6 +71,9 @@ namespace DaphneGui
 
         protected void btnRemoveReactionComplex_Click(object sender, RoutedEventArgs e)
         {
+            // This data context should be the list of reactions
+            // Generally, the list will be in a compartment (either environment, membrane, or cytosol)
+
             ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
             if (crc != null)
             {
