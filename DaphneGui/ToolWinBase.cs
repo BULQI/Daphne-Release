@@ -15,13 +15,17 @@ namespace DaphneGui
     {
         public MainWindow MW { get; set; }
         public string TitleText { get; set; }
-        public Visibility ToroidalVisibility { get; set; }
+        public Visibility ToroidalVisibility 
+        { 
+            get; 
+            set; 
+        }
         public Visibility SimRepetitionVisibility { get; set; }
 
-        public ToolWinBase()
-        {
+        //public ToolWinBase()
+        //{
             
-        }
+        //}
 
         /// <summary>
         /// Functionality to preserve focus when the Apply button is clicked.

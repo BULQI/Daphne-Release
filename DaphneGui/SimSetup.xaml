@@ -22,6 +22,7 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        <local:ToolWinBase x:Key="toolWinBase"/>
     </UserControl.Resources>
     
     <Grid>
@@ -172,16 +173,18 @@
                 <TextBlock Text="times" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Visibility="{Binding Path=scenario.toroidalVis,Mode=OneWay}">
-                
+            <StackPanel Orientation="Horizontal" 
+                        Visibility="{Binding Source={StaticResource toolWinBase}, Path=ToroidalVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        >
+        
                 <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
-                <CheckBox x:Name="cbToroidal" Margin="10,22" Visibility="Hidden" IsChecked="{Binding Path=scenario.environment.toroidal}"/>
+                <!--<CheckBox x:Name="cbToroidal" Margin="10,22" Visibility="Hidden" IsChecked="{Binding Path=scenario.environment.toroidal}"/>
                 <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"
                             SelectedIndex="{Binding scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
                             ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
                             SelectionChanged="comboToroidal_SelectionChanged"
                             >
-                </ComboBox>
+                </ComboBox>-->
                 
             </StackPanel>
      </StackPanel>

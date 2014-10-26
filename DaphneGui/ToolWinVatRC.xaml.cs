@@ -20,12 +20,12 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinVatRC : ToolWinBase
     {
-        public ToolWinVatRC()  : base()
+        public ToolWinVatRC()
         {
-            InitializeComponent();
             TitleText = "Vat Reaction Complex workbench";
             ToroidalVisibility = Visibility.Hidden;
             SimRepetitionVisibility = Visibility.Hidden;
+            InitializeComponent();
         }
 
         public override void Apply()
