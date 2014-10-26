@@ -26,11 +26,11 @@ namespace DaphneGui
             int RUN = 0, RESET = 1, ABORT = 2;
 
             buttons[RUN] = runButton.IsEnabled;
-            buttons[RESET] = resetButton.IsEnabled;
+            buttons[RESET] = applyButton.IsEnabled;
             buttons[ABORT] = abortButton.IsEnabled;
 
             runButton.IsEnabled = false;
-            resetButton.IsEnabled = false;
+            applyButton.IsEnabled = false;
             abortButton.IsEnabled = false;
             if (ProtocolSaver == null)
             {
@@ -64,7 +64,7 @@ namespace DaphneGui
                 if (dlg.ShowDialog() != true)
                 {
                     runButton.IsEnabled = buttons[RUN];
-                    resetButton.IsEnabled = buttons[RESET];
+                    applyButton.IsEnabled = buttons[RESET];
                     abortButton.IsEnabled = buttons[ABORT];
                     return;
                 }
@@ -142,7 +142,7 @@ namespace DaphneGui
 
             ProtocolSaver.SerializeToFile();
             runButton.IsEnabled = buttons[RUN];
-            resetButton.IsEnabled = buttons[RESET];
+            applyButton.IsEnabled = buttons[RESET];
             abortButton.IsEnabled = buttons[ABORT];
         }
 
