@@ -21,12 +21,12 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinTissue : ToolWinBase
     {
-        public ToolWinTissue() : base()
+        public ToolWinTissue()
         {
-            InitializeComponent();
             TitleText = "Tissue Simulation";
-            ToroidalVisibility = Visibility.Visible;
-            SimRepetitionVisibility = Visibility.Visible;
+            ToroidalVisibility = Visibility.Hidden;
+            SimRepetitionVisibility = Visibility.Hidden;
+            InitializeComponent();
         }
 
         public override void Apply()
