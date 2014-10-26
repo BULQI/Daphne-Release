@@ -25,27 +25,9 @@ namespace DaphneGui
         {
             InitializeComponent();
             TitleText = "Tissue Simulation";
-            workbenchType = WorkbenchType.TissueSimulation;
+            ToroidalVisibility = Visibility.Visible;
+            SimRepetitionVisibility = Visibility.Visible;
         }
 
     }
-
-    /// <summary>
-    /// Converter to discover DataContext
-    /// </summary>
-    [ValueConversion(typeof(WorkbenchType), typeof(string))]
-    public class DataContextConverter : IValueConverter
-    {
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return value;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return value;
-        }
-    }
-
 }

@@ -24,6 +24,8 @@ namespace DaphneGui
         {
             InitializeComponent();
             TitleText = "Vat Reaction Complex workbench";
+            ToroidalVisibility = Visibility.Hidden;
+            SimRepetitionVisibility = Visibility.Hidden;
         }
 
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)

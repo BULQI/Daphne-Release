@@ -361,25 +361,12 @@
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
                 
                 <!-- Workbench Tab control -->
-                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="leftTWContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-
-                    <!-- this doesn't work -->
-                    <!-- <local:ToolWinBase x:Name="ProtocolToolWindow" Title="{Binding ElementName=ToolWindow, Path=TitleText}"/> -->
-                    
-                    
-                    
-                    <!-- these work but we need to have a switch or if/else  -->
-                    <!--  
+                <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="ProtocolToolWindowContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
+                    <!-- Retained this because ProtocolToolWindow is used many places in MainWindow. For example:
+                            ProtocolToolWindow.IsEnabled = true;
+                            ProtocolToolWindow.MW = this;
                     -->
-                    <local:ToolWinVatRC x:Name="ProtocolToolWindow" Title="Daphne Vat Reaction Complex" />
-
-
-                    <!--  -->
-                    <!-- Also, how do we bind to TitleText defined in the base class ToolWinBase? 
-                    <local:ToolWinTissue x:Name="ProtocolToolWindow" Title="Tissue Simulation" />
-                    -->
-
-
+                    <local:ToolWinBase x:Name="ProtocolToolWindow" Title="{Binding ElementName=ToolWindow, Path=TitleText}"/>
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->

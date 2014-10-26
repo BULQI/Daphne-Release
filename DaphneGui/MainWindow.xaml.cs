@@ -54,7 +54,7 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ToolWinBase toolWin;
+        public ToolWinBase toolWin { get; set; }
 
         /// <summary>
         /// the absolute path where the installed, running executable resides
@@ -433,8 +433,8 @@ namespace DaphneGui
             }
             else
             {
-                //file = "daphne_driver_locomotion_scenario.json";
-                file = "daphne_vatRC_ligand_receptor_scenario.json";
+                file = "daphne_driver_locomotion_scenario.json";
+                //file = "daphne_vatRC_ligand_receptor_scenario.json";
             }
 
             int repeat = 0;
@@ -1610,8 +1610,9 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void resetButton_Click(object sender, RoutedEventArgs e)
         {
+            // gmk - fix
             //Code to preserve focus to the element that was in focus before "Apply" button clicked.
-            TabItem selectedTab = ProtocolToolWindow.ConfigTabControl.SelectedItem as TabItem;
+            //TabItem selectedTab = ProtocolToolWindow.ConfigTabControl.SelectedItem as TabItem;
 
             //int nCellPopSelIndex = -1;
             //if (selectedTab == ProtocolToolWindow.tabCellPop)
@@ -1947,13 +1948,19 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                this.ProtocolToolWindow.DataContext = sop.Protocol;
+                // gmk - is this next line still needed?
+                //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
+                    toolWin = new ToolWinTissue();
+                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ((ToolWinTissue)toolWin).DataContext = sop.Protocol;
+
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
@@ -1962,16 +1969,21 @@ namespace DaphneGui
                     vtkDataBasket = new VTKFullDataBasket();
                     // graphics controller to manage vtk objects
                     gc = new VTKFullGraphicsController(this);
-                    toolWin = new ToolWinTissue();
-                }
+                 }
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                this.ProtocolToolWindow.DataContext = sop.Protocol;
+                // gmk - is this next line still needed?
+                //this.ProtocolToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
+                    toolWin = new ToolWinVatRC();
+                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ((ToolWinVatRC)toolWin).DataContext = sop.Protocol;
+                    
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
@@ -1979,7 +1991,6 @@ namespace DaphneGui
                     // no graphics for the VatRC
                     vtkDataBasket = new VTKNullDataBasket();
                     gc = new VTKNullGraphicsController();
-                    toolWin = new ToolWinVatRC();
                 }
             }
             else
@@ -2050,7 +2061,8 @@ namespace DaphneGui
                     // NOTE: For now not doing any callbacks on property change for RegionControls...
                     kvp.Value.ClearCallbacks();
                     kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gcHandle.WidgetInteractionToGUICallback));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWindow.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(toolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(toolWin.RegionFocusToGUISection));
                     kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
                     kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
                 }
@@ -2306,7 +2318,8 @@ namespace DaphneGui
             }
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
-            this.ProtocolToolWindow.Activate();
+            //this.ProtocolToolWindow.Activate();
+            this.toolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...

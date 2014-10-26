@@ -11,13 +11,12 @@ using Daphne;
 
 namespace DaphneGui
 {
-    public enum WorkbenchType { None = 0, TissueSimulation, VatRC }
-
     public class ToolWinBase : ToolWindow
     {
         public MainWindow MW { get; set; }
         public string TitleText { get; set; }
-        public WorkbenchType workbenchType;
+        public Visibility ToroidalVisibility { get; set; }
+        public Visibility SimRepetitionVisibility { get; set; }
 
         public ToolWinBase()
         {
