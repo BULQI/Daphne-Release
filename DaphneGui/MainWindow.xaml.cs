@@ -1915,8 +1915,7 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                // gmk - is this next line still needed?
-                //this.ProtocolToolWindow.DataContext = sop.Protocol;
+                this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
@@ -1943,8 +1942,9 @@ namespace DaphneGui
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                // gmk - is this next line still needed?
-                //this.ProtocolToolWindow.DataContext = sop.Protocol;
+                // GUI Resources
+                // Set the data context for the main tab control config GUI
+                this.ProtocolToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
@@ -3207,22 +3207,6 @@ namespace DaphneGui
                 saveStoreFiles();
             }
         }
-
-
-        // methods add by gmk for refactoring
-
-        //This helps in refreshing the available reactions for the ECM tab
-        protected void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // gmk - uncomment
-            //if (tabECM.IsSelected == true)
-            //{
-            //    if (lvAvailableReacs.ItemsSource != null)
-            //        CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-            //}
-        }
-
-        
     }
 
     
