@@ -24,8 +24,8 @@ namespace DaphneGui
         public ToolWinTissue()
         {
             TitleText = "Tissue Simulation";
-            ToroidalVisibility = Visibility.Hidden;
-            SimRepetitionVisibility = Visibility.Hidden;
+            ToroidalVisibility = Visibility.Visible;
+            SimRepetitionVisibility = Visibility.Visible;
             InitializeComponent();
         }
 
