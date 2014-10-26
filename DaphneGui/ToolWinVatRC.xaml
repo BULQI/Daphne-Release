@@ -18,8 +18,14 @@
         <TabControl.Resources>
     
         </TabControl.Resources>
-            
-           
+
+        <!-- SIM SETUP -->
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}"/>
+            </ScrollViewer>
+        </TabItem>
+        
         <!-- REACTION COMPLEXES -->
         <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -50,13 +56,6 @@
                     
                     
                 </StackPanel>
-            </ScrollViewer>
-        </TabItem>
-
-        <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <local:SimSetupControl DataContext="{Binding}"/>
             </ScrollViewer>
         </TabItem>
 
