@@ -23,7 +23,21 @@ namespace DaphneGui
             
         }
 
-        //This helps in refreshing the available reactions for the ECM tab
+        /// <summary>
+        /// Functionality to preserve focus when the Apply button is clicked.
+        /// The base implementation does not preserve focus. 
+        /// </summary>
+        public virtual void Apply()
+        {
+            MW.Apply();
+        }
+
+
+        /// <summary>
+        /// Functionality to refresh elements when the selected tab changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected virtual void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             //if (tabECM.IsSelected == true)

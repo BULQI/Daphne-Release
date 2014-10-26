@@ -981,7 +981,7 @@ namespace DaphneGui
                     UpdateGraphics();
 
                     // prevent the user from running certain tasks immediately, crashing the simulation
-                    resetButton.IsEnabled = false;
+                    applyButton.IsEnabled = false;
                     enableFileMenu(false);
                     saveButton.IsEnabled = false;
                     analysisMenu.IsEnabled = false;
@@ -1602,63 +1602,30 @@ namespace DaphneGui
             dw.Show();
         }
 
-        // gmk - needs fixing. move some of the functionality to ToolWinBase method(s)?
         /// <summary>
-        /// reset the simulation to a random initial state
+        /// Apply changes to the temporary file.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void resetButton_Click(object sender, RoutedEventArgs e)
+        private void applyButton_Click(object sender, RoutedEventArgs e)
         {
-            // gmk - fix
-            //Code to preserve focus to the element that was in focus before "Apply" button clicked.
-            //TabItem selectedTab = ProtocolToolWindow.ConfigTabControl.SelectedItem as TabItem;
-
-            //int nCellPopSelIndex = -1;
-            //if (selectedTab == ProtocolToolWindow.tabCellPop)
-            //{
-            //    nCellPopSelIndex = ProtocolToolWindow.CellPopsListBox.SelectedIndex;
-            //}
-
-            //int nMolPopSelIndex = -1;
-            //if (selectedTab == ProtocolToolWindow.tabECM)
-            //{
-            //    nMolPopSelIndex = ProtocolToolWindow.lbEcsMolPops.SelectedIndex;
-            //}
-
-            //int nRepEcmMolSelIndex = -1;
-            //int nRepCellSelIndex = -1;
-            //int nRepCellPopSelIndex = -1;
-            //if (selectedTab == ProtocolToolWindow.tabReports)
-            //{
-            //    nRepEcmMolSelIndex = reportControl.dgEcmMols.SelectedIndex;
-            //    nRepEcmMolSelIndex = ProtocolToolWindow.dgEcmMols.SelectedIndex;
-            //    nRepCellSelIndex = ProtocolToolWindow.dgCellDetails.SelectedIndex;
-            //    nRepCellPopSelIndex = ProtocolToolWindow.lbRptCellPops.SelectedIndex;
-            //}
-
-            //runButton.IsEnabled = false;
-            //mutex = true;
-
-            //saveTempFiles();
-            //updateGraphicsAndGUI();
-
-            //ProtocolToolWindow.ConfigTabControl.SelectedItem = selectedTab;
-            //if (selectedTab == ProtocolToolWindow.tabCellPop)
-            //{
-            //    ProtocolToolWindow.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
-            //}
-            //else if (selectedTab == ProtocolToolWindow.tabECM)
-            //{
-            //    ProtocolToolWindow.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
-            //}
-            //else if (selectedTab == ProtocolToolWindow.tabReports)
-            //{
-            //    ProtocolToolWindow.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
-            //    ProtocolToolWindow.dgCellDetails.SelectedIndex = nRepCellSelIndex;
-            //    ProtocolToolWindow.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
-            //}
+            // Workbench-specific code to preserve focus to the element that was in focus before "Apply" button clicked.
+            toolWin.Apply();
         }
+
+        /// <summary>
+        /// The essential components of the Apply button functionality.
+        /// Workbenches call this method after they preserve focus information and before they restore focus.
+        /// </summary>
+        public void Apply()
+        {
+            runButton.IsEnabled = false;
+            mutex = true;
+
+            saveTempFiles();
+            updateGraphicsAndGUI();
+        }
+
 
         /// <summary>
         /// reset the simulation to a random initial state and ready it for running (time = 0); the simulation will then start automatically
@@ -1667,7 +1634,7 @@ namespace DaphneGui
         /// <param name="e"></param>
         private void runButton_Click(object sender, RoutedEventArgs e)
         {
-            resetButton.IsEnabled = false;
+            applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
             runSim();
@@ -1957,8 +1924,11 @@ namespace DaphneGui
                 if(sim == null || sim is TissueSimulation == false)
                 {
                     toolWin = new ToolWinTissue();
+                    toolWin.MW = this;
+
                     ProtocolToolWindowContainer.Items.RemoveAt(0);
                     ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
                     ((ToolWinTissue)toolWin).DataContext = sop.Protocol;
 
                     // create the simulation
@@ -1980,8 +1950,11 @@ namespace DaphneGui
                 if (sim == null || sim is VatReactionComplex == false)
                 {
                     toolWin = new ToolWinVatRC();
+                    toolWin.MW = this;
+
                     ProtocolToolWindowContainer.Items.RemoveAt(0);
                     ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
                     ((ToolWinVatRC)toolWin).DataContext = sop.Protocol;
                     
                     // create the simulation
@@ -2290,7 +2263,7 @@ namespace DaphneGui
             }
 
             //sim.RunStatus = Simulation.RUNSTAT_OFF;
-            resetButton.IsEnabled = true;
+            applyButton.IsEnabled = true;
             abortButton.IsEnabled = false;
             runButton.Content = "Run";
             statusBarMessagePanel.Content = "Ready:  Protocol";

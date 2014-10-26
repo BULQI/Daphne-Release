@@ -220,9 +220,9 @@
                     </Style>
                 </ToolBarTray.Resources>                
                 <ToolBar Name="SaveToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                    <Button Content="Apply" HorizontalAlignment="Left" Name="resetButton" 
+                    <Button Content="Apply" HorizontalAlignment="Left" Name="applyButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
-                                Margin="0" Click="resetButton_Click">
+                                Margin="0" Click="applyButton_Click">
                         <Button.ToolTip>
                             <ToolTip>
                                 <StackPanel Width="200" Orientation="Horizontal">

@@ -1852,7 +1852,7 @@ namespace DaphneGui
             if (current_dist.DistType == CellPopDistributionType.Gaussian || current_dist.DistType == CellPopDistributionType.Uniform)
             {
                 current_dist.Reset();
-                MW.resetButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                MW.applyButton.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             }
         }
 

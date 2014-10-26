@@ -28,6 +28,13 @@ namespace DaphneGui
             SimRepetitionVisibility = Visibility.Hidden;
         }
 
+        public override void Apply()
+        {
+            TabItem selectedTab = toolWinVatRC.ConfigTabControl.SelectedItem as TabItem;
+            MW.Apply();
+            toolWinVatRC.ConfigTabControl.SelectedItem = selectedTab;
+        }
+
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)
         {
             throw new Exception("VatReactionComplex does not implement RegionFocusToGUISection method.");

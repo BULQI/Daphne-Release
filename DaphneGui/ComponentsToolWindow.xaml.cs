@@ -441,6 +441,7 @@ namespace DaphneGui
         private void MyComponentsWindow_Loaded(object sender, RoutedEventArgs e)
         {
             var dc = this.DataContext;
+            // gmk - fix this 
             //DataContext = MainWindow.SOP.Protocol;
 
             ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
