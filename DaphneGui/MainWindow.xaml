@@ -362,11 +362,7 @@
                 
                 <!-- Workbench Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="ProtocolToolWindowContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <!-- Retained this because ProtocolToolWindow is used many places in MainWindow. For example:
-                            ProtocolToolWindow.IsEnabled = true;
-                            ProtocolToolWindow.MW = this;
-                    -->
-                    <local:ToolWinBase x:Name="ProtocolToolWindow" Title="{Binding ElementName=ToolWindow, Path=TitleText}"/>
+                    <local:ToolWinBase x:Name="ProtocolToolWindow"/>
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->

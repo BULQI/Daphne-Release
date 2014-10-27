@@ -1918,9 +1918,11 @@ namespace DaphneGui
                 //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+
                 toolWin = new ToolWinTissue();
                 toolWin.MW = this;
                 toolWin.Protocol = SOP.Protocol;
+                toolWin.Title = toolWin.TitleText;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.RemoveAt(0);
@@ -1948,6 +1950,7 @@ namespace DaphneGui
                 toolWin = new ToolWinVatRC();
                 toolWin.MW = this;
                 toolWin.Protocol = SOP.Protocol;
+                toolWin.Title = toolWin.TitleText;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.Clear();
