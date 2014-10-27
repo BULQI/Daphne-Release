@@ -1918,19 +1918,18 @@ namespace DaphneGui
                 //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
+                toolWin = new ToolWinTissue();
+                toolWin.MW = this;
+
+                if (ProtocolToolWindowContainer.Items.Count > 0)
+                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                ProtocolToolWindowContainer.Items.Add(toolWin);
+                ProtocolToolWindow = ((ToolWinTissue)toolWin);
 
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
-                    toolWin = new ToolWinTissue();
-                    toolWin.MW = this;
-
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.RemoveAt(0);
-
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
-
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
@@ -1945,18 +1944,18 @@ namespace DaphneGui
             {
                 // GUI Resources
 
+                toolWin = new ToolWinVatRC();
+                toolWin.MW = this;
+
+                if (ProtocolToolWindowContainer.Items.Count > 0)
+                    ProtocolToolWindowContainer.Items.Clear();
+
+                ProtocolToolWindowContainer.Items.Add(toolWin);
+                ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+ 
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    toolWin = new ToolWinVatRC();
-                    toolWin.MW = this;
-
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.Clear();
-
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
-                    
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
