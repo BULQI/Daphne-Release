@@ -14,6 +14,7 @@ namespace DaphneGui
     public class ToolWinBase : ToolWindow
     {
         public MainWindow MW { get; set; }
+        public Protocol Protocol { get; set; }
         public string TitleText { get; set; }
         public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
