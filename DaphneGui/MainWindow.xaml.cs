@@ -1920,6 +1920,7 @@ namespace DaphneGui
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
                 toolWin = new ToolWinTissue();
                 toolWin.MW = this;
+                toolWin.Protocol = SOP.Protocol;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.RemoveAt(0);
@@ -1946,6 +1947,7 @@ namespace DaphneGui
 
                 toolWin = new ToolWinVatRC();
                 toolWin.MW = this;
+                toolWin.Protocol = SOP.Protocol;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.Clear();
