@@ -19,7 +19,7 @@ using DaphneUserControlLib;
 namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for SimSetup.xaml
+    /// Interaction logic for SimSetupControl.xaml
     /// </summary>
     public partial class SimSetupControl : UserControl
     {
@@ -71,8 +71,8 @@ namespace DaphneGui
             if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
                 MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
 
-            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > time_step_slider.Maximum)
-                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > render_interval_slider.Maximum)
+                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
         }
 
         public void SelectSimSetupInGUISetExpName(string exp_name)
@@ -97,7 +97,7 @@ namespace DaphneGui
             double temp_samp = MainWindow.SOP.Protocol.scenario.time_config.sampling_interval;
             double temp_rand = MainWindow.SOP.Protocol.scenario.time_config.rendering_interval;
 
-            if ((sampling_interval_slider == null) || (time_step_slider == null))
+            if ((sampling_interval_slider == null) || (render_interval_slider == null))
             {
                 return;
             }
@@ -108,11 +108,11 @@ namespace DaphneGui
             sampling_interval_slider.Value = temp_samp;
             MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
 
-            time_step_slider.Maximum = time_duration_slider.Value;
-            if (temp_rand > time_step_slider.Maximum)
-                temp_rand = time_step_slider.Maximum;
-            time_step_slider.Value = temp_rand;
-            MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+            render_interval_slider.Maximum = time_duration_slider.Value;
+            if (temp_rand > render_interval_slider.Maximum)
+                temp_rand = render_interval_slider.Maximum;
+            render_interval_slider.Value = temp_rand;
+            MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
 
         }
 
