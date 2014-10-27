@@ -13,7 +13,7 @@
                     x:Name="toolWinVatRC"
                     >
 
-    <TabControl  x:Name="ConfigTabControl2" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl2">
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <TabControl.Resources>
     
@@ -54,7 +54,7 @@
         </TabItem>
 
         <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup2" AutomationProperties.AutomationId="DaphneSimSetupTab2">
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <local:SimSetupControl DataContext="{Binding}"/>
             </ScrollViewer>
@@ -62,7 +62,7 @@
 
         
         <!-- REPORTS -->
-        <TabItem Header="Reports" x:Name="tabReports2" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab2">
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
 
                 <!-- Report Settings -->

@@ -32,9 +32,9 @@ namespace DaphneGui
 
         public override void Apply()
         {
-            TabItem selectedTab = toolWinVatRC.ConfigTabControl2.SelectedItem as TabItem;
+            TabItem selectedTab = toolWinVatRC.ConfigTabControl.SelectedItem as TabItem;
             MW.Apply();
-            toolWinVatRC.ConfigTabControl2.SelectedItem = selectedTab;
+            toolWinVatRC.ConfigTabControl.SelectedItem = selectedTab;
         }
 
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)

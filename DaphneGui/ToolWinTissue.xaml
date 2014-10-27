@@ -13,7 +13,7 @@
                     x:Name="toolWinTissue"
                     >
 
-    <TabControl  x:Name="ConfigTabControl2" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl2">
+    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <!-- for debugging -->
         <!--
@@ -21,14 +21,14 @@
         -->
         
         <!-- SIM SETUP -->
-            <TabItem Header="Sim Setup" x:Name="tabSimSetup2" AutomationProperties.AutomationId="DaphneSimSetupTab2">
+            <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <local:SimSetupControl DataContext="{Binding}"/>                     
                 </ScrollViewer>
             </TabItem>
 
         <!-- EXTRACELLULAR MEDIUM -->
-        <TabItem x:Name="tabECM2" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab2" >
+        <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <!-- add control -->
 
@@ -36,7 +36,7 @@
         </TabItem>
 
         <!-- LIBRARY CELL POPULATIONS -->
-        <TabItem x:Name="tabCellPop2" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab2">
+        <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">                
                 <!-- add control -->
 
@@ -44,7 +44,7 @@
         </TabItem>
 
         <!-- REPORTS -->
-        <TabItem Header="Reports" x:Name="tabReports2" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab2">
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 
                 <!-- Report Settings -->
