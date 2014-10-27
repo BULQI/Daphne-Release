@@ -70,6 +70,18 @@ namespace DaphneGui
 
             if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
                 MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+        }
+
+        private void rendering_interval_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SOP == null)
+                return;
+
+            if (MainWindow.SOP.Protocol == null)
+                return;
+
+            if (MainWindow.SOP.Protocol.scenario == null)
+                return;
 
             if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > render_interval_slider.Maximum)
                 MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
