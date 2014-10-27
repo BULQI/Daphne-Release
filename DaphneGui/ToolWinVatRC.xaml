@@ -18,16 +18,10 @@
         <TabControl.Resources>
     
         </TabControl.Resources>
-
-        <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <local:SimSetupControl DataContext="{Binding}"/>
-            </ScrollViewer>
-        </TabItem>
-        
+            
+           
         <!-- REACTION COMPLEXES -->
-        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes">
+        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes2">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
                     <Expander Padding="5" ExpandDirection="Down" IsExpanded="True"
@@ -59,17 +53,24 @@
             </ScrollViewer>
         </TabItem>
 
+        <!-- SIM SETUP -->
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}"/>
+            </ScrollViewer>
+        </TabItem>
+
         
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
 
                 <!-- Report Settings -->
-                <ContentControl Name="ReportSettings"
+                <!--<ContentControl Name="ReportSettings"
                                 Content="{Binding}"
                                 ContentTemplate="{StaticResource reportSettingsTemplate}" 
                                 Margin="6"
-                />
+                />-->
 
 
             </ScrollViewer>

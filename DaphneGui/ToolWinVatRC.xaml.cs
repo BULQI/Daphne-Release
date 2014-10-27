@@ -26,6 +26,8 @@ namespace DaphneGui
             ToroidalVisibility = Visibility.Hidden;
             SimRepetitionVisibility = Visibility.Hidden;
             InitializeComponent();
+
+            DataContext = this;
         }
 
         public override void Apply()
