@@ -14,12 +14,9 @@ namespace DaphneGui
     public class ToolWinBase : ToolWindow
     {
         public MainWindow MW { get; set; }
+        public Protocol Protocol { get; set; }
         public string TitleText { get; set; }
-        public Visibility ToroidalVisibility 
-        { 
-            get; 
-            set; 
-        }
+        public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
 
         //public ToolWinBase()
@@ -44,11 +41,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         protected virtual void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if (tabECM.IsSelected == true)
-            //{
-            //    if (lvAvailableReacs.ItemsSource != null)
-            //        CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-            //}
         }
 
         public virtual void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)

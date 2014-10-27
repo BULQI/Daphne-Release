@@ -36,10 +36,10 @@
 
             <!-- Experiment -->
             <TextBlock Text="Experiment name" FontWeight="Bold" Margin="0,5,0,0" />
-            <TextBox Text="{Binding Path=MW.SOP.Protocol.experiment_name, UpdateSourceTrigger=PropertyChanged}" x:Name="experiment_name_box"/>
+            <TextBox Text="{Binding Path=Protocol.experiment_name, UpdateSourceTrigger=PropertyChanged}" x:Name="experiment_name_box"/>
 
             <TextBlock Text="Description" FontWeight="Bold" Margin="0,10,0,0" />
-            <TextBox Text="{Binding Path=MW.SOP.Protocol.experiment_description, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
+            <TextBox Text="{Binding Path=Protocol.experiment_description, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap"
                                 Height="40" MaxWidth="{Binding ElementName=experiment_name_box, Path=ActualWidth}"
                                 VerticalScrollBarVisibility="Auto"/>
 
@@ -59,7 +59,7 @@
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Minimum="0.001" 
                                         Maximum="28800" 
-                                        Value="{Binding Path=MW.SOP.Protocol.scenario.time_config.duration, UpdateSourceTrigger=PropertyChanged}" 
+                                        Value="{Binding Path=Protocol.scenario.time_config.duration, UpdateSourceTrigger=PropertyChanged}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="10" 
                                         KeyboardNavigation.IsTabStop="False"
@@ -85,17 +85,18 @@
                                             TextAlignment="Right"
                                             Width="120"
                                             />
-                <Slider Name="time_step_slider"
+                <Slider Name="render_interval_slider"
                                         Orientation="Horizontal"
                                         VerticalAlignment="Center"
                                         Width="100"
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Maximum="{Binding ElementName=time_duration_slider, Path=Value}" 
                                         Minimum="0.001" 
-                                        Value="{Binding Path=MW.SOP.Protocol.scenario.time_config.rendering_interval}" 
+                                        Value="{Binding Path=Protocol.scenario.time_config.rendering_interval}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="0.01" 
                                         KeyboardNavigation.IsTabStop="False"
+                                        ValueChanged="rendering_interval_slider_ValueChanged"
                                         />
                 <editors:DoubleEditBox x:Name="TimeStepReadout" 
                                                         CheckBoxVisibility="Collapsed" 
@@ -105,7 +106,7 @@
                                                         StepValue="0.01"
                                                         Width="60" 
                                                         CenterSlotHorizontalAlignment="Right"
-                                                        Value="{Binding ElementName=time_step_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                                        Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
                                                         />
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
@@ -124,7 +125,7 @@
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
                                         Minimum="0.001"
-                                        Value="{Binding Path=MW.SOP.Protocol.scenario.time_config.sampling_interval}" 
+                                        Value="{Binding Path=Protocol.scenario.time_config.sampling_interval}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="0.01" 
                                         KeyboardNavigation.IsTabStop="False"
@@ -142,8 +143,8 @@
                                                         />
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" Visibility="{Binding MW.SOP.Protocol.scenario.repeatVis}">
+
+            <StackPanel Orientation="Horizontal" Visibility="{Binding Path=SimRepetitionVisibility}">
                 <TextBlock Text="repetitions" Margin="6,0"
                                             Grid.Column="0" Grid.Row="5"  
                                             HorizontalAlignment="Right" VerticalAlignment="Center"
@@ -157,7 +158,7 @@
                                         RenderTransform="1.0,0,0,0.5,0,7"
                                         Minimum="1" 
                                         Maximum="50" 
-                                        Value="{Binding Path=MW.SOP.Protocol.experiment_reps}" 
+                                        Value="{Binding Path=Protocol.experiment_reps}" 
                                         IsSnapToTickEnabled="True" 
                                         TickFrequency="3" 
                                         KeyboardNavigation.IsTabStop="False"
@@ -180,10 +181,10 @@
                 <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
                 <CheckBox x:Name="cbToroidal" Margin="10,22" 
                           Visibility="{Binding Path=ToroidalVisibility}" 
-                          IsChecked="{Binding Path=MW.SOP.Protocol.scenario.environment.toroidal}"/>
+                          IsChecked="{Binding Path=Protocol.scenario.environment.toroidal}"/>
 
                 <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"  Visibility="{Binding Path=ToroidalVisibility}"
-                            SelectedIndex="{Binding MW.SOP.Protocol.scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
+                            SelectedIndex="{Binding Protocol.scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
                             ItemsSource="{Binding Source={StaticResource boundaryTypes}}"
                             SelectionChanged="comboToroidal_SelectionChanged"
                             >
