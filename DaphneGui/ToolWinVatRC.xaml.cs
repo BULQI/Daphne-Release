@@ -22,7 +22,7 @@ namespace DaphneGui
     {
         public ToolWinVatRC()
         {
-            TitleText = "Vat Reaction Complex workbench";
+            TitleText = "Vat Reaction Complex";
             ToroidalVisibility = Visibility.Hidden;
             SimRepetitionVisibility = Visibility.Hidden;
             InitializeComponent();

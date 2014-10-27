@@ -19,10 +19,10 @@ namespace DaphneGui
         public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
 
-        //public ToolWinBase()
-        //{
-            
-        //}
+        public ToolWinBase()
+        {
+            TitleText = "";
+        }
 
         /// <summary>
         /// Functionality to preserve focus when the Apply button is clicked.

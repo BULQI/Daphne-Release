@@ -48,11 +48,11 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 
                 <!-- Report Settings -->
-                <!--<ContentControl Name="ReportSettings"
-                                Content="{Binding}"
+                <ContentControl Name="ReportSettings"
+                                Content="{Binding Path=Protocol}"
                                 ContentTemplate="{StaticResource reportSettingsTemplate}" 
                                 Margin="6"
-                />-->
+                />
                 
                 
             </ScrollViewer>
