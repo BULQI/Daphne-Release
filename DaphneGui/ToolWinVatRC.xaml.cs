@@ -26,13 +26,15 @@ namespace DaphneGui
             ToroidalVisibility = Visibility.Hidden;
             SimRepetitionVisibility = Visibility.Hidden;
             InitializeComponent();
+
+            DataContext = this;
         }
 
         public override void Apply()
         {
-            TabItem selectedTab = toolWinVatRC.ConfigTabControl.SelectedItem as TabItem;
+            TabItem selectedTab = toolWinVatRC.ConfigTabControl2.SelectedItem as TabItem;
             MW.Apply();
-            toolWinVatRC.ConfigTabControl.SelectedItem = selectedTab;
+            toolWinVatRC.ConfigTabControl2.SelectedItem = selectedTab;
         }
 
         public override void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix)

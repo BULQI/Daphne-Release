@@ -13,7 +13,7 @@
                     x:Name="toolWinVatRC"
                     >
 
-    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
+    <TabControl  x:Name="ConfigTabControl2" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl2">
 
         <TabControl.Resources>
     
@@ -21,7 +21,7 @@
             
            
         <!-- REACTION COMPLEXES -->
-        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes">
+        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes2">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
                     <Expander Padding="5" ExpandDirection="Down" IsExpanded="True"
@@ -54,7 +54,7 @@
         </TabItem>
 
         <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup2" AutomationProperties.AutomationId="DaphneSimSetupTab2">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <local:SimSetupControl DataContext="{Binding}"/>
             </ScrollViewer>
@@ -62,15 +62,15 @@
 
         
         <!-- REPORTS -->
-        <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
+        <TabItem Header="Reports" x:Name="tabReports2" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab2">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
 
                 <!-- Report Settings -->
-                <ContentControl Name="ReportSettings"
+                <!--<ContentControl Name="ReportSettings"
                                 Content="{Binding}"
                                 ContentTemplate="{StaticResource reportSettingsTemplate}" 
                                 Margin="6"
-                />
+                />-->
 
 
             </ScrollViewer>

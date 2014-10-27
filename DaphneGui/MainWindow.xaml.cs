@@ -1915,7 +1915,7 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                this.ProtocolToolWindow.DataContext = sop.Protocol;
+                //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
@@ -1925,10 +1925,11 @@ namespace DaphneGui
                     toolWin = new ToolWinTissue();
                     toolWin.MW = this;
 
-                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.RemoveAt(0);
+
                     ProtocolToolWindowContainer.Items.Add(toolWin);
                     ProtocolToolWindow = ((ToolWinTissue)toolWin);
-                    ((ToolWinTissue)toolWin).DataContext = sop.Protocol;
 
                     // create the simulation
                     sim = new TissueSimulation();
@@ -1943,8 +1944,6 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 // GUI Resources
-                // Set the data context for the main tab control config GUI
-                this.ProtocolToolWindow.DataContext = sop.Protocol;
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
@@ -1952,10 +1951,11 @@ namespace DaphneGui
                     toolWin = new ToolWinVatRC();
                     toolWin.MW = this;
 
-                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.Clear();
+
                     ProtocolToolWindowContainer.Items.Add(toolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)toolWin);
-                    ((ToolWinVatRC)toolWin).DataContext = sop.Protocol;
                     
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2090,7 +2090,7 @@ namespace DaphneGui
             sop.Protocol.experiment_description = "";
             orig_content = sop.Protocol.SerializeToStringSkipDeco();
             orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-            ProtocolToolWindow.DataContext = sop.Protocol;
+            //ProtocolToolWindow.DataContext = sop.Protocol;
             CellStudioToolWindow.DataContext = sop.Protocol;
             ComponentsToolWindow.DataContext = sop.Protocol;
             //////////gc.Cleanup();
@@ -2291,7 +2291,7 @@ namespace DaphneGui
             }
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
-            //this.ProtocolToolWindow.Activate();
+            this.ProtocolToolWindow.Activate();
             this.toolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);

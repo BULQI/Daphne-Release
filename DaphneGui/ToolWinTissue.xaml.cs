@@ -24,28 +24,30 @@ namespace DaphneGui
         public ToolWinTissue()
         {
             TitleText = "Tissue Simulation";
-            ToroidalVisibility = Visibility.Hidden;
-            SimRepetitionVisibility = Visibility.Hidden;
+            ToroidalVisibility = Visibility.Visible;
+            SimRepetitionVisibility = Visibility.Visible;
             InitializeComponent();
+
+            DataContext = this;
         }
 
         public override void Apply()
         {
-            TabItem selectedTab = toolWinTissue.ConfigTabControl.SelectedItem as TabItem;
+            ////////TabItem selectedTab = toolWinTissue.ConfigTabControl.SelectedItem as TabItem;
 
-            int nCellPopSelIndex = -1;
-            if (selectedTab == toolWinTissue.tabCellPop)
-            {
-                // gmk - fix after this functionality is added
-                // nCellPopSelIndex = toolWinTissue.CellPopsListBox.SelectedIndex;
-            }
+            ////////int nCellPopSelIndex = -1;
+            ////////if (selectedTab == toolWinTissue.tabCellPop)
+            ////////{
+            ////////    // gmk - fix after this functionality is added
+            ////////    // nCellPopSelIndex = toolWinTissue.CellPopsListBox.SelectedIndex;
+            ////////}
 
-            int nMolPopSelIndex = -1;
-            if (selectedTab == toolWinTissue.tabECM)
-            {
-                // gmk - fix after this functionality is added
-                // nMolPopSelIndex = toolWinTissue.lbEcsMolPops.SelectedIndex;
-            }
+            ////////int nMolPopSelIndex = -1;
+            ////////if (selectedTab == toolWinTissue.tabECM)
+            ////////{
+            ////////    // gmk - fix after this functionality is added
+            ////////    // nMolPopSelIndex = toolWinTissue.lbEcsMolPops.SelectedIndex;
+            ////////}
 
             int nRepEcmMolSelIndex = -1;
             int nRepCellSelIndex = -1;
@@ -62,38 +64,38 @@ namespace DaphneGui
 
             MW.Apply();
 
-            toolWinTissue.ConfigTabControl.SelectedItem = selectedTab;
-            if (selectedTab == toolWinTissue.tabCellPop)
-            {
-                // gmk - fix after this functionality is added
-                //toolWinTissue.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
-            }
-            else if (selectedTab == toolWinTissue.tabECM)
-            {
-                // gmk - fix after this functionality is added
-                //toolWinTissue.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
-            }
-            else if (selectedTab == toolWinTissue.tabReports)
-            {
-                // gmk - fix after this functionality is added
-                //toolWinTissue.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
-                //toolWinTissue.dgCellDetails.SelectedIndex = nRepCellSelIndex;
-                //toolWinTissue.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
-            }
+            ////////toolWinTissue.ConfigTabControl.SelectedItem = selectedTab;
+            ////////if (selectedTab == toolWinTissue.tabCellPop)
+            ////////{
+            ////////    // gmk - fix after this functionality is added
+            ////////    //toolWinTissue.CellPopsListBox.SelectedIndex = nCellPopSelIndex;
+            ////////}
+            //////////else if (selectedTab == toolWinTissue.tabECM)
+            //////////{
+            //////////    // gmk - fix after this functionality is added
+            //////////    //toolWinTissue.lbEcsMolPops.SelectedIndex = nMolPopSelIndex;
+            //////////}
+            ////////else if (selectedTab == toolWinTissue.tabReports)
+            ////////{
+            ////////    // gmk - fix after this functionality is added
+            ////////    //toolWinTissue.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
+            ////////    //toolWinTissue.dgCellDetails.SelectedIndex = nRepCellSelIndex;
+            ////////    //toolWinTissue.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
+            ////////}
 
 
         }
 
         protected override void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (tabECM.IsSelected == true)
-            {
-                // gmk - fix after this functionality is added
-                //if (lvAvailableReacs.ItemsSource != null)
-                //{
-                //    CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-                //}
-            }
+            //if (tabECM.IsSelected == true)
+            //{
+            //    // gmk - fix after this functionality is added
+            //    //if (lvAvailableReacs.ItemsSource != null)
+            //    //{
+            //    //    CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            //    //}
+            //}
         }
 
     }
