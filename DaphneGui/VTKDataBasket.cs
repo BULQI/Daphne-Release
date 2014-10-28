@@ -430,7 +430,7 @@ namespace DaphneGui
                 mp_color[3] = render_mol.color.EntityColor.A;
                 double div = render_mol.max;
 
-                if (render_method == RenderMethod.MP_TYPE && div == 0.0)
+                if (div == 0.0)
                 {
                     continue;
                 }
@@ -444,33 +444,45 @@ namespace DaphneGui
                 int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
                 int NodesPerside0 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0);
                 double[] point = new double[3];
-                double blendingWeight = kvp.Value.BlendingWeight;
                 double color_scale_factor = 0;
-                double conc_scale_factor = kvp.Value.BlendingWeight / div;
+                double conc_scale_factor = render_mol.blendingWeight / (render_mol.max - render_mol.min);
+                //conc range per shade.
+                double conc_shade_factor = (render_mol.max - render_mol.min) / render_mol.shades;
+
                 double val, conc;
+
                 for (int iz = 0; iz < NodesPerSide2; iz++)
                 {
                     for (int iy = 0; iy < NodesPerSide1; iy++)
-                    {
+                    {  
                         for (int ix = 0; ix < NodesPerside0; ix++)
                         {
                             //double[] point = { step_size * ix, step_size * iy, step_size * iz };
                             point[0] = step_size * ix;
                             point[1] = step_size * iy;
                             point[2] = step_size * iz;
+                            conc = molpop_sf.Value(point);
+                            if (conc < render_mol.min)conc = render_mol.min;
+                            else if (conc > render_mol.max)conc = render_mol.max;
 
-                            if (render_method == RenderMethod.MP_TYPE)
+                            if (render_method == RenderMethod.MP_CONC)
                             {
-                                color_scale_factor = blendingWeight;
+                                color_scale_factor = (conc - render_mol.min) * conc_scale_factor;
                             }
-                            else if (render_method == RenderMethod.MP_CONC)
+                            else if (render_method == RenderMethod.MP_CONC_SHADE)
                             {
-                                point[0] = step_size * ix;
-                                point[1] = step_size * iy;
-                                point[2] = step_size * iz;
-
-                                conc = molpop_sf.Value(point);
-                                color_scale_factor = conc_scale_factor * conc;
+                                int nth = (int)((conc - render_mol.min) / conc_shade_factor);
+                                color_scale_factor = nth * conc_shade_factor * conc_scale_factor;
+                            }
+                            else if (render_method == RenderMethod.MP_CONC_MIX_COLOR)
+                            {
+                                int nth = (int)((conc - render_mol.min) / conc_shade_factor);
+                                Color c = render_mol.GetConcColor(nth);
+                                mp_color[0] = c.R;
+                                mp_color[1] = c.G;
+                                mp_color[2] = c.B;
+                                mp_color[3] = c.A;
+                                color_scale_factor = 1;
                             }
 
                             // rgba
@@ -484,8 +496,9 @@ namespace DaphneGui
                                 {
                                     val = imageGrid.GetScalarComponentAsDouble(ix, iy, iz, i) + mp_color[i] * color_scale_factor;
                                 }
+                                if (val > 255.0) val = 255.0;
                                 // set the scalar data according to rgba
-                                imageGrid.SetScalarComponentFromDouble(ix, iy, iz, i, val > Byte.MaxValue ? Byte.MaxValue : val);
+                                imageGrid.SetScalarComponentFromDouble(ix, iy, iz, i, val);
                             }
                         }
                     }

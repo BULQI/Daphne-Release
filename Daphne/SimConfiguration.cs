@@ -6884,8 +6884,32 @@ namespace Daphne
 
     public enum RenderMethod
     {
-        CELL_TYPE, CELL_POP, CELL_DIFF_STATE, CELL_DIFF_SHADE, CELL_DIV_STATE, CELL_DIV_SHADE,
-        CELL_DEATH_STATE, CELL_DEATH_SHADE, CELL_GEN, CELL_GEN_SHADE, CELL_MP, MP_TYPE, MP_CONC
+        [Description("Type")]
+        CELL_TYPE,
+        [Description("Population")]
+        CELL_POP,
+        [Description("Differentiation State (solid color)")]
+        CELL_DIFF_STATE,
+        [Description("Differentiation State (shade)")]
+        CELL_DIFF_SHADE, 
+        [Description("Division State (solid color)")]
+        CELL_DIV_STATE, 
+        [Description("Division State (shade)")]
+        CELL_DIV_SHADE,
+        [Description("Death State (solid color)")]
+        CELL_DEATH_STATE, 
+        [Description("Death State (shade)")]
+        CELL_DEATH_SHADE, 
+        [Description("Generation (solid color)")]
+        CELL_GEN, 
+        [Description("Generation (shade)")]
+        CELL_GEN_SHADE, 
+        [Description("Molecular Population (continuous)")] 
+        MP_CONC,
+        [Description("Molecular Population (discrete)")]
+        MP_CONC_SHADE,
+        [Description("MolecularPopulation (Mixed Colors)")]
+        MP_CONC_MIX_COLOR
     }
 
     public class RenderColor : INotifyPropertyChanged
@@ -6969,7 +6993,8 @@ namespace Daphne
 
     public class RenderMol
     {
-        public RenderColor color { get; set; }      // the one color used
+
+        public RenderColor color {get; set;} 
         public double min { get; set; }             // to scale when rendering by conc
         public double max { get; set; }
         public int shades { get; set; }             // number of shades for applicable options
@@ -6977,10 +7002,28 @@ namespace Daphne
         public string name { get; set; }            // exist to facilitate eding scheme
         public string renderLabel { get; set; }     // ConfigMolecule’s label
 
+        [JsonIgnore]
+        private List<Color> shade_colors { get; set; }
+
         public RenderMol()
         {
             renderLabel = "";
         }
+
+        /// <summary>
+        /// this is for testing the method of using different color for different conc. for a molpop
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Color GetConcColor(int index)
+        {
+            if (shade_colors == null)
+            {
+                shade_colors = ColorHelper.pickASetOfColor(12);
+            }
+            return shade_colors[index%12];
+        }
+            
     }
 
     public class RenderPop
@@ -7140,8 +7183,8 @@ namespace Daphne
             renm.min = 0.0;
             renm.max = 1.0;
             renm.blendingWeight = 10.0;
-            renm.shades = 100;
             renm.color = new RenderColor(ColorHelper.pickASolidColor());
+            renm.shades = 10;
             renderMols.Add(renm);
         }
 
@@ -7233,7 +7276,7 @@ namespace Daphne
                 rp.renderLabel = lable;
                 rp.name = name;
                 rp.renderOn = false;
-                rp.renderMethod = RenderMethod.MP_TYPE;
+                rp.renderMethod = RenderMethod.MP_CONC;
                 molPopOptions.Add(rp);
             }
         }
@@ -7887,7 +7930,7 @@ namespace Daphne
     }
 
 
-
+    /*
     [ValueConversion(typeof(RenderMethod), typeof(bool))]
     public class CellRenderMethodConverter : IValueConverter
     {
@@ -7933,6 +7976,7 @@ namespace Daphne
         #endregion
     }
 
+    */
 
     public class RenderMethodItemValidConverter : IValueConverter
     {

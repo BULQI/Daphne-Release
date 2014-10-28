@@ -17,6 +17,7 @@ using System.Windows.Controls.Primitives;
 using System.ComponentModel;
 using ActiproSoftware.Windows;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace DaphneGui
 {
@@ -254,5 +255,37 @@ namespace DaphneGui
 
     }
 
+    public class RenderMethodEnumDescriptionConverter : IValueConverter
+    {
+
+        private string GetEnumDescription(Enum enumObj)
+        {
+
+            FieldInfo fieldInfo = enumObj.GetType().GetField(enumObj.ToString());
+            object[] attribArray = fieldInfo.GetCustomAttributes(false);
+            if (attribArray.Length == 0)
+            {
+                return enumObj.ToString();
+            }
+            else
+            {
+                DescriptionAttribute attrib = attribArray[0] as DescriptionAttribute;
+                return attrib.Description;
+            }
+        }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            Enum enum_val = (Enum)value;
+            string description = GetEnumDescription(enum_val);
+            return description;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return string.Empty;
+        }
+
+    }
 
 }

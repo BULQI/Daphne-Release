@@ -58,7 +58,9 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <daph:CellRenderMethodConverter x:Key="CellRenderMethodConverter" />
+        <!--<daph:CellRenderMethodConverter x:Key="CellRenderMethodConverter" />-->
+        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+
 
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
 
@@ -3311,6 +3313,11 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
                                             </ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -3386,7 +3393,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="RenderMethod">
+                                <DataGridTemplateColumn Header="RenderMethod" MinWidth="220">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
@@ -3400,6 +3407,11 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
                                             </ComboBox>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

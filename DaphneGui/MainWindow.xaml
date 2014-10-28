@@ -20,6 +20,8 @@
 
         <local:CellRenderPopFromProtocolConverter x:Key="CellRenderPopFromProtocolConverter"/>
 
+        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+        
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
         
         <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
@@ -473,6 +475,11 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </ComboBox.ItemContainerStyle>
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
                                                 </ComboBox>
 
                                                 <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>

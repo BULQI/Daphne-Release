@@ -381,7 +381,7 @@
                                                        HorizontalAlignment ="Stretch"
                                                        SNUpperThreshold="1000"  
                                                        TextFieldWidth="120"
-                                                       Number="{Binding Path=min}"></uc:DoublesBox>
+                                                       Number="{Binding Path=min, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -393,7 +393,19 @@
                                                        HorizontalAlignment ="Stretch"
                                                        SNUpperThreshold="1000"  
                                                        TextFieldWidth="120"
-                                                       Number="{Binding Path=max}"></uc:DoublesBox>
+                                                       Number="{Binding Path=max, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Number of Shades">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" DecimalPlaces="0" IsReadOnly="false" 
+                                                       HorizontalAlignment ="Stretch"
+                                                       SNUpperThreshold="1000"  
+                                                       TextFieldWidth="120"
+                                                       Number="{Binding Path=shades, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -405,7 +417,7 @@
                                                        HorizontalAlignment ="Stretch"
                                                        SNUpperThreshold="1000"  
                                                        TextFieldWidth="120"
-                                                       Number="{Binding Path=blendingWeight}"></uc:DoublesBox>
+                                                       Number="{Binding Path=blendingWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></uc:DoublesBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
