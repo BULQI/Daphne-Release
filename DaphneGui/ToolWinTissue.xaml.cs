@@ -26,8 +26,8 @@ namespace DaphneGui
             TitleText = "Tissue Simulation";
             ToroidalVisibility = Visibility.Visible;
             SimRepetitionVisibility = Visibility.Visible;
-            InitializeComponent();
 
+            InitializeComponent();
             DataContext = this;
         }
 
@@ -49,16 +49,15 @@ namespace DaphneGui
                 // nMolPopSelIndex = toolWinTissue.lbEcsMolPops.SelectedIndex;
             }
 
-            int nRepEcmMolSelIndex = -1;
-            int nRepCellSelIndex = -1;
-            int nRepCellPopSelIndex = -1;
+            int reportECMmolSelectedIndex = -1;
+            int reportCellSelectedIndex = -1;
+            int reportCellPopSelectedIndex = -1;
             // gmk - fix after this functionality is added
             if (selectedTab == tabReports)
             {
-            //    nRepEcmMolSelIndex = reportControl.dgEcmMols.SelectedIndex;
-            //    nRepEcmMolSelIndex = toolWinTissue.dgEcmMols.SelectedIndex;
-            //    nRepCellSelIndex = toolWinTissue.dgCellDetails.SelectedIndex;
-            //    nRepCellPopSelIndex = toolWinTissue.lbRptCellPops.SelectedIndex;
+                reportECMmolSelectedIndex = dgEcmMols.SelectedIndex;
+                //reportCellSelectedIndex = toolWinTissue.dgCellDetails.SelectedIndex;
+                //reportCellPopSelectedIndex = toolWinTissue.lbRptCellPops.SelectedIndex;
             }
 
 
@@ -78,11 +77,12 @@ namespace DaphneGui
             else if (selectedTab == toolWinTissue.tabReports)
             {
                 // gmk - fix after this functionality is added
-                //toolWinTissue.dgEcmMols.SelectedIndex = nRepEcmMolSelIndex;
-                //toolWinTissue.dgCellDetails.SelectedIndex = nRepCellSelIndex;
-                //toolWinTissue.lbRptCellPops.SelectedIndex = nRepCellPopSelIndex;
+                dgEcmMols.SelectedIndex = reportECMmolSelectedIndex;
+                //toolWinTissue.dgCellDetails.SelectedIndex = reportCellSelectedIndex;
+                //toolWinTissue.lbRptCellPops.SelectedIndex = reportCellPopSelectedIndex;
             }
         }
+
 
         protected override void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -95,6 +95,7 @@ namespace DaphneGui
             //    //}
             //}
         }
+
 
     }
 }

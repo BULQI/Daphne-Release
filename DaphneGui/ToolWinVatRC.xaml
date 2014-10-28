@@ -20,8 +20,17 @@
         </TabControl.Resources>
             
            
+
+        <!-- SIM SETUP -->
+        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <local:SimSetupControl DataContext="{Binding}"/>
+            </ScrollViewer>
+        </TabItem>
+
+
         <!-- REACTION COMPLEXES -->
-        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes2">
+        <TabItem Header="Reaction Complexes" x:Name="tabReactionComplexes">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8">
                     <Expander Padding="5" ExpandDirection="Down" IsExpanded="True"
@@ -45,34 +54,55 @@
                             </Style>
                         </Expander.Resources>
                         <local:ReactioComplexListControl DataContext="{Binding}"/>
-                        
+
                     </Expander>
-                    
-                    
+
+
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
 
-        <!-- SIM SETUP -->
-        <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <local:SimSetupControl DataContext="{Binding}"/>
-            </ScrollViewer>
-        </TabItem>
 
-        
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
 
                 <!-- Report Settings -->
-                <ContentControl Name="ReportSettings"
-                                Content="{Binding Path=Protocol}"
-                                ContentTemplate="{StaticResource reportSettingsTemplate}" 
+                <Expander ExpandDirection="Down" Padding="5"
+                    IsExpanded="True"
+                    Header="Report Settings"
+                    Margin="0,4,0,0" 
+                    Canvas.ZIndex="1"
+                    BorderThickness="1"
+                    BorderBrush="Black"
+                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                    >
+                    <ContentControl Name="ReportSettings"
+                            Content="{Binding Path=Protocol}"
+                            ContentTemplate="{StaticResource reportSettingsTemplate}" 
+                            Margin="6"
+                    />
+                </Expander>
+
+                    <!--Molecules in Vat -->
+                <Expander ExpandDirection="Down" Padding="5"
+                        IsExpanded="True"
+                        Header="Molecules in Vat"
+                        Margin="0,4,0,0" 
+                        Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                        >
+                        <!--<ContentControl Name="Vat_MoleculeSettings"
+                                Content="{Binding Path=Protocol.scenario.environment.comp}"
+                                ContentTemplate="{StaticResource interpNodesMolecReportTemplate}" 
                                 Margin="6"
-                />
+                        />-->
+                </Expander>
 
-
+                </StackPanel>
             </ScrollViewer>
         </TabItem>
         
