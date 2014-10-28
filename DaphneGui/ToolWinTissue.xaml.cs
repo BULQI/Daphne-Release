@@ -52,18 +52,19 @@ namespace DaphneGui
             int reportECMmolSelectedIndex = -1;
             int reportCellSelectedIndex = -1;
             int reportCellPopSelectedIndex = -1;
-            // gmk - fix after this functionality is added
+            int reportCellStateSelectedIndex = -1;
             if (selectedTab == tabReports)
             {
-                reportECMmolSelectedIndex = dgEcmMols.SelectedIndex;
-                //reportCellSelectedIndex = toolWinTissue.dgCellDetails.SelectedIndex;
-                //reportCellPopSelectedIndex = toolWinTissue.lbRptCellPops.SelectedIndex;
+                reportECMmolSelectedIndex = toolWinTissue.dgEcmMols.SelectedIndex;
+                reportCellSelectedIndex = toolWinTissue.dgCellDetails.SelectedIndex;
+                reportCellPopSelectedIndex = toolWinTissue.lbRptCellPops.SelectedIndex;
+                reportCellStateSelectedIndex = toolWinTissue.dgCellStates.SelectedIndex;
             }
-
 
             MW.Apply();
 
             toolWinTissue.ConfigTabControl.SelectedItem = selectedTab;
+
             if (selectedTab == toolWinTissue.tabCellPop)
             {
                 // gmk - fix after this functionality is added
@@ -76,10 +77,10 @@ namespace DaphneGui
             }
             else if (selectedTab == toolWinTissue.tabReports)
             {
-                // gmk - fix after this functionality is added
-                dgEcmMols.SelectedIndex = reportECMmolSelectedIndex;
-                //toolWinTissue.dgCellDetails.SelectedIndex = reportCellSelectedIndex;
-                //toolWinTissue.lbRptCellPops.SelectedIndex = reportCellPopSelectedIndex;
+                toolWinTissue.dgEcmMols.SelectedIndex = reportECMmolSelectedIndex;
+                toolWinTissue.dgCellDetails.SelectedIndex = reportCellSelectedIndex;
+                toolWinTissue.lbRptCellPops.SelectedIndex = reportCellPopSelectedIndex;
+                toolWinTissue.dgCellStates.SelectedIndex = reportCellStateSelectedIndex;
             }
         }
 

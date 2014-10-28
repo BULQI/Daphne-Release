@@ -1915,24 +1915,42 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
-                toolWin = new ToolWinTissue();
-                toolWin.MW = this;
-                toolWin.Protocol = SOP.Protocol;
-                toolWin.Title = toolWin.TitleText;
+                // gmk - The code inside the if-statement insures that the information in the protocol window
+                // updates when a new scenario of the same workbench-type is loaded.
+                // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
+                // when the user pushes the Apply button. 
+                // There is probably redundancy here, but I'm not sure how to restructure it.
+                if (newFile == true)
+                {
+                    toolWin = new ToolWinTissue();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
 
-                if (ProtocolToolWindowContainer.Items.Count > 0)
-                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.RemoveAt(0);
 
-                ProtocolToolWindowContainer.Items.Add(toolWin);
-                ProtocolToolWindow = ((ToolWinTissue)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
+                }
 
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
+                    toolWin = new ToolWinTissue();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
+
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
+
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
@@ -1947,20 +1965,39 @@ namespace DaphneGui
             {
                 // GUI Resources
 
-                toolWin = new ToolWinVatRC();
-                toolWin.MW = this;
-                toolWin.Protocol = SOP.Protocol;
-                toolWin.Title = toolWin.TitleText;
+                // gmk - The code inside the if-statement insures that the information in the protocol window
+                // updates when a new scenario of the same workbench-type is loaded.
+                // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
+                // when the user pushes the Apply button. 
+                // There is probably redundancy here, but I'm not sure how to restructure it.
+                if (newFile == true)
+                {
+                    toolWin = new ToolWinVatRC();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
 
-                if (ProtocolToolWindowContainer.Items.Count > 0)
-                    ProtocolToolWindowContainer.Items.Clear();
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.Clear();
 
-                ProtocolToolWindowContainer.Items.Add(toolWin);
-                ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+                }
  
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
+                    toolWin = new ToolWinVatRC();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
+
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.Clear();
+
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
