@@ -226,9 +226,6 @@
     <Compile Include="Rendering\RenderMolPop.xaml.cs">
       <DependentUpon>RenderMolPop.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reports.xaml.cs">
-      <DependentUpon>Reports.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -337,10 +334,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Rendering\RenderMolPop.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Reports.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

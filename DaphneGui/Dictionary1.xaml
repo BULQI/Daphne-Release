@@ -146,8 +146,6 @@
         </StackPanel>
     </DataTemplate>
 
-
-
     <!-- Reaction list view template -->
     <DataTemplate x:Key="reacListViewTemplate">
         <ListView x:Name="lvReacComplexReactions" 
@@ -200,35 +198,61 @@
 
     <!-- Report settings template : DataContext must be Protocol -->
     <DataTemplate x:Key="reportSettingsTemplate">
-        <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="True"
-                            Header="Report Settings"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
             <StackPanel>
                 <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
                 <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>           
             </StackPanel>
-        </Expander>
     </DataTemplate>
 
-    <!-- Display a list of ReactionComplexes  - not sure if this is a keeper -->
-    <DataTemplate x:Key="RCListItemTemplate">
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Path=Name}" />
-        </StackPanel>
-    </DataTemplate>
-    
+    <!-- gmk - Can we put all the converters here for convenience?  -->
+    <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+    <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
+    <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
+    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
+    <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
+    <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
+    <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
+    <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
+    <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
+    <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
+    <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
+    <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
+    <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
+    <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
+    <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
+    <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
+    <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
+    <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
+    <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
+    <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+    <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
+
+    <!-- gmk - copied from SimConfigToolWindow.xaml, but they may not work properly in a Dictionary.
+        Leave here for now, but may need to cleanup later. -->
     <!--
-    <DataTemplate x:Key="ecsReacComplexListItemTemplate">
-        <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
-                                    ConverterParameter={StaticResource ecmReactionComplexesListView}}">
-        </TextBlock>
-    </DataTemplate>
--->
+    <CollectionViewSource x:Key="cellsetRegionsListView"  Source="{Binding Path=Protocol.scenario.regions}"/>
+    <CollectionViewSource x:Key="boxSpecsListView"   Source="{Binding Path=Protocol.scenario.box_specifications}"/>
+    <CollectionViewSource x:Key="ggBoxSpecsListView"  
+                                  Source="{Binding Path=Protocol.scenario.box_specifications}"/>
+    <CollectionViewSource x:Key="molpopGaussianSpecsListView"  
+                                  Source="{Binding Path=Protocol.scenario.gaussian_specifications}"/>
+    <CollectionViewSource x:Key="moleculesListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"/>-->
     
+    <!--<CollectionViewSource x:Key="environMolPopsListView"  
+                                  Source="{Binding Path=Protocol.scenario.environment.comp.molpops}"/>-->
+    <!--<CollectionViewSource x:Key="bulkMoleculesListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"  />
+    <CollectionViewSource x:Key="cytoGenesListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.genes}"/>
+    <CollectionViewSource x:Key="ecmReactionsListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.reactions}" />
+    <CollectionViewSource x:Key="ecmReactionComplexesListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.reaction_complexes}"/>
+
+    <CollectionViewSource x:Key="baseCellTypesListView"  
+                                  Source="{Binding Path=Protocol.scenario.entity_repository.CellBaseTypeLabel}"/>
+    -->
+
+
 </ResourceDictionary>
