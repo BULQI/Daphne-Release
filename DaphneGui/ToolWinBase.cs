@@ -105,7 +105,6 @@ namespace DaphneGui
         /// <param name="e"></param>
         protected virtual void ConfigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            throw new Exception("This method must be implemented in a derived class.");
         }
 
         /// <summary>

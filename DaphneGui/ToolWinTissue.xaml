@@ -149,7 +149,7 @@
                         </DataGrid>
                     </Expander>
 
-                    <!-- Cell Information -->
+                    <!-- Cell spatial details (position, velocity, force) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Cell Information"
@@ -225,7 +225,7 @@
                         </DataGrid>
                     </Expander>
 
-                    <!-- Cell reportStates -->
+                    <!-- Cell States (death, division, differentiation) -->
                     <Expander ExpandDirection="Down" Padding="5"
                             IsExpanded="False"
                             Header="Cell State"
