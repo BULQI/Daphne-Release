@@ -13,6 +13,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Linq;
 using System.Windows.Data;
+using System.ComponentModel;
 
 namespace DaphneGui
 {
@@ -28,7 +29,6 @@ namespace DaphneGui
         public ComponentsToolWindow()
         {
             InitializeComponent();
-            
         }
 
         private void btnRemoveGene_Click(object sender, RoutedEventArgs e)
@@ -63,10 +63,11 @@ namespace DaphneGui
             if (gene == null)
                 return;
 
+            Level level = DataContext as Level;
             ConfigGene newgene = gene.Clone(MainWindow.SOP.Protocol);
             //MainWindow.SOP.Protocol.entity_repository.genes.Add(newgene);
 
-            Level level = (Level)(this.DataContext);
+            //Level level = (Level)(this.DataContext);
             level.entity_repository.genes.Add(newgene);
             
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
@@ -77,11 +78,12 @@ namespace DaphneGui
 
         private void btnAddGene_Click(object sender, RoutedEventArgs e)
         {
-            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
-            gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
-
             Level level = (Level)(this.DataContext);
+            ConfigGene gm = new ConfigGene("NewGene", 0, 0);
+            //gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            gm.Name = gm.GenerateNewName(level, "_New");
+            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gm);
+            
             level.entity_repository.genes.Add(gm);
 
             dgLibGenes.SelectedIndex = dgLibGenes.Items.Count - 1;
@@ -96,11 +98,12 @@ namespace DaphneGui
         //MOLECULES        
         private void btnAddLibMolecule_Click(object sender, RoutedEventArgs e)
         {
+            Level level = (Level)(this.DataContext);
             ConfigMolecule gm = new ConfigMolecule();
-            gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            //gm.Name = gm.GenerateNewName(MainWindow.SOP.Protocol, "_New");
+            gm.Name = gm.GenerateNewName(level, "_New");
             //MainWindow.SOP.Protocol.entity_repository.molecules.Add(gm);
 
-            Level level = (Level)(this.DataContext);
             level.entity_repository.molecules.Add(gm);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
@@ -116,11 +119,12 @@ namespace DaphneGui
             if (cm == null)
                 return;
 
-            //ConfigMolecule gm = new ConfigMolecule(cm);
-            ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
-            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
-
             Level level = (Level)(this.DataContext);
+            //ConfigMolecule gm = new ConfigMolecule(cm);
+            //ConfigMolecule newmol = cm.Clone(MainWindow.SOP.Protocol);
+            ConfigMolecule newmol = cm.Clone(level);
+            //MainWindow.SOP.Protocol.entity_repository.molecules.Add(newmol);
+            
             level.entity_repository.molecules.Add(newmol);
 
             dgLibMolecules.SelectedIndex = dgLibMolecules.Items.Count - 1;
@@ -306,20 +310,21 @@ namespace DaphneGui
             dgLibMolecules.ScrollIntoView(cm);
         }
 
-        private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
-        {
-            if (lbComplexes.SelectedIndex < 0)
-            {
-                MessageBox.Show("Select a reaction complex to process.");
-                return;
-            }
+        //OLD RC - May still need code
+        //private void btnGraphReactionComplex_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    if (lbComplexes.SelectedIndex < 0)
+        //    {
+        //        MessageBox.Show("Select a reaction complex to process.");
+        //        return;
+        //    }
 
-            if (btnGraphReactionComplex.IsChecked == true)
-            {
-                DrawSelectedReactionComplex();
-                btnGraphReactionComplex.IsChecked = false;
-            }
-        }
+        //    if (btnGraphReactionComplex.IsChecked == true)
+        //    {
+        //        DrawSelectedReactionComplex();
+        //        btnGraphReactionComplex.IsChecked = false;
+        //    }
+        //}
 
         private void DrawSelectedReactionComplex()
         {
@@ -421,7 +426,6 @@ namespace DaphneGui
             MainWindow.ST_ReacComplexChartWindow.dblMaxTime.Number = Processor.dInitialTime;  //crc.Processor.dInitialTime;
             MW.VTKDisplayDocWindow.Activate();
             MainWindow.ST_ReacComplexChartWindow.Activate();
-            MainWindow.ST_ReacComplexChartWindow.toggleButton = btnGraphReactionComplex;
         }
 
         public ConfigReactionComplex GetConfigReactionComplex()
@@ -438,15 +442,40 @@ namespace DaphneGui
         {
             var dc = this.DataContext;
             //DataContext = MainWindow.SOP.Protocol;
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
+            view.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
+            view.SortDescriptions.Add(sd);
+            sd = new SortDescription("Name", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sd);
         }
 
-        
+        private void btnSaveReacToProtocol_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigReactionComplex crc = (ConfigReactionComplex)(lbComplexes.SelectedItem);
 
+            if (crc == null)
+                return;
 
+            if (lvReacComplexReactions.SelectedItems.Count <= 0)
+                return;
 
+            ConfigReaction reac = (ConfigReaction)(lvReacComplexReactions.SelectedItem);
 
+            ConfigReaction newreac = reac.Clone(true);
+            MainWindow.GenericPush(newreac);
+        }
 
-
+        private void MoleculesExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            ICollectionView view = CollectionViewSource.GetDefaultView(dgLibMolecules.ItemsSource);
+            view.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription("molecule_location", ListSortDirection.Descending);
+            view.SortDescriptions.Add(sd);
+            sd = new SortDescription("Name", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sd);
+        }
 
 
     }

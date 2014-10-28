@@ -10,7 +10,6 @@
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
         xmlns:uc="clr-namespace:DaphneUserControlLib;assembly=DaphneUserControlLib"
-        Loaded="Window_Loaded"
         Title="Daphne"
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
@@ -167,11 +166,14 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
                 
-                <MenuItem Header="Save Entities"    Name="pushMenu">
-                    <MenuItem Header="Molecules..." Name="pushMol"  Click="pushMol_Click"></MenuItem>
-                    <MenuItem Header="Genes..."     Name="pushGene" Click="pushGene_Click" />
-                    <MenuItem Header="Reactions..." Name="pushReac" Click="pushReac_Click" />
-                    <MenuItem Header="Cells..."     Name="pushCell" Click="pushCell_Click" />
+                <MenuItem Header="Save Entities"                 Name="pushMenu">
+                    <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
+                    <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
+                    <MenuItem Header="Reactions..."              Name="pushReac"        Click="pushReac_Click" />
+                    <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
+                    <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" />
+                    <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" />
+                    <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />                  
                 </MenuItem>
                 
                 <MenuItem Header="Data Export" Name = "ExportMenu">

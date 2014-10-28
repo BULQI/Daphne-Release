@@ -22,7 +22,7 @@ namespace DaphneGui.Pushing
     /// </summary>
     public partial class PushBetweenLevels : Window
     {
-        public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell };
+        public enum PushLevelEntityType { Molecule = 0, Gene, Reaction, Cell, DiffScheme, ReactionTemplate, ReactionComplex, TransDriver };
 
         public PushLevelEntityType PushEntityType { get; set; }
         public PushLevel PushLevelA { get; set; }
@@ -59,13 +59,28 @@ namespace DaphneGui.Pushing
             {
                 this.Title = "Save Cells Between Levels";
             }
+            else if (type == PushLevelEntityType.ReactionComplex)
+            {
+                this.Title = "Save Reaction Complexes Between Levels";
+            }
+            else if (type == PushLevelEntityType.ReactionTemplate)
+            {
+                this.Title = "Save Reaction Templates Between Levels";
+            }
+            else if (type == PushLevelEntityType.TransDriver)
+            {
+                this.Title = "Save Transition Drivers Between Levels";
+            }
+            else if (type == PushLevelEntityType.DiffScheme)
+            {
+                this.Title = "Save Differentiation Schemes Between Levels";
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ResetGrids();
             ActualButtonImage.Source = RightImage.Source;
-            
         }
 
         private void ResetGrids()
@@ -114,6 +129,22 @@ namespace DaphneGui.Pushing
                     LeftList = LevelA.entity_repository.cells;
                     RightList = LevelB.entity_repository.cells;
                     break;
+                case PushLevelEntityType.DiffScheme:
+                    LeftList = LevelA.entity_repository.diff_schemes;
+                    RightList = LevelB.entity_repository.diff_schemes;
+                    break;
+                case PushLevelEntityType.ReactionTemplate:
+                    LeftList = LevelA.entity_repository.reaction_templates;
+                    RightList = LevelB.entity_repository.reaction_templates;
+                    break;
+                case PushLevelEntityType.ReactionComplex:
+                    LeftList = LevelA.entity_repository.reaction_complexes;
+                    RightList = LevelB.entity_repository.reaction_complexes;
+                    break;
+                case PushLevelEntityType.TransDriver:
+                    LeftList = LevelA.entity_repository.transition_drivers;
+                    RightList = LevelB.entity_repository.transition_drivers;
+                    break;
                 default:
                     break;
             }
@@ -125,7 +156,8 @@ namespace DaphneGui.Pushing
             }
 
             RightGroup.DataContext = LevelB.entity_repository;
-            RightContent.DataContext = FilteredRightList();          //RightList;   //must do this first (??)
+            //RightContent.DataContext = FilteredRightList();          //RightList;   //must do this first (??)
+            RightContent.DataContext = RightList;   //must do this first (??)
             LeftGroup.DataContext = LevelA.entity_repository;
             LeftContent.DataContext = FilteredLeftList();
         }
@@ -211,6 +243,86 @@ namespace DaphneGui.Pushing
                         }
                     }
                     return filtered_cell_list;
+                case PushLevelEntityType.ReactionComplex:
+                    ObservableCollection<ConfigReactionComplex> left5 = (ObservableCollection<ConfigReactionComplex>)LeftList;
+                    ObservableCollection<ConfigReactionComplex> right5 = (ObservableCollection<ConfigReactionComplex>)RightList;
+                    ObservableCollection<ConfigReactionComplex> filtered_rc_list = new ObservableCollection<ConfigReactionComplex>();
+                    foreach (ConfigReactionComplex rc in left5)
+                    {
+                        ConfigReactionComplex rc2 = FindReacCompInList(right5, rc);
+                        if (rc2 == null)
+                        {
+                            filtered_rc_list.Add(rc);
+                        }
+                        else {
+                            if (rc.change_stamp != rc2.change_stamp)
+                            {
+                                filtered_rc_list.Add(rc);
+                            }
+                        }
+                    }
+                    return filtered_rc_list;
+                case PushLevelEntityType.ReactionTemplate:
+                    ObservableCollection<ConfigReactionTemplate> left6 = (ObservableCollection<ConfigReactionTemplate>)LeftList;
+                    ObservableCollection<ConfigReactionTemplate> right6 = (ObservableCollection<ConfigReactionTemplate>)RightList;
+                    ObservableCollection<ConfigReactionTemplate> filtered_rt_list = new ObservableCollection<ConfigReactionTemplate>();
+                    foreach (ConfigReactionTemplate rt in left6)
+                    {
+                        ConfigReactionTemplate rt2 = FindReacTempInList(right6, rt);
+                        if (rt2 == null)
+                        {
+                            filtered_rt_list.Add(rt);
+                        }
+                        else
+                        {
+                            if (rt.change_stamp != rt2.change_stamp)
+                            {
+                                filtered_rt_list.Add(rt);
+                            }
+                        }
+                    }
+                    return filtered_rt_list;
+                case PushLevelEntityType.TransDriver:
+                    ObservableCollection<ConfigTransitionDriver> left7 = (ObservableCollection<ConfigTransitionDriver>)LeftList;
+                    ObservableCollection<ConfigTransitionDriver> right7 = (ObservableCollection<ConfigTransitionDriver>)RightList;
+                    ObservableCollection<ConfigTransitionDriver> filtered_td_list = new ObservableCollection<ConfigTransitionDriver>();
+                    foreach (ConfigTransitionDriver td in left7)
+                    {
+                        ConfigTransitionDriver td2 = FindTransDriverInList(right7, td);
+                        if (td2 == null)
+                        {
+                            filtered_td_list.Add(td);
+                        }
+                        else
+                        {
+                            if (td.change_stamp != td2.change_stamp)
+                            {
+                                filtered_td_list.Add(td);
+                            }
+                        }
+                    }
+                    return filtered_td_list;
+                case PushLevelEntityType.DiffScheme:
+                    ObservableCollection<ConfigDiffScheme> left8 = (ObservableCollection<ConfigDiffScheme>)LeftList;
+                    ObservableCollection<ConfigDiffScheme> right8 = (ObservableCollection<ConfigDiffScheme>)RightList;
+                    ObservableCollection<ConfigDiffScheme> filtered_ds_list = new ObservableCollection<ConfigDiffScheme>();
+                    foreach (ConfigDiffScheme ds in left8)
+                    {
+                        ConfigDiffScheme ds2 = FindDiffSchemeInList(right8, ds);
+                        if (ds2 == null)
+                        {
+                            filtered_ds_list.Add(ds);
+                        }
+                        else
+                        {
+                            if (ds.change_stamp != ds2.change_stamp)
+                            {
+                                filtered_ds_list.Add(ds);
+                            }
+                        }
+                    }
+                    return filtered_ds_list;
+
                 default:
                     return null;
             }
@@ -279,6 +391,59 @@ namespace DaphneGui.Pushing
                             }
                     }
                     return filtered_cell_list;
+                case PushLevelEntityType.ReactionComplex:
+                    ObservableCollection<ConfigReactionComplex> left5 = (ObservableCollection<ConfigReactionComplex>)LeftList;
+                    ObservableCollection<ConfigReactionComplex> right5 = (ObservableCollection<ConfigReactionComplex>)RightList;
+                    ObservableCollection<ConfigReactionComplex> filtered_rc_list = new ObservableCollection<ConfigReactionComplex>();
+                    foreach (ConfigReactionComplex rc in right5)
+                    {
+                        ConfigReactionComplex rc2 = FindReacCompInList(left5, rc);
+                        if (rc.change_stamp != rc2.change_stamp)
+                        {
+                            filtered_rc_list.Add(rc);
+                        }
+                    }
+                    return filtered_rc_list;
+                case PushLevelEntityType.ReactionTemplate:
+                    ObservableCollection<ConfigReactionTemplate> left6 = (ObservableCollection<ConfigReactionTemplate>)LeftList;
+                    ObservableCollection<ConfigReactionTemplate> right6 = (ObservableCollection<ConfigReactionTemplate>)RightList;
+                    ObservableCollection<ConfigReactionTemplate> filtered_rt_list = new ObservableCollection<ConfigReactionTemplate>();
+                    foreach (ConfigReactionTemplate rt in right6)
+                    {
+                        ConfigReactionTemplate rt2 = FindReacTempInList(left6, rt);
+                        
+                            if (rt.change_stamp != rt2.change_stamp)
+                            {
+                                filtered_rt_list.Add(rt);
+                            }
+                    }
+                    return filtered_rt_list;
+                case PushLevelEntityType.TransDriver:
+                    ObservableCollection<ConfigTransitionDriver> left7 = (ObservableCollection<ConfigTransitionDriver>)LeftList;
+                    ObservableCollection<ConfigTransitionDriver> right7 = (ObservableCollection<ConfigTransitionDriver>)RightList;
+                    ObservableCollection<ConfigTransitionDriver> filtered_td_list = new ObservableCollection<ConfigTransitionDriver>();
+                    foreach (ConfigTransitionDriver td in right7)
+                    {
+                        ConfigTransitionDriver td2 = FindTransDriverInList(left7, td);
+                        if (td.change_stamp != td2.change_stamp)
+                        {
+                            filtered_td_list.Add(td);
+                        }
+                    }
+                    return filtered_td_list;
+                case PushLevelEntityType.DiffScheme:
+                    ObservableCollection<ConfigDiffScheme> left8 = (ObservableCollection<ConfigDiffScheme>)LeftList;
+                    ObservableCollection<ConfigDiffScheme> right8 = (ObservableCollection<ConfigDiffScheme>)RightList;
+                    ObservableCollection<ConfigDiffScheme> filtered_ds_list = new ObservableCollection<ConfigDiffScheme>();
+                    foreach (ConfigDiffScheme ds in right8)
+                    {
+                        ConfigDiffScheme ds2 = FindDiffSchemeInList(left8, ds);
+                        if (ds.change_stamp != ds2.change_stamp)
+                        {
+                            filtered_ds_list.Add(ds);
+                        }
+                }
+                    return filtered_ds_list;
                 default:
                     return null;
             }
@@ -329,6 +494,50 @@ namespace DaphneGui.Pushing
             }
             return null;
         }
+        private ConfigReactionComplex FindReacCompInList(ObservableCollection<ConfigReactionComplex> list, ConfigReactionComplex entity)
+        {
+            foreach (ConfigReactionComplex e in list)
+            {
+                if (entity.entity_guid == e.entity_guid)
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
+        private ConfigDiffScheme FindDiffSchemeInList(ObservableCollection<ConfigDiffScheme> list, ConfigDiffScheme entity)
+        {
+            foreach (ConfigDiffScheme e in list)
+            {
+                if (entity.entity_guid == e.entity_guid)
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
+        private ConfigTransitionDriver FindTransDriverInList(ObservableCollection<ConfigTransitionDriver> list, ConfigTransitionDriver entity)
+        {
+            foreach (ConfigTransitionDriver e in list)
+            {
+                if (entity.entity_guid == e.entity_guid)
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
+        private ConfigReactionTemplate FindReacTempInList(ObservableCollection<ConfigReactionTemplate> list, ConfigReactionTemplate entity)
+        {
+            foreach (ConfigReactionTemplate e in list)
+            {
+                if (entity.entity_guid == e.entity_guid)
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
 
         private void pushMoleculesListView_Filter(object sender, FilterEventArgs e)
         {
@@ -369,11 +578,17 @@ namespace DaphneGui.Pushing
 
             PushLevelA = level;
 
-            if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
+            //if (PushLevelA == PushLevel.Protocol && (string)(PushButtonArrow.Tag) == "Right")
+            if (PushLevelA == PushLevel.Protocol)
             {
                 PushLevelB = PushLevel.UserStore;
                 LevelBComboBox.SelectedIndex = 1;
             }
+            //else if (PushLevelA == PushLevel.UserStore)
+            //{
+            //    PushLevelB = PushLevel.Protocol;
+            //    LevelBComboBox.SelectedIndex = 0;
+            //}
 
             if (LeftGroup == null)
                 return;
@@ -438,8 +653,6 @@ namespace DaphneGui.Pushing
         {
             
             DataGrid grid = sender as DataGrid;
-            e.CanExecute = true;
-            return;
 
             if (grid != null)
             {
@@ -455,7 +668,8 @@ namespace DaphneGui.Pushing
                 else
                 {
                     object obj = grid.SelectedItems[0];
-                    if ( !(obj is ConfigEntity) ) {
+                    if (!(obj is ConfigEntity))
+                    {
                         e.CanExecute = false;
                     }
                     else
@@ -470,64 +684,102 @@ namespace DaphneGui.Pushing
 
         private void GenericPusher(ConfigEntity entity, Level levelA, Level levelB)
         {
-            ConfigEntity newEntity = null;
-            bool UserWantsNewEntity = false;
-            //Level.PushStatus status = levelB.pushStatus(entity);
-            //if (status == Level.PushStatus.PUSH_INVALID)
-            //{
-            //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-            //    return;
-            //}
+            //ConfigEntity newEntity = null;
+            //bool UserWantsNewEntity = false;
+            Level.PushStatus status = levelB.pushStatus(entity);
+            if (status == Level.PushStatus.PUSH_INVALID)
+            {
+                MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                return;
+            }
 
-            ////if (status == Level.PushStatus.PUSH_CREATE_ITEM)
-            ////{
-                //If the entity is new, must clone it here and then push
-                switch (PushEntityType)
-                {
-                    case PushLevelEntityType.Molecule:
-                        ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
-                        Level.PushStatus status = levelB.pushStatus(newmol);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newmol, status);
-                        break;
-                    case PushLevelEntityType.Gene:
-                        ConfigGene newgene = ((ConfigGene)entity).Clone(null);
-                        status = levelB.pushStatus(newgene);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newgene, status);
-                        break;
-                    case PushLevelEntityType.Reaction:
-                        ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
-                        status = levelB.pushStatus(newreac);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newreac, status);
-                        break;
-                    case PushLevelEntityType.Cell:
-                        ConfigCell newcell = ((ConfigCell)entity).Clone(true);
-                        status = levelB.pushStatus(newcell);
-                        if (status == Level.PushStatus.PUSH_INVALID)
-                        {
-                            MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
-                            return;
-                        }
-                        levelB.repositoryPush(newcell, status);
-                        break;
-                    default:
-                        break;
-                }
-            ////}
+            //If the entity is new, must clone it here and then push
+            switch (PushEntityType)
+            {
+                case PushLevelEntityType.Molecule:
+                    ConfigMolecule newmol = ((ConfigMolecule)entity).Clone(null);
+                    //Level.PushStatus status = levelB.pushStatus(newmol);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+
+                    while (ConfigMolecule.FindMoleculeByName(LevelB.entity_repository, newmol.Name) == true)
+                    {
+                        string entered_name = newmol.Name;
+                        newmol.ValidateName(MainWindow.SOP.Protocol);
+                        MessageBox.Show(string.Format("A molecule named {0} already exists. Please enter a unique name or accept the newly generated name.", entered_name));
+                        AddEditMolecule aem = new AddEditMolecule(newmol, MoleculeDialogType.NEW);
+
+                    }
+
+                    levelB.repositoryPush(newmol, status);
+                    break;
+                case PushLevelEntityType.Gene:
+                    ConfigGene newgene = ((ConfigGene)entity).Clone(null);
+                    //status = levelB.pushStatus(newgene);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newgene, status);
+                    break;
+                case PushLevelEntityType.Reaction:
+                    ConfigReaction newreac = ((ConfigReaction)entity).Clone(true);
+                    //status = levelB.pushStatus(newreac);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newreac, status, levelA, true);
+                    break;
+                case PushLevelEntityType.Cell:
+                    ConfigCell newcell = ((ConfigCell)entity).Clone(true);
+                    //status = levelB.pushStatus(newcell);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    levelB.repositoryPush(newcell, status, levelA, true);
+                    break;
+                case PushLevelEntityType.DiffScheme:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                            
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigDiffScheme newscheme = ((ConfigDiffScheme)entity).Clone(true);
+                    levelB.repositoryPush(newscheme, status, levelA, true);
+                    break;
+                case PushLevelEntityType.ReactionTemplate:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigReactionTemplate newreactemp = ((ConfigReactionTemplate)entity).Clone(true);
+                    levelB.repositoryPush(newreactemp, status, levelA, true);
+                    break;
+                case PushLevelEntityType.ReactionComplex:
+                    //status = levelB.pushStatus(entity);
+                    //if (status == Level.PushStatus.PUSH_INVALID)
+                    //{
+                    //    MessageBox.Show(string.Format("Entity {0} not pushable.", entity.entity_guid));
+                    //    return;
+                    //}
+                    ConfigReactionComplex newrc = ((ConfigReactionComplex)entity).Clone(true);
+                    levelB.repositoryPush(newrc, status, levelA, true);
+                    break;
+                default:
+                    break;
+            }
 
 
             //else // the item exists; could be newer or older
@@ -541,23 +793,6 @@ namespace DaphneGui.Pushing
             //        //levelB.repositoryPush(newEntity, Level.PushStatus.PUSH_CREATE_ITEM);  //create new entity in repository
             //    }
             //}
-        }
-
-        private void PushButtonArrow_Click(object sender, RoutedEventArgs e)
-        {
-            Button btn = sender as Button;
-            if ((string)btn.Tag == "Right")
-            {
-                btn.Tag = "Left";
-                ActualButtonImage.Source = LeftImage.Source;
-            }
-            else
-            {
-                btn.Tag = "Right";
-                ActualButtonImage.Source = RightImage.Source;
-            }
-            
-            ResetGrids();
         }
 
     }  //End of PushBetweenLevels class
@@ -625,6 +860,10 @@ namespace DaphneGui.Pushing
         public DataTemplate PushLevelGeneTemplate { get; set; }
         public DataTemplate PushLevelReactionTemplate { get; set; }
         public DataTemplate PushLevelCellTemplate { get; set; }
+        public DataTemplate PushLevelDiffSchemeTemplate { get; set; }
+        public DataTemplate PushLevelReacComplexTemplate { get; set; }
+        public DataTemplate PushLevelTransDriverTemplate { get; set; }
+        public DataTemplate PushLevelReacTemplateTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -638,6 +877,14 @@ namespace DaphneGui.Pushing
                     return PushLevelReactionTemplate;
                 else if (item is ObservableCollection<ConfigCell>)
                     return PushLevelCellTemplate;
+                else if (item is ObservableCollection<ConfigDiffScheme>)
+                    return PushLevelDiffSchemeTemplate;
+                else if (item is ObservableCollection<ConfigReactionComplex>)
+                    return PushLevelReacComplexTemplate;
+                else if (item is ObservableCollection<ConfigTransitionDriver>)
+                    return PushLevelTransDriverTemplate;
+                else if (item is ObservableCollection<ConfigReactionTemplate>)
+                    return PushLevelReacTemplateTemplate;
             }
 
             return PushLevelMoleculeTemplate;

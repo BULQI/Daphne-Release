@@ -116,7 +116,7 @@
             
             
             <daph:CellGUIDtoCellNameConverter x:Key="CellGUIDtoCellNameConv" />-->
-            <!--<daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />-->
+            <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
             <!--<daph:MoleculeLocationToBoolConverter x:Key="MolPopLocationBoolConv" />-->
 
             <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
@@ -232,9 +232,9 @@
             <!--<CollectionViewSource x:Key="diffSchemesListView"  
                                   Source="{Binding Path=entity_repository.diff_schemes}"/>-->
             
-            <!--<CollectionViewSource x:Key="ecmReactionsListView"  
+            <CollectionViewSource x:Key="ecmReactionsListView"  
                                   Source="{Binding Path=entity_repository.reactions}"
-                                  />-->
+                                  />
             <CollectionViewSource x:Key="ecmReactionComplexesListView"  
                                   Source="{Binding Path=entity_repository.reaction_complexes}"
                                   />           
@@ -495,6 +495,57 @@
             
             <!-- =========================== -->
             
+            <!-- Reaction list view template -->
+            <!--<DataTemplate x:Key="reacListViewTemplate">
+                <ListView x:Name="lvReacComplexReactions" 
+                                            ItemsSource="{Binding Path=reactions, Mode=TwoWay}"
+                                            SelectedIndex="0"  >
+                    <ListView.View>
+                        <GridView>
+                            <GridView.ColumnHeaderContainerStyle>
+                                <Style TargetType="GridViewColumnHeader">
+                                    <Setter Property="Height" Value="Auto"></Setter>
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GridView.ColumnHeaderContainerStyle>
+
+                            <GridViewColumn Width="80" Header="Rate constant">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <uc:DoublesBox SliderEnabled="False" Number="{Binding rate_const, Mode=TwoWay}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Width="300" Header="Reaction" >
+
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=TotalReactionString}">
+                                                        <TextBlock.Style>
+                                                            <Style>
+                                                                <Setter Property="TextBlock.Foreground" 
+                                                                        Value="Black">
+                                                                </Setter>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DataTemplate>-->
+
+
             <!-- Differentiator -->
             
             
@@ -1373,7 +1424,7 @@
                                                             </Style>
                                                         </DataGrid.ColumnHeaderStyle>                                                        
                                                         <DataGrid.Columns>
-                                                            <DataGridTextColumn  Header="Cell" Width="40" IsReadOnly="True"
+                                                            <DataGridTextColumn Header="Cell"  Width="40" IsReadOnly="True"
                                                                 ScrollViewer.CanContentScroll ="False"
                                                                 Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Converter={local:RowToIndexConverter}}" 
                                                             />
@@ -2270,7 +2321,7 @@
                     <!-- Remove reaction complexes for now 10/15/13 -->
                     <!-- Reaction Complexes -->
                     <Expander
-                        Visibility="Hidden"
+                        Visibility="Visible"
                         Padding="5" 
                         ExpandDirection="Down"
                             IsExpanded="False"
@@ -2309,8 +2360,8 @@
                                 </TextBlock>
                         
                                 <ListBox x:Name="ReactionComplexListBox" MinHeight="50" 
-                                    ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes_guid_ref}" 
-                                    ItemTemplate="{Binding Source={StaticResource ecsReacComplexListItemTemplate}}"
+                                    ItemsSource="{Binding Path=scenario.environment.comp.reaction_complexes}" 
+                                    DisplayMemberPath="Name"
                                     SelectedIndex="0"
                                  />
 
@@ -2319,7 +2370,6 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
                                 <Button Name="RemoveReacCompButton" Width="50" Content="Remove" Click="RemoveEcmReacCompButton_Click" />
                             </StackPanel>
-
 
                             <Expander ExpandDirection="Down"
                                     IsExpanded="False"
@@ -2332,15 +2382,6 @@
                                     Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
 
                                 <StackPanel Orientation="Vertical" >
-                                    <!--<StackPanel.Resources>
-                                        <DataTemplate x:Key="ecsReacListItemTemplate">
-                                            <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                            </TextBlock>
-                                        </DataTemplate>
-                                        
-                                        
-                                    </StackPanel.Resources>-->
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
@@ -2350,11 +2391,7 @@
                                                                 ConverterParameter={StaticResource ecmReactionComplexesListView}}" 
                                                                 />
                                     </StackPanel >
-                                    <StackPanel x:Name="spReacComp"
-                                        Tag="{Binding ElementName=ReactionComplexListBox, Path=SelectedItem, 
-                                                        Converter={StaticResource ReacComplexGUIDtoReactionComplexConv},
-                                                        ConverterParameter={StaticResource ecmReactionComplexesListView}}">
-
+                                    <StackPanel x:Name="spReacComp"  >
                                         <StackPanel.Resources>                                            
                                             <DataTemplate x:Key="cellReacListItemTemplate">
                                                 <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
@@ -2365,14 +2402,11 @@
 
                                         <TextBlock Text="Reactions" Margin="6,0"  />
 
-                                        <ListBox x:Name="ecmRCReacsListBox" MinHeight="50" Height="100" MaxHeight="100" AlternationCount="2"
-                                                ItemsSource="{Binding ElementName=spReacComp, Path=Tag.reactions_guid_ref, Mode=OneWay, UpdateSourceTrigger=PropertyChanged }"
-                                                ItemTemplate="{Binding Source={StaticResource cellReacListItemTemplate}}"
-                                                 
-                                                >
-                                        </ListBox>
-                                        
-                                        
+                                        <ContentControl
+                                            Content="{Binding ElementName=ReactionComplexListBox, Path=SelectedItem}" 
+                                                              ContentTemplate="{StaticResource reacListViewTemplate}">
+                                        </ContentControl>
+
                                     </StackPanel>
                                     
                                 </StackPanel>
@@ -2396,23 +2430,6 @@
                                             </StackPanel>
                                         </DataTemplate>
 
-                                        <DataTemplate x:Key="rcReacListItemTemplate">
-                                            <TextBlock Text="{Binding   Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                            </TextBlock>
-                                        </DataTemplate>
-
-                                        <DataTemplate x:Key="addEcsReacComplexDetailsTemplate">
-                                            <StackPanel>                                                
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="Reactions in selected Complex" Grid.Column="0" Grid.Row="3"  Margin="0,-10,0,0" />
-                                                    <ListBox x:Name="lbReacsInComplex" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,5,0" MinHeight="50"  AlternationCount="2"                                                        
-                                                        ItemsSource="{Binding Path=reactions_guid_ref, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"                                                      
-                                                        ItemTemplate="{Binding Source={StaticResource rcReacListItemTemplate}}" >
-                                                    </ListBox>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </DataTemplate>
                                     </StackPanel.Resources>
                                     
                                     <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
@@ -2428,18 +2445,13 @@
 
                                     <ContentControl Name="AddReactionComplexDetails"
                                         Content="{Binding ElementName=lbAvailableReacCx, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource addEcsReacComplexDetailsTemplate}" 
+                                        ContentTemplate="{StaticResource reacListViewTemplate}" 
                                         Margin="6"/>
                                 
                                 </StackPanel>
                             </Expander>
-
-                            
-                            
                         </StackPanel>
                     </Expander>
-
-                    
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -3429,9 +3441,7 @@
 
 
 
-        <!-- LIBRARIES: MOLECULES, REACTIONS, CELLS, REACTION COMPLEXES, AND DIFF SCHEMES -->
-       
-
+        
         <!-- LIBRARIES: CELLS -->
         
     </TabControl>
