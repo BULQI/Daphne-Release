@@ -42,6 +42,11 @@
         <CollectionViewSource x:Name="ecmAvailableReacs" x:Key="ecmAvailableReactionsListView"  
                                   Filter="ecmAvailableReactionsListView_Filter"                                   
                                   />
+        <CollectionViewSource x:Key="membraneAvailableReactionComplexesListView"  
+                                  Filter="membraneAvailableReactionComplexesListView_Filter"/>
+        <CollectionViewSource x:Key="cytosolAvailableReactionComplexesListView"  
+                                  Filter="cytosolAvailableReactionComplexesListView_Filter"/>
+
         <CollectionViewSource x:Key="CytosolBulkMoleculesListView"/>
 
         <CollectionViewSource x:Key="CytoSolMolPopListView" Source="{Binding Path=cytosol.molpops}" />
@@ -827,6 +832,241 @@
                         </TabControl>
                     </StackPanel>
 
+                </StackPanel>
+            </Expander>
+
+            <Expander
+                        Visibility="Visible"
+                        Padding="5" 
+                        ExpandDirection="Down"
+                        IsExpanded="False"
+                        Header="Cell Reaction Complexes"                                            
+                        x:Name="ReacCompExpander"
+                        Margin="0,5,0,0" 
+                        Canvas.ZIndex="1"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                <StackPanel>
+
+                    <TabControl SelectionChanged="TabControl_SelectionChanged">
+                        <!-- Reaction Complexes in cell Membrane -->
+                        <TabItem >
+                            <TabItem.Header>
+                                <TextBlock Text="Membrane" FontWeight="Bold" />
+                            </TabItem.Header>
+
+                            <StackPanel>
+                                <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
+
+
+                                <StackPanel>
+
+                                    <StackPanel.ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel.ToolTip>
+
+
+                                    <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
+                                            ItemsSource="{Binding Path=membrane.reaction_complexes}" 
+                                            DisplayMemberPath="Name"
+                                            SelectedIndex="0"
+                                    />
+
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="MembRemoveReacCompButton" Width="50" Content="Remove" Click="MembRemoveReacCompButton_Click" />
+                                </StackPanel>
+
+                                <Expander ExpandDirection="Down"
+                                    IsExpanded="False"
+                                    Header="Details"
+                                    x:Name="MembRCDetailsExpander"
+                                    Margin="0,5,0,0" 
+                                    Canvas.ZIndex="1"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                    <StackPanel Orientation="Vertical" >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            <TextBox Margin="0,2" x:Name="txtReacComplexName" IsReadOnly="True" 
+                                                Text="{Binding  ElementName=MembReactionComplexListBox, 
+                                                                Path=SelectedItem.Name}" />
+                                        </StackPanel >
+                                        <StackPanel x:Name="spReacComp"  >
+                                            <StackPanel.Resources>
+                                                <DataTemplate x:Key="cellReacListItemTemplate">
+                                                    <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </StackPanel.Resources>
+
+                                            <TextBlock Text="Reactions" Margin="6,0"  />
+
+                                            <ContentControl
+                                            Content="{Binding ElementName=MembReactionComplexListBox, Path=SelectedItem}" 
+                                                              ContentTemplate="{StaticResource reacListViewTemplate}">
+                                            </ContentControl>
+
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Expander>
+
+                                <Expander ExpandDirection="Down"
+                                IsExpanded="False"
+                                Header="Add reaction complex"
+                                x:Name="MembAddReacCxExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Expanded="MembAddReacCxExpander_Expanded"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                    <StackPanel Orientation="Vertical" Margin="10,0">
+                                        <StackPanel.Resources>
+                                            <DataTemplate x:Key="reacCxListItemTemplate">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Path=Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+
+                                        </StackPanel.Resources>
+
+                                        <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                        <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
+                                            ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
+                                            ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
+                                            SelectedIndex="0" >
+                                        </ListBox>
+                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
+                                            <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click"/>
+                                        </StackPanel>
+
+                                        <ContentControl Name="AddReactionComplexDetails"
+                                            Content="{Binding ElementName=lbAvailableReacCx, Path=SelectedItem}" 
+                                            ContentTemplate="{StaticResource reacListViewTemplate}" 
+                                            Margin="6"/>
+
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </TabItem>
+                        
+                        <!-- Reaction Complexes in cell Cytosol -->
+                        <TabItem >
+                            <TabItem.Header>
+                                <TextBlock Text="Cytosol" FontWeight="Bold" />
+                            </TabItem.Header>
+
+                            <StackPanel>
+                                <TextBlock Text="Reaction Complexes" Margin="0,0,0,0" />
+                                <StackPanel>                                    
+                                    <StackPanel.ToolTip>
+                                        <StackPanel Width="200" Orientation="Horizontal">
+                                            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                                        Click Add button to add a reaction complex to the extracellular medium from a list of reactions complexes in the list box below.
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel.ToolTip>
+
+                                    <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
+                                        ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
+                                        DisplayMemberPath="Name"
+                                        SelectedIndex="0"
+                                     />
+
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                                    <Button Name="CytoRemoveReacCompButton" Width="50" Content="Remove" Click="CytoRemoveReacCompButton_Click" />
+                                </StackPanel>
+
+                                <Expander ExpandDirection="Down"
+                                    IsExpanded="False"
+                                    Expanded="CytoRCDetailsExpander_Expanded"
+                                    Header="Details"
+                                    x:Name="CytoRCDetailsExpander"
+                                    Margin="0,5,0,0" 
+                                    Canvas.ZIndex="1"
+                                    BorderThickness="1"
+                                    BorderBrush="Black"
+                                    Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                    <StackPanel Orientation="Vertical" >
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Name" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            <TextBox Margin="0,2" x:Name="txtCytoReacComplexName" IsReadOnly="True" 
+                                                Text="{Binding  ElementName=CytoReactionComplexListBox, Path=SelectedItem.Name}" />
+                                        </StackPanel >
+                                        <StackPanel x:Name="spCytoReacComp"  >
+                                            <StackPanel.Resources>
+                                                <DataTemplate x:Key="cellReacListItemTemplate">
+                                                    <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
+                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </StackPanel.Resources>
+
+                                            <TextBlock Text="Reactions" Margin="6,0"  />
+
+                                            <ContentControl
+                                                    Content="{Binding ElementName=CytoReactionComplexListBox, Path=SelectedItem}" 
+                                                    ContentTemplate="{StaticResource reacListViewTemplate}">
+                                            </ContentControl>
+                                        </StackPanel>
+
+                                    </StackPanel>
+                                </Expander>
+
+                                <Expander ExpandDirection="Down"
+                                IsExpanded="False"
+                                Expanded="AddReacCxExpander_Expanded"
+                                Header="Add reaction complex"
+                                x:Name="CytoAddReacCxExpander"
+                                Margin="0,5,0,0" 
+                                Canvas.ZIndex="1"
+                                BorderThickness="1"
+                                BorderBrush="Black"
+                                Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
+
+                                    <StackPanel Orientation="Vertical" Margin="10,0">
+                                        <StackPanel.Resources>
+                                            <DataTemplate x:Key="reacCxListItemTemplate">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Path=Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </StackPanel.Resources>
+
+                                        <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
+                                        <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
+                                                 ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionComplexesListView}}"
+                                                ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
+                                                SelectedIndex="0" >
+                                        </ListBox>
+                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
+                                            <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click"  />
+                                        </StackPanel>
+                                        <ContentControl Name="AddCytoReactionComplexDetails"
+                                            Content="{Binding ElementName=lbCytoAvailableReacCx, Path=SelectedItem}" 
+                                            ContentTemplate="{StaticResource reacListViewTemplate}" 
+                                            Margin="6"/>
+
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </TabItem>
+                    </TabControl>
                 </StackPanel>
             </Expander>
 

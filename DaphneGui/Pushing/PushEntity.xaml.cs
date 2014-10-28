@@ -81,10 +81,13 @@ namespace DaphneGui.Pushing
 
     public class EntityTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate ReactionTemplate { get; set; }
-        public DataTemplate MoleculeTemplate { get; set; }
-        public DataTemplate GeneTemplate     { get; set; }
-        public DataTemplate CellTemplate     { get; set; }
+        public DataTemplate ReactionTemplate    { get; set; }
+        public DataTemplate MoleculeTemplate    { get; set; }
+        public DataTemplate GeneTemplate        { get; set; }
+        public DataTemplate CellTemplate        { get; set; }
+        public DataTemplate DiffSchemeTemplate  { get; set; }
+        public DataTemplate RCTemplate          { get; set; }
+        public DataTemplate TransDrivTemplate   { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -99,6 +102,12 @@ namespace DaphneGui.Pushing
                 return GeneTemplate;
             else if (item is ConfigCell)
                 return CellTemplate;
+            else if (item is ConfigDiffScheme)
+                return DiffSchemeTemplate;
+            else if (item is ConfigReactionComplex)
+                return RCTemplate;
+            else if (item is ConfigTransitionDriver)
+                return TransDrivTemplate;
 
             return ReactionTemplate;
         }

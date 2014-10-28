@@ -1186,7 +1186,7 @@ namespace Daphne
             PushStatus s2 = pushStatus(crt);
             if (s2 != PushStatus.PUSH_INVALID && s2 != PushStatus.PUSH_OLDER_ITEM)
             {
-                ConfigReactionTemplate newcrt = crt.Clone(null);
+                ConfigReactionTemplate newcrt = crt.Clone(true);
                 repositoryPush(newcrt, s2);
             }
         }
@@ -1702,55 +1702,14 @@ namespace Daphne
         /// <returns></returns>
         public List<ConfigReaction> GetTranscriptionReactions(ConfigCompartment configComp)
         {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
+            Dictionary<string, ConfigReaction> config_reacs = new Dictionary<string, ConfigReaction>();
 
             // Compartment reactions
             foreach (ConfigReaction cr in configComp.Reactions)
             {
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription) && (config_reacs.ContainsKey(cr.entity_guid) == false))         
                 {
-                    reac_guids.Add(cr.entity_guid);
-                    config_reacs.Add(cr);
-                }
-            }
-
-            // Compartment reaction complexes
-            foreach (ConfigReactionComplex rc in configComp.reaction_complexes)
-            {
-                foreach (ConfigReaction cr in rc.reactions)
-                {
-                    if (reac_guids.Contains(cr.entity_guid) == false)
-                    {
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription)
-                        {
-                            config_reacs.Add(cr);
-                        }
-                    }
-                }
-            }
-
-            return config_reacs;
-        }
-
-        /// <summary>
-        /// Select boundary or bulk reactions in the compartment.
-        /// </summary>
-        /// <param name="configComp">the compartment</param>
-        /// <param name="boundMol">boolean: true to select boundary, false to select bulk</param>
-        /// <returns></returns>
-        public List<ConfigReaction> GetReactions(ConfigCompartment configComp, bool boundMol)
-        {
-            List<string> reac_guids = new List<string>();
-            List<ConfigReaction> config_reacs = new List<ConfigReaction>();
-
-            // Compartment reactions
-            foreach (ConfigReaction cr in configComp.Reactions)
-            {
-                if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
-                {
-                    reac_guids.Add(cr.entity_guid);
-                    config_reacs.Add(cr);
+                    config_reacs.Add(cr.entity_guid, cr);
                 }
             }
 
@@ -1759,17 +1718,51 @@ namespace Daphne
             {
                 foreach (ConfigReaction cr in crc.reactions)
                 {
-                    if (reac_guids.Contains(cr.entity_guid) == false)
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.Transcription) && (config_reacs.ContainsKey(cr.entity_guid) == false))
                     {
-                        if (entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol)
-                        {
-                            config_reacs.Add(cr);
-                        }
+                        config_reacs.Add(cr.entity_guid, cr);
                     }
                 }
             }
 
-            return config_reacs;
+            return config_reacs.Values.ToList();
+        }
+
+        /// <summary>
+        /// Select boundary or bulk reactions in the compartment.
+        /// Do not allow duplicate reactions.
+        /// </summary>
+        /// <param name="configComp">the compartment</param>
+        /// 
+        /// <param name="boundMol">boolean: true to select boundary, false to select bulk</param>
+        /// <returns></returns>
+        public List<ConfigReaction> GetReactions(ConfigCompartment configComp, bool boundMol)
+        {
+            Dictionary<string, ConfigReaction> config_reacs = new Dictionary<string, ConfigReaction>();
+
+            // Compartment reactions
+            foreach (ConfigReaction cr in configComp.Reactions)
+            {
+                if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                {
+                    config_reacs.Add(cr.entity_guid, cr);
+                }
+            }
+
+            // Compartment reaction complexes
+            foreach (ConfigReactionComplex crc in configComp.reaction_complexes)
+            {
+                foreach (ConfigReaction cr in crc.reactions)
+                {
+                    if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
+                    {
+                        config_reacs.Add(cr.entity_guid, cr);
+                     }
+                    
+                }
+            }
+
+            return config_reacs.Values.ToList();
         }
         
         public string findMoleculeGuidByName(string inputMolName)
@@ -3484,7 +3477,6 @@ namespace Daphne
             change_stamp = SystemOfPersistence.changesCounter++;
         }
 
-        public abstract string GenerateNewName(Protocol protocol, string ending);
         public abstract string GenerateNewName(Level level, string ending);
 
         public string entity_guid { get; set; }
@@ -3591,29 +3583,6 @@ namespace Daphne
             molecule_location = MoleculeLocation.Bulk;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            string OriginalName = Name;
-
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
-
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindMoleculeByName(protocol, TempMolName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
-            }
-
-            return TempMolName;
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             string OriginalName = Name;
@@ -3635,30 +3604,6 @@ namespace Daphne
             }
 
             return TempMolName;
-        }
-
-        /// <summary>
-        /// create a clone of a molecule
-        /// </summary>
-        /// <param name="protocol">null to create a literal copy</param>
-        /// <returns></returns>
-        public ConfigMolecule Clone(Protocol protocol)
-        {
-            var Settings = new JsonSerializerSettings();
-            Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            Settings.TypeNameHandling = TypeNameHandling.Auto;
-            string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-            ConfigMolecule newmol = JsonConvert.DeserializeObject<ConfigMolecule>(jsonSpec, Settings);
-
-            if (protocol != null)
-            {
-                Guid id = Guid.NewGuid();
-
-                newmol.entity_guid = id.ToString();
-                newmol.Name = newmol.GenerateNewName(protocol, "_Copy");
-            }
-            
-            return newmol;
         }
 
         /// <summary>
@@ -3791,7 +3736,7 @@ namespace Daphne
             ActivationLevel = actlevel;
         }
 
-        public ConfigGene Clone(Protocol protocol)
+        public ConfigGene Clone(Level level)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -3799,57 +3744,15 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
 
-            if (protocol != null)
+            if (level != null)
             {
                 Guid id = Guid.NewGuid();
 
                 newgene.entity_guid = id.ToString();
-                newgene.Name = newgene.GenerateNewName(protocol, "_Copy");
+                newgene.Name = newgene.GenerateNewName(level, "_Copy");
             }
-                
+
             return newgene;
-        }
-
-        //public ConfigGene Clone(Level level)
-        //{
-        //    var Settings = new JsonSerializerSettings();
-        //    Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-        //    Settings.TypeNameHandling = TypeNameHandling.Auto;
-        //    string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
-        //    ConfigGene newgene = JsonConvert.DeserializeObject<ConfigGene>(jsonSpec, Settings);
-
-        //    if (level != null)
-        //    {
-        //        Guid id = Guid.NewGuid();
-
-        //        newgene.entity_guid = id.ToString();
-        //        newgene.Name = newgene.GenerateNewName(level, "_Copy");
-        //    }
-
-        //    return newgene;
-        //}
-
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            string OriginalName = Name;
-
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
-
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string TempMolName = OriginalName + suffix;
-            while (FindGeneByName(protocol, TempMolName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                TempMolName = OriginalName + suffix;
-            }
-
-            return TempMolName;
         }
 
         public override string GenerateNewName(Level level, string ending)
@@ -3989,11 +3892,6 @@ namespace Daphne
             return new_ctd;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
@@ -4055,11 +3953,6 @@ namespace Daphne
         private void genes_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("genes");
-        }
-
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
         }
 
         public override string GenerateNewName(Level level, string ending)
@@ -4841,11 +4734,6 @@ namespace Daphne
             return newreaction;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
@@ -5011,17 +4899,12 @@ namespace Daphne
             isBoundary = false;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
         }
 
-        public ConfigReactionTemplate Clone(Protocol protocol)
+        public ConfigReactionTemplate Clone(bool identical)
         {
             var Settings = new JsonSerializerSettings();
             Settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -5029,7 +4912,7 @@ namespace Daphne
             string jsonSpec = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented, Settings);
             ConfigReactionTemplate newRT = JsonConvert.DeserializeObject<ConfigReactionTemplate>(jsonSpec, Settings);
 
-            if (protocol != null)
+            if (identical == false)
             {
                 Guid id = Guid.NewGuid();
                 newRT.entity_guid = id.ToString();
@@ -5037,6 +4920,7 @@ namespace Daphne
 
             return newRT;
         }       
+
     }
 
 #if OLD_RC
@@ -5073,11 +4957,6 @@ namespace Daphne
             }
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
@@ -5112,6 +4991,7 @@ namespace Daphne
             set
             {
                 _reactions = value;
+                this.incrementChangeStamp();
                 OnPropertyChanged("reactions");
             }
         }
@@ -5150,15 +5030,17 @@ namespace Daphne
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
                 {
                     ConfigReaction cr = nn as ConfigReaction;
-
                     if (reactions_dict.ContainsKey(cr.entity_guid) == false)
                     {
                         reactions_dict.Add(cr.entity_guid, cr);
+                        changed = true;
+                        
                     }
                 }
             }
@@ -5171,13 +5053,21 @@ namespace Daphne
                     if (reactions_dict.ContainsKey(cr.entity_guid) == true)
                     {
                         reactions_dict.Remove(cr.entity_guid);
+                        changed = true;
                     }
                 }
             }
+
+            if (changed == true)
+            {
+                this.incrementChangeStamp();
+            }
+
         }
 
         private void molpops_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            bool changed = false;
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (var nn in e.NewItems)
@@ -5187,6 +5077,7 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == false)
                     {
                         molecules_dict.Add(cm.molecule.entity_guid, cm.molecule);
+                        changed = true;
                     }
                 }
             }
@@ -5199,8 +5090,14 @@ namespace Daphne
                     if (molecules_dict.ContainsKey(cm.molecule.entity_guid) == true)
                     {
                         molecules_dict.Remove(cm.molecule.entity_guid);
+                        changed = true;
                     }
                 }
+            }
+
+            if (changed == true)
+            {
+                this.incrementChangeStamp();
             }
         }
 
@@ -5274,11 +5171,6 @@ namespace Daphne
             return newrc;
         }
 
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            throw new NotImplementedException();
-        }
-
         public override string GenerateNewName(Level level, string ending)
         {
             throw new NotImplementedException();
@@ -5329,7 +5221,7 @@ namespace Daphne
 
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mp_dist_name = "Uniform";
+                        configMolPop.mp_dist_name = "Homogeneous";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                         configMolPop.mp_render_blending_weight = 2.0;
                         configMolPop.mp_render_on = true;
@@ -5338,26 +5230,20 @@ namespace Daphne
 
                         hl.concentration = 1;
                         configMolPop.mp_distribution = hl;
-                        if (HasMolecule(molguid) == false)
-                        {
-                            molpops.Add(configMolPop);
-                        }
+                        molpops.Add(configMolPop);
                     }
                 }
             }
         }
 
-        public void RefreshMolPops()
+        public void RefreshMolPops(ConfigReaction reac)
         {
-            //Clear mol pop list and regenerate it
-            molpops.Clear();
-            foreach (ConfigReaction reac in reactions)
-            {
-                CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
-                CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
-                CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
-            }
+            CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
+            CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
+            CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
         }
+
+        
     }
 
     public class ConfigCell : ConfigEntity
@@ -5625,29 +5511,6 @@ namespace Daphne
             {
                 CellName = GenerateNewName(protocol, "_Copy");
             }
-        }
-
-        public override string GenerateNewName(Protocol protocol, string ending)
-        {
-            string OriginalName = CellName;
-
-            if (OriginalName.Contains(ending))
-            {
-                int index = OriginalName.IndexOf(ending);
-                OriginalName = OriginalName.Substring(0, index);
-            }
-
-            int nSuffix = 1;
-            string suffix = ending + string.Format("{0:000}", nSuffix);
-            string NewCellName = OriginalName + suffix;
-            while (FindCellByName(protocol, NewCellName) == true)
-            {
-                nSuffix++;
-                suffix = ending + string.Format("{0:000}", nSuffix);
-                NewCellName = OriginalName + suffix;
-            }
-
-            return NewCellName;
         }
 
         public override string GenerateNewName(Level level, string ending)
