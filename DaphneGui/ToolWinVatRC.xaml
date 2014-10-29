@@ -95,7 +95,7 @@
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                         >
-                        <DataGrid x:Name="dgEcmMols" 
+                        <DataGrid x:Name="dgVatMols" 
                             ItemsSource="{Binding Path=Protocol.scenario.environment.comp.molpops}" AutoGenerateColumns="False" 
                             MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
