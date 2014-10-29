@@ -499,7 +499,8 @@ namespace Workbench
                     ToolWin.dblMouseHover.Number = valu;
 
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
-                    ToolWin.RC.EditConc(guid, valu);
+                    //Fix this
+                    ////ToolWin.RC.EditConc(guid, valu);
                     RedrawSeries();
                 }
             }            
@@ -580,7 +581,7 @@ namespace Workbench
         /// </summary>
         public void RedrawSeries()
         {
-            ToolWin.RC.Go();
+            ToolWin.RC.RunForward();
             ListTimes = ToolWin.RC.ListTimes;
             DictConcs = ToolWin.RC.DictGraphConcs;
 
@@ -646,7 +647,8 @@ namespace Workbench
                 foreach (Series s in cChart.Series)
                 {
                     string guid = ConvertMolNameToMolGuid(s.Name);
-                    ToolWin.RC.EditConc(guid, s.Points[0].YValues[0]);                    
+                    //Fix this
+                    ////ToolWin.RC.EditConc(guid, s.Points[0].YValues[0]);                    
                 }
 
                 //ToolWin.RC.SaveOriginalConcs();

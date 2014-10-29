@@ -15,6 +15,7 @@ namespace DaphneGui
     {
         public MainWindow MW { get; set; }
         public string TitleText { get; set; }
+        public Protocol protocol { get; set; }
         public Visibility ToroidalVisibility 
         { 
             get; 

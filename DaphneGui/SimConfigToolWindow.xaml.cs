@@ -2153,6 +2153,16 @@ namespace DaphneGui
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
         }
+
+        private void EntitiesStackPanel_LeftButtonDown(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void EntitiesStackPanel_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
     }
 
     public class DatabindingDebugConverter : IValueConverter

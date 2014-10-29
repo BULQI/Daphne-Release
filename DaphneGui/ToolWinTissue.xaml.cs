@@ -31,6 +31,16 @@ namespace DaphneGui
             DataContext = this;
         }
 
+        private void EntitiesStackPanel_LeftButtonDown(object sender, RoutedEventArgs e)
+        {
+            txtTest.Text = "Mouse";
+        }
+
+        private void EntitiesStackPanel_KeyDown(object sender, KeyEventArgs e)
+        {
+            txtTest.Text = "Key";
+        }
+
         public override void Apply()
         {
             ////////TabItem selectedTab = toolWinTissue.ConfigTabControl.SelectedItem as TabItem;

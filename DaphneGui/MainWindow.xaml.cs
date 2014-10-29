@@ -1919,18 +1919,19 @@ namespace DaphneGui
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
+                toolWin = new ToolWinTissue();
+                toolWin.MW = this;
+                toolWin.protocol = SOP.Protocol;
+
+                if (ProtocolToolWindowContainer.Items.Count > 0)
+                    ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                ProtocolToolWindowContainer.Items.Add(toolWin);
+                ProtocolToolWindow = ((ToolWinTissue)toolWin);
+
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
-                    toolWin = new ToolWinTissue();
-                    toolWin.MW = this;
-
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.RemoveAt(0);
-
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
-
                     // create the simulation
                     sim = new TissueSimulation();
                     // set the reporter's path
@@ -1944,18 +1945,19 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 // GUI Resources
+                toolWin = new ToolWinVatRC();
+                toolWin.MW = this;
+                toolWin.protocol = SOP.Protocol;
+
+                if (ProtocolToolWindowContainer.Items.Count > 0)
+                    ProtocolToolWindowContainer.Items.Clear();
+
+                ProtocolToolWindowContainer.Items.Add(toolWin);
+                ProtocolToolWindow = ((ToolWinVatRC)toolWin);
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    toolWin = new ToolWinVatRC();
-                    toolWin.MW = this;
-
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.Clear();
-
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
                     
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2273,6 +2275,12 @@ namespace DaphneGui
             // TODO: Should probably combine these...
 
             gc.EnableComponents(finished);
+
+            if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                ReacComplexChartWindow.DataContext = Sim;
+                ReacComplexChartWindow.Render();
+            }
 
             //Set the box and blob visibilities to how they were pre-run
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)

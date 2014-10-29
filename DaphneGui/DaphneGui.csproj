@@ -215,6 +215,9 @@
     <Compile Include="ReactioComplexListControl.xaml.cs">
       <DependentUpon>ReactioComplexListControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ReactionComplexControl.xaml.cs">
+      <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
     <Compile Include="Rendering\RenderCell.xaml.cs">
@@ -324,7 +327,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="DaphneResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ReactioComplexListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ReactionComplexControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -28,15 +28,16 @@ namespace Workbench
         public List<double> lTimes = new List<double>();
         private ChartManager cm;
         private System.Drawing.Size chartSize;
-        public ReactionComplexProcessor RC { get; set; }
+        public VatReactionComplex RC { get; set; }
+        private SimulationBase Sim;
 
-        public ToggleButton toggleButton { get; set; }
+        ////public ToggleButton toggleButton { get; set; }
 
         public ChartViewToolWindow()
         {
             InitializeComponent();
             chartSize = new System.Drawing.Size(700, 300);
-            DataContext = RC;
+            //RC = DataContext; // as VatReactionComplex;
         }
 
         public void ClearChart()
@@ -49,6 +50,9 @@ namespace Workbench
         
         public void Render()
         {
+            
+            RC = DataContext as VatReactionComplex;
+
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
@@ -149,13 +153,14 @@ namespace Workbench
                 return;
 
             RC.RestoreOriginalConcs();
-            RC.RestoreOriginalRateConstants();
+            //Fix this
+            ////RC.RestoreOriginalRateConstants();
 
-            if (toggleButton != null)
-            {
-                //This causes a redraw
-                toggleButton.IsChecked = true;
-            }
+            //if (toggleButton != null)
+            //{
+            //    //This causes a redraw
+            //    toggleButton.IsChecked = true;
+            //}
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -168,7 +173,7 @@ namespace Workbench
         private void btnDiscard_Click(object sender, EventArgs e)
         {
             RC.RestoreOriginalConcs();
-            RC.Go();
+            RC.RunForward();
             cm.ListTimes = RC.ListTimes;
             cm.DictConcs = RC.DictGraphConcs;
             cm.DrawChart();
@@ -193,7 +198,8 @@ namespace Workbench
 
             foreach (MolConcInfo mci in RC.initConcs)
             {
-                RC.EditConc(mci.molguid, mci.conc);
+                //Fix this
+                ////RC.EditConc(mci.molguid, mci.conc);
             }
 
             cm.RedrawSeries();
@@ -223,8 +229,9 @@ namespace Workbench
         {
             if (e.PropertyName == "Number")
             {
-                RC.UpdateRateConstants();
-                RC.Sim.Load(MainWindow.SOP.Protocol, true);
+                //Fix this
+                ////RC.UpdateRateConstants();
+                ////RC.Sim.Load(MainWindow.SOP.Protocol, true);
                 cm.RedrawSeries();
                 cm.RecalculateYMax();
             }
@@ -254,7 +261,8 @@ namespace Workbench
             {
                 foreach (MolConcInfo mci in RC.initConcs)
                 {
-                    RC.EditConc(mci.molguid, mci.conc);
+                    //Fix this
+                    ////RC.EditConc(mci.molguid, mci.conc);
                 }
                 cm.RedrawSeries();
                 cm.RecalculateYMax();
@@ -277,9 +285,12 @@ namespace Workbench
         {
             foreach (MolConcInfo mci in RC.initConcs)
             {
-                RC.EditConc(mci.molguid, mci.conc);
+                //Fix this
+                ////RC.EditConc(mci.molguid, mci.conc);
             }
-            RC.UpdateRateConstants();
+
+            //Fix this
+            ////RC.UpdateRateConstants();
             cm.RedrawSeries();
             cm.RecalculateYMax();
 

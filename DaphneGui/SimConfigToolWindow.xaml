@@ -2444,7 +2444,9 @@
         <!-- LIBRARY CELL POPULATIONS -->
         <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8">
+                <StackPanel x:Name="EntitiesStackPanel" Orientation="Vertical" Margin="8" 
+                            MouseLeftButtonDown="EntitiesStackPanel_LeftButtonDown"
+                            KeyDown="EntitiesStackPanel_KeyDown">
 
                     <!-- CELL POPULATIONS -->
                     <Expander ExpandDirection="Down" Padding="5"

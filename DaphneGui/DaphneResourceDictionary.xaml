@@ -9,9 +9,9 @@
     <CollectionViewSource x:Key="testMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   />
-    
+
     <!--These templates are used for pushing entities to protocol (i.e. push from entity to protocol) and not for pushing entities between levels-->
-    
+
     <!-- ConfigMolecule properties template : DataContext must be ConfigMolecule -->
     <DataTemplate x:Key="moleculeTemplate">
         <StackPanel Orientation="Vertical">
@@ -211,7 +211,7 @@
                             >
             <StackPanel>
                 <TextBlock Text="File name root:" FontWeight="Bold" Margin="0,-10,0,0" />
-                <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>           
+                <TextBox x:Name="txtFileNameRoot" Text="{Binding Path=reporter_file_name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></TextBox>
             </StackPanel>
         </Expander>
     </DataTemplate>
@@ -222,14 +222,6 @@
             <TextBlock Text="{Binding Path=Name}" />
         </StackPanel>
     </DataTemplate>
-    
-    <!--
-    <DataTemplate x:Key="ecsReacComplexListItemTemplate">
-        <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
-                                    ConverterParameter={StaticResource ecmReactionComplexesListView}}">
-        </TextBlock>
-    </DataTemplate>
--->
 
     <!-- Reaction complex reactions : DataContext must be ConfigReactionComplex -->
     <DataTemplate x:Key="reactionComplexReactionsTemplate">
@@ -253,7 +245,7 @@
                                 </Setter>
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
-                        
+
                         <GridViewColumn Width="80" Header="Rate constant">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -261,11 +253,10 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        
                         <GridViewColumn Width="300" Header="Reaction" >
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding TotalReactionString}">
+                                    <TextBlock Text="{Binding Path=TotalReactionString}">
                                             <TextBlock.Style>
                                                 <Style>
                                                   <Setter Property="TextBlock.Foreground" Value="Black">
