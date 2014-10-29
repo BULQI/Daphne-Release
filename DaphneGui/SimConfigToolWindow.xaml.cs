@@ -109,12 +109,6 @@ namespace DaphneGui
             //add rendering options to scenario
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
 
-            //add lable to skin if not exist, to all skins, probably just to the current skin.
-            //that is little messy, you load another skin, the entry may not there!
-            //then need to check and make default entries
-
-            //to be removed....
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
@@ -195,7 +189,9 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
             gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            Color spec_color = ColorHelper.pickASolidColor();
+            spec_color.A = 80;
+            gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             mpg.gauss_spec = gg;
@@ -390,8 +386,6 @@ namespace DaphneGui
                         molpoplin.boundary_face = BoundaryFace.X;
                         current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
-                        current_mol.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        current_mol.mp_render_blending_weight = 2.0;
                         break;
 
                     case MolPopDistributionType.Gaussian:
@@ -461,7 +455,6 @@ namespace DaphneGui
             }
             if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
-            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
 
@@ -887,7 +880,9 @@ namespace DaphneGui
                 ////gg.DrawAsWireframe = true;
 
                 //gg.gaussian_spec_color = cellPop.cellpopulation_color;
-                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+                var render_cell = MainWindow.SOP.GetRenderCell(cellPop.renderLabel);
+                Color cellpop_color = render_cell.base_color.EntityColor;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellpop_color.R, cellpop_color.G, cellpop_color.B);
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
@@ -2130,35 +2125,9 @@ namespace DaphneGui
 
             MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
-            mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
+            mpg.gauss_spec.gaussian_spec_color = Colors.White;
         }
 
-        private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
-            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
-            // but I don't know for sure; we can discuss
-            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            {
-                return;
-                //throw new InvalidCastException();
-            }
-
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
-            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
-            if (cellPop == null)
-                return;
-
-            CellPopDistribution current_dist = cellPop.cellPopDist;
-
-            if (current_dist.DistType != CellPopDistributionType.Gaussian)
-            {
-                return;
-            }
-
-            ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
-        }
         
         private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -2299,6 +2268,30 @@ namespace DaphneGui
             return value;
         }
     }
+
+
+    /// <summary>
+    /// given a cell population, fidn the pop color for the population
+    /// </summary>
+    public class CellPopulationToSolidBrushConv : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var cellpop = value as CellPopulation;
+            if (cellpop == null) return null;
+
+            RenderCell rc = MainWindow.SOP.GetRenderCell(cellpop.renderLabel);
+            if (rc == null)return null;
+            return new SolidColorBrush(rc.base_color.EntityColor);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 
     public class diffSchemeValueConverter : IValueConverter
     {

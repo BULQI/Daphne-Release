@@ -40,37 +40,11 @@ namespace DaphneGui
         /// </summary>
         public MolPopTypeController()
         {
-            renderGradient = false;
-            blendingWeight = 1.0;
+
         }
 
-        /// <summary>
-        /// accessor for the render gradient state variable
-        /// </summary>
-        public bool RenderGradient
-        {
-            get { return renderGradient; }
-            set { renderGradient = value; }
-        }
 
         public string renderLabel { get; set; }
-
-        /// <summary>
-        /// retrieve the color array
-        /// </summary>
-        public double[] Color
-        {
-            get { return color; }
-        }
-
-        /// <summary>
-        /// retrieve the render weight for this molpop
-        /// </summary>
-        public double BlendingWeight
-        {
-            get { return blendingWeight; }
-            set { blendingWeight = value; }
-        }
 
         /// <summary>
         /// accessor for the molpop's type variable
@@ -303,6 +277,24 @@ namespace DaphneGui
             imageGrid.SetScalarTypeToUnsignedChar();
             imageGrid.SetNumberOfScalarComponents(4);
             imageGrid.AllocateScalars();
+
+            //the allocated space is not zeroed. when no data is being rendered,  cause random bits of color
+            int NodesPerSide2 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2);
+            int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
+            int NodesPerside0 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0);
+            for (int iz = 0; iz <= NodesPerSide2; iz++)
+            {
+                for (int iy = 0; iy <= NodesPerSide1; iy++)
+                {
+                    for (int ix = 0; ix <= NodesPerside0; ix++)
+                    {
+                        for (int i = 0; i < 4; i++)
+                        {
+                            imageGrid.SetScalarComponentFromDouble(ix, iy, iz, i, 0);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -384,15 +376,6 @@ namespace DaphneGui
                 return;
             }
 
-            // set the remaining molpop controller fields
-            molpopControl.RenderGradient = molpop.mp_render_on;
-            // assign color and weight
-            molpopControl.Color[0] = molpop.mp_color.R;
-            molpopControl.Color[1] = molpop.mp_color.G;
-            molpopControl.Color[2] = molpop.mp_color.B;
-            // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = molpop.mp_color.A;
-            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
             molpopControl.TypeGUID = molpop.molecule.entity_guid;
 
             molpopControl.renderLabel = molpop.renderLabel;
@@ -414,6 +397,12 @@ namespace DaphneGui
             }
 
             bool first = true;
+            bool hasValue = false;
+            //these are pre-evalulated/allocated to improve performance - axin
+            int NodesPerSide2 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2);
+            int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
+            int NodesPerside0 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0);
+            double[] point = new double[3];
 
             foreach (KeyValuePair<string, MolPopTypeController> kvp in molpopTypeControllers)
             {
@@ -428,22 +417,14 @@ namespace DaphneGui
                 mp_color[1] = render_mol.color.EntityColor.G;
                 mp_color[2] = render_mol.color.EntityColor.B;
                 mp_color[3] = render_mol.color.EntityColor.A;
-                double div = render_mol.max;
+                if (render_mol.max == 0.0) continue;
 
-                if (div == 0.0)
-                {
-                    continue;
-                }
+                hasValue = true;
 
                 // generate scalar data
                 double step_size = SimulationBase.dataBasket.Environment.Comp.Interior.StepSize();
                 ScalarField molpop_sf = SimulationBase.dataBasket.Environment.Comp.Populations[kvp.Value.TypeGUID].Conc;
 
-                //these are pre-evalulated/allocated to improve performance - axin
-                int NodesPerSide2 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2);
-                int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
-                int NodesPerside0 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(0);
-                double[] point = new double[3];
                 double color_scale_factor = 0;
                 double conc_scale_factor = render_mol.blendingWeight / (render_mol.max - render_mol.min);
                 //conc range per shade.
@@ -1686,6 +1667,7 @@ namespace DaphneGui
             GaussianSpecification next;
 
             scenario.resetGaussRetrieve();
+            Dictionary<string, int> region_indexes = new Dictionary<string, int>();
             while ((next = scenario.nextGaussSpec()) != null)
             {
                 AddGaussSpecRegionControl(next);

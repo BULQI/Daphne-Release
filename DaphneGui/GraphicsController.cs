@@ -766,7 +766,7 @@ namespace DaphneGui
         //        }
         //    }
         //}
-        
+
         /// <summary>
         /// set the cell opacities
         /// </summary>
@@ -834,7 +834,7 @@ namespace DaphneGui
         {
         }
     }
-   
+
     /// <summary>
     /// entity encapsulating the control of a simulation's 3D VTK graphics
     /// </summary>
@@ -908,7 +908,7 @@ namespace DaphneGui
                 return CURSOR_HAND;
             }
         }
-       
+
         /// <summary>
         /// constructor
         /// </summary>
@@ -916,7 +916,7 @@ namespace DaphneGui
         {
             // Trying to get a link to the main window so can activate toolwindow from a callback here...
             MW = mw;
-            
+
             // create a VTK output control and make the forms host point to it
             rwc = new RenderWindowControl();
             wfh = new WindowsFormsHost();
@@ -978,7 +978,7 @@ namespace DaphneGui
 
             // cells
             cellController = new VTKCellController(rw);
-            
+
             // extracellular medium
             ecsController = new VTKECSController(rw);
 #if ALL_GRAPHICS
@@ -1004,7 +1004,7 @@ namespace DaphneGui
             CellSelectionToolModes.Add("Molecular Concentrations");
             CellSelectionToolMode = CellSelectionToolModes[0];
         }
-        
+
         /// <summary>
         /// free allocated memory
         /// </summary>
@@ -1075,12 +1075,12 @@ namespace DaphneGui
         public bool ResetCamera_IsChecked
         {
             get { return resetCameraButton_IsChecked; }
-            set 
-            { 
+            set
+            {
                 // Using a cheat to make toggle button act like regular button
                 this.recenterCamera();
                 this.Rwc.Invalidate();
-                base.OnPropertyChanged("ResetCamera_IsChecked"); 
+                base.OnPropertyChanged("ResetCamera_IsChecked");
             }
         }
 
@@ -1100,7 +1100,7 @@ namespace DaphneGui
                 }
             }
         }
-        
+
         public string ECSRenderingMethod
         {
             get { return ecsRenderingMethod; }
@@ -1191,51 +1191,12 @@ namespace DaphneGui
             this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
             if (this.CellController.GlyphData != null)
             {
-
                 var VTKBasket = ((VTKFullDataBasket)MainWindow.VTKBasket);
-                double[] rr = new double[2];
-                rr = this.CellController.GlyphData.GetPointData().GetArray(this.cellColorArrayName).GetRange();
-               
-                bool test_new = true;
-                if (test_new)
-                {
-                    this.CellController.CellMapper.SetLookupTable(VTKBasket.CellController.CellColorTable);
-                    this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
-                    //this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
-                    int tmp = (int)VTKBasket.CellController.CellColorTable.GetNumberOfTableValues();
-                    this.CellController.CellMapper.SetScalarRange(0, tmp-1);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-
-                }
-                else if (this.cellColorArrayName == "cellID")
-                {
-                    this.CellController.CellMapper.SetLookupTable(VTKBasket.CellController.CellGenericColorTable);
-                    this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
-                }
-#if ALL_GRAPHICS
-                else if (this.cellColorArrayName == "receptorComp")
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.BivariateColorTable);
-                    this.CellController.UpdateReceptorCalcFormula(this.colorScaleMaxFactor);
-                    this.CellController.CellMapper.SetScalarRange(0, 4 * this.colorScaleMaxFactor);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
-                else if (MainWindow.VTKBasket.CellReceptorMaxConcs.ContainsKey(this.cellColorArrayName))
-                {
-                    this.CellController.CellMapper.SetLookupTable(MainWindow.VTKBasket.CellController.CellGenericColorTable);
-
-                    // Scale color map range by max value of receptor concentration rather than current values
-                    this.CellController.CellMapper.SetScalarRange(0f, this.ColorScaleMaxFactor * MainWindow.VTKBasket.CellReceptorMaxConcs[this.cellColorArrayName]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
-#endif
-                else
-                {
-                    this.CellController.CellMapper.SetLookupTable(((VTKFullDataBasket)MainWindow.VTKBasket).CellController.CellGenericColorTable);
-                    this.CellController.CellMapper.SetScalarRange(rr[0], rr[1]);
-                    this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Visible;
-                }
+                this.CellController.CellMapper.SetLookupTable(VTKBasket.CellController.CellColorTable);
+                this.CellController.CellMapper.SelectColorArray(this.cellColorArrayName);
+                int tmp = (int)VTKBasket.CellController.CellColorTable.GetNumberOfTableValues();
+                this.CellController.CellMapper.SetScalarRange(0, tmp - 1);
+                this.ColorScaleSlider_IsEnabled = System.Windows.Visibility.Collapsed;
                 this.scalarBar.GetScalarBarActor().SetLookupTable(cellController.CellMapper.GetLookupTable());
                 this.scalarBar.GetScalarBarActor().SetTitle(this.CellColorArrayName);
                 Rwc.Invalidate();
@@ -1468,7 +1429,7 @@ namespace DaphneGui
             WhArrowToolButton_IsEnabled = false;
             WhArrowToolButton_IsChecked = true;
             HandToolButton_IsEnabled = true;                //false;    //TEMPORARILY ENABLED ALL THE TIME
-            HandToolButton_IsChecked = false;                        
+            HandToolButton_IsChecked = false;
             PreviewButton_IsEnabled = false;
             PreviewButton_IsChecked = true;
             Rwc.RenderWindow.SetCurrentCursor(CURSOR_ARROW);
@@ -1478,7 +1439,7 @@ namespace DaphneGui
         {
             get { return rwc; }
         }
-        
+
         public WindowsFormsHost Wfh
         {
             get { return wfh; }
@@ -1629,7 +1590,7 @@ namespace DaphneGui
             leftButtonPressed = true;
             leftButtonPressTimeStamp = interactor.GetMTime();
         }
-            
+
         /// <summary>
         /// handler for left mouse click
         /// </summary>
@@ -1968,6 +1929,7 @@ namespace DaphneGui
 
             RegionWidget rw = new RegionWidget(Rwc.RenderWindow, gs, RegionShape.Ellipsoid);
 
+
             // color
             rw.SetColor(gs.gaussian_spec_color.ScR,
                         gs.gaussian_spec_color.ScG,
@@ -2005,7 +1967,7 @@ namespace DaphneGui
             GaussianSpecification next;
 
             scenario.resetGaussRetrieve();
-            while((next = scenario.nextGaussSpec()) != null)
+            while ((next = scenario.nextGaussSpec()) != null)
             {
                 AddGaussSpecRegionWidget(next);
             }
