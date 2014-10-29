@@ -26,6 +26,7 @@ namespace DaphneGui
             TitleText = "Tissue Simulation";
             ToroidalVisibility = Visibility.Visible;
             SimRepetitionVisibility = Visibility.Visible;
+            ZExtentVisibility = Visibility.Visible;
 
             InitializeComponent();
             DataContext = this;

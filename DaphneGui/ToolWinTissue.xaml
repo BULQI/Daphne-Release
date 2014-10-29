@@ -35,7 +35,19 @@
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <!-- add control -->
+                
+                <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
+                    
+                    <!-- extents -->
+                    <Expander Padding="5"  ExpandDirection="Down" IsExpanded="True"
+                              Header="Extracellular Medium Extents"                                              
+                              x:Name="EnvironmentExpander"
+                              Margin="0,5,0,0" Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
+                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" 
+                     >
+                        <local:EnvironmentExtents DataContext="{Binding}"/>
+                    </Expander>
+                </StackPanel>
 
             </ScrollViewer>
         </TabItem>

@@ -202,6 +202,9 @@
     <Compile Include="DocWindow.xaml.cs">
       <DependentUpon>DocWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnvironmentExtents.xaml.cs">
+      <DependentUpon>EnvironmentExtents.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GraphicsController.cs" />
     <Compile Include="MoleculeGridControl.xaml.cs">
       <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
@@ -308,6 +311,10 @@
     <Page Include="DocWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EnvironmentExtents.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MoleculeGridControl.xaml">
       <SubType>Designer</SubType>

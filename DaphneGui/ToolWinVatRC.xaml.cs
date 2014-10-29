@@ -25,6 +25,8 @@ namespace DaphneGui
             TitleText = "Vat Reaction Complex";
             ToroidalVisibility = Visibility.Hidden;
             SimRepetitionVisibility = Visibility.Hidden;
+            // Shouldn't have to set this, since extents control isn't used here but...
+            ZExtentVisibility = Visibility.Hidden;
 
             InitializeComponent();
             DataContext = this;

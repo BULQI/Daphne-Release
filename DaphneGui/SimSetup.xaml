@@ -99,48 +99,48 @@
                                         ValueChanged="rendering_interval_slider_ValueChanged"
                                         />
                 <editors:DoubleEditBox x:Name="TimeStepReadout" 
-                                                        CheckBoxVisibility="Collapsed" 
-                                                        SpinnerVisibility="Collapsed"
-                                                        HorizontalAlignment="Right"
-                                                        Format="N3"
-                                                        StepValue="0.01"
-                                                        Width="60" 
-                                                        CenterSlotHorizontalAlignment="Right"
-                                                        Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                                        />
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=render_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                 />
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
             
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="sampling interval" Margin="6,0"
-                                            Grid.Column="0" Grid.Row="4"  
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            TextAlignment="Right"
-                                            Width="120"
-                                            />
+                            Grid.Column="0" Grid.Row="4"  
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            TextAlignment="Right"
+                            Width="120"
+                />
                 <Slider Name="sampling_interval_slider"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center"
-                                        Width="100"
-                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                        Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
-                                        Minimum="0.001"
-                                        Value="{Binding Path=Protocol.scenario.time_config.sampling_interval}" 
-                                        IsSnapToTickEnabled="True" 
-                                        TickFrequency="0.01" 
-                                        KeyboardNavigation.IsTabStop="False"
-                                        ValueChanged="sampling_interval_slider_ValueChanged"
-                                        />
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Width="100"
+                        RenderTransform="1.0,0,0,0.5,0,7"
+                        Maximum="{Binding ElementName=time_duration_slider, Mode=OneWay, Path=Value}"
+                        Minimum="0.001"
+                        Value="{Binding Path=Protocol.scenario.time_config.sampling_interval}" 
+                        IsSnapToTickEnabled="True" 
+                        TickFrequency="0.01" 
+                        KeyboardNavigation.IsTabStop="False"
+                        ValueChanged="sampling_interval_slider_ValueChanged"
+                />
                 <editors:DoubleEditBox x:Name="SamplingInterval" 
-                                                        CheckBoxVisibility="Collapsed" 
-                                                        SpinnerVisibility="Collapsed"
-                                                        HorizontalAlignment="Right"
-                                                        Format="N3"
-                                                        StepValue="0.01"
-                                                        Width="60" 
-                                                        CenterSlotHorizontalAlignment="Right"
-                                                        Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                                                        />
+                                        CheckBoxVisibility="Collapsed" 
+                                        SpinnerVisibility="Collapsed"
+                                        HorizontalAlignment="Right"
+                                        Format="N3"
+                                        StepValue="0.01"
+                                        Width="60" 
+                                        CenterSlotHorizontalAlignment="Right"
+                                        Value="{Binding ElementName=sampling_interval_slider, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                />
                 <TextBlock Text="min" VerticalAlignment="Center" Margin="2,0,0,0"/>
             </StackPanel>
 
