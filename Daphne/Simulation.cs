@@ -150,6 +150,8 @@ namespace Daphne
                                        List<ConfigReaction> transcription_reacs)
         {
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
+
+            simCell.renderLabel = cell.label ?? cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;
@@ -292,6 +294,8 @@ namespace Daphne
                     simCell.SetGeneActivities(simCell.Differentiator);
                 }
             }
+            //generaiton
+            simCell.generation = cellState.CellGeneration;
 
             // add the cell
             AddCell(simCell);
@@ -863,6 +867,8 @@ namespace Daphne
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
                 boundary_reacs = protocol.GetReactions(configComp[0], true);
                 transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
+                //need to figure out how to set the lable.
+                if (cp.renderLabel == null) cp.renderLabel = cp.Cell.entity_guid;
                 
                 for (int i = 0; i < cp.number; i++)
                 {

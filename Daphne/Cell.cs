@@ -78,6 +78,13 @@ namespace Daphne
         private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
 
+
+        /// <summary>
+        /// info for rendering
+        /// </summary>
+        public string renderLabel;
+        public int generation;
+
         /// <summary>
         /// the genes in a cell
         /// NOTE: should these be in the cytoplasm
@@ -305,6 +312,9 @@ namespace Daphne
             daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
             // same population id
             daughter.Population_id = Population_id;
+            daughter.renderLabel = renderLabel;
+            this.generation++;
+            daughter.generation = generation;
             // same state
             daughter.setState(spatialState);
             // but offset the daughter randomly
