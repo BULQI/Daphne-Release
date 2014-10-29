@@ -20,6 +20,10 @@ namespace DaphneGui
         public string TitleText { get; set; }
         public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
+        // This would be set to Hidden if we implement a 2D environment
+        // and want to reuse the EnvironmentExtents control.
+        // This field is not relevant to VatRC.
+        public Visibility ZExtentVisibility { get; set; }
 
         public ToolWinBase()
         {
