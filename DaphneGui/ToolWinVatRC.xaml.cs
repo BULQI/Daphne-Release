@@ -37,9 +37,8 @@ namespace DaphneGui
             int reportVatMolSelectedIndex = -1;
             if (selectedTab == tabReports)
             {
-                //reportVatMolSelectedIndex = ((DataGrid)Vat_MoleculeSettings.Content).SelectedIndex;
+                reportVatMolSelectedIndex = toolWinVatRC.dgVatMols.SelectedIndex;
             }
-
 
             MW.Apply();
 
@@ -50,7 +49,7 @@ namespace DaphneGui
             }
             else if (selectedTab == toolWinVatRC.tabReports)
             {
-                //((DataGrid)Vat_MoleculeSettings.Content).SelectedIndex = reportVatMolSelectedIndex = -1;
+                toolWinVatRC.dgVatMols.SelectedIndex = reportVatMolSelectedIndex;
             }
 
         }
@@ -65,7 +64,7 @@ namespace DaphneGui
             throw new Exception("VatReactionComplex does not implement CellPopsHaveMolecule method.");
         }
 
-        protected virtual void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        protected override void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
         {
             throw new Exception("VatReactionComplex does not implement ecmAvailableReactionsListView_Filter method.");
         }
@@ -76,7 +75,7 @@ namespace DaphneGui
             throw new Exception("VatReactionComplex does not implement RegionFocusToGUISection method.");
         }
 
-        public virtual void SelectGaussSpecInGUI(int index, string guid)
+        public override void SelectGaussSpecInGUI(int index, string guid)
         {
             throw new Exception("VatReactionComplex does not implement SelectGaussSpecInGUI method.");
         }

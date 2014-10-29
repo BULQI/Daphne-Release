@@ -205,27 +205,28 @@
     </DataTemplate>
 
     <!-- gmk - Can we put all the converters here for convenience?  -->
-    <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
-    <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
-    <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
-    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
-    <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
-    <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
+    <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
     <daph:BoundaryFaceToVisStringConverter x:Key="BoundaryFaceVisConv" />
+    <daph:CellPopDistributionTypeToStringConverter x:Key="CellPopDistTypeEnumConv" />
     <daph:CellGuidToCellMembMolPopsConverter x:Key="CellGuidToCellMembMolPopsConv" />
     <daph:CellGuidToCellCytoMolPopsConverter x:Key="CellGuidToCellCytoMolPopsConv" />
-    <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
     <daph:ColorListToStringConverter x:Key="ColorListToStringConv" />
     <daph:ColorListToIntConverter x:Key="ColorListToIntConv" />
     <daph:ColorListToColorConverter x:Key="ColorListToColorConv" />
     <daph:ColorListToBrushConverter x:Key="ColorListToBrushConv" />
-    <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
-    <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
-    <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
     <daph:DiffSchemeToBoolConverter x:Key="DiffSchemeToBoolConv" />
     <daph:DivDeathDriverToBoolConverter x:Key="DivDeathDriverToBoolConv" />
     <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+    <daph:GeneGUIDtoNameConverter x:Key="GeneGUIDtoNameConv" />
+    <daph:GeneGUIDtoConfigGeneConverter x:Key="GeneGUIDtoConfigGeneConv" />
+    <daph:MolPopGUIDtoMolPopNameConverter x:Key="MolPopGUIDtoMolPopNameConv" />
+    <daph:MolPopDistributionTypeToStringConverter x:Key="MolPopDistTypeEnumConv" />
     <daph:MolGUIDtoMolNameConverter x:Key="MolGUIDtoMolNameConv" />
+    <daph:ReactionComplexGUIDtoReactionComplexStringConverter x:Key="ReacComplexGUIDtoStringConv" />
+    <daph:ReacComplexGUIDtoReactionComplexConverter x:Key="ReacComplexGUIDtoReactionComplexConv" />
+    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
+    <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
+    <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
 
     <!-- gmk - copied from SimConfigToolWindow.xaml, but they may not work properly in a Dictionary.
         Leave here for now, but may need to cleanup later. -->
@@ -240,7 +241,7 @@
                                   Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"/>-->
     
     <!--<CollectionViewSource x:Key="environMolPopsListView"  
-                                  Source="{Binding Path=Protocol.scenario.environment.comp.molpops}"/>-->
+                                  Source="{Binding Path=ProtocolToolWindow.Protocol.scenario.environment.comp.molpops}"/>-->
     <!--<CollectionViewSource x:Key="bulkMoleculesListView"  
                                   Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"  />
     <CollectionViewSource x:Key="cytoGenesListView"  

@@ -16,7 +16,6 @@
     <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <TabControl.Resources>
-            <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
             <CollectionViewSource x:Key="environMolPopsListView"  
                                   Source="{Binding Path=Protocol.scenario.environment.comp.molpops}"/>
             <!-- for debugging -->
@@ -84,7 +83,7 @@
 
                         <DataGrid x:Name="dgEcmMols" 
                             ItemsSource="{Binding Path=Protocol.scenario.environment.comp.molpops}" AutoGenerateColumns="False" 
-                            Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
+                            MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
                             CanUserReorderColumns="False" CanUserResizeRows="False"
                             CanUserSortColumns="False" RowHeaderWidth="0"
                             VerticalContentAlignment="Center"
@@ -162,7 +161,7 @@
                         <!--<TextBlock Text="Cell Information" FontWeight="Bold" Margin="0,10,0,0" />-->
                         <DataGrid x:Name="dgCellDetails" AutoGenerateColumns="False" 
                               ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}"     
-                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                               CanUserReorderColumns="False" CanUserResizeRows="False"
                               CanUserSortColumns="False" RowHeaderWidth="0"
                               VerticalContentAlignment="Center"
@@ -237,7 +236,7 @@
                             >
                         <DataGrid x:Name="dgCellStates" AutoGenerateColumns="False" 
                               ItemsSource="{Binding Path=Protocol.scenario.cellpopulations, UpdateSourceTrigger=PropertyChanged}"     
-                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                               CanUserReorderColumns="False" CanUserResizeRows="False"
                               CanUserSortColumns="False" RowHeaderWidth="0"
                               VerticalContentAlignment="Center"
@@ -340,7 +339,7 @@
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                             >
                         <StackPanel>
-                            <ListBox x:Name="lbRptCellPops" MinHeight="100" 
+                            <ListBox x:Name="lbRptCellPops"
                                 ItemsSource="{Binding Path=Protocol.scenario.cellpopulations}" 
                                 DisplayMemberPath="cellpopulation_name"
                             />
@@ -358,7 +357,7 @@
                                 <StackPanel>
                                     <DataGrid x:Name="dgEcmProbeMols" AutoGenerateColumns="False" 
                                         ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.ecm_probe}"                                                         
-                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200"
+                                        MinWidth="200" MinRowHeight="20" MinColumnWidth="90" ColumnWidth="100" MaxColumnWidth="200"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"
                                         VerticalContentAlignment="Center"
@@ -431,7 +430,7 @@
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellMembMols" AutoGenerateColumns="False"                                              
                                     ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.membrane.molpops}"                         
-                                    Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                    MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                     CanUserReorderColumns="False" CanUserResizeRows="False"
                                     CanUserSortColumns="False" RowHeaderWidth="0"
                                     VerticalContentAlignment="Center"
@@ -503,7 +502,7 @@
                                 <StackPanel>
                                     <DataGrid x:Name="dgCellCytosolMols" AutoGenerateColumns="False" 
                                         ItemsSource="{Binding ElementName=lbRptCellPops, Path=SelectedItem.Cell.cytosol.molpops}"                                                                                 
-                                        Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                                        MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
                                         CanUserReorderColumns="False" CanUserResizeRows="False"
                                         CanUserSortColumns="False" RowHeaderWidth="0"
                                         VerticalContentAlignment="Center"
