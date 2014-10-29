@@ -2499,8 +2499,59 @@ namespace Daphne
             diff_schemes_dict = new Dictionary<string, ConfigDiffScheme>();
             transition_drivers = new ObservableCollection<ConfigTransitionDriver>();
             transition_drivers_dict = new Dictionary<string, ConfigTransitionDriver>();
-        }        
+        }
+
+#if CHANGESTAMPOUTOFSYNC
+        public ulong GetHighestChangeStamp()
+        {
+            ulong num = 0;
+
+            foreach (ConfigEntity ent in cells)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in molecules)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in genes)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in reactions)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in reaction_complexes)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in diff_schemes)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in transition_drivers)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+            foreach (ConfigEntity ent in reaction_templates)
+            {
+                if (ent.change_stamp > num)
+                    num = ent.change_stamp;
+            }
+
+            return num;
+        }
+
     }
+#endif
 
     public class TimeConfig
     {
@@ -4949,7 +5000,7 @@ namespace Daphne
         }
     }
 #endif
-    public class ConfigReactionComplex : ConfigEntity
+    public class ConfigReactionComplex : ConfigEntity, IEquatable<ConfigReactionComplex>
     {
         public string Name { get; set; }
 #if OLD_RC
@@ -5011,6 +5062,59 @@ namespace Daphne
 #if OLD_RC
             ReactionRates = new ObservableCollection<ConfigReactionGuidRatePair>();
 #endif
+        }
+
+        public bool Equals(ConfigReactionComplex crc)
+        {
+            if (this.Name != crc.Name)
+                return false;
+            if (this.entity_guid != crc.entity_guid)
+                return false;
+
+            //Check reactions
+            if (reactions.Count != crc.reactions.Count)
+                return false;
+
+            foreach (ConfigReaction reac in reactions)
+            {
+                if (crc.reactions_dict.ContainsKey(reac.entity_guid) == false)
+                {
+                    return false;
+                }
+                else
+                {
+                    ConfigReaction reac2 = crc.reactions_dict[reac.entity_guid];
+                    if (reac.Equals(reac2) == false)
+                        return false;
+                }
+            }
+
+            //Check molpops?
+            if (crc.molpops.Count != this.molpops.Count)
+                return false;
+
+            foreach (ConfigMolecularPopulation cmp in molpops)
+            {
+            }
+
+
+            //Check molecules
+            if (crc.molecules_dict.Count != this.molecules_dict.Count)
+                return false;
+
+            foreach (KeyValuePair<string, ConfigMolecule> kvp in molecules_dict)
+            {
+                if (crc.molecules_dict.ContainsKey(kvp.Key) == false)
+                    return false;
+                else
+                {
+                    ConfigMolecule mol = crc.molecules_dict[kvp.Key];
+                    if (mol.Equals(kvp.Value) == false)
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         private void reactions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

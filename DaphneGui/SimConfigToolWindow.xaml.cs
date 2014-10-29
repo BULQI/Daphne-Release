@@ -2176,6 +2176,38 @@ namespace DaphneGui
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
         }
+
+        private void ApplyMoleculeButton_Click(object sender, RoutedEventArgs e)
+        {            
+            ConfigMolecularPopulation molpop = (ConfigMolecularPopulation)lbEcsMolPops.SelectedItem;
+            if (molpop == null)
+                return;
+
+            double rad = dbEffRad.Number;
+            double coeff = dbDiffCoeff.Number;
+            double wt = dbMolWt.Number;
+
+            bool changed = false;
+            if (molpop.molecule.MolecularWeight != wt)
+            {
+                changed = true;
+                molpop.molecule.MolecularWeight = wt;               
+            }
+            if (molpop.molecule.DiffusionCoefficient != coeff)
+            {
+                changed = true;
+                molpop.molecule.DiffusionCoefficient = coeff;
+            }
+            if (molpop.molecule.EffectiveRadius != rad)
+            {
+                changed = true;
+                molpop.molecule.EffectiveRadius = rad;
+            }
+            if (changed)
+            {
+                molpop.molecule.incrementChangeStamp();
+            }
+        }
     }
 
     public class DatabindingDebugConverter : IValueConverter

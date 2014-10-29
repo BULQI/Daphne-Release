@@ -2842,13 +2842,14 @@ namespace DaphneGui
             }
 
             // remember the changes counter
+
             Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
 
             // save the preferences
             Properties.Settings.Default.Save();
 
         }
-
+        
         private void exitApp_Click(object sender, RoutedEventArgs e)
         {            
             CloseApp();
@@ -2978,7 +2979,7 @@ namespace DaphneGui
                     }
                 }
 
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
 
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
@@ -3003,7 +3004,7 @@ namespace DaphneGui
                     }
                 }
 
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
                 if (pr.ShowDialog() == false)
                     return;
 
@@ -3024,8 +3025,7 @@ namespace DaphneGui
                         return;
                     }
                 }
-
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
                 if (pcell.ShowDialog() == false)
                     return;
 
@@ -3048,7 +3048,7 @@ namespace DaphneGui
                     }
                 }
 
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
                 {
@@ -3074,7 +3074,7 @@ namespace DaphneGui
                     }
                 }
 
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
                 //Show the confirmation dialog
                 if (pm.ShowDialog() == false)
                 {
@@ -3087,19 +3087,19 @@ namespace DaphneGui
             {
                 MessageBox.Show(string.Format("Entity type {0} 'save' operation not yet supported.", source.GetType().ToString()));
                 return;
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
             }
             else if (source is ConfigTransitionDriver)
             {
                 MessageBox.Show(string.Format("Entity type {0} 'save' operation not yet supported.", source.GetType().ToString()));
                 return;
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
             }
             else
             {
                 MessageBox.Show(string.Format("Entity type {0} 'save' operation not supported.", source.GetType().ToString()));
                 return;
-                source.incrementChangeStamp();
+                //source.incrementChangeStamp();
             }
 
             //If we get here, then the user confirmed a PUSH

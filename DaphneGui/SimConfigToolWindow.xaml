@@ -2115,16 +2115,36 @@
                                               DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem, Mode=TwoWay}"
                                               >
                                 <StackPanel>
-                                    <ContentControl Name="ecmMolpopMolDetails"
+                                    <!--<ContentControl Name="ecmMolpopMolDetails"
                                             Content="{Binding Path=molecule}" 
                                             ContentTemplate="{StaticResource editMoleculeTemplate}" 
-                                            Margin="6"/>
+                                            Margin="6"/>-->
 
-                                    <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." 
-                                            Click="PushEcmMoleculeButton_Click"
-                                            >
-                                        
-                                    </Button>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Width="150" Text="Name"></TextBlock>
+                                            <TextBlock Width="80" Margin="20,0" Text="Diff Coeff"></TextBlock>
+                                            <TextBlock Width="80" Margin="20,0" Text="Weight"></TextBlock>
+                                            <TextBlock Width="80" Margin="20,0" Text="Radius"></TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Width="150" Text="{Binding Path=Name}" IsEnabled="False"></TextBox>
+                                            <uc:DoublesBox x:Name="dbDiffCoeff" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=molecule.DiffusionCoefficient,Mode=TwoWay,UpdateSourceTrigger=Explicit}"></uc:DoublesBox>
+                                            <uc:DoublesBox x:Name="dbMolWt" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=molecule.MolecularWeight,Mode=TwoWay,UpdateSourceTrigger=Explicit}"></uc:DoublesBox>
+                                            <uc:DoublesBox x:Name="dbEffRad" SliderEnabled="False" TextFieldWidth="80" Number="{Binding Path=molecule.EffectiveRadius,Mode=TwoWay,UpdateSourceTrigger=Explicit}"></uc:DoublesBox>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button x:Name="ApplyMoleculeButton" Content="Apply" 
+                                                Click="ApplyMoleculeButton_Click"
+                                                >
+                                        </Button>
+                                        <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." 
+                                                Click="PushEcmMoleculeButton_Click"
+                                                >
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
                                 
                             </Expander>
