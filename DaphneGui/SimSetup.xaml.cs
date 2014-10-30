@@ -27,10 +27,19 @@ namespace DaphneGui
         public SimSetupControl()
         {
             InitializeComponent();
+            
+            
         }
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+
+            ToolWinTissue vrc = DataContext as ToolWinTissue;
+            if (vrc != null)
+            {
+                double temp = vrc.protocol.scenario.time_config.rendering_interval;
+            }
+
             ComboBox cb = e.Source as ComboBox;
 
             if (!cb.IsDropDownOpen)
@@ -81,11 +90,15 @@ namespace DaphneGui
             experiment_name_box.Text = exp_name;
             experiment_name_box.SelectAll();
             experiment_name_box.Focus();
+
+            
         }
 
 
         private void time_duration_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            return;
+
             if (MainWindow.SOP == null)
                 return;
             if (MainWindow.SOP.Protocol == null)
@@ -119,6 +132,15 @@ namespace DaphneGui
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void time_step_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ToolWinTissue vrc = DataContext as ToolWinTissue;
+            if (vrc != null)
+            {
+                double temp = vrc.protocol.scenario.time_config.rendering_interval;
+            }
         }
     }
 }

@@ -212,9 +212,6 @@
     <Compile Include="Pushing\PushEntity.xaml.cs">
       <DependentUpon>PushEntity.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ReactioComplexListControl.xaml.cs">
-      <DependentUpon>ReactioComplexListControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ReactionComplexControl.xaml.cs">
       <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
     </Compile>
@@ -328,10 +325,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DaphneResourceDictionary.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ReactioComplexListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

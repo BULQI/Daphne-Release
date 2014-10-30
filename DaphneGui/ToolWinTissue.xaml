@@ -30,72 +30,7 @@
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <!-- add control -->
-                <!--This is temporary-->
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
-                        <!-- Environment -->
-                        <!-- Remove reaction complexes for now 10/15/13 -->
-                        <!-- Reaction Complexes -->
-                        <Expander
-                            Visibility="Visible"
-                            Padding="5" 
-                            ExpandDirection="Down"
-                            IsExpanded="False"
-                            Header="Reaction Complexes"                                            
-                            x:Name="ReacCompExpander"
-                            Margin="0,5,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                            <StackPanel>
-                                <local:ReactionComplexControl x:Name="RCControl" 
-                                    DataContext="{Binding Path=MW.SOP.Protocol.scenario.environment.comp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
-                        </Expander>
-
-                        <Expander ExpandDirection="Down"
-                            IsExpanded="False"
-                            Header="Add reaction complex"
-                            x:Name="AddReacCxExpander"
-                            Margin="0,5,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}" >
-
-                                <StackPanel Orientation="Vertical" Margin="10,0">
-                                    <!--<StackPanel.Resources>
-                                        <DataTemplate x:Key="reacCxListItemTemplate">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Path=Name}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-
-                                    </StackPanel.Resources>-->
-
-                                    <!--<TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
-                                    <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
-                                        ItemsSource="{Binding Path=entity_repository.reaction_complexes}"                                                      
-                                        ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
-                                        SelectedIndex="0"
-                                    >
-                                    </ListBox>-->
-                                    <!--<StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
-                                        <Button Name="AddReacCxButton"  Width="50" Content="Add" Click="AddEcmReacCompButton_Click"/>
-                                    </StackPanel>-->
-
-                                    <!--<ContentControl Name="AddReactionComplexDetails"
-                                        Content="{Binding ElementName=lbAvailableReacCx, Path=SelectedItem}" 
-                                        ContentTemplate="{StaticResource reacListViewTemplate}" 
-                                        Margin="6"/>-->
-
-                                </StackPanel>
-                        </Expander>
-                    </StackPanel>
-                </ScrollViewer>
+                <!-- add control -->                
             </ScrollViewer>
         </TabItem>
 
@@ -103,12 +38,12 @@
         <TabItem x:Name="tabCellPop" Header="Cell Populations" AutomationProperties.AutomationId="DaphneCellPopsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">                
                 <!-- add control -->
-                <StackPanel Name="EntitiesStackPanel" Orientation="Vertical" Margin="8"
+                <!--<StackPanel Name="EntitiesStackPanel" Orientation="Vertical" Margin="8"
                     MouseLeftButtonDown="EntitiesStackPanel_LeftButtonDown"
                             KeyDown="EntitiesStackPanel_KeyDown">
                     
                     <TextBox Name="txtTest" Width="100"></TextBox>
-                </StackPanel>
+                </StackPanel>-->
 
             </ScrollViewer>
         </TabItem>
