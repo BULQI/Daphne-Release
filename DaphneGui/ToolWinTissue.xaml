@@ -13,11 +13,237 @@
                     x:Name="toolWinTissue"
                     >
 
-    <TabControl  x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
+    <docking:ToolWindow.Resources>
+        <CollectionViewSource x:Key="EcsBulkMoleculesListView" Source="{Binding Path=Protocol.entity_repository.molecules}"/>
+    </docking:ToolWindow.Resources>
+    
+    <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
 
         <TabControl.Resources>
-            <CollectionViewSource x:Key="environMolPopsListView"  
-                                  Source="{Binding Path=Protocol.scenario.environment.comp.molpops}"/>
+            <!-- molpop linear details template - cannot go in Dictionary1 -->
+            <DataTemplate DataType="{x:Type daph:MolPopLinear}">
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="True">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ElementName=cbToroidal, Path=IsChecked}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel  Grid.Column="0" Grid.Row="4">
+                        <TextBlock Text="impose gradient" Margin="60,2" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="100">
+
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="0,-4">
+                        <TextBlock x:Name="tbSpecify" Text="direction of gradient" Margin="0,0" 
+                                           Height="40" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center"  TextAlignment="Right" 
+                                           Width="100">
+                        </TextBlock>
+                        <ComboBox  x:Name="cbBoundFace" MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24"
+                                           ItemsSource="{Binding Source={StaticResource boundaryFaces}}"
+                                           SelectedValue="{Binding Path=boundary_face, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                           SelectionChanged="cbBoundFace_SelectionChanged">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="None">
+                                            <Setter Property="Visibility" Value="Collapsed">
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="6" Margin="50,4" Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}" >
+                        <TextBlock x:Name="tbConc" Text="concentration (molec/µm^3)" Margin="0,0" 
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" 
+                                           Width="160"/>
+                    </StackPanel>
+                    <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="7" Orientation="Horizontal"  >
+                        <TextBlock x:Name="tbLeft" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                                    <Setter Property="Text" Value="x=0"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                                    <Setter Property="Text" Value="y=0"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                                    <Setter Property="Text" Value="z=0"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                        </TextBlock>
+                        <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
+                                        Number="{Binding Path=boundaryCondition[0].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
+                                        SliderEnabled="False">
+                        </uc:DoublesBox>
+                    </StackPanel>
+                    <StackPanel Visibility="{Binding ElementName=cbBoundFace, Path=SelectedItem, Converter={StaticResource BoundaryFaceVisConv}}"  Grid.Column="0" Grid.Row="8" Orientation="Horizontal" >
+                        <TextBlock x:Name="tbRight" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" Width="100">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="1">
+                                        <Setter Property="Text" Value="{Binding ElementName=extent_x_slider, Path=Value, StringFormat='x={0}'}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="2">
+                                        <Setter Property="Text" Value="{Binding ElementName=extent_y_slider, Path=Value, StringFormat='y={0}'}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ElementName=cbBoundFace, Path=SelectedIndex}" Value="3">
+                                        <Setter Property="Text" Value="{Binding ElementName=extent_z_slider, Path=Value, StringFormat='z={0}'}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        </TextBlock>
+                        <uc:DoublesBox  MinWidth="100" HorizontalAlignment="Right"  Margin="4,0" Height="24" 
+                                        Number="{Binding Path=boundaryCondition[1].concVal, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                        
+                                        SNLowerThreshold="0.001"
+                                        SNUpperThreshold="1000"
+                                        SliderEnabled="False">
+                        </uc:DoublesBox>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+
+            <!-- Gaussian Box Specification : gaussBoxSpecDetailsTemplate  - cannot go in Dictionary1 -->
+            <DataTemplate x:Key="gaussBoxSpecDetailsTemplate">
+                <Grid Margin="0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
+                        <ColumnDefinition Width="44" />
+                        <ColumnDefinition Width="74" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+                        <Grid  VerticalAlignment="Center">
+                            <Rectangle Fill="White"
+                                       Stroke="Black"
+                                       StrokeThickness="0.5"
+                                       Width="15"
+                                       Height="15"
+                                       />
+                            <CheckBox x:Name="box_widget_on_checkbox"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                        Style="{StaticResource EyeballCheckboxStyle}"
+                                        IsChecked="{Binding Path=box_spec.box_visibility}"                                      
+                                        />
+                        </Grid>
+                        <Grid VerticalAlignment="Center">
+                            <Rectangle Fill="LightPink"
+                                   Stroke="Black"
+                                   StrokeThickness="0.5"
+                                   Width="15"
+                                   Height="15"
+                                   />
+                            <CheckBox x:Name="gauss_blob_on_checkbox"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                    Style="{StaticResource EyeballCheckboxStyle}"
+                                    IsChecked="{Binding Path=gaussian_region_visibility}"
+                                      Click="gaussian_region_actor_checkbox_clicked"
+                                      CommandParameter="{Binding}"
+                                    />
+                        </Grid>
+                    </StackPanel>
+                    <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
+                    <TextBlock Text="std. dev. (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
+                    <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
+                    <uc:DoublesBox x:Name="dbl_x_trans"
+                                   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"     
+                                   Number="{Binding Path=box_spec.x_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    <uc:DoublesBox x:Name="dbl_x_scale"
+                                   Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_x_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <TextBlock Text="Y" Grid.Column="0" Grid.Row="3" Margin="2,0" TextAlignment="Right" />
+                    <uc:DoublesBox x:Name="dbl_y_trans"
+                                   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2"   
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.y_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <uc:DoublesBox x:Name="dbl_y_scale"
+                                   Grid.Column="3" Grid.Row="3"   Grid.ColumnSpan="2" 
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_y_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                    <TextBlock Text="Z" Grid.Column="0" Grid.Row="4" Margin="2,0" TextAlignment="Right" />
+                    <uc:DoublesBox x:Name="dbl_z_trans"
+                                   Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.z_trans, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+                    <uc:DoublesBox x:Name="dbl_z_scale"
+                                   Grid.Column="3" Grid.Row="4"  Grid.ColumnSpan="2"  
+                                   TextFieldWidth="70"
+                                   SliderWidth="40"
+                                   RangeFactor="1"
+                                   DecimalPlaces="2"
+                                   Number="{Binding Path=box_spec.half_z_scale, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   >
+
+                    </uc:DoublesBox>
+
+                </Grid>
+            </DataTemplate>
+
+            <CollectionViewSource x:Key="environMolPopsListView" Source="{Binding Path=Protocol.scenario.environment.comp.molpops}"/>
+            
             <!-- for debugging -->
             <!--
             <local:DataContextConverter x:Key="dataContextConverter" />
@@ -26,7 +252,7 @@
 
         
         <!-- SIM SETUP -->
-            <TabItem Header="Sim Setup" x:Name="tabSimSetup" AutomationProperties.AutomationId="DaphneSimSetupTab">
+        <TabItem x:Name="tabSimSetup" Header="Sim Setup"  AutomationProperties.AutomationId="DaphneSimSetupTab">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <local:SimSetupControl DataContext="{Binding}"/>                     
                 </ScrollViewer>
@@ -34,6 +260,16 @@
 
         <!-- EXTRACELLULAR MEDIUM -->
         <TabItem x:Name="tabECM" Header="Extracellular Medium" AutomationProperties.AutomationId="DaphneECMTab" >
+            <TabItem.Resources>
+                <ObjectDataProvider x:Key="molpopDistributionTypes"
+                    MethodName="GetValues" 
+                    ObjectType="{x:Type sys:Enum}">
+                    <ObjectDataProvider.MethodParameters>
+                        <x:Type TypeName="daph:MolPopDistributionType" />
+                    </ObjectDataProvider.MethodParameters>
+                </ObjectDataProvider>
+            </TabItem.Resources>
+            
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 
                 <StackPanel Name="ConfigStackPanel" Orientation="Vertical" Margin="8">
@@ -47,7 +283,174 @@
                      >
                         <local:EnvironmentExtents DataContext="{Binding}"/>
                     </Expander>
-                </StackPanel>
+
+                    <!-- ECS Molecular Populations -->
+                    <Expander Padding="5" ExpandDirection="Down" IsExpanded="True"
+                              Header="Molecular Populations" x:Name="MolPopsExpander"
+                              Margin="0,5,0,0" Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
+                              Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                     >
+                        <StackPanel>
+                        <StackPanel.Resources>
+                            <DataTemplate x:Key="libMolListItemTemplate">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Path=Name}" Foreground="Black" Margin="5,0,0,0" />
+                                </StackPanel>
+                            </DataTemplate>
+                         </StackPanel.Resources>
+                            
+                        <!-- Molecular Populations -->
+                        <StackPanel>                     
+                            <StackPanel.ToolTip>
+                                <StackPanel Width="200" Orientation="Horizontal">
+                                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
+                                        Click Add button to create a population of cells from a subset defined below. 
+                                        Specify the number of cells, their color and the region (from above) that will contain these cells.
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel.ToolTip>            
+                            <TextBlock Text="Molecular Populations" FontWeight="Bold" Margin="0,-10,0,0" />
+                        </StackPanel>
+                           
+                        <!-- List of ecs molpops for selection -->
+                        <ListBox x:Name="lbEcsMolPops" MinHeight="20" SelectedIndex="-1"
+                                ItemsSource="{Binding Path=Protocol.scenario.environment.comp.molpops, Mode=TwoWay}" 
+                                ItemTemplate="{Binding Source={StaticResource compMolListItemTemplate}}"        
+                        />
+                            <!-- buttons for adding, deleting molpops -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
+                            <Button Name="AddEcmMolButton"  Width="50" Content="New" Click="AddEcmMolButton_Click"/>
+                            <Button Name="RemoveEcmMolButton" Width="50" Content="Remove" Click="RemoveEcmMolButton_Click" />
+                        </StackPanel>
+                            
+                            <!-- molecular population details -->
+                            <Expander ExpandDirection="Down" IsExpanded="True" 
+                                      Header="Details" x:Name="MolDetailsExpander"  Margin="0,-15,0,0"  Canvas.ZIndex="1"
+                            >
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal" DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+                                                <!-- display molpop name -->
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
+                                                    <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
+                                                    <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
+                                                </StackPanel>
+                                                <!-- Display and allow selection of molecule type -->
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
+                                                    <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
+                                                    <ComboBox  x:Name="ecm_molecule_combo_box" MinWidth="140" HorizontalAlignment="Left"  Margin="4,0"                                                        
+                                                        DisplayMemberPath="Name"
+                                                        SelectedValue="{Binding Path=molecule.entity_guid, UpdateSourceTrigger=Explicit}"
+                                                        SelectedValuePath="entity_guid"
+                                                        SelectionChanged="ecs_molpop_molecule_combo_box_SelectionChanged"
+                                                        >
+                                                        <!--GotFocus="ecm_molecule_combo_box_GotFocus"-->
+
+                                                        <ComboBox.ItemsSource>
+                                                            <CompositeCollection>
+                                                                <CollectionContainer Collection="{Binding Source={StaticResource EcsBulkMoleculesListView}}" />
+                                                                <daph:ConfigMolecule Name="New Molecule"/>
+                                                            </CompositeCollection>
+                                                        </ComboBox.ItemsSource>
+
+                                                    </ComboBox>
+
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </StackPanel>
+                                        <!-- display and allow editing of distribution type and details-->
+                                        <StackPanel Margin="10,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+                                                <!-- initial distribution -->
+                                                <!-- select molpop distribution type -->
+                                                <!-- display molpop distribution type -->
+                                                <!-- display molpop distribution details -->
+                                                <!--"Explicit" can only set programmatically, not selectable by user!-->
+
+                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
+                                                    <TextBlock Text="initial distribution" Margin="0,10" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                    
+                                                    <ComboBox Margin="10,10" 
+                                                        Name="MolPopDistributionTypeComboBox"
+                                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
+                                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
+                                                        SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
+                                                        MinWidth="120">
+                                                        
+                                                        <ComboBox.ItemContainerStyle>
+                                                            <Style TargetType="{x:Type ComboBoxItem}">
+                                                                <Style.Triggers>
+
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Explicit">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}}"  Value="Linear">
+                                                                        <Setter Property="IsEnabled" Value="False">
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding ElementName=comboToroidal, Path=SelectedIndex}" Value="0" />
+                                                                            <Condition Binding="{Binding Content, RelativeSource={RelativeSource self}}" Value="Linear" />
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="IsEnabled" Value="True">
+                                                                        </Setter>
+                                                                    </MultiDataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </ComboBox.ItemContainerStyle>
+                                                    </ComboBox>
+                                                </StackPanel>
+                                                
+                                                
+                                                <StackPanel Grid.Column="0" Grid.Row="1">
+                                                    <ContentControl Name="MolPopDistributionDetails"
+                                                            Content="{Binding ElementName=lbEcsMolPops, Path=SelectedItem}" 
+                                                            ContentTemplate="{StaticResource molpopDistributionDetailsTemplate}" 
+                                                            Margin="6,2"/>
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </StackPanel>
+                                    </StackPanel>
+
+
+                                </StackPanel>
+                            </Expander>
+
+                        </StackPanel>
+
+                    </Expander> <!-- ecs molpops expander -->
+                </StackPanel> <!-- end ecs config stack panel -->
+                
+                
 
             </ScrollViewer>
         </TabItem>
@@ -66,20 +469,15 @@
                 <StackPanel>
 
                     <!-- Report Settings -->
-                    <Expander ExpandDirection="Down" Padding="5"
-                            IsExpanded="True"
-                            Header="Report Settings"
-                            Margin="0,4,0,0" 
-                            Canvas.ZIndex="1"
-                            BorderThickness="1"
-                            BorderBrush="Black"
+                    <Expander ExpandDirection="Down" Padding="5" IsExpanded="True" Header="Report Settings"
+                            Margin="0,4,0,0"  Canvas.ZIndex="1" BorderThickness="1" BorderBrush="Black"
                             Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
-                            >
-                            <ContentControl Name="ReportSettings"
-                                    Content="{Binding Path=Protocol}"
-                                    ContentTemplate="{StaticResource reportSettingsTemplate}" 
-                                    Margin="6"
-                            />
+                    >
+                        <ContentControl Name="ReportSettings"
+                                Content="{Binding Path=Protocol}"
+                                ContentTemplate="{StaticResource reportSettingsTemplate}" 
+                                Margin="6"
+                        />
                     </Expander>
 
                     <!--Molecules in Extracellular Medium -->
@@ -338,7 +736,6 @@
                             </DataGrid.Columns>
                         </DataGrid>
                     </Expander>
-
 
                     <!-- Molecules by Cell -->
                     <Expander ExpandDirection="Down" Padding="5"
