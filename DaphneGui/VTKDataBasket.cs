@@ -24,11 +24,9 @@ namespace DaphneGui
     /// </summary>
     public class MolPopTypeController
     {
-        // molpop properties
-        private bool renderGradient;
-        private double blendingWeight;
+
         // color as rgba
-        private double[] color = new double[4] { 0, 0, 0, 0 };
+        //private double[] color = new double[4] { 0, 0, 0, 0 };
         /// <summary>
         /// identifier indicating the molpop distribution type
         /// </summary>
@@ -397,7 +395,6 @@ namespace DaphneGui
             }
 
             bool first = true;
-            bool hasValue = false;
             //these are pre-evalulated/allocated to improve performance - axin
             int NodesPerSide2 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(2);
             int NodesPerSide1 = SimulationBase.dataBasket.Environment.Comp.Interior.NodesPerSide(1);
@@ -419,7 +416,6 @@ namespace DaphneGui
                 mp_color[3] = render_mol.color.EntityColor.A;
                 if (render_mol.max == 0.0) continue;
 
-                hasValue = true;
 
                 // generate scalar data
                 double step_size = SimulationBase.dataBasket.Environment.Comp.Interior.StepSize();

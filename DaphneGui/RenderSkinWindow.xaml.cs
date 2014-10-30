@@ -276,6 +276,10 @@ namespace DaphneGui
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            if (value is string)
+            {
+                return value;
+            }
             Enum enum_val = (Enum)value;
             string description = GetEnumDescription(enum_val);
             return description;

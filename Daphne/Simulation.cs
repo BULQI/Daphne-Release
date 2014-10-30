@@ -151,7 +151,7 @@ namespace Daphne
         {
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
 
-            simCell.renderLabel = cell.label ?? cell.entity_guid;
+            simCell.renderLabel = cell.renderLabel ?? cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;

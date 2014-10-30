@@ -2160,6 +2160,7 @@ namespace Daphne
             cellpopulation_id_cellpopulation_dict = new Dictionary<int, CellPopulation>();
             // Set callback to update box specification extents when environment extents change
             environment.PropertyChanged += new PropertyChangedEventHandler(environment_PropertyChanged);
+            RenderSkinName = "default";
             popOptions = new RenderPopOptions();
         }
 
@@ -4387,6 +4388,7 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molpop_guid = id.ToString();
+            renderLabel = molpop_guid;
 
             if (rt == ReportType.CELL_MP)
             {
@@ -5391,7 +5393,7 @@ namespace Daphne
 
     public class ConfigCell : ConfigEntity
     {
-        public string label { get; set; }        //label to color scheme
+        public string renderLabel { get; set; }        //label to color scheme
 
         public ConfigCell()
             : base()
@@ -5408,7 +5410,8 @@ namespace Daphne
 
             // behaviors
             genes = new ObservableCollection<ConfigGene>();
-
+            
+            renderLabel = this.entity_guid;
         }
 
         public ConfigCell Clone(bool identical)
@@ -6315,6 +6318,10 @@ namespace Daphne
             set
             {
                 _Cell = value;
+                if (_Cell != null)
+                {
+                    renderLabel = _Cell.renderLabel;
+                }
                 OnPropertyChanged("Cell");
             }
         }
