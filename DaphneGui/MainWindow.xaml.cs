@@ -2026,7 +2026,7 @@ namespace DaphneGui
                 this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-            this.CellRenderMethodCB.DataContext = sop.Protocol;
+                //this.CellRenderMethodCB.DataContext = sop.Protocol; 
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
@@ -2094,7 +2094,8 @@ namespace DaphneGui
                 orig_content = sop.Protocol.SerializeToStringSkipDeco();
             }
 
-            
+            //this cannot be set before databaseket get updated from loading the new scenario
+            CellRenderMethodCB.DataContext = sop.Protocol;
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();

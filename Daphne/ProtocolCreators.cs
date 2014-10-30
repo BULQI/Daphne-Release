@@ -336,6 +336,9 @@ namespace Daphne
                     ((ReportECM)configMolPop.report_mp).mean = true;
 
                     protocol.scenario.environment.comp.molpops.Add(configMolPop);
+
+                    //rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
                 }
             }
 
@@ -355,6 +358,8 @@ namespace Daphne
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
 
             // Cell reporting
             cellPop.report_xvf.position = false;
@@ -503,6 +508,9 @@ namespace Daphne
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = false;
 
+                    //Rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
+
                     protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
             }
@@ -529,6 +537,9 @@ namespace Daphne
             cellPop.report_xvf.position = true;
             cellPop.report_xvf.velocity = true;
             cellPop.report_xvf.force = true;
+
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
 
             foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
             {
@@ -653,6 +664,9 @@ namespace Daphne
                 protocol.reporter_file_name = "Diffusion_test";
 
                 protocol.scenario.environment.comp.molpops.Add(configMolPop);
+
+                //rendering
+                ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
             }
         }
 
