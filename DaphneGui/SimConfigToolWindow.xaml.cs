@@ -102,7 +102,13 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
-            cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            //if about rendering...
+            //for now, use name as label
+            cp.renderLabel = cp.Cell.entity_guid;
+
+            //add rendering options to scenario
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+
             scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
@@ -140,6 +146,14 @@ namespace DaphneGui
             //Remove the cell population
             scenario.cellpopulations.Remove(current_item);
 
+            //remove rendering option if no other refernece
+            string label = current_item.renderLabel;
+            bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, true) == 0;
+            if (safe_to_remove)
+            {
+                (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, true);
+            }
+
             CellPopsListBox.SelectedIndex = index;
 
             if (index >= CellPopsListBox.Items.Count)
@@ -175,7 +189,9 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
             gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            Color spec_color = ColorHelper.pickASolidColor();
+            spec_color.A = 80;
+            gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             mpg.gauss_spec = gg;
@@ -370,8 +386,6 @@ namespace DaphneGui
                         molpoplin.boundary_face = BoundaryFace.X;
                         current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
-                        current_mol.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        current_mol.mp_render_blending_weight = 2.0;
                         break;
 
                     case MolPopDistributionType.Gaussian:
@@ -441,9 +455,14 @@ namespace DaphneGui
             }
             if (gmp.molecule == null) return;
             gmp.mp_dist_name = "New distribution";
-            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
+
+            gmp.renderLabel = gmp.molecule.renderLabel ?? gmp.molecule.entity_guid;
+
+            //add render option
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(gmp.renderLabel, gmp.Name, false);
+
         }
 
         private void RemoveEcmMolButton_Click(object sender, RoutedEventArgs e)
@@ -486,6 +505,14 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
 
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+                //remove rendering option if no other refernece
+                string label = cmp.renderLabel;
+                bool safe_to_remove = (MainWindow.SOP.Protocol.scenario as TissueScenario).RenderPopReferenceCount(label, false) == 0;
+                if (safe_to_remove)
+                {
+                    (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(label, false);
+                }
+
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -853,7 +880,9 @@ namespace DaphneGui
                 ////gg.DrawAsWireframe = true;
 
                 //gg.gaussian_spec_color = cellPop.cellpopulation_color;
-                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
+                var render_cell = MainWindow.SOP.GetRenderCell(cellPop.renderLabel);
+                Color cellpop_color = render_cell.base_color.EntityColor;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellpop_color.R, cellpop_color.G, cellpop_color.B);
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
@@ -1081,6 +1110,11 @@ namespace DaphneGui
                 }
                 //ucCellPopCellDetails.DataContext = cp.Cell;
             }
+
+            //replace rendering info
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(cp.renderLabel, true);
+            cp.renderLabel = cp.Cell.entity_guid;
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.cellpopulation_name, true);
         }
 
         /// <summary>
@@ -1558,6 +1592,8 @@ namespace DaphneGui
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
+
+
             }
             //user picked an existing molecule
             else
@@ -1578,6 +1614,11 @@ namespace DaphneGui
                 if (curr_mol_guid != molpop.molecule.entity_guid)
                     molpop.Name = new_mol_name;
             }
+
+            //update render informaiton
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(molpop.renderLabel, false);
+            molpop.renderLabel = molpop.molecule.entity_guid;
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(molpop.renderLabel, molpop.Name, false);
 
             if (lvAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
@@ -2084,35 +2125,9 @@ namespace DaphneGui
 
             MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
-            mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
+            mpg.gauss_spec.gaussian_spec_color = Colors.White;
         }
 
-        private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
-            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
-            // but I don't know for sure; we can discuss
-            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            {
-                return;
-                //throw new InvalidCastException();
-            }
-
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
-            CellPopulation cellPop = (CellPopulation)CellPopsListBox.SelectedItem;
-            if (cellPop == null)
-                return;
-
-            CellPopDistribution current_dist = cellPop.cellPopDist;
-
-            if (current_dist.DistType != CellPopDistributionType.Gaussian)
-            {
-                return;
-            }
-
-            ((CellPopGaussian)(cellPop.cellPopDist)).gauss_spec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
-        }
         
         private void PushEcmMoleculeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -2153,6 +2168,82 @@ namespace DaphneGui
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
         }
+        private void btnNewSkinClick(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (skinNameTextBox.Visibility == System.Windows.Visibility.Collapsed)
+            {
+                skinLabel.Visibility = System.Windows.Visibility.Visible;
+                skinNameTextBox.Visibility = System.Windows.Visibility.Visible;
+                button.Content = "Create";
+                return;
+            }
+            //get a name for the new skin
+            string skinName = skinNameTextBox.Text;
+            skinNameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+            skinLabel.Visibility = System.Windows.Visibility.Collapsed;
+            skinNameTextBox.Text = "";
+            button.Content = "New Skin";
+            if (skinName == null || skinName.Length == 0)
+            {
+                skinNote.Text = "No Name Given";
+                return;
+            }
+
+            RenderSkin skin = MainWindow.SOP.SkinList.Where(x => x.Name == skinName).SingleOrDefault();
+            if (skin != null)
+            {
+                var result = MessageBox.Show("A skin with the given name exists, Do you want to overwrite it? ", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    skinNote.Text = "Creating new skin cancelled";
+                    return;
+                }
+            }
+
+            var er = MainWindow.SOP.Protocol.entity_repository;
+            RenderSkin newrs = new RenderSkin(skinName, er);
+            //serialize to file
+            string SkinFilePath = new Uri(MainWindow.appPath + @"\Config\RenderSkin\" + skinName + ".json").LocalPath;
+            newrs.SerializeToFile(SkinFilePath);
+            newrs.FileName = SkinFilePath;
+            if (skin != null)
+            {
+                int index = MainWindow.SOP.SkinList.IndexOf(skin);
+                MainWindow.SOP.SkinList.RemoveAt(index);
+                MainWindow.SOP.SkinList.Insert(index, newrs);
+                skinNote.Text = "skin data regenerated";
+            }
+            else
+            {
+                MainWindow.SOP.SkinList.Add(newrs);
+                skinNote.Text = "New Skin created";
+            }
+
+            var cv = (CollectionView)CollectionViewSource.GetDefaultView(MainWindow.SOP.SkinList);
+            if (cv != null)
+            {
+                cv.MoveCurrentTo(newrs);
+            }
+        }
+
+        private void Button_Click_Edit_RenderSkin(object sender, RoutedEventArgs e)
+        {
+            var item = skinChoiceComboBox.SelectedItem;
+
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            MainWindow.ST_RenderSkinWindow.Visibility = System.Windows.Visibility.Visible;
+            MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
+        private void skinChoiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MainWindow.ST_RenderSkinWindow.Visibility != System.Windows.Visibility.Visible) return;
+            var item = skinChoiceComboBox.SelectedItem;
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            //MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
     }
 
     public class DatabindingDebugConverter : IValueConverter
@@ -2160,6 +2251,13 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
+            var val = value as Protocol;
+            if (val != null && val.scenario is TissueScenario)
+            {
+                var ts = val.scenario as TissueScenario;
+                return ts.cellpopulations;
+            }
+
             return value;
         }
 
@@ -2170,6 +2268,30 @@ namespace DaphneGui
             return value;
         }
     }
+
+
+    /// <summary>
+    /// given a cell population, fidn the pop color for the population
+    /// </summary>
+    public class CellPopulationToSolidBrushConv : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            var cellpop = value as CellPopulation;
+            if (cellpop == null) return null;
+
+            RenderCell rc = MainWindow.SOP.GetRenderCell(cellpop.renderLabel);
+            if (rc == null)return null;
+            return new SolidColorBrush(rc.base_color.EntityColor);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 
     public class diffSchemeValueConverter : IValueConverter
     {

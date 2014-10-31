@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollisionManager.cs" />
+    <Compile Include="ColorHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="CellManager.cs" />

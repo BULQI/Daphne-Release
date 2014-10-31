@@ -49,6 +49,24 @@
             <CollectionContainer Collection="{Binding Source={StaticResource moleculesListView}}" />
         </CompositeCollection>
 
+        
+        <ObjectDataProvider x:Key="RenderMethodEnum"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="daph:RenderMethod" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <!--<daph:CellRenderMethodConverter x:Key="CellRenderMethodConverter" />-->
+        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+
+
+        <local:CellPopulationToSolidBrushConv x:Key="CellPopulationToSolidBrushConv" />
+        
+        
+        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
+
         <!--<CollectionViewSource x:Key="newBoundaryMoleculesListView"  
                                   Source="{Binding Path=entity_repository.molecules}"
                                   Filter="boundaryMoleculesListView_Filter"
@@ -1155,7 +1173,7 @@
                     <Rectangle Width="10" Height="10"
                                                Margin="5,0,0,0"
                                                VerticalAlignment="Center"
-                                               Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
+                                               Fill="{Binding Converter={StaticResource CellPopulationToSolidBrushConv}}"
                                                Stroke="Black" StrokeThickness="0.5"/>
 
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
@@ -1265,41 +1283,6 @@
                                     ValueChanged="numberBox_ValueChanged"
                                     />
                         </StackPanel>
-
-                        <TextBlock Text="color" Margin="6,0" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                        <ComboBox x:Name="cbCellColor"  Width="140" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="4" Margin="0,2"
-                                        ItemsSource="{Binding Source={StaticResource colorList}}" 
-                                        ItemTemplate="{Binding Source={StaticResource colorItemTemplate}}"
-                                        SelectedIndex="{Binding Path=cellpopulation_predef_color, Converter={StaticResource ColorListToIntConv}, 
-                                        Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        SelectionChanged="cellPopColor_SelectionChanged"
-                                        >                            
-                        </ComboBox>
-
-                        <StackPanel Grid.Column="1" Grid.Row="5" >
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=cbCellColor, Path=SelectedIndex}" Value="7">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-
-                            <editors:ColorEditBox x:Name="cellColorEditBox" 
-                                        CheckBoxVisibility="Collapsed"
-                                        SpinnerVisibility="Collapsed"
-                                        Width="140"
-                                        HorizontalAlignment="Left" 
-                                        Format="a r g b"
-                                        Value="{Binding Path=cellpopulation_color, UpdateSourceTrigger=PropertyChanged}"
-                                        Margin="0,2" >
-
-                            </editors:ColorEditBox>
-                        </StackPanel>
-
                     </Grid>
                     <Grid>
                         <Expander ExpandDirection="Down" Padding="6"
@@ -1307,7 +1290,7 @@
                                 IsExpanded="False"
                                 Header="Cell Placement Method"
                                 x:Name="CPMExpander"
-                                Margin="0,-10,0,0" 
+                                Margin="0,10,0,0" 
                                 Canvas.ZIndex="1"         >
                             
                                 <StackPanel Orientation="Vertical">                                
@@ -1987,41 +1970,8 @@
                                                     <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                                     <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
                                                 </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
-                                                    <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                                    <editors:ColorEditBox x:Name="cellColorEditBox"
-                                    CheckBoxVisibility="Collapsed"
-                                    SpinnerVisibility="Collapsed"
-                                    Width="140"
-                                    HorizontalAlignment="Left" 
-                                    Format="a r g b"
-                                    Value="{Binding Path=mp_color, UpdateSourceTrigger=PropertyChanged}"
-                                    Margin="4,2"
-                                    ValueChanged="molPopColorEditBox_ValueChanged"
-                                    />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
-                                                    <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
-                                                    <Slider x:Name="solfac_weight_slider"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                    HorizontalAlignment="Left"
-                                Width="50"
-                                    Margin="4,0"
-                                RenderTransform="1.0,0,0,0.5,0,7"
-                                Minimum="0" 
-                                Maximum="5" 
-                                Value="{Binding Path=mp_render_blending_weight}" 
-                                IsSnapToTickEnabled="True" 
-                                TickFrequency="0.1" 
-                                />
-                                                    <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                VerticalAlignment="Center"
-                                TextAlignment="Right"
-                                Margin="5,0,0,0"
-                                MinWidth="20"
-                                />
-                                                </StackPanel>
+
+
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="0,10">
                                                     <TextBlock Text="molecule" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center"  TextAlignment="Right" MinWidth="60"/>
 
@@ -2056,15 +2006,15 @@
                                                     <RowDefinition />
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0">
-                                                    <TextBlock Text="initial distribution" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                    <TextBlock Text="initial distribution" Margin="0,10" HorizontalAlignment="Right" VerticalAlignment="Center" />
 
-                                                    <ComboBox Margin="10,0" 
-                                        Name="MolPopDistributionTypeComboBox"
-                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
-                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
-                                        SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
-                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
-                                        MinWidth="120">
+                                                    <ComboBox Margin="10,10" 
+                                                        Name="MolPopDistributionTypeComboBox"
+                                                        ItemsSource="{Binding Source={StaticResource molpopDistributionTypes}}"
+                                                        ItemTemplate="{Binding Source={StaticResource molpopDistributionTypeTemplate}}"
+                                                        SelectedValue="{Binding Path=mp_distribution.mp_distribution_type, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"                                        
+                                                        SelectionChanged="MolPopDistributionComboBox_SelectionChanged"
+                                                        MinWidth="120">
                                                         <ComboBox.ItemContainerStyle>
                                                             <Style TargetType="{x:Type ComboBoxItem}">
                                                                 <Style.Triggers>
@@ -2647,7 +2597,7 @@
         </TabItem>
 
         <!-- REPORTS -->
-        <TabItem Header="Reports" x:Name="tabReports" Loaded="TabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
+        <TabItem Header="Reports" x:Name="tabReports" Loaded="TabItem_Loaded" AutomationProperties.AutomationId="DaphneRenderingTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical" Margin="8" >
                     <StackPanel.Resources >
@@ -2930,7 +2880,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                
+
                                 <DataGridCheckBoxColumn Header="Death" Width="60"                 
                                     Binding="{Binding Path=reportStates.Death, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
@@ -2940,7 +2890,7 @@
                                         </Style>
                                     </DataGridCheckBoxColumn.CellStyle>
                                 </DataGridCheckBoxColumn>
-                                
+
                                 <DataGridCheckBoxColumn Header="Division" Width="60"                 
                                     Binding="{Binding Path=reportStates.Division, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                     ElementStyle="{StaticResource checkboxstyle1}">
@@ -3197,6 +3147,234 @@
                     
             </ScrollViewer>
         </TabItem>
+
+
+        <!-- Rendering scheme -->
+        <TabItem Header="Rendering Scheme" x:Name="tabRending" Loaded="TabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical" Margin="8" >
+ 
+                    <!-- Rendering Settings -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Rendering Settings"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <StackPanel>
+                            <TextBlock Text="Rendering Skin" FontWeight="Bold" Margin="0,-10,0,5" />
+
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="skinChoiceComboBox" MinWidth="80" 
+                                          ItemsSource="{Binding Tag.SkinList, ElementName=MyToolWindow}"
+                                          SelectedItem="{Binding Tag.SelectedRenderSkin, ElementName=MyToolWindow}"
+                                          IsSynchronizedWithCurrentItem="True"
+                                          DisplayMemberPath="Name"
+                                          SelectionChanged="skinChoiceComboBox_SelectionChanged"
+                                          >
+
+                                </ComboBox>
+                                <Button Content="Edit Selected skin" Margin="20, 0" Click="Button_Click_Edit_RenderSkin"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                                <TextBlock x:Name="skinLabel" Visibility="Collapsed">Name:</TextBlock>
+                                <TextBox x:Name="skinNameTextBox"  Visibility="Collapsed" MinWidth="80" Margin="5, 0, 10, 0"></TextBox>
+                                <Button Content="New skin" Click="btnNewSkinClick" MinWidth="80"/>
+                                <TextBlock Name="skinNote" Margin="5,0"></TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Cell options -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Cell Options"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <!--<TextBlock Text="Cell Information" FontWeight="Bold" Margin="0,10,0,0" />-->
+                        <DataGrid x:Name="dgRenderCellDetails1" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Path=scenario.popOptions.cellPopOptions, UpdateSourceTrigger=PropertyChanged}"     
+                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              CanUserSortColumns="False" RowHeaderWidth="0"
+                              VerticalContentAlignment="Center"
+                              CanUserAddRows="False"
+                              BorderThickness="1"
+                              BorderBrush="Black"
+                            >
+                            
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="cell population" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderMethod">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                      SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" >
+                                                <ComboBox.ItemContainerStyle>
+                                                    <Style TargetType="ComboBoxItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    
+                                </DataGridTemplateColumn>
+                                
+                                <!--<DataGridComboBoxColumn Header="Render Method" ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                        SelectedItemBinding="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}">
+ 
+                                    
+                                </DataGridComboBoxColumn>-->
+                                
+                               
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+
+
+                    <!-- Molecules in Extracellular Medium -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Molecules in Extracellular Medium"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                        <DataGrid x:Name="dgRenderMolDetails1" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Path=scenario.popOptions.molPopOptions, UpdateSourceTrigger=PropertyChanged}"     
+                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              CanUserSortColumns="False" RowHeaderWidth="0"
+                              VerticalContentAlignment="Center"
+                              CanUserAddRows="False"
+                              BorderThickness="1"
+                              BorderBrush="Black"
+                            >
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Molecular population" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderMethod" MinWidth="220">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                      SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" >
+                                                <ComboBox.ItemContainerStyle>
+                                                    <Style TargetType="ComboBoxItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=mol}"  Value="false">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+
+                                </DataGridTemplateColumn>
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+
+                </StackPanel>
+
+            </ScrollViewer>
+        </TabItem>
+
+
 
         
         <!-- LIBRARIES: CELLS -->
