@@ -440,13 +440,37 @@
                                             </Grid>
                                         </StackPanel>
                                     </StackPanel>
-
-
                                 </StackPanel>
-                            </Expander>
 
+                            </Expander>
+                            <!-- end molecular population details -->
+
+                            <!-- molecule details -->
+                            <Expander ExpandDirection="Down"
+                                              IsExpanded="False"
+                                              Header="Molecule Properties"
+                                              x:Name="ecmMolPropExpander"
+                                              Margin="0,0,0,0" 
+                                              Canvas.ZIndex="1"
+                                              DataContext="{Binding ElementName=lbEcsMolPops, Path=SelectedItem, Mode=TwoWay}"
+                                              >
+                                <StackPanel>
+                                    <ContentControl Name="ecmMolpopMolDetails"
+                                            Content="{Binding Path=molecule}" 
+                                            ContentTemplate="{StaticResource editMoleculeTemplate}" 
+                                            Margin="6"/>
+
+                                    <Button x:Name="PushEcmMoleculeButton" Content="Save Molecule to Subcellular Components Library..." Click="PushEcmMoleculeButton_Click">
+
+                                    </Button>
+                                </StackPanel>
+
+                            </Expander>
+                            
                         </StackPanel>
 
+                        <!-- reactions -->
+                        
                     </Expander> <!-- ecs molpops expander -->
                 </StackPanel> <!-- end ecs config stack panel -->
                 
