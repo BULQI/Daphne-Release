@@ -26,12 +26,10 @@ namespace Workbench
     {
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
-        private ChartManager cm;
+        private ChartManager Chart;
         private System.Drawing.Size chartSize;
         public VatReactionComplex RC { get; set; }
         private SimulationBase Sim;
-
-        ////public ToggleButton toggleButton { get; set; }
 
         public ChartViewToolWindow()
         {
@@ -42,32 +40,61 @@ namespace Workbench
 
         public void ClearChart()
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.ClearChart();
+            Chart.ClearChart();
         }
         
         public void Render()
         {
-            
             RC = DataContext as VatReactionComplex;
 
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
+            //TEMP CODE FOR TESTING
+            List<Reaction> mylist = VatReactionComplex.dataBasket.Environment.Comp.BulkReactions;
+            List<double> templist = dictConcs.First().Value;
+            double[] val = new double[3] { 0,0,0 };
+
+            int n = 0;
+            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
+            {
+                val[n] = kvp.Value[0];
+                kvp.Value.Clear();
+                n++;
+            }
+
+            n = 0;
+            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
+            {
+                //val = 1 + n;
+                double delta = 0;
+                for (int i = 0; i < 100; i++)
+                {
+                    delta = delta + i/100.0;
+                    val[n] = val[n] + delta;
+                    if (val[n] <= 0)
+                        val[n] = 0.1;
+                    kvp.Value.Add(val[n]);
+                }
+                n++;
+            }
+            //END TEST CODE
+
             if (lTimes.Count > 0 && dictConcs.Count > 0)
             {
-                cm = new ChartManager(this, chartSize);
-                cm.PChart = pChartMolConcs;
-                
-                cm.ListTimes = lTimes;
-                cm.DictConcs = dictConcs;                
+                Chart = new ChartManager(this, chartSize);
+                Chart.PChart = pChartMolConcs;
 
-                cm.LabelX = "Time";
-                cm.LabelY = "Concentration";
-                cm.TitleXY = "Time Trajectory of Molecular Concentrations";
-                cm.DrawLine = true;
+                Chart.ListTimes = lTimes;
+                Chart.DictConcs = dictConcs;
+
+                Chart.LabelX = "Time";
+                Chart.LabelY = "Concentration";
+                Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
+                Chart.DrawLine = true;
 
                 System.Windows.Forms.MenuItem[] menuItems = 
                 {   
@@ -78,7 +105,7 @@ namespace Workbench
                 };
 
                 System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                cm.SetContextMenu(menu);
+                Chart.SetContextMenu(menu);
                 menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
                 menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
 
@@ -87,7 +114,7 @@ namespace Workbench
                 btnDiscard.IsEnabled = true;
                 btnSave.IsEnabled = true;
 
-                cm.DrawChart();
+                Chart.DrawChart();
 
                 dgInitConcs.ItemsSource = RC.initConcs;
 #if OLD_RC
@@ -100,10 +127,10 @@ namespace Workbench
         
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.ChartSize;
             int w = sz.Width;
             int h = sz.Height;
 
@@ -120,18 +147,18 @@ namespace Workbench
             windowsFormsHost1.Height = h;
             
             chartSize = sz;
-            cm.ChartSize = sz;
+            Chart.ChartSize = sz;
 
-            cm.DrawChart();
+            Chart.DrawChart();
                        
         }
 
         private void btnDecSize_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            System.Drawing.Size sz = cm.ChartSize;
+            System.Drawing.Size sz = Chart.ChartSize;
 
             sz.Width = (int)(sz.Width * 0.9);
             sz.Height = (int)(sz.Height * 0.9);
@@ -143,8 +170,8 @@ namespace Workbench
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
             chartSize = sz;
-            cm.ChartSize = sz;
-            cm.DrawChart();            
+            Chart.ChartSize = sz;
+            Chart.DrawChart();            
         }        
 
         private void btnDiscard_Click(object sender, RoutedEventArgs e)
@@ -165,25 +192,25 @@ namespace Workbench
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (cm != null)
+            if (Chart != null)
             {
-                cm.SaveChanges();
+                Chart.SaveChanges();
             }
         }
         private void btnDiscard_Click(object sender, EventArgs e)
         {
             RC.RestoreOriginalConcs();
             RC.RunForward();
-            cm.ListTimes = RC.ListTimes;
-            cm.DictConcs = RC.DictGraphConcs;
-            cm.DrawChart();
+            Chart.ListTimes = RC.ListTimes;
+            Chart.DictConcs = RC.DictGraphConcs;
+            Chart.DrawChart();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (cm != null)
+            if (Chart != null)
             {
-                cm.SaveChanges();
+                Chart.SaveChanges();
             }
         }
                 
@@ -199,11 +226,11 @@ namespace Workbench
             foreach (MolConcInfo mci in RC.initConcs)
             {
                 //Fix this
-                ////RC.EditConc(mci.molguid, mci.conc);
+                RC.EditConc(mci.molguid, mci.conc);
             }
 
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
+            Chart.RedrawSeries();
+            Chart.RecalculateYMax();
         }
 
         private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -232,27 +259,27 @@ namespace Workbench
                 //Fix this
                 ////RC.UpdateRateConstants();
                 ////RC.Sim.Load(MainWindow.SOP.Protocol, true);
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                Chart.RedrawSeries();
+                Chart.RecalculateYMax();
             }
         }
 
         private void btnX_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsXLogarithmic = !cm.IsXLogarithmic;
-            cm.DrawChart();
+            Chart.IsXLogarithmic = !Chart.IsXLogarithmic;
+            Chart.DrawChart();
         }
 
         private void btnY_Axis_Click(object sender, RoutedEventArgs e)
         {
-            if (cm == null)
+            if (Chart == null)
                 return;
 
-            cm.IsYLogarithmic = !cm.IsYLogarithmic;
-            cm.DrawChart();
+            Chart.IsYLogarithmic = !Chart.IsYLogarithmic;
+            Chart.DrawChart();
         }
 
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -264,8 +291,8 @@ namespace Workbench
                     //Fix this
                     ////RC.EditConc(mci.molguid, mci.conc);
                 }
-                cm.RedrawSeries();
-                cm.RecalculateYMax();
+                Chart.RedrawSeries();
+                Chart.RecalculateYMax();
             }
         }
 
@@ -273,10 +300,10 @@ namespace Workbench
         {
             if (e.PropertyName == "Number")
             {
-                if (RC != null && cm != null)
+                if (RC != null && Chart != null)
                 {
-                    cm.RedrawSeries();
-                    cm.RecalculateYMax();
+                    Chart.RedrawSeries();
+                    Chart.RecalculateYMax();
                 }
             }
         }
@@ -291,8 +318,8 @@ namespace Workbench
 
             //Fix this
             ////RC.UpdateRateConstants();
-            cm.RedrawSeries();
-            cm.RecalculateYMax();
+            Chart.RedrawSeries();
+            Chart.RecalculateYMax();
 
             //This causes a refresh of the conc data grid
             UpdateGrids();

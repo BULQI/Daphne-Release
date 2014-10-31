@@ -27,23 +27,14 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
-            <!--<TextBlock Grid.Column="0" Grid.Row="1">Mouse Down Pos:</TextBlock>
-                <TextBox x:Name="txtMouseClick" Grid.Column="1" Grid.Row="1" Width="150" HorizontalAlignment="Left" >Mouse down</TextBox>
-                <TextBlock Grid.Column="2" Grid.Row="1">Mouse Up Pos:</TextBlock>
-                <TextBox x:Name="txtMouseUp" Grid.Column="3" Grid.Row="1" Width="150" HorizontalAlignment="Left" >Mouse up</TextBox> 
-            -->
-            
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Visibility="Hidden">
                 <TextBlock >Dragging Concentration:</TextBlock>
-                <!--<TextBox x:Name="txtMouseHover" Width="150" HorizontalAlignment="Left" >Dragging Conc</TextBox>-->
                 <uc:DoublesBox x:Name="dblMouseHover" HorizontalAlignment="Left" Margin="4,0"
-                                                Number="0.00"   
-                                                DecimalPlaces="3" 
-                                                RangeFactor="2"
-                                                SNLowerThreshold="0.001"
-                                                SNUpperThreshold="1000">
-                    
+                        Number="0.00"   
+                        DecimalPlaces="3" 
+                        RangeFactor="2"
+                        SNLowerThreshold="0.001"
+                        SNUpperThreshold="1000">
                 </uc:DoublesBox>
                                             
             </StackPanel>
@@ -59,21 +50,6 @@
             
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
                 <TextBlock VerticalAlignment="Center" >Maximum time (minutes):</TextBlock>
-                <!--<Slider x:Name="slMaxTime" 
-                        Orientation="Horizontal"
-                        Width="100" Height="24"
-                        RenderTransform="1.0,0,0,0.5,0,4"
-                        Minimum="0.01" 
-                        Maximum="{Binding Path=dMaxTime}"                        
-                        Margin="10,0,0,0" IsSnapToTickEnabled="True" 
-                        ValueChanged="slMaxTime_ValueChanged"
-                        Value="{Binding Path=dInitialTime}"                        
-                        TickFrequency="0.01">
-                </Slider>
-                <TextBox x:Name="txtMaxTime" Width="150" Height="24" HorizontalAlignment="Left" Margin="10,0,0,0"  VerticalAlignment="Center" 
-                      Text="{Binding ElementName=slMaxTime, Path=Value}">
-                </TextBox>-->
-
                 <uc:DoublesBox x:Name="dblMaxTime" HorizontalAlignment="Left" Margin="4,0"
                                                 Number="{Binding Path=dInitialTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                   
                                                 SNLowerThreshold="0.001"
@@ -85,14 +61,15 @@
 
             </StackPanel>
 
+            <!--GRAPH-->
             <StackPanel Grid.Column="0" Grid.Row="2" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
                     <wf:Panel x:Name="pChartMolConcs" Visible="False" />
                 </WindowsFormsHost>
             </StackPanel>
 
+            <!--MOLECULES-->
             <StackPanel Grid.Column="0" Grid.Row="3" Margin="30,0">
-                <!-- new code -->
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
                 <DataGrid x:Name="dgInitConcs" 
                         ItemsSource="{Binding Path=initConcs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
@@ -174,14 +151,14 @@
                 
             </StackPanel>
 
-            <!--<StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
+            <!--REACTIONS-->
+            <StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
 
                 <StackPanel.Resources>
                     <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDToStringConv" />
 
                     <CollectionViewSource x:Key="ecmReacsListView"  
-                                      Source="{Binding Path=SC.entity_repository.reactions}"
-                                      />
+                                      Source="{Binding Path=SC.entity_repository.reactions}"  />
                 </StackPanel.Resources>
 
                 <TextBlock>Reaction Rates</TextBlock>
@@ -253,7 +230,8 @@
 
                 <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>
                 
-            </StackPanel>-->
+            </StackPanel>
+            
 
         </Grid>
     </ScrollViewer>

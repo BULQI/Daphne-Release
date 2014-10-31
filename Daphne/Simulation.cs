@@ -1128,6 +1128,14 @@ namespace Daphne
             }
         }
 
+        //This method updates the conc of the given molecule
+        public void EditConc(string moleculeKey, double conc)
+        {
+            dictInitialConcs[moleculeKey] = conc;
+            initConcsDict[moleculeKey].conc = conc;
+            OnPropertyChanged("initConcs");
+        }
+
         //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
         public void SaveInitialConcs()
         {

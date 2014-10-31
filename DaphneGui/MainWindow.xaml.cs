@@ -433,8 +433,8 @@ namespace DaphneGui
             }
             else
             {
-                file = "daphne_driver_locomotion_scenario.json";
-                //file = "daphne_vatRC_ligand_receptor_scenario.json";
+                //file = "daphne_driver_locomotion_scenario.json";
+                file = "daphne_vatRC_ligand_receptor_scenario.json";
             }
 
             int repeat = 0;
@@ -2318,7 +2318,9 @@ namespace DaphneGui
 
             if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                ReacComplexChartWindow.DataContext = Sim;
+                ReacComplexChartWindow.DataContext = Sim; //this is what we want
+                //ReacComplexChartWindow.DataContext = SOP.Protocol.scenario.environment.comp.reaction_complexes[0]; //?
+                ReacComplexChartWindow.Activate();
                 ReacComplexChartWindow.Render();
             }
 

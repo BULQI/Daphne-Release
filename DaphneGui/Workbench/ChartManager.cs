@@ -165,14 +165,14 @@ namespace Workbench
             if (IsYLogarithmic)
             {
 
-                chartArear1.AxisY.IsLogarithmic = true;
+                chartArear1.AxisY.IsLogarithmic = false; // true;
                 chartArear1.AxisY.LogarithmBase = 10;
                 LabelY = "Concentration (log)";
             }
             //LOGARITHMIC X Axis
             if (IsXLogarithmic)
             {
-                chartArear1.AxisX.IsLogarithmic = true;
+                chartArear1.AxisX.IsLogarithmic = false; // true;
                 chartArear1.AxisX.LogarithmBase = 10;
                 LabelX = "Time (log)";
             }
@@ -500,7 +500,7 @@ namespace Workbench
 
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
                     //Fix this
-                    ////ToolWin.RC.EditConc(guid, valu);
+                    ToolWin.RC.EditConc(guid, valu);
                     RedrawSeries();
                 }
             }            
@@ -584,6 +584,45 @@ namespace Workbench
             ToolWin.RC.RunForward();
             ListTimes = ToolWin.RC.ListTimes;
             DictConcs = ToolWin.RC.DictGraphConcs;
+
+
+
+
+
+
+            //TEMP TEST CODE
+            double[] tempval = new double[3] { 0, 0, 0 };
+
+            int nn = 0;
+            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
+            {
+                tempval[nn] = kvp.Value[0];
+                kvp.Value.Clear();
+                nn++;
+            }
+
+            nn = 0;
+            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
+            {
+                //val = 1 + n;
+                double delta = 0;
+                for (int i = 0; i < 100; i++)
+                {
+                    delta = delta + i / 100.0;
+                    tempval[nn] = tempval[nn] + delta;
+                    if (tempval[nn] <= 0)
+                        tempval[nn] = 0.1;
+                    kvp.Value.Add(tempval[nn]);
+                }
+                nn++;
+            }
+            //END TEST CODE
+
+
+
+
+
+
 
             double[] x; 
             double[] y; 

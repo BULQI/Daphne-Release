@@ -409,29 +409,14 @@
                             ContentTemplateSelector="{StaticResource pushLevelEntityTemplateSelector}"
                             Margin="6"/>                        
                     </StackPanel>
-
-                    
                 </StackPanel>
-
-                
             </GroupBox>
-
-            <!--<Button Grid.Row="0" Grid.Column="1" x:Name="PushButton" Content="Push >" FontWeight="Bold" FontSize="16" Height="24" Width="80" Margin="0,22"
-                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Top" VerticalContentAlignment="Top"
-                        Command="ApplicationCommands.Save"
-                        FocusManager.IsFocusScope="True"
-                        >-->
-            
-                <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel">
-                    
-                    <Button x:Name="PushButtonArrow" Height="48" Width="48" 
-                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+            <StackPanel Grid.Row="0" Grid.Column="1" x:Name="ButtonsPanel" VerticalAlignment="Center">
+                <Button x:Name="PushButtonArrow" Height="48" Width="48" 
+                            HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"
                             Command="ApplicationCommands.Save"
-                            FocusManager.IsFocusScope="True"    
-                            >
-                    <!--Click="PushButtonArrow_Click" Tag="Right"-->
-                    <StackPanel>
+                            FocusManager.IsFocusScope="True">
+                        <StackPanel>
                             <StackPanel.Resources>
                                 <Style x:Key="ImageEnabled" TargetType="Image">
                                     <Style.Triggers>
@@ -441,19 +426,13 @@
                                     </Style.Triggers>
                                 </Style>
                             </StackPanel.Resources>
+                        
                             <Image x:Name="LeftImage" Margin="200,0" Visibility="Hidden" Source="../Images/LeftArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../Images/LeftArrow_48x48.png" />
                             <Image x:Name="RightImage" Margin="200,0" Visibility="Hidden" Source="../Images/RightArrow_48x48.png" Style="{StaticResource ImageEnabled}" Tag="../ImagesRightArrow_48x48.png" />
                             <Image x:Name="ActualButtonImage" Style="{StaticResource ImageEnabled}"/>
                             <TextBlock>Left</TextBlock>
                         </StackPanel>
-                    </Button>
-                    <!--<Button x:Name="PushButton" Height="24" Width="48" Content="Apply..."
-                            HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                                VerticalAlignment="Top" VerticalContentAlignment="Top"
-                                Command="ApplicationCommands.Save"
-                                FocusManager.IsFocusScope="True" >
-                    
-                    </Button>-->
+                </Button>                    
             </StackPanel>
            
             <GroupBox x:Name="RightGroup" Grid.Column="2" Grid.Row="0" >
