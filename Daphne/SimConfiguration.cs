@@ -1800,8 +1800,7 @@ namespace Daphne
                     if ((entity_repository.reaction_templates_dict[cr.reaction_template_guid_ref].isBoundary == boundMol) && (config_reacs.ContainsKey(cr.entity_guid) == false))
                     {
                         config_reacs.Add(cr.entity_guid, cr);
-                     }
-                    
+                    }
                 }
             }
 
@@ -5021,7 +5020,6 @@ namespace Daphne
         public ObservableCollection<string> modifiers_molecule_guid_ref;
 
         public string TotalReactionString { get; set; }
-
     }
 
     public class ConfigReactionTemplate : ConfigEntity
