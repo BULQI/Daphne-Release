@@ -19,7 +19,7 @@ using DaphneUserControlLib;
 namespace DaphneGui
 {
     /// <summary>
-    /// Interaction logic for SimSetup.xaml
+    /// Interaction logic for SimSetupControl.xaml
     /// </summary>
     public partial class SimSetupControl : UserControl
     {
@@ -33,13 +33,6 @@ namespace DaphneGui
 
         private void comboToroidal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-            ToolWinTissue vrc = DataContext as ToolWinTissue;
-            if (vrc != null)
-            {
-                double temp = vrc.protocol.scenario.time_config.rendering_interval;
-            }
-
             ComboBox cb = e.Source as ComboBox;
 
             if (!cb.IsDropDownOpen)
@@ -79,9 +72,21 @@ namespace DaphneGui
 
             if (MainWindow.SOP.Protocol.scenario.time_config.sampling_interval > sampling_interval_slider.Maximum)
                 MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
+        }
 
-            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > time_step_slider.Maximum)
-                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+        private void rendering_interval_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (MainWindow.SOP == null)
+                return;
+
+            if (MainWindow.SOP.Protocol == null)
+                return;
+
+            if (MainWindow.SOP.Protocol.scenario == null)
+                return;
+
+            if (MainWindow.SOP.Protocol.scenario.time_config.rendering_interval > render_interval_slider.Maximum)
+                MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
         }
 
         public void SelectSimSetupInGUISetExpName(string exp_name)
@@ -97,8 +102,6 @@ namespace DaphneGui
 
         private void time_duration_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            return;
-
             if (MainWindow.SOP == null)
                 return;
             if (MainWindow.SOP.Protocol == null)
@@ -110,7 +113,7 @@ namespace DaphneGui
             double temp_samp = MainWindow.SOP.Protocol.scenario.time_config.sampling_interval;
             double temp_rand = MainWindow.SOP.Protocol.scenario.time_config.rendering_interval;
 
-            if ((sampling_interval_slider == null) || (time_step_slider == null))
+            if ((sampling_interval_slider == null) || (render_interval_slider == null))
             {
                 return;
             }
@@ -121,26 +124,17 @@ namespace DaphneGui
             sampling_interval_slider.Value = temp_samp;
             MainWindow.SOP.Protocol.scenario.time_config.sampling_interval = sampling_interval_slider.Value;
 
-            time_step_slider.Maximum = time_duration_slider.Value;
-            if (temp_rand > time_step_slider.Maximum)
-                temp_rand = time_step_slider.Maximum;
-            time_step_slider.Value = temp_rand;
-            MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = time_step_slider.Value;
+            render_interval_slider.Maximum = time_duration_slider.Value;
+            if (temp_rand > render_interval_slider.Maximum)
+                temp_rand = render_interval_slider.Maximum;
+            render_interval_slider.Value = temp_rand;
+            MainWindow.SOP.Protocol.scenario.time_config.rendering_interval = render_interval_slider.Value;
 
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
 
-        }
-
-        private void time_step_slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            ToolWinTissue vrc = DataContext as ToolWinTissue;
-            if (vrc != null)
-            {
-                double temp = vrc.protocol.scenario.time_config.rendering_interval;
-            }
         }
     }
 }

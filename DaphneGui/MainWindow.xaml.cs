@@ -1915,13 +1915,32 @@ namespace DaphneGui
             {
                 // GUI Resources
                 // Set the data context for the main tab control config GUI
-                //this.ProtocolToolWindow.DataContext = sop.Protocol;
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
 
+                // gmk - The code inside the if-statement insures that the information in the protocol window
+                // updates when a new scenario of the same workbench-type is loaded.
+                // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
+                // when the user pushes the Apply button. 
+                // There is probably redundancy here, but I'm not sure how to restructure it.
+                if (newFile == true)
+                {
+                    toolWin = new ToolWinTissue();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
+
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
+                }
+
                 toolWin = new ToolWinTissue();
                 toolWin.MW = this;
-                toolWin.protocol = SOP.Protocol;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.RemoveAt(0);
@@ -1945,9 +1964,34 @@ namespace DaphneGui
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
                 // GUI Resources
+                // gmk - The code inside the if-statement insures that the information in the protocol window
+                // updates when a new scenario of the same workbench-type is loaded.
+                // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
+                // when the user pushes the Apply button. 
+                // There is probably redundancy here, but I'm not sure how to restructure it.
+                if (newFile == true)
+                {
+                    toolWin = new ToolWinVatRC();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
+
+                    if (ProtocolToolWindowContainer.Items.Count > 0)
+                        ProtocolToolWindowContainer.Items.Clear();
+
+                    ProtocolToolWindowContainer.Items.Add(toolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+                }
+ 
                 toolWin = new ToolWinVatRC();
                 toolWin.MW = this;
-                toolWin.protocol = SOP.Protocol;
+                // only create during construction or when the type changes
+                if (sim == null || sim is VatReactionComplex == false)
+                {
+                    toolWin = new ToolWinVatRC();
+                    toolWin.MW = this;
+                    toolWin.Protocol = SOP.Protocol;
+                    toolWin.Title = toolWin.TitleText;
 
                 if (ProtocolToolWindowContainer.Items.Count > 0)
                     ProtocolToolWindowContainer.Items.Clear();
@@ -1955,10 +1999,6 @@ namespace DaphneGui
                 ProtocolToolWindowContainer.Items.Add(toolWin);
                 ProtocolToolWindow = ((ToolWinVatRC)toolWin);
 
-                // only create during construction or when the type changes
-                if (sim == null || sim is VatReactionComplex == false)
-                {
-                    
                     // create the simulation
                     sim = new VatReactionComplex();
                     // set the reporter's path
@@ -2300,7 +2340,7 @@ namespace DaphneGui
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
-            this.toolWin.Activate();
+            //this.toolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...

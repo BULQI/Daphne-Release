@@ -759,10 +759,10 @@ namespace Daphne
                 }
             }
 
-            foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
-            {
-                envHandle.comp.molpops.Add(configMolpop);
-            }
+            //foreach (ConfigMolecularPopulation configMolpop in envHandle.comp.reaction_complexes[0].molpops)
+            //{
+            //    envHandle.comp.molpops.Add(configMolpop);
+            //}
         }
 
         public static void CreateVatRC_TwoSiteAbBinding_Protocol(Protocol protocol)

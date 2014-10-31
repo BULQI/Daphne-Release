@@ -174,7 +174,7 @@
                 
             </StackPanel>
 
-            <StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
+            <!--<StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
 
                 <StackPanel.Resources>
                     <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDToStringConv" />
@@ -184,7 +184,6 @@
                                       />
                 </StackPanel.Resources>
 
-                <!-- new code -->
                 <TextBlock>Reaction Rates</TextBlock>
                 
                 <DataGrid x:Name="dgReactionRates" 
@@ -253,27 +252,10 @@
                 </DataGrid>
 
                 <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>
-            </StackPanel>
-
-                <!--<Menu DockPanel.Dock="Top">
-                    <MenuItem Header="_File">
-                    </MenuItem>
-                </Menu>-->
-
                 
-            
+            </StackPanel>-->
 
         </Grid>
     </ScrollViewer>
 
-        <!--<StatusBar DockPanel.Dock="Bottom">
-            <TextBlock>Field 1</TextBlock>
-            <Separator/>
-            <TextBlock>Field 2</TextBlock>
-        </StatusBar>
-
-        <Grid x:Name="rootGrid">
-        </Grid>-->
-        
-       
 </docking:DocumentWindow>
