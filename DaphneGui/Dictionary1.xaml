@@ -36,6 +36,29 @@
     <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
 
+
+    <!-- Style for eyeball visibility checkboxes in list views -->
+    <Style x:Key="EyeballCheckboxStyle" TargetType="CheckBox">
+        <Setter Property="SnapsToDevicePixels" Value="true"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Grid Width="13" Height="13">
+                        <Image x:Name="_image" Source="Images/cartoonEyeClosed.png" Opacity="0.6"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="_image" Property="Source" Value="Images/cartoonEyeOpen.png"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="_image" Property="Opacity" Value="0.2" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
     <!-- molpopDistributionTypeTemplate -->
@@ -459,63 +482,6 @@
                 </StackPanel>
             </StackPanel>
         </Grid>
-    </DataTemplate>
-    
-    <!-- molpop gaussian distribution details template-->
-    <DataTemplate DataType="{x:Type daph:MolPopGaussian}">
-        <StackPanel Orientation="Vertical">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="70" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
-                    <TextBlock Text="peak concentration" Margin="0,0"
-                                   Grid.Column="0" Grid.Row="0"  
-                                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   />
-
-                    <uc:DoublesBox SliderEnabled="False" Width="80" Number="{Binding Path=peak_concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                    </uc:DoublesBox>
-
-                    <!--<editors:DoubleEditBox CheckBoxVisibility="Collapsed" 
-                                                    SpinnerVisibility="Collapsed"
-                                                    HorizontalAlignment="Right"
-                                                    Format="F2"
-                                                    StepValue="10"
-                                                    Width="50" 
-                                                    Margin="4,0"
-                                                    CenterSlotHorizontalAlignment="Right"
-                                                    Value="{Binding Path=peak_concentration, UpdateSourceTrigger=PropertyChanged}"
-                                                    />-->
-                    <TextBlock Text="molec/µm^3" VerticalAlignment="Center" Margin="2,0,0,0"/>
-                </StackPanel>
-            </Grid>
-            <!-- ListView as level of indirection for getting to the correct BoxSpec -->
-            <!--<ListView x:Name="molpopGaussianBoxSpecsListView" Visibility="Hidden"
-                                              ItemsSource="{Binding Source={StaticResource ggBoxSpecsListView}}"
-                                              DisplayMemberPath="box_guid"
-                                              SelectedValue="{Binding Path=gauss_spec, Mode=OneWay}"
-                                              SelectedValuePath="box_guid"
-                                              
-                                              />-->
-            <!--<ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding ElementName=molpopGaussianBoxSpecsListView, Path=SelectedItem}" 
-                                                    HorizontalAlignment="Center"
-                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
-                                                    Margin="0,2"/>-->
-            <ContentControl Name="GaussianBoxSpecDetails"
-                                                    Content="{Binding Path=gauss_spec}" 
-                                                    HorizontalAlignment="Center"
-                                                    ContentTemplate="{StaticResource gaussBoxSpecDetailsTemplate}" 
-                                                    Margin="0,2"/>
-        </StackPanel>
     </DataTemplate>
 
     <!-- gmk - copied from SimConfigToolWindow.xaml, but they may not work properly in a Dictionary.
