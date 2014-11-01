@@ -16,7 +16,7 @@ namespace Workbench
     {
         public Size ChartSize { get; set; }
         private System.Windows.Forms.DataVisualization.Charting.Chart cChart;
-        public Panel PChart;
+        public Panel panelRC;
         private Dictionary<int, Color> colorTable;        
         //private int fontSize = 20;
         private ChartViewToolWindow ToolWin;
@@ -97,12 +97,12 @@ namespace Workbench
 
         public void ClearChart()
         {
-            if (PChart == null)
+            if (panelRC == null)
                 return;
 
-            foreach (Control c in PChart.Controls)
+            foreach (Control c in panelRC.Controls)
             {
-                PChart.Controls.Remove(c);
+                panelRC.Controls.Remove(c);
             }
         }
 
@@ -113,9 +113,9 @@ namespace Workbench
         /// </summary>
         public void DrawChart()
         {
-            foreach (Control c in PChart.Controls)
+            foreach (Control c in panelRC.Controls)
             {
-                PChart.Controls.Remove(c);
+                panelRC.Controls.Remove(c);
             }
 
             cChart = new Chart();
@@ -219,8 +219,8 @@ namespace Workbench
             cChart.Location = new System.Drawing.Point(1, 8);
 
             cChart.Size = ChartSize;
-            
-            PChart.Controls.Add(cChart);
+
+            panelRC.Controls.Add(cChart);
             
             return;
         }
@@ -473,16 +473,7 @@ namespace Workbench
 
         private void cChart_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            //Update the mouse path that is drawn onto the Panel. 
-
-#if false
-            //These 4 lines are only for debugging - they can be removed later on
-            int mouseX = e.X;
-            int mouseY = e.Y;
-            string output = mouseX.ToString() + ", " + mouseY.ToString();
-            //ToolWin.txtMouseHover.Text = output;  
-#endif
-
+            //if a marker is being dragged
             if (bDrag)
             {
                 if (e.Y < 0 || e.Y >= ChartSize.Height)
@@ -574,55 +565,23 @@ namespace Workbench
             }
 
             return s;
-        }        
+        }
+
+        public void EditConc(double newval)
+        {
+            string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
+            ToolWin.RC.EditConc(guid, newval);
+        }
 
         /// <summary>
         /// Redraw the series for example after a mouse move
         /// </summary>
         public void RedrawSeries()
         {
+            ToolWin.RC.reset();
             ToolWin.RC.RunForward();
             ListTimes = ToolWin.RC.ListTimes;
             DictConcs = ToolWin.RC.DictGraphConcs;
-
-
-
-
-
-
-            //TEMP TEST CODE
-            double[] tempval = new double[3] { 0, 0, 0 };
-
-            int nn = 0;
-            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
-            {
-                tempval[nn] = kvp.Value[0];
-                kvp.Value.Clear();
-                nn++;
-            }
-
-            nn = 0;
-            foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
-            {
-                //val = 1 + n;
-                double delta = 0;
-                for (int i = 0; i < 100; i++)
-                {
-                    delta = delta + i / 100.0;
-                    tempval[nn] = tempval[nn] + delta;
-                    if (tempval[nn] <= 0)
-                        tempval[nn] = 0.1;
-                    kvp.Value.Add(tempval[nn]);
-                }
-                nn++;
-            }
-            //END TEST CODE
-
-
-
-
-
-
 
             double[] x; 
             double[] y; 
@@ -710,4 +669,5 @@ namespace Workbench
         }
 
     }
+
 }

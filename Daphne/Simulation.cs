@@ -1131,7 +1131,7 @@ namespace Daphne
         //This method updates the conc of the given molecule
         public void EditConc(string moleculeKey, double conc)
         {
-            dictInitialConcs[moleculeKey] = conc;
+            //dictInitialConcs[moleculeKey] = conc;
             initConcsDict[moleculeKey].conc = conc;
             OnPropertyChanged("initConcs");
         }

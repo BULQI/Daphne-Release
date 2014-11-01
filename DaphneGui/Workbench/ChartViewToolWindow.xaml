@@ -64,14 +64,73 @@
             <!--GRAPH-->
             <StackPanel Grid.Column="0" Grid.Row="2" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 
-                    <wf:Panel x:Name="pChartMolConcs" Visible="False" />
+                    <wf:Panel x:Name="panelRC" Visible="False" />
                 </WindowsFormsHost>
             </StackPanel>
 
             <!--MOLECULES-->
             <StackPanel Grid.Column="0" Grid.Row="3" Margin="30,0">
                 <TextBlock>Initial Molecular Concentrations</TextBlock>
+                
                 <DataGrid x:Name="dgInitConcs" 
+                        ItemsSource="{Binding Path=molpops, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                        Height="150" MinWidth="150" Width="500" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
+                        CanUserReorderColumns="False" CanUserResizeRows="False"
+                        CanUserSortColumns="True" RowHeaderWidth="0"
+                        HorizontalAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        CanUserAddRows="False"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        >
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader" >
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="Height" Value="24" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="BorderBrush" Value="Black" />
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Offset="0.0" Color="White" />
+                                        <GradientStop Offset="1.0" Color="Beige" />
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="colMolName" Header="Molecule" Width="180" IsReadOnly="True"
+                                 Binding="{Binding Path=molecule.Name, Mode=OneWay}" />
+                        
+                        <DataGridTemplateColumn x:Name="colConc" Header="Concentration" MinWidth="300" MaxWidth="350">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <uc:DoublesBox x:Name="dblConcs" HorizontalAlignment="Left" Margin="4,0"
+                                                Number="{Binding Path=mp_distribution.concentration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                                RangeFactor="1"
+                                                SNLowerThreshold="0.001"
+                                                SNUpperThreshold="1000"
+                                                PropertyChanged="dblConcs_PropertyChanged"       
+                                                >
+                                        </uc:DoublesBox>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+
+
+                </DataGrid>
+            </StackPanel>
+            <StackPanel Grid.Column="0" Grid.Row="3" Margin="30,0">
+                <!--<TextBlock>Initial Molecular Concentrations</TextBlock>-->
+                <!--<DataGrid x:Name="dgInitConcs" 
                         ItemsSource="{Binding Path=initConcs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
                         Height="150" MinWidth="150" Width="400" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                         CanUserReorderColumns="False" CanUserResizeRows="False"
@@ -124,47 +183,21 @@
                                                 SNUpperThreshold="1000"
                                                 PropertyChanged="dblConcs_PropertyChanged"       
                                                 >
-                                            
-
                                         </uc:DoublesBox>
-
-                                        <!--<Slider x:Name="slConc" 
-                                                Orientation="Horizontal"
-                                                Width="100"
-                                                RenderTransform="1.0,0,0,0.5,0,4"
-                                                Minimum="0.00" 
-                                                Maximum="10.00"
-                                                Value="{Binding Path=conc, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                                Margin="0,0,0,0" IsSnapToTickEnabled="True" 
-                                                TickFrequency="0.01"                                                
-                                                ValueChanged="slConc_ValueChanged"
-                                                >
-                                        </Slider>
-                                        <TextBox Width="150" TextAlignment="Center" Margin="20,0" HorizontalAlignment="Center" Text="{Binding ElementName=slConc, Path=Value, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"     />-->
                                     </StackPanel>    
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
                     </DataGrid.Columns>
-                </DataGrid>
-                
+                </DataGrid>-->
             </StackPanel>
 
             <!--REACTIONS-->
             <StackPanel Grid.Column="0" Grid.Row="4" Margin="30,12">
-
-                <StackPanel.Resources>
-                    <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDToStringConv" />
-
-                    <CollectionViewSource x:Key="ecmReacsListView"  
-                                      Source="{Binding Path=SC.entity_repository.reactions}"  />
-                </StackPanel.Resources>
-
                 <TextBlock>Reaction Rates</TextBlock>
-                
                 <DataGrid x:Name="dgReactionRates" 
-                                ItemsSource="{Binding Path=CRC.ReactionRates, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
+                                ItemsSource="{Binding Path=reactions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" 
                                 MaxHeight="200" MinWidth="300" Width="500" MinRowHeight="20" RowHeight="28" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="150" MaxWidth="600"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
@@ -194,13 +227,11 @@
                     </DataGrid.ColumnHeaderStyle>
 
                     <DataGrid.Columns>
-
                         <DataGridTemplateColumn x:Name="colReac" Header="Reaction"  Width="200" MinWidth="100" MaxWidth="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBox  TextAlignment="Center" BorderThickness="0" HorizontalAlignment="Center" IsReadOnly="True"
-                                              Text="{Binding Path=entity_guid, Converter={StaticResource ReacGUIDToStringConv},
-                                                            ConverterParameter={StaticResource ecmReacsListView}}">
+                                              Text="{Binding Path=TotalReactionString}">
                                     </TextBox>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -212,7 +243,7 @@
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
                                             <uc:DoublesBox x:Name="dblReacRate" Margin="0,0"
-                                                Number="{Binding Path=ReactionComplexRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
+                                                Number="{Binding Path=rate_const, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   
                                                 DecimalPlaces="3" 
                                                 RangeFactor="2"
                                                 SNLowerThreshold="0.001"

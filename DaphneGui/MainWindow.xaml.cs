@@ -2318,8 +2318,12 @@ namespace DaphneGui
 
             if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                ReacComplexChartWindow.DataContext = Sim; //this is what we want
-                //ReacComplexChartWindow.DataContext = SOP.Protocol.scenario.environment.comp.reaction_complexes[0]; //?
+                //ReacComplexChartWindow.Tag = SOP.Protocol.scenario.environment.comp.reaction_complexes[0];
+                //ReacComplexChartWindow.DataContext = Sim; //this is what we want
+
+                ReacComplexChartWindow.Tag = Sim;
+                ReacComplexChartWindow.MW = this;
+                ReacComplexChartWindow.DataContext = SOP.Protocol.scenario.environment.comp.reaction_complexes[0]; //?
                 ReacComplexChartWindow.Activate();
                 ReacComplexChartWindow.Render();
             }
@@ -2444,7 +2448,7 @@ namespace DaphneGui
         /// This needs to work for any scenario, i.e., it needs to work in the general case and not just for a specific scenario.
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
-        private void runSim()
+        public void runSim()
         {            
             VTKDisplayDocWindow.Activate();
 
@@ -2907,7 +2911,7 @@ namespace DaphneGui
             ProtocolToolWindow.IsEnabled = true;
             saveScenario.IsEnabled = true;
             displayTitle();
-            MainWindow.ST_ReacComplexChartWindow.ClearChart();
+            //MainWindow.ST_ReacComplexChartWindow.ClearChart();
             VTKDisplayDocWindow.Activate();
         }
 

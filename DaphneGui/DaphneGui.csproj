@@ -215,6 +215,9 @@
     <Compile Include="Pushing\PushEntity.xaml.cs">
       <DependentUpon>PushEntity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ReactionComplexChart.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ReactionComplexControl.xaml.cs">
       <DependentUpon>ReactionComplexControl.xaml</DependentUpon>
     </Compile>
