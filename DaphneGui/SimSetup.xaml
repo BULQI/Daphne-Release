@@ -179,9 +179,10 @@
                         >
         
                 <TextBlock Text="Boundary Condition" FontWeight="Bold" Margin="0,20,0,0"/>
-                <CheckBox x:Name="cbToroidal" Margin="10,22" 
-                          Visibility="{Binding Path=ToroidalVisibility}" 
-                          IsChecked="{Binding Path=Protocol.scenario.environment.toroidal}"/>
+                
+                <!--<CheckBox x:Name="cbToroidal" Margin="10,22" 
+                          Visibility="Hidden" 
+                          IsChecked="{Binding Path=Protocol.scenario.environment.toroidal}"/>-->
 
                 <ComboBox x:Name="comboToroidal" MinWidth="120" Margin="12,10" Height="22"  Visibility="{Binding Path=ToroidalVisibility}"
                             SelectedIndex="{Binding Protocol.scenario.environment.toroidal, Converter={StaticResource BoolToIndexConv}}"
