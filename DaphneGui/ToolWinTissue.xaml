@@ -42,7 +42,7 @@
             </TabItem.Resources>
             
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <local:MolpopControl DataContext="{Binding ElementName=toolWinTissue}" x:Name="EcmMolpopControl"/>
+                <local:ECMMolpopControl DataContext="{Binding ElementName=toolWinTissue}" x:Name="EcmMolpopControl"/>
             </ScrollViewer>
             
             <!-- add reaction control -->

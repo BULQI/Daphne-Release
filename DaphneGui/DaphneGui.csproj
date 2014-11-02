@@ -209,6 +209,9 @@
     <Compile Include="MoleculeGridControl.xaml.cs">
       <DependentUpon>MoleculeGridControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ECMMolpopControl.xaml.cs">
+      <DependentUpon>ECMMolpopControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pushing\PushBetweenLevels.xaml.cs">
       <DependentUpon>PushBetweenLevels.xaml</DependentUpon>
     </Compile>
@@ -317,6 +320,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MoleculeGridControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ECMMolpopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

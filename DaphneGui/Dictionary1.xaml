@@ -36,29 +36,6 @@
     <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
 
-
-    <!-- Style for eyeball visibility checkboxes in list views -->
-    <Style x:Key="EyeballCheckboxStyle" TargetType="CheckBox">
-        <Setter Property="SnapsToDevicePixels" Value="true"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type CheckBox}">
-                    <Grid Width="13" Height="13">
-                        <Image x:Name="_image" Source="Images/cartoonEyeClosed.png" Opacity="0.6"/>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="_image" Property="Source" Value="Images/cartoonEyeOpen.png"/>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="_image" Property="Opacity" Value="0.2" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- DATA TEMPLATES: must come after definition of converters -->
 
     <!-- molpopDistributionTypeTemplate -->
@@ -483,35 +460,6 @@
             </StackPanel>
         </Grid>
     </DataTemplate>
-
-    <!-- gmk - copied from SimConfigToolWindow.xaml, but they may not work properly in a Dictionary.
-        Leave here for now, but may need to cleanup later. -->
-    <!--
-    <CollectionViewSource x:Key="cellsetRegionsListView"  Source="{Binding Path=Protocol.scenario.regions}"/>
-    <CollectionViewSource x:Key="boxSpecsListView"   Source="{Binding Path=Protocol.scenario.box_specifications}"/>
-    <CollectionViewSource x:Key="ggBoxSpecsListView"  
-                                  Source="{Binding Path=Protocol.scenario.box_specifications}"/>
-    <CollectionViewSource x:Key="molpopGaussianSpecsListView"  
-                                  Source="{Binding Path=Protocol.scenario.gaussian_specifications}"/>
-    <CollectionViewSource x:Key="moleculesListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"/>-->
-    
-    <!--<CollectionViewSource x:Key="environMolPopsListView"  
-                                  Source="{Binding Path=ProtocolToolWindow.Protocol.scenario.environment.comp.molpops}"/>-->
-    <!--<CollectionViewSource x:Key="bulkMoleculesListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.molecules}"  />
-    <CollectionViewSource x:Key="cytoGenesListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.genes}"/>
-    <CollectionViewSource x:Key="ecmReactionsListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.reactions}" />
-    <CollectionViewSource x:Key="ecmReactionComplexesListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.reaction_complexes}"/>
-
-    <CollectionViewSource x:Key="baseCellTypesListView"  
-                                  Source="{Binding Path=Protocol.scenario.entity_repository.CellBaseTypeLabel}"/>
-    -->
-    <!--<CollectionViewSource x:Key="EcsBulkMoleculesListView"  
-                                  Source="{Binding Path=Protocol.entity_repository.molecules}"/>-->
 
     <ObjectDataProvider x:Key="boundaryFaces"
                     MethodName="GetValues" 
