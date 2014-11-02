@@ -5,7 +5,6 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:DaphneGui"
         xmlns:work="clr-namespace:Workbench"
-        xmlns:daph="clr-namespace:Daphne;assembly=Daphne"
         xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
 	    xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
 	    xmlns:docking="http://schemas.actiprosoftware.com/winfx/xaml/docking"
@@ -17,23 +16,16 @@
 
     <Window.Resources>
         <local:SimSetupControl x:Key="simSetupControl"/>
-
-        <local:CellRenderPopFromProtocolConverter x:Key="CellRenderPopFromProtocolConverter"/>
-
-        <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
-        
-        <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
-        
         <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
 
-        <ObjectDataProvider x:Key="RenderMethodEnum"
-                            MethodName="GetValues"
+        <!--<ObjectDataProvider x:Key="cellRenderMethodEnum"
+                            MethodName="GetValues" 
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="daph:RenderMethod" />
+                <x:Type TypeName="local:CellRenderMethod" />
             </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
-        
+        </ObjectDataProvider>-->
+
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
             <Grid>
@@ -384,15 +376,6 @@
                                 <TextBlock Text="Cells Library" />
                             </Grid>
                         </DataTemplate>
-
-                        <DataTemplate x:Key="renderTabTemplate">
-                            <Grid>
-                                <!--<Border BorderThickness="1" CornerRadius="4,4,4,4" BorderBrush="Lime"></Border>-->
-                                <!--<Image Source="Images/MyGreenCells.bmp" />-->
-                                <TextBlock Text="Render Skin" />
-                            </Grid>
-                        </DataTemplate>
-
                     </docking:SplitContainer.Resources>
                     
                     <!-- VTK Windows Forms Host panel -->
@@ -458,31 +441,13 @@
                                                 <ComboBox Name="CellRenderMethodCB" Width="100"
                                                           BorderBrush="LightGray" 
                                                           ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
-                                                          ItemsSource="{Binding Converter={StaticResource CellRenderPopFromProtocolConverter}}"
-                                                          IsSynchronizedWithCurrentItem="True"
-                                                          DisplayMemberPath="name"
                                                           />
                                                 <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
                                                 <ComboBox x:Name="CellsColorByCB" Width="100" 
-                                                          ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
-                                                          SelectedItem="{Binding ElementName=CellRenderMethodCB, Path=SelectedItem.renderMethod, UpdateSourceTrigger=PropertyChanged}"
-                                                          SelectionChanged="CellsColorByCB_SelectionChanged"
+                                                          ItemsSource="{Binding Path=CellAttributeArrayNames}" 
+                                                          SelectedValue="{Binding Path=CellColorArrayName}"
                                                           BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Choose cell render method">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                    <ComboBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
-                                                        </DataTemplate>
-                                                    </ComboBox.ItemTemplate>
+                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells color by attribute">
                                                 </ComboBox>
 
                                                 <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
@@ -554,8 +519,6 @@
                                 </local:CellStudioToolWindow>
 
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" ></work:ChartViewToolWindow>
-                                <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
-                                       HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
                                 
                                 <!-- "#FFE7F5DC" -->
 
