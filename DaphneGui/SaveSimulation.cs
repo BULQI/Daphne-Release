@@ -122,7 +122,6 @@ namespace DaphneGui
                 cell_state.setDivisonDriverState(cell.Divider.CurrentState);
                 cell_state.setDifferentiationDriverState(cell.DifferentiationState);
                 cell_state.setGeneState(cell.Genes);
-                cell_state.setCellGeneration(cell.generation);
 
                 Dictionary<string, MolecularPopulation> membrane_mol_pop_dict = cell.PlasmaMembrane.Populations;
                 foreach (KeyValuePair<string, MolecularPopulation> kvpair in membrane_mol_pop_dict)

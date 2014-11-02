@@ -96,6 +96,19 @@
             
             <StackPanel Orientation="Vertical" Margin="16,0">
 
+                <!-- This is for debugging -->
+                <!--<StackPanel Orientation="Horizontal">
+                    <TextBlock Text="debug" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                    <uc:DoublesBox Margin="0,2" Width="100" SliderEnabled="False"
+                                Number="{Binding Converter={StaticResource DebugConverter}, ConverterParameter=drag}"    />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="drag coefficient test" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
+                    <TextBox Margin="0,2" Width="100"
+                                Text="{Binding Path=DragCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
+                </StackPanel>-->
+
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="drag coefficient" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120"/>
                     <uc:DoublesBox Margin="0,2" TextFieldWidth="100" SliderEnabled="False"

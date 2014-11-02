@@ -147,12 +147,9 @@ namespace Daphne
                                        ConfigCompartment[] configComp, CellState cellState,
                                        List<ConfigReaction>[] bulk_reacs,
                                        List<ConfigReaction> boundary_reacs,
-                                       List<ConfigReaction> transcription_reacs,
-                                       bool[] result)
+                                       List<ConfigReaction> transcription_reacs)
         {
             Cell simCell = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", cell.CellRadius));
-
-            simCell.renderLabel = cell.renderLabel ?? cell.entity_guid;
             Compartment[] simComp = new Compartment[2];
 
             simComp[0] = simCell.Cytosol;
@@ -186,8 +183,8 @@ namespace Daphne
             //CELL REACTIONS
             AddCompartmentBulkReactions(simCell.Cytosol, protocol.entity_repository, bulk_reacs[0]);
             AddCompartmentBulkReactions(simCell.PlasmaMembrane, protocol.entity_repository, bulk_reacs[1]);
-            // membrane has no boundary
-            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs, result);
+            // membrane; no boundary
+            AddCompartmentBoundaryReactions(simCell.Cytosol, simCell.PlasmaMembrane, protocol.entity_repository, boundary_reacs);
             AddCellTranscriptionReactions(simCell, protocol.entity_repository, transcription_reacs);
 
             // locomotion - merged from release-dev
@@ -295,8 +292,6 @@ namespace Daphne
                     simCell.SetGeneActivities(simCell.Differentiator);
                 }
             }
-            //generaiton
-            simCell.generation = cellState.CellGeneration;
 
             // add the cell
             AddCell(simCell);
@@ -466,60 +461,7 @@ namespace Daphne
             get { return reporter; }
         }
 
-        protected void prepareBoundaryReactionReport(int size, ref bool[] result)
-        {
-            result = new bool[size];
-            for (int i = 0; i < size; i++)
-            {
-                result[i] = false;
-            }
-        }
-
-        protected void boundaryReactionReport(List<ConfigReaction> boundary_reacs, bool[] result, string id)
-        {
-            // should always be so, but for safety have this check
-            if (boundary_reacs.Count == result.Length)
-            {
-                bool allPresent = true;
-
-                for (int i = 0; i < result.Length; i++)
-                {
-                    if (result[i] == false)
-                    {
-                        allPresent = false;
-                        break;
-                    }
-                }
-                if (allPresent == false)
-                {
-                    // configure the message box to be displayed
-                    string messageBoxText = "Not all boundary reactions could be added into " + id + ":";
-                    string caption = "Boundary reaction warning";
-                    MessageBoxButton button = MessageBoxButton.OK;
-                    MessageBoxImage icon = MessageBoxImage.Warning;
-
-                    for (int i = 0; i < result.Length; i++)
-                    {
-                        if (result[i] == false)
-                        {
-                            messageBoxText += "\n" + boundary_reacs[i].TotalReactionString;
-                        }
-                    }
-                    // display message box
-                    MessageBox.Show(messageBoxText, caption, button, icon);
-                }
-            }
-        }
-
-        /// <summary>
-        /// adds boundary reactions to the compartment
-        /// </summary>
-        /// <param name="comp">the compartment</param>
-        /// <param name="boundary">its boundary compartment</param>
-        /// <param name="er">the entity repository</param>
-        /// <param name="config_reacs">the boundary reactions</param>
-        /// <param name="result">result array, null when no reporting needed</param>
-        public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs, bool[] result)
+        public static void AddCompartmentBoundaryReactions(Compartment comp, Compartment boundary, EntityRepository er, List<ConfigReaction> config_reacs)
         {
             //foreach (string rcguid in configComp.reaction_complexes_guid_ref)
             //{
@@ -540,10 +482,8 @@ namespace Daphne
             // When comp is ECS then ECS boundary reactions may not apply to some cell types. 
             // The continue statements below catch these cases.
 
-            for (int i = 0; i < config_reacs.Count; i++)
+            foreach (ConfigReaction cr in config_reacs)
             {
-                ConfigReaction cr = config_reacs[i];
-
                 if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryAssociation)
                 {
                     if (!boundary.Populations.ContainsKey(cr.reactants_molecule_guid_ref[1]) || !boundary.Populations.ContainsKey(cr.products_molecule_guid_ref[0]))
@@ -553,10 +493,6 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryAssociation(boundary.Populations[cr.reactants_molecule_guid_ref[1]],
                                                                                            comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                            boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
-                    {
-                        result[i] = true;
-                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryDissociation)
                 {
@@ -567,10 +503,6 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryDissociation(boundary.Populations[cr.products_molecule_guid_ref[1]],
                                                                                             comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                                             boundary.Populations[cr.reactants_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
-                    {
-                        result[i] = true;
-                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.CatalyzedBoundaryActivation)
                 {
@@ -581,10 +513,6 @@ namespace Daphne
                     comp.AddBoundaryReaction(boundary.Interior.Id, new CatalyzedBoundaryActivation(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                                    comp.Populations[cr.products_molecule_guid_ref[0]],
                                                                                                    boundary.Populations[cr.modifiers_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
-                    {
-                        result[i] = true;
-                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportTo)
                 {
@@ -594,10 +522,6 @@ namespace Daphne
                     }
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportTo(comp.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                            boundary.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
-                    {
-                        result[i] = true;
-                    }
                 }
                 else if (er.reaction_templates_dict[cr.reaction_template_guid_ref].reac_type == ReactionType.BoundaryTransportFrom)
                 {
@@ -607,12 +531,9 @@ namespace Daphne
                     }
                     comp.AddBoundaryReaction(boundary.Interior.Id, new BoundaryTransportFrom(boundary.Populations[cr.reactants_molecule_guid_ref[0]],
                                                                                              comp.Populations[cr.products_molecule_guid_ref[0]], cr.rate_const));
-                    if (result != null)
-                    {
-                        result[i] = true;
-                    }
                 }
             }
+            return;
         }
 
         public static void AddCompartmentBulkReactions(Compartment comp, EntityRepository er, List<ConfigReaction> config_reacs)
@@ -927,7 +848,6 @@ namespace Daphne
             ConfigCompartment[] configComp = new ConfigCompartment[2];
             List<ConfigReaction>[] bulk_reacs = new List<ConfigReaction>[2];
             List<ConfigReaction> boundary_reacs = new List<ConfigReaction>();
-            bool[] result = null;
             List<ConfigReaction> transcription_reacs = new List<ConfigReaction>();
 
             // INSTANTIATE CELLS AND ADD THEIR MOLECULAR POPULATIONS
@@ -943,31 +863,11 @@ namespace Daphne
                 bulk_reacs[1] = protocol.GetReactions(configComp[1], false);
                 boundary_reacs = protocol.GetReactions(configComp[0], true);
                 transcription_reacs = protocol.GetTranscriptionReactions(configComp[0]);
-                //need to figure out how to set the label
-                if (cp.renderLabel == null)
-                {
-                    cp.renderLabel = cp.Cell.entity_guid;
-                }
                 
                 for (int i = 0; i < cp.number; i++)
                 {
-                    // only report boundary reaction failures for the first cell of the population
-                    if (i == 0)
-                    {
-                        prepareBoundaryReactionReport(boundary_reacs.Count, ref result);
-                    }
-                    else
-                    {
-                        result = null;
-                    }
                     instantiateCell(protocol, cp.Cell, cp.cellpopulation_id, configComp,
-                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs, result);
-                    // report if needed
-                    if (result != null)
-                    {
-                        // report if a reaction could not be inserted
-                        boundaryReactionReport(boundary_reacs, result, "population " + cp.cellpopulation_id + ", cell " + cp.Cell.CellName);
-                    }
+                                    cp.CellStates[i], bulk_reacs, boundary_reacs, transcription_reacs);
                 }
             }
 
@@ -1012,14 +912,10 @@ namespace Daphne
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, false);
             AddCompartmentBulkReactions(dataBasket.Environment.Comp, protocol.entity_repository, reacs);
             reacs = protocol.GetReactions(scenarioHandle.environment.comp, true);
-
-            prepareBoundaryReactionReport(reacs.Count, ref result);
             foreach (KeyValuePair<int, Cell> kvp in dataBasket.Cells)
             {
-                AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs, result);
+                AddCompartmentBoundaryReactions(dataBasket.Environment.Comp, kvp.Value.PlasmaMembrane, protocol.entity_repository, reacs);
             }
-            // report if a reaction could not be inserted
-            boundaryReactionReport(reacs, result, "the ECS");
 
             // general parameters
             Pair.Phi1 = protocol.sim_params.phi1;

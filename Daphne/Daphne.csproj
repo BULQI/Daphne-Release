@@ -108,7 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CollisionManager.cs" />
-    <Compile Include="ColorHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="CellManager.cs" />
@@ -130,6 +129,7 @@
     <Compile Include="Transitions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
