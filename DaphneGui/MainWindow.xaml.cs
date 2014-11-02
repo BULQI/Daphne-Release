@@ -54,16 +54,16 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static ToolWinBase _toolWin;
-        public static ToolWinBase toolWin
+        private static ToolWinBase toolWin;
+        public static ToolWinBase ToolWin
         {
             get
             {
-                return _toolWin;
+                return toolWin;
             }
             set
             {
-                _toolWin = value;
+                toolWin = value;
             }
         }
 
@@ -1621,7 +1621,7 @@ namespace DaphneGui
         private void applyButton_Click(object sender, RoutedEventArgs e)
         {
             // Workbench-specific code to preserve focus to the element that was in focus before "Apply" button clicked.
-            toolWin.Apply();
+            ToolWin.Apply();
         }
 
         /// <summary>
@@ -1936,31 +1936,31 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    toolWin = new ToolWinTissue();
-                    toolWin.MW = this;
-                    toolWin.Protocol = SOP.Protocol;
-                    toolWin.Title = toolWin.TitleText;
+                    ToolWin = new ToolWinTissue();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
 
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
                 }
 
                 // only create during construction or when the type changes
                 if(sim == null || sim is TissueSimulation == false)
                 {
-                    toolWin = new ToolWinTissue();
-                    toolWin.MW = this;
-                    toolWin.Protocol = SOP.Protocol;
-                    toolWin.Title = toolWin.TitleText;
+                    ToolWin = new ToolWinTissue();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
 
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
 
                     // create the simulation
                     sim = new TissueSimulation();
@@ -1983,31 +1983,31 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    toolWin = new ToolWinVatRC();
-                    toolWin.MW = this;
-                    toolWin.Protocol = SOP.Protocol;
-                    toolWin.Title = toolWin.TitleText;
+                    ToolWin = new ToolWinVatRC();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
 
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
                 }
  
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    toolWin = new ToolWinVatRC();
-                    toolWin.MW = this;
-                    toolWin.Protocol = SOP.Protocol;
-                    toolWin.Title = toolWin.TitleText;
+                    ToolWin = new ToolWinVatRC();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
 
-                    ProtocolToolWindowContainer.Items.Add(toolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)toolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
 
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2086,8 +2086,8 @@ namespace DaphneGui
                     // NOTE: For now not doing any callbacks on property change for RegionControls...
                     kvp.Value.ClearCallbacks();
                     kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gcHandle.WidgetInteractionToGUICallback));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(toolWin.RegionFocusToGUISection));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(toolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
                     kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
                     kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
                 }
@@ -2344,7 +2344,7 @@ namespace DaphneGui
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
-            toolWin.Activate();
+            ToolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
