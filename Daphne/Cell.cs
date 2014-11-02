@@ -78,6 +78,13 @@ namespace Daphne
         private ITransitionDriver deathBehavior;
         private ITransitionScheme differentiator, divider;
 
+
+        /// <summary>
+        /// info for rendering
+        /// </summary>
+        public string renderLabel;
+        public int generation;
+
         /// <summary>
         /// the genes in a cell
         /// NOTE: should these be in the cytoplasm
@@ -305,6 +312,9 @@ namespace Daphne
             daughter = SimulationModule.kernel.Get<Cell>(new ConstructorArgument("radius", radius));
             // same population id
             daughter.Population_id = Population_id;
+            daughter.renderLabel = renderLabel;
+            this.generation++;
+            daughter.generation = generation;
             // same state
             daughter.setState(spatialState);
             // but offset the daughter randomly
@@ -374,8 +384,12 @@ namespace Daphne
             SimulationBase.AddCompartmentBulkReactions(daughter.Cytosol, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[0]);
             // membrane bulk reactions
             SimulationBase.AddCompartmentBulkReactions(daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, bulk_reacs[1]);
+
             // boundary reactions
-            SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs);
+            // all daughter cells will have the molecules as long as the mother had them,
+            // and if the latter didn't we issued a warning there already
+
+            SimulationBase.AddCompartmentBoundaryReactions(daughter.Cytosol, daughter.PlasmaMembrane, SimulationBase.ProtocolHandle.entity_repository, boundary_reacs, null);
             // transcription reactions
             SimulationBase.AddCellTranscriptionReactions(daughter, SimulationBase.ProtocolHandle.entity_repository, transcription_reacs);
 

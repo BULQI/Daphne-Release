@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Cell locomotion with driver molecule.",
   "experiment_reps": 1,
-  "experiment_guid": "cb792865-37dd-43e8-a641-4fcc78a42026",
+  "experiment_guid": "a4d7511d-cb88-434c-8a81-b104e5679c45",
   "experiment_description": "Cell moves in the direction of the CXCL13 linear gradient (right to left) maintained by Dirichlet BCs. Cytosol molecule A* drives locomotion.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -11,8 +11,8 @@
         "Cell": {
           "CurrentDeathState": 0,
           "CurrentDivState": 0,
+          "renderLabel": "719dc513-7023-49a5-a89a-648f8fc31d4d",
           "CellName": "Leukocyte_staticReceptor_motile",
-          "label": null,
           "CellRadius": 5.0,
           "locomotor_mol_guid_ref": "90381ce6-3e8f-4e2b-b20b-df67869d3d7a",
           "TransductionConstant": 100.0,
@@ -24,7 +24,7 @@
                 "molpop_guid": "e85bb64c-9a88-49a6-bdfc-a0eb5d955308",
                 "molecule": {
                   "Name": "CXCR5|",
-                  "label": null,
+                  "renderLabel": null,
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -44,16 +44,13 @@
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-                "mp_render_blending_weight": 2.0,
-                "mp_render_on": true,
-                "label": null
+                "renderLabel": null
               },
               {
                 "molpop_guid": "74d5b06f-9d2c-412b-9cd7-9a17ef387b32",
                 "molecule": {
                   "Name": "CXCL13:CXCR5|",
-                  "label": null,
+                  "renderLabel": null,
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
@@ -73,10 +70,7 @@
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-                "mp_render_blending_weight": 2.0,
-                "mp_render_on": true,
-                "label": null
+                "renderLabel": null
               }
             ],
             "Reactions": [],
@@ -88,7 +82,7 @@
                 "molpop_guid": "64d257fe-e190-4aff-a0ea-15cb277e98c0",
                 "molecule": {
                   "Name": "A",
-                  "label": null,
+                  "renderLabel": null,
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 750.0,
@@ -108,16 +102,13 @@
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-                "mp_render_blending_weight": 2.0,
-                "mp_render_on": true,
-                "label": null
+                "renderLabel": null
               },
               {
                 "molpop_guid": "01e2a179-b8f2-4e00-9989-faed88796ea9",
                 "molecule": {
                   "Name": "A*",
-                  "label": null,
+                  "renderLabel": null,
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 7.5,
@@ -137,16 +128,13 @@
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-                "mp_render_blending_weight": 2.0,
-                "mp_render_on": true,
-                "label": null
+                "renderLabel": null
               },
               {
                 "molpop_guid": "60e31ca5-148d-4165-910f-42409eca66c7",
                 "molecule": {
                   "Name": "sApop",
-                  "label": null,
+                  "renderLabel": null,
                   "MolecularWeight": 1.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1.0,
@@ -166,10 +154,7 @@
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-                "mp_render_blending_weight": 2.0,
-                "mp_render_on": true,
-                "label": null
+                "renderLabel": null
               }
             ],
             "Reactions": [
@@ -236,7 +221,7 @@
           "change_stamp": 335
         },
         "cellpopulation_name": "Leukocyte_staticReceptor_motile",
-        "cellpopulation_guid": "c99aedf1-480b-4ddf-ab84-5cc748512829",
+        "cellpopulation_guid": "407e1186-12be-41f8-9503-7279df25b89b",
         "cellpopulation_id": 0,
         "report_xvf": {
           "position": true,
@@ -252,13 +237,10 @@
           {
             "mean": false,
             "mp_extended": 2,
-            "molpop_guid_ref": "2b13f366-af11-48b1-a465-50451c969a91"
+            "molpop_guid_ref": "22ac51aa-c528-4c34-a097-9ad06c1020fe"
           }
         ],
         "number": 1,
-        "cellpopulation_render_on": true,
-        "cellpopulation_color": "sc#1, 1, 0.5, 0",
-        "cellpopulation_predef_color": 1,
         "CellStates": [
           {
             "spState": {
@@ -288,7 +270,8 @@
             },
             "cgState": {
               "geneDict": {}
-            }
+            },
+            "CellGeneration": 0
           }
         ],
         "cellPopDist": {
@@ -301,9 +284,28 @@
           ],
           "MinDisSquared": 100.0
         },
-        "label": null
+        "renderLabel": "719dc513-7023-49a5-a89a-648f8fc31d4d"
       }
     ],
+    "RenderSkinName": "default",
+    "popOptions": {
+      "cellPopOptions": [
+        {
+          "renderOn": true,
+          "renderMethod": 0,
+          "name": "Leukocyte_staticReceptor_motile",
+          "renderLabel": "719dc513-7023-49a5-a89a-648f8fc31d4d"
+        }
+      ],
+      "molPopOptions": [
+        {
+          "renderOn": false,
+          "renderMethod": 10,
+          "name": "CXCL13",
+          "renderLabel": "22ac51aa-c528-4c34-a097-9ad06c1020fe"
+        }
+      ]
+    },
     "time_config": {
       "duration": 30.0,
       "rendering_interval": 0.3,
@@ -326,10 +328,10 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "2b13f366-af11-48b1-a465-50451c969a91",
+            "molpop_guid": "22ac51aa-c528-4c34-a097-9ad06c1020fe",
             "molecule": {
               "Name": "CXCL13",
-              "label": null,
+              "renderLabel": null,
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -342,7 +344,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": false,
               "mp_extended": 0,
-              "molpop_guid_ref": "2b13f366-af11-48b1-a465-50451c969a91"
+              "molpop_guid_ref": "22ac51aa-c528-4c34-a097-9ad06c1020fe"
             },
             "mp_dist_name": "Linear",
             "mp_distribution": {
@@ -364,10 +366,7 @@
                 }
               ]
             },
-            "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-            "mp_render_blending_weight": 2.0,
-            "mp_render_on": true,
-            "label": null
+            "renderLabel": "22ac51aa-c528-4c34-a097-9ad06c1020fe"
           }
         ],
         "Reactions": [
@@ -413,18 +412,14 @@
     "deathOrder": 1
   },
   "reporter_file_name": "Loco_test",
-  "popOptions": {
-    "cellPopOptions": [],
-    "molPopOptions": []
-  },
   "entity_repository": {
     "reaction_complexes": [],
     "cells": [
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
+        "renderLabel": "719dc513-7023-49a5-a89a-648f8fc31d4d",
         "CellName": "Leukocyte_staticReceptor_motile",
-        "label": null,
         "CellRadius": 5.0,
         "locomotor_mol_guid_ref": "90381ce6-3e8f-4e2b-b20b-df67869d3d7a",
         "TransductionConstant": 100.0,
@@ -436,7 +431,7 @@
               "molpop_guid": "e85bb64c-9a88-49a6-bdfc-a0eb5d955308",
               "molecule": {
                 "Name": "CXCR5|",
-                "label": null,
+                "renderLabel": null,
                 "MolecularWeight": 43.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -456,16 +451,13 @@
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-              "mp_render_blending_weight": 2.0,
-              "mp_render_on": true,
-              "label": null
+              "renderLabel": null
             },
             {
               "molpop_guid": "74d5b06f-9d2c-412b-9cd7-9a17ef387b32",
               "molecule": {
                 "Name": "CXCL13:CXCR5|",
-                "label": null,
+                "renderLabel": null,
                 "MolecularWeight": 50.96,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
@@ -485,10 +477,7 @@
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-              "mp_render_blending_weight": 2.0,
-              "mp_render_on": true,
-              "label": null
+              "renderLabel": null
             }
           ],
           "Reactions": [],
@@ -500,7 +489,7 @@
               "molpop_guid": "64d257fe-e190-4aff-a0ea-15cb277e98c0",
               "molecule": {
                 "Name": "A",
-                "label": null,
+                "renderLabel": null,
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 750.0,
@@ -520,16 +509,13 @@
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-              "mp_render_blending_weight": 2.0,
-              "mp_render_on": true,
-              "label": null
+              "renderLabel": null
             },
             {
               "molpop_guid": "01e2a179-b8f2-4e00-9989-faed88796ea9",
               "molecule": {
                 "Name": "A*",
-                "label": null,
+                "renderLabel": null,
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 7.5,
@@ -549,16 +535,13 @@
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-              "mp_render_blending_weight": 2.0,
-              "mp_render_on": true,
-              "label": null
+              "renderLabel": null
             },
             {
               "molpop_guid": "60e31ca5-148d-4165-910f-42409eca66c7",
               "molecule": {
                 "Name": "sApop",
-                "label": null,
+                "renderLabel": null,
                 "MolecularWeight": 1.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1.0,
@@ -578,10 +561,7 @@
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-              "mp_render_blending_weight": 2.0,
-              "mp_render_on": true,
-              "label": null
+              "renderLabel": null
             }
           ],
           "Reactions": [
@@ -651,7 +631,7 @@
     "molecules": [
       {
         "Name": "CXCL13",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
@@ -661,7 +641,7 @@
       },
       {
         "Name": "A",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 750.0,
@@ -671,7 +651,7 @@
       },
       {
         "Name": "A*",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 7.5,
@@ -681,7 +661,7 @@
       },
       {
         "Name": "sApop",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 1.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1.0,
@@ -691,7 +671,7 @@
       },
       {
         "Name": "CXCR5|",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
@@ -701,7 +681,7 @@
       },
       {
         "Name": "CXCL13:CXCR5|",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
