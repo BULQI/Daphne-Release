@@ -223,14 +223,12 @@
     </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
-    <Compile Include="Rendering\RenderCell.xaml.cs">
-      <DependentUpon>RenderCell.xaml</DependentUpon>
+    <Compile Include="Rendering\BindingList.cs" />
+    <Compile Include="RenderSkinEditor.xaml.cs">
+      <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Rendering\RenderDrawing.xaml.cs">
-      <DependentUpon>RenderDrawing.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Rendering\RenderMolPop.xaml.cs">
-      <DependentUpon>RenderMolPop.xaml</DependentUpon>
+    <Compile Include="RenderSkinWindow.xaml.cs">
+      <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
@@ -335,31 +333,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ReactioComplexListControl.xaml">
+    <Page Include="RenderSkinEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Rendering\RenderCell.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Rendering\RenderDrawing.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Rendering\RenderMolPop.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SimSetup.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ToolWinTissue.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ToolWinVatRC.xaml">
+    <Page Include="RenderSkinWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -514,6 +492,7 @@
       <Name>Daphne</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
