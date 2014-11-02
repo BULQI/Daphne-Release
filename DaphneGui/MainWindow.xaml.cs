@@ -54,7 +54,18 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ToolWinBase toolWin { get; set; }
+        private static ToolWinBase _toolWin;
+        public static ToolWinBase toolWin
+        {
+            get
+            {
+                return _toolWin;
+            }
+            set
+            {
+                _toolWin = value;
+            }
+        }
 
         /// <summary>
         /// the absolute path where the installed, running executable resides
@@ -2333,7 +2344,7 @@ namespace DaphneGui
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
-            this.toolWin.Activate();
+            toolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
@@ -3248,7 +3259,10 @@ namespace DaphneGui
                 saveStoreFiles();
             }
         }
+
     }
+
+
 
     
 }
