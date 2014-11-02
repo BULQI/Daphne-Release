@@ -2,11 +2,23 @@
   "experiment_db_id": 0,
   "experiment_name": "Diffusion Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "4a15c620-57fa-450a-b809-96893a698856",
+  "experiment_guid": "5f233227-b704-4576-ae6d-ef4723e0ca07",
   "experiment_description": "CXCL13 diffusion in the ECM. No cells. Initial distribution is Gaussian. No flux BCs.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
     "cellpopulations": [],
+    "RenderSkinName": "default",
+    "popOptions": {
+      "cellPopOptions": [],
+      "molPopOptions": [
+        {
+          "renderOn": false,
+          "renderMethod": 10,
+          "name": "CXCL13",
+          "renderLabel": "74665670-275e-45e8-a8af-1aa7179419b4"
+        }
+      ]
+    },
     "time_config": {
       "duration": 2.0,
       "rendering_interval": 0.2,
@@ -29,10 +41,10 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "fbc61380-cbff-45ef-afe4-06b68c8fcc90",
+            "molpop_guid": "74665670-275e-45e8-a8af-1aa7179419b4",
             "molecule": {
               "Name": "CXCL13",
-              "label": null,
+              "renderLabel": null,
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
@@ -45,7 +57,7 @@
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 2,
-              "molpop_guid_ref": "fbc61380-cbff-45ef-afe4-06b68c8fcc90"
+              "molpop_guid_ref": "74665670-275e-45e8-a8af-1aa7179419b4"
             },
             "mp_dist_name": "Gaussian",
             "mp_distribution": {
@@ -54,7 +66,7 @@
               "gauss_spec": {
                 "gaussian_spec_name": "",
                 "box_spec": {
-                  "box_guid": "d75619a2-5e2f-4e11-b2dd-538a661804df",
+                  "box_guid": "4925c439-116b-4b7a-b6e3-3a91015fff27",
                   "transform_matrix": [
                     [
                       70.710678118654755,
@@ -97,10 +109,7 @@
               "mp_distribution_type": 2,
               "boundaryCondition": null
             },
-            "mp_color": "sc#0.3, 0.89, 0.11, 0.11",
-            "mp_render_blending_weight": 2.0,
-            "mp_render_on": true,
-            "label": null
+            "renderLabel": "74665670-275e-45e8-a8af-1aa7179419b4"
           }
         ],
         "Reactions": [],
@@ -115,17 +124,13 @@
     "deathOrder": 1
   },
   "reporter_file_name": "Diffusion_test",
-  "popOptions": {
-    "cellPopOptions": [],
-    "molPopOptions": []
-  },
   "entity_repository": {
     "reaction_complexes": [],
     "cells": [],
     "molecules": [
       {
         "Name": "CXCL13",
-        "label": null,
+        "renderLabel": null,
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
