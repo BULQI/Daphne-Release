@@ -511,7 +511,7 @@ namespace DaphneGui
                     {
                         Directory.CreateDirectory(SkinFolderPath);
                         RenderSkin sk = new RenderSkin("default", null);
-                        sk.FileName = SkinFolderPath + "default.json";
+                        sk.FileName = SkinFolderPath + "default_skin.json";
                         sop.SkinList.Add(sk);
                     }
 
@@ -532,7 +532,7 @@ namespace DaphneGui
                     if (sop.SkinList.Count == 0)
                     {
                         RenderSkin sk = new RenderSkin("default", null);
-                        sk.FileName = SkinFolderPath + "default.json";
+                        sk.FileName = SkinFolderPath + "default_skin.json";
                         sk.SerializeToFile();
                         sop.SkinList.Add(sk);
                     }

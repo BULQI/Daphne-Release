@@ -53,7 +53,7 @@ namespace Daphne
                 if (_selectedRenderSkin == null && SkinList.Count > 0)
                 {
                     _selectedRenderSkin = SkinList.Where(x => x.Name == "default").SingleOrDefault();
-                    if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList[0];
+                    if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList.First();
                 }
                 return _selectedRenderSkin;
             }
@@ -157,7 +157,7 @@ namespace Daphne
         {
             if (SelectedRenderSkin == null)
             {
-                SelectedRenderSkin = SkinList.Count > 0 ? SkinList[0] : null;
+                SelectedRenderSkin = SkinList.First();
             }
             if (SelectedRenderSkin == null) return null;
             return SelectedRenderSkin.renderCells.Where(x => x.renderLabel == label).SingleOrDefault();
@@ -165,7 +165,7 @@ namespace Daphne
 
         public RenderMol GetRenderMol(string label)
         {
-            if (SelectedRenderSkin == null) SelectedRenderSkin = SkinList.Count > 0 ? SkinList[0] : null;
+            if (SelectedRenderSkin == null) SelectedRenderSkin = SkinList.First();
             if (SelectedRenderSkin == null) return null;
             return SelectedRenderSkin.renderMols.Where(x => x.renderLabel == label).SingleOrDefault();
         }
