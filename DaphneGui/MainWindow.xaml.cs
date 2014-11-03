@@ -989,7 +989,7 @@ namespace DaphneGui
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-                    ProtocolToolWindow.Close();
+                    //ProtocolToolWindow.Close();
                     ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
@@ -1632,13 +1632,13 @@ namespace DaphneGui
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void runButton_Click(object sender, RoutedEventArgs e)
+        public void runButton_Click(object sender, RoutedEventArgs e)
         {
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
             runSim();
-        }
+        }        
        
         /// <summary>
         /// save when simulation is paused state
@@ -1983,8 +1983,8 @@ namespace DaphneGui
                     ProtocolToolWindow = ((ToolWinVatRC)toolWin);
                 }
  
-                toolWin = new ToolWinVatRC();
-                toolWin.MW = this;
+                //toolWin = new ToolWinVatRC();
+                //toolWin.MW = this;
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
@@ -2265,11 +2265,20 @@ namespace DaphneGui
         }
 
         // rerun the simulation when multiple repetitions are specified
-        private void RerunSimulation()
+        public void RerunSimulation()
         {
             // increment the repetition
             repetition++;
-            lockSaveStartSim(true);
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                //runSim();
+                lockSaveStartSim(true);
+                Sim.RunStatus = SimulationBase.RUNSTAT_RUN; 
+            }
+            else
+            {
+                lockSaveStartSim(true);
+            }
         }
 
         // re-enable the gui elements that got disabled during a simulation run
@@ -2323,6 +2332,10 @@ namespace DaphneGui
 
                 ReacComplexChartWindow.Tag = Sim;
                 ReacComplexChartWindow.MW = this;
+                //ReacComplexChartWindow.redraw_flag = false;
+                //if () {
+                //    ReacComplexChartWindow.redraw_flag = true;
+                //}
                 ReacComplexChartWindow.DataContext = SOP.Protocol.scenario.environment.comp.reaction_complexes[0]; //?
                 ReacComplexChartWindow.Activate();
                 ReacComplexChartWindow.Render();
@@ -2449,8 +2462,15 @@ namespace DaphneGui
         /// MAKE SURE TO DO WHAT IT SAYS IN PREVIOUS LINE!!!!
         /// </summary>
         public void runSim()
-        {            
-            VTKDisplayDocWindow.Activate();
+        {
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                toolWin.Activate();
+            }
 
             //MessageBox.Show("In runSim()");
 
@@ -2544,33 +2564,47 @@ namespace DaphneGui
                 }
                 else
                 {
-                    // Display message box
-                    MessageBoxResult result = saveDialog();
-
-                    // Process message box results
-                    switch (result)
+                    //skg
+                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
                     {
-                        case MessageBoxResult.Yes:
-                            sop.Protocol.SerializeToFile();
-                            orig_content = sop.Protocol.SerializeToStringSkipDeco();
-                            orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
-                            // initiating a run starts always at repetition 1
-                            repetition = 1;
-                            lockSaveStartSim(true);
-                            tempFileContent = false;
-                            break;
-                        case MessageBoxResult.No:
-                            if (saveScenarioUsingDialog() == true)
-                            {
+                        // Display message box
+                        MessageBoxResult result = saveDialog();
+
+                        // Process message box results
+                        switch (result)
+                        {
+                            case MessageBoxResult.Yes:
+                                sop.Protocol.SerializeToFile();
+                                orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                                orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                                 // initiating a run starts always at repetition 1
                                 repetition = 1;
                                 lockSaveStartSim(true);
                                 tempFileContent = false;
-                            }
-                            break;
-                        case MessageBoxResult.Cancel:
-                            // Do nothing...
-                            break;
+                                break;
+                            case MessageBoxResult.No:
+                                if (saveScenarioUsingDialog() == true)
+                                {
+                                    // initiating a run starts always at repetition 1
+                                    repetition = 1;
+                                    lockSaveStartSim(true);
+                                    tempFileContent = false;
+                                }
+                                break;
+                            case MessageBoxResult.Cancel:
+                                // Do nothing...
+                                break;
+                        }
+                    }
+                    else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+                    {
+                        //sop.Protocol.SerializeToFile();
+                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
+                        // initiating a run starts always at repetition 1
+                        repetition = 1;
+                        lockSaveStartSim(true);
+                        tempFileContent = false;
                     }
                 }
 
@@ -2911,8 +2945,15 @@ namespace DaphneGui
             ProtocolToolWindow.IsEnabled = true;
             saveScenario.IsEnabled = true;
             displayTitle();
-            //MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            VTKDisplayDocWindow.Activate();
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                toolWin.Activate();
+            }
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)

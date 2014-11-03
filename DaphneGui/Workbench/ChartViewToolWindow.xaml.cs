@@ -28,31 +28,23 @@ namespace Workbench
     {
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
-        private ChartManager ChartOld;
         private ReactionComplexChart Chart;
         private System.Drawing.Size chartSize;
         public VatReactionComplex RC { get; set; }
+        public ConfigReactionComplex CRC { get; set; }
         public MainWindow MW;
+        public bool redraw_flag;
 
         public ChartViewToolWindow()
         {
             InitializeComponent();
             chartSize = new System.Drawing.Size(700, 300);
-            //RC = DataContext; // as VatReactionComplex;
-            ChartOld = new ChartManager(this, chartSize);
-            ChartOld.panelRC = panelRC;
-
+            CRC = DataContext as ConfigReactionComplex;
             Chart = new ReactionComplexChart();
             Chart.panelRC = panelRC;
+            Chart.ToolWin = this;
+            redraw_flag = false;
         }
-
-        //public void ClearChart()
-        //{
-        //    if (Chart == null)
-        //        return;
-
-        //    Chart.ClearChart();
-        //}
         
 #if OLD_RC
         public void RenderOld()
@@ -137,21 +129,29 @@ namespace Workbench
         public void Render()
         {
             RC = Tag as VatReactionComplex;
+            CRC = DataContext as ConfigReactionComplex;
 
             lTimes = RC.ListTimes;
             dictConcs = RC.DictGraphConcs;
 
-            if (lTimes.Count > 0 && dictConcs.Count > 0)
+            if (redraw_flag == true)
             {
-                Chart.ListTimes = lTimes;
-                Chart.DictConcs = dictConcs;
+                Chart.RedrawSeries();
+            }
+            else
+            {
+                Chart.Clear();
+                if (lTimes.Count > 0 && dictConcs.Count > 0)
+                {
+                    Chart.ListTimes = lTimes;
+                    Chart.DictConcs = dictConcs;
 
-                Chart.LabelX = "Time";
-                Chart.LabelY = "Concentration";
-                Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
-                Chart.DrawLine = true;
+                    Chart.LabelX = "Time";
+                    Chart.LabelY = "Concentration";
+                    Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
+                    Chart.DrawLine = true;
 
-                System.Windows.Forms.MenuItem[] menuItems = 
+                    System.Windows.Forms.MenuItem[] menuItems = 
                 {   
                     new System.Windows.Forms.MenuItem("Zoom in"),
                     new System.Windows.Forms.MenuItem("Zoom out"),
@@ -159,17 +159,18 @@ namespace Workbench
                     new System.Windows.Forms.MenuItem("Discard Changes"),
                 };
 
-                System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                Chart.SetContextMenu(menu);
-                //menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                //menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
+                    System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
+                    Chart.SetContextMenu(menu);
+                    //menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
+                    //menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
 
-                btnIncSize.IsEnabled = true;
-                btnDecSize.IsEnabled = true;
-                btnDiscard.IsEnabled = true;
-                btnSave.IsEnabled = true;
+                    btnIncSize.IsEnabled = true;
+                    btnDecSize.IsEnabled = true;
+                    btnDiscard.IsEnabled = true;
+                    btnSave.IsEnabled = true;
 
-                Chart.Draw();
+                    Chart.Draw();
+                }
             }
 
         }
@@ -223,6 +224,7 @@ namespace Workbench
             Chart.Draw();            
         }        
 
+        ////KEEP THIS
         ////private void btnDiscard_Click(object sender, RoutedEventArgs e)
         ////{
         ////    if (RC == null)
@@ -239,6 +241,8 @@ namespace Workbench
         ////    //}
         ////}
 
+
+        ////KEEP THIS
         //private void btnSave_Click(object sender, RoutedEventArgs e)
         //{
         //    if (Chart != null)
@@ -264,44 +268,19 @@ namespace Workbench
             //    Chart.SaveChanges();
             //}
         }
-                
-        private void slConc_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Slider s = sender as Slider;
-            if (!s.IsLoaded)
-                return;
-
-            if (e.OldValue == e.NewValue)
-                return;
-
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                //Fix this
-                RC.EditConc(mci.molguid, mci.conc);
-            }
-
-            Chart.RedrawSeries();
-            Chart.RecalculateYMax();
-        }
-
-        private void slRate_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Slider s = sender as Slider;
-            double m = s.Minimum;
-        }
-
-        private string GetNumerics(string input)
-        {
-            var sb = new StringBuilder();
-            string goodChars = "0123456789.eE+-";
-            foreach (var c in input)
-            {                
-                if (goodChars.IndexOf(c) >=0 )
-                    sb.Append(c);
-            }
-            string output = sb.ToString();
-            return output;
-        }
+        
+        //private string GetNumerics(string input)
+        //{
+        //    var sb = new StringBuilder();
+        //    string goodChars = "0123456789.eE+-";
+        //    foreach (var c in input)
+        //    {                
+        //        if (goodChars.IndexOf(c) >=0 )
+        //            sb.Append(c);
+        //    }
+        //    string output = sb.ToString();
+        //    return output;
+        //}
 
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -312,6 +291,8 @@ namespace Workbench
                 ////RC.Sim.Load(MainWindow.SOP.Protocol, true);
                 Chart.RedrawSeries();
                 Chart.RecalculateYMax();
+
+                //MW.runButton_Click(0, 0);
             }
         }
 
@@ -337,19 +318,29 @@ namespace Workbench
         {
             if (e.PropertyName == "Number")
             {
-                //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)dgInitConcs.SelectedItem;
-                //((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration = ((DoublesBox)sender).Number;
-                foreach (MolConcInfo mci in RC.initConcs)
-                {
-                    //Fix this
-                    RC.EditConc(mci.molguid, mci.conc);
-                }
-                RC.Load(MainWindow.SOP.Protocol, true);
+                redraw_flag = true;
+                MW.runButton_Click(null, null);
+                //Render();
 
-                Chart.RedrawSeries();
-                Chart.RecalculateYMax();
-                //MW.runSim();
-                
+                //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)dgInitConcs.SelectedItem;
+                //double newval = ((DoublesBox)sender).Number;
+                //double oldval = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
+
+                //if (newval != oldval)
+                //{
+                //    ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration = ((DoublesBox)sender).Number;
+                //    //foreach (MolConcInfo mci in RC.initConcs)
+                //    //{
+                //    //    //Fix this
+                //    //    RC.EditConc(mci.molguid, mci.conc);
+                //    //}
+                //    //RC.Load(MainWindow.SOP.Protocol, true);
+
+                //    //Chart.RedrawSeries();
+                //    //Chart.RecalculateYMax();
+                //    MW.RerunSimulation();
+                //}
+
             }
         }
 
@@ -367,11 +358,11 @@ namespace Workbench
 
         private void btnRedraw_Click(object sender, RoutedEventArgs e)
         {
-            foreach (MolConcInfo mci in RC.initConcs)
-            {
-                //Fix this
-                ////RC.EditConc(mci.molguid, mci.conc);
-            }
+            //foreach (MolConcInfo mci in RC.initConcs)
+            //{
+            //    //Fix this
+            //    ////RC.EditConc(mci.molguid, mci.conc);
+            //}
 
             //Fix this
             ////RC.UpdateRateConstants();

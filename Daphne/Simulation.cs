@@ -1129,11 +1129,23 @@ namespace Daphne
         }
 
         //This method updates the conc of the given molecule
-        public void EditConc(string moleculeKey, double conc)
+        public void EditConc(string molguid, double conc)
         {
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            double[] initArray = new double[1];
+
+            if (comp.Populations.ContainsKey(molguid)) 
+            {
+                initArray[0] = conc;
+                ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+                sf.Initialize("const", initArray);
+                comp.Populations[molguid].Conc *= 0;
+                comp.Populations[molguid].Conc += sf;
+            }
+
             //dictInitialConcs[moleculeKey] = conc;
-            initConcsDict[moleculeKey].conc = conc;
-            OnPropertyChanged("initConcs");
+            //initConcsDict[moleculeKey].conc = conc;
+            //OnPropertyChanged("initConcs");
         }
 
         //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs

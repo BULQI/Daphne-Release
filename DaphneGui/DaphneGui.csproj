@@ -223,15 +223,6 @@
     </Compile>
     <Compile Include="RegionControl.cs" />
     <Compile Include="RegionWidget.cs" />
-    <Compile Include="Rendering\RenderCell.xaml.cs">
-      <DependentUpon>RenderCell.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Rendering\RenderDrawing.xaml.cs">
-      <DependentUpon>RenderDrawing.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Rendering\RenderMolPop.xaml.cs">
-      <DependentUpon>RenderMolPop.xaml</DependentUpon>
-    </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -252,9 +243,6 @@
     </Compile>
     <Compile Include="Workbench\AddReactionControl.xaml.cs">
       <DependentUpon>AddReactionControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Workbench\ChartManager.cs">
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Workbench\ChartViewToolWindow.xaml.cs">
       <DependentUpon>ChartViewToolWindow.xaml</DependentUpon>
@@ -336,18 +324,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ReactionComplexControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Rendering\RenderCell.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Rendering\RenderDrawing.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Rendering\RenderMolPop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -6942,7 +6942,19 @@ namespace Daphne
 
     public class MolPopHomogeneousLevel : MolPopDistribution
     {
-        public double concentration { get; set; }
+        private double _concentration;
+        public double concentration
+        {
+            get
+            {
+                return _concentration;
+            }
+            set
+            {
+                _concentration = value;
+                OnPropertyChanged("concentration");
+            }
+        }
 
         public MolPopHomogeneousLevel()
         {

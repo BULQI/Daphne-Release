@@ -73,7 +73,7 @@ namespace DaphneGui
 
             Size = new System.Drawing.Size(700, 300);
             IsXLogarithmic = false;
-            IsYLogarithmic = true;
+            IsYLogarithmic = false;
             DrawLine = true;
             LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
@@ -304,11 +304,23 @@ namespace DaphneGui
                 if (valu > 0)
                 {
                     ToolWin.dblMouseHover.Number = valu;
-
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
+                    //ToolWin.redraw_flag = true;
+                    //ToolWin.MW.RerunSimulation();
+                    
                     //Fix this
-                    ToolWin.RC.EditConc(guid, valu);
-                    RedrawSeries();
+                    //ToolWin.RC.EditConc(guid, valu);
+                    //RedrawSeries();
+
+
+                    ConfigMolecularPopulation molpop = ToolWin.CRC.molpops.Where(m => m.molecule.entity_guid == guid).First();
+                    if (molpop != null)
+                    {
+                        MolPopHomogeneousLevel homogeneous = molpop.mp_distribution as MolPopHomogeneousLevel;
+                        homogeneous.concentration = valu;
+                        ToolWin.redraw_flag = true;
+                        ToolWin.MW.runButton_Click(null, null);
+                    }
                 }
             }            
         }
@@ -328,6 +340,12 @@ namespace DaphneGui
             {
                 panelRC.Controls.Remove(c);
             }
+
+            ChartAreas.Clear();
+            Series.Clear();
+            Legends.Clear();
+            Titles.Clear();
+            
         }
 
         /// <summary>
@@ -372,7 +390,7 @@ namespace DaphneGui
                 chartArear1.AxisY.Minimum = Math.Pow(10, Math.Floor(Math.Log10(chartArear1.AxisY.Minimum)));
             }
 
-            LabelX = "Timee (linear)";
+            LabelX = "Time (linear)";
             LabelY = "Concentration (linear)";
 
             //LOGARITHMIC Y Axis
@@ -545,8 +563,9 @@ namespace DaphneGui
         /// </summary>
         public void RedrawSeries()
         {
-            ToolWin.RC.reset();
-            ToolWin.RC.RunForward();
+            //ToolWin.RC.reset();
+            //ToolWin.RC.RunForward();
+            
             ListTimes = ToolWin.RC.ListTimes;
             DictConcs = ToolWin.RC.DictGraphConcs;
 
