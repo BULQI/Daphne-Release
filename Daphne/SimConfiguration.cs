@@ -52,7 +52,7 @@ namespace Daphne
             {
                 if (_selectedRenderSkin == null && SkinList.Count > 0)
                 {
-                    _selectedRenderSkin = SkinList.Where(x => x.Name == "default").SingleOrDefault();
+                    _selectedRenderSkin = SkinList.Where(x => x.Name == "default_skin").SingleOrDefault();
                     if (_selectedRenderSkin == null) _selectedRenderSkin = SkinList.First();
                 }
                 return _selectedRenderSkin;
@@ -1313,6 +1313,8 @@ namespace Daphne
             string jsonFile = tempFiles == true ? TempFile : FileName;
             string readText = File.ReadAllText(jsonFile);
             Level local = JsonConvert.DeserializeObject<Level>(readText, settings);
+
+            Level local_copy = JsonConvert.DeserializeObject<Level>(readText, settings);
 
             // after deserialization the names are blank, restore them
             local.FileName = FileName;
@@ -3743,6 +3745,7 @@ namespace Daphne
             EffectiveRadius = thisEffRad;
             DiffusionCoefficient = thisDiffCoeff;
             molecule_location = MoleculeLocation.Bulk;
+            renderLabel = this.entity_guid;
         }
 
         public ConfigMolecule()
@@ -3753,6 +3756,7 @@ namespace Daphne
             EffectiveRadius = 5.0;
             DiffusionCoefficient = 2;
             molecule_location = MoleculeLocation.Bulk;
+            renderLabel = this.entity_guid;
         }
 
         public override string GenerateNewName(Level level, string ending)
@@ -4319,6 +4323,10 @@ namespace Daphne
             set
             {
                 _molecule = value;
+                if (_molecule != null)
+                {
+                    renderLabel = _molecule.renderLabel ?? _molecule.entity_guid;
+                }
                 OnPropertyChanged("molecule");
             }
         }
@@ -4387,7 +4395,6 @@ namespace Daphne
         {
             Guid id = Guid.NewGuid();
             molpop_guid = id.ToString();
-            renderLabel = molpop_guid;
 
             if (rt == ReportType.CELL_MP)
             {
@@ -6318,7 +6325,7 @@ namespace Daphne
                 _Cell = value;
                 if (_Cell != null)
                 {
-                    renderLabel = _Cell.renderLabel;
+                    renderLabel = _Cell.renderLabel ?? _Cell.entity_guid;
                 }
                 OnPropertyChanged("Cell");
             }

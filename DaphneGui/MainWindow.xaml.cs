@@ -510,7 +510,7 @@ namespace DaphneGui
                     if (!Directory.Exists(SkinFolderPath))
                     {
                         Directory.CreateDirectory(SkinFolderPath);
-                        RenderSkin sk = new RenderSkin("default", null);
+                        RenderSkin sk = new RenderSkin("default_skin", null);
                         sk.FileName = SkinFolderPath + "default_skin.json";
                         sop.SkinList.Add(sk);
                     }
@@ -531,7 +531,7 @@ namespace DaphneGui
                     //create a default if none exxists
                     if (sop.SkinList.Count == 0)
                     {
-                        RenderSkin sk = new RenderSkin("default", null);
+                        RenderSkin sk = new RenderSkin("default_skin", null);
                         sk.FileName = SkinFolderPath + "default_skin.json";
                         sk.SerializeToFile();
                         sop.SkinList.Add(sk);
