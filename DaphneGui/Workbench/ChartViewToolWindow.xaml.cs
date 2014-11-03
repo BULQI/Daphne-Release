@@ -29,102 +29,22 @@ namespace Workbench
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
         private ReactionComplexChart Chart;
-        private System.Drawing.Size chartSize;
-        public VatReactionComplex RC { get; set; }
-        public ConfigReactionComplex CRC { get; set; }
-        public MainWindow MW;
-        public bool redraw_flag;
+        //private System.Drawing.Size chartSize;          
+        public VatReactionComplex RC { get; set; }      //Simulation object - used to plot graph
+        public ConfigReactionComplex CRC { get; set; }  //ConfigReactionComplex object - used for gui display and changes and not graph data
+        public MainWindow MW;       //handle to main window
+        public bool redraw_flag;    //true if redraw and not creating a new chart
 
         public ChartViewToolWindow()
         {
             InitializeComponent();
-            chartSize = new System.Drawing.Size(700, 300);
+            //chartSize = new System.Drawing.Size(700, 300);
             CRC = DataContext as ConfigReactionComplex;
             Chart = new ReactionComplexChart();
             Chart.panelRC = panelRC;
             Chart.ToolWin = this;
             redraw_flag = false;
         }
-        
-#if OLD_RC
-        public void RenderOld()
-        {
-            RC = Tag as VatReactionComplex;
-
-            lTimes = RC.ListTimes;
-            dictConcs = RC.DictGraphConcs;
-
-            //////TEMP CODE FOR TESTING
-            ////List<Reaction> mylist = VatReactionComplex.dataBasket.Environment.Comp.BulkReactions;
-            ////List<double> templist = dictConcs.First().Value;
-            ////double[] val = new double[3] { 0,0,0 };
-
-            ////int n = 0;
-            ////foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
-            ////{
-            ////    val[n] = kvp.Value[0];
-            ////    kvp.Value.Clear();
-            ////    n++;
-            ////}
-
-            ////n = 0;
-            ////foreach (KeyValuePair<string, List<double>> kvp in dictConcs)
-            ////{
-            ////    //val = 1 + n;
-            ////    double delta = 0;
-            ////    for (int i = 0; i < 100; i++)
-            ////    {
-            ////        delta = delta + i/100.0;
-            ////        val[n] = val[n] + delta;
-            ////        if (val[n] <= 0)
-            ////            val[n] = 0.1;
-            ////        kvp.Value.Add(val[n]);
-            ////    }
-            ////    n++;
-            ////}
-            //////END TEST CODE
-
-            if (lTimes.Count > 0 && dictConcs.Count > 0)
-            {
-                //Chart = new ChartManager(this, chartSize);
-                //Chart.PChart = pChartMolConcs;
-
-                Chart.ListTimes = lTimes;
-                Chart.DictConcs = dictConcs;
-
-                Chart.LabelX = "Time";
-                Chart.LabelY = "Concentration";
-                Chart.TitleXY = "Time Trajectory of Molecular Concentrations";
-                Chart.DrawLine = true;
-
-                System.Windows.Forms.MenuItem[] menuItems = 
-                {   
-                    new System.Windows.Forms.MenuItem("Zoom in"),
-                    new System.Windows.Forms.MenuItem("Zoom out"),
-                    new System.Windows.Forms.MenuItem("Save Changes"),
-                    new System.Windows.Forms.MenuItem("Discard Changes"),
-                };
-
-                System.Windows.Forms.ContextMenu menu = new System.Windows.Forms.ContextMenu(menuItems);
-                Chart.SetContextMenu(menu);
-                menu.MenuItems[2].Click += new System.EventHandler(this.btnSave_Click);
-                menu.MenuItems[3].Click += new System.EventHandler(this.btnDiscard_Click);
-
-                btnIncSize.IsEnabled = true;
-                btnDecSize.IsEnabled = true;
-                btnDiscard.IsEnabled = true;
-                btnSave.IsEnabled = true;
-
-                Chart.DrawChart();
-
-                //dgInitConcs.ItemsSource = RC.initConcs;
-#if OLD_RC
-                dgReactionRates.ItemsSource = RC.CRC.ReactionRates;
-#endif
-
-            }
-        }
-#endif
 
         public void Render()
         {
@@ -172,7 +92,6 @@ namespace Workbench
                     Chart.Draw();
                 }
             }
-
         }
         
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
@@ -196,7 +115,7 @@ namespace Workbench
             windowsFormsHost1.Width = w;
             windowsFormsHost1.Height = h;
             
-            chartSize = sz;
+            //chartSize = sz;
             Chart.Size = sz;
 
             Chart.Draw();
@@ -219,7 +138,7 @@ namespace Workbench
             windowsFormsHost1.Width = windowsFormsHost1.Width * 0.9;
             windowsFormsHost1.Height = windowsFormsHost1.Height * 0.9;            
 
-            chartSize = sz;
+            //chartSize = sz;
             Chart.Size = sz;
             Chart.Draw();            
         }        
@@ -269,6 +188,7 @@ namespace Workbench
             //}
         }
         
+        //DELETE?
         //private string GetNumerics(string input)
         //{
         //    var sb = new StringBuilder();
@@ -282,17 +202,17 @@ namespace Workbench
         //    return output;
         //}
 
+        /// <summary>
+        /// This handler is called if user changes a reaction rate by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblReacRate_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Number")
             {
-                //Fix this
-                ////RC.UpdateRateConstants();
-                ////RC.Sim.Load(MainWindow.SOP.Protocol, true);
-                Chart.RedrawSeries();
-                Chart.RecalculateYMax();
-
-                //MW.runButton_Click(0, 0);
+                redraw_flag = true;
+                MW.runButton_Click(null, null);
             }
         }
 
@@ -314,33 +234,17 @@ namespace Workbench
             Chart.Draw();
         }
 
+        /// <summary>
+        /// This handler is called if user changes a molecular concentration by slider or in text box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
                 MW.runButton_Click(null, null);
-                //Render();
-
-                //ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)dgInitConcs.SelectedItem;
-                //double newval = ((DoublesBox)sender).Number;
-                //double oldval = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
-
-                //if (newval != oldval)
-                //{
-                //    ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration = ((DoublesBox)sender).Number;
-                //    //foreach (MolConcInfo mci in RC.initConcs)
-                //    //{
-                //    //    //Fix this
-                //    //    RC.EditConc(mci.molguid, mci.conc);
-                //    //}
-                //    //RC.Load(MainWindow.SOP.Protocol, true);
-
-                //    //Chart.RedrawSeries();
-                //    //Chart.RecalculateYMax();
-                //    MW.RerunSimulation();
-                //}
-
             }
         }
 
@@ -356,28 +260,28 @@ namespace Workbench
             }
         }
 
-        private void btnRedraw_Click(object sender, RoutedEventArgs e)
-        {
-            //foreach (MolConcInfo mci in RC.initConcs)
-            //{
-            //    //Fix this
-            //    ////RC.EditConc(mci.molguid, mci.conc);
-            //}
+        ////private void btnRedraw_Click(object sender, RoutedEventArgs e)
+        ////{
+        ////    //foreach (MolConcInfo mci in RC.initConcs)
+        ////    //{
+        ////    //    //Fix this
+        ////    //    ////RC.EditConc(mci.molguid, mci.conc);
+        ////    //}
 
-            //Fix this
-            ////RC.UpdateRateConstants();
-            Chart.RedrawSeries();
-            Chart.RecalculateYMax();
+        ////    //Fix this
+        ////    ////RC.UpdateRateConstants();
+        ////    Chart.RedrawSeries();
+        ////    Chart.RecalculateYMax();
 
-            //This causes a refresh of the conc data grid
-            UpdateGrids();
-        }
+        ////    //This causes a refresh of the conc data grid
+        ////    UpdateGrids();
+        ////}
 
-        public void UpdateGrids()
-        {
-            dgInitConcs.ItemsSource = null;
-            dgInitConcs.ItemsSource = RC.initConcs;
-        }
+        ////public void UpdateGrids()
+        ////{
+        ////    dgInitConcs.ItemsSource = null;
+        ////    dgInitConcs.ItemsSource = RC.initConcs;
+        ////}
 
         
     }

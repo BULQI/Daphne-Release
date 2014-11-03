@@ -32,17 +32,7 @@ namespace DaphneGui
             DataContext = this;
         }
 
-        protected override void AddDefaultBoxSpec(BoxSpecification box)
-        {
-            throw new Exception("VatReactionComplex does not implement AddDefaultBoxSpec method.");
-        }
-
         protected override void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
-        {
-            throw new Exception("VatReactionComplex does not implement AddGaussianSpecification method.");
-        }
-
-        protected override void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
         {
             throw new Exception("VatReactionComplex does not implement AddGaussianSpecification method.");
         }
@@ -81,11 +71,6 @@ namespace DaphneGui
             throw new Exception("VatReactionComplex does not implement CellPopsHaveMolecule method.");
         }
 
-        protected override void DeleteGaussianSpecification(MolPopDistribution dist)
-        {
-            throw new Exception("VatReactionComplex does not implement DeleteGaussianSpecification method.");
-        }
-
         protected override void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
         {
             throw new Exception("VatReactionComplex does not implement ecmAvailableReactionsListView_Filter method.");
@@ -96,17 +81,5 @@ namespace DaphneGui
         {
             throw new Exception("VatReactionComplex does not implement RegionFocusToGUISection method.");
         }
-
-        public override void SelectGaussSpecInGUI(int index, string guid)
-        {
-            throw new Exception("VatReactionComplex does not implement SelectGaussSpecInGUI method.");
-        }
-
-        public override void SelectMolpopInGUI(int index)
-        {
-            throw new Exception("VatReactionComplex does not implement SelectMolpopInGUI method.");
-        }
-
-
     }
 }

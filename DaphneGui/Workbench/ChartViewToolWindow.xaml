@@ -195,7 +195,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>
+                <!--<Button x:Name="btnRedraw" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRedraw_Click" >Redraw</Button>-->
                 
             </StackPanel>
             

@@ -279,7 +279,7 @@ namespace DaphneGui
             ToolWin.dblMouseHover.Number = 0;
             ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
 
-            ToolWin.UpdateGrids();
+            //ToolWin.UpdateGrids();
         }
 
         /// <summary>

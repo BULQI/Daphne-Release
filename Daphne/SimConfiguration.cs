@@ -2115,6 +2115,7 @@ namespace Daphne
         }
 
         /// <summary>
+        /// gmk - remove this?
         /// override this function to handle the base version and for the tissue scenario
         /// </summary>
         public override void resetGaussRetrieve()
@@ -2126,6 +2127,7 @@ namespace Daphne
 
         /// <summary>
         /// retrieve the next Gaussian spec
+        /// gmk - remove this?
         /// </summary>
         /// <returns>the Gaussian found or null when done</returns>
         public override GaussianSpecification nextGaussSpec()
@@ -4337,6 +4339,7 @@ namespace Daphne
         }
 
         /// <summary>
+        /// gmk - remove this?
         /// grab the next Gaussian spec
         /// </summary>
         /// <returns>the spec or null when done</returns>
