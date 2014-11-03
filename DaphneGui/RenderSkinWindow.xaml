@@ -45,9 +45,9 @@
                         <Style TargetType="Rectangle">
                             <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Converter={StaticResource DebugConverter}, ConverterParameter=7}" Value="7">
+                                <DataTrigger Binding="{Binding}" Value="7">
                                     <Setter Property="Fill" Value="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ComboBox}, 
-                                        Converter={StaticResource ColorToBrushConverter}, ConverterParameter=7triggered}"/>
+                                        Converter={StaticResource ColorToBrushConverter}}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding}" Value="8">
                                     <Setter Property="Fill" Value="{Binding Path=Tag, RelativeSource={RelativeSource AncestorType=ComboBox}, Converter={StaticResource ColorToBrushConverter}}"/>
@@ -343,7 +343,7 @@
                 <local:DaphneStackPanel>
                     <DataGrid Name="SkinMolEditor" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" SelectionUnit="FullRow"
                               RowHeaderWidth="0"
-                              ItemsSource="{Binding Path=renderMols, Converter={StaticResource DebugConverter}}">
+                              ItemsSource="{Binding Path=renderMols}">
                         <DataGrid.Columns>
 
                             <DataGridTextColumn Header="Name" Binding="{Binding name}" IsReadOnly="True" MinWidth="120" >
