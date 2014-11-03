@@ -1986,6 +1986,7 @@ namespace DaphneGui
                     ToolWin.MW = this;
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
+                    ReacComplexChartWindow.redraw_flag = false;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();

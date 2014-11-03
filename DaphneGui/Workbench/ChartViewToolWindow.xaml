@@ -39,6 +39,7 @@
                                             
             </StackPanel>
 
+            <!--PUSH BUTTONS-->
             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" >
                 <Button x:Name="btnIncSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnIncSize_Click" IsEnabled="False">Zoom in</Button>
                 <Button x:Name="btnDecSize" Width="70" Height="24" HorizontalAlignment="Left" Click="btnDecSize_Click" IsEnabled="False">Zoom out</Button>
@@ -48,19 +49,6 @@
                 <Button Content="Y-Axis Log" Height="23" Name="btnLogY" Width="75" Click="btnY_Axis_Click" />
             </StackPanel>
             
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
-                <TextBlock VerticalAlignment="Center" >Maximum time (minutes):</TextBlock>
-                <uc:DoublesBox x:Name="dblMaxTime" HorizontalAlignment="Left" Margin="4,0"
-                                                Number="{Binding Path=dInitialTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                   
-                                                SNLowerThreshold="0.001"
-                                                SNUpperThreshold="1000"
-                                                PropertyChanged="dblMaxTime_PropertyChanged"
-                               >
-
-                </uc:DoublesBox>
-
-            </StackPanel>
-
             <!--GRAPH-->
             <StackPanel Grid.Column="0" Grid.Row="2" >
                 <WindowsFormsHost Margin="0,0,0,0" Name="windowsFormsHost1" ClipToBounds="True"  > 

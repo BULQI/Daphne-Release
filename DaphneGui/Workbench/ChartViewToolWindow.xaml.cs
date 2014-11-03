@@ -188,6 +188,7 @@ namespace Workbench
             //}
         }
         
+#if OLD_RC
         //DELETE?
         //private string GetNumerics(string input)
         //{
@@ -201,6 +202,7 @@ namespace Workbench
         //    string output = sb.ToString();
         //    return output;
         //}
+#endif
 
         /// <summary>
         /// This handler is called if user changes a reaction rate by slider or in text box

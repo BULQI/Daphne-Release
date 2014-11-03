@@ -278,8 +278,7 @@ namespace DaphneGui
             SeriesToDrag = null;
             ToolWin.dblMouseHover.Number = 0;
             ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
-
-            //ToolWin.UpdateGrids();
+            CalculateXMax();
         }
 
         /// <summary>
@@ -396,14 +395,14 @@ namespace DaphneGui
             //LOGARITHMIC Y Axis
             if (IsYLogarithmic)
             {
-                chartArear1.AxisY.IsLogarithmic = false; // true;
+                chartArear1.AxisY.IsLogarithmic = IsYLogarithmic; // true;
                 chartArear1.AxisY.LogarithmBase = 10;
                 LabelY = "Concentration (log)";
             }
             //LOGARITHMIC X Axis
             if (IsXLogarithmic)
             {
-                chartArear1.AxisX.IsLogarithmic = false; // true;
+                chartArear1.AxisX.IsLogarithmic = IsXLogarithmic; // true;
                 chartArear1.AxisX.LogarithmBase = 10;
                 LabelX = "Time (log)";
             }
@@ -614,7 +613,8 @@ namespace DaphneGui
             }
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            CalculateXMax();
+            //CalculateXMax();
+            //RecalculateYMax();
 
             Focus();
             Invalidate();
