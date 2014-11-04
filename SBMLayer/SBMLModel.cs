@@ -2126,7 +2126,7 @@ namespace SBMLayer
                     cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * gc.CellRadius - envHandle.gridstep / 2,
                                                           envHandle.extent_y / 2 - envHandle.gridstep / 2,
                                                           envHandle.extent_z / 2 - envHandle.gridstep / 2);
-                    cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+                    //cellPop.cellpopulation_color = Syste/m.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
 
                     if (protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
                     {
@@ -2494,8 +2494,8 @@ namespace SBMLayer
                     box.SetMatrix(trans_matrix);
 
                     configMolPop.mp_dist_name = "Gaussian";
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopGaussian molPopGaussian = new MolPopGaussian();
                     molPopGaussian.peak_concentration = peakConc;
@@ -2548,8 +2548,6 @@ namespace SBMLayer
             {
                 MolPopHomogeneousLevel uniformDistribution;
                 configMolPop.mp_dist_name = "Uniform";
-                configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                configMolPop.mp_render_blending_weight = 2.0;
                 uniformDistribution = new MolPopHomogeneousLevel();
                 uniformDistribution.concentration = species.getInitialConcentration();
                 configMolPop.mp_distribution = uniformDistribution;
