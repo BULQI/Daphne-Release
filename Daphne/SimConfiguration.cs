@@ -4171,22 +4171,6 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        private string _mp_dist_name = "";
-        public string mp_dist_name
-        {
-            get { return _mp_dist_name; }
-            set
-            {
-                if (_mp_dist_name == value)
-                    return;
-                else
-                {
-                    _mp_dist_name = value;
-                    OnPropertyChanged("mp_dist_name");
-                }
-            }
-        }
-
         private MolPopDistribution _mp_distribution;
         public MolPopDistribution mp_distribution
         {
@@ -5224,7 +5208,6 @@ namespace Daphne
 
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mp_dist_name = "Homogeneous";
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                         configMolPop.mp_render_blending_weight = 2.0;
                         configMolPop.mp_render_on = true;

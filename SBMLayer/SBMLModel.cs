@@ -2493,7 +2493,6 @@ namespace SBMLayer
                     trans_matrix[3] = new double[4] { 0, 0, 0, 1 };
                     box.SetMatrix(trans_matrix);
 
-                    configMolPop.mp_dist_name = "Gaussian";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     configMolPop.mp_render_blending_weight = 2.0;
 
@@ -2516,7 +2515,6 @@ namespace SBMLayer
                     double boundaryEndConc = Convert.ToDouble(attributes.getValue(attributes.getIndex("boundary_end_conc")));
 
                     MolPopLinear molpoplin = new MolPopLinear();
-                    configMolPop.mp_dist_name = "Linear";
 
                     if (boundaryStart == Daphne.Boundary.left)
                     {
@@ -2547,7 +2545,6 @@ namespace SBMLayer
             if (!isDistributionSet)
             {
                 MolPopHomogeneousLevel uniformDistribution;
-                configMolPop.mp_dist_name = "Uniform";
                 configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 configMolPop.mp_render_blending_weight = 2.0;
                 uniformDistribution = new MolPopHomogeneousLevel();

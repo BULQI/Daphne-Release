@@ -277,7 +277,8 @@ namespace DaphneGui
 
             SeriesToDrag = null;
             ToolWin.dblMouseHover.Number = 0;
-            ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
+            //ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
+            RecalculateYMax();
             CalculateXMax();
         }
 
@@ -317,8 +318,8 @@ namespace DaphneGui
                     {
                         MolPopHomogeneousLevel homogeneous = molpop.mp_distribution as MolPopHomogeneousLevel;
                         homogeneous.concentration = valu;
-                        ToolWin.redraw_flag = true;
-                        ToolWin.MW.runButton_Click(null, null);
+                        //ToolWin.redraw_flag = true;
+                        //ToolWin.MW.runButton_Click(null, null);
                     }
                 }
             }            
@@ -340,6 +341,8 @@ namespace DaphneGui
                 panelRC.Controls.Remove(c);
             }
 
+            bDrag = false;
+            SeriesToDrag = null;
             ChartAreas.Clear();
             Series.Clear();
             Legends.Clear();
@@ -444,6 +447,9 @@ namespace DaphneGui
 
             // Set chart control location
             Location = new System.Drawing.Point(1, 8);
+
+            CalculateXMax();
+            RecalculateYMax();
 
             panelRC.Controls.Add(this);
         }
@@ -613,8 +619,8 @@ namespace DaphneGui
             }
 
             //HAVE TO UPDATE X AXIS MAX TOO
-            //CalculateXMax();
-            //RecalculateYMax();
+            CalculateXMax();
+            RecalculateYMax();
 
             Focus();
             Invalidate();

@@ -346,7 +346,6 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
                         break;
 

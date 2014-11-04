@@ -250,17 +250,17 @@ namespace Workbench
             }
         }
 
-        private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "Number")
-            {
-                if (RC != null && Chart != null)
-                {
-                    Chart.RedrawSeries();
-                    Chart.RecalculateYMax();
-                }
-            }
-        }
+        //private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        //{
+        //    if (e.PropertyName == "Number")
+        //    {
+        //        if (RC != null && Chart != null)
+        //        {
+        //            Chart.RedrawSeries();
+        //            Chart.RecalculateYMax();
+        //        }
+        //    }
+        //}
 
         ////private void btnRedraw_Click(object sender, RoutedEventArgs e)
         ////{
