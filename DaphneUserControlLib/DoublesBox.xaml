@@ -33,9 +33,13 @@
             <TextBox x:Name="tbFNumber" Height="24" VerticalAlignment="Top" Margin="0,0" 
                     BorderThickness="{Binding Path=TextBorderThickness, Mode=OneWay, ElementName=UC}"  
                     Width="{Binding Path=TextFieldWidth, Mode=OneWay, ElementName=UC}"
-                    Text="{Binding Path=FNumber, ElementName=UC}"
+                    Text="{Binding Path=FNumber, Mode=TwoWay, UpdateSourceTrigger=LostFocus,  ElementName=UC}"
                     IsReadOnly="{Binding Path=IsReadOnly, ElementName=UC}"
-                    GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus">
+                    GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus"
+                    >
+
+                <!--Text="{Binding Path=FNumber,  ElementName=UC}"-->
+                <!--GotFocus="tbFNumber_GotFocus"  LostFocus="tbFNumber_LostFocus"-->
             </TextBox>
             
         </StackPanel>

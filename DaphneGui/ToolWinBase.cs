@@ -65,29 +65,30 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
-        /// <summary>
-        /// Add a molecular population to a compartement.
-        /// Intended as a utility to be used by the derived classes.
-        /// </summary>
-        /// <param name="mol"></param>
-        /// <param name="comp"></param>
-        /// <param name="isCell"></param>
-        protected void AddMolPopToCmpartment(ConfigMolecule mol, ConfigCompartment comp, Boolean isCell)
-        {
-            ConfigMolecularPopulation cmp;
+        //Moved to ConfigCompartment
+        ///// <summary>
+        ///// Add a molecular population to a compartement.
+        ///// Intended as a utility to be used by the derived classes.
+        ///// </summary>
+        ///// <param name="mol"></param>
+        ///// <param name="comp"></param>
+        ///// <param name="isCell"></param>
+        //protected void AddMolPopToCmpartment(ConfigMolecule mol, ConfigCompartment comp, Boolean isCell)
+        //{
+        //    ConfigMolecularPopulation cmp;
 
-            if (isCell == true)
-            {
-                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
-            }
-            else
-            {
-                cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
-            }
-            cmp.molecule = mol.Clone(null);
-            cmp.Name = mol.Name;
-            comp.molpops.Add(cmp);
-        }
+        //    if (isCell == true)
+        //    {
+        //        cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+        //    }
+        //    else
+        //    {
+        //        cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+        //    }
+        //    cmp.molecule = mol.Clone(null);
+        //    cmp.Name = mol.Name;
+        //    comp.molpops.Add(cmp);
+        //}
 
         /// <summary>
         /// Functionality to preserve focus when the Apply button is clicked.

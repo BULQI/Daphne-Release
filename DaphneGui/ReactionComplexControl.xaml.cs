@@ -27,6 +27,19 @@ namespace DaphneGui
             Tag = ListBoxReactionComplexes.SelectedItem;
         }
 
+        public ConfigReactionComplex GetSelectedReactionComplex()
+        {
+            if (ListBoxReactionComplexes.SelectedIndex < 0)
+                return null;
+
+            ConfigReactionComplex crc = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
+
+            if (crc == null)
+                return null;
+
+            return crc;
+        }
+
         private void ButtonEditComplex_Click(object sender, RoutedEventArgs e)
         {
             // Data context: compartment's list of reactions, need access to ER?

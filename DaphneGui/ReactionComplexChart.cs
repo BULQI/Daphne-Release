@@ -70,6 +70,8 @@ namespace DaphneGui
             colorTable.Add(3, Color.Brown);
             colorTable.Add(4, Color.Gold);
             colorTable.Add(5, Color.Fuchsia);
+            colorTable.Add(6, Color.Lime);
+            colorTable.Add(7, Color.Violet);
 
             Size = new System.Drawing.Size(700, 300);
             IsXLogarithmic = false;
@@ -123,7 +125,7 @@ namespace DaphneGui
             ChartAreas[0].AxisX.Maximum = max * 1.1;
         }
 
-        public void RecalculateYMax()
+        public void CalculateYMax()
         {
             ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
         }
@@ -277,9 +279,10 @@ namespace DaphneGui
 
             SeriesToDrag = null;
             ToolWin.dblMouseHover.Number = 0;
-            //ChartAreas[0].AxisY.Maximum = getMax_Series(DictConcs) * 1.1 + 0.0001;
-            RecalculateYMax();
-            CalculateXMax();
+
+            CalculateYMax();
+            Focus();
+            Invalidate();
         }
 
         /// <summary>
@@ -305,21 +308,13 @@ namespace DaphneGui
                 {
                     ToolWin.dblMouseHover.Number = valu;
                     string guid = ConvertMolNameToMolGuid(SeriesToDrag.Name);
-                    //ToolWin.redraw_flag = true;
-                    //ToolWin.MW.RerunSimulation();
-                    
-                    //Fix this
-                    //ToolWin.RC.EditConc(guid, valu);
-                    //RedrawSeries();
 
-
+                    //Just change the value in the molpop and that will lead to a call to dblConcs_PropertyChanged in ChartViewToolWindow.xaml.cs
                     ConfigMolecularPopulation molpop = ToolWin.CRC.molpops.Where(m => m.molecule.entity_guid == guid).First();
                     if (molpop != null)
                     {
                         MolPopHomogeneousLevel homogeneous = molpop.mp_distribution as MolPopHomogeneousLevel;
                         homogeneous.concentration = valu;
-                        //ToolWin.redraw_flag = true;
-                        //ToolWin.MW.runButton_Click(null, null);
                     }
                 }
             }            
@@ -449,7 +444,7 @@ namespace DaphneGui
             Location = new System.Drawing.Point(1, 8);
 
             CalculateXMax();
-            RecalculateYMax();
+            CalculateYMax();
 
             panelRC.Controls.Add(this);
         }
@@ -568,16 +563,12 @@ namespace DaphneGui
         /// </summary>
         public void RedrawSeries()
         {
-            //ToolWin.RC.reset();
-            //ToolWin.RC.RunForward();
-            
             ListTimes = ToolWin.RC.ListTimes;
             DictConcs = ToolWin.RC.DictGraphConcs;
 
             double[] x;
             double[] y;
             x = ListTimes.ToArray();
-
            
             foreach (Series s in Series)
             {
@@ -620,7 +611,7 @@ namespace DaphneGui
 
             //HAVE TO UPDATE X AXIS MAX TOO
             CalculateXMax();
-            RecalculateYMax();
+            CalculateYMax();
 
             Focus();
             Invalidate();

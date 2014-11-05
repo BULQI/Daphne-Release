@@ -1088,7 +1088,7 @@
             </DataTemplate>
 
 
-            <DataTemplate x:Key="molpopDistributionDetailsTemplate">
+            <!--<DataTemplate x:Key="molpopDistributionDetailsTemplate">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="70" />
@@ -1098,13 +1098,13 @@
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <ContentControl Name="solfac_dist_cc"
+                    <ContentControl Name="molpop_dist_cc"
                                     Grid.ColumnSpan="2" Grid.Row="0"
                                     Margin="0,6"
                                     BorderBrush="DarkGray" BorderThickness="1"
                                     Content="{Binding Path=mp_distribution}"  />
                 </Grid>
-            </DataTemplate>
+            </DataTemplate>-->
 
             <DataTemplate x:Key="cellPopDistributionDetailsTemplate">
                 <Grid>

@@ -81,5 +81,11 @@ namespace DaphneGui
         {
             throw new Exception("VatReactionComplex does not implement RegionFocusToGUISection method.");
         }
+
+        public ConfigReactionComplex GetSelectedReactionComplex()
+        {
+            return RCControl.GetSelectedReactionComplex();
+        }
+
     }
 }

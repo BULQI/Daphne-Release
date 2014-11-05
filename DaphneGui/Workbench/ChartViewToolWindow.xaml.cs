@@ -93,6 +93,13 @@ namespace Workbench
                 }
             }
         }
+
+        public void Reset()
+        {
+            if (Chart != null) {
+                Chart.Clear();
+            }
+        }
         
         private void btnIncSize_Click(object sender, RoutedEventArgs e)
         {
@@ -241,12 +248,18 @@ namespace Workbench
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        //private void dblConcs_PropertyChanged(object sender, RoutedEventArgs e)
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            //object a = e.OriginalSource;
+            //object b = e.Source;
+
+            //if ( true ) 
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
                 MW.runButton_Click(null, null);
+                //MW.RerunSimulation();
             }
         }
 
@@ -262,22 +275,12 @@ namespace Workbench
         //    }
         //}
 
-        ////private void btnRedraw_Click(object sender, RoutedEventArgs e)
-        ////{
-        ////    //foreach (MolConcInfo mci in RC.initConcs)
-        ////    //{
-        ////    //    //Fix this
-        ////    //    ////RC.EditConc(mci.molguid, mci.conc);
-        ////    //}
-
-        ////    //Fix this
-        ////    ////RC.UpdateRateConstants();
-        ////    Chart.RedrawSeries();
-        ////    Chart.RecalculateYMax();
-
-        ////    //This causes a refresh of the conc data grid
-        ////    UpdateGrids();
-        ////}
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            int i = 0;
+            i++;
+            //Chart.RedrawSeries();
+        }
 
         ////public void UpdateGrids()
         ////{

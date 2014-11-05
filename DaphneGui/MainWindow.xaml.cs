@@ -1648,6 +1648,21 @@ namespace DaphneGui
             applyButton.IsEnabled = false;
             saveButton.IsEnabled = false;
             mutex = true;
+
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
+            {
+                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+                if (crc == null)
+                {
+                    MessageBox.Show("Please select a reaction complex to process.");
+                    return;
+                }
+                if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
+                {
+                    sim.RunStatus = SimulationBase.RUNSTAT_OFF;
+                }
+            }
+
             runSim();
         }        
        
@@ -1980,8 +1995,11 @@ namespace DaphneGui
                 // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
                 // when the user pushes the Apply button. 
                 // There is probably redundancy here, but I'm not sure how to restructure it.
+
+                //tmcContainer
                 if (newFile == true)
                 {
+                    ReacComplexChartWindow.Reset();
                     ToolWin = new ToolWinVatRC();
                     ToolWin.MW = this;
                     ToolWin.Protocol = SOP.Protocol;
@@ -2275,11 +2293,20 @@ namespace DaphneGui
         }
 
         // rerun the simulation when multiple repetitions are specified
-        private void RerunSimulation()
+        public void RerunSimulation()
         {
-            // increment the repetition
-            repetition++;
-            lockSaveStartSim(true);
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true && Sim.RunStatus != SimulationBase.RUNSTAT_RUN)
+            {
+                Sim.Load(sop.Protocol, true);
+                Sim.restart();
+                Sim.RunStatus = SimulationBase.RUNSTAT_RUN;
+            }
+            else
+            {
+                // increment the repetition
+                repetition++;
+                lockSaveStartSim(true);
+            }
         }
 
         // re-enable the gui elements that got disabled during a simulation run
@@ -2328,16 +2355,17 @@ namespace DaphneGui
 
             if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                //ReacComplexChartWindow.Tag = SOP.Protocol.scenario.environment.comp.reaction_complexes[0];
-                //ReacComplexChartWindow.DataContext = Sim; //this is what we want
-
                 ReacComplexChartWindow.Tag = Sim;
                 ReacComplexChartWindow.MW = this;
-                //ReacComplexChartWindow.redraw_flag = false;
-                //if () {
-                //    ReacComplexChartWindow.redraw_flag = true;
-                //}
-                ReacComplexChartWindow.DataContext = SOP.Protocol.scenario.environment.comp.reaction_complexes[0]; //?
+                
+                ConfigReactionComplex crc = ((ToolWinVatRC)ToolWin).GetSelectedReactionComplex();
+                if (crc == null)
+                {
+                    MessageBox.Show("Please select a reaction complex to process..");
+                    return;
+                }
+
+                ReacComplexChartWindow.DataContext = crc;
                 ReacComplexChartWindow.Activate();
                 ReacComplexChartWindow.Render();
             }
@@ -2600,7 +2628,7 @@ namespace DaphneGui
                     else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
                     {
                         //sop.Protocol.SerializeToFile();
-                        orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                        //orig_content = sop.Protocol.SerializeToStringSkipDeco();
                         orig_path = System.IO.Path.GetDirectoryName(protocol_path.LocalPath);
                         // initiating a run starts always at repetition 1
                         repetition = 1;

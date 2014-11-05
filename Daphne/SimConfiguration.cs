@@ -4345,6 +4345,33 @@ namespace Daphne
         }
 
         /// <summary>
+        /// Add a molecular population to a compartement, given a molecule.
+        /// Meant to be used for a new or cloned ConfigMolecule.
+        /// </summary>
+        /// <param name="mol"></param>
+        /// <param name="comp"></param>
+        /// <param name="isCell"></param>
+        public void AddMolPop(ConfigMolecule mol, Boolean isCell)
+        {
+            if (molecules_dict.ContainsKey(mol.entity_guid) == true)
+                return;
+
+            ConfigMolecularPopulation cmp;
+
+            if (isCell == true)
+            {
+                cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
+            }
+            else
+            {
+                cmp = new ConfigMolecularPopulation(ReportType.ECM_MP);
+            }
+            cmp.molecule = mol.Clone(null);
+            cmp.Name = mol.Name;
+            molpops.Add(cmp);
+        }
+
+        /// <summary>
         /// push a molecule into this compartment
         /// </summary>
         /// <param name="m">the molecule</param>

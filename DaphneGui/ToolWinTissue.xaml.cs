@@ -59,6 +59,7 @@ namespace DaphneGui
         //        cm = item.Clone(null);
         //        if (cm == null) return;
         //        AddMolPopToCmpartment(cm, MainWindow.SOP.Protocol.scenario.environment.comp, false);
+        //        this.Protocol.scenario.environment.comp.AddMolPop(AddMolPopToCmpartment, false);
         //        break;
         //    }
         //    lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
