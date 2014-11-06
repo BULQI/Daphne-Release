@@ -574,6 +574,234 @@
 
         </TabItem>
 
+
+
+
+        <!-- Rendering scheme -->
+        <TabItem Header="Rendering Scheme" x:Name="tabRending" AutomationProperties.AutomationId="DaphneRenderTab">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Orientation="Vertical" Margin="8" >
+
+                    <!-- Rendering Settings -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Rendering Settings"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <StackPanel>
+                            <TextBlock Text="Rendering Skin" FontWeight="Bold" Margin="0,-10,0,5" />
+
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="skinChoiceComboBox" MinWidth="80" 
+                                          ItemsSource="{Binding Tag.SkinList, ElementName=MyToolWindow}"
+                                          SelectedItem="{Binding Tag.SelectedRenderSkin, ElementName=MyToolWindow}"
+                                          IsSynchronizedWithCurrentItem="True"
+                                          DisplayMemberPath="Name"
+                                          SelectionChanged="skinChoiceComboBox_SelectionChanged"
+                                          >
+
+                                </ComboBox>
+                                <Button Content="Edit Selected skin" Margin="20, 0" Click="Button_Click_Edit_RenderSkin"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0, 10, 0, 0">
+                                <TextBlock x:Name="skinLabel" Visibility="Collapsed">Name:</TextBlock>
+                                <TextBox x:Name="skinNameTextBox"  Visibility="Collapsed" MinWidth="80" Margin="5, 0, 10, 0"></TextBox>
+                                <Button Content="New skin" Click="btnNewSkinClick" MinWidth="80"/>
+                                <TextBlock Name="skinNote" Margin="5,0"></TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <!-- Cell options -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Cell Options"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+                        <!--<TextBlock Text="Cell Information" FontWeight="Bold" Margin="0,10,0,0" />-->
+                        <DataGrid x:Name="dgRenderCellDetails1" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Path=scenario.popOptions.cellPopOptions, UpdateSourceTrigger=PropertyChanged}"     
+                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              CanUserSortColumns="False" RowHeaderWidth="0"
+                              VerticalContentAlignment="Center"
+                              CanUserAddRows="False"
+                              BorderThickness="1"
+                              BorderBrush="Black"
+                            >
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="cell population" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderMethod">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                      SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" >
+                                                <ComboBox.ItemContainerStyle>
+                                                    <Style TargetType="ComboBoxItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+
+                                </DataGridTemplateColumn>
+
+                                <!--<DataGridComboBoxColumn Header="Render Method" ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                        SelectedItemBinding="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}">
+ 
+                                    
+                                </DataGridComboBoxColumn>-->
+
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+
+
+                    <!-- Molecules in Extracellular Medium -->
+                    <Expander ExpandDirection="Down" Padding="5"
+                            IsExpanded="False"
+                            Header="Molecules in Extracellular Medium"
+                            Margin="0,4,0,0" 
+                            Canvas.ZIndex="1"
+                            BorderThickness="1"
+                            BorderBrush="Black"
+                            Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
+                            >
+
+                        <DataGrid x:Name="dgRenderMolDetails1" AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Path=scenario.popOptions.molPopOptions, UpdateSourceTrigger=PropertyChanged}"     
+                              Height="120" MinWidth="200" MinRowHeight="20" MinColumnWidth="50" ColumnWidth="200" MaxColumnWidth="300"
+                              CanUserReorderColumns="False" CanUserResizeRows="False"
+                              CanUserSortColumns="False" RowHeaderWidth="0"
+                              VerticalContentAlignment="Center"
+                              CanUserAddRows="False"
+                              BorderThickness="1"
+                              BorderBrush="Black"
+                            >
+
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader" >
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Height" Value="24" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="Black" />
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Offset="0.0" Color="White" />
+                                                <GradientStop Offset="1.0" Color="Beige" />
+                                            </LinearGradientBrush>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Molecular population" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderOn" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=renderOn, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="RenderMethod" MinWidth="220">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
+                                                      SelectedItem="{Binding Path=renderMethod, UpdateSourceTrigger=PropertyChanged}" >
+                                                <ComboBox.ItemContainerStyle>
+                                                    <Style TargetType="ComboBoxItem">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=mol}"  Value="false">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ComboBox.ItemContainerStyle>
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+
+                                </DataGridTemplateColumn>
+
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+
+                </StackPanel>
+
+            </ScrollViewer>
+        </TabItem>
+        
     </TabControl>
  
     

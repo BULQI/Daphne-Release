@@ -30,9 +30,16 @@ namespace DaphneGui
         // This field is not relevant to VatRC.
         public Visibility ZExtentVisibility { get; set; }
 
+
+        public VTKDisplaDocWindow VTKDisplayWindow;
+        public ObservableCollection<ContentControl> ContentComponents { get; set; }
+
+
         public ToolWinBase()
         {
             TitleText = "";
+            ContentComponents = new ObservableCollection<ContentControl>();
+
         }
 
         // Used to specify Gaussian distibution for cell positions

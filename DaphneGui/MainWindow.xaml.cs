@@ -2030,6 +2030,8 @@ namespace DaphneGui
 
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinTissue)ToolWin);
+                    //testtab.ItemsSource = toolWin.ContentComponents;
+
 
                     // create the simulation
                     sim = new TissueSimulation();

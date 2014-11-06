@@ -20,9 +20,11 @@
         <local:CellRenderPopFromProtocolConverter x:Key="CellRenderPopFromProtocolConverter"/>
 
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
-        
+
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
-        
+
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+
         <local:SimSetupControl x:Key="simSetupControl"/>
         <!--<local:CellRenderMethodToStringConverter x:Key="CellRendToStringConv" />-->
 
@@ -33,7 +35,7 @@
                 <x:Type TypeName="daph:RenderMethod" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        
+
         <!-- Tab header text layout for LP fitting tab -->
         <DataTemplate x:Key="TabItemHeaderTemplate">
             <Grid>
@@ -53,14 +55,14 @@
                 <!--<TextBlock Text="{Binding Converter={StaticResource CellRendToStringConv}}"/>-->
             </StackPanel>
         </DataTemplate>
-        
+
     </Window.Resources>
-    
+
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.Open" 
                         CanExecute="CommandBindingOpen_CanExecute" 
                         Executed="CommandBindingOpen_Executed" />
-        
+
         <CommandBinding Command="ApplicationCommands.Save" 
                         CanExecute="CommandBindingSave_CanExecute" 
                         Executed="CommandBindingSave_Executed" />
@@ -88,10 +90,10 @@
                     Command="{x:Static custom:MainWindow.DeleteDBCommand}" />-->
     </Window.InputBindings>
 
-    
+
     <!-- Begin GUI layout definitions -->
     <DockPanel LastChildFill="True">
-        
+
         <shared:PixelSnapper DockPanel.Dock="Top">
             <Menu x:Name="MainMenu">
                 <!--><MenuItem Header="Edit"/>-->
@@ -159,14 +161,14 @@
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
                     <MenuItem x:Name="menu_CellsLibrary" Header="Cells Library"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=CellStudioToolWindow}" />
-                    
+
                     <!-- This one is not yet functional -->
                     <!--<MenuItem x:Name="menu_ActivateAnalysisChart" Header="Activate Run Stats Results"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=ChartViewDocWindow}" />-->
                     <!--<MenuItem x:Name="menu_ActivateDisplayOptions" Header="Activate Display Options"  
 							  Command="docking:DockingCommands.ActivateWindow" CommandTarget="{Binding ElementName=DisplayOptionsToolWindow}" />-->
                 </MenuItem>
-                
+
                 <MenuItem Header="Save Entities"                 Name="pushMenu">
                     <MenuItem Header="Molecules..."              Name="pushMol"         Click="pushMol_Click"  />
                     <MenuItem Header="Genes..."                  Name="pushGene"        Click="pushGene_Click" />
@@ -174,9 +176,9 @@
                     <MenuItem Header="Cells..."                  Name="pushCell"        Click="pushCell_Click" />
                     <MenuItem Header="Differentiation Scheme..." Name="pushDiffScheme"  Click="pushDiffScheme_Click" />
                     <MenuItem Header="Transition Drivers..."     Name="pushTransDriver" Click="pushTransDriver_Click" />
-                    <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />                  
+                    <MenuItem Header="Reaction Complexes..."     Name="pushReacComplex" Click="pushReacComplex_Click" />
                 </MenuItem>
-                
+
                 <MenuItem Header="Data Export" Name = "ExportMenu">
                     <MenuItem Header="B Cell Summary" Name="bCellSummaryExport" Click="bCellSummaryExport_Click" />
                     <MenuItem Header="B Cell Pedigree" Name="bCellPedigreeExport" Click="bCellPedigreeExport_Click" />
@@ -187,14 +189,14 @@
                 <MenuItem Header="Administration" Name="AdminMenu">
                     <MenuItem Header="User Store" Name="menuUserStore" Click="menuUserStore_Click" />
                     <MenuItem Header="Daphne Store" Name="menuDaphneStore" Click="menuDaphneStore_Click" />
-                    <MenuItem Header="Back to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click"  />               
+                    <MenuItem Header="Back to Protocol" Name="menuProtocolStore" Click="menuProtocolStore_Click"  />
                 </MenuItem>
                 <MenuItem Header="Help">
                     <MenuItem Header="Dev help" Name="devHelp" Click="devHelp_click" />
                     <MenuItem Header="Tech help" Name="techHelp">
                         <MenuItem Header="Fitting" Name="fittingHelp" Click="fittingHelp_click" />
                         <MenuItem Header="Locomotion" Name="locomotionHelp" Click="locomotionHelp_click" />
-                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />                        
+                        <MenuItem Header="Receptor dynamics" Name="receptorHelp" Click="receptorHelp_click" />
                     </MenuItem>
                     <MenuItem Header="About..." Name="helpAbout" Click="helpAbout_Click" />
                 </MenuItem>
@@ -226,7 +228,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ToolBarTray.Resources>                
+                </ToolBarTray.Resources>
                 <ToolBar Name="SaveToolbar" RenderOptions.BitmapScalingMode="NearestNeighbor">
                     <Button Content="Apply" HorizontalAlignment="Left" Name="applyButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
@@ -241,7 +243,7 @@
                                 </StackPanel>
                             </ToolTip>
                         </Button.ToolTip>
-                    </Button>                    
+                    </Button>
                     <Button Content="Save" HorizontalAlignment="Right" Name="saveButton" 
                                 Width="60" ToolTipService.InitialShowDelay="1500"
                                 Margin="0" Command="ApplicationCommands.Save">
@@ -364,14 +366,15 @@
                           AreDocumentWindowsDestroyedOnClose="False"
                           UseHostedAutoHidePopups="False"
                           AutomationProperties.AutomationId="DaphneDockSite"
-                          >            
+                          >
 
             <docking:SplitContainer x:Name="ProtocolSplitContainer">
-                
+
                 <!-- Workbench Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="ProtocolToolWindowContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
                     <local:ToolWinBase x:Name="ProtocolToolWindow"/>
                 </docking:ToolWindowContainer>
+
 
                 <!-- Right-hand content containers -->
                 <docking:SplitContainer Orientation="Vertical">
@@ -394,170 +397,23 @@
                         </DataTemplate>
 
                     </docking:SplitContainer.Resources>
-                    
+
                     <!-- VTK Windows Forms Host panel -->
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
                             <docking:TabbedMdiContainer Background="LightGray" >
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
-                                        <DockPanel.Resources>
-                                            <!-- Gray out button images when toolbar is disabled -->
-                                            <Style TargetType="{x:Type Image}" x:Key="toolbarImageStyle">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
-                                                        <Setter Property="Opacity" Value="0.25"></Setter>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                            <Style TargetType="{x:Type Image}" x:Key="toolbarTBImageStyle">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
-                                                        <Setter Property="Opacity" Value="0.25"></Setter>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                            <Style TargetType="{x:Type Image}" x:Key="toolbarPlayButtonImageStyle">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}, AncestorLevel=1}, Path=IsEnabled}" Value="False">
-                                                        <Setter Property="Opacity" Value="0.25"></Setter>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </DockPanel.Resources>
 
-                                        <ToolBarTray DockPanel.Dock="Top">
-                                            <ToolBar Name="Tools_Toolbar" 
-                                 IsEnabled="{Binding ToolsToolbar_IsEnabled}"
-                                 RenderOptions.BitmapScalingMode="NearestNeighbor">
-                                                <ToggleButton Name="WhArrowToolButton" 
-                                          IsChecked="{Binding WhArrowToolButton_IsChecked}" 
-                                          IsEnabled="{Binding WhArrowToolButton_IsEnabled}"
-                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Navigation tool" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/cursors_wh_arrow.png" Style="{StaticResource toolbarTBImageStyle}"/>
-                                                </ToggleButton>
-                                                <ToggleButton Name="HandToolButton" 
-                                                          IsChecked="{Binding HandToolButton_IsChecked}" 
-                                                          IsEnabled="{Binding HandToolButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cell selection tool" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/cursors_hand.png" Style="{StaticResource toolbarTBImageStyle}" DataContext="{Binding}" />
-                                                </ToggleButton>
-                                                <ToggleButton Name="PreviewButton" 
-                                                          IsChecked="{Binding PreviewButton_IsChecked}" 
-                                                          IsEnabled="{Binding PreviewButton_IsEnabled}"
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Track Preview Mode (fast)" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/preview_path.png" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <Separator ToolBar.OverflowMode="AsNeeded"/>
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Cells</Label>
-
-                                                <!--ItemsSource="{Binding Source={StaticResource cellRenderMethodEnum}}"
-                                                          ItemTemplate="{Binding Source={StaticResource cellRenderMethodTemplate}}"
-                                                SelectedValue="{Binding Path=CellRenderMethod}"-->
-                                                <ComboBox Name="CellRenderMethodCB" Width="100"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Cells rendered as shape"
-                                                          ItemsSource="{Binding Converter={StaticResource CellRenderPopFromProtocolConverter}}"
-                                                          IsSynchronizedWithCurrentItem="True"
-                                                          DisplayMemberPath="name"
-                                                          />
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">color by</Label>
-                                                <ComboBox x:Name="CellsColorByCB" Width="100" 
-                                                          ItemsSource="{Binding Source={StaticResource RenderMethodEnum}}"
-                                                          SelectedItem="{Binding ElementName=CellRenderMethodCB, Path=SelectedItem.renderMethod, UpdateSourceTrigger=PropertyChanged}"
-                                                          SelectionChanged="CellsColorByCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded" ToolTip="Choose cell render method">
-                                                    <ComboBox.ItemContainerStyle>
-                                                        <Style TargetType="ComboBoxItem">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource self}, Converter={StaticResource RenderMethodItemDisableConverter}, ConverterParameter=cell}"  Value="false">
-                                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ComboBox.ItemContainerStyle>
-                                                    <ComboBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding Converter={StaticResource RenderMethodEnumDescriptionConverter}}"/>
-                                                        </DataTemplate>
-                                                    </ComboBox.ItemTemplate>
-                                                </ComboBox>
-
-                                                <!--<Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="AsNeeded">Cell selection mode</Label>
-                                                <ComboBox Name="CellSelectionToolCB" Width="160"
-                                                          ItemsSource="{Binding Path=CellSelectionToolModes}"
-                                                          SelectedValue="{Binding Path=CellSelectionToolMode}"
-                                                          SelectionChanged="CellSelectionToolCB_SelectionChanged"
-                                                          BorderBrush="LightGray" 
-                                                          ToolBar.OverflowMode="AsNeeded"  ToolTip="Select the function the cell selection tool should perform"
-                                                          />-->
-
-                                                <Slider x:Name="ColorMapScaleFactorSlider"
-                                                        Visibility="{Binding ColorScaleSlider_IsEnabled}"
-                                                        Value="{Binding ColorScaleMaxFactor}"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Center"
-                                                        ToolBar.OverflowMode="AsNeeded"
-                                                        Width="50"
-                                                        RenderTransform="1.0,0,0,0.5,0,6"
-                                                        Minimum="0.01" 
-                                                        Maximum="1"
-                                                        KeyboardNavigation.IsTabStop="False"
-                                                        >
-                                                </Slider>
-                                                <TextBlock ToolBar.OverflowMode="AsNeeded" 
-                                                            VerticalAlignment="Center"
-                                                            Margin="2,0,5,0"
-                                                            Visibility="{Binding ColorScaleSlider_IsEnabled}"
-                                                            Text="{Binding ColorScaleMaxFactor, StringFormat={}{0:F2}, Mode=OneWay}"
-                                                            />
-                                                <Label RenderTransform="1,0,0,1,0,2" ToolBar.OverflowMode="Never">Extracellular medium</Label>
-                                                <ComboBox x:Name="SolfacRenderingCB" Width="120" 
-                                                            ItemsSource="{Binding Path=ECSRenderingMethodNames}" 
-                                                            SelectedValue="{Binding Path=ECSRenderingMethod}"
-                                                            BorderBrush="LightGray" 
-                                                            ToolBar.OverflowMode="AsNeeded" ToolTip="Extracellular medium rendering style">
-                                                </ComboBox>
-                                                <ToggleButton x:Name="ScalarBarMarkerButton" 
-                                                        IsChecked="{Binding ScalarBarMarker_IsChecked}" 
-                                                        ToolTip="Show scalar color bar" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqScalarBar24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <ToggleButton Name="OrientationMarkerButton" 
-                                                        IsChecked="{Binding OrientationMarker_IsChecked}" 
-                                                        ToolTip="Show orientation axes marker" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqShowOrientationAxes24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <ToggleButton Name="ResetCameraButton" 
-                                                        IsChecked="{Binding ResetCamera_IsChecked}" 
-                                                        ToolTip="Reset camera" ToolTipService.ShowOnDisabled="True">
-                                                    <Image Source="Images/pqResetCamera24.png" Width="24" Style="{StaticResource toolbarTBImageStyle}" />
-                                                </ToggleButton>
-                                                <Separator ToolBar.OverflowMode="Never"/>
-                                                <Button Content="Export 3D View" Height="24" HorizontalAlignment="Left" Margin="2,0,0,0" Name="save3DView" VerticalAlignment="Center" Width="92" Visibility="Visible" IsEnabled="True" Click="save3DView_Click"/>
-                                            </ToolBar>
-                                        </ToolBarTray>
-
-                                        <!-- VTK render window -->
-                                        <ContentPresenter MinHeight="100" Content="{Binding Wfh}" />
-                                    </DockPanel>
-                                </docking:DocumentWindow>
-
-                                <!-- This is the window that contains the reaction complex graph-->
-                                <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
-                               
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
+                                <local:VTKDisplaDocWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" />
+                             
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
                                 <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    
+
                                 </local:CellStudioToolWindow>
 
                                 <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" ></work:ChartViewToolWindow>
                                 <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
-                                
-                                <!-- "#FFE7F5DC" -->
 
                             </docking:TabbedMdiContainer>
 
@@ -650,7 +506,7 @@
                                                                     </DataTemplate>
                                                                 </GridViewColumn.CellTemplate>
                                                             </GridViewColumn>
-                                                            
+
                                                         </GridView>
                                                     </ListView.View>
                                                 </ListView>
@@ -716,12 +572,12 @@
                                                 </ListView.View>
                                             </ListView>
                                         </StackPanel>
-                                        
+
                                     </TabItem>
                                     <TabItem Header="Cell Differentiation" x:Name="TabItemCellDiff" >
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Margin="0,4">Current State:  </TextBlock>
+                                                <TextBlock Margin="0,4">Current State:</TextBlock>
                                                 <TextBox x:Name="txtCellState" Width="200" Margin="10,0" IsEnabled="False"></TextBox>
                                             </StackPanel>
                                             <ListView x:Name="lvCellDiff" Margin="0,4"
@@ -750,7 +606,7 @@
                                                                 </DataTemplate>
                                                             </GridViewColumn.CellTemplate>
                                                         </GridViewColumn>
-                                                        
+
                                                         <GridViewColumn Width="150" Header="Gene Activation Levels">
                                                             <GridViewColumn.CellTemplate>
                                                                 <DataTemplate>
@@ -758,7 +614,7 @@
                                                                 </DataTemplate>
                                                             </GridViewColumn.CellTemplate>
                                                         </GridViewColumn>
-                                                        
+
                                                     </GridView>
                                                 </ListView.View>
                                             </ListView>
@@ -812,7 +668,7 @@
                     </docking:ToolWindowContainer>
 
                 </docking:SplitContainer>
-                
+
             </docking:SplitContainer>
         </docking:DockSite>
     </DockPanel>

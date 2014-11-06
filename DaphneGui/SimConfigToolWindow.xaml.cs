@@ -2168,6 +2168,8 @@ namespace DaphneGui
             ConfigReaction newreac = reac.Clone(true);
             MainWindow.GenericPush(newreac);
         }
+
+
         private void btnNewSkinClick(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -2251,13 +2253,12 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            var val = value as Protocol;
-            if (val != null && val.scenario is TissueScenario)
-            {
-                var ts = val.scenario as TissueScenario;
-                return ts.cellpopulations;
-            }
 
+            var twbase = value as ToolWinBase;
+            if (twbase != null)
+            {
+                return twbase.ContentComponents;
+            }
             return value;
         }
 

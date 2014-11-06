@@ -24,7 +24,7 @@ namespace DaphneGui
     /// <summary>
     /// Interaction logic for RenderSkinEditor.xaml
     /// </summary>
-    public partial class RenderSkinWindow : ToolWindow
+    public partial class RenderSkinWindow : ToolWinBase
     {
 
         public RenderSkinWindow()
