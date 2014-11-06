@@ -405,7 +405,6 @@ namespace DaphneGui
             autoZoomFitMenu.IsChecked = Properties.Settings.Default.autoZoomFit;
             openLastScenarioMenu.IsChecked = Properties.Settings.Default.lastOpenScenario != "";
             skipDataWriteMenu.IsChecked = Properties.Settings.Default.skipDataBaseWrites;
-            SystemOfPersistence.changesCounter = Properties.Settings.Default.changesCounter;
             // TEMP_SUMMARY
             writeCellSummariesMenu.IsChecked = Properties.Settings.Default.writeCellsummaries;
 
@@ -2866,9 +2865,6 @@ namespace DaphneGui
             {
                 Properties.Settings.Default.lastOpenScenario = extractFileName();
             }
-
-            // remember the changes counter
-            Properties.Settings.Default.changesCounter = SystemOfPersistence.changesCounter;
 
             // save the preferences
             Properties.Settings.Default.Save();
