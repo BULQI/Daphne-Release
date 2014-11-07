@@ -103,7 +103,7 @@
                                                 RangeFactor="1"
                                                 SNLowerThreshold="0.001"
                                                 SNUpperThreshold="1000"
-                                                PropertyChanged="dblConcs_PropertyChanged"       
+                                                PropertyChanged="dblConcs_PropertyChanged"     
                                                 >
                                         </uc:DoublesBox>
                                     </StackPanel>

@@ -112,7 +112,7 @@ namespace DaphneUserControlLib
 
             string sRounded = dRounded.ToString();
 
-            char[] charsToTrim1 = {'0', '-'};
+            char[] charsToTrim1 = { '0', '-' };
             sRounded = sRounded.Trim(charsToTrim1);
             char[] charsToTrim2 = { '.' };
             sRounded = sRounded.Trim(charsToTrim2);
@@ -226,7 +226,7 @@ namespace DaphneUserControlLib
             Maximum = max;
         }
 
-        private string ToFormatted(double number)
+        public string ToFormatted(double number)
         {
             return number.ConvertToSignificantDigits(SignificantDigits, SNLowerThreshold, SNUpperThreshold);
         }
@@ -296,13 +296,16 @@ namespace DaphneUserControlLib
             }
             catch
             {
-                MessageBox.Show("Please enber a valid number.");
+                MessageBox.Show("Please enter a valid number.");
                 //throw new Exception("Invalid number entered");
                 return;
             }
 
-            Number = d;
-            SetMinMax();
+            if (Number != d)
+            {
+                Number = d;
+                SetMinMax();
+            }
         }
 
         private string GetNumericChars(string input)
@@ -340,7 +343,9 @@ namespace DaphneUserControlLib
 
                 if (currval != newval)
                 {
+                    //slFNumber.Value = newval;
                     SetValue(NumberProperty, newval);
+                    //OnPropertyChanged("Number");
                 }
                 FNumber = ToFormatted(ToDisplayNumber());
                 if (!SliderInitialized)
@@ -675,6 +680,8 @@ namespace DaphneUserControlLib
             uc.AbsMaximum = (double)(e.NewValue);
         }
 
+        
+
 
 
 #if USE_CAPTION
@@ -699,6 +706,26 @@ namespace DaphneUserControlLib
 #endif
 
 
+    }
+
+    public class NumberToFormattedNumberConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string s = "";
+            double d = (double) value;
+
+            DoublesBox db = new DoublesBox();
+            db.Number = d;
+
+            s = db.ToFormatted(d);
+            return s;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return null;
+        }
     }
 }
 

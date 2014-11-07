@@ -248,32 +248,15 @@ namespace Workbench
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        //private void dblConcs_PropertyChanged(object sender, RoutedEventArgs e)
         private void dblConcs_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            //object a = e.OriginalSource;
-            //object b = e.Source;
-
-            //if ( true ) 
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
-                //MW.RerunSimulation();
+                //MW.runButton_Click(null, null);
+                MW.SimulationTestFunction();
             }
         }
-
-        //private void dblMaxTime_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        //{
-        //    if (e.PropertyName == "Number")
-        //    {
-        //        if (RC != null && Chart != null)
-        //        {
-        //            Chart.RedrawSeries();
-        //            Chart.RecalculateYMax();
-        //        }
-        //    }
-        //}
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {

@@ -54,6 +54,10 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static int TestCount = 0;
+        public static int TestCount1 = 1;
+        public static int TestCount2 = 2;
+
         private static ToolWinBase toolWin;
         public static ToolWinBase ToolWin
         {
@@ -988,6 +992,7 @@ namespace DaphneGui
                     // so we don't bother people about saving just because of this change
                     // NOTE: If we want to save scenario along with data, need to save after this GUID change is made...
                     orig_content = sop.Protocol.SerializeToStringSkipDeco();
+                    
                     sim.restart();
                     UpdateGraphics();
 
@@ -1661,10 +1666,52 @@ namespace DaphneGui
                 {
                     sim.RunStatus = SimulationBase.RUNSTAT_OFF;
                 }
+
+                
             }
 
+            TestCount = 0;
+            TestCount1 = 0;
+            TestCount2 = 0;
+            //SimulationBase.StepCounter = 0;
+            //MessageBox.Show(string.Format("TestCount before start = {0}, TestCount1 = {0}, TestCount2 = {0}", TestCount, TestCount1, TestCount2));
             runSim();
-        }        
+        }
+
+        public void SimulationTestFunction()
+        {
+            if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+            {
+                throw new InvalidCastException();
+            }
+            
+            VatReactionComplex vatSim = (VatReactionComplex)Sim;
+         
+            vatSim.reset();
+            //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            foreach (KeyValuePair<string, List<double>> kvp in vatSim.DictGraphConcs)
+            {
+                kvp.Value.Clear();
+                //kvp.Value.Add(
+            }
+            vatSim.ListTimes.Clear();
+            vatSim.ListTimes.Add(0);
+            //comp.Populations.Clear();
+            vatSim.Load(sop.Protocol, true);
+            //vatSim.
+
+            double dt = sop.Protocol.scenario.time_config.sampling_interval;
+            int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
+
+            for (int i = 1; i < nSteps; i++)
+            {
+                vatSim.Step(dt);
+                vatSim.Reporter.AppendReporter();
+            }
+            ReacComplexChartWindow.Activate();
+            ReacComplexChartWindow.Render();
+            
+        }
        
         /// <summary>
         /// save when simulation is paused state
@@ -2185,17 +2232,21 @@ namespace DaphneGui
             }
         }
 
+        
         private void run()
         {
             while (true)
             {
                 lock (sim)
                 {
+                    TestCount++;
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
+                        TestCount1++;
                         // run the simulation forward to the next task
                         if (postConstruction == true && AssumeIDE() == true)
                         {
+                            TestCount2++;
                             sim.RunForward();
                         }
                         else
@@ -2355,6 +2406,7 @@ namespace DaphneGui
 
             if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
+                //MessageBox.Show(string.Format("TestCount after finish = {0}, TestCount1 = {0}, TestCount2 = {0}", TestCount, TestCount1, TestCount2));
                 ReacComplexChartWindow.Tag = Sim;
                 ReacComplexChartWindow.MW = this;
                 
@@ -2817,13 +2869,6 @@ namespace DaphneGui
             {
                 prepareProtocol(ReadJson(""));
             }
-
-            ////skg testing
-            //Protocol.ScenarioType st = SOP.Protocol.GetScenarioType();
-
-            //if (true)
-            //{
-            //}
 
         }
 
