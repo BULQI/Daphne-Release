@@ -513,7 +513,7 @@ namespace Daphne
                 else
                 {
                     // list update
-                    for (int i = 0; i < entity_repository.reactions.Count; i++)
+                    for (int i = 0; i < entity_repository.reaction_templates.Count; i++)
                     {
                         if (entity_repository.reaction_templates[i].entity_guid == e.entity_guid)
                         {
