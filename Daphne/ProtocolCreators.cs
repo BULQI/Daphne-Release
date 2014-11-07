@@ -325,7 +325,6 @@ namespace Daphne
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
-                    configMolPop.mp_dist_name = "Uniform";
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     configMolPop.mp_render_blending_weight = 2.0;
                     configMolPop.mp_render_on = true;
@@ -500,7 +499,6 @@ namespace Daphne
                     bc = new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0);
                     molpoplin.boundaryCondition.Add(bc);
                     configMolPop.mp_distribution = molpoplin;
-                    configMolPop.mp_dist_name = "Linear";
 
                     // graphics colors etc
                     configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
@@ -621,7 +619,6 @@ namespace Daphne
             box.y_scale = envHandle.extent_y / 4;
             box.z_scale = envHandle.extent_z / 5;
             gaussSpec.box_spec = box;
-            //gg.gaussian_spec_name = "gaussian";
             gaussSpec.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Rotate the box by 45 degrees about the box's y-axis.
             double theta = Math.PI / 4,
@@ -646,7 +643,6 @@ namespace Daphne
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
-                configMolPop.mp_dist_name = "Gaussian";
                 configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                 configMolPop.mp_render_blending_weight = 2.0;
 
@@ -948,9 +944,6 @@ namespace Daphne
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
-                    configMolPop.mp_dist_name = "Uniform";
-                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    //configMolPop.mp_render_blending_weight = 2.0;
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1041,9 +1034,6 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
-
-                    gmp.mp_dist_name = "Uniform";
-                    //gmp.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
                     gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
@@ -1066,8 +1056,6 @@ namespace Daphne
                     gmp.molecule_guid_ref = cm.molecule_guid;
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
                     gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
@@ -1114,9 +1102,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1136,9 +1121,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1191,9 +1173,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1213,9 +1192,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1277,9 +1253,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1302,9 +1275,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1386,9 +1356,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1411,9 +1378,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1492,10 +1456,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    //gmp.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1515,9 +1475,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1568,10 +1525,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    //gmp.mp_color = System.Windows.Media.Color.FromScRgb(colors[i,0], colors[i,1], colors[i,2], colors[i,3]);
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -1591,9 +1544,6 @@ namespace Daphne
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
 
-                    gmp.mp_dist_name = "Uniform";
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;
@@ -2664,7 +2614,6 @@ namespace Daphne
 
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
-                    configMolPop.mp_dist_name = "Uniform";
 
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
