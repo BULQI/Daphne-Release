@@ -32,11 +32,6 @@ namespace DaphneGui
             DataContext = this;
         }
 
-        protected override void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
-        {
-            throw new Exception("VatReactionComplex does not implement AddGaussianSpecification method.");
-        }
-
         public override void Apply()
         {
             TabItem selectedTab = toolWinVatRC.ConfigTabControl.SelectedItem as TabItem;
