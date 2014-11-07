@@ -171,12 +171,11 @@ namespace DaphneGui
 
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
-            cmp.mp_dist_name = "New distribution";
-            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            cmp.mp_render_on = true;
+            //cmp.mp_dist_name = "New distribution";
+            //cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            //cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
             cmp.molecule = null;
-            //cmp.molecule = MainWindow.SOP.Protocol.entity_repository.molecules.First().Clone(null);
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
             foreach (ConfigMolecule item in cvs.View)
@@ -187,16 +186,6 @@ namespace DaphneGui
                 break;
             }
             if (cmp.molecule == null) return;
-
-            ////ObservableCollection<ConfigMolecule> mol_list = cvs.Source as ObservableCollection<ConfigMolecule>;
-            ////if (mol_list != null)
-            ////{
-            ////    cmp.molecule = mol_list.First().Clone(null);
-            ////}
-            ////else
-            ////{
-            ////    return;
-            ////}
 
             cell.cytosol.molpops.Add(cmp);
             CellCytosolMolPopsListBox.SelectedIndex = CellCytosolMolPopsListBox.Items.Count - 1;
@@ -223,31 +212,6 @@ namespace DaphneGui
             }
         }
 
-
-
-        //private void CellCytosolMolPopsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    CollectionViewSource cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
-        //    if (cvs == null || cvs.View == null)
-        //        return;
-
-        //    cvs.View.Refresh();
-
-        //    if (e.AddedItems.Count == 0) return;
-        //    var tmp = e.AddedItems[0] as ConfigMolecularPopulation;
-        //    //var tmp = (sender as ComboBox).SelectedItem as ConfigMolecularPopulation;
-        //    foreach (ConfigMolecule cm in cvs.View)
-        //    {
-        //        if (cm.Name == tmp.molecule.Name)
-        //        {
-        //            cvs.View.MoveCurrentTo(cm);
-        //            return;
-        //        }
-        //    }
-        //}
-
-
-
         private void CytosolRemoveMolButton_Click(object sender, RoutedEventArgs e)
         {
             ConfigMolecularPopulation cmp = (ConfigMolecularPopulation)CellCytosolMolPopsListBox.SelectedItem;
@@ -259,7 +223,6 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
 
             foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
@@ -270,7 +233,6 @@ namespace DaphneGui
                 }
             }
 
-            //added 1/10/14
             foreach (ConfigReaction cr in cell.membrane.Reactions.ToList())
             {
                 if (cr.HasMolecule(cmp.molecule.entity_guid))
@@ -294,9 +256,9 @@ namespace DaphneGui
 
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
-            cmp.mp_dist_name = "New distribution";
-            cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            cmp.mp_render_on = true;
+            //cmp.mp_dist_name = "New distribution";
+            //cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            //cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
@@ -323,9 +285,7 @@ namespace DaphneGui
             {
                 return;
             }
-
-            
-
+      
             cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
 
@@ -353,7 +313,7 @@ namespace DaphneGui
                     cell.membrane.Reactions.Remove(cr);
                 }
             }
-            //added 1/10/14
+          
             foreach (ConfigReaction cr in cell.cytosol.Reactions.ToList())
             {
                 if (cr.HasMolecule(cmp.molecule.entity_guid))
@@ -378,15 +338,10 @@ namespace DaphneGui
         {
             ConfigGene gene = new ConfigGene("NewGene", 0, 0);
             gene.Name = gene.GenerateNewName(MainWindow.SOP.Protocol, "_New");
-            //MainWindow.SOP.Protocol.entity_repository.genes.Add(gene);
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
+
             ConfigCell cell = DataContext as ConfigCell;
             cell.genes.Add(gene);
-            //CollectionViewSource.GetDefaultView(CellNucleusGenesListBox.ItemsSource).Refresh();
             CellNucleusGenesListBox.SelectedIndex = CellNucleusGenesListBox.Items.Count - 1;
-
-            //string guid = (string)CellNucleusGenesListBox.SelectedItem;
-            //CellNucleusGenesListBox.ScrollIntoView(guid);
             CellNucleusGenesListBox.ScrollIntoView(CellNucleusGenesListBox.SelectedItem);
 
             txtGeneName.IsEnabled = true;
@@ -395,7 +350,6 @@ namespace DaphneGui
         private void NucleusAddGeneButton_Click(object sender, RoutedEventArgs e)
         {
             //Get selected cell
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
 
             //if no cell selected, return
@@ -420,14 +374,8 @@ namespace DaphneGui
 
         private void NucleusRemoveGeneButton_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
-            //string gene_guid = (string)CellNucleusGenesListBox.SelectedItem;
-
             ConfigGene gene = (ConfigGene)CellNucleusGenesListBox.SelectedItem;
-
-            //if (gene_guid == "")
-            //    return;
 
             MessageBoxResult res = MessageBox.Show("Are you sure you would like to remove this gene from this cell?", "Warning", MessageBoxButton.YesNo);
 
@@ -443,7 +391,6 @@ namespace DaphneGui
 
         private void MembraneRemoveReacButton_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
             int nIndex = MembReacListBox.SelectedIndex;
 
@@ -465,7 +412,6 @@ namespace DaphneGui
 
         private void MembraneAddReacButton_Click(object sender, RoutedEventArgs e)
         {
-            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
@@ -491,12 +437,10 @@ namespace DaphneGui
 
         private void CytosolReacListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            //ReacParams2.IsExpanded = true;
         }
 
         private void CytosolRemoveReacButton_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
             int nIndex = CytosolReacListBox.SelectedIndex;
             if (nIndex >= 0)
@@ -511,7 +455,6 @@ namespace DaphneGui
 
         private void CytosolAddReacButton_Click(object sender, RoutedEventArgs e)
         {
-            ////ConfigCell cc = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cc = DataContext as ConfigCell;
             bool needRefresh = false;
 
@@ -572,12 +515,6 @@ namespace DaphneGui
 
         private void gaussian_region_actor_checkbox_clicked(object sender, RoutedEventArgs e)
         {
-            // this only makes sense if the scenario is the tissue scenario
-            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            {
-                throw new InvalidCastException();
-            }
-
             CheckBox cb = e.OriginalSource as CheckBox;
 
             if (cb.CommandParameter == null)
@@ -669,17 +606,9 @@ namespace DaphneGui
                     molpop.Name = new_mol_name;
             }
 
-            //ConfigMolecule mol = (ConfigMolecule)cb.SelectedItem;
-            //molpop.molecule = mol.Clone(null);
-
-            //string new_mol_name = mol.Name;
-            //if (curr_mol_guid != molpop.molecule.entity_guid)
-            //    molpop.Name = new_mol_name;
             var cvs = (CollectionViewSource)(FindResource("cytosolAvailableReactionsListView"));
             if (cvs.View == null) return; //not ready yet
             cvs.View.Refresh();
-
-            //CollectionViewSource.GetDefaultView(lvCytosolAvailableReacs.ItemsSource).Refresh();
         }
 
         private void cyto_molecule_combo_box_GotFocus(object sender, RoutedEventArgs e)
@@ -698,8 +627,6 @@ namespace DaphneGui
                 e.Accepted = false;
                 return;
             }
-
-            ////ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
 
             ObservableCollection<string> membBound = new ObservableCollection<string>();
             ObservableCollection<string> gene_guids = new ObservableCollection<string>();
@@ -780,8 +707,6 @@ namespace DaphneGui
                 e.Accepted = false;
                 return;
             }
-
-            ////ConfigCell cc = CellsListBox.SelectedItem as ConfigCell;
 
             //This filter is called for every reaction in the repository.
             //For current reaction, if all of its molecules are in the membrane, then the reaction should be included.
@@ -1060,7 +985,6 @@ namespace DaphneGui
 
         private void btnNewDeathDriver_Click(object sender, RoutedEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)(CellsListBox.SelectedItem);
             ConfigCell cell = DataContext as ConfigCell;
 
             if (cell == null)
@@ -1199,7 +1123,6 @@ namespace DaphneGui
         private void AddDifferentiationState(string schemeName, string stateName)
         {
             EntityRepository er = MainWindow.SOP.Protocol.entity_repository;
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)return;
 
@@ -1258,7 +1181,6 @@ namespace DaphneGui
             if (res == MessageBoxResult.No)
                 return;
 
-            //ConfigCell cell = CellsListBox.SelectedItem as ConfigCell;
             ConfigCell cell = DataContext as ConfigCell;
             if (cell == null)
                 return;
@@ -1365,7 +1287,6 @@ namespace DaphneGui
 
         private void unusedGenesListView_Filter(object sender, FilterEventArgs e)
         {
-            //ConfigCell cell = (ConfigCell)CellsListBox.SelectedItem;
             ConfigCell cell = DataContext as ConfigCell;
 
             e.Accepted = false;

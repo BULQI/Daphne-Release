@@ -366,15 +366,15 @@ namespace DaphneGui
                 return;
             }
 
-            // set the remaining molpop controller fields
-            molpopControl.RenderGradient = molpop.mp_render_on;
-            // assign color and weight
-            molpopControl.Color[0] = molpop.mp_color.R;
-            molpopControl.Color[1] = molpop.mp_color.G;
-            molpopControl.Color[2] = molpop.mp_color.B;
-            // NOTE: keep an eye on this; we may have to clamp this to zero
-            molpopControl.Color[3] = molpop.mp_color.A;
-            molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
+            //// set the remaining molpop controller fields
+            //molpopControl.RenderGradient = molpop.mp_render_on;
+            //// assign color and weight
+            //molpopControl.Color[0] = molpop.mp_color.R;
+            //molpopControl.Color[1] = molpop.mp_color.G;
+            //molpopControl.Color[2] = molpop.mp_color.B;
+            //// NOTE: keep an eye on this; we may have to clamp this to zero
+            //molpopControl.Color[3] = molpop.mp_color.A;
+            //molpopControl.BlendingWeight = molpop.mp_render_blending_weight;
             molpopControl.TypeGUID = molpop.molecule.entity_guid;
 
             // add the controller to the dictionary

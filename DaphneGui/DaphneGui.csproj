@@ -186,6 +186,9 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellPopControl.xaml.cs">
+      <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -246,6 +249,12 @@
     <Compile Include="ToolWinVatRC.xaml.cs">
       <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControl1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControl1.Designer.cs">
+      <DependentUpon>UserControl1.cs</DependentUpon>
+    </Compile>
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
@@ -288,6 +297,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellDetailsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

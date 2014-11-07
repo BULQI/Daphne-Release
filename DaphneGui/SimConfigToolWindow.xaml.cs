@@ -174,8 +174,8 @@ namespace DaphneGui
 
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
-            gg.gaussian_spec_name = "New on-center gradient";
-            gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            //gg.gaussian_spec_name = "New on-center gradient";
+            //gg.gaussian_spec_color = molpop.mp_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
             mpg.gauss_spec = gg;
@@ -368,10 +368,10 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        current_mol.mp_dist_name = "Linear";
+                        //current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
-                        current_mol.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        current_mol.mp_render_blending_weight = 2.0;
+                        //current_mol.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        //current_mol.mp_render_blending_weight = 2.0;
                         break;
 
                     case MolPopDistributionType.Gaussian:
@@ -440,8 +440,8 @@ namespace DaphneGui
                 break;
             }
             if (gmp.molecule == null) return;
-            gmp.mp_dist_name = "New distribution";
-            gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
+            //gmp.mp_dist_name = "New distribution";
+            //gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
         }
@@ -2084,7 +2084,7 @@ namespace DaphneGui
 
             MolPopGaussian mpg = mol_pop.mp_distribution as MolPopGaussian;
 
-            mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
+            //mpg.gauss_spec.gaussian_spec_color = mol_pop.mp_color;
         }
 
         private void cellPopColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
