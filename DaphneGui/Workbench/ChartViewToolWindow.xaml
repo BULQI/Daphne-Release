@@ -184,8 +184,19 @@
                 </DataGrid>
 
                 <!--<Button x:Name="btnRefresh" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRefresh_Click" >Refresh</Button>-->
-                <Button x:Name="btnRefresh" Width="70" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnRefresh_Click" >Test</Button>
-                
+
+
+                <GroupBox x:Name="LeftGroup" Margin="0,10">
+                    <GroupBox.Header>
+                        <TextBlock Text="For Testing" FontWeight="Bold" FontSize="16"/>
+                    </GroupBox.Header>
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="btnTest" Width="150" Height="24" Margin="0,8" HorizontalAlignment="Left" Click="btnTest_Click" >Change Test Method</Button>
+                        <TextBox x:Name="txtTestMethod" Width="150" Margin="10,8" Height="24" IsEnabled="False" Text="Config"></TextBox>
+                    </StackPanel>
+                </GroupBox>
+
             </StackPanel>
             
 

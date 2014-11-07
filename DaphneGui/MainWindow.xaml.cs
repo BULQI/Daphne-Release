@@ -1701,12 +1701,20 @@ namespace DaphneGui
             //vatSim.
 
             double dt = sop.Protocol.scenario.time_config.sampling_interval;
+            double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
             int nSteps = Math.Min((int)(sop.Protocol.scenario.time_config.duration / dt), 10000);
+
+            int interval = nSteps / 100;
+            if (interval == 0)
+                interval = 1;
 
             for (int i = 1; i < nSteps; i++)
             {
                 vatSim.Step(dt);
-                vatSim.Reporter.AppendReporter();
+                if (i % interval == 0)
+                {
+                    vatSim.Reporter.AppendReporter();
+                }
             }
             ReacComplexChartWindow.Activate();
             ReacComplexChartWindow.Render();

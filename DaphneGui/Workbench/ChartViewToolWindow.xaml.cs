@@ -29,11 +29,16 @@ namespace Workbench
         public Dictionary<string, List<double>> dictConcs = new Dictionary<string, List<double>>();
         public List<double> lTimes = new List<double>();
         private ReactionComplexChart Chart;
-        //private System.Drawing.Size chartSize;          
         public VatReactionComplex RC { get; set; }      //Simulation object - used to plot graph
         public ConfigReactionComplex CRC { get; set; }  //ConfigReactionComplex object - used for gui display and changes and not graph data
         public MainWindow MW;       //handle to main window
         public bool redraw_flag;    //true if redraw and not creating a new chart
+
+
+        //For testing
+        public static byte TestMethod;
+        public static byte TEST_BY_CONFIG = 0,
+                           TEST_BY_SIM = 1;
 
         public ChartViewToolWindow()
         {
@@ -44,6 +49,8 @@ namespace Workbench
             Chart.panelRC = panelRC;
             Chart.ToolWin = this;
             redraw_flag = false;
+
+            TestMethod = ChartViewToolWindow.TEST_BY_CONFIG;
         }
 
         public void Render()
@@ -221,7 +228,10 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                MW.runButton_Click(null, null);
+                if (TestMethod == TEST_BY_CONFIG)
+                    MW.runButton_Click(null, null);
+                else
+                    MW.SimulationTestFunction();
             }
         }
 
@@ -253,16 +263,26 @@ namespace Workbench
             if (e.PropertyName == "Number")
             {
                 redraw_flag = true;
-                //MW.runButton_Click(null, null);
-                MW.SimulationTestFunction();
+
+                if (TestMethod == TEST_BY_CONFIG)
+                    MW.runButton_Click(null, null);
+                else
+                    MW.SimulationTestFunction();
             }
         }
 
-        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            int i = 0;
-            i++;
-            //Chart.RedrawSeries();
+            if (TestMethod == TEST_BY_SIM)
+            {
+                TestMethod = TEST_BY_CONFIG;
+                txtTestMethod.Text = "Using Config";
+            }
+            else 
+            {
+                TestMethod = TEST_BY_SIM;
+                txtTestMethod.Text = "Using Simulation";
+            }
         }
 
         ////public void UpdateGrids()
