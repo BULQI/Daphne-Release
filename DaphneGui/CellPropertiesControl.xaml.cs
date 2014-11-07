@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Daphne;
 using System.Globalization;
 
+using System.Collections.ObjectModel;
+
 namespace DaphneGui
 {
     /// <summary>
@@ -24,6 +26,7 @@ namespace DaphneGui
         public CellPropertiesControl()
         {
             InitializeComponent();
+            this.DataContext = this;
         }
 
         public class diffSchemeValueConverter : IValueConverter
@@ -96,20 +99,39 @@ namespace DaphneGui
             ////CellsListBox.SelectedIndex = nIndex;
         }
 
-        // QUESTION: why cell properties and diffschemes only
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("diffSchemesListView"));
-            if (cvs.Source != null)
+            CollectionViewSource cvs = (CollectionViewSource)(FindResource("moleculesListView"));
+            if (cvs.Source == null)
             {
-                cvs.Source = MainWindow.SOP.Protocol.entity_repository.diff_schemes;
+                cvs.Source = new ObservableCollection<ConfigMolecule>();
             }
 
-            cvs = (CollectionViewSource)(FindResource("moleculesListView"));
-            if (cvs.Source != null)
+            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
+
+            if (this.Tag == null)
             {
-                cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
+                return;
             }
+
+            if ((CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem == null)
+            {
+                return;
+            }
+
+            CellPopulation cellpop = (CellPopulation)((ToolWinTissue)this.Tag).CellPopControl.CellPopsListBox.SelectedItem;
+            ConfigCell cell = cellpop.Cell;
+
+            foreach (ConfigMolecularPopulation configMolpop in cell.cytosol.molpops)
+            {
+                ((ObservableCollection<ConfigMolecule>)cvs.Source).Add(configMolpop.molecule);
+            }
+
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+        }
+
     }
 }

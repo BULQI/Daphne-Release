@@ -384,7 +384,6 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
-                        current_mol.mp_dist_name = "Linear";
                         current_mol.mp_distribution = molpoplin;
                         break;
 
@@ -454,7 +453,7 @@ namespace DaphneGui
                 break;
             }
             if (gmp.molecule == null) return;
-            gmp.mp_dist_name = "New distribution";
+
             MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Add(gmp);
             lbEcsMolPops.SelectedIndex = lbEcsMolPops.Items.Count - 1;
 
@@ -886,8 +885,8 @@ namespace DaphneGui
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
+                //((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
+                ((CellPopGaussian)cellPop.cellPopDist).Initialize(gg);
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
