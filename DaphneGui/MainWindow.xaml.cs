@@ -56,7 +56,7 @@ namespace DaphneGui
     public partial class MainWindow : Window
     {
         private static ToolWinBase toolWin;
-        public static ToolWinBase ToolWin
+        public static ToolWinBase ProtocolToolWin
         {
             get
             {
@@ -68,6 +68,21 @@ namespace DaphneGui
             }
         }
 
+        public static DependencyProperty ToolWinTypeProperty =
+            DependencyProperty.Register("ToolWinType", typeof(ToolWindowType), typeof(MainWindow), new FrameworkPropertyMetadata(ToolWindowType.BaseType));
+
+        public ToolWindowType ToolWinType
+        {
+            get
+            {
+                return (ToolWindowType)GetValue(ToolWinTypeProperty);
+            }
+            set
+            {
+                SetValue(ToolWinTypeProperty, value);
+            }
+        }
+        
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -1687,7 +1702,7 @@ namespace DaphneGui
         private void applyButton_Click(object sender, RoutedEventArgs e)
         {
             // Workbench-specific code to preserve focus to the element that was in focus before "Apply" button clicked.
-            ToolWin.Apply();
+            ProtocolToolWin.Apply();
         }
 
         /// <summary>
@@ -2005,33 +2020,32 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    ProtocolToolWin = new ToolWinTissue();
+                    ProtocolToolWin.MW = this;
+                    ProtocolToolWin.Protocol = SOP.Protocol;
+                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+
+                    ToolWinType = ToolWindowType.Tissue;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
-
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
+                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
                 }
 
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
                 {
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    ProtocolToolWin = new ToolWinTissue();
+                    ProtocolToolWin.MW = this;
+                    ProtocolToolWin.Protocol = SOP.Protocol;
+                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
 
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
-                    //testtab.ItemsSource = toolWin.ContentComponents;
-
+                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
 
                     // create the simulation
                     sim = new TissueSimulation();
@@ -2054,31 +2068,31 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ToolWin = new ToolWinVatRC();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    ProtocolToolWin = new ToolWinVatRC();
+                    ProtocolToolWin.MW = this;
+                    ProtocolToolWin.Protocol = SOP.Protocol;
+                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
 
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
+                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ProtocolToolWin);
                 }
  
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    ToolWin = new ToolWinVatRC();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    ProtocolToolWin = new ToolWinVatRC();
+                    ProtocolToolWin.MW = this;
+                    ProtocolToolWin.Protocol = SOP.Protocol;
+                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
-
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
+                    ToolWinType = ToolWindowType.VatRC;
+                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ProtocolToolWin);
 
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2129,7 +2143,10 @@ namespace DaphneGui
             }
 
             //this cannot be set before databaseket get updated from loading the new scenario
-            CellRenderMethodCB.DataContext = sop.Protocol;
+            if (gc is VTKFullGraphicsController)
+            {
+                CellRenderMethodCB.DataContext = sop.Protocol;
+            }
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
@@ -2158,8 +2175,8 @@ namespace DaphneGui
                     // NOTE: For now not doing any callbacks on property change for RegionControls...
                     kvp.Value.ClearCallbacks();
                     kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gcHandle.WidgetInteractionToGUICallback));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWin.RegionFocusToGUISection));
                     kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
                     kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
                 }
@@ -2418,7 +2435,7 @@ namespace DaphneGui
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
-            ToolWin.Activate();
+            ProtocolToolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...
@@ -2990,7 +3007,15 @@ namespace DaphneGui
             saveScenario.IsEnabled = true;
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            VTKDisplayDocWindow.Activate();
+            if (ToolWinType == ToolWindowType.Tissue)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else if (ToolWinType == ToolWindowType.VatRC)
+            {
+                ReacComplexChartWindow.Activate();
+            }
+
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3354,8 +3379,6 @@ namespace DaphneGui
             UpdateGraphics();
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
         }
-
-
     }
 
 

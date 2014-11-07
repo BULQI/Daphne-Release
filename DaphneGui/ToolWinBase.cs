@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Collections.ObjectModel;
 
 using Daphne;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -17,6 +18,8 @@ namespace DaphneGui
     {
         void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix);
     }
+
+    public enum ToolWindowType {BaseType, Tissue, VatRC};
 
     public class ToolWinBase : ToolWindow, IRegionFocus
     {
@@ -30,16 +33,12 @@ namespace DaphneGui
         // This field is not relevant to VatRC.
         public Visibility ZExtentVisibility { get; set; }
 
-
-        public VTKDisplaDocWindow VTKDisplayWindow;
-        public ObservableCollection<ContentControl> ContentComponents { get; set; }
-
+        
+        
 
         public ToolWinBase()
         {
             TitleText = "";
-            ContentComponents = new ObservableCollection<ContentControl>();
-
         }
 
         // Used to specify Gaussian distibution for cell positions
@@ -375,4 +374,43 @@ namespace DaphneGui
 
 
     }
+
+
+
+    public class ToolwinComponentVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ToolWindowType type = (ToolWindowType)value;
+            if (type == ToolWindowType.Tissue)
+            {
+                switch (parameter as string)
+                {
+                    case "VTKDisplayWindow":
+                    case "ComponentsToolWindow":
+                    case "CellStudioToolWindow":
+                        return Visibility.Visible;
+                }
+            }
+            else if (type == ToolWindowType.VatRC)
+            {
+                switch (parameter as string)
+                {
+                    case "ReacComplexChartWindow":
+                        return Visibility.Visible;
+                }
+            }
+
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+
 }

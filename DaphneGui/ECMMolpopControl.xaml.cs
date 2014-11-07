@@ -139,7 +139,7 @@ namespace DaphneGui
             ((VTKFullGraphicsController)MainWindow.GC).AddGaussSpecRegionWidget(gg);
             // Connect the VTK callback
             ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
-            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((ToolWinBase)MainWindow.ToolWin).RegionFocusToGUISection));
+            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((ToolWinBase)MainWindow.ProtocolToolWin).RegionFocusToGUISection));
             
             ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
