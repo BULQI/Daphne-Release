@@ -325,9 +325,9 @@ namespace Daphne
                     ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                     configMolPop.molecule = configMolecule.Clone(null);
                     configMolPop.Name = configMolecule.Name;
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
-                    configMolPop.mp_render_on = true;
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
+                    //configMolPop.mp_render_on = true;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     configMolPop.mp_distribution = hl;
@@ -501,8 +501,8 @@ namespace Daphne
                     configMolPop.mp_distribution = molpoplin;
 
                     // graphics colors etc
-                    configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    configMolPop.mp_render_blending_weight = 2.0;
+                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //configMolPop.mp_render_blending_weight = 2.0;
 
                     // Reporting
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
@@ -643,8 +643,8 @@ namespace Daphne
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
-                configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                configMolPop.mp_render_blending_weight = 2.0;
+                //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                //configMolPop.mp_render_blending_weight = 2.0;
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
@@ -1034,8 +1034,8 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
-                    gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    gmp.mp_render_blending_weight = 2.0;
+                    //gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                    //gmp.mp_render_blending_weight = 2.0;
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;

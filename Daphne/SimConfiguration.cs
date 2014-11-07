@@ -4169,21 +4169,24 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        private string _mp_dist_name = "";
-        public string mp_dist_name
-        {
-            get { return _mp_dist_name; }
-            set
-            {
-                if (_mp_dist_name == value)
-                    return;
-                else
-                {
-                    _mp_dist_name = value;
-                    OnPropertyChanged("mp_dist_name");
-                }
-            }
-        }
+        //// gmk - these aren't needed. phase out.
+        //[JsonIgnore]
+        //private string _mp_dist_name = "";
+        //[JsonIgnore]
+        //public string mp_dist_name
+        //{
+        //    get { return _mp_dist_name; }
+        //    set
+        //    {
+        //        if (_mp_dist_name == value)
+        //            return;
+        //        else
+        //        {
+        //            _mp_dist_name = value;
+        //            OnPropertyChanged("mp_dist_name");
+        //        }
+        //    }
+        //}
 
         private MolPopDistribution _mp_distribution;
         public MolPopDistribution mp_distribution
@@ -4201,35 +4204,35 @@ namespace Daphne
             }
         }
 
-        private System.Windows.Media.Color _mp_color;
-        public System.Windows.Media.Color mp_color
-        {
-            get { return _mp_color; }
-            set
-            {
-                if (_mp_color == value)
-                    return;
-                else
-                {
-                    _mp_color = value;
-                    OnPropertyChanged("mp_color");
-                }
-            }
-        }
-        public double mp_render_blending_weight { get; set; }
-        private bool _mp_render_on;
-        public bool mp_render_on
-        {
-            get
-            {
-                return _mp_render_on;
-            }
-            set
-            {
-                _mp_render_on = value;
-                OnPropertyChanged("mp_render_on");
-            }
-        }
+        //private System.Windows.Media.Color _mp_color;
+        //public System.Windows.Media.Color mp_color
+        //{
+        //    get { return _mp_color; }
+        //    set
+        //    {
+        //        if (_mp_color == value)
+        //            return;
+        //        else
+        //        {
+        //            _mp_color = value;
+        //            OnPropertyChanged("mp_color");
+        //        }
+        //    }
+        //}
+        //public double mp_render_blending_weight { get; set; }
+        //private bool _mp_render_on;
+        //public bool mp_render_on
+        //{
+        //    get
+        //    {
+        //        return _mp_render_on;
+        //    }
+        //    set
+        //    {
+        //        _mp_render_on = value;
+        //        OnPropertyChanged("mp_render_on");
+        //    }
+        //}
 
         public string label { get; set; }        //label to color scheme
 
@@ -4258,10 +4261,10 @@ namespace Daphne
             reportMP.molpop_guid_ref = molpop_guid;
             
             mp_distribution = new MolPopHomogeneousLevel();
-            mp_color = new System.Windows.Media.Color();
-            mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
-            mp_render_blending_weight = 1.0;
-            mp_render_on = true;
+            //mp_color = new System.Windows.Media.Color();
+            //mp_color = System.Windows.Media.Color.FromRgb(255, 255, 255);
+            //mp_render_blending_weight = 1.0;
+            //mp_render_on = true;
         }
 
         /// <summary>
@@ -5221,10 +5224,10 @@ namespace Daphne
 
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mp_dist_name = "Homogeneous";
-                        configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                        configMolPop.mp_render_blending_weight = 2.0;
-                        configMolPop.mp_render_on = true;
+                        //configMolPop.mp_dist_name = "Homogeneous";
+                        //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
+                        //configMolPop.mp_render_blending_weight = 2.0;
+                        //configMolPop.mp_render_on = true;
 
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
@@ -7032,7 +7035,10 @@ namespace Daphne
 
     public class GaussianSpecification : EntityModelBase
     {
+        // gmk - these aren't used. phase out. 
+        [JsonIgnore] 
         private string _gaussian_spec_name = "";
+        [JsonIgnore]
         public string gaussian_spec_name 
         {
             get { return _gaussian_spec_name; }
