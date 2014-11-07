@@ -38,7 +38,7 @@ namespace DaphneGui
             }
 
             cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
-            if (cvs.Source != null)
+            if (cvs != null)
             {
                 cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
             }
@@ -80,7 +80,7 @@ namespace DaphneGui
             }
 
             cvs = (CollectionViewSource)(FindResource("CytosolBulkMoleculesListView"));
-            if (cvs.Source != null)
+            if (cvs != null)
             {
                 cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
             }
@@ -303,24 +303,26 @@ namespace DaphneGui
 
             foreach (ConfigMolecule item in cvs.View)
             {
-                if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any()) continue;
+                if (cell.membrane.molpops.Where(m => m.molecule.Name == item.Name).Any())
+                    continue;
+                
                 if (item.molecule_location == MoleculeLocation.Boundary)
                 {
                     mol_list.Add(item);
                 }
+                
             }
 
-            if (mol_list != null)
+            if (mol_list != null && mol_list.Count > 0)
             {
                 cmp.molecule = mol_list.First().Clone(null);
                 cmp.Name = cmp.molecule.Name;
             }
             else
             {
+                MessageBox.Show("All available molecular populations have already been added.", "Cytosol", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-
-            
 
             cell.membrane.molpops.Add(cmp);
             CellMembraneMolPopsListBox.SelectedIndex = CellMembraneMolPopsListBox.Items.Count - 1;
