@@ -337,6 +337,9 @@ namespace Daphne
                     ((ReportECM)configMolPop.report_mp).mean = true;
 
                     protocol.scenario.environment.comp.molpops.Add(configMolPop);
+
+                    //rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
                 }
             }
 
@@ -355,8 +358,9 @@ namespace Daphne
             minDisSquared *= minDisSquared;
             cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
             cellPop.CellStates[0] = new CellState(envHandle.extent_x / 2, envHandle.extent_y / 2, envHandle.extent_z / 2);
-            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
 
             // Cell reporting
             cellPop.report_xvf.position = false;
@@ -500,13 +504,12 @@ namespace Daphne
                     molpoplin.boundaryCondition.Add(bc);
                     configMolPop.mp_distribution = molpoplin;
 
-                    // graphics colors etc
-                    //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    //configMolPop.mp_render_blending_weight = 2.0;
-
                     // Reporting
                     configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
                     ((ReportECM)configMolPop.report_mp).mean = false;
+
+                    //Rendering
+                    ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
 
                     protocol.scenario.environment.comp.molpops.Add(configMolPop);
                 }
@@ -530,11 +533,13 @@ namespace Daphne
             cellPop.CellStates[0] = new CellState(envHandle.extent_x - 2 * configCell.CellRadius - envHandle.gridstep / 2,
                                                   envHandle.extent_y / 2 - envHandle.gridstep / 2,
                                                   envHandle.extent_z / 2 - envHandle.gridstep / 2);
-            cellPop.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
             ((TissueScenario)protocol.scenario).cellpopulations.Add(cellPop);
             cellPop.report_xvf.position = true;
             cellPop.report_xvf.velocity = true;
             cellPop.report_xvf.force = true;
+
+            //rendering
+            ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(cellPop.renderLabel, cellPop.cellpopulation_name, true);
 
             foreach (ConfigMolecularPopulation cmp in configCell.membrane.molpops)
             {
@@ -643,8 +648,6 @@ namespace Daphne
                 configMolPop = new ConfigMolecularPopulation(ReportType.ECM_MP);
                 configMolPop.molecule = cm.Clone(null);
                 configMolPop.Name = cm.Name;
-                //configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                //configMolPop.mp_render_blending_weight = 2.0;
 
                 MolPopGaussian molPopGaussian = new MolPopGaussian();
                 molPopGaussian.peak_concentration = 10;
@@ -659,6 +662,9 @@ namespace Daphne
                 protocol.reporter_file_name = "Diffusion_test";
 
                 protocol.scenario.environment.comp.molpops.Add(configMolPop);
+
+                //rendering
+                ((TissueScenario)protocol.scenario).popOptions.AddRenderOptions(configMolPop.renderLabel, configMolPop.Name, false);
             }
         }
 
@@ -1034,8 +1040,7 @@ namespace Daphne
                     gmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
                     gmp.molecule = cm.Clone(null);
                     gmp.Name = cm.Name;
-                    //gmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
-                    //gmp.mp_render_blending_weight = 2.0;
+
                     MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
                     hl.concentration = conc[i];
                     gmp.mp_distribution = hl;

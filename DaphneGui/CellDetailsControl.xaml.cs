@@ -171,9 +171,6 @@ namespace DaphneGui
 
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
-            //cmp.mp_dist_name = "New distribution";
-            //cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            //cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
             cmp.molecule = null;
 
@@ -256,9 +253,6 @@ namespace DaphneGui
 
             ConfigMolecularPopulation cmp = new ConfigMolecularPopulation(ReportType.CELL_MP);
             cmp.Name = "NewMP";
-            //cmp.mp_dist_name = "New distribution";
-            //cmp.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 1.0f, 0.2f);
-            //cmp.mp_render_on = true;
             cmp.mp_distribution = new MolPopHomogeneousLevel();
 
             CollectionViewSource cvs = (CollectionViewSource)(FindResource("boundaryMoleculesListView"));
