@@ -55,8 +55,8 @@ namespace DaphneGui
     public partial class MainWindow : Window
     {
         public static int TestCount = 0;
-        public static int TestCount1 = 1;
-        public static int TestCount2 = 2;
+        public static int TestCount1 = 0;
+        public static int TestCount2 = 0;
 
         private static ToolWinBase toolWin;
         public static ToolWinBase ToolWin
@@ -1686,6 +1686,12 @@ namespace DaphneGui
             }
             
             VatReactionComplex vatSim = (VatReactionComplex)Sim;
+
+            // terminate the simulation thread first
+            if (simThread != null && simThread.IsAlive)
+            {
+                simThread.Suspend();
+            }
          
             vatSim.reset();
             //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
@@ -1718,6 +1724,11 @@ namespace DaphneGui
             }
             ReacComplexChartWindow.Activate();
             ReacComplexChartWindow.Render();
+
+            if (simThread != null)
+            {
+                simThread.Resume();
+            }
             
         }
        
@@ -2247,14 +2258,14 @@ namespace DaphneGui
             {
                 lock (sim)
                 {
-                    TestCount++;
+                    //TestCount++;
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
-                        TestCount1++;
+                        //TestCount1++;
                         // run the simulation forward to the next task
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            TestCount2++;
+                            //TestCount2++;
                             sim.RunForward();
                         }
                         else
