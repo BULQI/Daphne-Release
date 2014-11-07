@@ -857,8 +857,8 @@ namespace DaphneGui
                 AddGaussianSpecification(gg, box);
 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(extents, box);
+                //((CellPopGaussian)cellPop.cellPopDist).gauss_spec = gg;
+                ((CellPopGaussian)cellPop.cellPopDist).Initialize(gg);
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
