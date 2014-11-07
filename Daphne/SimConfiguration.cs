@@ -5645,7 +5645,7 @@ namespace Daphne
         public CellPopulation cellPop;
 
         // Limits for placing cells
-        private double[] extents;
+        protected double[] extents;
         public double[] Extents 
         { 
             get { return extents; }
@@ -5917,18 +5917,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)  
         {
             DistType = CellPopDistributionType.Gaussian;
-
-            if (_cellPop != null)
-            {
-                AddByDistr(_cellPop.number);
-            }
-            //else
-            //{
-            //    // json deserialization puts us here
-            //    AddByDistr(1);
-            //}
- 
-            //OnPropertyChanged("CellStates");
         }
 
         /// <summary>
@@ -5936,19 +5924,32 @@ namespace Daphne
         /// </summary>
         /// <param name="extents"></param>
         /// <param name="box"></param>
-        public void Initialize(double[] extents, BoxSpecification box)
+        //public void Initialize(double[] extents, BoxSpecification box)
+        public void Initialize(GaussianSpecification _gaussSpec)
         {
-            if (box != null)
+            gauss_spec = _gaussSpec;
+
+            if (gauss_spec != null)
             {
-                box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
-                sigma = new double[3] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
-                setRotationMatrix(box);
+                if (gauss_spec.box_spec != null)
+                {
+                    gauss_spec.box_spec.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
+                    sigma = new double[3] { gauss_spec.box_spec.x_scale / 2, gauss_spec.box_spec.y_scale / 2, gauss_spec.box_spec.z_scale / 2 };
+                    setRotationMatrix(gauss_spec.box_spec);
+                }
             }
             else
             {
-                // We get here when deserializing from json
                 sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
             }
+
+            if (cellPop != null)
+            {
+                cellPop.CellStates.Clear();
+                AddByDistr(cellPop.number);
+                //OnPropertyChanged("CellStates");
+            }
+
         }
 
         public override void Resize(double[] newExtents)
