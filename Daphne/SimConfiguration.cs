@@ -5473,6 +5473,10 @@ namespace Daphne
         public int CurrentDeathState;
         public int CurrentDivState;
 
+        //public bool HasMolecule(string molguid)
+        //{
+        //}
+
         //Return true if this compartment has a molecular population with given molecule
         public bool HasGene(string gene_guid)
         {

@@ -110,12 +110,12 @@ namespace DaphneGui
         {
             if (isMembrane == true)
             {
-                if (CompartmentHasMolecule(molguid, cell.membrane))
+                if (cell.membrane.HasMolecule(molguid))
                 {
                     return true;
                 }
             }
-            else if (CompartmentHasMolecule(molguid, cell.membrane))
+            else if (cell.cytosol.HasMolecule(molguid))
             {
                 return true;
             }
@@ -144,6 +144,7 @@ namespace DaphneGui
             return false;
         }
 
+        // skg - remove this - belongs in ConfigCompartment
         /// <summary>
         /// Check to see if a compartment contains a molecular population of type molecule.
         /// gmk - Modified and reorganized from previous code. Needs evaluation.
@@ -151,15 +152,15 @@ namespace DaphneGui
         /// <param name="molguid"></param>
         /// <param name="compartment"></param>
         /// <returns></returns>
-        protected bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
-        {
-            foreach (ConfigMolecularPopulation molpop in compartment.molpops)
-            {
-                if (molpop.molecule.entity_guid == molguid)
-                    return true;
-            }
-            return false;
-        }
+        //protected bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
+        //{
+        //    foreach (ConfigMolecularPopulation molpop in compartment.molpops)
+        //    {
+        //        if (molpop.molecule.entity_guid == molguid)
+        //            return true;
+        //    }
+        //    return false;
+        //}
 
         /// <summary>
         /// Functionality to refresh elements when the selected tab changes
@@ -183,7 +184,8 @@ namespace DaphneGui
             foreach (string molguid in cr.reactants_molecule_guid_ref)
             {
                 //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+                //if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+                if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
                 {
                     bOK = true;
                 }
@@ -198,7 +200,7 @@ namespace DaphneGui
                 foreach (string molguid in cr.products_molecule_guid_ref)
                 {
                     //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+                    if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
                     {
                         bOK = true;
                     }
@@ -214,7 +216,7 @@ namespace DaphneGui
                 foreach (string molguid in cr.modifiers_molecule_guid_ref)
                 {
                     //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+                    if (Protocol.scenario.environment.comp.HasMolecule(molguid) || CellPopsHaveMolecule(molguid, true))
                     {
                         bOK = true;
                     }

@@ -1703,8 +1703,37 @@ namespace DaphneGui
             vatSim.ListTimes.Clear();
             vatSim.ListTimes.Add(0);
             //comp.Populations.Clear();
-            vatSim.Load(sop.Protocol, true);
-            //vatSim.
+            //vatSim.Load(sop.Protocol, true);
+
+            //////////////////////////////////////////////////////////////////////////
+            //INSTEAD OF RELOADING THE WHOLE SIMULATION, JUST RELOAD THE MOL CONCS
+            /////////////////////////////////////////////////////////////////////////
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            foreach (ConfigMolecularPopulation cmp in sop.Protocol.scenario.environment.comp.reaction_complexes.First().molpops)
+            {
+                string molguid = cmp.molecule.entity_guid;
+                if (comp.Populations.ContainsKey(molguid) == true) {
+                    double[] initArray = new double[1];
+                    double conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
+                    initArray[0] = conc;
+                    //SimulationBase.dataBasket.Environment.Comp.Populations[molguid].Conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
+                    ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+                    sf.Initialize("const", initArray);
+                    comp.Populations[molguid].Conc *= 0;
+                    comp.Populations[molguid].Conc += sf;
+                    if (vatSim.DictGraphConcs.ContainsKey(molguid) == true)
+                        vatSim.DictGraphConcs[molguid].Add(conc);
+                }
+                    
+            }
+            ///////////////////////////////////////////////
+            //NEED TO DO THIS FOR REACTION RATES TOO!
+            ////////////////////////////////////////////
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+            reacs = sop.Protocol.GetReactions(sop.Protocol.scenario.environment.comp, false);
+            comp.BulkReactions.Clear();
+            SimulationBase.AddCompartmentBulkReactions(comp, sop.Protocol.entity_repository, reacs);
+            
 
             double dt = sop.Protocol.scenario.time_config.sampling_interval;
             double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
