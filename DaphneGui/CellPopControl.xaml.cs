@@ -77,7 +77,13 @@ namespace DaphneGui
             // Default is uniform probability distribution
             cp.cellPopDist = new CellPopUniform(extents, minDisSquared, cp);
 
-            //cp.cellpopulation_color = System.Windows.Media.Color.FromScRgb(1.0f, 1.0f, 0.5f, 0.0f);
+            //if about rendering...
+            //for now, use name as label
+            cp.renderLabel = cp.Cell.entity_guid;
+
+            //add rendering options to scenario
+            (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.AddRenderOptions(cp.renderLabel, cp.Cell.CellName, true);
+
             scenario.cellpopulations.Add(cp);
             CellPopsListBox.SelectedIndex = CellPopsListBox.Items.Count - 1;
         }
