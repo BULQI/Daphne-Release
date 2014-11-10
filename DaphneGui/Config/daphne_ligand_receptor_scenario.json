@@ -2,7 +2,7 @@
   "experiment_db_id": 0,
   "experiment_name": "Ligand Receptor Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "62e3a7c6-254d-4747-bbcc-84ba8b81a9cb",
+  "experiment_guid": "faa964e5-2be5-4f42-aaa3-baa97d9210f3",
   "experiment_description": "CXCL13 binding to membrane-bound CXCR5. Uniform CXCL13.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
@@ -11,7 +11,7 @@
         "Cell": {
           "CurrentDeathState": 0,
           "CurrentDivState": 0,
-          "renderLabel": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20",
+          "label": null,
           "CellName": "Leukocyte_staticReceptor",
           "CellRadius": 5.0,
           "locomotor_mol_guid_ref": "",
@@ -21,56 +21,54 @@
           "membrane": {
             "molpops": [
               {
-                "molpop_guid": "3d164e47-54c1-4c94-b65c-7fb86124e613",
+                "molpop_guid": "b934db62-7476-4396-9e6a-3d9735532e82",
                 "molecule": {
                   "Name": "CXCR5|",
-                  "renderLabel": "16b62996-5952-458f-ac99-8890df601005",
+                  "label": null,
                   "MolecularWeight": 43.0,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
                   "molecule_location": 1,
-                  "entity_guid": "16b62996-5952-458f-ac99-8890df601005",
-                  "change_stamp": 65
+                  "entity_guid": "60807cc1-e4b1-4056-a48f-3bc1029d07fe",
+                  "change_stamp": 56
                 },
                 "Name": "CXCR5|",
                 "report_mp": {
                   "mp_extended": 0,
-                  "molpop_guid_ref": "3d164e47-54c1-4c94-b65c-7fb86124e613"
+                  "molpop_guid_ref": "b934db62-7476-4396-9e6a-3d9735532e82"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 44.0,
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "renderLabel": "16b62996-5952-458f-ac99-8890df601005"
+                "label": null
               },
               {
-                "molpop_guid": "cf2b5452-620f-4a86-a8a7-857ba1961602",
+                "molpop_guid": "84d7ce98-0031-4c5e-a57e-5319e02cc5d1",
                 "molecule": {
                   "Name": "CXCL13:CXCR5|",
-                  "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04",
+                  "label": null,
                   "MolecularWeight": 50.96,
                   "EffectiveRadius": 1.0,
                   "DiffusionCoefficient": 1E-07,
                   "molecule_location": 1,
-                  "entity_guid": "566f043d-e47c-4dde-9a0c-897179b1dc04",
-                  "change_stamp": 71
+                  "entity_guid": "d41f171f-b426-4461-8daa-182dfcb18d0b",
+                  "change_stamp": 62
                 },
                 "Name": "CXCL13:CXCR5|",
                 "report_mp": {
                   "mp_extended": 0,
-                  "molpop_guid_ref": "cf2b5452-620f-4a86-a8a7-857ba1961602"
+                  "molpop_guid_ref": "84d7ce98-0031-4c5e-a57e-5319e02cc5d1"
                 },
-                "mp_dist_name": "Uniform",
                 "mp_distribution": {
                   "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                   "concentration": 0.0,
                   "mp_distribution_type": 0,
                   "boundaryCondition": null
                 },
-                "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04"
+                "label": null
               }
             ],
             "Reactions": [],
@@ -85,11 +83,11 @@
           "diff_scheme": null,
           "death_driver": null,
           "div_scheme": null,
-          "entity_guid": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20",
-          "change_stamp": 293
+          "entity_guid": "8636b038-ebe9-4ad6-8d15-420f55fd278d",
+          "change_stamp": 284
         },
         "cellpopulation_name": "Leukocyte_staticReceptor",
-        "cellpopulation_guid": "e942b5be-423b-4ba6-92bb-39826f013dcd",
+        "cellpopulation_guid": "3e0f344e-8ff4-4a42-992d-d96faffef5b9",
         "cellpopulation_id": 1,
         "report_xvf": {
           "position": false,
@@ -105,10 +103,13 @@
           {
             "mean": false,
             "mp_extended": 1,
-            "molpop_guid_ref": "76e79be1-12e1-4d19-8e34-497d1e4df4ba"
+            "molpop_guid_ref": "15af02c5-3a4a-402f-8593-f526ef47d3bd"
           }
         ],
         "number": 1,
+        "cellpopulation_render_on": true,
+        "cellpopulation_color": "sc#1, 1, 0.5, 0",
+        "cellpopulation_predef_color": 1,
         "CellStates": [
           {
             "spState": {
@@ -138,8 +139,7 @@
             },
             "cgState": {
               "geneDict": {}
-            },
-            "CellGeneration": 0
+            }
           }
         ],
         "cellPopDist": {
@@ -152,28 +152,9 @@
           ],
           "MinDisSquared": 100.0
         },
-        "renderLabel": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20"
+        "label": null
       }
     ],
-    "RenderSkinName": "default",
-    "popOptions": {
-      "cellPopOptions": [
-        {
-          "renderOn": true,
-          "renderMethod": 0,
-          "name": "Leukocyte_staticReceptor",
-          "renderLabel": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20"
-        }
-      ],
-      "molPopOptions": [
-        {
-          "renderOn": false,
-          "renderMethod": 10,
-          "name": "CXCL13",
-          "renderLabel": "71eecf85-da98-47d6-99bd-57ff3a85e9ad"
-        }
-      ]
-    },
     "time_config": {
       "duration": 15.0,
       "rendering_interval": 1.5,
@@ -196,64 +177,63 @@
       "comp": {
         "molpops": [
           {
-            "molpop_guid": "76e79be1-12e1-4d19-8e34-497d1e4df4ba",
+            "molpop_guid": "15af02c5-3a4a-402f-8593-f526ef47d3bd",
             "molecule": {
               "Name": "CXCL13",
-              "renderLabel": "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
+              "label": null,
               "MolecularWeight": 7.96,
               "EffectiveRadius": 1.0,
               "DiffusionCoefficient": 4500.0,
               "molecule_location": 0,
-              "entity_guid": "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-              "change_stamp": 59
+              "entity_guid": "31dab044-8d99-413e-ba26-68778408b7c5",
+              "change_stamp": 50
             },
             "Name": "CXCL13",
             "report_mp": {
               "$type": "Daphne.ReportECM, Daphne",
               "mean": true,
               "mp_extended": 0,
-              "molpop_guid_ref": "76e79be1-12e1-4d19-8e34-497d1e4df4ba"
+              "molpop_guid_ref": "15af02c5-3a4a-402f-8593-f526ef47d3bd"
             },
-            "mp_dist_name": "Uniform",
             "mp_distribution": {
               "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
               "concentration": 0.030411100000000003,
               "mp_distribution_type": 0,
               "boundaryCondition": null
             },
-            "renderLabel": "71eecf85-da98-47d6-99bd-57ff3a85e9ad"
+            "label": null
           }
         ],
         "Reactions": [
           {
             "reactants_molecule_guid_ref": [
-              "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-              "16b62996-5952-458f-ac99-8890df601005"
+              "31dab044-8d99-413e-ba26-68778408b7c5",
+              "60807cc1-e4b1-4056-a48f-3bc1029d07fe"
             ],
             "products_molecule_guid_ref": [
-              "566f043d-e47c-4dde-9a0c-897179b1dc04"
+              "d41f171f-b426-4461-8daa-182dfcb18d0b"
             ],
             "modifiers_molecule_guid_ref": [],
-            "reaction_template_guid_ref": "90b70df6-7f48-4919-bfd5-69165c78e385",
+            "reaction_template_guid_ref": "c3a62997-949b-4a27-aee0-0cbb41532464",
             "rate_const": 16.25,
             "TotalReactionString": "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-            "entity_guid": "025b93bd-897e-464e-98e6-67729b06a19e",
-            "change_stamp": 161
+            "entity_guid": "eca90536-072c-47c7-b97f-1f82e1f990fe",
+            "change_stamp": 152
           },
           {
             "reactants_molecule_guid_ref": [
-              "566f043d-e47c-4dde-9a0c-897179b1dc04"
+              "d41f171f-b426-4461-8daa-182dfcb18d0b"
             ],
             "products_molecule_guid_ref": [
-              "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-              "16b62996-5952-458f-ac99-8890df601005"
+              "31dab044-8d99-413e-ba26-68778408b7c5",
+              "60807cc1-e4b1-4056-a48f-3bc1029d07fe"
             ],
             "modifiers_molecule_guid_ref": [],
-            "reaction_template_guid_ref": "25e9c11b-1a03-44cc-89f5-0a67b0ffc615",
+            "reaction_template_guid_ref": "1241a831-2ad5-42ad-a929-425fb56ce234",
             "rate_const": 0.494,
             "TotalReactionString": "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-            "entity_guid": "a6075262-b7d4-4348-b02d-6f451df9ae88",
-            "change_stamp": 163
+            "entity_guid": "7d8c9059-d15f-462b-8b0f-1293380ad74d",
+            "change_stamp": 154
           }
         ],
         "reaction_complexes": []
@@ -267,13 +247,17 @@
     "deathOrder": 1
   },
   "reporter_file_name": "lig-rec_test",
+  "popOptions": {
+    "cellPopOptions": [],
+    "molPopOptions": []
+  },
   "entity_repository": {
     "reaction_complexes": [],
     "cells": [
       {
         "CurrentDeathState": 0,
         "CurrentDivState": 0,
-        "renderLabel": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20",
+        "label": null,
         "CellName": "Leukocyte_staticReceptor",
         "CellRadius": 5.0,
         "locomotor_mol_guid_ref": "",
@@ -283,56 +267,54 @@
         "membrane": {
           "molpops": [
             {
-              "molpop_guid": "3d164e47-54c1-4c94-b65c-7fb86124e613",
+              "molpop_guid": "b934db62-7476-4396-9e6a-3d9735532e82",
               "molecule": {
                 "Name": "CXCR5|",
-                "renderLabel": "16b62996-5952-458f-ac99-8890df601005",
+                "label": null,
                 "MolecularWeight": 43.0,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
                 "molecule_location": 1,
-                "entity_guid": "16b62996-5952-458f-ac99-8890df601005",
-                "change_stamp": 65
+                "entity_guid": "60807cc1-e4b1-4056-a48f-3bc1029d07fe",
+                "change_stamp": 56
               },
               "Name": "CXCR5|",
               "report_mp": {
                 "mp_extended": 1,
-                "molpop_guid_ref": "3d164e47-54c1-4c94-b65c-7fb86124e613"
+                "molpop_guid_ref": "b934db62-7476-4396-9e6a-3d9735532e82"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 44.0,
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "renderLabel": "16b62996-5952-458f-ac99-8890df601005"
+              "label": null
             },
             {
-              "molpop_guid": "cf2b5452-620f-4a86-a8a7-857ba1961602",
+              "molpop_guid": "84d7ce98-0031-4c5e-a57e-5319e02cc5d1",
               "molecule": {
                 "Name": "CXCL13:CXCR5|",
-                "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04",
+                "label": null,
                 "MolecularWeight": 50.96,
                 "EffectiveRadius": 1.0,
                 "DiffusionCoefficient": 1E-07,
                 "molecule_location": 1,
-                "entity_guid": "566f043d-e47c-4dde-9a0c-897179b1dc04",
-                "change_stamp": 71
+                "entity_guid": "d41f171f-b426-4461-8daa-182dfcb18d0b",
+                "change_stamp": 62
               },
               "Name": "CXCL13:CXCR5|",
               "report_mp": {
                 "mp_extended": 1,
-                "molpop_guid_ref": "cf2b5452-620f-4a86-a8a7-857ba1961602"
+                "molpop_guid_ref": "84d7ce98-0031-4c5e-a57e-5319e02cc5d1"
               },
-              "mp_dist_name": "Uniform",
               "mp_distribution": {
                 "$type": "Daphne.MolPopHomogeneousLevel, Daphne",
                 "concentration": 0.0,
                 "mp_distribution_type": 0,
                 "boundaryCondition": null
               },
-              "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04"
+              "label": null
             }
           ],
           "Reactions": [],
@@ -347,73 +329,73 @@
         "diff_scheme": null,
         "death_driver": null,
         "div_scheme": null,
-        "entity_guid": "fa3befca-bb33-4a79-ae7a-a8a34c6cef20",
-        "change_stamp": 293
+        "entity_guid": "8636b038-ebe9-4ad6-8d15-420f55fd278d",
+        "change_stamp": 284
       }
     ],
     "molecules": [
       {
         "Name": "CXCL13",
-        "renderLabel": "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
+        "label": null,
         "MolecularWeight": 7.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 4500.0,
         "molecule_location": 0,
-        "entity_guid": "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-        "change_stamp": 59
+        "entity_guid": "31dab044-8d99-413e-ba26-68778408b7c5",
+        "change_stamp": 50
       },
       {
         "Name": "CXCR5|",
-        "renderLabel": "16b62996-5952-458f-ac99-8890df601005",
+        "label": null,
         "MolecularWeight": 43.0,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "16b62996-5952-458f-ac99-8890df601005",
-        "change_stamp": 65
+        "entity_guid": "60807cc1-e4b1-4056-a48f-3bc1029d07fe",
+        "change_stamp": 56
       },
       {
         "Name": "CXCL13:CXCR5|",
-        "renderLabel": "566f043d-e47c-4dde-9a0c-897179b1dc04",
+        "label": null,
         "MolecularWeight": 50.96,
         "EffectiveRadius": 1.0,
         "DiffusionCoefficient": 1E-07,
         "molecule_location": 1,
-        "entity_guid": "566f043d-e47c-4dde-9a0c-897179b1dc04",
-        "change_stamp": 71
+        "entity_guid": "d41f171f-b426-4461-8daa-182dfcb18d0b",
+        "change_stamp": 62
       }
     ],
     "genes": [],
     "reactions": [
       {
         "reactants_molecule_guid_ref": [
-          "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-          "16b62996-5952-458f-ac99-8890df601005"
+          "31dab044-8d99-413e-ba26-68778408b7c5",
+          "60807cc1-e4b1-4056-a48f-3bc1029d07fe"
         ],
         "products_molecule_guid_ref": [
-          "566f043d-e47c-4dde-9a0c-897179b1dc04"
+          "d41f171f-b426-4461-8daa-182dfcb18d0b"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "90b70df6-7f48-4919-bfd5-69165c78e385",
+        "reaction_template_guid_ref": "c3a62997-949b-4a27-aee0-0cbb41532464",
         "rate_const": 16.25,
         "TotalReactionString": "CXCL13 + CXCR5| -> CXCL13:CXCR5|",
-        "entity_guid": "025b93bd-897e-464e-98e6-67729b06a19e",
-        "change_stamp": 161
+        "entity_guid": "eca90536-072c-47c7-b97f-1f82e1f990fe",
+        "change_stamp": 152
       },
       {
         "reactants_molecule_guid_ref": [
-          "566f043d-e47c-4dde-9a0c-897179b1dc04"
+          "d41f171f-b426-4461-8daa-182dfcb18d0b"
         ],
         "products_molecule_guid_ref": [
-          "71eecf85-da98-47d6-99bd-57ff3a85e9ad",
-          "16b62996-5952-458f-ac99-8890df601005"
+          "31dab044-8d99-413e-ba26-68778408b7c5",
+          "60807cc1-e4b1-4056-a48f-3bc1029d07fe"
         ],
         "modifiers_molecule_guid_ref": [],
-        "reaction_template_guid_ref": "25e9c11b-1a03-44cc-89f5-0a67b0ffc615",
+        "reaction_template_guid_ref": "1241a831-2ad5-42ad-a929-425fb56ce234",
         "rate_const": 0.494,
         "TotalReactionString": "CXCL13:CXCR5| -> CXCL13 + CXCR5|",
-        "entity_guid": "a6075262-b7d4-4348-b02d-6f451df9ae88",
-        "change_stamp": 163
+        "entity_guid": "7d8c9059-d15f-462b-8b0f-1293380ad74d",
+        "change_stamp": 154
       }
     ],
     "reaction_templates": [
@@ -429,7 +411,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 15,
-        "entity_guid": "90b70df6-7f48-4919-bfd5-69165c78e385",
+        "entity_guid": "c3a62997-949b-4a27-aee0-0cbb41532464",
         "change_stamp": 0
       },
       {
@@ -444,7 +426,7 @@
         "modifiers_stoichiometric_const": [],
         "isBoundary": true,
         "reac_type": 16,
-        "entity_guid": "25e9c11b-1a03-44cc-89f5-0a67b0ffc615",
+        "entity_guid": "1241a831-2ad5-42ad-a929-425fb56ce234",
         "change_stamp": 0
       }
     ],

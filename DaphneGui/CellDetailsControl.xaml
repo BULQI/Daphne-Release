@@ -193,40 +193,6 @@
                                     </ComboBox.ItemsSource>
                                 </ComboBox>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
-                                <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                <editors:ColorEditBox x:Name="cellColorEditBox"
-                                    CheckBoxVisibility="Collapsed"
-                                    SpinnerVisibility="Collapsed"
-                                    Width="140"
-                                    HorizontalAlignment="Left" 
-                                    Format="a r g b"
-                                    Value="{Binding Path=mp_color}"
-                                    Margin="4,2"
-                                    />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
-                                <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
-                                <Slider x:Name="solfac_weight_slider"
-                                        Orientation="Horizontal"
-                                        VerticalAlignment="Center"
-                                            HorizontalAlignment="Left"
-                                        Width="50"
-                                            Margin="4,0"
-                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                        Minimum="0" 
-                                        Maximum="5" 
-                                        Value="{Binding Path=mp_render_blending_weight}" 
-                                        IsSnapToTickEnabled="True" 
-                                        TickFrequency="0.1" 
-                                />
-                                <TextBlock Text="{Binding ElementName=solfac_weight_slider, Path=Value}" 
-                                        VerticalAlignment="Center"
-                                        TextAlignment="Right"
-                                        Margin="5,0,0,0"
-                                        MinWidth="20"
-                                />
-                            </StackPanel>
                             <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
                                 <TextBlock Text="name" Margin="0,0" HorizontalAlignment="Right"  VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"/>
                                 <TextBox Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"  Margin="4,2" MinWidth="140" HorizontalAlignment="Left"/>
@@ -313,10 +279,10 @@
                                 </TabItem.Header>
 
                                 <StackPanel Orientation="Vertical">
-                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="50" MaxHeight="100" 
+                                    <ListBox x:Name="CellMembraneMolPopsListBox" MinHeight="10" MaxHeight="100"
                                                     ItemsSource="{Binding Path=membrane.molpops}" 
                                                     DisplayMemberPath="Name"
-                                                    SelectedIndex="0" 
+                                                    SelectedIndex="-1" 
                                                     />
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
@@ -362,40 +328,6 @@
                                                         </ComboBox.ItemsSource>
 
                                                     </ComboBox>
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="0,10">
-                                                    <TextBlock Text="color" Margin="0,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" MinWidth="60"  />
-                                                    <editors:ColorEditBox x:Name="cell2ColorEditBox"
-                                                                        CheckBoxVisibility="Collapsed"
-                                                                        SpinnerVisibility="Collapsed"
-                                                                        Width="140"
-                                                                        HorizontalAlignment="Left" 
-                                                                        Format="a r g b"
-                                                                        Value="{Binding Path=mp_color}"
-                                                                        Margin="4,2"
-                                                                        />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="2" Margin="0,0" IsEnabled="{Binding Path=mp_render_on}">
-                                                    <TextBlock Text="render wt" Margin="0,0" MinWidth="60"  VerticalAlignment="Center"  TextAlignment="Right"  />
-                                                    <Slider x:Name="solfac2_weight_slider"
-                                                                        Orientation="Horizontal"
-                                                                        VerticalAlignment="Center"
-                                                                            HorizontalAlignment="Left"
-                                                                        Width="50"
-                                                                            Margin="4,0"
-                                                                        RenderTransform="1.0,0,0,0.5,0,7"
-                                                                        Minimum="0" 
-                                                                        Maximum="5" 
-                                                                        Value="{Binding Path=mp_render_blending_weight}" 
-                                                                        IsSnapToTickEnabled="True" 
-                                                                        TickFrequency="0.1" 
-                                                                    />
-                                                    <TextBlock Text="{Binding ElementName=solfac2_weight_slider, Path=Value}" 
-                                                                        VerticalAlignment="Center"
-                                                                        TextAlignment="Right"
-                                                                        Margin="5,0,0,0"
-                                                                        MinWidth="20"
-                                                                    />
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="3" >
@@ -515,7 +447,7 @@
                                             </StackPanel>
                                         </DataTemplate>
                                     </StackPanel.Resources>
-                                    <ListBox x:Name="CellNucleusGenesListBox" MinHeight="50" MaxHeight="100" 
+                                    <ListBox x:Name="CellNucleusGenesListBox" MinHeight="10" MaxHeight="100" 
                                                                     ItemsSource="{Binding Path=genes}" 
                                                                     DisplayMemberPath="Name"                                                    
                                                                     SelectedIndex="-1"
@@ -875,7 +807,7 @@
                                     <ListBox x:Name="MembReactionComplexListBox" MinHeight="50" 
                                             ItemsSource="{Binding Path=membrane.reaction_complexes}" 
                                             DisplayMemberPath="Name"
-                                            SelectedIndex="0"
+                                            SelectedIndex="-1"
                                     />
 
                                 </StackPanel>
@@ -946,7 +878,7 @@
                                         <ListBox x:Name="lbMembAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                        
                                             ItemsSource="{Binding Source={StaticResource membraneAvailableReactionComplexesListView}}"                                                      
                                             ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
-                                            SelectedIndex="0" >
+                                            SelectedIndex="-1" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
                                             <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click"/>
@@ -982,7 +914,7 @@
                                     <ListBox x:Name="CytoReactionComplexListBox" MinHeight="50" 
                                         ItemsSource="{Binding Path=cytosol.reaction_complexes}" 
                                         DisplayMemberPath="Name"
-                                        SelectedIndex="0"
+                                        SelectedIndex="-1"
                                      />
 
                                 </StackPanel>
@@ -1052,7 +984,7 @@
                                         <ListBox x:Name="lbCytoAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"     
                                                  ItemsSource="{Binding Source={StaticResource cytosolAvailableReactionComplexesListView}}"
                                                 ItemTemplate="{Binding Source={StaticResource reacCxListItemTemplate}}"
-                                                SelectedIndex="0" >
+                                                SelectedIndex="-1" >
                                         </ListBox>
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,6,0" Canvas.ZIndex="10">
                                             <Button Name="CytoAddReacCxButton"  Width="50" Content="Add" Click="CytoAddReacCxButton_Click"  />

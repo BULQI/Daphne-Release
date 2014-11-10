@@ -186,6 +186,9 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellPopControl.xaml.cs">
+      <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -286,6 +289,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CellDetailsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CellPopControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -2166,7 +2166,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// gmk - remove this?
         /// override this function to handle the base version and for the tissue scenario
         /// </summary>
         public override void resetGaussRetrieve()
@@ -2178,7 +2177,6 @@ namespace Daphne
 
         /// <summary>
         /// retrieve the next Gaussian spec
-        /// gmk - remove this?
         /// </summary>
         /// <returns>the Gaussian found or null when done</returns>
         public override GaussianSpecification nextGaussSpec()
@@ -4354,21 +4352,24 @@ namespace Daphne
             set { reportMP = value; }
         }
 
-        private string _mp_dist_name = "";
-        public string mp_dist_name
-        {
-            get { return _mp_dist_name; }
-            set
-            {
-                if (_mp_dist_name == value)
-                    return;
-                else
-                {
-                    _mp_dist_name = value;
-                    OnPropertyChanged("mp_dist_name");
-                }
-            }
-        }
+        //// gmk - these aren't needed. phase out.
+        //[JsonIgnore]
+        //private string _mp_dist_name = "";
+        //[JsonIgnore]
+        //public string mp_dist_name
+        //{
+        //    get { return _mp_dist_name; }
+        //    set
+        //    {
+        //        if (_mp_dist_name == value)
+        //            return;
+        //        else
+        //        {
+        //            _mp_dist_name = value;
+        //            OnPropertyChanged("mp_dist_name");
+        //        }
+        //    }
+        //}
 
         private MolPopDistribution _mp_distribution;
         public MolPopDistribution mp_distribution
@@ -4488,7 +4489,6 @@ namespace Daphne
         }
 
         /// <summary>
-        /// gmk - remove this?
         /// grab the next Gaussian spec
         /// </summary>
         /// <returns>the spec or null when done</returns>
@@ -5377,7 +5377,6 @@ namespace Daphne
 
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
-                        configMolPop.mp_dist_name = "Homogeneous";
 
                         MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
 
@@ -5800,9 +5799,9 @@ namespace Daphne
         public CellPopulation cellPop;
 
         // Limits for placing cells
-        private double[] extents;
-        public double[] Extents
-        {
+        protected double[] extents;
+        public double[] Extents 
+        { 
             get { return extents; }
             set { extents = value; }
         }
@@ -6072,18 +6071,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Gaussian;
-
-            if (_cellPop != null)
-            {
-                AddByDistr(_cellPop.number);
-            }
-            //else
-            //{
-            //    // json deserialization puts us here
-            //    AddByDistr(1);
-            //}
-
-            //OnPropertyChanged("CellStates");
         }
 
         /// <summary>
@@ -6091,19 +6078,32 @@ namespace Daphne
         /// </summary>
         /// <param name="extents"></param>
         /// <param name="box"></param>
-        public void Initialize(double[] extents, BoxSpecification box)
+        //public void Initialize(double[] extents, BoxSpecification box)
+        public void Initialize(GaussianSpecification _gaussSpec)
         {
-            if (box != null)
+            gauss_spec = _gaussSpec;
+
+            if (gauss_spec != null)
             {
-                box.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
-                sigma = new double[3] { box.x_scale / 2, box.y_scale / 2, box.z_scale / 2 };
-                setRotationMatrix(box);
+                if (gauss_spec.box_spec != null)
+                {
+                    gauss_spec.box_spec.PropertyChanged += new PropertyChangedEventHandler(CellPopGaussChanged);
+                    sigma = new double[3] { gauss_spec.box_spec.x_scale / 2, gauss_spec.box_spec.y_scale / 2, gauss_spec.box_spec.z_scale / 2 };
+                    setRotationMatrix(gauss_spec.box_spec);
+                }
             }
             else
             {
-                // We get here when deserializing from json
                 sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
             }
+
+            if (cellPop != null)
+            {
+                cellPop.CellStates.Clear();
+                AddByDistr(cellPop.number);
+                //OnPropertyChanged("CellStates");
+            }
+
         }
 
         public override void Resize(double[] newExtents)
@@ -7162,8 +7162,11 @@ namespace Daphne
 
     public class GaussianSpecification : EntityModelBase
     {
+        // gmk - these aren't used. phase out. 
+        [JsonIgnore] 
         private string _gaussian_spec_name = "";
-        public string gaussian_spec_name
+        [JsonIgnore]
+        public string gaussian_spec_name 
         {
             get { return _gaussian_spec_name; }
             set
