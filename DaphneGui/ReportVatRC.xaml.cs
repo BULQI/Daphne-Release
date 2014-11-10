@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Daphne;
+using System.Collections.ObjectModel;
 
 namespace DaphneGui
 {
@@ -23,5 +25,12 @@ namespace DaphneGui
         {
             InitializeComponent();
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            dgVatMols.ItemsSource = ((ToolWinVatRC)DataContext).allmols;
+        }
+
+        
     }
 }

@@ -4,10 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:shared="http://schemas.actiprosoftware.com/winfx/xaml/shared"
+             xmlns:daph="clr-namespace:Daphne;assembly=Daphne" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="400">
+             d:DesignHeight="300" d:DesignWidth="400"
+             Loaded="UserControl_Loaded">
     
     <StackPanel>
+        <StackPanel.Resources>
+            <ObjectDataProvider x:Key="molsList"
+                MethodName="GetMolsInAllRCs"             
+                ObjectType="{x:Type daph:ConfigMolecule}">
+            </ObjectDataProvider>
+
+        </StackPanel.Resources>
         <!-- Report Settings -->
         <Expander ExpandDirection="Down" Padding="5"
                     IsExpanded="True"
@@ -35,16 +44,17 @@
                         BorderBrush="Black"
                         Background="{shared:LinearGradientBrush #EEEEEE, #CCCCCC, GradientType=TopLeftToBottomRight}"
                         >
-            <DataGrid x:Name="dgVatMols" 
-                            ItemsSource="{Binding ElementName=dgRC, Path=SelectedItem.molpops}" AutoGenerateColumns="False" 
-                            MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
-                            CanUserReorderColumns="False" CanUserResizeRows="False"
-                            CanUserSortColumns="False" RowHeaderWidth="0"
-                            VerticalContentAlignment="Center"
-                            CanUserAddRows="False"
-                            BorderThickness="1"
-                            BorderBrush="Black"
-                            >
+            <StackPanel>
+                <DataGrid x:Name="dgVatMols" 
+                        ItemsSource="{Binding Path=DataContext.allmols}" AutoGenerateColumns="False"                           
+                        MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="300"
+                        CanUserReorderColumns="False" CanUserResizeRows="False"
+                        CanUserSortColumns="False" RowHeaderWidth="0"
+                        VerticalContentAlignment="Center"
+                        CanUserAddRows="False"
+                        BorderThickness="1"
+                        BorderBrush="Black"
+                        >
 
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader" >
@@ -64,24 +74,25 @@
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
 
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="molecular population" Width="150">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="molecular population" Width="150">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock HorizontalAlignment="Center" Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="report" Width="100">
+                                                <DataGridTemplateColumn Header="report" Width="100">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox HorizontalAlignment="Center" IsChecked="{Binding Path=report_mp.mp_extended, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource rptEnumBoolConverter}, ConverterParameter=LEAN}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
         </Expander>
     </StackPanel>
 </UserControl>

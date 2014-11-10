@@ -3683,6 +3683,7 @@ namespace Daphne
 
     }
 
+    //public GetMolsInAllRCs
 
     //  -----------------------------------------------------------------------
     //  Differentiation Schemes
@@ -5177,7 +5178,7 @@ namespace Daphne
                     if (configMolecule != null)
                     {
                         ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
-
+                        configMolPop.molecule = configMolecule.Clone(null);
                         configMolPop.molecule.entity_guid = configMolecule.entity_guid;
                         configMolPop.Name = configMolecule.Name;
                         configMolPop.mp_color = System.Windows.Media.Color.FromScRgb(0.3f, 0.89f, 0.11f, 0.11f);
