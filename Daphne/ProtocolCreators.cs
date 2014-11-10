@@ -2033,16 +2033,6 @@ namespace Daphne
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
 
-            // Annihiliation: CXCL13 -> 
-            cr = new ConfigReaction();
-            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Annihilation);
-            // reactants
-            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL13", MoleculeLocation.Bulk, store));
-            cr.rate_const = ecsDefaultDegradRate;
-            cr.GetTotalReactionString(store.entity_repository);
-            store.entity_repository.reactions.Add(cr);
-
-
             ////////////////////////////////////////////////////////////////////////////////////
             // CXCL13 + CXCR5| <-> CXCL13:CXCR5|
             //
@@ -2597,6 +2587,32 @@ namespace Daphne
             cr.rate_const = kr;
             cr.GetTotalReactionString(store.entity_repository);
             store.entity_repository.reactions.Add(cr);
+            //
+            // Association: CXCR4 + CXCL12 -> CXCL12:CXCR4
+            kr = 0.494;
+            kf = 23.6;
+            //
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Association);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = kf;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
+            // Dissociation: CXCL13:CXCR5 -> CXCR5 + CXCL13
+            cr = new ConfigReaction();
+            cr.reaction_template_guid_ref = store.findReactionTemplateGuid(ReactionType.Dissociation);
+            // reactants
+            cr.reactants_molecule_guid_ref.Add(findMoleculeGuid("CXCL12:CXCR4", MoleculeLocation.Bulk, store));
+            // products
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCL12", MoleculeLocation.Bulk, store));
+            cr.products_molecule_guid_ref.Add(findMoleculeGuid("CXCR4", MoleculeLocation.Bulk, store));
+            cr.rate_const = kr;
+            cr.GetTotalReactionString(store.entity_repository);
+            store.entity_repository.reactions.Add(cr);
             ////////////////////////////////////////////////////
 
         }
@@ -2657,6 +2673,101 @@ namespace Daphne
             }
 
             store.entity_repository.reaction_complexes.Add(crc);
+
+            ////////////////////////////////////////////////////////////////
+
+            crc = new ConfigReactionComplex("CXCL12/CXCR4 binding");
+
+            //MOLECULES
+            conc = new double[3] { 0.03, 1, 0 };
+            type = new string[3] { "CXCL12", "CXCR4", "CXCL12:CXCR4" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+
+            //REACTIONS
+
+            // Reaction strings
+            type = new string[2] { "CXCL12:CXCR4 -> CXCL12 + CXCR4", "CXCL12 + CXCR4 -> CXCL12:CXCR4" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+
+            store.entity_repository.reaction_complexes.Add(crc);
+
+            ////////////////////////////////////////////////////////////////
+
+            crc = new ConfigReactionComplex("CXCL13/CXCR5 binding");
+
+            //MOLECULES
+            conc = new double[3] { 0.03, 1, 0 };
+            type = new string[3] { "CXCL13", "CXCR5", "CXCL13:CXCR5" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigMolecule configMolecule = store.entity_repository.molecules_dict[findMoleculeGuid(type[i], MoleculeLocation.Bulk, store)];
+
+                if (configMolecule != null)
+                {
+                    ConfigMolecularPopulation configMolPop = new ConfigMolecularPopulation(ReportType.CELL_MP);
+
+                    configMolPop.molecule = configMolecule.Clone(null);
+                    configMolPop.Name = configMolecule.Name;
+
+                    MolPopHomogeneousLevel hl = new MolPopHomogeneousLevel();
+                    hl.concentration = conc[i];
+                    configMolPop.mp_distribution = hl;
+
+                    // Reporting
+                    configMolPop.report_mp.mp_extended = ExtendedReport.NONE;
+
+                    crc.molpops.Add(configMolPop);
+                }
+            }
+
+            //REACTIONS
+
+            // Reaction strings
+            type = new string[2] { "CXCL13:CXCR5 -> CXCL13 + CXCR5", "CXCL13 + CXCR5 -> CXCL13:CXCR5" };
+
+            for (int i = 0; i < type.Length; i++)
+            {
+                ConfigReaction reac = findReaction(type[i], store);
+
+                if (reac != null)
+                {
+                    crc.reactions.Add(reac.Clone(true));
+                }
+            }
+
+            store.entity_repository.reaction_complexes.Add(crc);
+
         }
 
         //Following function needs to be called only once
