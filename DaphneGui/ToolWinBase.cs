@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Collections.ObjectModel;
 
 using Daphne;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -17,6 +18,8 @@ namespace DaphneGui
     {
         void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix);
     }
+
+    public enum ToolWindowType {BaseType, Tissue, VatRC};
 
     public class ToolWinBase : ToolWindow, IRegionFocus
     {
@@ -30,6 +33,9 @@ namespace DaphneGui
         // and want to reuse the EnvironmentExtents control.
         // This field is not relevant to VatRC.
         public Visibility ZExtentVisibility { get; set; }
+
+        
+        
 
         public ToolWinBase()
         {
@@ -368,4 +374,45 @@ namespace DaphneGui
 
 
     }
+
+
+
+    public class ToolwinComponentVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ToolWindowType type = (ToolWindowType)value;
+            if (type == ToolWindowType.Tissue)
+            {
+                switch (parameter as string)
+                {
+                    case "VTKDisplayWindow":
+                    case "ComponentsToolWindow":
+                    case "CellStudioToolWindow":
+                    case "ComponentsToolWindow_Genes":
+                        return Visibility.Visible;
+                }
+            }
+            else if (type == ToolWindowType.VatRC)
+            {
+                switch (parameter as string)
+                {
+                    case "ReacComplexChartWindow":
+                    case "ComponentsToolWindow":
+                        return Visibility.Visible;
+                }
+            }
+
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+
 }

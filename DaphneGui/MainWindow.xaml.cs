@@ -68,6 +68,21 @@ namespace DaphneGui
             }
         }
 
+        public static DependencyProperty ToolWinTypeProperty =
+            DependencyProperty.Register("ToolWinType", typeof(ToolWindowType), typeof(MainWindow), new FrameworkPropertyMetadata(ToolWindowType.BaseType));
+
+        public ToolWindowType ToolWinType
+        {
+            get
+            {
+                return (ToolWindowType)GetValue(ToolWinTypeProperty);
+            }
+            set
+            {
+                SetValue(ToolWinTypeProperty, value);
+            }
+        }
+        
         /// <summary>
         /// the absolute path where the installed, running executable resides
         /// </summary>
@@ -1991,13 +2006,9 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
-                // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.Tag = sop;
-               
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                //this.CellRenderMethodCB.DataContext = sop.Protocol; 
-
+                
                 // gmk - The code inside the if-statement insures that the information in the protocol window
                 // updates when a new scenario of the same workbench-type is loaded.
                 // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
@@ -2010,6 +2021,9 @@ namespace DaphneGui
                     ToolWin.Protocol = SOP.Protocol;
                     ToolWin.Title = ToolWin.TitleText;
 
+                    ToolWinType = ToolWindowType.Tissue;
+                    ToolWin.Tag = sop;
+
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
 
@@ -2020,16 +2034,19 @@ namespace DaphneGui
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
                 {
-                    ToolWin = new ToolWinTissue();
-                    ToolWin.MW = this;
-                    ToolWin.Protocol = SOP.Protocol;
-                    ToolWin.Title = ToolWin.TitleText;
+                    //ProtocolToolWin = new ToolWinTissue();ds
+                    //ProtocolToolWin.MW = this;
+                    //ProtocolToolWin.Protocol = SOP.Protocol;
+                    //ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    //ToolWinType = ToolWindowType.Tissue;
+                    //ProtocolToolWin.Tag = sop;
 
-                    ProtocolToolWindowContainer.Items.Add(ToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
+                    //if (ProtocolToolWindowContainer.Items.Count > 0)
+                    //    ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                    //ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    //ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
 
                     // create the simulation
                     sim = new TissueSimulation();
@@ -2043,6 +2060,7 @@ namespace DaphneGui
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
                 // GUI Resources
 
                 // gmk - The code inside the if-statement insures that the information in the protocol window
@@ -2074,7 +2092,7 @@ namespace DaphneGui
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
-
+                    ToolWinType = ToolWindowType.VatRC;
                     ProtocolToolWindowContainer.Items.Add(ToolWin);
                     ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
 
@@ -2127,7 +2145,10 @@ namespace DaphneGui
             }
 
             //this cannot be set before databaseket get updated from loading the new scenario
-            CellRenderMethodCB.DataContext = sop.Protocol;
+            if (gc is VTKFullGraphicsController)
+            {
+                CellRenderMethodCB.DataContext = sop.Protocol;
+            }
             vtkDataBasket.SetupVTKData(sop.Protocol);
             // Create all VTK visualization pipelines and elements
             gc.CreatePipelines();
@@ -2988,7 +3009,15 @@ namespace DaphneGui
             saveScenario.IsEnabled = true;
             displayTitle();
             MainWindow.ST_ReacComplexChartWindow.ClearChart();
-            VTKDisplayDocWindow.Activate();
+            if (ToolWinType == ToolWindowType.Tissue)
+            {
+                VTKDisplayDocWindow.Activate();
+            }
+            else if (ToolWinType == ToolWindowType.VatRC)
+            {
+                ReacComplexChartWindow.Activate();
+            }
+
         }
 
         private void abortButton_Click(object sender, RoutedEventArgs e)
@@ -3352,8 +3381,6 @@ namespace DaphneGui
             UpdateGraphics();
             (gc as VTKFullGraphicsController).Rwc.Invalidate();
         }
-
-
     }
 
 

@@ -24,7 +24,7 @@ namespace DaphneGui
     /// <summary>
     /// Interaction logic for RenderSkinEditor.xaml
     /// </summary>
-    public partial class RenderSkinWindow : ToolWindow
+    public partial class RenderSkinWindow : ToolWinBase
     {
 
         public RenderSkinWindow()
@@ -202,6 +202,11 @@ namespace DaphneGui
             {
                 DataGrid dataGrid = SkinEditor.RenderColorHost;
                 DataGridRow row = (DataGridRow)(dataGrid.ItemContainerGenerator.ContainerFromItem(dataGrid.SelectedItem));
+                if (row == null)
+                {
+                    e.Accepted = false;
+                    return;
+                }
                 string header = (row.Header as DataGridRowHeader).Content as string;
 
                 e.Accepted = (header != "Base Color" && header.EndsWith("Shade") != true);

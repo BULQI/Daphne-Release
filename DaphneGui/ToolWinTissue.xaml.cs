@@ -21,6 +21,7 @@ namespace DaphneGui
     /// </summary>
     public partial class ToolWinTissue : ToolWinBase
     {
+
         public ToolWinTissue()
         {
             TitleText = "Tissue Simulation";
@@ -185,6 +186,84 @@ namespace DaphneGui
                 }
             }
         }
+
+
+        private void btnNewSkinClick(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (skinNameTextBox.Visibility == System.Windows.Visibility.Collapsed)
+            {
+                skinLabel.Visibility = System.Windows.Visibility.Visible;
+                skinNameTextBox.Visibility = System.Windows.Visibility.Visible;
+                button.Content = "Create";
+                return;
+            }
+            //get a name for the new skin
+            string skinName = skinNameTextBox.Text;
+            skinNameTextBox.Visibility = System.Windows.Visibility.Collapsed;
+            skinLabel.Visibility = System.Windows.Visibility.Collapsed;
+            skinNameTextBox.Text = "";
+            button.Content = "New Skin";
+            if (skinName == null || skinName.Length == 0)
+            {
+                skinNote.Text = "No Name Given";
+                return;
+            }
+
+            RenderSkin skin = MainWindow.SOP.SkinList.Where(x => x.Name == skinName).SingleOrDefault();
+            if (skin != null)
+            {
+                var result = MessageBox.Show("A skin with the given name exists, Do you want to overwrite it? ", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    skinNote.Text = "Creating new skin cancelled";
+                    return;
+                }
+            }
+
+            var er = MainWindow.SOP.Protocol.entity_repository;
+            RenderSkin newrs = new RenderSkin(skinName, er);
+            //serialize to file
+            string SkinFilePath = new Uri(MainWindow.appPath + @"\Config\RenderSkin\" + skinName + ".json").LocalPath;
+            newrs.SerializeToFile(SkinFilePath);
+            newrs.FileName = SkinFilePath;
+            if (skin != null)
+            {
+                int index = MainWindow.SOP.SkinList.IndexOf(skin);
+                MainWindow.SOP.SkinList.RemoveAt(index);
+                MainWindow.SOP.SkinList.Insert(index, newrs);
+                skinNote.Text = "skin data regenerated";
+            }
+            else
+            {
+                MainWindow.SOP.SkinList.Add(newrs);
+                skinNote.Text = "New Skin created";
+            }
+
+            var cv = (CollectionView)CollectionViewSource.GetDefaultView(MainWindow.SOP.SkinList);
+            if (cv != null)
+            {
+                cv.MoveCurrentTo(newrs);
+            }
+        }
+
+        private void Button_Click_Edit_RenderSkin(object sender, RoutedEventArgs e)
+        {
+            var item = skinChoiceComboBox.SelectedItem;
+
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            MainWindow.ST_RenderSkinWindow.Visibility = System.Windows.Visibility.Visible;
+            MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
+        private void skinChoiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MainWindow.ST_RenderSkinWindow.Visibility != System.Windows.Visibility.Visible) return;
+            var item = skinChoiceComboBox.SelectedItem;
+            MainWindow.ST_RenderSkinWindow.DataContext = item;
+            //MainWindow.ST_RenderSkinWindow.Activate();
+        }
+
 
     }
 }
