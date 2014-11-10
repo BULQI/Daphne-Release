@@ -54,10 +54,6 @@ namespace DaphneGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static int TestCount = 0;
-        public static int TestCount1 = 0;
-        public static int TestCount2 = 0;
-
         private static ToolWinBase toolWin;
         public static ToolWinBase ToolWin
         {
@@ -1670,11 +1666,6 @@ namespace DaphneGui
                 
             }
 
-            TestCount = 0;
-            TestCount1 = 0;
-            TestCount2 = 0;
-            //SimulationBase.StepCounter = 0;
-            //MessageBox.Show(string.Format("TestCount before start = {0}, TestCount1 = {0}, TestCount2 = {0}", TestCount, TestCount1, TestCount2));
             runSim();
         }
 
@@ -1692,51 +1683,9 @@ namespace DaphneGui
             {
                 simThread.Suspend();
             }
-         
-            vatSim.reset();
 
-            vatSim.Reporter.StartReporter(vatSim);
-
-            //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            //foreach (KeyValuePair<string, List<double>> kvp in vatSim.DictGraphConcs)
-            //{
-            //    kvp.Value.Clear();
-            //    //kvp.Value.Add(
-            //}
-            //vatSim.ListTimes.Clear();
-            vatSim.ListTimes.Add(0);
-            //comp.Populations.Clear();
-            //vatSim.Load(sop.Protocol, true);
-
-            //////////////////////////////////////////////////////////////////////////
-            //INSTEAD OF RELOADING THE WHOLE SIMULATION, JUST RELOAD THE MOL CONCS
-            /////////////////////////////////////////////////////////////////////////
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            foreach (ConfigMolecularPopulation cmp in sop.Protocol.scenario.environment.comp.reaction_complexes.First().molpops)
-            {
-                string molguid = cmp.molecule.entity_guid;
-                if (comp.Populations.ContainsKey(molguid) == true) {
-                    double[] initArray = new double[1];
-                    double conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
-                    initArray[0] = conc;
-                    //SimulationBase.dataBasket.Environment.Comp.Populations[molguid].Conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
-                    ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-                    sf.Initialize("const", initArray);
-                    comp.Populations[molguid].Conc *= 0;
-                    comp.Populations[molguid].Conc += sf;
-                    if (vatSim.DictGraphConcs.ContainsKey(molguid) == true)
-                        vatSim.DictGraphConcs[molguid].Add(conc);
-                }
-                    
-            }
-            ///////////////////////////////////////////////
-            //NEED TO DO THIS FOR REACTION RATES TOO!
-            ////////////////////////////////////////////
-            List<ConfigReaction> reacs = new List<ConfigReaction>();
-            reacs = sop.Protocol.GetReactions(sop.Protocol.scenario.environment.comp, false);
-            comp.BulkReactions.Clear();
-            SimulationBase.AddCompartmentBulkReactions(comp, sop.Protocol.entity_repository, reacs);
-            
+            //This resets the mol concs and reaction rates instead of reloading the whole simulation
+            vatSim.resetConcsAndRates(sop.Protocol);
 
             double dt = sop.Protocol.scenario.time_config.sampling_interval;
             double renderInterval = sop.Protocol.scenario.time_config.rendering_interval;
@@ -2290,14 +2239,11 @@ namespace DaphneGui
             {
                 lock (sim)
                 {
-                    //TestCount++;
                     if (sim.RunStatus == SimulationBase.RUNSTAT_RUN)
                     {
-                        //TestCount1++;
                         // run the simulation forward to the next task
                         if (postConstruction == true && AssumeIDE() == true)
                         {
-                            //TestCount2++;
                             sim.RunForward();
                         }
                         else
@@ -2457,7 +2403,6 @@ namespace DaphneGui
 
             if (finished && sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
-                //MessageBox.Show(string.Format("TestCount after finish = {0}, TestCount1 = {0}, TestCount2 = {0}", TestCount, TestCount1, TestCount2));
                 ReacComplexChartWindow.Tag = Sim;
                 ReacComplexChartWindow.MW = this;
                 

@@ -1128,26 +1128,6 @@ namespace Daphne
             }
         }
 
-        //This method updates the conc of the given molecule
-        public void EditConc(string molguid, double conc)
-        {
-            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            double[] initArray = new double[1];
-
-            if (comp.Populations.ContainsKey(molguid)) 
-            {
-                initArray[0] = conc;
-                ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
-                sf.Initialize("const", initArray);
-                comp.Populations[molguid].Conc *= 0;
-                comp.Populations[molguid].Conc += sf;
-            }
-
-            //dictInitialConcs[moleculeKey] = conc;
-            //initConcsDict[moleculeKey].conc = conc;
-            //OnPropertyChanged("initConcs");
-        }
-
         //Save the initial concs. If user drags graph, use dictInitialConcs to update the initial concs
         public void SaveInitialConcs()
         {
@@ -1239,6 +1219,49 @@ namespace Daphne
                 comp.Populations[molguid].Conc *= 0;
                 comp.Populations[molguid].Conc += sf;
             }
+        }
+
+        /// <summary>
+        /// FOR VAT RC, INSTEAD OF RELOADING THE WHOLE SIMULATION, JUST RELOAD 
+        /// THE MOL CONCS PLUS THE REACTION RATES. THIS IS FOR THE CASE WHEN THE
+        /// USER DRAGS THE INITIAL CONCS ON GRAPH OR VIA SLIDER OR DRAGS THE RATES VIA SLIDER
+        /// </summary>
+        public void resetConcsAndRates(Protocol protocol)
+        {
+            reset();
+            Reporter.StartReporter(this);
+            ListTimes.Add(0);
+
+            scenarioHandle = (VatReactionComplexScenario)protocol.scenario;
+            envHandle = (ConfigPointEnvironment)protocol.scenario.environment;
+
+            //Molecules
+            Compartment comp = SimulationBase.dataBasket.Environment.Comp;
+            foreach (ConfigReactionComplex crc in envHandle.comp.reaction_complexes)
+            {
+                foreach (ConfigMolecularPopulation cmp in crc.molpops)
+                {
+                    string molguid = cmp.molecule.entity_guid;
+                    if (comp.Populations.ContainsKey(molguid) == true)
+                    {
+                        double[] initArray = new double[1];
+                        double conc = ((MolPopHomogeneousLevel)(cmp.mp_distribution)).concentration;
+                        initArray[0] = conc;
+                        ScalarField sf = SimulationModule.kernel.Get<ScalarField>(new ConstructorArgument("m", comp.Interior));
+                        sf.Initialize("const", initArray);
+                        comp.Populations[molguid].Conc *= 0;
+                        comp.Populations[molguid].Conc += sf;
+                        if (DictGraphConcs.ContainsKey(molguid) == true)
+                            DictGraphConcs[molguid].Add(conc);
+                    }
+                }
+            }
+
+            //Reactions
+            List<ConfigReaction> reacs = new List<ConfigReaction>();
+            reacs = protocol.GetReactions(protocol.scenario.environment.comp, false);
+            comp.BulkReactions.Clear();
+            AddCompartmentBulkReactions(comp, protocol.entity_repository, reacs);
         }
 
         public override void Step(double dt)
