@@ -35,7 +35,6 @@
         <CollectionViewSource x:Key="GenesListView"  
                                   Source="{Binding Path=entity_repository.genes}"
                                   />
-        <CollectionViewSource x:Key="moleculesListView" Source="{Binding Path=entity_repository.molecules}" />
 
         <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
@@ -58,7 +57,7 @@
 
                 </StackPanel.Resources>
                 <!-- LIBRARY GENES -->
-            <Expander                                            
+                <Expander                                            
                             Padding="5" ExpandDirection="Down"
                             IsExpanded="False"
                             Header="Genes"                                                  
@@ -165,7 +164,7 @@
                     <StackPanel>
 
                         <DataGrid x:Name="dgLibMolecules"
-                                ItemsSource="{Binding Source={StaticResource moleculesListView}}" AutoGenerateColumns="False" 
+                                ItemsSource="{Binding Path=entity_repository.molecules}" AutoGenerateColumns="False" 
                                 Height="150" MinWidth="200" MinRowHeight="20" MinColumnWidth="20" ColumnWidth="60" MaxColumnWidth="80"
                                 CanUserReorderColumns="False" CanUserResizeRows="False"
                                 CanUserSortColumns="True" RowHeaderWidth="0"
@@ -267,7 +266,7 @@
                                 >
                     <StackPanel>
                         <ListView x:Name="lvReactions" 
-                                          ItemsSource="{Binding Source={StaticResource ecmReactionsListView}}"
+                                          ItemsSource="{Binding Path=entity_repository.reactions, Mode=TwoWay}"
                                           MinHeight="50" MaxHeight="150"
                                           >
 

@@ -884,8 +884,8 @@
                                             <Button Name="MembAddReacCxButton"  Width="50" Content="Add" Click="MembAddReacCxButton_Click"/>
                                         </StackPanel>
 
-                                        <ContentControl Name="AddReactionComplexDetails"
-                                            Content="{Binding ElementName=lbAvailableReacCx, Path=SelectedItem}" 
+                                        <ContentControl Name="AddReactionComplexDetails1"
+                                            Content="{Binding ElementName=lbMembAvailableReacCx, Path=SelectedItem}" 
                                             ContentTemplate="{StaticResource reacListViewTemplate}" 
                                             Margin="6"/>
 

@@ -56,7 +56,7 @@ namespace DaphneGui
     public partial class MainWindow : Window
     {
         private static ToolWinBase toolWin;
-        public static ToolWinBase ProtocolToolWin
+        public static ToolWinBase ToolWin
         {
             get
             {
@@ -1702,7 +1702,7 @@ namespace DaphneGui
         private void applyButton_Click(object sender, RoutedEventArgs e)
         {
             // Workbench-specific code to preserve focus to the element that was in focus before "Apply" button clicked.
-            ProtocolToolWin.Apply();
+            ToolWin.Apply();
         }
 
         /// <summary>
@@ -2016,18 +2016,19 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ProtocolToolWin = new ToolWinTissue();
-                    ProtocolToolWin.MW = this;
-                    ProtocolToolWin.Protocol = SOP.Protocol;
-                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+                    ToolWin = new ToolWinTissue();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     ToolWinType = ToolWindowType.Tissue;
-                    ProtocolToolWin.Tag = sop;
+                    ToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
-                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
+
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinTissue)ToolWin);
                 }
 
                 // only create during construction or when the type changes
@@ -2069,31 +2070,31 @@ namespace DaphneGui
                 // There is probably redundancy here, but I'm not sure how to restructure it.
                 if (newFile == true)
                 {
-                    ProtocolToolWin = new ToolWinVatRC();
-                    ProtocolToolWin.MW = this;
-                    ProtocolToolWin.Protocol = SOP.Protocol;
-                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+                    ToolWin = new ToolWinVatRC();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
 
-                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)ProtocolToolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
                 }
  
                 // only create during construction or when the type changes
                 if (sim == null || sim is VatReactionComplex == false)
                 {
-                    ProtocolToolWin = new ToolWinVatRC();
-                    ProtocolToolWin.MW = this;
-                    ProtocolToolWin.Protocol = SOP.Protocol;
-                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+                    ToolWin = new ToolWinVatRC();
+                    ToolWin.MW = this;
+                    ToolWin.Protocol = SOP.Protocol;
+                    ToolWin.Title = ToolWin.TitleText;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.Clear();
                     ToolWinType = ToolWindowType.VatRC;
-                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
-                    ProtocolToolWindow = ((ToolWinVatRC)ProtocolToolWin);
+                    ProtocolToolWindowContainer.Items.Add(ToolWin);
+                    ProtocolToolWindow = ((ToolWinVatRC)ToolWin);
 
                     // create the simulation
                     sim = new VatReactionComplex();
@@ -2176,8 +2177,8 @@ namespace DaphneGui
                     // NOTE: For now not doing any callbacks on property change for RegionControls...
                     kvp.Value.ClearCallbacks();
                     kvp.Value.AddCallback(new RegionWidget.CallbackHandler(gcHandle.WidgetInteractionToGUICallback));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWin.RegionFocusToGUISection));
-                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ProtocolToolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
+                    kvp.Value.AddCallback(new RegionWidget.CallbackHandler(ToolWin.RegionFocusToGUISection));
                     kvp.Value.Gaussian.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
                     kvp.Value.Gaussian.box_spec.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
                 }
@@ -2436,7 +2437,7 @@ namespace DaphneGui
 
             // NOTE: Uncomment this to open the Sim Config ToolWindow after a run has completed
             this.ProtocolToolWindow.Activate();
-            ProtocolToolWin.Activate();
+            ToolWin.Activate();
             this.menu_ActivateSimSetup.IsEnabled = true;
             SetControlFlag(MainWindow.CONTROL_NEW_RUN, true);
             // TODO: These Focus calls will be a problem with multiple GCs...

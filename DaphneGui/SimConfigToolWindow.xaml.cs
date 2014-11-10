@@ -2582,9 +2582,6 @@ namespace DaphneGui
                 }
             }
         }
-
-
-
     }
 }
 

@@ -373,7 +373,7 @@
                 
                 <!-- Workbench Tab control -->
                 <docking:ToolWindowContainer docking:DockSite.ControlSize="560,1" x:Name="ProtocolToolWindowContainer" AutomationProperties.AutomationId="DaphneLeftTWContainer">
-                    <local:ToolWinBase x:Name="ProtocolToolWindow" />
+                    <local:ToolWinBase x:Name="ProtocolToolWindow"/>
                 </docking:ToolWindowContainer>
 
                 <!-- Right-hand content containers -->
