@@ -2250,13 +2250,6 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-            var val = value as Protocol;
-            if (val != null && val.scenario is TissueScenario)
-            {
-                var ts = val.scenario as TissueScenario;
-                return ts.cellpopulations;
-            }
-
             return value;
         }
 

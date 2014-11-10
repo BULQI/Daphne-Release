@@ -13,6 +13,7 @@
         Title="Daphne"
         Width="1400" Height="770" Closing="Window_Closing"
         Icon="Daphne.ico"
+        Name="mainWindow"
         >
 
     <Window.Resources>
@@ -20,6 +21,8 @@
         <local:CellRenderPopFromProtocolConverter x:Key="CellRenderPopFromProtocolConverter"/>
 
         <local:RenderMethodEnumDescriptionConverter x:Key="RenderMethodEnumDescriptionConverter" />
+
+        <local:ToolwinComponentVisibilityConverter x:Key="ToolwinComponentVisibilityConverter" />
         
         <daph:RenderMethodItemValidConverter x:Key="RenderMethodItemDisableConverter" />
         
@@ -399,9 +402,11 @@
                     <!-- Workspace -->
                     <docking:Workspace>
                         <docking:TabbedMdiHost x:Name="tabbedMdiHost">
-                            <docking:TabbedMdiContainer Background="LightGray" >
-                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel">
+                            <docking:TabbedMdiContainer Name="MdiTabContainer" Background="LightGray">
+                                <docking:DocumentWindow x:Name="VTKDisplayDocWindow" Title="3D View" TabBorderThickness="1" TabBorderBrush="Beige"
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=VTKDisplayWindow}">
+                                    <DockPanel Grid.Row="0" x:Name="vtkDisplay_DockPanel" Visibility="{Binding ElementName=VTKDisplayDocWindow, Path=Visibility}">
                                         <DockPanel.Resources>
                                             <!-- Gray out button images when toolbar is disabled -->
                                             <Style TargetType="{x:Type Image}" x:Key="toolbarImageStyle">
@@ -548,12 +553,15 @@
                                 <!-- This is the window that contains the reaction complex graph-->
                                 <!--<work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Magenta" TabForeground="DarkGreen"  TabBackground="#FFC9E6D1"> </work:ChartViewToolWindow>-->
                                
-                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />                                
-                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" >
-                                    
-                                </local:CellStudioToolWindow>
-
-                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" ></work:ChartViewToolWindow>
+                                <local:ComponentsToolWindow x:Name="ComponentsToolWindow" DataContext="MainWindow.SOP.Protocol"  Title="Subcellular Components Library" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"  
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ComponentsToolWindow}" />                                
+                                <local:CellStudioToolWindow x:Name="CellStudioToolWindow" HeaderTemplate="{Binding Source={StaticResource cellTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige"                         
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=CellStudioToolWindow}" />
+                                <work:ChartViewToolWindow x:Name="ReacComplexChartWindow" Title="Reaction Complex Results" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" 
+                                    Visibility="{Binding ElementName=mainWindow, Path=ToolWinType, Converter={StaticResource ToolwinComponentVisibilityConverter}, 
+                                    ConverterParameter=ReacComplexChartWindow}" />
                                 <local:RenderSkinWindow x:Name="renderSkinWindow" Visibility="Collapsed"
                                        HeaderTemplate="{Binding Source={StaticResource renderTabTemplate}}" ClipToBounds="True" TabBorderThickness="1" TabBorderBrush="Beige" />
                                 
