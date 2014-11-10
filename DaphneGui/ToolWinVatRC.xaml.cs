@@ -44,7 +44,7 @@ namespace DaphneGui
             int reportVatMolSelectedIndex = -1;
             if (selectedTab == tabReports)
             {
-                reportVatMolSelectedIndex = toolWinVatRC.dgVatMols.SelectedIndex;
+                reportVatMolSelectedIndex = vatControl.dgVatMols.SelectedIndex;
             }
 
             MW.Apply();
@@ -56,7 +56,7 @@ namespace DaphneGui
             }
             else if (selectedTab == toolWinVatRC.tabReports)
             {
-                toolWinVatRC.dgVatMols.SelectedIndex = reportVatMolSelectedIndex;
+                vatControl.dgVatMols.SelectedIndex = reportVatMolSelectedIndex;
             }
 
         }

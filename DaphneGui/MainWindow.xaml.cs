@@ -1694,13 +1694,16 @@ namespace DaphneGui
             }
          
             vatSim.reset();
+
+            vatSim.Reporter.StartReporter(vatSim);
+
             //Compartment comp = SimulationBase.dataBasket.Environment.Comp;
-            foreach (KeyValuePair<string, List<double>> kvp in vatSim.DictGraphConcs)
-            {
-                kvp.Value.Clear();
-                //kvp.Value.Add(
-            }
-            vatSim.ListTimes.Clear();
+            //foreach (KeyValuePair<string, List<double>> kvp in vatSim.DictGraphConcs)
+            //{
+            //    kvp.Value.Clear();
+            //    //kvp.Value.Add(
+            //}
+            //vatSim.ListTimes.Clear();
             vatSim.ListTimes.Add(0);
             //comp.Populations.Clear();
             //vatSim.Load(sop.Protocol, true);

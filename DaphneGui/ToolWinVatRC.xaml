@@ -62,9 +62,10 @@
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
+                <!--<StackPanel>-->
+                    <local:ReportVatRC x:Name="vatControl" DataContext="{Binding}"></local:ReportVatRC>
                 <!-- Report Settings -->
-                <Expander ExpandDirection="Down" Padding="5"
+                <!--<Expander ExpandDirection="Down" Padding="5"
                     IsExpanded="True"
                     Header="Report Settings"
                     Margin="0,4,0,0" 
@@ -78,10 +79,10 @@
                             ContentTemplate="{StaticResource reportSettingsTemplate}" 
                             Margin="6"
                     />
-                </Expander>
+                </Expander>-->
 
                 <!--Molecules in Vat -->
-                <Expander ExpandDirection="Down" Padding="5"
+                <!--<Expander ExpandDirection="Down" Padding="5"
                         IsExpanded="True"
                         Header="Molecules in Vat"
                         Margin="0,0,0,0" 
@@ -137,9 +138,9 @@
                                 </DataGridTemplateColumn>                                                               
                             </DataGrid.Columns>
                         </DataGrid>
-                    </Expander>
+                    </Expander>-->
 
-                </StackPanel>
+                <!--</StackPanel>-->
             </ScrollViewer>
         </TabItem>
         

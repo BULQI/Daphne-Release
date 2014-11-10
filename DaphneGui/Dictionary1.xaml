@@ -35,6 +35,9 @@
     <daph:ReactionGUIDtoReactionStringConverter x:Key="ReacGUIDtoReacStringConv" />
     <daph:RptEnumBooleanConverter x:Key="rptEnumBoolConverter" />
     <daph:SWMColorToSolidBrushConverter x:Key="colorToSolidBrushConv" />
+    <daph:VatRptEnumBooleanConverter x:Key="vatRptEnumBoolConverter" />
+
+    
 
     <!-- DATA TEMPLATES: must come after definition of converters -->
 

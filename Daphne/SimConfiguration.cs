@@ -4937,64 +4937,22 @@ namespace Daphne
 
     }
 
-#if OLD_RC
-    public class ConfigReactionGuidRatePair : ConfigEntity
+    public enum VatExtendedReport { INITCONCS, TIMECONCS };
+    public class ReportVatRC
     {
-        public ConfigReactionGuidRatePair() : base()
-        {
-        }
+        public bool rates { get; set; }
+        public VatExtendedReport concs { get; set; }
 
-        private double originalRate;
-        public double OriginalRate 
+        public ReportVatRC()
         {
-            get
-            {
-                return originalRate;
-            }
-            set
-            {
-                originalRate = value;
-                OnPropertyChanged("OriginalRate");
-            }
-        }
-        private double reactionComplexRate;
-        public double ReactionComplexRate
-        {
-            get
-            {
-                return reactionComplexRate;
-            }
-            set
-            {
-                reactionComplexRate = value;
-                OnPropertyChanged("ReactionComplexRate");
-            }
-        }
-
-        public override string GenerateNewName(Level level, string ending)
-        {
-            throw new NotImplementedException();
+            rates = false;
+            concs = VatExtendedReport.INITCONCS;
         }
     }
-#endif
+
     public class ConfigReactionComplex : ConfigEntity
     {
         public string Name { get; set; }
-#if OLD_RC
-        private ObservableCollection<string> _reactions_guid_ref;
-        public ObservableCollection<string> reactions_guid_ref 
-        {
-            get
-            {
-                return _reactions_guid_ref;
-            }
-            set
-            {
-                _reactions_guid_ref = value;
-                OnPropertyChanged("reactions_guid_ref");
-            }
-        }
-#endif
         private ObservableCollection<ConfigReaction> _reactions;
         public ObservableCollection<ConfigReaction> reactions
         {
@@ -5114,6 +5072,8 @@ namespace Daphne
                 this.incrementChangeStamp();
             }
         }
+
+        public ReportVatRC reportVat { get; set; }      
 
         /// <summary>
         /// push a reaction into this reaction complex
@@ -5254,9 +5214,7 @@ namespace Daphne
             CreateReactionMolpops(reac, reac.reactants_molecule_guid_ref);
             CreateReactionMolpops(reac, reac.products_molecule_guid_ref);
             CreateReactionMolpops(reac, reac.modifiers_molecule_guid_ref);
-        }
-
-        
+        }        
     }
 
     public class ConfigCell : ConfigEntity
@@ -7798,6 +7756,45 @@ namespace Daphne
     /// </summary>
     [ValueConversion(typeof(ExtendedReport), typeof(bool))]
     public class RptEnumBooleanConverter : IValueConverter
+    {
+        #region IValueConverter Members
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+                return DependencyProperty.UnsetValue;
+
+            object parameterValue = Enum.Parse(value.GetType(), parameterString);
+
+            bool ret = parameterValue.Equals(value);
+            return ret;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+                return DependencyProperty.UnsetValue;
+
+            bool chk = (bool)value;
+
+            if (chk == false)
+                return Enum.Parse(targetType, "NONE");
+
+            return Enum.Parse(targetType, parameterString);
+        }
+        #endregion
+    }
+
+    /// <summary>
+    /// Convert Reporter enum to boolean
+    /// </summary>
+    [ValueConversion(typeof(VatExtendedReport), typeof(bool))]
+    public class VatRptEnumBooleanConverter : IValueConverter
     {
         #region IValueConverter Members
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
