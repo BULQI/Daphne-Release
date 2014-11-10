@@ -245,9 +245,6 @@
       <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
     </Compile>
     <Compile Include="VTKDataBasket.cs" />
-    <Compile Include="VTKDisplayDocWindow.xaml.cs">
-      <DependentUpon>VTKDisplayDocWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
     </Compile>
@@ -357,10 +354,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ToolWinVatRC.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="VTKDisplayDocWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

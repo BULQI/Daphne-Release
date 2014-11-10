@@ -15,6 +15,9 @@
 
     <docking:ToolWindow.Resources>
         <CollectionViewSource x:Key="EcsBulkMoleculesListView" Source="{Binding Path=Protocol.entity_repository.molecules}"/>
+
+        <local:DatabindingDebugConverter x:Key="DebugConverter"/>
+        
     </docking:ToolWindow.Resources>
     
     <TabControl x:Name="ConfigTabControl" Grid.Column="0" TabStripPlacement="Top" SelectionChanged="ConfigTabControl_SelectionChanged" AutomationProperties.AutomationId="DaphneTabsControl">
@@ -597,8 +600,8 @@
 
                             <StackPanel Orientation="Horizontal">
                                 <ComboBox x:Name="skinChoiceComboBox" MinWidth="80" 
-                                          ItemsSource="{Binding Tag.SkinList, ElementName=MyToolWindow}"
-                                          SelectedItem="{Binding Tag.SelectedRenderSkin, ElementName=MyToolWindow}"
+                                          ItemsSource="{Binding Tag.SkinList, ElementName=toolWinTissue, Converter={StaticResource DebugConverter}, ConverterParameter=skinlist}"
+                                          SelectedItem="{Binding Tag.SelectedRenderSkin, ElementName=toolWinTissue, Converter={StaticResource DebugConverter}, ConverterParameter=skin_selected}"
                                           IsSynchronizedWithCurrentItem="True"
                                           DisplayMemberPath="Name"
                                           SelectionChanged="skinChoiceComboBox_SelectionChanged"

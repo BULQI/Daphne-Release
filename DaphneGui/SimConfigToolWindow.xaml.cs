@@ -2253,12 +2253,6 @@ namespace DaphneGui
         public object Convert(object value, Type targetType,
             object parameter, CultureInfo culture)
         {
-
-            var twbase = value as ToolWinBase;
-            if (twbase != null)
-            {
-                return twbase.ContentComponents;
-            }
             return value;
         }
 
@@ -2581,7 +2575,7 @@ namespace DaphneGui
             if (mol != null)
             {
                 // Filter out mol if membrane bound 
-                if (mol.molecule_location == MoleculeLocation.Bulk)
+                if (mol.molecule_location == MoleculeLocation.Boundary)
                 {
                     e.Accepted = true;
                 }
@@ -2591,6 +2585,9 @@ namespace DaphneGui
                 }
             }
         }
+
+
+
     }
 }
 

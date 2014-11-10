@@ -33,19 +33,6 @@ namespace DaphneGui
             InitializeComponent();
             DataContext = this;
 
-            VTKDisplayWindow = new VTKDisplaDocWindow();
-            ContentComponents.Add(VTKDisplayWindow);
-
-            var ComponentsToolWindow = new ComponentsToolWindow();
-            ContentComponents.Add(ComponentsToolWindow);
-
-            var CellStudioToolWindow = new CellStudioToolWindow();
-            ContentComponents.Add(CellStudioToolWindow);
-
-
-            var ReacComplexChartWindow = new ChartViewToolWindow();
-            ContentComponents.Add(ReacComplexChartWindow);
-
             //CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
             //cvs.Filter += FilterFactory.bulkMoleculesListView_Filter;
         }

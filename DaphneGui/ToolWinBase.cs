@@ -390,6 +390,7 @@ namespace DaphneGui
                     case "VTKDisplayWindow":
                     case "ComponentsToolWindow":
                     case "CellStudioToolWindow":
+                    case "ComponentsToolWindow_Genes":
                         return Visibility.Visible;
                 }
             }
@@ -398,6 +399,7 @@ namespace DaphneGui
                 switch (parameter as string)
                 {
                     case "ReacComplexChartWindow":
+                    case "ComponentsToolWindow":
                         return Visibility.Visible;
                 }
             }

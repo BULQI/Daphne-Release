@@ -2006,13 +2006,9 @@ namespace DaphneGui
             if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == true)
             {
                 // GUI Resources
-                // Set the data context for the main tab control config GUI
-            this.ProtocolToolWindow.Tag = sop;
-               
                 this.CellStudioToolWindow.DataContext = sop.Protocol;
                 this.ComponentsToolWindow.DataContext = sop.Protocol;
-                //this.CellRenderMethodCB.DataContext = sop.Protocol; 
-
+                
                 // gmk - The code inside the if-statement insures that the information in the protocol window
                 // updates when a new scenario of the same workbench-type is loaded.
                 // If we implement that code all the time (outside the if-statement) then the selected tab reverts to Sim Setup
@@ -2026,6 +2022,7 @@ namespace DaphneGui
                     ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
                     ToolWinType = ToolWindowType.Tissue;
+                    ProtocolToolWin.Tag = sop;
 
                     if (ProtocolToolWindowContainer.Items.Count > 0)
                         ProtocolToolWindowContainer.Items.RemoveAt(0);
@@ -2036,16 +2033,19 @@ namespace DaphneGui
                 // only create during construction or when the type changes
                 if (sim == null || sim is TissueSimulation == false)
                 {
-                    ProtocolToolWin = new ToolWinTissue();
-                    ProtocolToolWin.MW = this;
-                    ProtocolToolWin.Protocol = SOP.Protocol;
-                    ProtocolToolWin.Title = ProtocolToolWin.TitleText;
+                    //ProtocolToolWin = new ToolWinTissue();ds
+                    //ProtocolToolWin.MW = this;
+                    //ProtocolToolWin.Protocol = SOP.Protocol;
+                    //ProtocolToolWin.Title = ProtocolToolWin.TitleText;
 
-                    if (ProtocolToolWindowContainer.Items.Count > 0)
-                        ProtocolToolWindowContainer.Items.RemoveAt(0);
+                    //ToolWinType = ToolWindowType.Tissue;
+                    //ProtocolToolWin.Tag = sop;
 
-                    ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
-                    ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
+                    //if (ProtocolToolWindowContainer.Items.Count > 0)
+                    //    ProtocolToolWindowContainer.Items.RemoveAt(0);
+
+                    //ProtocolToolWindowContainer.Items.Add(ProtocolToolWin);
+                    //ProtocolToolWindow = ((ToolWinTissue)ProtocolToolWin);
 
                     // create the simulation
                     sim = new TissueSimulation();
@@ -2059,6 +2059,7 @@ namespace DaphneGui
             }
             else if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == true)
             {
+                this.ComponentsToolWindow.DataContext = sop.Protocol;
                 // GUI Resources
 
                 // gmk - The code inside the if-statement insures that the information in the protocol window
