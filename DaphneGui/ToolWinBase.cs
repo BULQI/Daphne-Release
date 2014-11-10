@@ -94,7 +94,7 @@ namespace DaphneGui
                     return true;
                 }
             }
-            else if (CompartmentHasMolecule(molguid, cell.membrane))
+            else if (CompartmentHasMolecule(molguid, cell.cytosol))
             {
                 return true;
             }
@@ -110,7 +110,7 @@ namespace DaphneGui
         /// <param name="molguid"></param>
         /// <param name="isMembrane"></param>
         /// <returns></returns>
-        protected virtual bool CellPopsHaveMolecule(string molguid, bool isMembrane)
+        public virtual bool CellPopsHaveMolecule(string molguid, bool isMembrane)
         {
             foreach (CellPopulation cell_pop in ((TissueScenario)Protocol.scenario).cellpopulations)
             {
@@ -130,7 +130,7 @@ namespace DaphneGui
         /// <param name="molguid"></param>
         /// <param name="compartment"></param>
         /// <returns></returns>
-        protected bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
+        public bool CompartmentHasMolecule(string molguid, ConfigCompartment compartment)
         {
             foreach (ConfigMolecularPopulation molpop in compartment.molpops)
             {
@@ -139,6 +139,7 @@ namespace DaphneGui
             }
             return false;
         }
+
 
         /// <summary>
         /// Functionality to refresh elements when the selected tab changes
@@ -149,70 +150,71 @@ namespace DaphneGui
         {
         }
 
-        /// <summary>
-        /// Filter (return true) for reaction that has necessary molecules in the environment comp and one or more cell membrane.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected virtual void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
-        {
-            ConfigReaction cr = e.Item as ConfigReaction;
-            bool bOK = false;
+        //// gmk - should this be removed?
+        ///// <summary>
+        ///// Filter (return true) for reaction that has necessary molecules in the environment comp and one or more cell membrane.
+        ///// </summary>
+        ///// <param name="sender"></param>
+        ///// <param name="e"></param>
+        //protected virtual void ecmAvailableReactionsListView_Filter(object sender, FilterEventArgs e)
+        //{
+        //    ConfigReaction cr = e.Item as ConfigReaction;
+        //    bool bOK = false;
 
-            foreach (string molguid in cr.reactants_molecule_guid_ref)
-            {
-                //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-                {
-                    bOK = true;
-                }
-                else
-                {
-                    bOK = false;
-                    break;
-                }
-            }
-            if (bOK)
-            {
-                foreach (string molguid in cr.products_molecule_guid_ref)
-                {
-                    //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-                    {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
-                        break;
-                    }
-                }
-            }
-            if (bOK)
-            {
-                foreach (string molguid in cr.modifiers_molecule_guid_ref)
-                {
-                    //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
-                    if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
-                    {
-                        bOK = true;
-                    }
-                    else
-                    {
-                        bOK = false;
-                        break;
-                    }
-                }
-            }
+        //    foreach (string molguid in cr.reactants_molecule_guid_ref)
+        //    {
+        //        //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        //        if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+        //        {
+        //            bOK = true;
+        //        }
+        //        else
+        //        {
+        //            bOK = false;
+        //            break;
+        //        }
+        //    }
+        //    if (bOK)
+        //    {
+        //        foreach (string molguid in cr.products_molecule_guid_ref)
+        //        {
+        //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+        //            {
+        //                bOK = true;
+        //            }
+        //            else
+        //            {
+        //                bOK = false;
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    if (bOK)
+        //    {
+        //        foreach (string molguid in cr.modifiers_molecule_guid_ref)
+        //        {
+        //            //if (EcmHasMolecule(molguid) || CellPopsHaveMoleculeInMemb(molguid))
+        //            if (CompartmentHasMolecule(molguid, Protocol.scenario.environment.comp) || CellPopsHaveMolecule(molguid, true))
+        //            {
+        //                bOK = true;
+        //            }
+        //            else
+        //            {
+        //                bOK = false;
+        //                break;
+        //            }
+        //        }
+        //    }
 
-            //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
-            {
-                bOK = false;
-            }
+        //    //Finally, if the ecm already contains this reaction, exclude it from the available reactions list
+        //    if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
+        //    {
+        //        bOK = false;
+        //    }
 
-            e.Accepted = bOK;
-        }
+        //    e.Accepted = bOK;
+        //}
 
         /// <summary>
         /// Filter for bulk molecules. 
@@ -232,15 +234,33 @@ namespace DaphneGui
             return;
         }
 
-        /// <summary>
-        /// gmk - Do we need this? Why only for bulkMoleculesListView_Filter? 
-        /// Okay for all workbenches?
+        /// <summary> 
+        /// Gather filters that may be reused throughout the GUI.
         /// </summary>
         public class FilterFactory
         {
             private object Context { get; set; }
 
-            public static void bulkMoleculesListView_Filter(object sender, FilterEventArgs e)
+            public static void BoundaryMolecules_Filter(object sender, FilterEventArgs e)
+            {
+                ConfigMolecule mol = e.Item as ConfigMolecule;
+                e.Accepted = true;
+
+                if (mol != null)
+                {
+                    // Filter out mol if membrane bound 
+                    if (mol.molecule_location == MoleculeLocation.Boundary)
+                    {
+                        e.Accepted = true;
+                    }
+                    else
+                    {
+                        e.Accepted = false;
+                    }
+                }
+            }
+
+            public static void BulkMolecules_Filter(object sender, FilterEventArgs e)
             {
                 ConfigMolecule mol = e.Item as ConfigMolecule;
                 if (mol != null)
