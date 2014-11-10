@@ -4936,20 +4936,7 @@ namespace Daphne
         }       
 
     }
-
-    public enum VatExtendedReport { INITCONCS, TIMECONCS };
-    public class ReportVatRC
-    {
-        public bool rates { get; set; }
-        public VatExtendedReport concs { get; set; }
-
-        public ReportVatRC()
-        {
-            rates = false;
-            concs = VatExtendedReport.INITCONCS;
-        }
-    }
-
+    
     public class ConfigReactionComplex : ConfigEntity
     {
         public string Name { get; set; }
@@ -5072,8 +5059,6 @@ namespace Daphne
                 this.incrementChangeStamp();
             }
         }
-
-        public ReportVatRC reportVat { get; set; }      
 
         /// <summary>
         /// push a reaction into this reaction complex
@@ -7789,46 +7774,7 @@ namespace Daphne
         }
         #endregion
     }
-
-    /// <summary>
-    /// Convert Reporter enum to boolean
-    /// </summary>
-    [ValueConversion(typeof(VatExtendedReport), typeof(bool))]
-    public class VatRptEnumBooleanConverter : IValueConverter
-    {
-        #region IValueConverter Members
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            if (Enum.IsDefined(value.GetType(), value) == false)
-                return DependencyProperty.UnsetValue;
-
-            object parameterValue = Enum.Parse(value.GetType(), parameterString);
-
-            bool ret = parameterValue.Equals(value);
-            return ret;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-                return DependencyProperty.UnsetValue;
-
-            bool chk = (bool)value;
-
-            if (chk == false)
-                return Enum.Parse(targetType, "NONE");
-
-            return Enum.Parse(targetType, parameterString);
-        }
-        #endregion
-    }
-
+    
     /// <summary>
     /// Base class for all EntityModel classes.
     /// It provides support for property change notifications 

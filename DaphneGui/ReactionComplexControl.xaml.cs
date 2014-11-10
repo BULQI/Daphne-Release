@@ -65,11 +65,7 @@ namespace DaphneGui
             ConfigReactionComplex crcCurr = (ConfigReactionComplex)ListBoxReactionComplexes.SelectedItem;
             ConfigReactionComplex crcNew = crcCurr.Clone(false);
 
-            //FIX THIS - We don't have access to Level now since the DataContext is compartment
-            Level level = this.DataContext as Level;
-            level.entity_repository.reaction_complexes.Add(crcNew);
-
-            ConfigCompartment cc = DataContext as ConfigCompartment;
+            ConfigCompartment cc = this.DataContext as ConfigCompartment;
             cc.reaction_complexes.Add(crcNew);
 
             ListBoxReactionComplexes.SelectedIndex = ListBoxReactionComplexes.Items.Count - 1;
@@ -101,10 +97,8 @@ namespace DaphneGui
 
                 int index = ListBoxReactionComplexes.SelectedIndex;
 
-                Level level = this.DataContext as Level;
-                level.entity_repository.reaction_complexes.Remove(crc);
-
-                //                MainWindow.SOP.Protocol.entity_repository.reaction_complexes.Remove(crc);
+                ConfigCompartment cc = this.DataContext as ConfigCompartment;
+                cc.reaction_complexes.Remove(crc);
 
                 ListBoxReactionComplexes.SelectedIndex = index;
 

@@ -58,7 +58,6 @@
             </ScrollViewer>
         </TabItem>
 
-
         <!-- REPORTS -->
         <TabItem Header="Reports" x:Name="tabReports" Loaded="ReportsTabItem_Loaded" AutomationProperties.AutomationId="DaphneReportsTab">
             <ScrollViewer VerticalScrollBarVisibility="Auto">

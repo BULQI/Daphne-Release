@@ -444,8 +444,8 @@ namespace DaphneGui
             }
             else
             {
-                //file = "daphne_driver_locomotion_scenario.json";
-                file = "daphne_vatRC_ligand_receptor_scenario.json";
+                file = "daphne_driver_locomotion_scenario.json";
+                //file = "daphne_vatRC_ligand_receptor_scenario.json";
             }
 
             int repeat = 0;
