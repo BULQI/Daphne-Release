@@ -1082,7 +1082,12 @@ namespace DaphneGui
                     gc.DisableComponents();
                     VCR_Toolbar.IsEnabled = false;
                     this.menu_ActivateSimSetup.IsEnabled = false;
-                    ProtocolToolWindow.Close();
+
+                    if (sop.Protocol.CheckScenarioType(Protocol.ScenarioType.VAT_REACTION_COMPLEX) == false)
+                    {
+                        ProtocolToolWindow.Close();
+                    }
+
                     ImportSBML.IsEnabled = false;
                     // prevent all fit/analysis-related things
                     hideFit();
