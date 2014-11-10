@@ -186,6 +186,9 @@
       <DependentUpon>CellDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="CellMolecularInfo.cs" />
+    <Compile Include="CellPopControl.xaml.cs">
+      <DependentUpon>CellPopControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CellPropertiesControl.xaml.cs">
       <DependentUpon>CellPropertiesControl.xaml</DependentUpon>
     </Compile>
@@ -228,6 +231,12 @@
     <Compile Include="RegionWidget.cs" />
     <Compile Include="ReportVatRC.xaml.cs">
       <DependentUpon>ReportVatRC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RenderSkinEditor.xaml.cs">
+      <DependentUpon>RenderSkinEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RenderSkinWindow.xaml.cs">
+      <DependentUpon>RenderSkinWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SaveSimulation.cs">
       <SubType>Code</SubType>
@@ -285,6 +294,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CellPopControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CellPropertiesControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -329,15 +342,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DaphneResourceDictionary.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="ReactionComplexControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="RenderSkinEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ReportVatRC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenderSkinWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -438,6 +455,9 @@
     <Content Include="Config\daphne_vatRC_ligand_receptor_scenario.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Config\RenderSkin\default_skin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="help\Documentation.chm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -504,6 +524,7 @@
       <Name>Daphne</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

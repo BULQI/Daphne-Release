@@ -91,25 +91,6 @@ namespace DaphneGui
             }
         }
 
-        /// <summary>
-        /// Add an instance of the default box to the entity repository.
-        /// Default values: box center at center of ECS, box widths are 1/4 of ECS extents
-        /// </summary>
-        /// <param name="box"></param>
-        private void AddDefaultBoxSpec(BoxSpecification box)
-        {
-            ConfigECSEnvironment envHandle = (ConfigECSEnvironment)MainWindow.SOP.Protocol.scenario.environment;
-
-            box.x_trans = envHandle.extent_x / 2;
-            box.y_trans = envHandle.extent_y / 2;
-            box.z_trans = envHandle.extent_z / 2; ;
-            box.x_scale = envHandle.extent_x / 4; ;
-            box.y_scale = envHandle.extent_x / 4; ;
-            box.z_scale = envHandle.extent_x / 4; ;
-            // Add box GUI property changed to VTK callback
-            box.PropertyChanged += MainWindow.GUIInteractionToWidgetCallback;
-        }
-
         private void AddGaussianSpecification(MolPopGaussian mpg, ConfigMolecularPopulation molpop)
         {
             BoxSpecification box = new BoxSpecification();
@@ -124,7 +105,7 @@ namespace DaphneGui
 
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
-            gg.gaussian_spec_name = "New on-center gradient";
+           
             // gmk - fix after merging Axin's changes from main
             //Color spec_color = ColorHelper.pickASolidColor();
             //spec_color.A = 80;
@@ -346,6 +327,7 @@ namespace DaphneGui
                         molpoplin.boundaryCondition.Add(new BoundaryCondition(MolBoundaryType.Dirichlet, Boundary.right, 0.0));
                         molpoplin.Initalize(BoundaryFace.X);
                         molpoplin.boundary_face = BoundaryFace.X;
+                      
                         current_mol.mp_distribution = molpoplin;
                         break;
 

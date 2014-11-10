@@ -7,10 +7,6 @@
                     xmlns:editors="http://schemas.actiprosoftware.com/winfx/xaml/editors"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     >
-
-    <CollectionViewSource x:Key="testMoleculesListView"  
-                                  Source="{Binding Path=entity_repository.molecules}"
-                                  />
     
     <!-- gmk - Can we put all the converters here for convenience?  -->
     <daph:BoolToIndexConverter x:Key="BoolToIndexConv" />
@@ -306,14 +302,7 @@
             </Grid>
             <TextBlock Text="center (µm)" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0" Margin="5,4" HorizontalAlignment="Right"/>
             <TextBlock Text="size (µm)" Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="0" Margin="3,4" HorizontalAlignment="Right"/>
-            <!--<Line Margin="4,0,4,3" 
-                          Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" 
-                          SnapsToDevicePixels="True" Stroke="LightGray"
-                          Stretch="Fill" X1="0" X2="10" />
-                    <Line Margin="4,0,4,3" 
-                          Grid.Column="3" Grid.ColumnSpan="2" Grid.Row="1" 
-                          SnapsToDevicePixels="True" Stroke="LightGray"
-                          Stretch="Fill" X1="0" X2="10" />-->
+
             <TextBlock Text="X" Grid.Column="0" Grid.Row="2" Margin="2,0" TextAlignment="Right"/>
             <Slider x:Name="x_trans_slider"
                             Grid.Column="1" Grid.Row="2"
@@ -482,10 +471,6 @@
             <x:Type TypeName="daph:BoundaryFace" />
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
-
-
-
-
 
     <!-- Reaction complex reactions : DataContext must be ConfigReactionComplex -->
     <DataTemplate x:Key="reactionComplexReactionsTemplate">

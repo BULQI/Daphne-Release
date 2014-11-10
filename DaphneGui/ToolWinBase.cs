@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Collections.ObjectModel;
 
 using Daphne;
+using System.Globalization;
 
 namespace DaphneGui
 {
@@ -18,6 +19,8 @@ namespace DaphneGui
         void RegionFocusToGUISection(RegionWidget rw, bool transferMatrix);
     }
 
+    public enum ToolWindowType {BaseType, Tissue, VatRC};
+
     public class ToolWinBase : ToolWindow, IRegionFocus
     {
         public MainWindow MW { get; set; }
@@ -25,44 +28,27 @@ namespace DaphneGui
         public string TitleText { get; set; }
         public Visibility ToroidalVisibility { get; set; }
         public Visibility SimRepetitionVisibility { get; set; }
+
         // This would be set to Hidden if we implement a 2D environment
         // and want to reuse the EnvironmentExtents control.
         // This field is not relevant to VatRC.
         public Visibility ZExtentVisibility { get; set; }
+
+        
+        
 
         public ToolWinBase()
         {
             TitleText = "";
         }
 
-        // Used to specify Gaussian distibution for cell positions
-        protected virtual void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
+        /// <summary>
+        /// Add an instance of the default box to the entity repository.
+        /// Default values: box center at center of ECS, box widths are 1/4 of ECS extents
+        /// </summary>
+        /// <param name="box"></param>
+        public virtual void AddDefaultBoxSpec(BoxSpecification box)
         {
-            // this window seems to implement the tissue scenario gui; throw an exception for now to enforce that;
-            // Sanjeev, you probably need to have a hierachy of tool windows where each implements the gui for one case,
-            // but I don't know for sure; we can discuss
-            if (MainWindow.SOP.Protocol.CheckScenarioType(Protocol.ScenarioType.TISSUE_SCENARIO) == false)
-            {
-                throw new InvalidCastException();
-            }
-
-            TissueScenario scenario = (TissueScenario)MainWindow.SOP.Protocol.scenario;
-
-            gg.box_spec = box;
-            gg.gaussian_spec_name = "";
-            //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
-            // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
-            gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
-
-            // Add RegionControl & RegionWidget for the new gauss_spec
-            ((VTKFullDataBasket)MainWindow.VTKBasket).AddGaussSpecRegionControl(gg);
-            ((VTKFullGraphicsController)MainWindow.GC).AddGaussSpecRegionWidget(gg);
-            // Connect the VTK callback
-            // TODO: MainWindow.GC.Regions[box.box_guid].SetCallback(new RegionWidget.CallbackHandler(this.WidgetInteractionToGUICallback));
-            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
-            ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(RegionFocusToGUISection));
-
-            ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
         }
 
         //Moved to ConfigCompartment
@@ -396,4 +382,45 @@ namespace DaphneGui
 
 
     }
+
+
+
+    public class ToolwinComponentVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            ToolWindowType type = (ToolWindowType)value;
+            if (type == ToolWindowType.Tissue)
+            {
+                switch (parameter as string)
+                {
+                    case "VTKDisplayWindow":
+                    case "ComponentsToolWindow":
+                    case "CellStudioToolWindow":
+                    case "ComponentsToolWindow_Genes":
+                        return Visibility.Visible;
+                }
+            }
+            else if (type == ToolWindowType.VatRC)
+            {
+                switch (parameter as string)
+                {
+                    case "ReacComplexChartWindow":
+                    case "ComponentsToolWindow":
+                        return Visibility.Visible;
+                }
+            }
+
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+
 }

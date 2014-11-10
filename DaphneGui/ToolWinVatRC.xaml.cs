@@ -28,17 +28,11 @@ namespace DaphneGui
             SimRepetitionVisibility = Visibility.Hidden;
             // Shouldn't have to set this, since extents control isn't used here but...
             ZExtentVisibility = Visibility.Hidden;
-            //GetMolsInAllRCs(Protocol.scenario.environment.comp);
 
             InitializeComponent();
             
             DataContext = this;
             
-        }
-
-        protected override void AddGaussianSpecification(GaussianSpecification gg, BoxSpecification box)
-        {
-            throw new Exception("VatReactionComplex does not implement AddGaussianSpecification method.");
         }
 
         public override void Apply()

@@ -347,7 +347,7 @@
                             <!-- List of ecs molpops for selection -->
                             <ListBox x:Name="lbEcsMolPops" MinHeight="20" SelectedIndex="-1"
                                 ItemsSource="{Binding Path=Protocol.scenario.environment.comp.molpops, Mode=TwoWay}" 
-                                ItemTemplate="{Binding Source={StaticResource compMolListItemTemplate}}"        
+                                ItemTemplate="{Binding Source={StaticResource compMolListItemTemplate}}"       
                         />
                             <!-- buttons for adding, deleting molpops -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Canvas.ZIndex="10">
