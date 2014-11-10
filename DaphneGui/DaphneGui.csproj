@@ -247,12 +247,6 @@
     <Compile Include="ToolWinVatRC.xaml.cs">
       <DependentUpon>ToolWinVatRC.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControl1.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UserControl1.Designer.cs">
-      <DependentUpon>UserControl1.cs</DependentUpon>
-    </Compile>
     <Compile Include="VTKDataBasket.cs" />
     <Compile Include="Workbench\AddReacComplex.xaml.cs">
       <DependentUpon>AddReacComplex.xaml</DependentUpon>
