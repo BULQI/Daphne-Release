@@ -3679,10 +3679,6 @@ namespace Daphne
             }
         }
 
-        //public double MolecularWeight { get; set; }
-        //public double EffectiveRadius { get; set; }
-        //public double DiffusionCoefficient { get; set; }
-
         private double molWeight;
         public double MolecularWeight
         {
@@ -4351,25 +4347,6 @@ namespace Daphne
             get { return reportMP; }
             set { reportMP = value; }
         }
-
-        //// gmk - these aren't needed. phase out.
-        //[JsonIgnore]
-        //private string _mp_dist_name = "";
-        //[JsonIgnore]
-        //public string mp_dist_name
-        //{
-        //    get { return _mp_dist_name; }
-        //    set
-        //    {
-        //        if (_mp_dist_name == value)
-        //            return;
-        //        else
-        //        {
-        //            _mp_dist_name = value;
-        //            OnPropertyChanged("mp_dist_name");
-        //        }
-        //    }
-        //}
 
         private MolPopDistribution _mp_distribution;
         public MolPopDistribution mp_distribution
@@ -5540,7 +5517,6 @@ namespace Daphne
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
 
-        //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
@@ -5577,23 +5553,6 @@ namespace Daphne
                 OnPropertyChanged("death_driver");
             }
         }
-
-
-        //private ConfigTransitionDriver _div_driver;
-        //public ConfigTransitionDriver div_driver 
-        //{
-        //    get
-        //    {
-        //        return _div_driver;
-        //    }
-
-        //    set
-        //    {
-        //        _div_driver = value;
-        //        OnPropertyChanged("div_driver");
-        //    }
-        //}
-
 
         private ConfigDiffScheme _div_scheme;
         public ConfigDiffScheme div_scheme
@@ -5851,6 +5810,22 @@ namespace Daphne
             }
             return true;
         }
+
+        /// <summary>
+        /// Initialize the cell states
+        /// </summary>
+        /// <param name="extents"></param>
+        /// <param name="box"></param>
+        public void Initialize()
+        {
+            if (cellPop != null)
+            {
+                cellPop.CellStates.Clear();
+                AddByDistr(cellPop.number);
+            }
+
+        }
+
         /// <summary>
         /// Return true if the position of the new cell doesn't overlap with existing cell positions.
         /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
@@ -5985,12 +5960,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
-
-            if (_cellPop != null)
-            {
-                AddByDistr(cellPop.number);
-            }
         }
 
         public override double[] nextPosition()
@@ -6020,16 +5989,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
-            if (_cellPop != null)
-            {
-                AddByDistr(_cellPop.number);
-            }
-            //else
-            //{
-            //    // json deserialization puts us here
-            //    AddByDistr(1);
-            //}
-            //OnPropertyChanged("CellStates");
         }
 
         public override double[] nextPosition()
@@ -6078,8 +6037,7 @@ namespace Daphne
         /// </summary>
         /// <param name="extents"></param>
         /// <param name="box"></param>
-        //public void Initialize(double[] extents, BoxSpecification box)
-        public void Initialize(GaussianSpecification _gaussSpec)
+        public void InitializeGaussSpec(GaussianSpecification _gaussSpec)
         {
             gauss_spec = _gaussSpec;
 
@@ -6096,14 +6054,6 @@ namespace Daphne
             {
                 sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
             }
-
-            if (cellPop != null)
-            {
-                cellPop.CellStates.Clear();
-                AddByDistr(cellPop.number);
-                //OnPropertyChanged("CellStates");
-            }
-
         }
 
         public override void Resize(double[] newExtents)

@@ -2,11 +2,16 @@
   "experiment_db_id": 0,
   "experiment_name": "Blank Tissue Simulation Scenario",
   "experiment_reps": 1,
-  "experiment_guid": "80ff39ca-3741-438f-8101-e6d1bb418be5",
+  "experiment_guid": "08128494-01e9-433c-97d2-02b918a8f50a",
   "experiment_description": "Libraries only.",
   "scenario": {
     "$type": "Daphne.TissueScenario, Daphne",
     "cellpopulations": [],
+    "RenderSkinName": "default",
+    "popOptions": {
+      "cellPopOptions": [],
+      "molPopOptions": []
+    },
     "time_config": {
       "duration": 100.0,
       "rendering_interval": 1.0,
@@ -40,10 +45,6 @@
     "deathOrder": 1
   },
   "reporter_file_name": "",
-  "popOptions": {
-    "cellPopOptions": [],
-    "molPopOptions": []
-  },
   "entity_repository": {
     "reaction_complexes": [],
     "cells": [],
