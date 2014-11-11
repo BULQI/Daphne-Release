@@ -682,19 +682,6 @@
                 <StackPanel>
 
                     <StackPanel>
-                        <!--<StackPanel.Resources>
-                            <DataTemplate x:Key="reacComplexListItemTemplate">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Path=Name}" />
-                                </StackPanel>
-                            </DataTemplate>
-                            <DataTemplate x:Key="ecsReacComplexListItemTemplate">
-                                <TextBlock Text="{Binding   Converter={StaticResource ReacComplexGUIDtoStringConv},
-                                                            ConverterParameter={StaticResource ecmAvailableReactionComplexesListView}}">
-                                </TextBlock>
-                            </DataTemplate>
-                        </StackPanel.Resources>-->
-
                         <StackPanel.ToolTip>
                             <StackPanel Width="200" Orientation="Horizontal">
                                 <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="5" Width="200">
@@ -738,14 +725,6 @@
                                                                 />
                             </StackPanel >
                             <StackPanel x:Name="spReacComp"  >
-                                <!--<StackPanel.Resources>
-                                    <DataTemplate x:Key="cellReacListItemTemplate">
-                                        <TextBlock Text="{Binding Converter={StaticResource ReacGUIDtoReacStringConv},
-                                                            ConverterParameter={StaticResource ecmReactionsListView}}">
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </StackPanel.Resources>-->
-
                                 <TextBlock Text="Reactions" Margin="6,0"  />
                                 <ContentControl
                                             Content="{Binding ElementName=ReactionComplexListBox, Path=SelectedItem}" 
@@ -776,7 +755,6 @@
 
                             </StackPanel.Resources>
 
-                            <!--ItemsSource="{Binding Path=Protocol.entity_repository.reaction_complexes}"-->
                             <TextBlock Text="Reaction Complexes Library"  Margin="0,0,6,0" />
                             <ListBox x:Name="lbAvailableReacCx" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,6,0" MinHeight="50" AlternationCount="2"                                                                                                                             
                                      ItemsSource="{Binding Source={StaticResource ecmAvailableReactionComplexesListView}}"   
