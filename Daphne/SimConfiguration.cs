@@ -5810,6 +5810,22 @@ namespace Daphne
             }
             return true;
         }
+
+        /// <summary>
+        /// Initialize the cell states
+        /// </summary>
+        /// <param name="extents"></param>
+        /// <param name="box"></param>
+        public void Initialize()
+        {
+            if (cellPop != null)
+            {
+                cellPop.CellStates.Clear();
+                AddByDistr(cellPop.number);
+            }
+
+        }
+
         /// <summary>
         /// Return true if the position of the new cell doesn't overlap with existing cell positions.
         /// NOTE: We should be checking for overlap with all cell populations. Not sure how to do this, yet.
@@ -5944,12 +5960,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Specific;
-            MathNet.Numerics.RandomSources.RandomSource ran = new MathNet.Numerics.RandomSources.MersenneTwisterRandomSource();
-
-            if (_cellPop != null)
-            {
-                AddByDistr(cellPop.number);
-            }
         }
 
         public override double[] nextPosition()
@@ -5979,16 +5989,6 @@ namespace Daphne
             : base(extents, minDisSquared, _cellPop)
         {
             DistType = CellPopDistributionType.Uniform;
-            if (_cellPop != null)
-            {
-                AddByDistr(_cellPop.number);
-            }
-            //else
-            //{
-            //    // json deserialization puts us here
-            //    AddByDistr(1);
-            //}
-            //OnPropertyChanged("CellStates");
         }
 
         public override double[] nextPosition()
@@ -6037,8 +6037,7 @@ namespace Daphne
         /// </summary>
         /// <param name="extents"></param>
         /// <param name="box"></param>
-        //public void Initialize(double[] extents, BoxSpecification box)
-        public void Initialize(GaussianSpecification _gaussSpec)
+        public void InitializeGaussSpec(GaussianSpecification _gaussSpec)
         {
             gauss_spec = _gaussSpec;
 
@@ -6055,14 +6054,6 @@ namespace Daphne
             {
                 sigma = new double[3] { extents[0] / 4, extents[1] / 4, extents[2] / 4 };
             }
-
-            if (cellPop != null)
-            {
-                cellPop.CellStates.Clear();
-                AddByDistr(cellPop.number);
-                //OnPropertyChanged("CellStates");
-            }
-
         }
 
         public override void Resize(double[] newExtents)
