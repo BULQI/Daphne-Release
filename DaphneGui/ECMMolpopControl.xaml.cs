@@ -514,6 +514,8 @@ namespace DaphneGui
                 return;
             }
             MainWindow.GenericPush(molpop.molecule.Clone(null));
+
+            CollectionViewSource.GetDefaultView(ecm_molecule_combo_box.ItemsSource).Refresh();
         }
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
