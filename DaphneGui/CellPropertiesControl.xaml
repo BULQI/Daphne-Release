@@ -93,7 +93,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" Width="520" TextWrapping="Wrap"/>
+                    <TextBlock Text="stochastic force parameter" Margin="6,0" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     <uc:DoublesBox Margin="0,2" TextFieldWidth="100" SliderEnabled="False"
                                 Number="{Binding Path=Sigma, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    />
                 </StackPanel>
