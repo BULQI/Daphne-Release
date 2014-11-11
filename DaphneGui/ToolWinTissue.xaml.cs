@@ -109,11 +109,14 @@ namespace DaphneGui
         {
             if (tabECM.IsSelected == true)
             {
-                // gmk - fix after this functionality is added
-                //if (lvAvailableReacs.ItemsSource != null)
-                //{
-                //    CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-                //}
+                if (toolWinTissue.EcmMolpopControl.lbAvailableReacCx != null)
+                {
+                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lbAvailableReacCx.ItemsSource).Refresh();
+                }
+                if (toolWinTissue.EcmMolpopControl.lvAvailableReacs != null)
+                {
+                    CollectionViewSource.GetDefaultView(toolWinTissue.EcmMolpopControl.lvAvailableReacs.ItemsSource).Refresh();
+                }
             }
         }
 
