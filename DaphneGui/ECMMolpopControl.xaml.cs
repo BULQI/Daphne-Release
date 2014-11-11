@@ -148,10 +148,9 @@ namespace DaphneGui
             GaussianSpecification gg = new GaussianSpecification();
             gg.box_spec = box;
            
-            // gmk - fix after merging Axin's changes from main
-            //Color spec_color = ColorHelper.pickASolidColor();
-            //spec_color.A = 80;
-            //gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
+            Color spec_color = ColorHelper.pickASolidColor();
+            spec_color.A = 80;
+            gg.gaussian_spec_color = spec_color;    //System.Windows.Media.Color.FromScRgb(0.3f, 1.0f, 0.5f, 0.5f);
             
             // Add gauss spec property changed to VTK callback (ellipsoid actor color & visibility)
             gg.PropertyChanged += MainWindow.GUIGaussianSurfaceVisibilityToggle;
@@ -514,6 +513,8 @@ namespace DaphneGui
                 return;
             }
             MainWindow.GenericPush(molpop.molecule.Clone(null));
+
+            CollectionViewSource.GetDefaultView(ecm_molecule_combo_box.ItemsSource).Refresh();
         }
 
         private void PushEcmReacButton_Click(object sender, RoutedEventArgs e)
