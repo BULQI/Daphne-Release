@@ -264,7 +264,27 @@
                 </StackPanel>
             </DataTemplate>
 
- 
+            <!-- Color field template -->
+            <!-- CellPopsListBox -->
+            <DataTemplate x:Key="colorItemTemplate">
+                <StackPanel Orientation="Horizontal">
+
+                    <Rectangle Width="10" Height="10" Margin="4,0" Stroke="Black" StrokeThickness="0.5"   >
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="Fill" Value="{Binding Converter={StaticResource ColorListToBrushConv}}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="7">
+                                        <Setter Property="Fill" Value="{Binding ElementName=CellPopsListBox, Path=SelectedItem.cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+
+                    </Rectangle>
+                    <TextBlock Width="40" Text="{Binding}" Margin="5,0,0,0"/>
+                </StackPanel>
+            </DataTemplate>
 
         </Grid.Resources>
 
@@ -323,7 +343,8 @@
                         <local:DaphneStackPanel x:Name="CellPropertiesPanel" >
                         
                         <StackPanel x:Name="PropertyHost" Orientation="Horizontal" Margin="10,0">
-                            <local:CellPropertiesControl Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                            <local:CellPropertiesControl x:Name="ucCellPropertiesControl"
+                                            Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
                                             DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                         </StackPanel>
 
@@ -332,7 +353,9 @@
                         </StackPanel>
 
                         <StackPanel Margin="10,0">
-                            <local:CellDetailsControl x:Name="ucCellPopCellDetails" DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
+                            <local:CellDetailsControl x:Name="ucCellPopCellDetails" 
+                                                      Tag ="{Binding ElementName=PropertyHost, Path=DataContext}"
+                                                      DataContext="{Binding ElementName=CellPopsListBox, Path=SelectedItem.Cell}"/>
                         </StackPanel>
                     </local:DaphneStackPanel>
 
