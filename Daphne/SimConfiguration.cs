@@ -3679,10 +3679,6 @@ namespace Daphne
             }
         }
 
-        //public double MolecularWeight { get; set; }
-        //public double EffectiveRadius { get; set; }
-        //public double DiffusionCoefficient { get; set; }
-
         private double molWeight;
         public double MolecularWeight
         {
@@ -4351,25 +4347,6 @@ namespace Daphne
             get { return reportMP; }
             set { reportMP = value; }
         }
-
-        //// gmk - these aren't needed. phase out.
-        //[JsonIgnore]
-        //private string _mp_dist_name = "";
-        //[JsonIgnore]
-        //public string mp_dist_name
-        //{
-        //    get { return _mp_dist_name; }
-        //    set
-        //    {
-        //        if (_mp_dist_name == value)
-        //            return;
-        //        else
-        //        {
-        //            _mp_dist_name = value;
-        //            OnPropertyChanged("mp_dist_name");
-        //        }
-        //    }
-        //}
 
         private MolPopDistribution _mp_distribution;
         public MolPopDistribution mp_distribution
@@ -5540,7 +5517,6 @@ namespace Daphne
         public ConfigCompartment membrane { get; set; }
         public ConfigCompartment cytosol { get; set; }
 
-        //FOR NOW, THIS IS HERE. MAYBE THER IS A BETTER PLACE FOR IT
         public ObservableCollection<ConfigGene> genes { get; set; }
 
         private ConfigDiffScheme _diff_scheme;
@@ -5577,23 +5553,6 @@ namespace Daphne
                 OnPropertyChanged("death_driver");
             }
         }
-
-
-        //private ConfigTransitionDriver _div_driver;
-        //public ConfigTransitionDriver div_driver 
-        //{
-        //    get
-        //    {
-        //        return _div_driver;
-        //    }
-
-        //    set
-        //    {
-        //        _div_driver = value;
-        //        OnPropertyChanged("div_driver");
-        //    }
-        //}
-
 
         private ConfigDiffScheme _div_scheme;
         public ConfigDiffScheme div_scheme
