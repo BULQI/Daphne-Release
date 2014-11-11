@@ -210,8 +210,10 @@ namespace DaphneGui
 
                 // Create new GaussianSpecification
                 GaussianSpecification gg = new GaussianSpecification();
-                //gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellPop.cellpopulation_color.R, cellPop.cellpopulation_color.G, cellPop.cellpopulation_color.B);
-                
+                var render_cell = MainWindow.SOP.GetRenderCell(cellPop.renderLabel);
+                Color cellpop_color = render_cell.base_color.EntityColor;
+                gg.gaussian_spec_color = System.Windows.Media.Color.FromScRgb(0.2f, cellpop_color.R, cellpop_color.G, cellpop_color.B);
+
                 // Associate box with gg.box and add both to appropriate VTK lists
                 AddGaussianSpecification(gg, box);
                 
