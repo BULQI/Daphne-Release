@@ -193,6 +193,7 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
                 cellPop.cellPopDist = new CellPopUniform(extents, minDisSquared, cellPop);
+                cellPop.cellPopDist.Initialize();
             }
             else if (cpdt == CellPopDistributionType.Gaussian)
             {
@@ -216,7 +217,8 @@ namespace DaphneGui
                 
                 // Create a new 
                 cellPop.cellPopDist = new CellPopGaussian(extents, minDisSquared, cellPop);
-                ((CellPopGaussian)cellPop.cellPopDist).Initialize(gg);
+                ((CellPopGaussian)cellPop.cellPopDist).InitializeGaussSpec(gg);
+                cellPop.cellPopDist.Initialize();
 
                 // Connect the VTK callback
                 ((VTKFullGraphicsController)MainWindow.GC).Regions[box.box_guid].AddCallback(new RegionWidget.CallbackHandler(((VTKFullGraphicsController)MainWindow.GC).WidgetInteractionToGUICallback));
@@ -228,13 +230,11 @@ namespace DaphneGui
                 if (res == MessageBoxResult.No)
                 {
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
+                    cellPop.cellPopDist.Initialize();
                 }
                 else
                 {
-                    CellPopulation tempCellPop = new CellPopulation();
-                    tempCellPop.cellPopDist = cellPop.cellPopDist;
                     cellPop.cellPopDist = new CellPopSpecific(extents, minDisSquared, cellPop);
-                    cellPop.CellStates = tempCellPop.CellStates;
                 }
                 // Remove box and Gaussian if applicable.
                 if (current_dist.DistType == CellPopDistributionType.Gaussian)
@@ -245,7 +245,6 @@ namespace DaphneGui
                     ((VTKFullGraphicsController)MainWindow.GC).Rwc.Invalidate();
                 }
             }
-            //ListBoxItem lbi = ((sender as ListBox).SelectedItem as ListBoxItem);
 
             // needed by the slider?
             ToolBarTray tr = new ToolBarTray();
