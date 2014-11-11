@@ -87,9 +87,6 @@ namespace DaphneGui
             //Refresh the filter
             if (needRefresh && lvAvailableReacs.ItemsSource != null)
                 CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-
-
-
         }
 
 
@@ -223,62 +220,6 @@ namespace DaphneGui
             }
 
             e.Accepted = reactionIsAvailable(cr);
-
-            //bool bOK = false;
-
-            //foreach (string molguid in cr.reactants_molecule_guid_ref)
-            //{
-            //    if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp) 
-            //            || MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true))
-            //    {
-            //        bOK = true;
-            //    }
-            //    else
-            //    {
-            //        bOK = false;
-            //        break;
-            //    }
-            //}
-            //if (bOK)
-            //{
-            //    foreach (string molguid in cr.products_molecule_guid_ref)
-            //    {
-            //        if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp)
-            //                    || MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true))
-            //        {
-            //            bOK = true;
-            //        }
-            //        else
-            //        {
-            //            bOK = false;
-            //            break;
-            //        }
-            //    }
-            //}
-            //if (bOK)
-            //{
-            //    foreach (string molguid in cr.modifiers_molecule_guid_ref)
-            //    {
-            //        if (MainWindow.ToolWin.CompartmentHasMolecule(molguid, MainWindow.ToolWin.Protocol.scenario.environment.comp)
-            //                    || MainWindow.ToolWin.CellPopsHaveMolecule(molguid, true))
-            //        {
-            //            bOK = true;
-            //        }
-            //        else
-            //        {
-            //            bOK = false;
-            //            break;
-            //        }
-            //    }
-            //}
-
-            ////Finally, if the ecm already contains this reaction, exclude it from the available reactions list
-            //if (MainWindow.SOP.Protocol.scenario.environment.comp.reactions_dict.ContainsKey(cr.entity_guid) == true)
-            //{
-            //    bOK = false;
-            //}
-
-            //e.Accepted = bOK;
         }
 
         protected virtual void ecmAvailableReactionComplexesListView_Filter(object sender, FilterEventArgs e)
@@ -297,6 +238,12 @@ namespace DaphneGui
                 {
                     bOK = false;
                 }
+            }
+
+            //Finally, if the ecm already contains this reaction complex, exclude it from the available reactions list
+            if (MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes_dict.ContainsKey(crc.entity_guid) == true)
+            {
+                bOK = false;
             }
 
             e.Accepted = bOK;
@@ -421,8 +368,6 @@ namespace DaphneGui
                 molpop.molecule = newLibMol.Clone(null);
                 molpop.Name = newLibMol.Name;
                 cb.SelectedItem = newLibMol;
-
-
             }
             //user picked an existing molecule
             else
@@ -453,8 +398,8 @@ namespace DaphneGui
                 CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
             }
 
-            //CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-            //CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
 
             //update render informaiton
             (MainWindow.SOP.Protocol.scenario as TissueScenario).popOptions.RemoveRenderOptions(molpop.renderLabel, false);
@@ -628,16 +573,6 @@ namespace DaphneGui
 
                 //Delete the molecular population
                 MainWindow.SOP.Protocol.scenario.environment.comp.molpops.Remove(cmp);
-
-                CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
-                CollectionViewSource.GetDefaultView(ReactionComplexListBox.ItemsSource).Refresh();
-                CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
-
-                //CollectionViewSource cvs = (CollectionViewSource)(FindResource("ecmAvailableReactionComplexesListView"));
-                //if (cvs != null)
-                //{
-                //    cvs.
-                //}
             }
 
             lbEcsMolPops.SelectedIndex = index;
@@ -647,6 +582,9 @@ namespace DaphneGui
 
             if (lbEcsMolPops.Items.Count == 0)
                 lbEcsMolPops.SelectedIndex = -1;
+
+            CollectionViewSource.GetDefaultView(lvAvailableReacs.ItemsSource).Refresh();
+            CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
         }
 
         private void RemoveEcmReacButton_Click(object sender, RoutedEventArgs e)
@@ -672,17 +610,6 @@ namespace DaphneGui
                 MainWindow.SOP.Protocol.scenario.environment.comp.reaction_complexes.Remove(rc);
                 CollectionViewSource.GetDefaultView(lbAvailableReacCx.ItemsSource).Refresh();
             }
-        }
-
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            CollectionViewSource cvs = (CollectionViewSource)(FindResource("EcsBulkMoleculesListView"));
-            if (cvs.Source == null)
-            {
-                cvs.Source = new ObservableCollection<ConfigMolecule>();
-            }
-            ((ObservableCollection<ConfigMolecule>)cvs.Source).Clear();
-            cvs.Source = MainWindow.SOP.Protocol.entity_repository.molecules;
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
