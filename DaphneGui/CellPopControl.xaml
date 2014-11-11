@@ -17,16 +17,18 @@
         
         <Grid.Resources>
 
+            <local:CellPopulationToSolidBrushConv x:Key="CellPopulationToSolidBrushConv" />
+            
             <CollectionViewSource x:Key="cellTypesListView" Source="{Binding Path=Protocol.entity_repository.cells}"/>
             
             <!-- cellPopListItemTemplate -->
             <DataTemplate x:Key="cellPopListItemTemplate">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="10" Height="10"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center"
-                                Fill="{Binding Path=cellpopulation_color, Converter={StaticResource colorToSolidBrushConv}}"
-                                Stroke="Black" StrokeThickness="0.5"/>
+                                               Margin="5,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Fill="{Binding Converter={StaticResource CellPopulationToSolidBrushConv}}"
+                                               Stroke="Black" StrokeThickness="0.5"/>
 
                     <TextBlock Text="{Binding Path=cellpopulation_name}" Margin="5,0,0,0"/>
 
@@ -36,6 +38,7 @@
 
                 </StackPanel>
             </DataTemplate>
+            
 
             <!-- cellPopDistributionTypeTemplate -->
             <DataTemplate x:Key="cellPopDistributionTypeTemplate">
