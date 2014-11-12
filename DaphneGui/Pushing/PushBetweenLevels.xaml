@@ -78,10 +78,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn x:Name="colMolStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
-                            />
                             <DataGridTextColumn x:Name="colMolGuid" Header="GUID" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=entity_guid, Mode=OneWay}" 
@@ -135,10 +131,6 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn x:Name="colGeneStamp" Header="Change Stamp" Width="90" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
-                            />
                             <DataGridTextColumn x:Name="colGeneGuid" Header="GUID" Width="100" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=entity_guid, Mode=OneWay}" 
@@ -187,11 +179,6 @@
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=TotalReactionString, Mode=OneWay}" 
                             />
-                            <DataGridTextColumn x:Name="colReacStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
-                            />
-
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock Text="No reactions exist that need to be pushed." HorizontalAlignment="Center"  VerticalAlignment="Center" >
@@ -232,8 +219,6 @@
                                  Binding="{Binding Path=TransductionConstant, Mode=OneWay}" />
                             <DataGridTextColumn x:Name="colCellDrag" Header="Drag Coefficient" Width="100" IsReadOnly="True"
                                  Binding="{Binding Path=DragCoefficient, Mode=OneWay}" />
-                            <DataGridTextColumn x:Name="colChangeStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" />
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -275,10 +260,6 @@
                             <DataGridTextColumn x:Name="colRCName" Header="Name" Width="150" IsReadOnly="True"
                                  ScrollViewer.CanContentScroll ="False"
                                  Binding="{Binding Path=Name, Mode=OneWay}" 
-                            />
-                            <DataGridTextColumn x:Name="colReacStamp" Header="Change Stamp" Width="100" IsReadOnly="True"
-                                 ScrollViewer.CanContentScroll ="False"
-                                 Binding="{Binding Path=change_stamp, Mode=OneWay}" 
                             />
                         </DataGrid.Columns>
                     </DataGrid>
